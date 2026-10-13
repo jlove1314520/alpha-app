@@ -438,6 +438,8 @@
   .cmodal .cancel{background:var(--surface-3);color:var(--ink)}
   .cmodal .del{background:var(--up-deep);color:#fff}
   #scr-picks.supply-mode .picks-lb-only{display:none!important}
+  /* 先.八十一-12：選股頁切到美股／期貨時，台股專屬元件（四榜切換、#287/#403 等回測標記、主流題材、供給觀察、台股評分搜尋）一律隱藏 */
+  #scr-picks.mkt-nontw .tw-only{display:none!important}
 
 /* 先.七十二-A2：「ⓘ 說明」點開（長說明自動收合） */
 .ui-info>summary{list-style:none;cursor:pointer;color:var(--ink-4);font-size:11px;display:inline-block;padding:2px 0}

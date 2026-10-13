@@ -279,11 +279,16 @@ def compute(facts_payload: dict) -> dict:
     return out
 
 
+NAMES: dict[str, str] = {}  # 先.八十一-12：名冊裡的公司名（美股排行要顯示名稱），build_universe() 填入
+
+
 def build_universe() -> list[tuple[str, int, str]]:
     r = requests.get(EXCHANGE_URL, headers=HEADERS, timeout=30)
     r.raise_for_status()
     d = r.json()
     idx = {f: i for i, f in enumerate(d["fields"])}
+    if "name" in idx:
+        NAMES.update({row[idx["ticker"]]: row[idx["name"]] for row in d["data"] if row[idx["name"]]})
     rows = [(row[idx["ticker"]], int(row[idx["cik"]]), row[idx["exchange"]]) for row in d["data"]]
     by_ticker = {t: (t, c, x) for t, c, x in rows}
     picked, seen = [], set()
@@ -320,6 +325,7 @@ def main() -> int:
                 else:
                     rec["cik"] = cik
                     rec["exchange"] = x
+                    rec["name"] = NAMES.get(t)
                     fin[t] = rec
         except Exception as e:
             errors[t] = f"fetch_or_parse_error: {type(e).__name__}: {str(e)[:120]}"

@@ -24,7 +24,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
      載不到時index.html::renderStockChart()自動退回既有SVG折線，不會讓個股頁空白。 -->
 <!-- 常備.開發-20（2026-10-11）：函式庫改為第一次畫K線時才載入（見 app.js ensureLwc()），不再佔首頁首次載入傳輸量。 -->
 <title>Alpha 台美股 AI 交易</title>
-<link rel="stylesheet" href="app.css?v=2026-10-13.0947">
+<link rel="stylesheet" href="app.css?v=2026-10-13.0954">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -390,36 +390,36 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;gap:10px">
       <div>
         <div style="font-size:22px;font-weight:700;letter-spacing:-.01em">AI 選股</div>
-        <div class="note num picks-lb-only" id="picks-asof-line" style="margin:3px 0 0">載入中…</div>
-        <div class="note picks-lb-only" id="picks-weight-note" data-ui-explain style="margin-top:2px"></div>
-        <div class="note picks-lb-only" id="picks-backtest-note" style="margin-top:4px;display:none"></div>
+        <div class="note num picks-lb-only tw-only" id="picks-asof-line" style="margin:3px 0 0">載入中…</div>
+        <div class="note picks-lb-only tw-only" id="picks-weight-note" data-ui-explain style="margin-top:2px"></div>
+        <div class="note picks-lb-only tw-only" id="picks-backtest-note" style="margin-top:4px;display:none"></div>
       </div>
       <div class="mkt-toggle" id="picks-toggle"></div>
     </div>
     <!-- 2026-08-27新增（策略層面決定：拆成兩個獨立榜單，不要用單一分數通吃）：
          價值成長榜=現行引擎（財報導向），題材動能榜=新引擎（股價領先財報的
          題材股）。兩榜共用同一份資料與流動性門檻，因子/權重各自獨立版本控管。 -->
-    <div class="mkt-toggle" id="picks-board-toggle" style="margin-top:8px;width:100%"></div>
+    <div class="mkt-toggle tw-only" id="picks-board-toggle" style="margin-top:8px;width:100%"></div>
     <!-- 2026-08-27新增（策略層面重要決定，使用者要求「最重要」，兩榜都要固定
          顯示，回測完成前不得移除）：本榜是資料排序，不是驗證過的策略。
          2026-10-12 常備.開發-6：三榜皆已回測且未通過（價值成長 #390/#395、題材動能 #437、
          未來性 #438），字樣改為「回測未通過」，仍固定顯示。 -->
-    <div class="note picks-lb-only" style="margin-top:6px;color:#c9524a;font-weight:600">⚠ 本榜為資料排序，組合策略回測未通過，不代表能贏大盤。</div>
+    <div class="note picks-lb-only tw-only" style="margin-top:6px;color:#c9524a;font-weight:600">⚠ 本榜為資料排序，組合策略回測未通過，不代表能贏大盤。</div>
     <!-- 2026-08-27新增（P1-新，使用者裁示）：總分跟資料完整度是兩件事，
          固定顯示在排行榜正上方，不是藏在角落的小字。 -->
-    <div class="note picks-lb-only" id="picks-coverage-note" data-ui-explain style="margin-top:6px;color:#c9a35a">⚠ 總分與「資料完整度」（coverage）是兩件事：全市場股票都會進榜，
+    <div class="note picks-lb-only tw-only" id="picks-coverage-note" data-ui-explain style="margin-top:6px;color:#c9a35a">⚠ 總分與「資料完整度」（coverage）是兩件事：全市場股票都會進榜，
       高分但資料完整度低的股票分數僅供參考、不代表可信——卡片變淡、加註「資料稀疏」的就是這種情況。</div>
 
     <!-- 搜尋框：任查任一檔（樣本內即使不在排行榜前段也查得到分數，樣本外誠實顯示查無資料）-->
-    <div class="press picks-lb-only" style="display:flex;align-items:center;gap:10px;margin-top:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:12px 14px" onclick="document.getElementById('picks-search-input').focus()">
+    <div class="press picks-lb-only tw-only" style="display:flex;align-items:center;gap:10px;margin-top:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:12px 14px" onclick="document.getElementById('picks-search-input').focus()">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8a857b" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
       <input id="picks-search-input" type="text" placeholder="搜尋股票代號或公司名稱…" oninput="onPicksSearchInput(this.value)" style="flex:1;background:none;border:0;outline:0;color:var(--ink);font-size:13.5px;font-family:inherit">
       <span style="font-size:10px;color:#c9a35a;background:rgba(216,176,112,.1);padding:3px 8px;border-radius:6px;flex-shrink:0">查評分</span>
     </div>
-    <div id="picks-search-result" class="picks-lb-only"></div>
+    <div id="picks-search-result" class="picks-lb-only tw-only"></div>
 
     <!-- 主流題材（資金流向）chips -->
-    <div id="mainstream-wrap" class="picks-lb-only" style="margin-top:12px">
+    <div id="mainstream-wrap" class="picks-lb-only tw-only" style="margin-top:12px">
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div style="font-size:12px;color:var(--ink-3)">🔥 主流題材（資金流入中）</div>
         <span class="press refresh-btn" id="mainstream-refresh" onclick="refreshTap(this,null,loadMainstreamIndustries)">重新整理</span>
@@ -443,7 +443,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <!-- 2026-10-01（先.八-三，總司令裁示）供給吃緊觀察清單：純描述性資料。
          只列最新一季「法定期限已過」之財報的 I1–I4 原始變化值與產業桶內百分位（同 PREREG v2 定義）；
          不得出現綜合分數、排名、買進字樣、任何績效數字。資料 data/supply_watchlist.json 由既有排程每日更新。 -->
-    <div class="card" id="picks-supply-card" style="display:none;margin-top:10px">
+    <div class="card tw-only" id="picks-supply-card" style="display:none;margin-top:10px">
       <h3>供給吃緊觀察清單</h3>
       <div class="note" style="color:#c9524a;font-weight:600">描述性資料，未經回測驗證；紙上追蹤中，滿8季前不得作為真錢依據</div>
       <div class="note" id="supply-meta-line" style="margin-top:6px">載入中…</div>
@@ -1414,6 +1414,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-13.0947"></script>
+<script src="app.js?v=2026-10-13.0954"></script>
 </body>
 </html>

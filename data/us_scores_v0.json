@@ -4,12 +4,12 @@
   "version": "us-score-v0",
   "label": "v0，未經回測驗證",
   "disclaimer": "資料整理與排序，未經回測驗證、未登記為試驗（受凍結.二限制），非投資建議。",
-  "generated_at": "2026-10-11T02:15:05+08:00",
+  "generated_at": "2026-10-13T09:49:20+08:00",
   "financials_generated_at": "2026-10-11T02:14:43+08:00",
   "financials_source": "SEC EDGAR XBRL companyfacts（官方，免金鑰）＋company_tickers_exchange.json 名冊；腳本 .github/scripts/fetch_us_financials_sec.py",
   "price_source": {
    "primary": "yfinance download(period=5d) 最近收盤",
-   "as_of": "2026-10-09",
+   "as_of": "2026-10-12",
    "fallback_used": [],
    "error": null
   },
@@ -43,7 +43,7 @@
  "stocks": [
   {
    "code": "MU",
-   "name": null,
+   "name": "MICRON TECHNOLOGY INC",
    "exchange": "Nasdaq",
    "total_score": 9.9,
    "coverage": 1.0,
@@ -52,10 +52,10 @@
      "score": 9.7,
      "pct": 0.97,
      "raw": {
-      "pe": 13.84,
+      "pe": 13.31,
       "peg": 0.07,
       "pb": null,
-      "price": 1029.0
+      "price": 989.04
      }
     },
     "growth": {
@@ -89,7 +89,7 @@
   },
   {
    "code": "AEM",
-   "name": null,
+   "name": "AGNICO EAGLE MINES LTD",
    "exchange": "NYSE",
    "total_score": 9.7,
    "coverage": 0.67,
@@ -128,19 +128,19 @@
   },
   {
    "code": "SNDK",
-   "name": null,
+   "name": "Sandisk Corp",
    "exchange": "Nasdaq",
-   "total_score": 9.6,
+   "total_score": 9.7,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 8.8,
-     "pct": 0.88,
+     "score": 9.0,
+     "pct": 0.9,
      "raw": {
-      "pe": 21.45,
-      "peg": 0.11,
+      "pe": 20.16,
+      "peg": 0.1,
       "pb": null,
-      "price": 1581.82
+      "price": 1487.33
      }
     },
     "growth": {
@@ -174,19 +174,19 @@
   },
   {
    "code": "NEM",
-   "name": null,
+   "name": "NEWMONT Corp /DE/",
    "exchange": "NYSE",
    "total_score": 9.5,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 9.0,
-     "pct": 0.9,
+     "score": 9.1,
+     "pct": 0.91,
      "raw": {
-      "pe": 18.44,
-      "peg": 0.16,
+      "pe": 18.33,
+      "peg": 0.15,
       "pb": null,
-      "price": 117.84
+      "price": 117.15
      }
     },
     "growth": {
@@ -220,19 +220,19 @@
   },
   {
    "code": "WDC",
-   "name": null,
+   "name": "WESTERN DIGITAL CORP",
    "exchange": "Nasdaq",
    "total_score": 9.3,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 9.5,
-     "pct": 0.95,
+     "score": 9.6,
+     "pct": 0.96,
      "raw": {
-      "pe": 16.36,
+      "pe": 15.94,
       "peg": 0.08,
       "pb": null,
-      "price": 397.28
+      "price": 386.94
      }
     },
     "growth": {
@@ -266,7 +266,7 @@
   },
   {
    "code": "BTI",
-   "name": null,
+   "name": "British American Tobacco p.l.c.",
    "exchange": "NYSE",
    "total_score": 9.2,
    "coverage": 0.67,
@@ -306,7 +306,7 @@
   },
   {
    "code": "B",
-   "name": null,
+   "name": "BARRICK MINING CORP",
    "exchange": "NYSE",
    "total_score": 9.0,
    "coverage": 0.67,
@@ -345,7 +345,7 @@
   },
   {
    "code": "SAP",
-   "name": null,
+   "name": "SAP SE",
    "exchange": "NYSE",
    "total_score": 8.9,
    "coverage": 0.67,
@@ -384,19 +384,19 @@
   },
   {
    "code": "APP",
-   "name": null,
+   "name": "AppLovin Corp",
    "exchange": "Nasdaq",
    "total_score": 8.8,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 7.6,
-     "pct": 0.76,
+     "score": 7.8,
+     "pct": 0.78,
      "raw": {
-      "pe": 28.41,
-      "peg": 0.25,
+      "pe": 27.78,
+      "peg": 0.24,
       "pb": null,
-      "price": 277.04
+      "price": 270.87
      }
     },
     "growth": {
@@ -430,7 +430,7 @@
   },
   {
    "code": "GILD",
-   "name": null,
+   "name": "GILEAD SCIENCES, INC.",
    "exchange": "Nasdaq",
    "total_score": 8.8,
    "coverage": 1.0,
@@ -439,10 +439,10 @@
      "score": 8.7,
      "pct": 0.87,
      "raw": {
-      "pe": 22.3,
+      "pe": 22.19,
       "peg": 0.11,
       "pb": null,
-      "price": 151.17
+      "price": 150.43
      }
     },
     "growth": {
@@ -478,19 +478,19 @@
   },
   {
    "code": "SPG",
-   "name": null,
+   "name": "SIMON PROPERTY GROUP INC.",
    "exchange": "NYSE",
    "total_score": 8.8,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 9.6,
-     "pct": 0.96,
+     "score": 9.5,
+     "pct": 0.95,
      "raw": {
-      "pe": 14.07,
+      "pe": 14.21,
       "peg": 0.15,
       "pb": null,
-      "price": 199.42
+      "price": 201.41
      }
     },
     "growth": {
@@ -524,7 +524,7 @@
   },
   {
    "code": "VRTX",
-   "name": null,
+   "name": "VERTEX PHARMACEUTICALS INC / MA",
    "exchange": "Nasdaq",
    "total_score": 8.8,
    "coverage": 1.0,
@@ -533,10 +533,10 @@
      "score": 7.0,
      "pct": 0.7,
      "raw": {
-      "pe": 33.3,
+      "pe": 33.09,
       "peg": 0.17,
       "pb": null,
-      "price": 510.08
+      "price": 507.0
      }
     },
     "growth": {
@@ -570,7 +570,7 @@
   },
   {
    "code": "BMY",
-   "name": null,
+   "name": "BRISTOL MYERS SQUIBB CO",
    "exchange": "NYSE",
    "total_score": 8.7,
    "coverage": 1.0,
@@ -579,10 +579,10 @@
      "score": 9.3,
      "pct": 0.93,
      "raw": {
-      "pe": 17.09,
-      "peg": 0.1,
+      "pe": 16.64,
+      "peg": 0.09,
       "pb": null,
-      "price": 59.12
+      "price": 57.58
      }
     },
     "growth": {
@@ -616,7 +616,7 @@
   },
   {
    "code": "CNQ",
-   "name": null,
+   "name": "CANADIAN NATURAL RESOURCES Ltd",
    "exchange": "NYSE",
    "total_score": 8.7,
    "coverage": 0.67,
@@ -655,7 +655,7 @@
   },
   {
    "code": "ADBE",
-   "name": null,
+   "name": "ADOBE INC.",
    "exchange": "Nasdaq",
    "total_score": 8.4,
    "coverage": 1.0,
@@ -664,10 +664,10 @@
      "score": 9.1,
      "pct": 0.91,
      "raw": {
-      "pe": 14.51,
+      "pe": 14.26,
       "peg": 0.41,
       "pb": null,
-      "price": 242.27
+      "price": 238.14
      }
     },
     "growth": {
@@ -701,7 +701,7 @@
   },
   {
    "code": "JNJ",
-   "name": null,
+   "name": "JOHNSON & JOHNSON",
    "exchange": "NYSE",
    "total_score": 8.2,
    "coverage": 1.0,
@@ -710,10 +710,10 @@
      "score": 8.2,
      "pct": 0.82,
      "raw": {
-      "pe": 23.7,
+      "pe": 23.91,
       "peg": 0.26,
       "pb": null,
-      "price": 261.44
+      "price": 263.73
      }
     },
     "growth": {
@@ -785,8 +785,54 @@
    "rank": 17
   },
   {
+   "code": "AVGO",
+   "name": "Broadcom Inc.",
+   "exchange": "Nasdaq",
+   "total_score": 8.0,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 5.0,
+     "pct": 0.5,
+     "raw": {
+      "pe": 74.37,
+      "peg": 0.37,
+      "pb": null,
+      "price": 354.73
+     }
+    },
+    "growth": {
+     "score": 9.5,
+     "pct": 0.95,
+     "raw": {
+      "eps_yoy": 2.0,
+      "revenue_yoy": 0.238744,
+      "gross_margin_yoy_pp": 4.73,
+      "op_margin_yoy_pp": 13.79,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 9.4,
+     "pct": 0.94,
+     "raw": {
+      "gross_margin": 0.677665,
+      "operating_margin": 0.398892,
+      "fcf_margin": 0.421275,
+      "debt_ratio": 0.470151,
+      "n_signals": 4
+     }
+    }
+   },
+   "period_end": "2025-11-02",
+   "filed": "2025-12-18",
+   "currency": "USD",
+   "warnings": [],
+   "rank": 18
+  },
+  {
    "code": "DIS",
-   "name": null,
+   "name": "Walt Disney Co",
    "exchange": "NYSE",
    "total_score": 8.0,
    "coverage": 1.0,
@@ -795,10 +841,10 @@
      "score": 9.5,
      "pct": 0.95,
      "raw": {
-      "pe": 15.77,
+      "pe": 15.84,
       "peg": 0.1,
       "pb": null,
-      "price": 108.05
+      "price": 108.49
      }
     },
     "growth": {
@@ -830,57 +876,11 @@
    "warnings": [
     "無總負債tag，以負債及權益合計−權益推導"
    ],
-   "rank": 18
-  },
-  {
-   "code": "AVGO",
-   "name": null,
-   "exchange": "Nasdaq",
-   "total_score": 7.9,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 4.8,
-     "pct": 0.48,
-     "raw": {
-      "pe": 75.79,
-      "peg": 0.38,
-      "pb": null,
-      "price": 361.54
-     }
-    },
-    "growth": {
-     "score": 9.5,
-     "pct": 0.95,
-     "raw": {
-      "eps_yoy": 2.0,
-      "revenue_yoy": 0.238744,
-      "gross_margin_yoy_pp": 4.73,
-      "op_margin_yoy_pp": 13.79,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 9.4,
-     "pct": 0.94,
-     "raw": {
-      "gross_margin": 0.677665,
-      "operating_margin": 0.398892,
-      "fcf_margin": 0.421275,
-      "debt_ratio": 0.470151,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2025-11-02",
-   "filed": "2025-12-18",
-   "currency": "USD",
-   "warnings": [],
    "rank": 19
   },
   {
    "code": "INTU",
-   "name": null,
+   "name": "INTUIT INC.",
    "exchange": "Nasdaq",
    "total_score": 7.7,
    "coverage": 1.0,
@@ -889,10 +889,10 @@
      "score": 7.7,
      "pct": 0.77,
      "raw": {
-      "pe": 18.39,
-      "peg": 0.9,
+      "pe": 18.59,
+      "peg": 0.91,
       "pb": null,
-      "price": 302.75
+      "price": 305.99
      }
     },
     "growth": {
@@ -925,8 +925,54 @@
    "rank": 20
   },
   {
+   "code": "NVDA",
+   "name": "NVIDIA CORP",
+   "exchange": "Nasdaq",
+   "total_score": 7.6,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 4.3,
+     "pct": 0.43,
+     "raw": {
+      "pe": 46.19,
+      "peg": 0.69,
+      "pb": null,
+      "price": 226.32
+     }
+    },
+    "growth": {
+     "score": 8.4,
+     "pct": 0.84,
+     "raw": {
+      "eps_yoy": 0.6666666666666667,
+      "revenue_yoy": 0.654735,
+      "gross_margin_yoy_pp": -3.92,
+      "op_margin_yoy_pp": -2.04,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 10.0,
+     "pct": 1.0,
+     "raw": {
+      "gross_margin": 0.710681,
+      "operating_margin": 0.603817,
+      "fcf_margin": 0.447703,
+      "debt_ratio": 0.285033,
+      "n_signals": 4
+     }
+    }
+   },
+   "period_end": "2026-01-25",
+   "filed": "2026-02-25",
+   "currency": "USD",
+   "warnings": [],
+   "rank": 21
+  },
+  {
    "code": "T",
-   "name": null,
+   "name": "AT&T INC.",
    "exchange": "NYSE",
    "total_score": 7.6,
    "coverage": 1.0,
@@ -935,10 +981,10 @@
      "score": 9.8,
      "pct": 0.98,
      "raw": {
-      "pe": 7.3,
+      "pe": 7.4,
       "peg": 0.07,
       "pb": null,
-      "price": 22.18
+      "price": 22.49
      }
     },
     "growth": {
@@ -970,11 +1016,11 @@
    "warnings": [
     "無總負債tag，以負債及權益合計−權益推導"
    ],
-   "rank": 21
+   "rank": 22
   },
   {
    "code": "AZN",
-   "name": null,
+   "name": "ASTRAZENECA PLC",
    "exchange": "NYSE",
    "total_score": 7.5,
    "coverage": 0.67,
@@ -1009,11 +1055,11 @@
     "IFRS 申報 EPS 為每普通股非每 ADR，不算價值",
     "IFRS申報（20-F）：EPS為每普通股，非每ADR"
    ],
-   "rank": 22
+   "rank": 23
   },
   {
    "code": "GSK",
-   "name": null,
+   "name": "GSK plc",
    "exchange": "NYSE",
    "total_score": 7.5,
    "coverage": 0.67,
@@ -1048,57 +1094,11 @@
     "申報幣別 GBP，本益比口徑對不上，不算價值",
     "IFRS申報（20-F）：EPS為每普通股，非每ADR"
    ],
-   "rank": 23
-  },
-  {
-   "code": "NVDA",
-   "name": "NVIDIA CORP",
-   "exchange": "Nasdaq",
-   "total_score": 7.5,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 4.2,
-     "pct": 0.42,
-     "raw": {
-      "pe": 46.79,
-      "peg": 0.7,
-      "pb": null,
-      "price": 229.28
-     }
-    },
-    "growth": {
-     "score": 8.4,
-     "pct": 0.84,
-     "raw": {
-      "eps_yoy": 0.6666666666666667,
-      "revenue_yoy": 0.654735,
-      "gross_margin_yoy_pp": -3.92,
-      "op_margin_yoy_pp": -2.04,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 10.0,
-     "pct": 1.0,
-     "raw": {
-      "gross_margin": 0.710681,
-      "operating_margin": 0.603817,
-      "fcf_margin": 0.447703,
-      "debt_ratio": 0.285033,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2026-01-25",
-   "filed": "2026-02-25",
-   "currency": "USD",
-   "warnings": [],
    "rank": 24
   },
   {
    "code": "PGR",
-   "name": null,
+   "name": "PROGRESSIVE CORP/OH/",
    "exchange": "NYSE",
    "total_score": 7.5,
    "coverage": 1.0,
@@ -1107,10 +1107,10 @@
      "score": 9.3,
      "pct": 0.93,
      "raw": {
-      "pe": 11.31,
+      "pe": 11.46,
       "peg": 0.34,
       "pb": null,
-      "price": 217.43
+      "price": 220.28
      }
     },
     "growth": {
@@ -1144,7 +1144,7 @@
   },
   {
    "code": "SCHW",
-   "name": null,
+   "name": "SCHWAB CHARLES CORP",
    "exchange": "NYSE",
    "total_score": 7.5,
    "coverage": 1.0,
@@ -1153,10 +1153,10 @@
      "score": 8.3,
      "pct": 0.83,
      "raw": {
-      "pe": 20.8,
-      "peg": 0.37,
+      "pe": 20.87,
+      "peg": 0.38,
       "pb": null,
-      "price": 96.7
+      "price": 97.06
      }
     },
     "growth": {
@@ -1190,7 +1190,7 @@
   },
   {
    "code": "ASML",
-   "name": null,
+   "name": "ASML HOLDING NV",
    "exchange": "Nasdaq",
    "total_score": 7.3,
    "coverage": 0.67,
@@ -1228,7 +1228,7 @@
   },
   {
    "code": "IBM",
-   "name": null,
+   "name": "INTERNATIONAL BUSINESS MACHINES CORP",
    "exchange": "NYSE",
    "total_score": 7.3,
    "coverage": 1.0,
@@ -1237,10 +1237,10 @@
      "score": 8.6,
      "pct": 0.86,
      "raw": {
-      "pe": 20.33,
+      "pe": 20.32,
       "peg": 0.28,
       "pb": null,
-      "price": 227.13
+      "price": 227.02
      }
     },
     "growth": {
@@ -1280,13 +1280,13 @@
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 6.1,
-     "pct": 0.61,
+     "score": 6.0,
+     "pct": 0.6,
      "raw": {
-      "pe": 29.81,
-      "peg": 0.94,
+      "pe": 30.15,
+      "peg": 0.95,
       "pb": null,
-      "price": 535.07
+      "price": 541.15
      }
     },
     "growth": {
@@ -1320,7 +1320,7 @@
   },
   {
    "code": "CVNA",
-   "name": null,
+   "name": "CARVANA CO.",
    "exchange": "NYSE",
    "total_score": 7.2,
    "coverage": 1.0,
@@ -1329,10 +1329,10 @@
      "score": 9.9,
      "pct": 0.99,
      "raw": {
-      "pe": 7.54,
+      "pe": 7.04,
       "peg": 0.04,
       "pb": null,
-      "price": 63.73
+      "price": 59.51
      }
     },
     "growth": {
@@ -1366,7 +1366,7 @@
   },
   {
    "code": "FCX",
-   "name": null,
+   "name": "FREEPORT-MCMORAN INC",
    "exchange": "NYSE",
    "total_score": 7.2,
    "coverage": 1.0,
@@ -1375,10 +1375,10 @@
      "score": 8.3,
      "pct": 0.83,
      "raw": {
-      "pe": 25.41,
+      "pe": 25.27,
       "peg": 0.13,
       "pb": null,
-      "price": 73.69
+      "price": 73.29
      }
     },
     "growth": {
@@ -1414,19 +1414,19 @@
   },
   {
    "code": "AMGN",
-   "name": null,
+   "name": "AMGEN INC",
    "exchange": "Nasdaq",
    "total_score": 7.1,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 7.1,
-     "pct": 0.71,
+     "score": 7.2,
+     "pct": 0.72,
      "raw": {
-      "pe": 29.15,
+      "pe": 29.34,
       "peg": 0.33,
       "pb": null,
-      "price": 414.87
+      "price": 417.57
      }
     },
     "growth": {
@@ -1462,19 +1462,19 @@
   },
   {
    "code": "APH",
-   "name": null,
+   "name": "AMPHENOL CORP /DE/",
    "exchange": "NYSE",
-   "total_score": 7.0,
+   "total_score": 7.1,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 7.4,
-     "pct": 0.74,
+     "score": 7.6,
+     "pct": 0.76,
      "raw": {
-      "pe": 26.12,
+      "pe": 25.81,
       "peg": 0.35,
       "pb": null,
-      "price": 87.24
+      "price": 86.19
      }
     },
     "growth": {
@@ -1514,13 +1514,13 @@
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 5.6,
-     "pct": 0.56,
+     "score": 5.7,
+     "pct": 0.57,
      "raw": {
-      "pe": 32.53,
-      "peg": 0.94,
+      "pe": 32.63,
+      "peg": 0.95,
       "pb": null,
-      "price": 351.66
+      "price": 352.72
      }
     },
     "growth": {
@@ -1554,7 +1554,7 @@
   },
   {
    "code": "LLY",
-   "name": null,
+   "name": "ELI LILLY & Co",
    "exchange": "NYSE",
    "total_score": 7.0,
    "coverage": 1.0,
@@ -1563,10 +1563,10 @@
      "score": 4.9,
      "pct": 0.49,
      "raw": {
-      "pe": 51.38,
+      "pe": 51.53,
       "peg": 0.54,
       "pb": null,
-      "price": 1179.27
+      "price": 1182.62
      }
     },
     "growth": {
@@ -1602,7 +1602,7 @@
   },
   {
    "code": "PLTR",
-   "name": null,
+   "name": "Palantir Technologies Inc.",
    "exchange": "Nasdaq",
    "total_score": 7.0,
    "coverage": 1.0,
@@ -1611,10 +1611,10 @@
      "score": 1.3,
      "pct": 0.13,
      "raw": {
-      "pe": 331.83,
+      "pe": 331.75,
       "peg": 1.66,
       "pb": null,
-      "price": 209.05
+      "price": 209.0
      }
     },
     "growth": {
@@ -1648,19 +1648,19 @@
   },
   {
    "code": "PM",
-   "name": null,
+   "name": "Philip Morris International Inc.",
    "exchange": "NYSE",
    "total_score": 7.0,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 6.9,
-     "pct": 0.69,
+     "score": 6.8,
+     "pct": 0.68,
      "raw": {
-      "pe": 27.71,
+      "pe": 27.82,
       "peg": 0.46,
       "pb": null,
-      "price": 201.19
+      "price": 202.0
      }
     },
     "growth": {
@@ -1693,54 +1693,8 @@
    "rank": 37
   },
   {
-   "code": "BNY",
-   "name": null,
-   "exchange": "NYSE",
-   "total_score": 6.7,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 7.8,
-     "pct": 0.78,
-     "raw": {
-      "pe": 19.29,
-      "peg": 0.7,
-      "pb": null,
-      "price": 142.71
-     }
-    },
-    "growth": {
-     "score": 7.6,
-     "pct": 0.76,
-     "raw": {
-      "eps_yoy": 0.27586206896551735,
-      "revenue_yoy": 0.078468,
-      "gross_margin_yoy_pp": null,
-      "op_margin_yoy_pp": null,
-      "n_signals": 2
-     }
-    },
-    "quality": {
-     "score": 4.6,
-     "pct": 0.46,
-     "raw": {
-      "gross_margin": null,
-      "operating_margin": null,
-      "fcf_margin": 0.257819,
-      "debt_ratio": 0.913626,
-      "n_signals": 2
-     }
-    }
-   },
-   "period_end": "2025-12-31",
-   "filed": "2026-02-25",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 38
-  },
-  {
    "code": "CMCSA",
-   "name": null,
+   "name": "COMCAST CORP",
    "exchange": "Nasdaq",
    "total_score": 6.7,
    "coverage": 1.0,
@@ -1749,10 +1703,10 @@
      "score": 9.7,
      "pct": 0.97,
      "raw": {
-      "pe": 3.83,
+      "pe": 3.84,
       "peg": 0.13,
       "pb": null,
-      "price": 20.66
+      "price": 20.68
      }
     },
     "growth": {
@@ -1784,23 +1738,23 @@
    "warnings": [
     "無總負債tag，以負債及權益合計−權益推導"
    ],
-   "rank": 39
+   "rank": 38
   },
   {
    "code": "NFLX",
-   "name": null,
+   "name": "NETFLIX INC",
    "exchange": "Nasdaq",
    "total_score": 6.7,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 6.2,
-     "pct": 0.62,
+     "score": 6.3,
+     "pct": 0.63,
      "raw": {
-      "pe": 27.79,
+      "pe": 27.91,
       "peg": 1.0,
       "pb": null,
-      "price": 70.3
+      "price": 70.61
      }
     },
     "growth": {
@@ -1830,11 +1784,11 @@
    "filed": "2026-01-23",
    "currency": "USD",
    "warnings": [],
-   "rank": 40
+   "rank": 39
   },
   {
    "code": "SPGI",
-   "name": null,
+   "name": "S&P Global Inc.",
    "exchange": "NYSE",
    "total_score": 6.7,
    "coverage": 1.0,
@@ -1843,10 +1797,10 @@
      "score": 5.4,
      "pct": 0.54,
      "raw": {
-      "pe": 27.82,
-      "peg": 1.49,
+      "pe": 28.12,
+      "peg": 1.5,
       "pb": null,
-      "price": 407.82
+      "price": 412.19
      }
     },
     "growth": {
@@ -1876,11 +1830,11 @@
    "filed": "2026-02-11",
    "currency": "USD",
    "warnings": [],
-   "rank": 41
+   "rank": 40
   },
   {
    "code": "BAM",
-   "name": null,
+   "name": "Brookfield Asset Management Ltd.",
    "exchange": "NYSE",
    "total_score": 6.6,
    "coverage": 1.0,
@@ -1889,10 +1843,10 @@
      "score": 2.2,
      "pct": 0.22,
      "raw": {
-      "pe": 40.6,
+      "pe": 40.56,
       "peg": null,
       "pb": null,
-      "price": 45.88
+      "price": 45.83
      }
     },
     "growth": {
@@ -1924,11 +1878,103 @@
    "warnings": [
     "EPS期末2023-12-31與營收期末2025-12-31不同"
    ],
+   "rank": 41
+  },
+  {
+   "code": "BNY",
+   "name": "Bank of New York Mellon Corp",
+   "exchange": "NYSE",
+   "total_score": 6.6,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 7.7,
+     "pct": 0.77,
+     "raw": {
+      "pe": 19.3,
+      "peg": 0.7,
+      "pb": null,
+      "price": 142.85
+     }
+    },
+    "growth": {
+     "score": 7.6,
+     "pct": 0.76,
+     "raw": {
+      "eps_yoy": 0.27586206896551735,
+      "revenue_yoy": 0.078468,
+      "gross_margin_yoy_pp": null,
+      "op_margin_yoy_pp": null,
+      "n_signals": 2
+     }
+    },
+    "quality": {
+     "score": 4.6,
+     "pct": 0.46,
+     "raw": {
+      "gross_margin": null,
+      "operating_margin": null,
+      "fcf_margin": 0.257819,
+      "debt_ratio": 0.913626,
+      "n_signals": 2
+     }
+    }
+   },
+   "period_end": "2025-12-31",
+   "filed": "2026-02-25",
+   "currency": "USD",
+   "warnings": [],
    "rank": 42
   },
   {
+   "code": "MRVL",
+   "name": "Marvell Technology, Inc.",
+   "exchange": "Nasdaq",
+   "total_score": 6.6,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 3.9,
+     "pct": 0.39,
+     "raw": {
+      "pe": 86.6,
+      "peg": 0.43,
+      "pb": null,
+      "price": 265.86
+     }
+    },
+    "growth": {
+     "score": 9.8,
+     "pct": 0.98,
+     "raw": {
+      "eps_yoy": 2.0,
+      "revenue_yoy": 0.420873,
+      "gross_margin_yoy_pp": 9.71,
+      "op_margin_yoy_pp": 28.63,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 6.0,
+     "pct": 0.6,
+     "raw": {
+      "gross_margin": 0.510177,
+      "operating_margin": 0.161436,
+      "fcf_margin": 0.170405,
+      "debt_ratio": 0.327459,
+      "n_signals": 4
+     }
+    }
+   },
+   "period_end": "2026-01-31",
+   "filed": "2026-03-11",
+   "currency": "USD",
+   "warnings": [],
+   "rank": 43
+  },
+  {
    "code": "BN",
-   "name": null,
+   "name": "BROOKFIELD Corp /ON/",
    "exchange": "NYSE",
    "total_score": 6.5,
    "coverage": 0.67,
@@ -1963,11 +2009,11 @@
     "IFRS 申報 EPS 為每普通股非每 ADR，不算價值",
     "IFRS申報（20-F）：EPS為每普通股，非每ADR"
    ],
-   "rank": 43
+   "rank": 44
   },
   {
    "code": "DLR",
-   "name": null,
+   "name": "DIGITAL REALTY TRUST, INC.",
    "exchange": "NYSE",
    "total_score": 6.5,
    "coverage": 1.0,
@@ -1976,10 +2022,10 @@
      "score": 5.5,
      "pct": 0.55,
      "raw": {
-      "pe": 49.93,
+      "pe": 50.32,
       "peg": 0.41,
       "pb": null,
-      "price": 178.76
+      "price": 180.16
      }
     },
     "growth": {
@@ -2009,23 +2055,23 @@
    "filed": "2026-02-13",
    "currency": "USD",
    "warnings": [],
-   "rank": 44
+   "rank": 45
   },
   {
    "code": "ICE",
-   "name": null,
+   "name": "Intercontinental Exchange, Inc.",
    "exchange": "NYSE",
    "total_score": 6.5,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 5.9,
-     "pct": 0.59,
+     "score": 6.0,
+     "pct": 0.6,
      "raw": {
-      "pe": 27.07,
-      "peg": 1.31,
+      "pe": 27.28,
+      "peg": 1.32,
       "pb": null,
-      "price": 156.19
+      "price": 157.42
      }
     },
     "growth": {
@@ -2055,57 +2101,11 @@
    "filed": "2026-02-05",
    "currency": "USD",
    "warnings": [],
-   "rank": 45
-  },
-  {
-   "code": "MRVL",
-   "name": null,
-   "exchange": "Nasdaq",
-   "total_score": 6.5,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 3.8,
-     "pct": 0.38,
-     "raw": {
-      "pe": 89.67,
-      "peg": 0.45,
-      "pb": null,
-      "price": 275.28
-     }
-    },
-    "growth": {
-     "score": 9.8,
-     "pct": 0.98,
-     "raw": {
-      "eps_yoy": 2.0,
-      "revenue_yoy": 0.420873,
-      "gross_margin_yoy_pp": 9.71,
-      "op_margin_yoy_pp": 28.63,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 6.0,
-     "pct": 0.6,
-     "raw": {
-      "gross_margin": 0.510177,
-      "operating_margin": 0.161436,
-      "fcf_margin": 0.170405,
-      "debt_ratio": 0.327459,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2026-01-31",
-   "filed": "2026-03-11",
-   "currency": "USD",
-   "warnings": [],
    "rank": 46
   },
   {
    "code": "RCL",
-   "name": null,
+   "name": "ROYAL CARIBBEAN CRUISES LTD",
    "exchange": "NYSE",
    "total_score": 6.5,
    "coverage": 1.0,
@@ -2114,10 +2114,10 @@
      "score": 8.6,
      "pct": 0.86,
      "raw": {
-      "pe": 18.08,
+      "pe": 17.98,
       "peg": 0.42,
       "pb": null,
-      "price": 282.26
+      "price": 280.67
      }
     },
     "growth": {
@@ -2151,7 +2151,7 @@
   },
   {
    "code": "BKNG",
-   "name": null,
+   "name": "Booking Holdings Inc.",
    "exchange": "Nasdaq",
    "total_score": 6.4,
    "coverage": 1.0,
@@ -2160,10 +2160,10 @@
      "score": 9.9,
      "pct": 0.99,
      "raw": {
-      "pe": 0.97,
+      "pe": 0.96,
       "peg": null,
       "pb": null,
-      "price": 160.34
+      "price": 158.43
      }
     },
     "growth": {
@@ -2197,19 +2197,19 @@
   },
   {
    "code": "CME",
-   "name": null,
+   "name": "CME GROUP INC.",
    "exchange": "Nasdaq",
    "total_score": 6.4,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 5.7,
-     "pct": 0.57,
+     "score": 5.8,
+     "pct": 0.58,
      "raw": {
-      "pe": 25.14,
-      "peg": 1.63,
+      "pe": 24.84,
+      "peg": 1.61,
       "pb": null,
-      "price": 280.56
+      "price": 277.24
      }
     },
     "growth": {
@@ -2243,7 +2243,7 @@
   },
   {
    "code": "CP",
-   "name": null,
+   "name": "CANADIAN PACIFIC KANSAS CITY LTD/CN",
    "exchange": "NYSE",
    "total_score": 6.4,
    "coverage": 0.67,
@@ -2281,7 +2281,7 @@
   },
   {
    "code": "EOG",
-   "name": null,
+   "name": "EOG RESOURCES INC",
    "exchange": "NYSE",
    "total_score": 6.4,
    "coverage": 1.0,
@@ -2290,10 +2290,10 @@
      "score": 9.2,
      "pct": 0.92,
      "raw": {
-      "pe": 16.25,
+      "pe": 16.5,
       "peg": null,
       "pb": null,
-      "price": 148.16
+      "price": 150.51
      }
     },
     "growth": {
@@ -2329,7 +2329,7 @@
   },
   {
    "code": "HDB",
-   "name": null,
+   "name": "HDFC BANK LTD",
    "exchange": "NYSE",
    "total_score": 6.4,
    "coverage": 1.0,
@@ -2338,10 +2338,10 @@
      "score": 7.4,
      "pct": 0.74,
      "raw": {
-      "pe": 21.42,
+      "pe": 21.71,
       "peg": null,
       "pb": null,
-      "price": 22.28
+      "price": 22.58
      }
     },
     "growth": {
@@ -2374,100 +2374,8 @@
    "rank": 52
   },
   {
-   "code": "KMI",
-   "name": null,
-   "exchange": "NYSE",
-   "total_score": 6.4,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 6.4,
-     "pct": 0.64,
-     "raw": {
-      "pe": 23.72,
-      "peg": 1.39,
-      "pb": null,
-      "price": 32.49
-     }
-    },
-    "growth": {
-     "score": 5.8,
-     "pct": 0.58,
-     "raw": {
-      "eps_yoy": 0.170940170940171,
-      "revenue_yoy": 0.121656,
-      "gross_margin_yoy_pp": null,
-      "op_margin_yoy_pp": -1.14,
-      "n_signals": 3
-     }
-    },
-    "quality": {
-     "score": 6.9,
-     "pct": 0.69,
-     "raw": {
-      "gross_margin": null,
-      "operating_margin": 0.278916,
-      "fcf_margin": 0.170691,
-      "debt_ratio": 0.556061,
-      "n_signals": 3
-     }
-    }
-   },
-   "period_end": "2025-12-31",
-   "filed": "2026-02-13",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 53
-  },
-  {
-   "code": "META",
-   "name": null,
-   "exchange": "Nasdaq",
-   "total_score": 6.4,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 5.3,
-     "pct": 0.53,
-     "raw": {
-      "pe": 30.59,
-      "peg": null,
-      "pb": null,
-      "price": 718.67
-     }
-    },
-    "growth": {
-     "score": 4.3,
-     "pct": 0.43,
-     "raw": {
-      "eps_yoy": -0.015507124895222213,
-      "revenue_yoy": 0.22167,
-      "gross_margin_yoy_pp": 0.33,
-      "op_margin_yoy_pp": -0.74,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 9.5,
-     "pct": 0.95,
-     "raw": {
-      "gross_margin": 0.819994,
-      "operating_margin": 0.414379,
-      "fcf_margin": 0.229437,
-      "debt_ratio": 0.419452,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2025-12-31",
-   "filed": "2026-01-29",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 54
-  },
-  {
    "code": "PSX",
-   "name": null,
+   "name": "Phillips 66",
    "exchange": "NYSE",
    "total_score": 6.4,
    "coverage": 1.0,
@@ -2476,10 +2384,10 @@
      "score": 7.9,
      "pct": 0.79,
      "raw": {
-      "pe": 25.78,
+      "pe": 26.09,
       "peg": 0.22,
       "pb": null,
-      "price": 278.18
+      "price": 281.47
      }
     },
     "growth": {
@@ -2509,11 +2417,57 @@
    "filed": "2026-02-20",
    "currency": "USD",
    "warnings": [],
-   "rank": 55
+   "rank": 53
+  },
+  {
+   "code": "STX",
+   "name": "Seagate Technology Holdings plc",
+   "exchange": "Nasdaq",
+   "total_score": 6.4,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 4.6,
+     "pct": 0.46,
+     "raw": {
+      "pe": 54.19,
+      "peg": 0.51,
+      "pb": null,
+      "price": 753.25
+     }
+    },
+    "growth": {
+     "score": 8.8,
+     "pct": 0.88,
+     "raw": {
+      "eps_yoy": 1.0531757754800593,
+      "revenue_yoy": 0.340552,
+      "gross_margin_yoy_pp": 10.4,
+      "op_margin_yoy_pp": 12.79,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 5.7,
+     "pct": 0.57,
+     "raw": {
+      "gross_margin": 0.455761,
+      "operating_margin": 0.335711,
+      "fcf_margin": 0.254613,
+      "debt_ratio": 0.782692,
+      "n_signals": 4
+     }
+    }
+   },
+   "period_end": "2026-07-03",
+   "filed": "2026-08-04",
+   "currency": "USD",
+   "warnings": [],
+   "rank": 54
   },
   {
    "code": "CI",
-   "name": null,
+   "name": "Cigna Group",
    "exchange": "NYSE",
    "total_score": 6.3,
    "coverage": 1.0,
@@ -2522,10 +2476,10 @@
      "score": 9.6,
      "pct": 0.96,
      "raw": {
-      "pe": 12.73,
+      "pe": 12.77,
       "peg": 0.15,
       "pb": null,
-      "price": 282.43
+      "price": 283.34
      }
     },
     "growth": {
@@ -2555,11 +2509,11 @@
    "filed": "2026-02-26",
    "currency": "USD",
    "warnings": [],
-   "rank": 56
+   "rank": 55
   },
   {
    "code": "EPD",
-   "name": null,
+   "name": "ENTERPRISE PRODUCTS PARTNERS L.P.",
    "exchange": "NYSE",
    "total_score": 6.3,
    "coverage": 1.0,
@@ -2568,10 +2522,10 @@
      "score": 9.4,
      "pct": 0.94,
      "raw": {
-      "pe": 15.16,
+      "pe": 15.09,
       "peg": 0.14,
       "pb": null,
-      "price": 36.08
+      "price": 35.91
      }
     },
     "growth": {
@@ -2603,11 +2557,57 @@
    "warnings": [
     "EPS期末2011-12-31與營收期末2025-12-31不同"
    ],
+   "rank": 56
+  },
+  {
+   "code": "KMI",
+   "name": "KINDER MORGAN, INC.",
+   "exchange": "NYSE",
+   "total_score": 6.3,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 6.2,
+     "pct": 0.62,
+     "raw": {
+      "pe": 24.15,
+      "peg": 1.41,
+      "pb": null,
+      "price": 33.08
+     }
+    },
+    "growth": {
+     "score": 5.8,
+     "pct": 0.58,
+     "raw": {
+      "eps_yoy": 0.170940170940171,
+      "revenue_yoy": 0.121656,
+      "gross_margin_yoy_pp": null,
+      "op_margin_yoy_pp": -1.14,
+      "n_signals": 3
+     }
+    },
+    "quality": {
+     "score": 6.9,
+     "pct": 0.69,
+     "raw": {
+      "gross_margin": null,
+      "operating_margin": 0.278916,
+      "fcf_margin": 0.170691,
+      "debt_ratio": 0.556061,
+      "n_signals": 3
+     }
+    }
+   },
+   "period_end": "2025-12-31",
+   "filed": "2026-02-13",
+   "currency": "USD",
+   "warnings": [],
    "rank": 57
   },
   {
    "code": "SPOT",
-   "name": null,
+   "name": "Spotify Technology S.A.",
    "exchange": "NYSE",
    "total_score": 6.3,
    "coverage": 0.67,
@@ -2645,66 +2645,20 @@
    "rank": 58
   },
   {
-   "code": "STX",
-   "name": null,
-   "exchange": "Nasdaq",
-   "total_score": 6.3,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 4.4,
-     "pct": 0.44,
-     "raw": {
-      "pe": 56.33,
-      "peg": 0.53,
-      "pb": null,
-      "price": 783.0
-     }
-    },
-    "growth": {
-     "score": 8.8,
-     "pct": 0.88,
-     "raw": {
-      "eps_yoy": 1.0531757754800593,
-      "revenue_yoy": 0.340552,
-      "gross_margin_yoy_pp": 10.4,
-      "op_margin_yoy_pp": 12.79,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 5.7,
-     "pct": 0.57,
-     "raw": {
-      "gross_margin": 0.455761,
-      "operating_margin": 0.335711,
-      "fcf_margin": 0.254613,
-      "debt_ratio": 0.782692,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2026-07-03",
-   "filed": "2026-08-04",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 59
-  },
-  {
    "code": "TRV",
-   "name": null,
+   "name": "TRAVELERS COMPANIES, INC.",
    "exchange": "NYSE",
    "total_score": 6.3,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 9.0,
-     "pct": 0.9,
+     "score": 8.9,
+     "pct": 0.89,
      "raw": {
-      "pe": 13.44,
-      "peg": 0.48,
+      "pe": 13.55,
+      "peg": 0.49,
       "pb": null,
-      "price": 368.75
+      "price": 371.68
      }
     },
     "growth": {
@@ -2734,11 +2688,11 @@
    "filed": "2026-02-12",
    "currency": "USD",
    "warnings": [],
-   "rank": 60
+   "rank": 59
   },
   {
    "code": "V",
-   "name": null,
+   "name": "VISA INC.",
    "exchange": "NYSE",
    "total_score": 6.3,
    "coverage": 0.67,
@@ -2772,11 +2726,11 @@
    "warnings": [
     "EPS ≤ 0 或缺，本益比無意義"
    ],
-   "rank": 61
+   "rank": 60
   },
   {
    "code": "BHP",
-   "name": null,
+   "name": "BHP Group Ltd",
    "exchange": "NYSE",
    "total_score": 6.2,
    "coverage": 0.67,
@@ -2811,11 +2765,11 @@
     "IFRS 申報 EPS 為每普通股非每 ADR，不算價值",
     "IFRS申報（20-F）：EPS為每普通股，非每ADR"
    ],
-   "rank": 62
+   "rank": 61
   },
   {
    "code": "CRM",
-   "name": null,
+   "name": "Salesforce, Inc.",
    "exchange": "NYSE",
    "total_score": 6.2,
    "coverage": 1.0,
@@ -2824,10 +2778,10 @@
      "score": 5.4,
      "pct": 0.54,
      "raw": {
-      "pe": 29.38,
-      "peg": 1.3,
+      "pe": 29.99,
+      "peg": 1.32,
       "pb": null,
-      "price": 229.13
+      "price": 233.92
      }
     },
     "growth": {
@@ -2857,23 +2811,23 @@
    "filed": "2026-03-02",
    "currency": "USD",
    "warnings": [],
-   "rank": 63
+   "rank": 62
   },
   {
    "code": "JCI",
-   "name": null,
+   "name": "Johnson Controls International plc",
    "exchange": "NYSE",
    "total_score": 6.2,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 6.9,
-     "pct": 0.69,
+     "score": 7.0,
+     "pct": 0.7,
      "raw": {
-      "pe": 31.3,
+      "pe": 30.9,
       "peg": 0.31,
       "pb": null,
-      "price": 157.44
+      "price": 155.41
      }
     },
     "growth": {
@@ -2905,11 +2859,103 @@
    "warnings": [
     "無總負債tag，以負債及權益合計−權益推導"
    ],
+   "rank": 63
+  },
+  {
+   "code": "LRCX",
+   "name": "LAM RESEARCH CORP",
+   "exchange": "Nasdaq",
+   "total_score": 6.2,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 3.0,
+     "pct": 0.3,
+     "raw": {
+      "pe": 53.74,
+      "peg": 1.39,
+      "pb": null,
+      "price": 309.56
+     }
+    },
+    "growth": {
+     "score": 7.5,
+     "pct": 0.75,
+     "raw": {
+      "eps_yoy": 0.3879518072289154,
+      "revenue_yoy": 0.260209,
+      "gross_margin_yoy_pp": 1.76,
+      "op_margin_yoy_pp": 3.29,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 8.0,
+     "pct": 0.8,
+     "raw": {
+      "gross_margin": 0.50469,
+      "operating_margin": 0.352942,
+      "fcf_margin": 0.210533,
+      "debt_ratio": 0.469993,
+      "n_signals": 4
+     }
+    }
+   },
+   "period_end": "2026-06-28",
+   "filed": "2026-08-07",
+   "currency": "USD",
+   "warnings": [],
    "rank": 64
   },
   {
+   "code": "META",
+   "name": "Meta Platforms, Inc.",
+   "exchange": "Nasdaq",
+   "total_score": 6.2,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 4.8,
+     "pct": 0.48,
+     "raw": {
+      "pe": 31.63,
+      "peg": null,
+      "pb": null,
+      "price": 742.96
+     }
+    },
+    "growth": {
+     "score": 4.3,
+     "pct": 0.43,
+     "raw": {
+      "eps_yoy": -0.015507124895222213,
+      "revenue_yoy": 0.22167,
+      "gross_margin_yoy_pp": 0.33,
+      "op_margin_yoy_pp": -0.74,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 9.5,
+     "pct": 0.95,
+     "raw": {
+      "gross_margin": 0.819994,
+      "operating_margin": 0.414379,
+      "fcf_margin": 0.229437,
+      "debt_ratio": 0.419452,
+      "n_signals": 4
+     }
+    }
+   },
+   "period_end": "2025-12-31",
+   "filed": "2026-01-29",
+   "currency": "USD",
+   "warnings": [],
+   "rank": 65
+  },
+  {
    "code": "REGN",
-   "name": null,
+   "name": "REGENERON PHARMACEUTICALS, INC.",
    "exchange": "Nasdaq",
    "total_score": 6.2,
    "coverage": 1.0,
@@ -2918,10 +2964,10 @@
      "score": 6.5,
      "pct": 0.65,
      "raw": {
-      "pe": 18.0,
-      "peg": 2.2,
+      "pe": 18.39,
+      "peg": 2.25,
       "pb": null,
-      "price": 746.54
+      "price": 762.81
      }
     },
     "growth": {
@@ -2951,11 +2997,11 @@
    "filed": "2026-02-04",
    "currency": "USD",
    "warnings": [],
-   "rank": 65
+   "rank": 66
   },
   {
    "code": "SCCO",
-   "name": null,
+   "name": "SOUTHERN COPPER CORP/",
    "exchange": "NYSE",
    "total_score": 6.2,
    "coverage": 1.0,
@@ -2964,10 +3010,10 @@
      "score": 3.1,
      "pct": 0.31,
      "raw": {
-      "pe": 39.93,
+      "pe": 39.83,
       "peg": 1.63,
       "pb": null,
-      "price": 209.21
+      "price": 208.69
      }
     },
     "growth": {
@@ -2999,11 +3045,11 @@
    "warnings": [
     "無總負債tag，以負債及權益合計−權益推導"
    ],
-   "rank": 66
+   "rank": 67
   },
   {
    "code": "AEP",
-   "name": null,
+   "name": "AMERICAN ELECTRIC POWER CO INC",
    "exchange": "Nasdaq",
    "total_score": 6.1,
    "coverage": 1.0,
@@ -3012,10 +3058,10 @@
      "score": 7.3,
      "pct": 0.73,
      "raw": {
-      "pe": 18.44,
-      "peg": 0.95,
+      "pe": 18.65,
+      "peg": 0.96,
       "pb": null,
-      "price": 122.81
+      "price": 124.23
      }
     },
     "growth": {
@@ -3045,115 +3091,69 @@
    "filed": "2026-02-12",
    "currency": "USD",
    "warnings": [],
-   "rank": 67
+   "rank": 68
   },
   {
-   "code": "LRCX",
-   "name": null,
+   "code": "DASH",
+   "name": "DoorDash, Inc.",
    "exchange": "Nasdaq",
    "total_score": 6.1,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 2.8,
-     "pct": 0.28,
+     "score": 3.8,
+     "pct": 0.38,
      "raw": {
-      "pe": 55.35,
-      "peg": 1.43,
+      "pe": 91.19,
+      "peg": 0.46,
       "pb": null,
-      "price": 318.84
+      "price": 194.24
      }
     },
     "growth": {
-     "score": 7.5,
-     "pct": 0.75,
+     "score": 9.9,
+     "pct": 0.99,
      "raw": {
-      "eps_yoy": 0.3879518072289154,
-      "revenue_yoy": 0.260209,
-      "gross_margin_yoy_pp": 1.76,
-      "op_margin_yoy_pp": 3.29,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 8.0,
-     "pct": 0.8,
-     "raw": {
-      "gross_margin": 0.50469,
-      "operating_margin": 0.352942,
-      "fcf_margin": 0.210533,
-      "debt_ratio": 0.469993,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2026-06-28",
-   "filed": "2026-08-07",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 68
-  },
-  {
-   "code": "MA",
-   "name": null,
-   "exchange": "NYSE",
-   "total_score": 6.1,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 3.3,
-     "pct": 0.33,
-     "raw": {
-      "pe": 35.66,
-      "peg": 1.88,
-      "pb": null,
-      "price": 589.14
-     }
-    },
-    "growth": {
-     "score": 6.6,
-     "pct": 0.66,
-     "raw": {
-      "eps_yoy": 0.18934485241180687,
-      "revenue_yoy": 0.164164,
+      "eps_yoy": 2.0,
+      "revenue_yoy": 0.279332,
       "gross_margin_yoy_pp": null,
-      "op_margin_yoy_pp": 2.31,
+      "op_margin_yoy_pp": 5.63,
       "n_signals": 3
      }
     },
     "quality": {
-     "score": 8.3,
-     "pct": 0.83,
+     "score": 4.5,
+     "pct": 0.45,
      "raw": {
       "gross_margin": null,
-      "operating_margin": 0.576286,
-      "fcf_margin": 0.523284,
-      "debt_ratio": 0.902827,
+      "operating_margin": 0.052708,
+      "fcf_margin": 0.158489,
+      "debt_ratio": 0.492255,
       "n_signals": 3
      }
     }
    },
    "period_end": "2025-12-31",
-   "filed": "2026-02-11",
+   "filed": "2026-05-06",
    "currency": "USD",
    "warnings": [],
    "rank": 69
   },
   {
    "code": "CB",
-   "name": null,
+   "name": "Chubb Ltd",
    "exchange": "NYSE",
    "total_score": 6.0,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 8.2,
-     "pct": 0.82,
+     "score": 8.1,
+     "pct": 0.81,
      "raw": {
-      "pe": 13.29,
-      "peg": 1.01,
+      "pe": 13.44,
+      "peg": 1.02,
       "pb": null,
-      "price": 341.2
+      "price": 345.06
      }
     },
     "growth": {
@@ -3186,54 +3186,100 @@
    "rank": 70
   },
   {
-   "code": "DASH",
-   "name": null,
+   "code": "CSCO",
+   "name": "CISCO SYSTEMS, INC.",
    "exchange": "Nasdaq",
    "total_score": 6.0,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 3.6,
-     "pct": 0.36,
+     "score": 4.7,
+     "pct": 0.47,
      "raw": {
-      "pe": 92.25,
-      "peg": 0.46,
+      "pe": 34.64,
+      "peg": 1.13,
       "pb": null,
-      "price": 196.5
+      "price": 115.34
      }
     },
     "growth": {
-     "score": 9.9,
-     "pct": 0.99,
+     "score": 6.2,
+     "pct": 0.62,
      "raw": {
-      "eps_yoy": 2.0,
-      "revenue_yoy": 0.279332,
-      "gross_margin_yoy_pp": null,
-      "op_margin_yoy_pp": 5.63,
-      "n_signals": 3
+      "eps_yoy": 0.3058823529411765,
+      "revenue_yoy": 0.11775,
+      "gross_margin_yoy_pp": -0.41,
+      "op_margin_yoy_pp": 3.51,
+      "n_signals": 4
      }
     },
     "quality": {
-     "score": 4.5,
-     "pct": 0.45,
+     "score": 7.0,
+     "pct": 0.7,
      "raw": {
-      "gross_margin": null,
-      "operating_margin": 0.052708,
-      "fcf_margin": 0.158489,
-      "debt_ratio": 0.492255,
-      "n_signals": 3
+      "gross_margin": 0.645243,
+      "operating_margin": 0.242685,
+      "fcf_margin": 0.201611,
+      "debt_ratio": 0.612109,
+      "n_signals": 4
      }
     }
    },
-   "period_end": "2025-12-31",
-   "filed": "2026-05-06",
+   "period_end": "2026-07-25",
+   "filed": "2026-09-02",
    "currency": "USD",
    "warnings": [],
    "rank": 71
   },
   {
+   "code": "MA",
+   "name": "Mastercard Inc",
+   "exchange": "NYSE",
+   "total_score": 6.0,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 3.2,
+     "pct": 0.32,
+     "raw": {
+      "pe": 36.02,
+      "peg": 1.9,
+      "pb": null,
+      "price": 595.09
+     }
+    },
+    "growth": {
+     "score": 6.6,
+     "pct": 0.66,
+     "raw": {
+      "eps_yoy": 0.18934485241180687,
+      "revenue_yoy": 0.164164,
+      "gross_margin_yoy_pp": null,
+      "op_margin_yoy_pp": 2.31,
+      "n_signals": 3
+     }
+    },
+    "quality": {
+     "score": 8.3,
+     "pct": 0.83,
+     "raw": {
+      "gross_margin": null,
+      "operating_margin": 0.576286,
+      "fcf_margin": 0.523284,
+      "debt_ratio": 0.902827,
+      "n_signals": 3
+     }
+    }
+   },
+   "period_end": "2025-12-31",
+   "filed": "2026-02-11",
+   "currency": "USD",
+   "warnings": [],
+   "rank": 72
+  },
+  {
    "code": "ADI",
-   "name": null,
+   "name": "ANALOG DEVICES INC",
    "exchange": "Nasdaq",
    "total_score": 5.9,
    "coverage": 1.0,
@@ -3242,10 +3288,10 @@
      "score": 1.2,
      "pct": 0.12,
      "raw": {
-      "pe": 89.08,
+      "pe": 89.09,
       "peg": 2.28,
       "pb": null,
-      "price": 406.19
+      "price": 406.25
      }
     },
     "growth": {
@@ -3277,23 +3323,23 @@
    "warnings": [
     "無總負債tag，以負債及權益合計−權益推導"
    ],
-   "rank": 72
+   "rank": 73
   },
   {
    "code": "ANET",
-   "name": null,
+   "name": "Arista Networks, Inc.",
    "exchange": "NYSE",
    "total_score": 5.9,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 1.0,
-     "pct": 0.1,
+     "score": 1.1,
+     "pct": 0.11,
      "raw": {
-      "pe": 78.81,
-      "peg": 3.38,
+      "pe": 76.68,
+      "peg": 3.29,
       "pb": null,
-      "price": 216.74
+      "price": 210.88
      }
     },
     "growth": {
@@ -3323,23 +3369,23 @@
    "filed": "2026-02-17",
    "currency": "USD",
    "warnings": [],
-   "rank": 73
+   "rank": 74
   },
   {
    "code": "COP",
-   "name": null,
+   "name": "CONOCOPHILLIPS",
    "exchange": "NYSE",
    "total_score": 5.9,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 7.6,
-     "pct": 0.76,
+     "score": 7.4,
+     "pct": 0.74,
      "raw": {
-      "pe": 21.12,
+      "pe": 21.66,
       "peg": null,
       "pb": null,
-      "price": 134.1
+      "price": 137.56
      }
     },
     "growth": {
@@ -3369,23 +3415,23 @@
    "filed": "2026-02-17",
    "currency": "USD",
    "warnings": [],
-   "rank": 74
+   "rank": 75
   },
   {
    "code": "MCO",
-   "name": null,
+   "name": "MOODYS CORP /DE/",
    "exchange": "NYSE",
    "total_score": 5.9,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 3.7,
-     "pct": 0.37,
+     "score": 3.8,
+     "pct": 0.38,
      "raw": {
-      "pe": 33.96,
-      "peg": 1.59,
+      "pe": 34.42,
+      "peg": 1.61,
       "pb": null,
-      "price": 464.23
+      "price": 470.5
      }
     },
     "growth": {
@@ -3415,103 +3461,11 @@
    "filed": "2026-02-18",
    "currency": "USD",
    "warnings": [],
-   "rank": 75
-  },
-  {
-   "code": "VRT",
-   "name": null,
-   "exchange": "NYSE",
-   "total_score": 5.9,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 4.6,
-     "pct": 0.46,
-     "raw": {
-      "pe": 71.2,
-      "peg": 0.43,
-      "pb": null,
-      "price": 242.78
-     }
-    },
-    "growth": {
-     "score": 9.1,
-     "pct": 0.91,
-     "raw": {
-      "eps_yoy": 1.6640625,
-      "revenue_yoy": 0.276854,
-      "gross_margin_yoy_pp": -0.31,
-      "op_margin_yoy_pp": 0.82,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 4.0,
-     "pct": 0.4,
-     "raw": {
-      "gross_margin": 0.363171,
-      "operating_margin": 0.178858,
-      "fcf_margin": 0.185124,
-      "debt_ratio": 0.700797,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2025-12-31",
-   "filed": "2026-02-13",
-   "currency": "USD",
-   "warnings": [],
    "rank": 76
   },
   {
-   "code": "CSCO",
-   "name": null,
-   "exchange": "Nasdaq",
-   "total_score": 5.8,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 4.1,
-     "pct": 0.41,
-     "raw": {
-      "pe": 35.55,
-      "peg": 1.16,
-      "pb": null,
-      "price": 118.39
-     }
-    },
-    "growth": {
-     "score": 6.2,
-     "pct": 0.62,
-     "raw": {
-      "eps_yoy": 0.3058823529411765,
-      "revenue_yoy": 0.11775,
-      "gross_margin_yoy_pp": -0.41,
-      "op_margin_yoy_pp": 3.51,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 7.0,
-     "pct": 0.7,
-     "raw": {
-      "gross_margin": 0.645243,
-      "operating_margin": 0.242685,
-      "fcf_margin": 0.201611,
-      "debt_ratio": 0.612109,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2026-07-25",
-   "filed": "2026-09-02",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 77
-  },
-  {
    "code": "HCA",
-   "name": null,
+   "name": "HCA Healthcare, Inc.",
    "exchange": "NYSE",
    "total_score": 5.8,
    "coverage": 1.0,
@@ -3520,10 +3474,10 @@
      "score": 8.5,
      "pct": 0.85,
      "raw": {
-      "pe": 15.92,
-      "peg": 0.55,
+      "pe": 16.19,
+      "peg": 0.56,
       "pb": null,
-      "price": 451.09
+      "price": 458.6
      }
     },
     "growth": {
@@ -3555,11 +3509,11 @@
    "warnings": [
     "無總負債tag，以負債及權益合計−權益推導"
    ],
-   "rank": 78
+   "rank": 77
   },
   {
    "code": "ING",
-   "name": null,
+   "name": "ING GROEP NV",
    "exchange": "NYSE",
    "total_score": 5.8,
    "coverage": 0.67,
@@ -3594,11 +3548,11 @@
     "申報幣別 EUR，本益比口徑對不上，不算價值",
     "IFRS申報（20-F）：EPS為每普通股，非每ADR"
    ],
-   "rank": 79
+   "rank": 78
   },
   {
    "code": "MNST",
-   "name": null,
+   "name": "Monster Beverage Corp",
    "exchange": "Nasdaq",
    "total_score": 5.8,
    "coverage": 1.0,
@@ -3607,10 +3561,10 @@
      "score": 4.3,
      "pct": 0.43,
      "raw": {
-      "pe": 19.14,
-      "peg": 6.04,
+      "pe": 19.19,
+      "peg": 6.06,
       "pb": null,
-      "price": 43.64
+      "price": 43.76
      }
     },
     "growth": {
@@ -3643,23 +3597,23 @@
     "EPS期末2010-12-31與營收期末2025-12-31不同",
     "無總負債tag，以負債及權益合計−權益推導"
    ],
-   "rank": 80
+   "rank": 79
   },
   {
    "code": "ORCL",
-   "name": null,
+   "name": "ORACLE CORP",
    "exchange": "NYSE",
    "total_score": 5.8,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 6.8,
-     "pct": 0.68,
+     "score": 6.9,
+     "pct": 0.69,
      "raw": {
-      "pe": 24.25,
-      "peg": 0.71,
+      "pe": 23.57,
+      "peg": 0.69,
       "pb": null,
-      "price": 141.4
+      "price": 137.39
      }
     },
     "growth": {
@@ -3691,11 +3645,57 @@
    "warnings": [
     "無總負債tag，以負債及權益合計−權益推導"
    ],
+   "rank": 80
+  },
+  {
+   "code": "VRT",
+   "name": "Vertiv Holdings Co",
+   "exchange": "NYSE",
+   "total_score": 5.8,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 4.4,
+     "pct": 0.44,
+     "raw": {
+      "pe": 70.19,
+      "peg": 0.42,
+      "pb": null,
+      "price": 239.36
+     }
+    },
+    "growth": {
+     "score": 9.1,
+     "pct": 0.91,
+     "raw": {
+      "eps_yoy": 1.6640625,
+      "revenue_yoy": 0.276854,
+      "gross_margin_yoy_pp": -0.31,
+      "op_margin_yoy_pp": 0.82,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 4.0,
+     "pct": 0.4,
+     "raw": {
+      "gross_margin": 0.363171,
+      "operating_margin": 0.178858,
+      "fcf_margin": 0.185124,
+      "debt_ratio": 0.700797,
+      "n_signals": 4
+     }
+    }
+   },
+   "period_end": "2025-12-31",
+   "filed": "2026-02-13",
+   "currency": "USD",
+   "warnings": [],
    "rank": 81
   },
   {
    "code": "AMD",
-   "name": null,
+   "name": "ADVANCED MICRO DEVICES INC",
    "exchange": "Nasdaq",
    "total_score": 5.7,
    "coverage": 1.0,
@@ -3704,10 +3704,10 @@
      "score": 1.9,
      "pct": 0.19,
      "raw": {
-      "pe": 229.47,
-      "peg": 1.39,
+      "pe": 224.24,
+      "peg": 1.36,
       "pb": null,
-      "price": 608.1
+      "price": 594.24
      }
     },
     "growth": {
@@ -3742,66 +3742,112 @@
    "rank": 82
   },
   {
-   "code": "BX",
-   "name": null,
+   "code": "AXP",
+   "name": "AMERICAN EXPRESS CO",
    "exchange": "NYSE",
    "total_score": 5.7,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 2.9,
-     "pct": 0.29,
+     "score": 6.1,
+     "pct": 0.61,
      "raw": {
-      "pe": 29.53,
-      "peg": 4.28,
+      "pe": 20.26,
+      "peg": 2.07,
       "pb": null,
-      "price": 114.29
+      "price": 311.53
      }
     },
     "growth": {
-     "score": 5.2,
-     "pct": 0.52,
+     "score": 5.3,
+     "pct": 0.53,
      "raw": {
-      "eps_yoy": 0.06906077348066297,
-      "revenue_yoy": 0.092237,
+      "eps_yoy": 0.09778729478943626,
+      "revenue_yoy": 0.063851,
       "gross_margin_yoy_pp": null,
       "op_margin_yoy_pp": null,
       "n_signals": 2
      }
     },
     "quality": {
-     "score": 8.9,
-     "pct": 0.89,
+     "score": 5.6,
+     "pct": 0.56,
      "raw": {
       "gross_margin": null,
       "operating_margin": null,
-      "fcf_margin": 0.314697,
-      "debt_ratio": 0.550366,
+      "fcf_margin": 0.387444,
+      "debt_ratio": 0.888775,
       "n_signals": 2
      }
     }
    },
    "period_end": "2025-12-31",
-   "filed": "2026-02-27",
+   "filed": "2026-02-06",
    "currency": "USD",
    "warnings": [],
    "rank": 83
   },
   {
-   "code": "NEE",
-   "name": null,
+   "code": "GLW",
+   "name": "CORNING INC /NY",
    "exchange": "NYSE",
    "total_score": 5.7,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 7.0,
-     "pct": 0.7,
+     "score": 4.2,
+     "pct": 0.42,
      "raw": {
-      "pe": 23.45,
+      "pe": 80.48,
+      "peg": 0.4,
+      "pb": null,
+      "price": 147.28
+     }
+    },
+    "growth": {
+     "score": 9.4,
+     "pct": 0.94,
+     "raw": {
+      "eps_yoy": 2.0,
+      "revenue_yoy": 0.191416,
+      "gross_margin_yoy_pp": 3.37,
+      "op_margin_yoy_pp": 5.93,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 3.5,
+     "pct": 0.35,
+     "raw": {
+      "gross_margin": 0.359652,
+      "operating_margin": 0.145819,
+      "fcf_margin": null,
+      "debt_ratio": 0.601681,
+      "n_signals": 3
+     }
+    }
+   },
+   "period_end": "2025-12-31",
+   "filed": "2026-02-12",
+   "currency": "USD",
+   "warnings": [],
+   "rank": 84
+  },
+  {
+   "code": "NEE",
+   "name": "NEXTERA ENERGY INC",
+   "exchange": "NYSE",
+   "total_score": 5.7,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 6.9,
+     "pct": 0.69,
+     "raw": {
+      "pe": 23.79,
       "peg": null,
       "pb": null,
-      "price": 77.38
+      "price": 78.51
      }
     },
     "growth": {
@@ -3831,11 +3877,11 @@
    "filed": "2026-02-13",
    "currency": "USD",
    "warnings": [],
-   "rank": 84
+   "rank": 85
   },
   {
    "code": "NU",
-   "name": null,
+   "name": "Nu Holdings Ltd.",
    "exchange": "NYSE",
    "total_score": 5.7,
    "coverage": 0.67,
@@ -3870,11 +3916,11 @@
     "IFRS 申報 EPS 為每普通股非每 ADR，不算價值",
     "IFRS申報（20-F）：EPS為每普通股，非每ADR"
    ],
-   "rank": 85
+   "rank": 86
   },
   {
    "code": "NVO",
-   "name": null,
+   "name": "NOVO NORDISK A S",
    "exchange": "NYSE",
    "total_score": 5.7,
    "coverage": 0.67,
@@ -3909,23 +3955,23 @@
     "申報幣別 DKK，本益比口徑對不上，不算價值",
     "IFRS申報（20-F）：EPS為每普通股，非每ADR"
    ],
-   "rank": 86
+   "rank": 87
   },
   {
    "code": "PFE",
-   "name": null,
+   "name": "PFIZER INC",
    "exchange": "NYSE",
    "total_score": 5.7,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 8.0,
-     "pct": 0.8,
+     "score": 7.9,
+     "pct": 0.79,
      "raw": {
-      "pe": 20.79,
+      "pe": 20.88,
       "peg": null,
       "pb": null,
-      "price": 28.28
+      "price": 28.4
      }
     },
     "growth": {
@@ -3955,11 +4001,11 @@
    "filed": "2026-02-26",
    "currency": "USD",
    "warnings": [],
-   "rank": 87
+   "rank": 88
   },
   {
    "code": "RACE",
-   "name": null,
+   "name": "Ferrari N.V.",
    "exchange": "NYSE",
    "total_score": 5.7,
    "coverage": 0.67,
@@ -3995,57 +4041,11 @@
     "IFRS申報（20-F）：EPS為每普通股，非每ADR",
     "無總負債tag，以負債及權益合計−權益推導"
    ],
-   "rank": 88
-  },
-  {
-   "code": "AXP",
-   "name": null,
-   "exchange": "NYSE",
-   "total_score": 5.6,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 6.0,
-     "pct": 0.6,
-     "raw": {
-      "pe": 20.04,
-      "peg": 2.05,
-      "pb": null,
-      "price": 308.17
-     }
-    },
-    "growth": {
-     "score": 5.3,
-     "pct": 0.53,
-     "raw": {
-      "eps_yoy": 0.09778729478943626,
-      "revenue_yoy": 0.063851,
-      "gross_margin_yoy_pp": null,
-      "op_margin_yoy_pp": null,
-      "n_signals": 2
-     }
-    },
-    "quality": {
-     "score": 5.6,
-     "pct": 0.56,
-     "raw": {
-      "gross_margin": null,
-      "operating_margin": null,
-      "fcf_margin": 0.387444,
-      "debt_ratio": 0.888775,
-      "n_signals": 2
-     }
-    }
-   },
-   "period_end": "2025-12-31",
-   "filed": "2026-02-06",
-   "currency": "USD",
-   "warnings": [],
    "rank": 89
   },
   {
    "code": "BUD",
-   "name": null,
+   "name": "Anheuser-Busch InBev SA/NV",
    "exchange": "NYSE",
    "total_score": 5.6,
    "coverage": 0.67,
@@ -4084,54 +4084,54 @@
    "rank": 90
   },
   {
-   "code": "GLW",
-   "name": null,
+   "code": "BX",
+   "name": "Blackstone Inc.",
    "exchange": "NYSE",
    "total_score": 5.6,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 4.0,
-     "pct": 0.4,
+     "score": 2.8,
+     "pct": 0.28,
      "raw": {
-      "pe": 85.62,
-      "peg": 0.43,
+      "pe": 29.66,
+      "peg": 4.29,
       "pb": null,
-      "price": 156.68
+      "price": 114.78
      }
     },
     "growth": {
-     "score": 9.4,
-     "pct": 0.94,
+     "score": 5.2,
+     "pct": 0.52,
      "raw": {
-      "eps_yoy": 2.0,
-      "revenue_yoy": 0.191416,
-      "gross_margin_yoy_pp": 3.37,
-      "op_margin_yoy_pp": 5.93,
-      "n_signals": 4
+      "eps_yoy": 0.06906077348066297,
+      "revenue_yoy": 0.092237,
+      "gross_margin_yoy_pp": null,
+      "op_margin_yoy_pp": null,
+      "n_signals": 2
      }
     },
     "quality": {
-     "score": 3.5,
-     "pct": 0.35,
+     "score": 8.9,
+     "pct": 0.89,
      "raw": {
-      "gross_margin": 0.359652,
-      "operating_margin": 0.145819,
-      "fcf_margin": null,
-      "debt_ratio": 0.601681,
-      "n_signals": 3
+      "gross_margin": null,
+      "operating_margin": null,
+      "fcf_margin": 0.314697,
+      "debt_ratio": 0.550366,
+      "n_signals": 2
      }
     }
    },
    "period_end": "2025-12-31",
-   "filed": "2026-02-12",
+   "filed": "2026-02-27",
    "currency": "USD",
    "warnings": [],
    "rank": 91
   },
   {
    "code": "ISRG",
-   "name": null,
+   "name": "INTUITIVE SURGICAL INC",
    "exchange": "Nasdaq",
    "total_score": 5.6,
    "coverage": 1.0,
@@ -4140,10 +4140,10 @@
      "score": 1.7,
      "pct": 0.17,
      "raw": {
-      "pe": 53.87,
-      "peg": 2.39,
+      "pe": 54.34,
+      "peg": 2.41,
       "pb": null,
-      "price": 423.96
+      "price": 427.64
      }
     },
     "growth": {
@@ -4176,56 +4176,8 @@
    "rank": 92
   },
   {
-   "code": "KO",
-   "name": null,
-   "exchange": "NYSE",
-   "total_score": 5.6,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 5.6,
-     "pct": 0.56,
-     "raw": {
-      "pe": 28.96,
-      "peg": 1.23,
-      "pb": null,
-      "price": 88.05
-     }
-    },
-    "growth": {
-     "score": 5.4,
-     "pct": 0.54,
-     "raw": {
-      "eps_yoy": 0.2357723577235773,
-      "revenue_yoy": 0.018699,
-      "gross_margin_yoy_pp": 0.56,
-      "op_margin_yoy_pp": 7.47,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 5.7,
-     "pct": 0.57,
-     "raw": {
-      "gross_margin": 0.616257,
-      "operating_margin": 0.287061,
-      "fcf_margin": 0.110469,
-      "debt_ratio": 0.657119,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2025-12-31",
-   "filed": "2026-02-20",
-   "currency": "USD",
-   "warnings": [
-    "無總負債tag，以負債及權益合計−權益推導"
-   ],
-   "rank": 93
-  },
-  {
    "code": "MO",
-   "name": null,
+   "name": "ALTRIA GROUP, INC.",
    "exchange": "NYSE",
    "total_score": 5.6,
    "coverage": 1.0,
@@ -4234,10 +4186,10 @@
      "score": 8.9,
      "pct": 0.89,
      "raw": {
-      "pe": 17.4,
+      "pe": 17.39,
       "peg": null,
       "pb": null,
-      "price": 71.68
+      "price": 71.66
      }
     },
     "growth": {
@@ -4267,11 +4219,11 @@
    "filed": "2026-02-25",
    "currency": "USD",
    "warnings": [],
-   "rank": 94
+   "rank": 93
   },
   {
    "code": "MSI",
-   "name": null,
+   "name": "Motorola Solutions, Inc.",
    "exchange": "NYSE",
    "total_score": 5.6,
    "coverage": 1.0,
@@ -4280,10 +4232,10 @@
      "score": 5.3,
      "pct": 0.53,
      "raw": {
-      "pe": 34.84,
-      "peg": 0.91,
+      "pe": 35.01,
+      "peg": 0.92,
       "pb": null,
-      "price": 444.18
+      "price": 446.33
      }
     },
     "growth": {
@@ -4315,11 +4267,11 @@
    "warnings": [
     "無總負債tag，以負債及權益合計−權益推導"
    ],
-   "rank": 95
+   "rank": 94
   },
   {
    "code": "PNC",
-   "name": null,
+   "name": "PNC FINANCIAL SERVICES GROUP, INC.",
    "exchange": "NYSE",
    "total_score": 5.6,
    "coverage": 1.0,
@@ -4328,10 +4280,10 @@
      "score": 8.8,
      "pct": 0.88,
      "raw": {
-      "pe": 13.21,
+      "pe": 13.34,
       "peg": 0.64,
       "pb": null,
-      "price": 219.21
+      "price": 221.26
      }
     },
     "growth": {
@@ -4361,57 +4313,57 @@
    "filed": "2026-02-20",
    "currency": "USD",
    "warnings": [],
-   "rank": 96
+   "rank": 95
   },
   {
-   "code": "USB",
-   "name": null,
+   "code": "UBER",
+   "name": "Uber Technologies, Inc",
    "exchange": "NYSE",
    "total_score": 5.6,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 8.9,
-     "pct": 0.89,
+     "score": 6.1,
+     "pct": 0.61,
      "raw": {
-      "pe": 12.35,
-      "peg": 0.56,
+      "pe": 15.12,
+      "peg": 4.05,
       "pb": null,
-      "price": 57.08
+      "price": 71.5
      }
     },
     "growth": {
-     "score": 6.8,
-     "pct": 0.68,
+     "score": 5.6,
+     "pct": 0.56,
      "raw": {
-      "eps_yoy": 0.21899736147757265,
-      "revenue_yoy": 0.043744,
+      "eps_yoy": 0.037280701754386136,
+      "revenue_yoy": 0.182796,
       "gross_margin_yoy_pp": null,
-      "op_margin_yoy_pp": null,
-      "n_signals": 2
+      "op_margin_yoy_pp": 4.33,
+      "n_signals": 3
      }
     },
     "quality": {
-     "score": 1.0,
-     "pct": 0.1,
+     "score": 5.0,
+     "pct": 0.5,
      "raw": {
       "gross_margin": null,
-      "operating_margin": null,
-      "fcf_margin": null,
-      "debt_ratio": 0.90647,
-      "n_signals": 1
+      "operating_margin": 0.106984,
+      "fcf_margin": 0.187689,
+      "debt_ratio": 0.568411,
+      "n_signals": 3
      }
     }
    },
    "period_end": "2025-12-31",
-   "filed": "2026-02-23",
+   "filed": "2026-02-13",
    "currency": "USD",
    "warnings": [],
-   "rank": 97
+   "rank": 96
   },
   {
    "code": "VZ",
-   "name": null,
+   "name": "VERIZON COMMUNICATIONS INC",
    "exchange": "NYSE",
    "total_score": 5.6,
    "coverage": 1.0,
@@ -4420,10 +4372,10 @@
      "score": 9.8,
      "pct": 0.98,
      "raw": {
-      "pe": 10.26,
+      "pe": 10.54,
       "peg": null,
       "pb": null,
-      "price": 41.65
+      "price": 42.78
      }
     },
     "growth": {
@@ -4455,23 +4407,23 @@
    "warnings": [
     "無總負債tag，以負債及權益合計−權益推導"
    ],
-   "rank": 98
+   "rank": 97
   },
   {
    "code": "ELV",
-   "name": null,
+   "name": "Elevance Health, Inc.",
    "exchange": "NYSE",
    "total_score": 5.5,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 9.1,
-     "pct": 0.91,
+     "score": 9.0,
+     "pct": 0.9,
      "raw": {
-      "pe": 16.37,
+      "pe": 16.74,
       "peg": null,
       "pb": null,
-      "price": 412.7
+      "price": 422.09
      }
     },
     "growth": {
@@ -4501,18 +4453,66 @@
    "filed": "2026-02-06",
    "currency": "USD",
    "warnings": [],
-   "rank": 99
+   "rank": 98
   },
   {
-   "code": "MS",
-   "name": null,
+   "code": "KO",
+   "name": "COCA COLA CO",
    "exchange": "NYSE",
    "total_score": 5.5,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 8.0,
-     "pct": 0.8,
+     "score": 5.5,
+     "pct": 0.55,
+     "raw": {
+      "pe": 29.54,
+      "peg": 1.25,
+      "pb": null,
+      "price": 89.79
+     }
+    },
+    "growth": {
+     "score": 5.4,
+     "pct": 0.54,
+     "raw": {
+      "eps_yoy": 0.2357723577235773,
+      "revenue_yoy": 0.018699,
+      "gross_margin_yoy_pp": 0.56,
+      "op_margin_yoy_pp": 7.47,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 5.7,
+     "pct": 0.57,
+     "raw": {
+      "gross_margin": 0.616257,
+      "operating_margin": 0.287061,
+      "fcf_margin": 0.110469,
+      "debt_ratio": 0.657119,
+      "n_signals": 4
+     }
+    }
+   },
+   "period_end": "2025-12-31",
+   "filed": "2026-02-20",
+   "currency": "USD",
+   "warnings": [
+    "無總負債tag，以負債及權益合計−權益推導"
+   ],
+   "rank": 99
+  },
+  {
+   "code": "MS",
+   "name": "MORGAN STANLEY",
+   "exchange": "NYSE",
+   "total_score": 5.5,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 8.1,
+     "pct": 0.81,
      "raw": {
       "pe": 18.61,
       "peg": 0.65,
@@ -4551,7 +4551,7 @@
   },
   {
    "code": "NWG",
-   "name": null,
+   "name": "NatWest Group plc",
    "exchange": "NYSE",
    "total_score": 5.5,
    "coverage": 0.67,
@@ -4590,7 +4590,7 @@
   },
   {
    "code": "SU",
-   "name": null,
+   "name": "SUNCOR ENERGY INC",
    "exchange": "NYSE",
    "total_score": 5.5,
    "coverage": 0.67,
@@ -4629,54 +4629,54 @@
    "rank": 102
   },
   {
-   "code": "UBER",
-   "name": null,
+   "code": "USB",
+   "name": "US BANCORP DE",
    "exchange": "NYSE",
    "total_score": 5.5,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 5.9,
-     "pct": 0.59,
+     "score": 8.8,
+     "pct": 0.88,
      "raw": {
-      "pe": 15.12,
-      "peg": 4.06,
+      "pe": 12.43,
+      "peg": 0.57,
       "pb": null,
-      "price": 71.51
+      "price": 57.42
      }
     },
     "growth": {
-     "score": 5.6,
-     "pct": 0.56,
+     "score": 6.8,
+     "pct": 0.68,
      "raw": {
-      "eps_yoy": 0.037280701754386136,
-      "revenue_yoy": 0.182796,
+      "eps_yoy": 0.21899736147757265,
+      "revenue_yoy": 0.043744,
       "gross_margin_yoy_pp": null,
-      "op_margin_yoy_pp": 4.33,
-      "n_signals": 3
+      "op_margin_yoy_pp": null,
+      "n_signals": 2
      }
     },
     "quality": {
-     "score": 5.0,
-     "pct": 0.5,
+     "score": 1.0,
+     "pct": 0.1,
      "raw": {
       "gross_margin": null,
-      "operating_margin": 0.106984,
-      "fcf_margin": 0.187689,
-      "debt_ratio": 0.568411,
-      "n_signals": 3
+      "operating_margin": null,
+      "fcf_margin": null,
+      "debt_ratio": 0.90647,
+      "n_signals": 1
      }
     }
    },
    "period_end": "2025-12-31",
-   "filed": "2026-02-13",
+   "filed": "2026-02-23",
    "currency": "USD",
    "warnings": [],
    "rank": 103
   },
   {
    "code": "BAC",
-   "name": null,
+   "name": "BANK OF AMERICA CORP /DE/",
    "exchange": "NYSE",
    "total_score": 5.4,
    "coverage": 1.0,
@@ -4685,10 +4685,10 @@
      "score": 8.4,
      "pct": 0.84,
      "raw": {
-      "pe": 14.26,
-      "peg": 0.73,
+      "pe": 14.33,
+      "peg": 0.74,
       "pb": null,
-      "price": 54.32
+      "price": 54.58
      }
     },
     "growth": {
@@ -4722,7 +4722,7 @@
   },
   {
    "code": "MRK",
-   "name": null,
+   "name": "Merck & Co., Inc.",
    "exchange": "NYSE",
    "total_score": 5.4,
    "coverage": 1.0,
@@ -4731,10 +4731,10 @@
      "score": 5.7,
      "pct": 0.57,
      "raw": {
-      "pe": 20.0,
-      "peg": 2.5,
+      "pe": 19.98,
+      "peg": 2.49,
       "pb": null,
-      "price": 145.6
+      "price": 145.45
      }
     },
     "growth": {
@@ -4770,7 +4770,7 @@
   },
   {
    "code": "UL",
-   "name": null,
+   "name": "UNILEVER PLC",
    "exchange": "NYSE",
    "total_score": 5.4,
    "coverage": 0.67,
@@ -4809,19 +4809,19 @@
   },
   {
    "code": "GEV",
-   "name": null,
+   "name": "GE Vernova Inc.",
    "exchange": "NYSE",
    "total_score": 5.3,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 5.5,
-     "pct": 0.55,
+     "score": 5.6,
+     "pct": 0.56,
      "raw": {
-      "pe": 56.8,
+      "pe": 56.35,
       "peg": 0.28,
       "pb": null,
-      "price": 1004.73
+      "price": 996.8
      }
     },
     "growth": {
@@ -4855,19 +4855,19 @@
   },
   {
    "code": "GS",
-   "name": null,
+   "name": "GOLDMAN SACHS GROUP INC",
    "exchange": "NYSE",
    "total_score": 5.3,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 8.1,
-     "pct": 0.81,
+     "score": 8.2,
+     "pct": 0.82,
      "raw": {
-      "pe": 17.45,
+      "pe": 17.42,
       "peg": 0.66,
       "pb": null,
-      "price": 895.32
+      "price": 893.95
      }
     },
     "growth": {
@@ -4901,19 +4901,19 @@
   },
   {
    "code": "NSC",
-   "name": null,
+   "name": "NORFOLK SOUTHERN CORP",
    "exchange": "NYSE",
    "total_score": 5.3,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 4.7,
-     "pct": 0.47,
+     "score": 4.6,
+     "pct": 0.46,
      "raw": {
-      "pe": 24.92,
-      "peg": 2.44,
+      "pe": 25.05,
+      "peg": 2.46,
       "pb": null,
-      "price": 317.79
+      "price": 319.36
      }
     },
     "growth": {
@@ -4947,7 +4947,7 @@
   },
   {
    "code": "NTES",
-   "name": null,
+   "name": "NetEase, Inc.",
    "exchange": "Nasdaq",
    "total_score": 5.3,
    "coverage": 1.0,
@@ -4956,10 +4956,10 @@
      "score": 0.7,
      "pct": 0.07,
      "raw": {
-      "pe": 82.83,
-      "peg": 4.35,
+      "pe": 83.61,
+      "peg": 4.39,
       "pb": null,
-      "price": 124.24
+      "price": 125.41
      }
     },
     "growth": {
@@ -4993,7 +4993,7 @@
   },
   {
    "code": "ENB",
-   "name": null,
+   "name": "ENBRIDGE INC",
    "exchange": "NYSE",
    "total_score": 5.2,
    "coverage": 0.67,
@@ -5031,7 +5031,7 @@
   },
   {
    "code": "HWM",
-   "name": null,
+   "name": "Howmet Aerospace Inc.",
    "exchange": "NYSE",
    "total_score": 5.2,
    "coverage": 1.0,
@@ -5040,10 +5040,10 @@
      "score": 2.1,
      "pct": 0.21,
      "raw": {
-      "pe": 60.72,
-      "peg": 1.9,
+      "pe": 59.52,
+      "peg": 1.86,
       "pb": null,
-      "price": 225.26
+      "price": 220.81
      }
     },
     "growth": {
@@ -5077,7 +5077,7 @@
   },
   {
    "code": "INTC",
-   "name": null,
+   "name": "INTEL CORP",
    "exchange": "Nasdaq",
    "total_score": 5.2,
    "coverage": 0.67,
@@ -5115,8 +5115,54 @@
    "rank": 113
   },
   {
+   "code": "RTX",
+   "name": "RTX Corp",
+   "exchange": "NYSE",
+   "total_score": 5.2,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 4.8,
+     "pct": 0.48,
+     "raw": {
+      "pe": 37.63,
+      "peg": 0.95,
+      "pb": null,
+      "price": 186.66
+     }
+    },
+    "growth": {
+     "score": 7.5,
+     "pct": 0.75,
+     "raw": {
+      "eps_yoy": 0.39718309859154943,
+      "revenue_yoy": 0.097414,
+      "gross_margin_yoy_pp": null,
+      "op_margin_yoy_pp": 2.4,
+      "n_signals": 3
+     }
+    },
+    "quality": {
+     "score": 3.2,
+     "pct": 0.32,
+     "raw": {
+      "gross_margin": null,
+      "operating_margin": 0.104963,
+      "fcf_margin": 0.089613,
+      "debt_ratio": 0.608305,
+      "n_signals": 3
+     }
+    }
+   },
+   "period_end": "2025-12-31",
+   "filed": "2026-02-06",
+   "currency": "USD",
+   "warnings": [],
+   "rank": 114
+  },
+  {
    "code": "SNOW",
-   "name": null,
+   "name": "Snowflake Inc.",
    "exchange": "NYSE",
    "total_score": 5.2,
    "coverage": 0.67,
@@ -5150,11 +5196,11 @@
    "warnings": [
     "EPS ≤ 0 或缺，本益比無意義"
    ],
-   "rank": 114
+   "rank": 115
   },
   {
    "code": "TD",
-   "name": null,
+   "name": "TORONTO DOMINION BANK",
    "exchange": "NYSE",
    "total_score": 5.2,
    "coverage": 0.67,
@@ -5189,11 +5235,11 @@
     "申報幣別 CAD，本益比口徑對不上，不算價值",
     "IFRS申報（20-F）：EPS為每普通股，非每ADR"
    ],
-   "rank": 115
+   "rank": 116
   },
   {
    "code": "UNP",
-   "name": null,
+   "name": "UNION PACIFIC CORP",
    "exchange": "NYSE",
    "total_score": 5.2,
    "coverage": 1.0,
@@ -5202,10 +5248,10 @@
      "score": 4.5,
      "pct": 0.45,
      "raw": {
-      "pe": 23.23,
-      "peg": 2.9,
+      "pe": 23.5,
+      "peg": 2.93,
       "pb": null,
-      "price": 278.34
+      "price": 281.57
      }
     },
     "growth": {
@@ -5235,23 +5281,23 @@
    "filed": "2026-02-06",
    "currency": "USD",
    "warnings": [],
-   "rank": 116
+   "rank": 117
   },
   {
    "code": "AMT",
-   "name": null,
+   "name": "AMERICAN TOWER CORP /MA/",
    "exchange": "NYSE",
    "total_score": 5.1,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 2.8,
-     "pct": 0.28,
+     "score": 2.9,
+     "pct": 0.29,
      "raw": {
-      "pe": 33.75,
-      "peg": 2.8,
+      "pe": 33.81,
+      "peg": 2.81,
       "pb": null,
-      "price": 182.24
+      "price": 182.56
      }
     },
     "growth": {
@@ -5281,11 +5327,11 @@
    "filed": "2026-02-24",
    "currency": "USD",
    "warnings": [],
-   "rank": 117
+   "rank": 118
   },
   {
    "code": "GE",
-   "name": null,
+   "name": "GENERAL ELECTRIC CO",
    "exchange": "NYSE",
    "total_score": 5.1,
    "coverage": 1.0,
@@ -5294,10 +5340,10 @@
      "score": 4.0,
      "pct": 0.4,
      "raw": {
-      "pe": 37.86,
-      "peg": 1.05,
+      "pe": 37.92,
+      "peg": 1.06,
       "pb": null,
-      "price": 308.2
+      "price": 308.64
      }
     },
     "growth": {
@@ -5327,12 +5373,12 @@
    "filed": "2026-01-29",
    "currency": "USD",
    "warnings": [],
-   "rank": 118
+   "rank": 119
   },
   {
-   "code": "KEYS",
-   "name": null,
-   "exchange": "NYSE",
+   "code": "KLAC",
+   "name": "KLA CORP",
+   "exchange": "Nasdaq",
    "total_score": 5.1,
    "coverage": 1.0,
    "pillars": {
@@ -5340,56 +5386,10 @@
      "score": 1.7,
      "pct": 0.17,
      "raw": {
-      "pe": 77.95,
-      "peg": 1.95,
+      "pe": 51.95,
+      "peg": 2.55,
       "pb": null,
-      "price": 382.75
-     }
-    },
-    "growth": {
-     "score": 6.4,
-     "pct": 0.64,
-     "raw": {
-      "eps_yoy": 0.3988603988603989,
-      "revenue_yoy": 0.079534,
-      "gross_margin_yoy_pp": -0.84,
-      "op_margin_yoy_pp": -0.43,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 7.1,
-     "pct": 0.71,
-     "raw": {
-      "gross_margin": 0.620837,
-      "operating_margin": 0.162977,
-      "fcf_margin": 0.238326,
-      "debt_ratio": 0.448788,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2025-10-31",
-   "filed": "2025-12-17",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 119
-  },
-  {
-   "code": "KLAC",
-   "name": null,
-   "exchange": "Nasdaq",
-   "total_score": 5.1,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 1.6,
-     "pct": 0.16,
-     "raw": {
-      "pe": 53.43,
-      "peg": 2.62,
-      "pb": null,
-      "price": 195.57
+      "price": 190.12
      }
     },
     "growth": {
@@ -5422,102 +5422,8 @@
    "rank": 120
   },
   {
-   "code": "RTX",
-   "name": null,
-   "exchange": "NYSE",
-   "total_score": 5.1,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 4.7,
-     "pct": 0.47,
-     "raw": {
-      "pe": 37.49,
-      "peg": 0.94,
-      "pb": null,
-      "price": 185.97
-     }
-    },
-    "growth": {
-     "score": 7.5,
-     "pct": 0.75,
-     "raw": {
-      "eps_yoy": 0.39718309859154943,
-      "revenue_yoy": 0.097414,
-      "gross_margin_yoy_pp": null,
-      "op_margin_yoy_pp": 2.4,
-      "n_signals": 3
-     }
-    },
-    "quality": {
-     "score": 3.2,
-     "pct": 0.32,
-     "raw": {
-      "gross_margin": null,
-      "operating_margin": 0.104963,
-      "fcf_margin": 0.089613,
-      "debt_ratio": 0.608305,
-      "n_signals": 3
-     }
-    }
-   },
-   "period_end": "2025-12-31",
-   "filed": "2026-02-06",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 121
-  },
-  {
-   "code": "TRGP",
-   "name": null,
-   "exchange": "NYSE",
-   "total_score": 5.1,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 5.8,
-     "pct": 0.58,
-     "raw": {
-      "pe": 33.77,
-      "peg": 0.7,
-      "pb": null,
-      "price": 286.7
-     }
-    },
-    "growth": {
-     "score": 7.1,
-     "pct": 0.71,
-     "raw": {
-      "eps_yoy": 0.4790940766550522,
-      "revenue_yoy": 0.039484,
-      "gross_margin_yoy_pp": 3.63,
-      "op_margin_yoy_pp": 3.11,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 2.3,
-     "pct": 0.23,
-     "raw": {
-      "gross_margin": 0.382921,
-      "operating_margin": 0.195627,
-      "fcf_margin": 0.034302,
-      "debt_ratio": 0.866888,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2025-12-31",
-   "filed": "2026-02-19",
-   "currency": "USD",
-   "warnings": [
-    "無總負債tag，以負債及權益合計−權益推導"
-   ],
-   "rank": 122
-  },
-  {
    "code": "ABNB",
-   "name": null,
+   "name": "Airbnb, Inc.",
    "exchange": "Nasdaq",
    "total_score": 5.0,
    "coverage": 0.67,
@@ -5551,23 +5457,69 @@
    "warnings": [
     "EPS ≤ 0 或缺，本益比無意義"
    ],
-   "rank": 123
+   "rank": 121
   },
   {
-   "code": "MCD",
-   "name": null,
+   "code": "KEYS",
+   "name": "Keysight Technologies, Inc.",
    "exchange": "NYSE",
    "total_score": 5.0,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 5.0,
-     "pct": 0.5,
+     "score": 1.6,
+     "pct": 0.16,
      "raw": {
-      "pe": 19.68,
-      "peg": 4.0,
+      "pe": 76.92,
+      "peg": 1.93,
       "pb": null,
-      "price": 235.23
+      "price": 377.7
+     }
+    },
+    "growth": {
+     "score": 6.4,
+     "pct": 0.64,
+     "raw": {
+      "eps_yoy": 0.3988603988603989,
+      "revenue_yoy": 0.079534,
+      "gross_margin_yoy_pp": -0.84,
+      "op_margin_yoy_pp": -0.43,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 7.1,
+     "pct": 0.71,
+     "raw": {
+      "gross_margin": 0.620837,
+      "operating_margin": 0.162977,
+      "fcf_margin": 0.238326,
+      "debt_ratio": 0.448788,
+      "n_signals": 4
+     }
+    }
+   },
+   "period_end": "2025-10-31",
+   "filed": "2025-12-17",
+   "currency": "USD",
+   "warnings": [],
+   "rank": 122
+  },
+  {
+   "code": "MCD",
+   "name": "MCDONALDS CORP",
+   "exchange": "NYSE",
+   "total_score": 5.0,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 5.1,
+     "pct": 0.51,
+     "raw": {
+      "pe": 19.72,
+      "peg": 4.01,
+      "pb": null,
+      "price": 235.65
      }
     },
     "growth": {
@@ -5599,11 +5551,59 @@
    "warnings": [
     "無總負債tag，以負債及權益合計−權益推導"
    ],
+   "rank": 123
+  },
+  {
+   "code": "TRGP",
+   "name": "Targa Resources Corp.",
+   "exchange": "NYSE",
+   "total_score": 5.0,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 5.6,
+     "pct": 0.56,
+     "raw": {
+      "pe": 34.22,
+      "peg": 0.71,
+      "pb": null,
+      "price": 290.54
+     }
+    },
+    "growth": {
+     "score": 7.1,
+     "pct": 0.71,
+     "raw": {
+      "eps_yoy": 0.4790940766550522,
+      "revenue_yoy": 0.039484,
+      "gross_margin_yoy_pp": 3.63,
+      "op_margin_yoy_pp": 3.11,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 2.3,
+     "pct": 0.23,
+     "raw": {
+      "gross_margin": 0.382921,
+      "operating_margin": 0.195627,
+      "fcf_margin": 0.034302,
+      "debt_ratio": 0.866888,
+      "n_signals": 4
+     }
+    }
+   },
+   "period_end": "2025-12-31",
+   "filed": "2026-02-19",
+   "currency": "USD",
+   "warnings": [
+    "無總負債tag，以負債及權益合計−權益推導"
+   ],
    "rank": 124
   },
   {
    "code": "WFC",
-   "name": null,
+   "name": "WELLS FARGO & COMPANY/MN",
    "exchange": "NYSE",
    "total_score": 5.0,
    "coverage": 1.0,
@@ -5612,10 +5612,10 @@
      "score": 8.5,
      "pct": 0.85,
      "raw": {
-      "pe": 13.35,
-      "peg": 0.81,
+      "pe": 13.31,
+      "peg": 0.8,
       "pb": null,
-      "price": 83.55
+      "price": 83.32
      }
     },
     "growth": {
@@ -5649,7 +5649,7 @@
   },
   {
    "code": "ARM",
-   "name": null,
+   "name": "ARM HOLDINGS PLC /UK",
    "exchange": "Nasdaq",
    "total_score": 4.9,
    "coverage": 1.0,
@@ -5658,10 +5658,10 @@
      "score": 0.2,
      "pct": 0.02,
      "raw": {
-      "pe": 313.27,
-      "peg": 23.5,
+      "pe": 300.28,
+      "peg": 22.52,
       "pb": null,
-      "price": 266.28
+      "price": 255.24
      }
     },
     "growth": {
@@ -5695,19 +5695,19 @@
   },
   {
    "code": "GD",
-   "name": null,
+   "name": "GENERAL DYNAMICS CORP",
    "exchange": "NYSE",
    "total_score": 4.9,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 6.3,
-     "pct": 0.63,
+     "score": 6.2,
+     "pct": 0.62,
      "raw": {
-      "pe": 21.44,
-      "peg": 1.61,
+      "pe": 21.71,
+      "peg": 1.63,
       "pb": null,
-      "price": 331.27
+      "price": 335.46
      }
     },
     "growth": {
@@ -5742,8 +5742,56 @@
    "rank": 127
   },
   {
+   "code": "MCK",
+   "name": "MCKESSON CORP",
+   "exchange": "NYSE",
+   "total_score": 4.9,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 7.3,
+     "pct": 0.73,
+     "raw": {
+      "pe": 24.9,
+      "peg": 0.51,
+      "pb": null,
+      "price": 955.76
+     }
+    },
+    "growth": {
+     "score": 7.2,
+     "pct": 0.72,
+     "raw": {
+      "eps_yoy": 0.4922239502332817,
+      "revenue_yoy": 0.123601,
+      "gross_margin_yoy_pp": -0.1,
+      "op_margin_yoy_pp": 0.31,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 0.1,
+     "pct": 0.01,
+     "raw": {
+      "gross_margin": 0.036066,
+      "operating_margin": 0.015398,
+      "fcf_margin": 0.014176,
+      "debt_ratio": 1.043745,
+      "n_signals": 4
+     }
+    }
+   },
+   "period_end": "2026-03-31",
+   "filed": "2026-05-08",
+   "currency": "USD",
+   "warnings": [
+    "無總負債tag，以負債及權益合計−權益推導"
+   ],
+   "rank": 128
+  },
+  {
    "code": "RIO",
-   "name": null,
+   "name": "RIO TINTO PLC",
    "exchange": "NYSE",
    "total_score": 4.9,
    "coverage": 0.67,
@@ -5778,11 +5826,57 @@
     "IFRS 申報 EPS 為每普通股非每 ADR，不算價值",
     "IFRS申報（20-F）：EPS為每普通股，非每ADR"
    ],
-   "rank": 128
+   "rank": 129
+  },
+  {
+   "code": "SLB",
+   "name": "SLB LIMITED/NV",
+   "exchange": "NYSE",
+   "total_score": 4.9,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 8.0,
+     "pct": 0.8,
+     "raw": {
+      "pe": 20.75,
+      "peg": null,
+      "pb": null,
+      "price": 48.77
+     }
+    },
+    "growth": {
+     "score": 0.6,
+     "pct": 0.06,
+     "raw": {
+      "eps_yoy": -0.24437299035369764,
+      "revenue_yoy": -0.01601,
+      "gross_margin_yoy_pp": null,
+      "op_margin_yoy_pp": null,
+      "n_signals": 2
+     }
+    },
+    "quality": {
+     "score": 6.0,
+     "pct": 0.6,
+     "raw": {
+      "gross_margin": null,
+      "operating_margin": null,
+      "fcf_margin": 0.134284,
+      "debt_ratio": 0.50922,
+      "n_signals": 2
+     }
+    }
+   },
+   "period_end": "2025-12-31",
+   "filed": "2026-01-23",
+   "currency": "USD",
+   "warnings": [],
+   "rank": 130
   },
   {
    "code": "DUK",
-   "name": null,
+   "name": "Duke Energy CORP",
    "exchange": "NYSE",
    "total_score": 4.8,
    "coverage": 1.0,
@@ -5791,10 +5885,10 @@
      "score": 6.6,
      "pct": 0.66,
      "raw": {
-      "pe": 18.49,
-      "peg": 1.76,
+      "pe": 18.65,
+      "peg": 1.77,
       "pb": null,
-      "price": 116.65
+      "price": 117.69
      }
     },
     "growth": {
@@ -5826,105 +5920,11 @@
    "warnings": [
     "無總負債tag，以負債及權益合計−權益推導"
    ],
-   "rank": 129
-  },
-  {
-   "code": "EQIX",
-   "name": null,
-   "exchange": "Nasdaq",
-   "total_score": 4.8,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 2.9,
-     "pct": 0.29,
-     "raw": {
-      "pe": 74.57,
-      "peg": 1.21,
-      "pb": null,
-      "price": 1026.06
-     }
-    },
-    "growth": {
-     "score": 7.8,
-     "pct": 0.78,
-     "raw": {
-      "eps_yoy": 0.6188235294117648,
-      "revenue_yoy": 0.053612,
-      "gross_margin_yoy_pp": 2.15,
-      "op_margin_yoy_pp": 4.87,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 3.6,
-     "pct": 0.36,
-     "raw": {
-      "gross_margin": 0.510904,
-      "operating_margin": 0.200499,
-      "fcf_margin": -0.043398,
-      "debt_ratio": 0.649479,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2025-12-31",
-   "filed": "2026-02-11",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 130
-  },
-  {
-   "code": "MCK",
-   "name": null,
-   "exchange": "NYSE",
-   "total_score": 4.8,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 7.2,
-     "pct": 0.72,
-     "raw": {
-      "pe": 24.46,
-      "peg": 0.5,
-      "pb": null,
-      "price": 938.84
-     }
-    },
-    "growth": {
-     "score": 7.2,
-     "pct": 0.72,
-     "raw": {
-      "eps_yoy": 0.4922239502332817,
-      "revenue_yoy": 0.123601,
-      "gross_margin_yoy_pp": -0.1,
-      "op_margin_yoy_pp": 0.31,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 0.1,
-     "pct": 0.01,
-     "raw": {
-      "gross_margin": 0.036066,
-      "operating_margin": 0.015398,
-      "fcf_margin": 0.014176,
-      "debt_ratio": 1.043745,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2026-03-31",
-   "filed": "2026-05-08",
-   "currency": "USD",
-   "warnings": [
-    "無總負債tag，以負債及權益合計−權益推導"
-   ],
    "rank": 131
   },
   {
    "code": "NOW",
-   "name": null,
+   "name": "ServiceNow, Inc.",
    "exchange": "NYSE",
    "total_score": 4.8,
    "coverage": 1.0,
@@ -5933,10 +5933,10 @@
      "score": 0.8,
      "pct": 0.08,
      "raw": {
-      "pe": 84.35,
-      "peg": 3.85,
+      "pe": 84.02,
+      "peg": 3.84,
       "pb": null,
-      "price": 140.86
+      "price": 140.32
      }
     },
     "growth": {
@@ -5970,19 +5970,19 @@
   },
   {
    "code": "PLD",
-   "name": null,
+   "name": "Prologis, Inc.",
    "exchange": "NYSE",
    "total_score": 4.8,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 3.0,
-     "pct": 0.3,
+     "score": 2.9,
+     "pct": 0.29,
      "raw": {
-      "pe": 36.37,
+      "pe": 37.21,
       "peg": null,
       "pb": null,
-      "price": 129.49
+      "price": 132.47
      }
     },
     "growth": {
@@ -6015,66 +6015,20 @@
    "rank": 133
   },
   {
-   "code": "SLB",
-   "name": null,
-   "exchange": "NYSE",
-   "total_score": 4.8,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 7.9,
-     "pct": 0.79,
-     "raw": {
-      "pe": 20.83,
-      "peg": null,
-      "pb": null,
-      "price": 48.95
-     }
-    },
-    "growth": {
-     "score": 0.6,
-     "pct": 0.06,
-     "raw": {
-      "eps_yoy": -0.24437299035369764,
-      "revenue_yoy": -0.01601,
-      "gross_margin_yoy_pp": null,
-      "op_margin_yoy_pp": null,
-      "n_signals": 2
-     }
-    },
-    "quality": {
-     "score": 6.0,
-     "pct": 0.6,
-     "raw": {
-      "gross_margin": null,
-      "operating_margin": null,
-      "fcf_margin": 0.134284,
-      "debt_ratio": 0.50922,
-      "n_signals": 2
-     }
-    }
-   },
-   "period_end": "2025-12-31",
-   "filed": "2026-01-23",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 134
-  },
-  {
    "code": "WMB",
-   "name": null,
+   "name": "WILLIAMS COMPANIES, INC.",
    "exchange": "NYSE",
    "total_score": 4.8,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 3.4,
-     "pct": 0.34,
+     "score": 3.3,
+     "pct": 0.33,
      "raw": {
-      "pe": 33.96,
-      "peg": 1.93,
+      "pe": 34.66,
+      "peg": 1.97,
       "pb": null,
-      "price": 72.67
+      "price": 74.17
      }
     },
     "growth": {
@@ -6106,11 +6060,11 @@
    "warnings": [
     "無總負債tag，以負債及權益合計−權益推導"
    ],
-   "rank": 135
+   "rank": 134
   },
   {
    "code": "CDNS",
-   "name": null,
+   "name": "CADENCE DESIGN SYSTEMS INC",
    "exchange": "Nasdaq",
    "total_score": 4.7,
    "coverage": 1.0,
@@ -6119,10 +6073,10 @@
      "score": 0.5,
      "pct": 0.05,
      "raw": {
-      "pe": 86.91,
-      "peg": 15.93,
+      "pe": 85.82,
+      "peg": 15.73,
       "pb": null,
-      "price": 352.84
+      "price": 348.42
      }
     },
     "growth": {
@@ -6154,11 +6108,57 @@
    "warnings": [
     "無總負債tag，以負債及權益合計−權益推導"
    ],
+   "rank": 135
+  },
+  {
+   "code": "EQIX",
+   "name": "EQUINIX INC",
+   "exchange": "Nasdaq",
+   "total_score": 4.7,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 2.8,
+     "pct": 0.28,
+     "raw": {
+      "pe": 75.04,
+      "peg": 1.21,
+      "pb": null,
+      "price": 1032.6
+     }
+    },
+    "growth": {
+     "score": 7.8,
+     "pct": 0.78,
+     "raw": {
+      "eps_yoy": 0.6188235294117648,
+      "revenue_yoy": 0.053612,
+      "gross_margin_yoy_pp": 2.15,
+      "op_margin_yoy_pp": 4.87,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 3.6,
+     "pct": 0.36,
+     "raw": {
+      "gross_margin": 0.510904,
+      "operating_margin": 0.200499,
+      "fcf_margin": -0.043398,
+      "debt_ratio": 0.649479,
+      "n_signals": 4
+     }
+    }
+   },
+   "period_end": "2025-12-31",
+   "filed": "2026-02-11",
+   "currency": "USD",
+   "warnings": [],
    "rank": 136
   },
   {
    "code": "MFG",
-   "name": null,
+   "name": "MIZUHO FINANCIAL GROUP INC",
    "exchange": "NYSE",
    "total_score": 4.7,
    "coverage": 0.67,
@@ -6196,7 +6196,7 @@
   },
   {
    "code": "NGG",
-   "name": null,
+   "name": "NATIONAL GRID PLC",
    "exchange": "NYSE",
    "total_score": 4.7,
    "coverage": 0.67,
@@ -6235,7 +6235,7 @@
   },
   {
    "code": "SHEL",
-   "name": null,
+   "name": "Shell plc",
    "exchange": "NYSE",
    "total_score": 4.7,
    "coverage": 0.67,
@@ -6272,51 +6272,49 @@
    "rank": 139
   },
   {
-   "code": "ACN",
-   "name": null,
-   "exchange": "NYSE",
+   "code": "AAPL",
+   "name": "Apple Inc.",
+   "exchange": "Nasdaq",
    "total_score": 4.6,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 6.1,
-     "pct": 0.61,
+     "score": 2.5,
+     "pct": 0.25,
      "raw": {
-      "pe": 17.21,
-      "peg": 2.77,
+      "pe": 45.71,
+      "peg": 2.01,
       "pb": null,
-      "price": 209.06
+      "price": 340.97
      }
     },
     "growth": {
-     "score": 3.6,
-     "pct": 0.36,
+     "score": 5.0,
+     "pct": 0.5,
      "raw": {
-      "eps_yoy": 0.062062937062937085,
-      "revenue_yoy": 0.073602,
-      "gross_margin_yoy_pp": -0.7,
-      "op_margin_yoy_pp": -0.11,
+      "eps_yoy": 0.22697368421052633,
+      "revenue_yoy": 0.064255,
+      "gross_margin_yoy_pp": 0.7,
+      "op_margin_yoy_pp": 0.46,
       "n_signals": 4
      }
     },
     "quality": {
-     "score": 4.0,
-     "pct": 0.4,
+     "score": 6.2,
+     "pct": 0.62,
      "raw": {
-      "gross_margin": 0.31914,
-      "operating_margin": 0.146767,
-      "fcf_margin": 0.156077,
-      "debt_ratio": 0.520193,
+      "gross_margin": 0.469052,
+      "operating_margin": 0.319708,
+      "fcf_margin": 0.237329,
+      "debt_ratio": 0.719464,
       "n_signals": 4
      }
     }
    },
-   "period_end": "2025-08-31",
-   "filed": "2025-10-10",
+   "period_end": "2025-09-27",
+   "filed": "2025-10-31",
    "currency": "USD",
-   "warnings": [
-    "無總負債tag，以負債及權益合計−權益推導"
-   ],
+   "warnings": [],
    "rank": 140
   },
   {
@@ -6330,10 +6328,10 @@
      "score": 3.9,
      "pct": 0.39,
      "raw": {
-      "pe": 36.6,
-      "peg": 1.23,
+      "pe": 36.2,
+      "peg": 1.22,
       "pb": null,
-      "price": 262.43
+      "price": 259.53
      }
     },
     "growth": {
@@ -6368,54 +6366,8 @@
    "rank": 141
   },
   {
-   "code": "C",
-   "name": null,
-   "exchange": "NYSE",
-   "total_score": 4.6,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 7.2,
-     "pct": 0.72,
-     "raw": {
-      "pe": 18.55,
-      "peg": 1.05,
-      "pb": null,
-      "price": 129.64
-     }
-    },
-    "growth": {
-     "score": 6.3,
-     "pct": 0.63,
-     "raw": {
-      "eps_yoy": 0.17676767676767668,
-      "revenue_yoy": 0.055784,
-      "gross_margin_yoy_pp": null,
-      "op_margin_yoy_pp": null,
-      "n_signals": 2
-     }
-    },
-    "quality": {
-     "score": 0.2,
-     "pct": 0.02,
-     "raw": {
-      "gross_margin": null,
-      "operating_margin": null,
-      "fcf_margin": -0.870073,
-      "debt_ratio": 0.919531,
-      "n_signals": 2
-     }
-    }
-   },
-   "period_end": "2025-12-31",
-   "filed": "2026-02-20",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 142
-  },
-  {
    "code": "EMR",
-   "name": null,
+   "name": "EMERSON ELECTRIC CO",
    "exchange": "NYSE",
    "total_score": 4.6,
    "coverage": 1.0,
@@ -6424,10 +6376,10 @@
      "score": 2.6,
      "pct": 0.26,
      "raw": {
-      "pe": 40.06,
-      "peg": 2.25,
+      "pe": 40.21,
+      "peg": 2.26,
       "pb": null,
-      "price": 161.83
+      "price": 162.46
      }
     },
     "growth": {
@@ -6459,115 +6411,71 @@
    "warnings": [
     "無總負債tag，以負債及權益合計−權益推導"
    ],
+   "rank": 142
+  },
+  {
+   "code": "ACN",
+   "name": "Accenture plc",
+   "exchange": "NYSE",
+   "total_score": 4.5,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 5.9,
+     "pct": 0.59,
+     "raw": {
+      "pe": 17.68,
+      "peg": 2.85,
+      "pb": null,
+      "price": 214.87
+     }
+    },
+    "growth": {
+     "score": 3.6,
+     "pct": 0.36,
+     "raw": {
+      "eps_yoy": 0.062062937062937085,
+      "revenue_yoy": 0.073602,
+      "gross_margin_yoy_pp": -0.7,
+      "op_margin_yoy_pp": -0.11,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 4.0,
+     "pct": 0.4,
+     "raw": {
+      "gross_margin": 0.31914,
+      "operating_margin": 0.146767,
+      "fcf_margin": 0.156077,
+      "debt_ratio": 0.520193,
+      "n_signals": 4
+     }
+    }
+   },
+   "period_end": "2025-08-31",
+   "filed": "2025-10-10",
+   "currency": "USD",
+   "warnings": [
+    "無總負債tag，以負債及權益合計−權益推導"
+   ],
    "rank": 143
   },
   {
-   "code": "SYK",
-   "name": null,
-   "exchange": "NYSE",
-   "total_score": 4.6,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 2.7,
-     "pct": 0.27,
-     "raw": {
-      "pe": 33.02,
-      "peg": 4.0,
-      "pb": null,
-      "price": 277.33
-     }
-    },
-    "growth": {
-     "score": 4.5,
-     "pct": 0.45,
-     "raw": {
-      "eps_yoy": 0.08247422680412386,
-      "revenue_yoy": 0.111573,
-      "gross_margin_yoy_pp": 0.06,
-      "op_margin_yoy_pp": 3.14,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 6.6,
-     "pct": 0.66,
-     "raw": {
-      "gross_margin": 0.639632,
-      "operating_margin": 0.194657,
-      "fcf_margin": 0.170529,
-      "debt_ratio": 0.49952,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2025-12-31",
-   "filed": "2026-02-11",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 144
-  },
-  {
-   "code": "AAPL",
-   "name": "Apple Inc.",
-   "exchange": "Nasdaq",
-   "total_score": 4.5,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 2.4,
-     "pct": 0.24,
-     "raw": {
-      "pe": 45.13,
-      "peg": 1.99,
-      "pb": null,
-      "price": 336.64
-     }
-    },
-    "growth": {
-     "score": 5.0,
-     "pct": 0.5,
-     "raw": {
-      "eps_yoy": 0.22697368421052633,
-      "revenue_yoy": 0.064255,
-      "gross_margin_yoy_pp": 0.7,
-      "op_margin_yoy_pp": 0.46,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 6.2,
-     "pct": 0.62,
-     "raw": {
-      "gross_margin": 0.469052,
-      "operating_margin": 0.319708,
-      "fcf_margin": 0.237329,
-      "debt_ratio": 0.719464,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2025-09-27",
-   "filed": "2025-10-31",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 145
-  },
-  {
    "code": "BLK",
-   "name": null,
+   "name": "BlackRock, Inc.",
    "exchange": "NYSE",
    "total_score": 4.5,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 5.2,
-     "pct": 0.52,
+     "score": 5.3,
+     "pct": 0.53,
      "raw": {
-      "pe": 30.65,
+      "pe": 30.7,
       "peg": null,
       "pb": null,
-      "price": 1082.39
+      "price": 1083.92
      }
     },
     "growth": {
@@ -6597,11 +6505,11 @@
    "filed": "2026-02-25",
    "currency": "USD",
    "warnings": [],
-   "rank": 146
+   "rank": 144
   },
   {
-   "code": "FDX",
-   "name": null,
+   "code": "C",
+   "name": "CITIGROUP INC",
    "exchange": "NYSE",
    "total_score": 4.5,
    "coverage": 1.0,
@@ -6610,10 +6518,56 @@
      "score": 7.1,
      "pct": 0.71,
      "raw": {
-      "pe": 15.73,
+      "pe": 18.87,
+      "peg": 1.07,
+      "pb": null,
+      "price": 131.92
+     }
+    },
+    "growth": {
+     "score": 6.3,
+     "pct": 0.63,
+     "raw": {
+      "eps_yoy": 0.17676767676767668,
+      "revenue_yoy": 0.055784,
+      "gross_margin_yoy_pp": null,
+      "op_margin_yoy_pp": null,
+      "n_signals": 2
+     }
+    },
+    "quality": {
+     "score": 0.2,
+     "pct": 0.02,
+     "raw": {
+      "gross_margin": null,
+      "operating_margin": null,
+      "fcf_margin": -0.870073,
+      "debt_ratio": 0.919531,
+      "n_signals": 2
+     }
+    }
+   },
+   "period_end": "2025-12-31",
+   "filed": "2026-02-20",
+   "currency": "USD",
+   "warnings": [],
+   "rank": 145
+  },
+  {
+   "code": "FDX",
+   "name": "FEDEX CORP",
+   "exchange": "NYSE",
+   "total_score": 4.5,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 7.1,
+     "pct": 0.71,
+     "raw": {
+      "pe": 15.75,
       "peg": 1.52,
       "pb": null,
-      "price": 291.71
+      "price": 292.23
      }
     },
     "growth": {
@@ -6645,11 +6599,11 @@
    "warnings": [
     "無總負債tag，以負債及權益合計−權益推導"
    ],
-   "rank": 147
+   "rank": 146
   },
   {
    "code": "ITW",
-   "name": null,
+   "name": "ILLINOIS TOOL WORKS INC",
    "exchange": "NYSE",
    "total_score": 4.5,
    "coverage": 1.0,
@@ -6658,10 +6612,10 @@
      "score": 6.7,
      "pct": 0.67,
      "raw": {
-      "pe": 25.18,
+      "pe": 25.27,
       "peg": null,
       "pb": null,
-      "price": 264.13
+      "price": 265.11
      }
     },
     "growth": {
@@ -6693,11 +6647,11 @@
    "warnings": [
     "無總負債tag，以負債及權益合計−權益推導"
    ],
-   "rank": 148
+   "rank": 147
   },
   {
    "code": "MUFG",
-   "name": null,
+   "name": "MITSUBISHI UFJ FINANCIAL GROUP INC",
    "exchange": "NYSE",
    "total_score": 4.5,
    "coverage": 0.67,
@@ -6731,161 +6685,69 @@
    "warnings": [
     "申報幣別 JPY，本益比口徑對不上，不算價值"
    ],
-   "rank": 149
+   "rank": 148
   },
   {
-   "code": "HOOD",
-   "name": null,
-   "exchange": "Nasdaq",
-   "total_score": 4.4,
+   "code": "SYK",
+   "name": "STRYKER CORP",
+   "exchange": "NYSE",
+   "total_score": 4.5,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 2.5,
-     "pct": 0.25,
+     "score": 2.4,
+     "pct": 0.24,
      "raw": {
-      "pe": 53.18,
-      "peg": 1.69,
+      "pe": 33.64,
+      "peg": 4.08,
       "pb": null,
-      "price": 109.02
+      "price": 282.6
      }
     },
     "growth": {
-     "score": 8.8,
-     "pct": 0.88,
+     "score": 4.5,
+     "pct": 0.45,
      "raw": {
-      "eps_yoy": 0.3141025641025639,
-      "revenue_yoy": 0.515757,
-      "gross_margin_yoy_pp": null,
-      "op_margin_yoy_pp": null,
-      "n_signals": 2
-     }
-    },
-    "quality": {
-     "score": 1.9,
-     "pct": 0.19,
-     "raw": {
-      "gross_margin": null,
-      "operating_margin": null,
-      "fcf_margin": null,
-      "debt_ratio": 0.831282,
-      "n_signals": 1
-     }
-    }
-   },
-   "period_end": "2025-12-31",
-   "filed": "2026-02-20",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 150
-  },
-  {
-   "code": "PDD",
-   "name": null,
-   "exchange": "Nasdaq",
-   "total_score": 4.4,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 3.4,
-     "pct": 0.34,
-     "raw": {
-      "pe": 34.47,
-      "peg": null,
-      "pb": null,
-      "price": 81.35
-     }
-    },
-    "growth": {
-     "score": 2.1,
-     "pct": 0.21,
-     "raw": {
-      "eps_yoy": -0.09230769230769242,
-      "revenue_yoy": 0.144523,
-      "gross_margin_yoy_pp": -4.64,
-      "op_margin_yoy_pp": -5.97,
+      "eps_yoy": 0.08247422680412386,
+      "revenue_yoy": 0.111573,
+      "gross_margin_yoy_pp": 0.06,
+      "op_margin_yoy_pp": 3.14,
       "n_signals": 4
      }
     },
     "quality": {
-     "score": 7.7,
-     "pct": 0.77,
+     "score": 6.6,
+     "pct": 0.66,
      "raw": {
-      "gross_margin": 0.562803,
-      "operating_margin": 0.215591,
-      "fcf_margin": null,
-      "debt_ratio": 0.343879,
-      "n_signals": 3
+      "gross_margin": 0.639632,
+      "operating_margin": 0.194657,
+      "fcf_margin": 0.170529,
+      "debt_ratio": 0.49952,
+      "n_signals": 4
      }
     }
    },
    "period_end": "2025-12-31",
-   "filed": "2026-04-29",
+   "filed": "2026-02-11",
    "currency": "USD",
    "warnings": [],
-   "rank": 151
-  },
-  {
-   "code": "SO",
-   "name": null,
-   "exchange": "NYSE",
-   "total_score": 4.4,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 7.3,
-     "pct": 0.73,
-     "raw": {
-      "pe": 21.98,
-      "peg": null,
-      "pb": null,
-      "price": 86.17
-     }
-    },
-    "growth": {
-     "score": 3.1,
-     "pct": 0.31,
-     "raw": {
-      "eps_yoy": -0.01754385964912286,
-      "revenue_yoy": 0.10586,
-      "gross_margin_yoy_pp": null,
-      "op_margin_yoy_pp": -1.8,
-      "n_signals": 3
-     }
-    },
-    "quality": {
-     "score": 2.8,
-     "pct": 0.28,
-     "raw": {
-      "gross_margin": null,
-      "operating_margin": 0.246506,
-      "fcf_margin": -0.099313,
-      "debt_ratio": 0.745834,
-      "n_signals": 3
-     }
-    }
-   },
-   "period_end": "2025-12-31",
-   "filed": "2026-02-19",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 152
+   "rank": 149
   },
   {
    "code": "URI",
-   "name": null,
+   "name": "UNITED RENTALS, INC.",
    "exchange": "NYSE",
-   "total_score": 4.4,
+   "total_score": 4.5,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 6.2,
-     "pct": 0.62,
+     "score": 6.4,
+     "pct": 0.64,
      "raw": {
-      "pe": 27.36,
+      "pe": 27.37,
       "peg": null,
       "pb": null,
-      "price": 1056.37
+      "price": 1056.92
      }
     },
     "growth": {
@@ -6915,11 +6777,149 @@
    "filed": "2026-01-28",
    "currency": "USD",
    "warnings": [],
+   "rank": 150
+  },
+  {
+   "code": "HOOD",
+   "name": "Robinhood Markets, Inc.",
+   "exchange": "Nasdaq",
+   "total_score": 4.4,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 2.6,
+     "pct": 0.26,
+     "raw": {
+      "pe": 53.28,
+      "peg": 1.7,
+      "pb": null,
+      "price": 109.22
+     }
+    },
+    "growth": {
+     "score": 8.8,
+     "pct": 0.88,
+     "raw": {
+      "eps_yoy": 0.3141025641025639,
+      "revenue_yoy": 0.515757,
+      "gross_margin_yoy_pp": null,
+      "op_margin_yoy_pp": null,
+      "n_signals": 2
+     }
+    },
+    "quality": {
+     "score": 1.9,
+     "pct": 0.19,
+     "raw": {
+      "gross_margin": null,
+      "operating_margin": null,
+      "fcf_margin": null,
+      "debt_ratio": 0.831282,
+      "n_signals": 1
+     }
+    }
+   },
+   "period_end": "2025-12-31",
+   "filed": "2026-02-20",
+   "currency": "USD",
+   "warnings": [],
+   "rank": 151
+  },
+  {
+   "code": "PDD",
+   "name": "PDD Holdings Inc.",
+   "exchange": "Nasdaq",
+   "total_score": 4.4,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 3.5,
+     "pct": 0.35,
+     "raw": {
+      "pe": 34.29,
+      "peg": null,
+      "pb": null,
+      "price": 80.92
+     }
+    },
+    "growth": {
+     "score": 2.1,
+     "pct": 0.21,
+     "raw": {
+      "eps_yoy": -0.09230769230769242,
+      "revenue_yoy": 0.144523,
+      "gross_margin_yoy_pp": -4.64,
+      "op_margin_yoy_pp": -5.97,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 7.7,
+     "pct": 0.77,
+     "raw": {
+      "gross_margin": 0.562803,
+      "operating_margin": 0.215591,
+      "fcf_margin": null,
+      "debt_ratio": 0.343879,
+      "n_signals": 3
+     }
+    }
+   },
+   "period_end": "2025-12-31",
+   "filed": "2026-04-29",
+   "currency": "USD",
+   "warnings": [],
+   "rank": 152
+  },
+  {
+   "code": "SO",
+   "name": "SOUTHERN CO",
+   "exchange": "NYSE",
+   "total_score": 4.4,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 7.2,
+     "pct": 0.72,
+     "raw": {
+      "pe": 22.2,
+      "peg": null,
+      "pb": null,
+      "price": 87.04
+     }
+    },
+    "growth": {
+     "score": 3.1,
+     "pct": 0.31,
+     "raw": {
+      "eps_yoy": -0.01754385964912286,
+      "revenue_yoy": 0.10586,
+      "gross_margin_yoy_pp": null,
+      "op_margin_yoy_pp": -1.8,
+      "n_signals": 3
+     }
+    },
+    "quality": {
+     "score": 2.8,
+     "pct": 0.28,
+     "raw": {
+      "gross_margin": null,
+      "operating_margin": 0.246506,
+      "fcf_margin": -0.099313,
+      "debt_ratio": 0.745834,
+      "n_signals": 3
+     }
+    }
+   },
+   "period_end": "2025-12-31",
+   "filed": "2026-02-19",
+   "currency": "USD",
+   "warnings": [],
    "rank": 153
   },
   {
    "code": "ABT",
-   "name": null,
+   "name": "ABBOTT LABORATORIES",
    "exchange": "NYSE",
    "total_score": 4.3,
    "coverage": 1.0,
@@ -6928,10 +6928,10 @@
      "score": 6.4,
      "pct": 0.64,
      "raw": {
-      "pe": 26.77,
+      "pe": 27.37,
       "peg": null,
       "pb": null,
-      "price": 99.6
+      "price": 101.82
      }
     },
     "growth": {
@@ -6967,7 +6967,7 @@
   },
   {
    "code": "FTNT",
-   "name": null,
+   "name": "Fortinet, Inc.",
    "exchange": "Nasdaq",
    "total_score": 4.3,
    "coverage": 1.0,
@@ -6976,10 +6976,10 @@
      "score": 0.6,
      "pct": 0.06,
      "raw": {
-      "pe": 80.48,
-      "peg": 11.37,
+      "pe": 79.73,
+      "peg": 11.26,
       "pb": null,
-      "price": 194.75
+      "price": 192.94
      }
     },
     "growth": {
@@ -7013,7 +7013,7 @@
   },
   {
    "code": "LOW",
-   "name": null,
+   "name": "LOWES COMPANIES INC",
    "exchange": "NYSE",
    "total_score": 4.3,
    "coverage": 1.0,
@@ -7022,10 +7022,10 @@
      "score": 9.2,
      "pct": 0.92,
      "raw": {
-      "pe": 15.7,
+      "pe": 15.66,
       "peg": null,
       "pb": null,
-      "price": 186.0
+      "price": 185.57
      }
     },
     "growth": {
@@ -7059,7 +7059,7 @@
   },
   {
    "code": "MDT",
-   "name": null,
+   "name": "Medtronic plc",
    "exchange": "NYSE",
    "total_score": 4.3,
    "coverage": 1.0,
@@ -7068,10 +7068,10 @@
      "score": 3.2,
      "pct": 0.32,
      "raw": {
-      "pe": 23.72,
-      "peg": 7.14,
+      "pe": 24.65,
+      "peg": 7.41,
       "pb": null,
-      "price": 88.48
+      "price": 91.93
      }
     },
     "growth": {
@@ -7105,19 +7105,19 @@
   },
   {
    "code": "TMUS",
-   "name": null,
+   "name": "T-Mobile US, Inc.",
    "exchange": "Nasdaq",
    "total_score": 4.3,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 4.6,
-     "pct": 0.46,
+     "score": 4.4,
+     "pct": 0.44,
      "raw": {
-      "pe": 15.29,
-      "peg": 24.61,
+      "pe": 15.62,
+      "peg": 25.16,
       "pb": null,
-      "price": 148.58
+      "price": 151.87
      }
     },
     "growth": {
@@ -7153,7 +7153,7 @@
   },
   {
    "code": "UPS",
-   "name": null,
+   "name": "UNITED PARCEL SERVICE INC",
    "exchange": "NYSE",
    "total_score": 4.3,
    "coverage": 1.0,
@@ -7162,10 +7162,10 @@
      "score": 9.4,
      "pct": 0.94,
      "raw": {
-      "pe": 14.42,
+      "pe": 14.53,
       "peg": null,
       "pb": null,
-      "price": 94.57
+      "price": 95.34
      }
     },
     "growth": {
@@ -7201,7 +7201,7 @@
   },
   {
    "code": "BA",
-   "name": null,
+   "name": "BOEING CO",
    "exchange": "NYSE",
    "total_score": 4.2,
    "coverage": 1.0,
@@ -7210,10 +7210,10 @@
      "score": 3.5,
      "pct": 0.35,
      "raw": {
-      "pe": 76.76,
-      "peg": 0.68,
+      "pe": 76.41,
+      "peg": 0.67,
       "pb": null,
-      "price": 190.37
+      "price": 189.5
      }
     },
     "growth": {
@@ -7247,19 +7247,19 @@
   },
   {
    "code": "IBKR",
-   "name": null,
+   "name": "Interactive Brokers Group, Inc.",
    "exchange": "Nasdaq",
    "total_score": 4.2,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 3.5,
-     "pct": 0.35,
+     "score": 3.4,
+     "pct": 0.34,
      "raw": {
-      "pe": 39.58,
+      "pe": 39.59,
       "peg": 1.4,
       "pb": null,
-      "price": 87.87
+      "price": 87.89
      }
     },
     "growth": {
@@ -7293,19 +7293,19 @@
   },
   {
    "code": "MRSH",
-   "name": null,
+   "name": "MARSH & MCLENNAN COMPANIES, INC.",
    "exchange": "NYSE",
    "total_score": 4.2,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 3.6,
-     "pct": 0.36,
+     "score": 3.7,
+     "pct": 0.37,
      "raw": {
-      "pe": 20.85,
-      "peg": 6.82,
+      "pe": 20.94,
+      "peg": 6.85,
       "pb": null,
-      "price": 175.76
+      "price": 176.54
      }
     },
     "growth": {
@@ -7340,8 +7340,100 @@
    "rank": 162
   },
   {
+   "code": "PEP",
+   "name": "PEPSICO INC",
+   "exchange": "Nasdaq",
+   "total_score": 4.2,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 7.8,
+     "pct": 0.78,
+     "raw": {
+      "pe": 21.11,
+      "peg": null,
+      "pb": null,
+      "price": 126.68
+     }
+    },
+    "growth": {
+     "score": 1.7,
+     "pct": 0.17,
+     "raw": {
+      "eps_yoy": -0.13669064748201443,
+      "revenue_yoy": 0.022547,
+      "gross_margin_yoy_pp": -0.41,
+      "op_margin_yoy_pp": -1.79,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 3.0,
+     "pct": 0.3,
+     "raw": {
+      "gross_margin": 0.541485,
+      "operating_margin": 0.122417,
+      "fcf_margin": 0.081682,
+      "debt_ratio": 0.79918,
+      "n_signals": 4
+     }
+    }
+   },
+   "period_end": "2025-12-27",
+   "filed": "2026-02-03",
+   "currency": "USD",
+   "warnings": [],
+   "rank": 163
+  },
+  {
+   "code": "QCOM",
+   "name": "QUALCOMM INC/DE",
+   "exchange": "Nasdaq",
+   "total_score": 4.2,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 3.3,
+     "pct": 0.33,
+     "raw": {
+      "pe": 34.82,
+      "peg": null,
+      "pb": null,
+      "price": 174.43
+     }
+    },
+    "growth": {
+     "score": 1.1,
+     "pct": 0.11,
+     "raw": {
+      "eps_yoy": -0.44147157190635455,
+      "revenue_yoy": 0.136595,
+      "gross_margin_yoy_pp": -0.79,
+      "op_margin_yoy_pp": 2.05,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 8.1,
+     "pct": 0.81,
+     "raw": {
+      "gross_margin": 0.554286,
+      "operating_margin": 0.278995,
+      "fcf_margin": 0.289495,
+      "debt_ratio": 0.517876,
+      "n_signals": 4
+     }
+    }
+   },
+   "period_end": "2025-09-28",
+   "filed": "2025-11-05",
+   "currency": "USD",
+   "warnings": [],
+   "rank": 164
+  },
+  {
    "code": "RY",
-   "name": null,
+   "name": "ROYAL BANK OF CANADA",
    "exchange": "NYSE",
    "total_score": 4.2,
    "coverage": 0.67,
@@ -7376,11 +7468,11 @@
     "申報幣別 CAD，本益比口徑對不上，不算價值",
     "IFRS申報（20-F）：EPS為每普通股，非每ADR"
    ],
-   "rank": 163
+   "rank": 165
   },
   {
    "code": "TT",
-   "name": null,
+   "name": "Trane Technologies plc",
    "exchange": "NYSE",
    "total_score": 4.2,
    "coverage": 1.0,
@@ -7389,10 +7481,10 @@
      "score": 2.7,
      "pct": 0.27,
      "raw": {
-      "pe": 36.75,
-      "peg": 2.37,
+      "pe": 36.79,
+      "peg": 2.38,
       "pb": null,
-      "price": 476.98
+      "price": 477.55
      }
     },
     "growth": {
@@ -7422,23 +7514,23 @@
    "filed": "2026-02-05",
    "currency": "USD",
    "warnings": [],
-   "rank": 164
+   "rank": 166
   },
   {
    "code": "LIN",
-   "name": null,
+   "name": "LINDE PLC",
    "exchange": "Nasdaq",
    "total_score": 4.1,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 2.3,
-     "pct": 0.23,
+     "score": 2.2,
+     "pct": 0.22,
      "raw": {
-      "pe": 33.11,
-      "peg": 4.56,
+      "pe": 33.36,
+      "peg": 4.59,
       "pb": null,
-      "price": 483.73
+      "price": 487.35
      }
     },
     "growth": {
@@ -7468,103 +7560,11 @@
    "filed": "2026-02-25",
    "currency": "USD",
    "warnings": [],
-   "rank": 165
-  },
-  {
-   "code": "PEP",
-   "name": null,
-   "exchange": "Nasdaq",
-   "total_score": 4.1,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 7.7,
-     "pct": 0.77,
-     "raw": {
-      "pe": 21.0,
-      "peg": null,
-      "pb": null,
-      "price": 125.97
-     }
-    },
-    "growth": {
-     "score": 1.7,
-     "pct": 0.17,
-     "raw": {
-      "eps_yoy": -0.13669064748201443,
-      "revenue_yoy": 0.022547,
-      "gross_margin_yoy_pp": -0.41,
-      "op_margin_yoy_pp": -1.79,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 3.0,
-     "pct": 0.3,
-     "raw": {
-      "gross_margin": 0.541485,
-      "operating_margin": 0.122417,
-      "fcf_margin": 0.081682,
-      "debt_ratio": 0.79918,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2025-12-27",
-   "filed": "2026-02-03",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 166
-  },
-  {
-   "code": "QCOM",
-   "name": null,
-   "exchange": "Nasdaq",
-   "total_score": 4.1,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 3.2,
-     "pct": 0.32,
-     "raw": {
-      "pe": 35.03,
-      "peg": null,
-      "pb": null,
-      "price": 175.5
-     }
-    },
-    "growth": {
-     "score": 1.1,
-     "pct": 0.11,
-     "raw": {
-      "eps_yoy": -0.44147157190635455,
-      "revenue_yoy": 0.136595,
-      "gross_margin_yoy_pp": -0.79,
-      "op_margin_yoy_pp": 2.05,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 8.1,
-     "pct": 0.81,
-     "raw": {
-      "gross_margin": 0.554286,
-      "operating_margin": 0.278995,
-      "fcf_margin": 0.289495,
-      "debt_ratio": 0.517876,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2025-09-28",
-   "filed": "2025-11-05",
-   "currency": "USD",
-   "warnings": [],
    "rank": 167
   },
   {
    "code": "WELL",
-   "name": null,
+   "name": "WELLTOWER INC.",
    "exchange": "NYSE",
    "total_score": 4.1,
    "coverage": 1.0,
@@ -7573,10 +7573,10 @@
      "score": 0.3,
      "pct": 0.03,
      "raw": {
-      "pe": 162.21,
+      "pe": 165.68,
       "peg": null,
       "pb": null,
-      "price": 225.47
+      "price": 230.29
      }
     },
     "growth": {
@@ -7610,7 +7610,7 @@
   },
   {
    "code": "BRK-B",
-   "name": null,
+   "name": "BERKSHIRE HATHAWAY INC",
    "exchange": "NYSE",
    "total_score": 4.0,
    "coverage": 0.67,
@@ -7687,19 +7687,19 @@
   },
   {
    "code": "HD",
-   "name": null,
+   "name": "HOME DEPOT, INC.",
    "exchange": "NYSE",
    "total_score": 4.0,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 8.1,
-     "pct": 0.81,
+     "score": 8.0,
+     "pct": 0.8,
      "raw": {
-      "pe": 20.43,
+      "pe": 20.42,
       "peg": null,
       "pb": null,
-      "price": 290.74
+      "price": 290.62
      }
     },
     "growth": {
@@ -7733,7 +7733,7 @@
   },
   {
    "code": "TXN",
-   "name": null,
+   "name": "TEXAS INSTRUMENTS INC",
    "exchange": "Nasdaq",
    "total_score": 4.0,
    "coverage": 1.0,
@@ -7742,10 +7742,10 @@
      "score": 0.8,
      "pct": 0.08,
      "raw": {
-      "pe": 52.06,
-      "peg": 10.83,
+      "pe": 51.7,
+      "peg": 10.75,
       "pb": null,
-      "price": 283.74
+      "price": 281.74
      }
     },
     "growth": {
@@ -7779,7 +7779,7 @@
   },
   {
    "code": "UNH",
-   "name": null,
+   "name": "UNITEDHEALTH GROUP INC",
    "exchange": "NYSE",
    "total_score": 4.0,
    "coverage": 1.0,
@@ -7788,10 +7788,10 @@
      "score": 5.8,
      "pct": 0.58,
      "raw": {
-      "pe": 28.67,
+      "pe": 28.61,
       "peg": null,
       "pb": null,
-      "price": 379.3
+      "price": 378.52
      }
     },
     "growth": {
@@ -7864,7 +7864,7 @@
   },
   {
    "code": "BMO",
-   "name": null,
+   "name": "BANK OF MONTREAL /CAN/",
    "exchange": "NYSE",
    "total_score": 3.9,
    "coverage": 0.67,
@@ -7903,19 +7903,19 @@
   },
   {
    "code": "CSX",
-   "name": null,
+   "name": "CSX CORP",
    "exchange": "Nasdaq",
    "total_score": 3.9,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 5.1,
-     "pct": 0.51,
+     "score": 5.2,
+     "pct": 0.52,
      "raw": {
-      "pe": 30.69,
+      "pe": 31.01,
       "peg": null,
       "pb": null,
-      "price": 47.26
+      "price": 47.75
      }
     },
     "growth": {
@@ -7949,7 +7949,7 @@
   },
   {
    "code": "CTAS",
-   "name": null,
+   "name": "CINTAS CORP",
    "exchange": "Nasdaq",
    "total_score": 3.9,
    "coverage": 1.0,
@@ -7958,10 +7958,10 @@
      "score": 1.6,
      "pct": 0.16,
      "raw": {
-      "pe": 41.22,
-      "peg": 3.56,
+      "pe": 41.8,
+      "peg": 3.61,
       "pb": null,
-      "price": 202.41
+      "price": 205.23
      }
     },
     "growth": {
@@ -7997,7 +7997,7 @@
   },
   {
    "code": "TGT",
-   "name": null,
+   "name": "TARGET CORP",
    "exchange": "NYSE",
    "total_score": 3.9,
    "coverage": 1.0,
@@ -8009,7 +8009,7 @@
       "pe": 18.9,
       "peg": null,
       "pb": null,
-      "price": 153.64
+      "price": 153.62
      }
     },
     "growth": {
@@ -8045,7 +8045,7 @@
   },
   {
    "code": "TTE",
-   "name": null,
+   "name": "TotalEnergies SE",
    "exchange": "NYSE",
    "total_score": 3.9,
    "coverage": 0.67,
@@ -8085,7 +8085,7 @@
   },
   {
    "code": "CM",
-   "name": null,
+   "name": "CANADIAN IMPERIAL BANK OF COMMERCE /CAN/",
    "exchange": "NYSE",
    "total_score": 3.8,
    "coverage": 0.67,
@@ -8124,19 +8124,19 @@
   },
   {
    "code": "DHR",
-   "name": null,
+   "name": "DANAHER CORP /DE/",
    "exchange": "NYSE",
    "total_score": 3.8,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 2.0,
-     "pct": 0.2,
+     "score": 1.9,
+     "pct": 0.19,
      "raw": {
-      "pe": 43.53,
+      "pe": 43.8,
       "peg": null,
       "pb": null,
-      "price": 219.81
+      "price": 221.2
      }
     },
     "growth": {
@@ -8172,19 +8172,19 @@
   },
   {
    "code": "HON",
-   "name": null,
+   "name": "HONEYWELL INTERNATIONAL INC",
    "exchange": "Nasdaq",
    "total_score": 3.8,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 6.0,
-     "pct": 0.6,
+     "score": 5.9,
+     "pct": 0.59,
      "raw": {
-      "pe": 28.22,
+      "pe": 28.48,
       "peg": null,
       "pb": null,
-      "price": 207.73
+      "price": 209.64
      }
     },
     "growth": {
@@ -8219,56 +8219,100 @@
    "rank": 182
   },
   {
-   "code": "TJX",
-   "name": null,
+   "code": "PG",
+   "name": "PROCTER & GAMBLE Co",
    "exchange": "NYSE",
    "total_score": 3.8,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 4.1,
-     "pct": 0.41,
+     "score": 3.1,
+     "pct": 0.31,
      "raw": {
-      "pe": 28.49,
-      "peg": 1.99,
+      "pe": 23.14,
+      "peg": 13.7,
       "pb": null,
-      "price": 138.76
+      "price": 153.2
      }
     },
     "growth": {
-     "score": 4.9,
-     "pct": 0.49,
+     "score": 2.7,
+     "pct": 0.27,
      "raw": {
-      "eps_yoy": 0.14319248826291098,
-      "revenue_yoy": 0.071185,
-      "gross_margin_yoy_pp": 0.36,
-      "op_margin_yoy_pp": null,
-      "n_signals": 3
+      "eps_yoy": 0.016897081413210557,
+      "revenue_yoy": 0.032604,
+      "gross_margin_yoy_pp": -0.98,
+      "op_margin_yoy_pp": -1.57,
+      "n_signals": 4
      }
     },
     "quality": {
-     "score": 2.3,
-     "pct": 0.23,
+     "score": 5.5,
+     "pct": 0.55,
      "raw": {
-      "gross_margin": 0.30963,
-      "operating_margin": null,
-      "fcf_margin": 0.081445,
-      "debt_ratio": 0.713027,
-      "n_signals": 3
+      "gross_margin": 0.501769,
+      "operating_margin": 0.226905,
+      "fcf_margin": 0.174039,
+      "debt_ratio": 0.570735,
+      "n_signals": 4
      }
     }
    },
-   "period_end": "2026-01-31",
-   "filed": "2026-03-31",
+   "period_end": "2026-06-30",
+   "filed": "2026-08-04",
    "currency": "USD",
-   "warnings": [
-    "無總負債tag，以負債及權益合計−權益推導"
-   ],
+   "warnings": [],
    "rank": 183
   },
   {
+   "code": "PH",
+   "name": "Parker-Hannifin Corp",
+   "exchange": "NYSE",
+   "total_score": 3.8,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 2.1,
+     "pct": 0.21,
+     "raw": {
+      "pe": 33.6,
+      "peg": 6.7,
+      "pb": null,
+      "price": 956.89
+     }
+    },
+    "growth": {
+     "score": 3.8,
+     "pct": 0.38,
+     "raw": {
+      "eps_yoy": 0.05014749262536866,
+      "revenue_yoy": 0.083073,
+      "gross_margin_yoy_pp": 0.83,
+      "op_margin_yoy_pp": 1.67,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 5.4,
+     "pct": 0.54,
+     "raw": {
+      "gross_margin": 0.376855,
+      "operating_margin": 0.235732,
+      "fcf_margin": 0.181636,
+      "debt_ratio": 0.500826,
+      "n_signals": 4
+     }
+    }
+   },
+   "period_end": "2026-06-30",
+   "filed": "2026-08-21",
+   "currency": "USD",
+   "warnings": [],
+   "rank": 184
+  },
+  {
    "code": "WM",
-   "name": null,
+   "name": "WASTE MANAGEMENT INC",
    "exchange": "NYSE",
    "total_score": 3.8,
    "coverage": 1.0,
@@ -8277,10 +8321,10 @@
      "score": 4.9,
      "pct": 0.49,
      "raw": {
-      "pe": 31.17,
+      "pe": 31.51,
       "peg": null,
       "pb": null,
-      "price": 208.83
+      "price": 211.14
      }
     },
     "growth": {
@@ -8310,57 +8354,11 @@
    "filed": "2026-02-09",
    "currency": "USD",
    "warnings": [],
-   "rank": 184
-  },
-  {
-   "code": "ADP",
-   "name": null,
-   "exchange": "Nasdaq",
-   "total_score": 3.7,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 4.4,
-     "pct": 0.44,
-     "raw": {
-      "pe": 24.76,
-      "peg": 2.57,
-      "pb": null,
-      "price": 270.88
-     }
-    },
-    "growth": {
-     "score": 4.4,
-     "pct": 0.44,
-     "raw": {
-      "eps_yoy": 0.09619238476953895,
-      "revenue_yoy": 0.067434,
-      "gross_margin_yoy_pp": 0.39,
-      "op_margin_yoy_pp": null,
-      "n_signals": 3
-     }
-    },
-    "quality": {
-     "score": 2.2,
-     "pct": 0.22,
-     "raw": {
-      "gross_margin": 0.464164,
-      "operating_margin": null,
-      "fcf_margin": null,
-      "debt_ratio": 0.90456,
-      "n_signals": 2
-     }
-    }
-   },
-   "period_end": "2026-06-30",
-   "filed": "2026-08-05",
-   "currency": "USD",
-   "warnings": [],
    "rank": 185
   },
   {
    "code": "AMAT",
-   "name": null,
+   "name": "APPLIED MATERIALS INC /DE",
    "exchange": "Nasdaq",
    "total_score": 3.7,
    "coverage": 1.0,
@@ -8369,10 +8367,10 @@
      "score": 0.7,
      "pct": 0.07,
      "raw": {
-      "pe": 58.55,
-      "peg": 100.82,
+      "pe": 57.45,
+      "peg": 98.93,
       "pb": null,
-      "price": 507.03
+      "price": 497.53
      }
     },
     "growth": {
@@ -8406,7 +8404,7 @@
   },
   {
    "code": "MELI",
-   "name": null,
+   "name": "MERCADOLIBRE INC",
    "exchange": "Nasdaq",
    "total_score": 3.7,
    "coverage": 1.0,
@@ -8415,10 +8413,10 @@
      "score": 0.9,
      "pct": 0.09,
      "raw": {
-      "pe": 47.97,
-      "peg": 10.57,
+      "pe": 48.03,
+      "peg": 10.59,
       "pb": null,
-      "price": 1889.85
+      "price": 1892.44
      }
     },
     "growth": {
@@ -8452,7 +8450,7 @@
   },
   {
    "code": "NOC",
-   "name": null,
+   "name": "NORTHROP GRUMMAN CORP /DE/",
    "exchange": "NYSE",
    "total_score": 3.7,
    "coverage": 1.0,
@@ -8461,10 +8459,10 @@
      "score": 5.2,
      "pct": 0.52,
      "raw": {
-      "pe": 16.53,
-      "peg": 6.33,
+      "pe": 16.68,
+      "peg": 6.39,
       "pb": null,
-      "price": 480.72
+      "price": 485.0
      }
     },
     "growth": {
@@ -8497,204 +8495,20 @@
    "rank": 188
   },
   {
-   "code": "PG",
-   "name": null,
-   "exchange": "NYSE",
-   "total_score": 3.7,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 3.0,
-     "pct": 0.3,
-     "raw": {
-      "pe": 22.84,
-      "peg": 13.52,
-      "pb": null,
-      "price": 151.23
-     }
-    },
-    "growth": {
-     "score": 2.7,
-     "pct": 0.27,
-     "raw": {
-      "eps_yoy": 0.016897081413210557,
-      "revenue_yoy": 0.032604,
-      "gross_margin_yoy_pp": -0.98,
-      "op_margin_yoy_pp": -1.57,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 5.5,
-     "pct": 0.55,
-     "raw": {
-      "gross_margin": 0.501769,
-      "operating_margin": 0.226905,
-      "fcf_margin": 0.174039,
-      "debt_ratio": 0.570735,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2026-06-30",
-   "filed": "2026-08-04",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 189
-  },
-  {
-   "code": "PH",
-   "name": null,
-   "exchange": "NYSE",
-   "total_score": 3.7,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 1.8,
-     "pct": 0.18,
-     "raw": {
-      "pe": 33.8,
-      "peg": 6.74,
-      "pb": null,
-      "price": 962.56
-     }
-    },
-    "growth": {
-     "score": 3.8,
-     "pct": 0.38,
-     "raw": {
-      "eps_yoy": 0.05014749262536866,
-      "revenue_yoy": 0.083073,
-      "gross_margin_yoy_pp": 0.83,
-      "op_margin_yoy_pp": 1.67,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 5.4,
-     "pct": 0.54,
-     "raw": {
-      "gross_margin": 0.376855,
-      "operating_margin": 0.235732,
-      "fcf_margin": 0.181636,
-      "debt_ratio": 0.500826,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2026-06-30",
-   "filed": "2026-08-21",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 190
-  },
-  {
-   "code": "LMT",
-   "name": null,
-   "exchange": "NYSE",
-   "total_score": 3.6,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 6.8,
-     "pct": 0.68,
-     "raw": {
-      "pe": 23.71,
-      "peg": null,
-      "pb": null,
-      "price": 509.59
-     }
-    },
-    "growth": {
-     "score": 2.8,
-     "pct": 0.28,
-     "raw": {
-      "eps_yoy": -0.036754818467055195,
-      "revenue_yoy": 0.056374,
-      "gross_margin_yoy_pp": 0.4,
-      "op_margin_yoy_pp": 0.43,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 1.2,
-     "pct": 0.12,
-     "raw": {
-      "gross_margin": 0.101522,
-      "operating_margin": 0.103014,
-      "fcf_margin": 0.092048,
-      "debt_ratio": 0.8596,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2025-12-31",
-   "filed": "2026-01-29",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 191
-  },
-  {
-   "code": "MPC",
-   "name": null,
-   "exchange": "NYSE",
-   "total_score": 3.6,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 4.8,
-     "pct": 0.48,
-     "raw": {
-      "pe": 34.42,
-      "peg": 1.1,
-      "pb": null,
-      "price": 455.03
-     }
-    },
-    "growth": {
-     "score": 4.9,
-     "pct": 0.49,
-     "raw": {
-      "eps_yoy": 0.3115079365079365,
-      "revenue_yoy": -0.044396,
-      "gross_margin_yoy_pp": 0.9,
-      "op_margin_yoy_pp": 1.35,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 1.1,
-     "pct": 0.11,
-     "raw": {
-      "gross_margin": 0.099873,
-      "operating_margin": 0.06248,
-      "fcf_margin": 0.035923,
-      "debt_ratio": 0.727282,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2025-12-31",
-   "filed": "2026-02-26",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 192
-  },
-  {
    "code": "TER",
-   "name": null,
+   "name": "TERADYNE, INC",
    "exchange": "Nasdaq",
-   "total_score": 3.6,
+   "total_score": 3.7,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 0.2,
-     "pct": 0.02,
+     "score": 0.3,
+     "pct": 0.03,
      "raw": {
-      "pe": 116.05,
-      "peg": 25.68,
+      "pe": 110.62,
+      "peg": 24.48,
       "pb": null,
-      "price": 402.68
+      "price": 383.85
      }
     },
     "growth": {
@@ -8724,11 +8538,197 @@
    "filed": "2026-02-19",
    "currency": "USD",
    "warnings": [],
+   "rank": 189
+  },
+  {
+   "code": "TJX",
+   "name": "TJX COMPANIES INC /DE/",
+   "exchange": "NYSE",
+   "total_score": 3.7,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 4.0,
+     "pct": 0.4,
+     "raw": {
+      "pe": 29.14,
+      "peg": 2.04,
+      "pb": null,
+      "price": 141.92
+     }
+    },
+    "growth": {
+     "score": 4.9,
+     "pct": 0.49,
+     "raw": {
+      "eps_yoy": 0.14319248826291098,
+      "revenue_yoy": 0.071185,
+      "gross_margin_yoy_pp": 0.36,
+      "op_margin_yoy_pp": null,
+      "n_signals": 3
+     }
+    },
+    "quality": {
+     "score": 2.3,
+     "pct": 0.23,
+     "raw": {
+      "gross_margin": 0.30963,
+      "operating_margin": null,
+      "fcf_margin": 0.081445,
+      "debt_ratio": 0.713027,
+      "n_signals": 3
+     }
+    }
+   },
+   "period_end": "2026-01-31",
+   "filed": "2026-03-31",
+   "currency": "USD",
+   "warnings": [
+    "無總負債tag，以負債及權益合計−權益推導"
+   ],
+   "rank": 190
+  },
+  {
+   "code": "ADP",
+   "name": "AUTOMATIC DATA PROCESSING INC",
+   "exchange": "Nasdaq",
+   "total_score": 3.6,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 4.1,
+     "pct": 0.41,
+     "raw": {
+      "pe": 25.03,
+      "peg": 2.6,
+      "pb": null,
+      "price": 273.81
+     }
+    },
+    "growth": {
+     "score": 4.4,
+     "pct": 0.44,
+     "raw": {
+      "eps_yoy": 0.09619238476953895,
+      "revenue_yoy": 0.067434,
+      "gross_margin_yoy_pp": 0.39,
+      "op_margin_yoy_pp": null,
+      "n_signals": 3
+     }
+    },
+    "quality": {
+     "score": 2.2,
+     "pct": 0.22,
+     "raw": {
+      "gross_margin": 0.464164,
+      "operating_margin": null,
+      "fcf_margin": null,
+      "debt_ratio": 0.90456,
+      "n_signals": 2
+     }
+    }
+   },
+   "period_end": "2026-06-30",
+   "filed": "2026-08-05",
+   "currency": "USD",
+   "warnings": [],
+   "rank": 191
+  },
+  {
+   "code": "LMT",
+   "name": "LOCKHEED MARTIN CORP",
+   "exchange": "NYSE",
+   "total_score": 3.6,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 6.8,
+     "pct": 0.68,
+     "raw": {
+      "pe": 23.82,
+      "peg": null,
+      "pb": null,
+      "price": 511.88
+     }
+    },
+    "growth": {
+     "score": 2.8,
+     "pct": 0.28,
+     "raw": {
+      "eps_yoy": -0.036754818467055195,
+      "revenue_yoy": 0.056374,
+      "gross_margin_yoy_pp": 0.4,
+      "op_margin_yoy_pp": 0.43,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 1.2,
+     "pct": 0.12,
+     "raw": {
+      "gross_margin": 0.101522,
+      "operating_margin": 0.103014,
+      "fcf_margin": 0.092048,
+      "debt_ratio": 0.8596,
+      "n_signals": 4
+     }
+    }
+   },
+   "period_end": "2025-12-31",
+   "filed": "2026-01-29",
+   "currency": "USD",
+   "warnings": [],
+   "rank": 192
+  },
+  {
+   "code": "MPC",
+   "name": "Marathon Petroleum Corp",
+   "exchange": "NYSE",
+   "total_score": 3.6,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 4.7,
+     "pct": 0.47,
+     "raw": {
+      "pe": 34.71,
+      "peg": 1.11,
+      "pb": null,
+      "price": 458.81
+     }
+    },
+    "growth": {
+     "score": 4.9,
+     "pct": 0.49,
+     "raw": {
+      "eps_yoy": 0.3115079365079365,
+      "revenue_yoy": -0.044396,
+      "gross_margin_yoy_pp": 0.9,
+      "op_margin_yoy_pp": 1.35,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 1.1,
+     "pct": 0.11,
+     "raw": {
+      "gross_margin": 0.099873,
+      "operating_margin": 0.06248,
+      "fcf_margin": 0.035923,
+      "debt_ratio": 0.727282,
+      "n_signals": 4
+     }
+    }
+   },
+   "period_end": "2025-12-31",
+   "filed": "2026-02-26",
+   "currency": "USD",
+   "warnings": [],
    "rank": 193
   },
   {
    "code": "APO",
-   "name": null,
+   "name": "Apollo Global Management, Inc.",
    "exchange": "NYSE",
    "total_score": 3.5,
    "coverage": 1.0,
@@ -8737,10 +8737,10 @@
      "score": 7.5,
      "pct": 0.75,
      "raw": {
-      "pe": 21.42,
+      "pe": 21.52,
       "peg": null,
       "pb": null,
-      "price": 118.65
+      "price": 119.22
      }
     },
     "growth": {
@@ -8774,7 +8774,7 @@
   },
   {
    "code": "BCS",
-   "name": null,
+   "name": "BARCLAYS PLC",
    "exchange": "NYSE",
    "total_score": 3.5,
    "coverage": 0.67,
@@ -8813,7 +8813,7 @@
   },
   {
    "code": "CMI",
-   "name": null,
+   "name": "CUMMINS INC",
    "exchange": "NYSE",
    "total_score": 3.5,
    "coverage": 1.0,
@@ -8822,10 +8822,10 @@
      "score": 6.6,
      "pct": 0.66,
      "raw": {
-      "pe": 25.53,
+      "pe": 25.75,
       "peg": null,
       "pb": null,
-      "price": 523.39
+      "price": 527.86
      }
     },
     "growth": {
@@ -8859,7 +8859,7 @@
   },
   {
    "code": "SHW",
-   "name": null,
+   "name": "SHERWIN WILLIAMS CO",
    "exchange": "NYSE",
    "total_score": 3.5,
    "coverage": 1.0,
@@ -8868,10 +8868,10 @@
      "score": 5.1,
      "pct": 0.51,
      "raw": {
-      "pe": 31.13,
+      "pe": 31.21,
       "peg": null,
       "pb": null,
-      "price": 319.36
+      "price": 320.21
      }
     },
     "growth": {
@@ -8907,7 +8907,7 @@
   },
   {
    "code": "ABBV",
-   "name": null,
+   "name": "AbbVie Inc.",
    "exchange": "NYSE",
    "total_score": 3.4,
    "coverage": 1.0,
@@ -8916,10 +8916,10 @@
      "score": 0.4,
      "pct": 0.04,
      "raw": {
-      "pe": 117.15,
+      "pe": 119.12,
       "peg": null,
       "pb": null,
-      "price": 276.47
+      "price": 281.12
      }
     },
     "growth": {
@@ -8954,8 +8954,54 @@
    "rank": 198
   },
   {
+   "code": "CVX",
+   "name": "CHEVRON CORP",
+   "exchange": "NYSE",
+   "total_score": 3.4,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 4.5,
+     "pct": 0.45,
+     "raw": {
+      "pe": 32.43,
+      "peg": null,
+      "pb": null,
+      "price": 215.0
+     }
+    },
+    "growth": {
+     "score": 0.7,
+     "pct": 0.07,
+     "raw": {
+      "eps_yoy": -0.3179012345679013,
+      "revenue_yoy": -0.067858,
+      "gross_margin_yoy_pp": 1.54,
+      "op_margin_yoy_pp": null,
+      "n_signals": 3
+     }
+    },
+    "quality": {
+     "score": 5.0,
+     "pct": 0.5,
+     "raw": {
+      "gross_margin": 0.427533,
+      "operating_margin": null,
+      "fcf_margin": 0.087774,
+      "debt_ratio": 0.407642,
+      "n_signals": 3
+     }
+    }
+   },
+   "period_end": "2025-12-31",
+   "filed": "2026-02-24",
+   "currency": "USD",
+   "warnings": [],
+   "rank": 199
+  },
+  {
    "code": "MPWR",
-   "name": null,
+   "name": "MONOLITHIC POWER SYSTEMS, INC.",
    "exchange": "Nasdaq",
    "total_score": 3.4,
    "coverage": 1.0,
@@ -8964,10 +9010,10 @@
      "score": 0.5,
      "pct": 0.05,
      "raw": {
-      "pe": 107.8,
+      "pe": 102.58,
       "peg": null,
       "pb": null,
-      "price": 1386.29
+      "price": 1319.23
      }
     },
     "growth": {
@@ -8997,11 +9043,11 @@
    "filed": "2026-02-27",
    "currency": "USD",
    "warnings": [],
-   "rank": 199
+   "rank": 200
   },
   {
    "code": "TMO",
-   "name": null,
+   "name": "THERMO FISHER SCIENTIFIC INC.",
    "exchange": "NYSE",
    "total_score": 3.4,
    "coverage": 1.0,
@@ -9010,10 +9056,10 @@
      "score": 1.5,
      "pct": 0.15,
      "raw": {
-      "pe": 37.09,
-      "peg": 5.07,
+      "pe": 37.33,
+      "peg": 5.1,
       "pb": null,
-      "price": 658.02
+      "price": 662.24
      }
     },
     "growth": {
@@ -9045,103 +9091,11 @@
    "warnings": [
     "無總負債tag，以負債及權益合計−權益推導"
    ],
-   "rank": 200
-  },
-  {
-   "code": "CVX",
-   "name": null,
-   "exchange": "NYSE",
-   "total_score": 3.3,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 4.3,
-     "pct": 0.43,
-     "raw": {
-      "pe": 31.97,
-      "peg": null,
-      "pb": null,
-      "price": 211.98
-     }
-    },
-    "growth": {
-     "score": 0.7,
-     "pct": 0.07,
-     "raw": {
-      "eps_yoy": -0.3179012345679013,
-      "revenue_yoy": -0.067858,
-      "gross_margin_yoy_pp": 1.54,
-      "op_margin_yoy_pp": null,
-      "n_signals": 3
-     }
-    },
-    "quality": {
-     "score": 5.0,
-     "pct": 0.5,
-     "raw": {
-      "gross_margin": 0.427533,
-      "operating_margin": null,
-      "fcf_margin": 0.087774,
-      "debt_ratio": 0.407642,
-      "n_signals": 3
-     }
-    }
-   },
-   "period_end": "2025-12-31",
-   "filed": "2026-02-24",
-   "currency": "USD",
-   "warnings": [],
    "rank": 201
   },
   {
-   "code": "DELL",
-   "name": null,
-   "exchange": "NYSE",
-   "total_score": 3.3,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 2.1,
-     "pct": 0.21,
-     "raw": {
-      "pe": 67.52,
-      "peg": 1.87,
-      "pb": null,
-      "price": 586.06
-     }
-    },
-    "growth": {
-     "score": 6.9,
-     "pct": 0.69,
-     "raw": {
-      "eps_yoy": 0.3605015673981191,
-      "revenue_yoy": 0.188046,
-      "gross_margin_yoy_pp": -2.24,
-      "op_margin_yoy_pp": 0.65,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 0.8,
-     "pct": 0.08,
-     "raw": {
-      "gross_margin": 0.199995,
-      "operating_margin": 0.071773,
-      "fcf_margin": 0.075323,
-      "debt_ratio": 1.011202,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2026-01-30",
-   "filed": "2026-03-16",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 202
-  },
-  {
    "code": "ETN",
-   "name": null,
+   "name": "Eaton Corp plc",
    "exchange": "NYSE",
    "total_score": 3.3,
    "coverage": 1.0,
@@ -9150,10 +9104,10 @@
      "score": 1.4,
      "pct": 0.14,
      "raw": {
-      "pe": 41.11,
-      "peg": 4.11,
+      "pe": 40.83,
+      "peg": 4.08,
       "pb": null,
-      "price": 429.65
+      "price": 426.69
      }
     },
     "growth": {
@@ -9185,57 +9139,11 @@
    "warnings": [
     "無總負債tag，以負債及權益合計−權益推導"
    ],
-   "rank": 203
-  },
-  {
-   "code": "MET",
-   "name": null,
-   "exchange": "NYSE",
-   "total_score": 3.3,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 7.8,
-     "pct": 0.78,
-     "raw": {
-      "pe": 20.88,
-      "peg": null,
-      "pb": null,
-      "price": 98.33
-     }
-    },
-    "growth": {
-     "score": 1.5,
-     "pct": 0.15,
-     "raw": {
-      "eps_yoy": -0.20707070707070718,
-      "revenue_yoy": 0.085904,
-      "gross_margin_yoy_pp": null,
-      "op_margin_yoy_pp": -0.49,
-      "n_signals": 3
-     }
-    },
-    "quality": {
-     "score": 0.6,
-     "pct": 0.06,
-     "raw": {
-      "gross_margin": null,
-      "operating_margin": 0.079614,
-      "fcf_margin": null,
-      "debt_ratio": 0.963179,
-      "n_signals": 2
-     }
-    }
-   },
-   "period_end": "2025-12-31",
-   "filed": "2026-02-19",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 204
+   "rank": 202
   },
   {
    "code": "MMM",
-   "name": null,
+   "name": "3M CO",
    "exchange": "NYSE",
    "total_score": 3.3,
    "coverage": 1.0,
@@ -9244,10 +9152,10 @@
      "score": 6.5,
      "pct": 0.65,
      "raw": {
-      "pe": 26.66,
+      "pe": 26.81,
       "peg": null,
       "pb": null,
-      "price": 159.96
+      "price": 160.89
      }
     },
     "growth": {
@@ -9277,23 +9185,23 @@
    "filed": "2026-02-03",
    "currency": "USD",
    "warnings": [],
-   "rank": 205
+   "rank": 203
   },
   {
    "code": "ORLY",
-   "name": null,
+   "name": "O REILLY AUTOMOTIVE INC",
    "exchange": "Nasdaq",
    "total_score": 3.3,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 3.3,
-     "pct": 0.33,
+     "score": 3.4,
+     "pct": 0.34,
      "raw": {
-      "pe": 29.11,
-      "peg": 3.03,
+      "pe": 29.18,
+      "peg": 3.04,
       "pb": null,
-      "price": 86.45
+      "price": 86.65
      }
     },
     "growth": {
@@ -9325,11 +9233,11 @@
    "warnings": [
     "無總負債tag，以負債及權益合計−權益推導"
    ],
-   "rank": 206
+   "rank": 204
   },
   {
    "code": "TM",
-   "name": null,
+   "name": "TOYOTA MOTOR CORP/",
    "exchange": "NYSE",
    "total_score": 3.3,
    "coverage": 0.67,
@@ -9364,11 +9272,11 @@
     "申報幣別 JPY，本益比口徑對不上，不算價值",
     "IFRS申報（20-F）：EPS為每普通股，非每ADR"
    ],
-   "rank": 207
+   "rank": 205
   },
   {
    "code": "AMX",
-   "name": null,
+   "name": "AMERICA MOVIL SAB DE CV/",
    "exchange": "NYSE",
    "total_score": 3.2,
    "coverage": 0.67,
@@ -9402,11 +9310,103 @@
    "warnings": [
     "EPS ≤ 0 或缺，本益比無意義"
    ],
+   "rank": 206
+  },
+  {
+   "code": "DELL",
+   "name": "Dell Technologies Inc.",
+   "exchange": "NYSE",
+   "total_score": 3.2,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 2.0,
+     "pct": 0.2,
+     "raw": {
+      "pe": 66.45,
+      "peg": 1.84,
+      "pb": null,
+      "price": 576.76
+     }
+    },
+    "growth": {
+     "score": 6.9,
+     "pct": 0.69,
+     "raw": {
+      "eps_yoy": 0.3605015673981191,
+      "revenue_yoy": 0.188046,
+      "gross_margin_yoy_pp": -2.24,
+      "op_margin_yoy_pp": 0.65,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 0.8,
+     "pct": 0.08,
+     "raw": {
+      "gross_margin": 0.199995,
+      "operating_margin": 0.071773,
+      "fcf_margin": 0.075323,
+      "debt_ratio": 1.011202,
+      "n_signals": 4
+     }
+    }
+   },
+   "period_end": "2026-01-30",
+   "filed": "2026-03-16",
+   "currency": "USD",
+   "warnings": [],
+   "rank": 207
+  },
+  {
+   "code": "MET",
+   "name": "METLIFE INC",
+   "exchange": "NYSE",
+   "total_score": 3.2,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 7.6,
+     "pct": 0.76,
+     "raw": {
+      "pe": 21.27,
+      "peg": null,
+      "pb": null,
+      "price": 100.17
+     }
+    },
+    "growth": {
+     "score": 1.5,
+     "pct": 0.15,
+     "raw": {
+      "eps_yoy": -0.20707070707070718,
+      "revenue_yoy": 0.085904,
+      "gross_margin_yoy_pp": null,
+      "op_margin_yoy_pp": -0.49,
+      "n_signals": 3
+     }
+    },
+    "quality": {
+     "score": 0.6,
+     "pct": 0.06,
+     "raw": {
+      "gross_margin": null,
+      "operating_margin": 0.079614,
+      "fcf_margin": null,
+      "debt_ratio": 0.963179,
+      "n_signals": 2
+     }
+    }
+   },
+   "period_end": "2025-12-31",
+   "filed": "2026-02-19",
+   "currency": "USD",
+   "warnings": [],
    "rank": 208
   },
   {
    "code": "NET",
-   "name": null,
+   "name": "Cloudflare, Inc.",
    "exchange": "NYSE",
    "total_score": 3.2,
    "coverage": 0.67,
@@ -9443,68 +9443,20 @@
    "rank": 209
   },
   {
-   "code": "RSG",
-   "name": null,
-   "exchange": "NYSE",
-   "total_score": 3.2,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 2.4,
-     "pct": 0.24,
-     "raw": {
-      "pe": 31.66,
-      "peg": 5.71,
-      "pb": null,
-      "price": 216.88
-     }
-    },
-    "growth": {
-     "score": 3.0,
-     "pct": 0.3,
-     "raw": {
-      "eps_yoy": 0.055469953775038494,
-      "revenue_yoy": 0.033065,
-      "gross_margin_yoy_pp": 0.15,
-      "op_margin_yoy_pp": 0.0,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 4.1,
-     "pct": 0.41,
-     "raw": {
-      "gross_margin": 0.493877,
-      "operating_margin": 0.173543,
-      "fcf_margin": 0.12661,
-      "debt_ratio": 0.657755,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2025-12-31",
-   "filed": "2026-02-18",
-   "currency": "USD",
-   "warnings": [
-    "無總負債tag，以負債及權益合計−權益推導"
-   ],
-   "rank": 210
-  },
-  {
    "code": "SNPS",
-   "name": null,
+   "name": "SYNOPSYS INC",
    "exchange": "Nasdaq",
    "total_score": 3.2,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 0.9,
-     "pct": 0.09,
+     "score": 1.0,
+     "pct": 0.1,
      "raw": {
-      "pe": 63.43,
+      "pe": 62.5,
       "peg": null,
       "pb": null,
-      "price": 509.99
+      "price": 502.51
      }
     },
     "growth": {
@@ -9534,11 +9486,11 @@
    "filed": "2025-12-22",
    "currency": "USD",
    "warnings": [],
-   "rank": 211
+   "rank": 210
   },
   {
    "code": "CRWD",
-   "name": null,
+   "name": "CrowdStrike Holdings, Inc.",
    "exchange": "Nasdaq",
    "total_score": 3.1,
    "coverage": 0.67,
@@ -9572,11 +9524,11 @@
    "warnings": [
     "EPS ≤ 0 或缺，本益比無意義"
    ],
-   "rank": 212
+   "rank": 211
   },
   {
    "code": "ITUB",
-   "name": null,
+   "name": "Itau Unibanco Holding S.A.",
    "exchange": "NYSE",
    "total_score": 3.1,
    "coverage": 0.67,
@@ -9610,11 +9562,11 @@
    "warnings": [
     "申報幣別 BRL，本益比口徑對不上，不算價值"
    ],
-   "rank": 213
+   "rank": 212
   },
   {
    "code": "LYG",
-   "name": null,
+   "name": "Lloyds Banking Group plc",
    "exchange": "NYSE",
    "total_score": 3.1,
    "coverage": 0.67,
@@ -9649,11 +9601,11 @@
     "申報幣別 GBP，本益比口徑對不上，不算價值",
     "IFRS申報（20-F）：EPS為每普通股，非每ADR"
    ],
-   "rank": 214
+   "rank": 213
   },
   {
    "code": "PBR",
-   "name": null,
+   "name": "PETROBRAS - PETROLEO BRASILEIRO SA",
    "exchange": "NYSE",
    "total_score": 3.1,
    "coverage": 0.67,
@@ -9688,23 +9640,71 @@
     "IFRS 申報 EPS 為每普通股非每 ADR，不算價值",
     "IFRS申報（20-F）：EPS為每普通股，非每ADR"
    ],
-   "rank": 215
+   "rank": 214
   },
   {
-   "code": "TEL",
-   "name": null,
+   "code": "RSG",
+   "name": "REPUBLIC SERVICES, INC.",
    "exchange": "NYSE",
    "total_score": 3.1,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 3.1,
-     "pct": 0.31,
+     "score": 2.3,
+     "pct": 0.23,
      "raw": {
-      "pe": 35.44,
+      "pe": 32.08,
+      "peg": 5.78,
+      "pb": null,
+      "price": 219.75
+     }
+    },
+    "growth": {
+     "score": 3.0,
+     "pct": 0.3,
+     "raw": {
+      "eps_yoy": 0.055469953775038494,
+      "revenue_yoy": 0.033065,
+      "gross_margin_yoy_pp": 0.15,
+      "op_margin_yoy_pp": 0.0,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 4.1,
+     "pct": 0.41,
+     "raw": {
+      "gross_margin": 0.493877,
+      "operating_margin": 0.173543,
+      "fcf_margin": 0.12661,
+      "debt_ratio": 0.657755,
+      "n_signals": 4
+     }
+    }
+   },
+   "period_end": "2025-12-31",
+   "filed": "2026-02-18",
+   "currency": "USD",
+   "warnings": [
+    "無總負債tag，以負債及權益合計−權益推導"
+   ],
+   "rank": 215
+  },
+  {
+   "code": "TEL",
+   "name": "TE Connectivity plc",
+   "exchange": "NYSE",
+   "total_score": 3.1,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 3.0,
+     "pct": 0.3,
+     "raw": {
+      "pe": 35.27,
       "peg": null,
       "pb": null,
-      "price": 218.29
+      "price": 217.28
      }
     },
     "growth": {
@@ -9738,7 +9738,7 @@
   },
   {
    "code": "DDOG",
-   "name": null,
+   "name": "Datadog, Inc.",
    "exchange": "Nasdaq",
    "total_score": 3.0,
    "coverage": 1.0,
@@ -9747,10 +9747,10 @@
      "score": 0.0,
      "pct": 0.0,
      "raw": {
-      "pe": 946.0,
+      "pe": 926.74,
       "peg": null,
       "pb": null,
-      "price": 293.26
+      "price": 287.29
      }
     },
     "growth": {
@@ -9784,7 +9784,7 @@
   },
   {
    "code": "SONY",
-   "name": null,
+   "name": "Sony Group Corp",
    "exchange": "NYSE",
    "total_score": 3.0,
    "coverage": 0.67,
@@ -9822,66 +9822,66 @@
    "rank": 218
   },
   {
-   "code": "CL",
-   "name": null,
+   "code": "COF",
+   "name": "CAPITAL ONE FINANCIAL CORP",
    "exchange": "NYSE",
    "total_score": 2.9,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 3.9,
-     "pct": 0.39,
+     "score": 1.5,
+     "pct": 0.15,
      "raw": {
-      "pe": 33.56,
+      "pe": 49.91,
       "peg": null,
       "pb": null,
-      "price": 88.27
+      "price": 201.14
      }
     },
     "growth": {
-     "score": 1.2,
-     "pct": 0.12,
+     "score": 0.5,
+     "pct": 0.05,
      "raw": {
-      "eps_yoy": -0.2507122507122507,
-      "revenue_yoy": 0.013979,
-      "gross_margin_yoy_pp": -0.39,
-      "op_margin_yoy_pp": -5.01,
-      "n_signals": 4
+      "eps_yoy": -0.6522864538395168,
+      "revenue_yoy": 0.366179,
+      "gross_margin_yoy_pp": null,
+      "op_margin_yoy_pp": null,
+      "n_signals": 2
      }
     },
     "quality": {
-     "score": 3.7,
-     "pct": 0.37,
+     "score": 6.6,
+     "pct": 0.66,
      "raw": {
-      "gross_margin": 0.60107,
-      "operating_margin": 0.162202,
-      "fcf_margin": 0.178295,
-      "debt_ratio": 0.966289,
-      "n_signals": 4
+      "gross_margin": null,
+      "operating_margin": null,
+      "fcf_margin": 0.489202,
+      "debt_ratio": 0.831126,
+      "n_signals": 2
      }
     }
    },
    "period_end": "2025-12-31",
-   "filed": "2026-02-23",
+   "filed": "2026-02-19",
    "currency": "USD",
    "warnings": [],
    "rank": 219
   },
   {
    "code": "ECL",
-   "name": null,
+   "name": "ECOLAB INC.",
    "exchange": "NYSE",
    "total_score": 2.9,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 2.6,
-     "pct": 0.26,
+     "score": 2.7,
+     "pct": 0.27,
      "raw": {
-      "pe": 38.71,
+      "pe": 39.05,
       "peg": null,
       "pb": null,
-      "price": 281.83
+      "price": 284.3
      }
     },
     "growth": {
@@ -9915,7 +9915,7 @@
   },
   {
    "code": "GM",
-   "name": null,
+   "name": "General Motors Co",
    "exchange": "NYSE",
    "total_score": 2.9,
    "coverage": 1.0,
@@ -9924,10 +9924,10 @@
      "score": 6.7,
      "pct": 0.67,
      "raw": {
-      "pe": 25.3,
+      "pe": 25.19,
       "peg": null,
       "pb": null,
-      "price": 82.73
+      "price": 82.37
      }
     },
     "growth": {
@@ -9961,7 +9961,7 @@
   },
   {
    "code": "MAR",
-   "name": null,
+   "name": "MARRIOTT INTERNATIONAL INC /MD/",
    "exchange": "Nasdaq",
    "total_score": 2.9,
    "coverage": 1.0,
@@ -9970,10 +9970,10 @@
      "score": 2.3,
      "pct": 0.23,
      "raw": {
-      "pe": 38.47,
-      "peg": 2.72,
+      "pe": 38.83,
+      "peg": 2.74,
       "pb": null,
-      "price": 365.88
+      "price": 369.3
      }
     },
     "growth": {
@@ -10008,54 +10008,54 @@
    "rank": 222
   },
   {
-   "code": "COF",
-   "name": null,
+   "code": "CL",
+   "name": "COLGATE PALMOLIVE CO",
    "exchange": "NYSE",
    "total_score": 2.8,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 1.4,
-     "pct": 0.14,
+     "score": 3.6,
+     "pct": 0.36,
      "raw": {
-      "pe": 49.44,
+      "pe": 34.21,
       "peg": null,
       "pb": null,
-      "price": 199.26
+      "price": 89.98
      }
     },
     "growth": {
-     "score": 0.5,
-     "pct": 0.05,
+     "score": 1.2,
+     "pct": 0.12,
      "raw": {
-      "eps_yoy": -0.6522864538395168,
-      "revenue_yoy": 0.366179,
-      "gross_margin_yoy_pp": null,
-      "op_margin_yoy_pp": null,
-      "n_signals": 2
+      "eps_yoy": -0.2507122507122507,
+      "revenue_yoy": 0.013979,
+      "gross_margin_yoy_pp": -0.39,
+      "op_margin_yoy_pp": -5.01,
+      "n_signals": 4
      }
     },
     "quality": {
-     "score": 6.6,
-     "pct": 0.66,
+     "score": 3.7,
+     "pct": 0.37,
      "raw": {
-      "gross_margin": null,
-      "operating_margin": null,
-      "fcf_margin": 0.489202,
-      "debt_ratio": 0.831126,
-      "n_signals": 2
+      "gross_margin": 0.60107,
+      "operating_margin": 0.162202,
+      "fcf_margin": 0.178295,
+      "debt_ratio": 0.966289,
+      "n_signals": 4
      }
     }
    },
    "period_end": "2025-12-31",
-   "filed": "2026-02-19",
+   "filed": "2026-02-23",
    "currency": "USD",
    "warnings": [],
    "rank": 223
   },
   {
    "code": "MFC",
-   "name": null,
+   "name": "MANULIFE FINANCIAL CORP",
    "exchange": "NYSE",
    "total_score": 2.7,
    "coverage": 0.67,
@@ -10094,7 +10094,7 @@
   },
   {
    "code": "PANW",
-   "name": null,
+   "name": "Palo Alto Networks Inc",
    "exchange": "Nasdaq",
    "total_score": 2.7,
    "coverage": 1.0,
@@ -10103,10 +10103,10 @@
      "score": 0.0,
      "pct": 0.0,
      "raw": {
-      "pe": 1046.95,
+      "pe": 1009.57,
       "peg": null,
       "pb": null,
-      "price": 418.78
+      "price": 403.83
      }
     },
     "growth": {
@@ -10140,7 +10140,7 @@
   },
   {
    "code": "ROST",
-   "name": null,
+   "name": "ROSS STORES, INC.",
    "exchange": "Nasdaq",
    "total_score": 2.7,
    "coverage": 1.0,
@@ -10149,10 +10149,10 @@
      "score": 1.8,
      "pct": 0.18,
      "raw": {
-      "pe": 33.65,
-      "peg": 7.33,
+      "pe": 34.17,
+      "peg": 7.45,
       "pb": null,
-      "price": 222.41
+      "price": 225.84
      }
     },
     "growth": {
@@ -10187,54 +10187,8 @@
    "rank": 226
   },
   {
-   "code": "COST",
-   "name": null,
-   "exchange": "Nasdaq",
-   "total_score": 2.6,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 1.5,
-     "pct": 0.15,
-     "raw": {
-      "pe": 45.61,
-      "peg": 3.26,
-      "pb": null,
-      "price": 946.92
-     }
-    },
-    "growth": {
-     "score": 4.6,
-     "pct": 0.46,
-     "raw": {
-      "eps_yoy": 0.14003294892915985,
-      "revenue_yoy": 0.101437,
-      "gross_margin_yoy_pp": -0.02,
-      "op_margin_yoy_pp": 0.08,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 1.6,
-     "pct": 0.16,
-     "raw": {
-      "gross_margin": 0.128235,
-      "operating_margin": 0.038545,
-      "fcf_margin": 0.030948,
-      "debt_ratio": 0.597922,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2026-08-30",
-   "filed": "2026-10-07",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 227
-  },
-  {
    "code": "HLT",
-   "name": null,
+   "name": "Hilton Worldwide Holdings Inc.",
    "exchange": "NYSE",
    "total_score": 2.6,
    "coverage": 1.0,
@@ -10243,10 +10197,10 @@
      "score": 1.2,
      "pct": 0.12,
      "raw": {
-      "pe": 53.36,
+      "pe": 53.52,
       "peg": null,
       "pb": null,
-      "price": 326.56
+      "price": 327.54
      }
     },
     "growth": {
@@ -10276,11 +10230,11 @@
    "filed": "2026-02-11",
    "currency": "USD",
    "warnings": [],
-   "rank": 228
+   "rank": 227
   },
   {
    "code": "JPM",
-   "name": null,
+   "name": "JPMORGAN CHASE & CO",
    "exchange": "NYSE",
    "total_score": 2.6,
    "coverage": 1.0,
@@ -10289,10 +10243,10 @@
      "score": 4.2,
      "pct": 0.42,
      "raw": {
-      "pe": 16.63,
-      "peg": 12.17,
+      "pe": 16.7,
+      "peg": 12.21,
       "pb": null,
-      "price": 332.99
+      "price": 334.3
      }
     },
     "growth": {
@@ -10322,23 +10276,23 @@
    "filed": "2026-02-13",
    "currency": "USD",
    "warnings": [],
-   "rank": 229
+   "rank": 228
   },
   {
    "code": "SHOP",
-   "name": null,
+   "name": "SHOPIFY INC.",
    "exchange": "Nasdaq",
    "total_score": 2.6,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 0.3,
-     "pct": 0.03,
+     "score": 0.2,
+     "pct": 0.02,
      "raw": {
-      "pe": 181.76,
+      "pe": 190.66,
       "peg": null,
       "pb": null,
-      "price": 170.85
+      "price": 179.22
      }
     },
     "growth": {
@@ -10370,7 +10324,7 @@
    "warnings": [
     "無總負債tag，以負債及權益合計−權益推導"
    ],
-   "rank": 230
+   "rank": 229
   },
   {
    "code": "UMC",
@@ -10409,11 +10363,57 @@
     "IFRS 申報 EPS 為每普通股非每 ADR，不算價值",
     "IFRS申報（20-F）：EPS為每普通股，非每ADR"
    ],
+   "rank": 230
+  },
+  {
+   "code": "COST",
+   "name": "COSTCO WHOLESALE CORP /NEW",
+   "exchange": "Nasdaq",
+   "total_score": 2.5,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 1.4,
+     "pct": 0.14,
+     "raw": {
+      "pe": 46.22,
+      "peg": 3.3,
+      "pb": null,
+      "price": 959.44
+     }
+    },
+    "growth": {
+     "score": 4.6,
+     "pct": 0.46,
+     "raw": {
+      "eps_yoy": 0.14003294892915985,
+      "revenue_yoy": 0.101437,
+      "gross_margin_yoy_pp": -0.02,
+      "op_margin_yoy_pp": 0.08,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 1.6,
+     "pct": 0.16,
+     "raw": {
+      "gross_margin": 0.128235,
+      "operating_margin": 0.038545,
+      "fcf_margin": 0.030948,
+      "debt_ratio": 0.597922,
+      "n_signals": 4
+     }
+    }
+   },
+   "period_end": "2026-08-30",
+   "filed": "2026-10-07",
+   "currency": "USD",
+   "warnings": [],
    "rank": 231
   },
   {
    "code": "LITE",
-   "name": null,
+   "name": "Lumentum Holdings Inc.",
    "exchange": "Nasdaq",
    "total_score": 2.5,
    "coverage": 0.67,
@@ -10451,7 +10451,7 @@
   },
   {
    "code": "PWR",
-   "name": null,
+   "name": "QUANTA SERVICES, INC.",
    "exchange": "NYSE",
    "total_score": 2.5,
    "coverage": 1.0,
@@ -10460,10 +10460,10 @@
      "score": 0.6,
      "pct": 0.06,
      "raw": {
-      "pe": 103.81,
-      "peg": 8.13,
+      "pe": 102.17,
+      "peg": 8.0,
       "pb": null,
-      "price": 705.94
+      "price": 694.79
      }
     },
     "growth": {
@@ -10497,19 +10497,19 @@
   },
   {
    "code": "WMT",
-   "name": null,
+   "name": "Walmart Inc.",
    "exchange": "Nasdaq",
    "total_score": 2.5,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 1.9,
-     "pct": 0.19,
+     "score": 1.8,
+     "pct": 0.18,
      "raw": {
-      "pe": 40.79,
-      "peg": 3.07,
+      "pe": 41.42,
+      "peg": 3.12,
       "pb": null,
-      "price": 111.35
+      "price": 113.08
      }
     },
     "growth": {
@@ -10545,7 +10545,7 @@
   },
   {
    "code": "BNS",
-   "name": null,
+   "name": "BANK OF NOVA SCOTIA",
    "exchange": "NYSE",
    "total_score": 2.4,
    "coverage": 0.67,
@@ -10584,19 +10584,19 @@
   },
   {
    "code": "DE",
-   "name": null,
+   "name": "DEERE & CO",
    "exchange": "NYSE",
    "total_score": 2.4,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 3.8,
-     "pct": 0.38,
+     "score": 3.6,
+     "pct": 0.36,
      "raw": {
-      "pe": 33.56,
+      "pe": 34.2,
       "peg": null,
       "pb": null,
-      "price": 620.93
+      "price": 632.61
      }
     },
     "growth": {
@@ -10629,54 +10629,8 @@
    "rank": 236
   },
   {
-   "code": "MDLZ",
-   "name": null,
-   "exchange": "Nasdaq",
-   "total_score": 2.4,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 4.5,
-     "pct": 0.45,
-     "raw": {
-      "pe": 31.96,
-      "peg": null,
-      "pb": null,
-      "price": 60.41
-     }
-    },
-    "growth": {
-     "score": 0.4,
-     "pct": 0.04,
-     "raw": {
-      "eps_yoy": -0.44736842105263164,
-      "revenue_yoy": 0.057518,
-      "gross_margin_yoy_pp": -10.75,
-      "op_margin_yoy_pp": -8.21,
-      "n_signals": 4
-     }
-    },
-    "quality": {
-     "score": 2.3,
-     "pct": 0.23,
-     "raw": {
-      "gross_margin": 0.283753,
-      "operating_margin": 0.092067,
-      "fcf_margin": 0.083945,
-      "debt_ratio": 0.637187,
-      "n_signals": 4
-     }
-    }
-   },
-   "period_end": "2025-12-31",
-   "filed": "2026-02-04",
-   "currency": "USD",
-   "warnings": [],
-   "rank": 237
-  },
-  {
    "code": "BP",
-   "name": null,
+   "name": "BP PLC",
    "exchange": "NYSE",
    "total_score": 2.3,
    "coverage": 0.67,
@@ -10710,11 +10664,11 @@
    "warnings": [
     "EPS ≤ 0 或缺，本益比無意義"
    ],
-   "rank": 238
+   "rank": 237
   },
   {
    "code": "EQNR",
-   "name": null,
+   "name": "EQUINOR ASA",
    "exchange": "NYSE",
    "total_score": 2.3,
    "coverage": 0.67,
@@ -10749,11 +10703,57 @@
     "IFRS 申報 EPS 為每普通股非每 ADR，不算價值",
     "IFRS申報（20-F）：EPS為每普通股，非每ADR"
    ],
+   "rank": 238
+  },
+  {
+   "code": "MDLZ",
+   "name": "Mondelez International, Inc.",
+   "exchange": "Nasdaq",
+   "total_score": 2.3,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 4.1,
+     "pct": 0.41,
+     "raw": {
+      "pe": 32.69,
+      "peg": null,
+      "pb": null,
+      "price": 61.79
+     }
+    },
+    "growth": {
+     "score": 0.4,
+     "pct": 0.04,
+     "raw": {
+      "eps_yoy": -0.44736842105263164,
+      "revenue_yoy": 0.057518,
+      "gross_margin_yoy_pp": -10.75,
+      "op_margin_yoy_pp": -8.21,
+      "n_signals": 4
+     }
+    },
+    "quality": {
+     "score": 2.3,
+     "pct": 0.23,
+     "raw": {
+      "gross_margin": 0.283753,
+      "operating_margin": 0.092067,
+      "fcf_margin": 0.083945,
+      "debt_ratio": 0.637187,
+      "n_signals": 4
+     }
+    }
+   },
+   "period_end": "2025-12-31",
+   "filed": "2026-02-04",
+   "currency": "USD",
+   "warnings": [],
    "rank": 239
   },
   {
    "code": "E",
-   "name": null,
+   "name": "ENI SPA",
    "exchange": "NYSE",
    "total_score": 2.2,
    "coverage": 0.67,
@@ -10792,7 +10792,7 @@
   },
   {
    "code": "BABA",
-   "name": null,
+   "name": "Alibaba Group Holding Ltd",
    "exchange": "NYSE",
    "total_score": 2.0,
    "coverage": 1.0,
@@ -10801,10 +10801,10 @@
      "score": 0.4,
      "pct": 0.04,
      "raw": {
-      "pe": 139.21,
+      "pe": 138.47,
       "peg": null,
       "pb": null,
-      "price": 111.37
+      "price": 110.78
      }
     },
     "growth": {
@@ -10838,7 +10838,7 @@
   },
   {
    "code": "CAT",
-   "name": null,
+   "name": "CATERPILLAR INC",
    "exchange": "NYSE",
    "total_score": 1.9,
    "coverage": 1.0,
@@ -10847,10 +10847,10 @@
      "score": 2.0,
      "pct": 0.2,
      "raw": {
-      "pe": 42.56,
+      "pe": 42.5,
       "peg": null,
       "pb": null,
-      "price": 800.47
+      "price": 799.37
      }
     },
     "growth": {
@@ -10883,8 +10883,54 @@
    "rank": 242
   },
   {
+   "code": "CEG",
+   "name": "Constellation Energy Corp",
+   "exchange": "Nasdaq",
+   "total_score": 1.9,
+   "coverage": 1.0,
+   "pillars": {
+    "value": {
+     "score": 2.4,
+     "pct": 0.24,
+     "raw": {
+      "pe": 39.71,
+      "peg": null,
+      "pb": null,
+      "price": 293.89
+     }
+    },
+    "growth": {
+     "score": 0.7,
+     "pct": 0.07,
+     "raw": {
+      "eps_yoy": -0.3776282590412111,
+      "revenue_yoy": 0.083376,
+      "gross_margin_yoy_pp": null,
+      "op_margin_yoy_pp": -6.38,
+      "n_signals": 3
+     }
+    },
+    "quality": {
+     "score": 2.5,
+     "pct": 0.25,
+     "raw": {
+      "gross_margin": null,
+      "operating_margin": 0.120863,
+      "fcf_margin": 0.050445,
+      "debt_ratio": 0.671033,
+      "n_signals": 3
+     }
+    }
+   },
+   "period_end": "2025-12-31",
+   "filed": "2026-02-24",
+   "currency": "USD",
+   "warnings": [],
+   "rank": 243
+  },
+  {
    "code": "MRNA",
-   "name": null,
+   "name": "Moderna, Inc.",
    "exchange": "Nasdaq",
    "total_score": 1.9,
    "coverage": 0.67,
@@ -10918,57 +10964,11 @@
    "warnings": [
     "EPS ≤ 0 或缺，本益比無意義"
    ],
-   "rank": 243
-  },
-  {
-   "code": "CEG",
-   "name": null,
-   "exchange": "Nasdaq",
-   "total_score": 1.8,
-   "coverage": 1.0,
-   "pillars": {
-    "value": {
-     "score": 2.2,
-     "pct": 0.22,
-     "raw": {
-      "pe": 40.28,
-      "peg": null,
-      "pb": null,
-      "price": 298.07
-     }
-    },
-    "growth": {
-     "score": 0.7,
-     "pct": 0.07,
-     "raw": {
-      "eps_yoy": -0.3776282590412111,
-      "revenue_yoy": 0.083376,
-      "gross_margin_yoy_pp": null,
-      "op_margin_yoy_pp": -6.38,
-      "n_signals": 3
-     }
-    },
-    "quality": {
-     "score": 2.5,
-     "pct": 0.25,
-     "raw": {
-      "gross_margin": null,
-      "operating_margin": 0.120863,
-      "fcf_margin": 0.050445,
-      "debt_ratio": 0.671033,
-      "n_signals": 3
-     }
-    }
-   },
-   "period_end": "2025-12-31",
-   "filed": "2026-02-24",
-   "currency": "USD",
-   "warnings": [],
    "rank": 244
   },
   {
    "code": "KKR",
-   "name": null,
+   "name": "KKR & Co. Inc.",
    "exchange": "NYSE",
    "total_score": 1.5,
    "coverage": 0.67,
@@ -11006,19 +11006,19 @@
   },
   {
    "code": "VLO",
-   "name": null,
+   "name": "VALERO ENERGY CORP/TX",
    "exchange": "NYSE",
-   "total_score": 1.5,
+   "total_score": 1.4,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 1.1,
-     "pct": 0.11,
+     "score": 1.0,
+     "pct": 0.1,
      "raw": {
-      "pe": 57.3,
+      "pe": 57.6,
       "peg": null,
       "pb": null,
-      "price": 433.75
+      "price": 436.0
      }
     },
     "growth": {
@@ -11054,19 +11054,19 @@
   },
   {
    "code": "CVS",
-   "name": null,
+   "name": "CVS HEALTH Corp",
    "exchange": "NYSE",
    "total_score": 1.1,
    "coverage": 1.0,
    "pillars": {
     "value": {
-     "score": 1.0,
-     "pct": 0.1,
+     "score": 0.9,
+     "pct": 0.09,
      "raw": {
-      "pe": 61.99,
+      "pe": 63.12,
       "peg": null,
       "pb": null,
-      "price": 86.16
+      "price": 87.74
      }
     },
     "growth": {
@@ -11100,7 +11100,7 @@
   },
   {
    "code": "TSLA",
-   "name": null,
+   "name": "Tesla, Inc.",
    "exchange": "Nasdaq",
    "total_score": 1.1,
    "coverage": 1.0,
@@ -11109,10 +11109,10 @@
      "score": 0.1,
      "pct": 0.01,
      "raw": {
-      "pe": 354.35,
+      "pe": 350.03,
       "peg": null,
       "pb": null,
-      "price": 382.7
+      "price": 378.03
      }
     },
     "growth": {
@@ -11146,7 +11146,7 @@
   },
   {
    "code": "APD",
-   "name": null,
+   "name": "Air Products & Chemicals, Inc.",
    "exchange": "NYSE",
    "total_score": 0.8,
    "coverage": 0.67,
@@ -11184,7 +11184,7 @@
   },
   {
    "code": "HPE",
-   "name": null,
+   "name": "Hewlett Packard Enterprise Co",
    "exchange": "NYSE",
    "total_score": 0.8,
    "coverage": 0.67,
@@ -11223,7 +11223,7 @@
   },
   {
    "code": "SBUX",
-   "name": null,
+   "name": "STARBUCKS CORP",
    "exchange": "Nasdaq",
    "total_score": 0.8,
    "coverage": 1.0,
@@ -11232,10 +11232,10 @@
      "score": 1.1,
      "pct": 0.11,
      "raw": {
-      "pe": 55.67,
+      "pe": 56.62,
       "peg": null,
       "pb": null,
-      "price": 90.75
+      "price": 92.29
      }
     },
     "growth": {
@@ -11269,7 +11269,7 @@
   },
   {
    "code": "BE",
-   "name": null,
+   "name": "Bloom Energy Corp",
    "exchange": "NYSE",
    "total_score": 0.5,
    "coverage": 0.67,
@@ -11307,7 +11307,7 @@
   },
   {
    "code": "DB",
-   "name": null,
+   "name": "DEUTSCHE BANK AKTIENGESELLSCHAFT",
    "exchange": "NYSE",
    "total_score": 5.8,
    "coverage": 0.33,

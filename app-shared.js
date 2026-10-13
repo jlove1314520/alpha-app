@@ -235,6 +235,7 @@
   }
   function onPicksToggleChange(){
     const mkt=MKT_STATE.picks;
+    const scr=document.getElementById('scr-picks');if(scr)scr.classList.toggle('mkt-nontw',mkt!=='TW');  // 先.八十一-12
     document.getElementById('picks-list-card').style.display=mkt==='TW'?'':'none';
     document.getElementById('picks-chips').classList.toggle('off-mkt',mkt!=='TW');  // 先.八十-4：切 class，不設 style.display
     document.getElementById('picks-us-panel').style.display=mkt==='US'?'':'none';

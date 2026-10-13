@@ -238,7 +238,7 @@ def main() -> int:
         coverage = round(len(pillars) / len(PILLARS), 2)
         total = round(sum(p["score"] for p in pillars.values()) / len(pillars), 1) if pillars else None
         stocks.append({
-            "code": t, "name": (sic.get(t) or {}).get("entity_name"), "exchange": f.get("exchange"),
+            "code": t, "name": (sic.get(t) or {}).get("entity_name") or f.get("name"), "exchange": f.get("exchange"),
             "total_score": total, "coverage": coverage, "pillars": pillars,
             "period_end": f.get("period_end"), "filed": f.get("filed"), "currency": f.get("currency"),
             "warnings": warns[t] + list(f.get("warnings", [])),
