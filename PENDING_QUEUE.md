@@ -19344,3 +19344,4 @@ C. 驗收
 - [ ] **先.八十一-38 （補件，來源：BACKLOG「尚未驗收／已知限制」979 檔缺 Q1 基準的財報季度）查現況：官方累計數差分（先.七十 系列）上線後還有幾檔缺單季、缺哪幾季、原因分類；能用既有官方檔補的補上，不能補的在個股頁誠實標示，附前後檔數**（互動視窗執行）
 - [ ] **先.八十一-39 （補件，來源：BACKLOG「尚未驗收／已知限制」TPEx 價量端點偶發 SSL 憑證錯誤）查近 30 天排程 log 的 TPEx CERTIFICATE_VERIFY_FAILED 次數與根因；若同央行／海關「中繼 CA 缺 SKI」，比照只關 VERIFY_X509_STRICT（不得 verify=False）並附驗證**（互動視窗執行）
 - [x] **先.八十一-40 （補件，來源：BACKLOG「尚未驗收／已知限制」財報公布時段推估失敗）查 data/earnings_calendar.json 在 GitHub Actions 上 estimated_session 是否仍全為 unknown；若 Actions 正常、只是本機 DNS 問題，就在 BACKLOG 結案並在 App 說明，若仍失敗則查因**（互動視窗執行）〔雲端 earnings_calendar 6 檔 post 5／pre 1／unknown 0，只是本機 DNS 問題；BACKLOG 結案〕
+- [ ] **先.八十一-41 （補件，來源：BACKLOG「尚未驗收／已知限制」earnings_growth 的 PER 反推 EPS 備援）先查證現況：官方季報累計差分上線後 earnings_growth 缺值檔數多少、是否仍需要 PER 反推；仍需要才評估（資料正確性，不調因子權重、不登記新試驗）**（互動視窗執行）
