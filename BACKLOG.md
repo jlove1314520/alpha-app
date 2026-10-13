@@ -153,7 +153,7 @@ un-alpha-live-server-cycle.ps1`
    `AlphaLiveServerBoot`（/SC ONSTART）需要系統管理員才能建，指令已交總司令；沒建也沒關係，
    每5分鐘那條開機後最多5分鐘會把它拉起來。cloudflared服務已由總司令裝好（Running/Automatic）、
    防火牆規則「Alpha Live 8001」（Private）已加。
-8. **美股IBKR 1分K**：需先查證`reqHistoricalData()`與`ibkr_quotes.py`現有短命連線是否
+8. ~~**美股IBKR 1分K**~~ **【不做，2026-10-14 總司令裁示 先.九十一-3】只拿得到延遲約 15 分鐘的資料（paper 帳戶實測，見 docs/IBKR_1MIN_KBAR_FEASIBILITY.md），對盤中走勢線沒有意義；個股頁維持誠實 501。** 原文：需先查證`reqHistoricalData()`與`ibkr_quotes.py`現有短命連線是否
    衝突（或改成常駐訂閱後用tick聚合，跟台股同一套），確認前維持501。
 9. **籌碼分頁免費層第二單位（需提案核准）**：(a)股權分散／千張大戶持股比例週變化
    ——FinMind `TaiwanStockHoldingSharesPer`（週資料），建議新增`.github/scripts/
