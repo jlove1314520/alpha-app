@@ -74,6 +74,7 @@ QUEUE = ROOT / "PENDING_QUEUE.md"
 STATE = ROOT / "research" / "data" / "dev_queue_state.json"
 PROMPT_OUT = ROOT / "research" / "DEV_QUEUE_PROMPT.txt"
 TZ = timezone(timedelta(hours=8))
+WRAP_UP_MIN = 45  # 先.九十三-3：每輪 45 分鐘自行存檔收尾（外層 run-dev-queue-cycle.ps1 60 分鐘強制中止）
 MAX_CONSECUTIVE_FAILS = 2
 
 sys.path.insert(0, str(ROOT / "research"))
@@ -963,8 +964,20 @@ def build_prompt() -> int:
         block_rule = ("它會把那一項標成阻塞並寫進 PENDING_QUEUE，然後**換下一項繼續做，不是結束整輪**\n"
                       "（除非所有項目都變成BLOCKED或已無`- [ ]`項目可做）。")
 
+    # 先.九十三-3（2026-10-14 總司令裁示）：wrapper 60 分鐘會強制砍掉（10/14 03:01、06:31 兩輪 TIMEOUT），
+    # 長時間抓取（SIC、Tiingo 等）一律在開工後 45 分鐘自行存檔收尾，下一輪續跑。
+    _t0 = datetime.now(TZ)
+    _wrap_at = (_t0 + timedelta(minutes=WRAP_UP_MIN)).strftime("%H:%M")
     prompt = f"""全程繁體中文。你是 Alpha 專案的開發佇列自走輪次（無人值守，沒有人在旁邊看）。
 這一輪的 cycle_id 是 `{cycle_id}`（這是實際值，不是佔位符，直接照抄）。
+
+## 時間上限（先.九十三-3）
+本輪 {_t0.strftime("%H:%M")} 開工，**{_wrap_at}（{WRAP_UP_MIN} 分鐘）一到就收尾**——外層 60 分鐘會強制砍掉，砍掉的話沒存的進度全丟。
+長時間抓取（SIC、Tiingo、SEC、FinMind 分批等）：
+1. 開工就用 `date` 記下時間；抓取迴圈每批之間檢查時間，到 {_wrap_at} 就停止送新請求；
+2. 已抓到的一律寫進快取／輸出檔，並記下斷點（下一批從哪裡開始）；
+3. commit＋push 已完成的部分，PENDING_QUEUE 那一項**維持 `- [ ]`**，補記「第 N 批完成、尚餘多少、下一輪從哪裡續」；
+4. 不要為了趕時間跳過冒煙或驗證；時間不夠就把驗證留到下一輪，照實寫「未驗證」。
 
 ## 這一輪要做的事
 `C:\\alpha\\alpha-app\\PENDING_QUEUE.md` 頂端「執行順序（權威清單）」取到的下一項：
