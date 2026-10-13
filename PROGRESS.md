@@ -7,7 +7,9 @@
 
 ## 2026-10-13 23:30（互動視窗）先.八十九-補-3 Telegram 視窗亂碼修正
 
-- 亂碼原因：Python 輸出 UTF-8，PowerShell 視窗用 Big5（cp950）解碼。\n- 修法：`research/telegram_reader.py` 啟動時 stdout 與 stderr 都改 UTF-8（errors=replace）；`setup_telegram.ps1` 加 `chcp 65001`＋`[Console]::OutputEncoding`＋`$OutputEncoding` 為 UTF-8；排程用的 `run-telegram-reader.ps1` 補 `$OutputEncoding`（該檔維持純英文註解，因為沒有 BOM）。\n- 重跑 --login：視窗與紀錄都正常顯示「登入成功，目標群組可讀取：Shioaji（ID 已寫入 .env）」。
+- 亂碼原因：Python 輸出 UTF-8，PowerShell 視窗用 Big5（cp950）解碼。
+- 修法：`research/telegram_reader.py` 啟動時 stdout 與 stderr 都改 UTF-8（errors=replace）；`setup_telegram.ps1` 加 `chcp 65001`＋`[Console]::OutputEncoding`＋`$OutputEncoding` 為 UTF-8；排程用的 `run-telegram-reader.ps1` 補 `$OutputEncoding`（該檔維持純英文註解，因為沒有 BOM）。
+- 重跑 --login：視窗與紀錄都正常顯示「登入成功，目標群組可讀取：Shioaji（ID 已寫入 .env）」。
 
 ## 2026-10-13 23:30（互動視窗）先.八十九-補-2 只讀擷取確認 OK
 
@@ -23,7 +25,10 @@
 
 ## 2026-10-13 23:30（互動視窗）先.八十九-4 只讀擷取實測 OK（11 則）
 
-- 視窗顯示「登入成功，目標群組可讀取：Shioaji（ID 已寫入 .env）」。\n- 手動只讀擷取一次：心跳 `OK`、新訊息 11 則，落地在 `C:\alpha\telegram_export\sinopac_api\2026-10-13.jsonl`（repo 外）。\n- 寫入防線：擷取過程沒有觸發 ReadOnlyViolation；`selftest_telegram_reader.py` 全過（含「只讀包裝擋寫入方法」「設定模式也擋寫入方法」）。\n- 註：第一次手動跑用錯 Python（沒有 telethon，ModuleNotFoundError），改用排程同一個 WindowsApps python 後成功；那次失敗心跳 23:28 ERROR 已被 23:29 OK 接上。
+- 視窗顯示「登入成功，目標群組可讀取：Shioaji（ID 已寫入 .env）」。
+- 手動只讀擷取一次：心跳 `OK`、新訊息 11 則，落地在 `C:\alpha\telegram_export\sinopac_api\2026-10-13.jsonl`（repo 外）。
+- 寫入防線：擷取過程沒有觸發 ReadOnlyViolation；`selftest_telegram_reader.py` 全過（含「只讀包裝擋寫入方法」「設定模式也擋寫入方法」）。
+- 註：第一次手動跑用錯 Python（沒有 telethon，ModuleNotFoundError），改用排程同一個 WindowsApps python 後成功；那次失敗心跳 23:28 ERROR 已被 23:29 OK 接上。
 
 ## 2026-10-13 23:30（互動視窗）先.八十九-3 邀請連結解析成功、群組 ID 寫入
 
