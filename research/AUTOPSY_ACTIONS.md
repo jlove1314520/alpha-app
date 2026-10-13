@@ -87,3 +87,15 @@
 - **三來源查證**：①官方網站（上述下載頁＋付費價目表 `交易歷史資料價格及提供時間_adj.odt`：選擇權成交簡檔自 2001/12/24）；②官方 API 文件 `openapi.taifex.com.tw/swagger.json`：`/DailyMarketReportOpt` 不能帶日期、無 VIX 端點 → 沒有歷史 API；③GitHub：約 10 個專案實際在用 `optDataDown`（例 ZivHong/twse_taifex_crawler、chunkai1312/node-twstock）；④供應商：FinMind 文件寫 TaiwanOptionDaily 自 2001-12-01。
 - 期交所共約 12 次請求、間隔 ≥3 秒；下載檔只在暫存區，未進 repo。
 - **PREREG 前待辦**：①判準照原 `vrp_gate.py` 寫死；②只用月合約（2012 起有週選擇權，要排除）；③2002–2005 流動性薄，要先驗每天「最接近價平」履約價買賣兩邊都有成交（尚未驗）；④加權指數要補 2002 起（原程式 2010 才開始；TWSE MI_5MINS_HIST 可到 1999）；⑤天條一 MDD 檢查。
+
+### B3 第一步結果（先.八十三-3c，2026-10-13）
+- **結論：湊不到 30 族，原子.五B 維持死亡。**這是資料源的結構上限，不是快取不夠。只讀本機快取，FinMind 0 次請求。
+- 族的定義（`research/ATOM_FIN_IC_MAP_SPEC.md` 第 6 節；實作 `fin_atom_ic_map_aggregate.py::clusters`）：每個表達式在各 snapshot 的 IC 串成序列，兩兩重疊 ≥8 期且 |r|>0.7 即連成同一族（連通成分）；判定只算 K=5（五個危機窗都有值，含 2011 歐債窗）的族。需約 30 族的理由見 `GRAVEYARD_AUTOPSY.md`：假設真實同號率 25%、對照 6.25%、p<0.01，4 族檢定力只有 5%，約 30 族才約 80%。
+- 能湊出的族數：
+  - 通道B 損益表（Tier A）45 個表達式全算也只有 15–16 族；K=5 只有 4 族（`fin_atom_ic_map_b_family.json`）。
+  - 併入原子.五 depth-1 損益表空間（102 個表達式）：不限 K 也只有 23–24 族；限 K=5 為 9–10 族。
+  - 資產負債表／現金流（Tier B）進不了 2011 窗：本機 2,271 檔非空資產負債表最早都是 2012；現金流 1,759 檔只有 8 檔 2010 起 → 結構上 K≤4，依規格不能與 K=5 混算。
+  - FinMind 損益表有 2010 年以前歷史（本機 549 檔，337 檔最早期別在 2008-07 以前），但只會把現有表達式的 K 補到 5，族數上限仍是 23–24。
+  - `net_income`／`shares` 為 IFRS 定義，2013 年才有；要接舊制數字須另案裁示。
+- 要湊到 30 族只能另立新搜尋空間（例：舊制與 IFRS 都有的營業費用、所得稅等科目），那是新假設、要另寫規格，不屬於原子.五B。
+- 證據：`research/FIN_ATOM_CHANNEL_B.md`、`research/ATOM_FIN_CHANNEL_B_SPEC.md`、`research/fin_atom_ic_map_b_family.json`、`research/fin_atom_ic_snapshots_A_h{20,60}{,_chB}.parquet`、`research/data/raw/TaiwanStock{FinancialStatements,BalanceSheet,CashFlowsStatement}__*.parquet`（3,477／2,626／1,976 檔；科目 58／128／49 種）。
