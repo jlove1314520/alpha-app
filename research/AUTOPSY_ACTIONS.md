@@ -99,3 +99,20 @@
   - `net_income`／`shares` 為 IFRS 定義，2013 年才有；要接舊制數字須另案裁示。
 - 要湊到 30 族只能另立新搜尋空間（例：舊制與 IFRS 都有的營業費用、所得稅等科目），那是新假設、要另寫規格，不屬於原子.五B。
 - 證據：`research/FIN_ATOM_CHANNEL_B.md`、`research/ATOM_FIN_CHANNEL_B_SPEC.md`、`research/fin_atom_ic_map_b_family.json`、`research/fin_atom_ic_snapshots_A_h{20,60}{,_chB}.parquet`、`research/data/raw/TaiwanStock{FinancialStatements,BalanceSheet,CashFlowsStatement}__*.parquet`（3,477／2,626／1,976 檔；科目 58／128／49 種）。
+
+### A 類先修診斷（先.八十三-2a／2b，2026-10-13，只讀、未改程式）
+
+**2a core_tilt #281／#283**
+- 抽樣方式：`core_tilt_backtest.py` 用 `factor_ic.sample_universe_ids(300)`（seed 20260822，從 `universe.universe()` 3,196 檔抽 300）；#283 另外硬塞 7 檔 Wayback 代碼，共 306 檔。
+- 只有 89／146 檔有市值的原因：市值用 PBR×權益估，必須本機同時有 PER 與資產負債表快取；PER 快取是 9/19 邊跑邊抓（19:10 前 143 檔、當晚 206 檔、現在 272 檔）→ 89／146 只是「跑的當下快取抓到哪」，不是資料上限。
+- **矛盾的答案：台積電在樣本裡。**用 9/18 版與現行版 `universe.py` 各重抽一次，2330 都在 300 檔內（同時抽到的大型股只有 3711、2002）；#281 自己寫了台積電市值 16.4 兆。#283「可能不在樣本」是錯的。
+- **新發現：#283 還有更深的計算錯誤。**#283 的 TE（18.28／22.43／13.83／25.29，全期 20.47%）與 0050 自己的年化波動（18.23／22.42／13.80／25.33，20.47%）幾乎相同；相關係數 0.01、9 組參數 TE 全是 0.762%、beta 0.0009 → 重建組合淨值幾乎是平線，等於沒有持股。#281 的 51% 是在「無限往後補價格」bug 修好之前跑的，也受污染。
+- 修法（未做）：①新寫 `research/pit_mktcap_rank.py`：`pit.balance_sheet_pit` 的 `OrdinaryShare`（法定公告日）÷10×未還原收盤，宇宙用含下市股的普通股、只留上市股（上市日看 `research/data/twse_listing_dates.json`）；②補缺口：約 17% 資產負債表快取是空檔、面額非 10 元者要修正（`TaiwanStockParValueChange` 快取只 11 檔）、季間增減資造成股數落後；③驗證腳本：先確認淨值曲線有在動，再對 2024 年以前還原 0050 檢查台積電權重約 30～50%、相關 ≥0.98、TE ≤1%。
+- 不能用：`data/listed_universe.json` 只有今天快照；PER 路線只有 692 檔普通股有快取。
+- 工作量約 1～1.5 天，要向 FinMind 補抓數百檔資產負債表（受每小時上限，約 1～2 小時）。風險：0050 按流通股數加權，用總市值重建可能永遠到不了 TE ≤1%。
+
+**2b #22 四濾網合取**
+- 遺失腳本的 .pyc：`research/__pycache__/composite_quality_revaccel_inst_lowvol_sanity.cpython-313.pyc`（原始碼時間 2026-09-03 03:52）。讀出的定義：品質 `roe_level`>0 且 `cfo`>0；營收加速 `f_rev_accel`>0；法人連買 `f_inst_streak_days`≥3；低波動 `f_low_vol` 高於當期中位數；五個都有值才算有效；sanity 判準「≥30% 快照至少一檔候選」。頂層 `from pit import cash_flow_pit`（當時有一份沒進 git 的 pit 版本）。
+- 根因實證：原輸出 `research/data/composite_sanity_snapshots.csv` 2015–2021 每期 n_valid 都是 0；但 9/3 當天抓的 277 個現金流快取多從 2012 年就有資料、營收與法人快取 2010 起 → **當年交集為 0 不是缺資料，是那份找不回來的腳本或 pit 版本有 bug**，具體哪個因子已無法確定。
+- 現在覆蓋（100 檔樣本、78 檔可用、TRAIN 2015–2020 共 73 期、載入時擋網路、沒讀 2020 年以後）：各因子每期 37～60 檔、兩兩交集 41.1～49.7 檔、五因子全有值每期 35.2（2015）～46.4（2020）檔，73 期全部 >0 → **交集已經不是 0**。
+- 修法（未做）：照上述定義寫 `composite_quality_revaccel_inst_lowvol_sanity_v2.py`，先產出 TRAIN 覆蓋表，再決定是否寫 PREREG（重跑 sanity 屬試驗的一關，要在 PREREG 之後）。約半天、無阻塞。墓園條目本身記錄「四個濾網近似獨立、沒有協同效果」的反證 → 建議優先度放低。
