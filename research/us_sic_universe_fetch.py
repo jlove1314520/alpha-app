@@ -47,6 +47,11 @@ FIN_LO, FIN_HI = 6000, 6799
 SPAC_SIC = 6770
 
 
+# 先.八十三-3a-3：--max-minutes N 時間到就不再發新請求（已落地的快取照常讀），
+# 讓約 28,000 次的補抓可以分好幾輪跑完，不會撞 DevQueue 的 60 分鐘逾時。
+DEADLINE: list[float | None] = [None]
+
+
 def _one(cik: int) -> tuple[int, dict]:
     p = SUB / f"CIK{cik:010d}.json"
     if p.exists():
@@ -54,6 +59,9 @@ def _one(cik: int) -> tuple[int, dict]:
             return cik, json.loads(p.read_text(encoding="utf-8"))
         except Exception:  # noqa: BLE001
             pass
+    import time
+    if DEADLINE[0] is not None and time.time() > DEADLINE[0]:
+        return cik, {"_skipped": "deadline"}
     U._acquire_slot()
     import requests
     try:
@@ -160,9 +168,19 @@ def main() -> int:
             sicmap = json.loads(OUT.read_text(encoding="utf-8")).get("sic", {})
         except Exception:  # noqa: BLE001
             sicmap = {}
+    if "--max-minutes" in args:
+        import time
+        DEADLINE[0] = time.time() + 60 * float(args[args.index("--max-minutes") + 1])
     if "--fetch" in args:
         print(f"=== 抓 SIC／ticker：{len(ciks)} 個 CIK ===", flush=True)
-        sicmap = fetch_all(ciks)
+        fetched = fetch_all(ciks)
+        skipped = sum(1 for v in fetched.values() if v.get("_skipped"))
+        if skipped:
+            # 沒抓完就不覆寫總檔：半套的 SIC 檔會讓每月表把沒抓到的公司當成「SIC 未知」以外的狀態。
+            print(f"時間到，尚有 {skipped} 個 CIK 未抓（已抓的都在 {SUB.name}/ 快取，下一輪續跑）；"
+                  f"本輪不覆寫 {OUT.name}", flush=True)
+            return 0
+        sicmap = fetched
         OUT.write_text(json.dumps({"generated_at": datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds"),
                                    "source": "SEC submissions 端點（sic/tickers/formerNames/exchanges）",
                                    "n": len(sicmap), "sic": sicmap}, ensure_ascii=False), encoding="utf-8")
