@@ -53,7 +53,12 @@
            /\.json$/.test(u.pathname)&&(/\/data\//.test(u.pathname)||/\/scores[^/]*\.json$/.test(u.pathname))){
           const key=u.pathname,hit=MEM.get(key);
           if(hit&&Date.now()-hit.at<TTL)return hit.p.then(r=>r.clone());
-          const p=nativeFetch(input,init).then(r=>{if(!r.ok)MEM.delete(key);return r});
+          const p=nativeFetch(input,init).then(r=>{if(!r.ok)MEM.delete(key);
+            // 先.八十一-8：SW 先回上次存的資料時會帶 x-alpha-from-cache；記下來讓畫面標「上次資料」
+            try{if(r.headers.get('x-alpha-from-cache')==='1'){const at=r.headers.get('x-alpha-cached-at')||'';
+              const S=window.__ALPHA_STALE||(window.__ALPHA_STALE={n:0,at:''});S.n++;if(at&&(!S.at||at<S.at))S.at=at;
+              window.dispatchEvent(new Event('alpha-stale-data'))}}catch(e2){console.warn('[fetchMemCache:stale]',e2)}
+            return r});
           p.catch(()=>MEM.delete(key));
           MEM.set(key,{at:Date.now(),p});
           setTimeout(()=>{const h=MEM.get(key);if(h&&h.p===p)MEM.delete(key)},TTL+1000);
@@ -62,7 +67,22 @@
       }catch(e){console.warn('[fetchMemCache] 包裝失敗，改用原生 fetch',e)}
       return nativeFetch(input,init);
     };
+    // 先.八十一-8：SW 背景抓到新版資料 → 清掉那條路徑的 60 秒記憶體快取，1.2 秒後把目前分頁重畫一次（多個檔案一起更新只重畫一次）
+    window.__alphaMemDrop=k=>MEM.delete(k);
   })();
+  let _uiDataRefreshT=null;
+  try{
+    if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',ev=>{
+      try{
+        const d=ev.data||{};if(d.type!=='DATA_UPDATED')return;
+        window.__alphaMemDrop&&window.__alphaMemDrop(d.path);
+        clearTimeout(_uiDataRefreshT);
+        _uiDataRefreshT=setTimeout(()=>{window.__ALPHA_STALE=null;window.dispatchEvent(new Event('alpha-stale-data'));if(typeof uiRefreshCurrent==='function')uiRefreshCurrent()},1200);
+      }catch(e){console.warn('[sw DATA_UPDATED]',e)}
+    });
+    // addEventListener 不會自動開始收訊息（要設 onmessage 或呼叫 startMessages），否則 DATA_UPDATED 會一直排隊收不到
+    if('serviceWorker' in navigator&&navigator.serviceWorker.startMessages)navigator.serviceWorker.startMessages();
+  }catch(e){console.warn('[sw message:setup]',e)}
 
   // ══════ 常備.開發-20 丙案（2026-10-11 先.六十五）：分頁程式延遲載入 ══════
   // app.js 只留首頁＋導覽＋共用；其餘分頁程式拆到 app-<頁>.js，點到該頁才載入（不引入建置步驟，
@@ -264,6 +284,29 @@
   }
   function _safeAsync(label,fn){Promise.resolve().then(fn).catch(e=>{console.warn('['+label+']',e);recordGlobalError(label,e)})}
   let CURRENT_TAB='home'; // 2026-08-28新增，供pull-to-refresh判斷目前在哪一頁該重整什麼
+  // 先.八十一-8：背景更新後重畫目前分頁（同 go() 的載入動作，但不捲回頂端、不切分頁）
+  function uiRefreshCurrent(){
+    const name=CURRENT_TAB;
+    if(name==='home')_safeAsync('hydrateHome',hydrateHome);
+    else if(name==='market')_safeAsync('hydrateMarket',hydrateMarket);
+    else if(name==='picks')_safeAsync('hydratePicks',hydratePicks);
+    else if(name==='trade')_safeSync('onTradeInit',onTradeInit);
+    else if(name==='settings')_safeSync('hydrateSettings',hydrateSettings);
+  }
+  // 「上次資料」提示：任何資料是 SW 先回的舊存檔時，首頁狀態列下方顯示一行（含存檔時間）；背景更新完成後自動收起
+  function uiRenderStaleLine(){
+    try{
+      const strip=document.getElementById('home-status-strip');if(!strip)return;
+      let el=document.getElementById('data-stale-line');
+      if(!el){el=document.createElement('div');el.id='data-stale-line';el.className='note';el.setAttribute('data-ui-keep','');el.style.cssText='margin:4px 2px 0;font-size:11px;color:var(--ink-3)';strip.insertAdjacentElement('afterend',el)}
+      const S=window.__ALPHA_STALE;
+      if(!S||!S.n){el.hidden=true;return}
+      const t=S.at?new Date(S.at):null;
+      el.hidden=false;
+      el.textContent='先顯示上次存的資料'+(t&&!isNaN(t)?'（'+fmtTzMMDDHHMM(t,'Asia/Taipei')+' 存）':'')+'，背景更新中；各卡片日期以卡上標示為準';
+    }catch(e){console.warn('[uiRenderStaleLine]',e)}
+  }
+  window.addEventListener('alpha-stale-data',()=>uiRenderStaleLine());
   function go(name){
     CURRENT_TAB=name;
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -2226,6 +2269,7 @@
     if(txfSrc.fut&&txfSrc.fut.last!=null)capsules.push(idxCapsuleHtml('台指期近月',txfSrc.srcLabel||'TAIFEX',{close:txfSrc.fut.last,change_pct:txfSrc.fut.change_pct,liveKey:'TXF_NEAR',sparkline:((tw.tx_futures||{}).sparkline||[]).filter(v=>v!=null)}));
     usIdx.forEach(r=>{if(r.item)capsules.push(idxCapsuleHtml(r.label,r.srcLabel,r.item))});
     el.innerHTML=capsules.join('')||'<div class="note">查無資料</div>';
+    if(capsules.length&&window.__ALPHA_DATA_MS==null)window.__ALPHA_DATA_MS=performance.now();  // 先.八十一-8：第一次有資料數字出現的時間（量測用）
     // 2026-09-04（四修.四）：加權/台指期走Shioaji即時時，時間戳寫即時時間；否則明標收盤日
     const liveTw=(taiexSrc.srcLabel||'').startsWith('Shioaji')||!!txfSrc.srcLabel;
     document.getElementById('home-idx-datatime').textContent=liveTw
@@ -3894,7 +3938,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-13.0845';
+  const APP_VERSION='2026-10-13.0859';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

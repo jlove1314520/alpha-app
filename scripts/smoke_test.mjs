@@ -3733,6 +3733,45 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { lzErrs.push(`測試本身出錯：${e.message || e}`); }
   record("114. 首頁下方卡片捲到才載（news／strategy_history 捲動前不抓）、首次載入 sw.js 不重複（先.八十一-7）", lzErrs.length === 0, lzErrs.join("; "));
 
+  // 115.【2026-10-13 先.八十一-8 裁示④】SW 對 data/*.json「先顯示上次資料、背景更新」：第二次開時 data 回應帶 x-alpha-from-cache、
+  // 首頁顯示「先顯示上次存的資料（… 存），背景更新中」；cache:'no-store' 照舊直通網路（不帶標頭）；price_history 不進快取。
+  const swrErrs = [];
+  try {
+    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 } });
+    try {
+      const p1 = await ctx.newPage();
+      await p1.goto(`${baseUrl}/index.html`, { waitUntil: "networkidle", timeout: 30000 });
+      await p1.waitForFunction(() => !!(navigator.serviceWorker && navigator.serviceWorker.controller), null, { timeout: 20000 }).catch(() => null);
+      await p1.evaluate(async () => { await fetch("data/market_tw.json?t=1"); await new Promise(r => setTimeout(r, 800)); });
+      await p1.close();
+      // 第一次開時首頁最早的資料請求發生在 SW 接管前、不會被存；第二次開把它們全部存起來，第三次開起才全面先回存檔
+      const p1b = await ctx.newPage();
+      await p1b.goto(`${baseUrl}/index.html`, { waitUntil: "networkidle", timeout: 30000 });
+      await p1b.waitForTimeout(800);
+      await p1b.close();
+      const p2 = await ctx.newPage();
+      await p2.goto(`${baseUrl}/index.html`, { waitUntil: "domcontentloaded", timeout: 30000 });
+      await p2.waitForFunction(() => !!(navigator.serviceWorker && navigator.serviceWorker.controller), null, { timeout: 20000 }).catch(() => null);
+      const r = await p2.evaluate(async () => {
+        const a = await fetch("data/market_tw.json?t=" + Date.now(), { cache: "default" });
+        const b = await fetch("data/market_tw.json?t=" + Date.now(), { cache: "no-store" });
+        await new Promise(res => setTimeout(res, 600));
+        const line = document.getElementById("data-stale-line");
+        const keys = await caches.keys();
+        const dc = keys.includes("alpha-data-v1") ? await caches.open("alpha-data-v1") : null;
+        const ph = dc ? !!(await dc.match(location.origin + location.pathname.replace(/index\.html$/, "") + "data/price_history.json")) : false;
+        return { a: a.headers.get("x-alpha-from-cache"), aAt: a.headers.get("x-alpha-cached-at"), b: b.headers.get("x-alpha-from-cache"),
+                 line: line && !line.hidden ? line.textContent : "", keys, ph };
+      });
+      if (r.a !== "1" || !r.aAt) swrErrs.push(`第二次開的資料回應應帶 x-alpha-from-cache 與存檔時間：${r.a}／${r.aAt}`);
+      if (r.b) swrErrs.push("cache:'no-store' 不該走存檔");
+      if (!/先顯示上次存的資料/.test(r.line)) swrErrs.push(`首頁缺「先顯示上次存的資料」提示：${r.line}`);
+      if (!r.keys.includes("alpha-data-v1")) swrErrs.push("沒有資料快取 alpha-data-v1");
+      if (r.ph) swrErrs.push("price_history.json 不該進資料快取");
+    } finally { await ctx.close(); }
+  } catch (e) { swrErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("115. SW 資料檔先顯示上次存檔、背景更新：回應帶存檔標記、首頁顯示「上次資料」提示、no-store 直通網路（先.八十一-8）", swrErrs.length === 0, swrErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -3761,7 +3800,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

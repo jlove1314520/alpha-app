@@ -42,6 +42,9 @@ export async function measureSecondOpen(browser, baseUrl, { settleMs = 10000 } =
       const nav = performance.getEntriesByType("navigation")[0] || {};
       return { boot: window.__ALPHA_BOOT_MS, dcl: nav.domContentLoadedEventEnd || null, controlled: !!navigator.serviceWorker.controller };
     });
+    // 先.八十一-8：第二次開到「大盤一眼」出現第一個資料數字的時間（SW 先回上次存的資料）
+    await p2.waitForFunction(() => typeof window.__ALPHA_DATA_MS === "number", null, { timeout: 30000 }).catch(() => null);
+    const dataInfo = await p2.evaluate(() => ({ ms: window.__ALPHA_DATA_MS == null ? null : Math.round(window.__ALPHA_DATA_MS), stale: (window.__ALPHA_STALE || {}).n || 0 }));
     await p2.waitForTimeout(settleMs);
     // 實際打到網路的 data/*.json（SW 不攔截資料；記憶體快取命中的根本不會發出請求）
     const counts = {};
@@ -52,7 +55,8 @@ export async function measureSecondOpen(browser, baseUrl, { settleMs = 10000 } =
     const dups = Object.entries(counts).filter(([, n]) => n > 1);
     await p2.close();
     return { firstBootMs: firstBoot && Math.round(firstBoot), shellCached: cached, secondBootMs: Math.round(t.boot), secondDclMs: t.dcl && Math.round(t.dcl),
-             controlled: t.controlled, dataRequests: Object.values(counts).reduce((a, b) => a + b, 0), dups };
+             controlled: t.controlled, dataRequests: Object.values(counts).reduce((a, b) => a + b, 0), dups,
+             secondDataMs: dataInfo.ms, staleHits: dataInfo.stale };
   } finally {
     await ctx.close();
   }
@@ -66,6 +70,7 @@ if (process.argv[1] && process.argv[1].endsWith("measure_second_open.mjs")) {
   try { r = await measureSecondOpen(browser, url); } finally { await close(); }
   console.log(`4G 模擬（1.6Mbps／RTT 150ms）：第一次可互動 ${r.firstBootMs}ms；第二次可互動 ${r.secondBootMs}ms（DOMContentLoaded ${r.secondDclMs}ms）；` +
     `SW 接管=${r.controlled}、外殼快取 ${r.shellCached} 檔`);
+  console.log(`第二次開到資料數字出現：${r.secondDataMs}ms（目標 <500ms）；SW 先回上次存檔 ${r.staleHits} 次`);
   console.log(`第二次開啟 10 秒內 data/*.json 網路請求 ${r.dataRequests} 次；重複：${r.dups.length ? r.dups.map(([p, n]) => p + "×" + n).join("、") : "無"}`);
   const ok = r.secondBootMs < 1500 && r.controlled && !r.dups.length;
   console.log(ok ? "=== 通過（<1.5 秒、無重複抓取）===" : "=== 未通過 ===");
