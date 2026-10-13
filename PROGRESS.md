@@ -1,3 +1,32 @@
+## 2026-10-13 10:46（互動視窗）先.八十一-19 搜尋名稱清單改 repo 為主、FinMind 只補充（549→33.5KB）
+
+### 2026-10-13 10:50 先.八十一-19 搜尋名稱清單改 repo 為主、FinMind 只補充（CC）
+
+**做了什麼**
+- 新增 `scripts/build_stock_names.py` → `data/stock_names.json`（掛進 market.yml）：
+  - 台股取 company_info.json 的名稱與產業：2,974 檔，含 ETF，濾掉權證規則同舊版。
+  - 美股取 us_financials.json 的 SEC 名冊公司名＋us_sic.json：253 檔。
+  - gzip 約 33KB。
+- `loadStockInfo()` 的順序改為：本機快取 → **repo 名單** → FinMind（只在 repo 檔讀不到時）→ company_info 退路。repo 名單不寫進永不過期的本機快取。
+- **FinMind 只補充**：搜尋在 repo 名單查不到任何股票時，才向 FinMind 完整名單補查一次（整個工作階段一次），合併後自動重跑搜尋。補查失敗時寫明原因，例如「FinMind 補查失敗：台股：FinMind 連不上（網路中斷或被擋）」，不再只顯示「查無」。
+- 順修：`fmErrReason()` 從 app-shared.js 移到核心 app.js。首頁搜尋補查時 app-shared.js 未必已載入，原本會在補查回呼裡拋錯，搜尋停在「補查中…」。這是冒煙 #125 抓到的。
+
+**前後量測**（打開搜尋那一刻起的下載，全新瀏覽器、無快取）
+
+| | 改前 | 改後 |
+|---|---|---|
+| 名稱清單 | FinMind TaiwanStockInfo 491.7KB＋USStockInfo 57.5KB＝549.2KB | stock_names.json 33.5KB |
+| 打開搜尋合計 | 約 982KB | 455.2KB（其中 events.json 399.7KB 是全域搜尋的「事件」組要用，未在本項處理） |
+
+**驗證**：冒煙新增 #125。檢查內容：
+- 打開搜尋讀 stock_names.json、不打 FinMind 名稱清單，來源標記為 repo
+- 搜「台積電」找到 2330，搜「NVDA」找得到
+- 搜不存在的「ZQXW」會觸發 FinMind 補查；擋掉 FinMind 時畫面寫明失敗原因
+
+全套冒煙 2026/10/13 10:46:38 全部通過。
+
+**影響檔案**：scripts/build_stock_names.py、data/stock_names.json、app.js、app-shared.js、.github/workflows/market.yml、scripts/smoke_test.mjs
+
 ## 2026-10-13 10:45（DevQueue cycle 20261013-103102）修 runner 誤派互動視窗專屬項目
 
 - **做了什麼**：本輪 runner 派出 `先.八十一-18`，但該項標「（互動視窗執行）」。根因：`scripts/dev_queue_runner.py` 的 `INLINE_INTERACTIVE_TAG` 用 `\*\*[^*]+\*\*`，標題內含星號（`scores*_list`、`Alpha*`）就對不上，`-18`／`-27` 被誤判成「債務」。改為非貪婪 `\*\*.+?\*\*`（純 bug 修復）。

@@ -1210,6 +1210,17 @@
   let FM_LAST_FAILED=false;
   // 先.八十一-10：FinMind 失敗時記下白話原因（額度用盡／網路／逾時…），fmEmptyMsg 一併顯示，不只顯示「—」。
   let FM_LAST_ERR='';
+  // 先.八十一-10：把 FinMind 失敗翻成白話原因（先.八十一-19 移到核心 app.js：首頁搜尋補查也要用，app-shared.js 未必已載入）
+  function fmErrReason(e){
+    const m=String((e&&e.message)||e||'');
+    if(/HTTP 402/.test(m))return 'FinMind 免費額度用盡（HTTP 402），約一小時後恢復';
+    if(/HTTP 429/.test(m))return 'FinMind 請求太頻繁（HTTP 429）';
+    if(/HTTP 5\d\d/.test(m))return 'FinMind 伺服器錯誤（'+m+'）';
+    if(/HTTP \d+/.test(m))return 'FinMind 回應錯誤（'+m+'）';
+    if(e&&e.name==='AbortError')return 'FinMind 逾時沒有回應';
+    if(e&&e.name==='TypeError')return 'FinMind 連不上（網路中斷或被擋）';
+    return 'FinMind 失敗（'+(m||'原因不明')+'）';
+  }
   // 2026-08-25 修正：原本線的顏色是看「這段sparkline最後一天vs第一天」（多日趨勢），
   // 跟旁邊直接顯示的「今日漲跌%」徽章是兩個不同的比較基準，兩者顏色常常對不上
   // （例如過去9天總體是漲的、但今天是跌的，線會畫成漲色、徽章卻是跌色），使用者
@@ -2653,6 +2664,30 @@
   // 完整清單在打開搜尋（openSearch）或第一次切到其他分頁（_lazyCall）時才抓。
   // 本次工作階段 FinMind 已失敗過就 10 分鐘內不重打（避免每次切頁再等一次 12 秒逾時），直接走退路。
   let FINMIND_INFO_FAILED_AT=0;
+  // 先.八十一-19：名稱清單來源（'repo'＝data/stock_names.json；'finmind'＝FinMind 完整名單）與 FinMind 補查狀態
+  let INFO_SRC='',FM_NAMES_SUPP=null,FM_NAMES_SUPP_DONE=null;
+  // repo 名單查不到時才向 FinMind 補查一次（整個工作階段只補一次），合併進清單後重跑搜尋；失敗寫明原因。
+  function finmindNamesSupplement(){
+    if(FM_NAMES_SUPP)return FM_NAMES_SUPP;
+    const _fmInfo=(ds)=>{const ac=new AbortController();const timer=setTimeout(()=>ac.abort(),12000);
+      return fetch(`${FM}?dataset=${ds}`,{signal:ac.signal}).then(r=>r.ok?r.json():Promise.reject(new Error('HTTP '+r.status))).finally(()=>clearTimeout(timer))};
+    FM_NAMES_SUPP=Promise.allSettled([_fmInfo('TaiwanStockInfo'),_fmInfo('USStockInfo')]).then(([sTW,sUS])=>{
+      let added=0;const errs=[];
+      if(sTW.status==='fulfilled'){
+        for(const s of ((sTW.value&&sTW.value.data)||[])){const id=s.stock_id;if(!id||STOCKNAME[id])continue;
+          if(id.length<4||id.length>6||(id.length===6&&/^\d+$/.test(id)))continue;
+          STOCKNAME[id]=s.stock_name;STOCKLIST.push({id,name:s.stock_name||'',ind:s.industry_category||'',mkt:'TW'});added++}
+      }else errs.push('台股：'+fmErrReason(sTW.reason));
+      if(sUS.status==='fulfilled'){
+        for(const s of ((sUS.value&&sUS.value.data)||[])){const id=s.stock_id;if(!id||STOCKNAME_US[id])continue;
+          const nm=(s.stock_name||'').replace(/\s*Common Stock\s*$/i,'');STOCKNAME_US[id]=nm;STOCKLIST_US.push({id,name:nm,ind:s.Subsector||'',mkt:'US'});added++}
+      }else errs.push('美股：'+fmErrReason(sUS.reason));
+      if(errs.length)console.warn('[finmindNamesSupplement]',errs.join('；'));
+      FM_NAMES_SUPP_DONE={added,errs};
+      return FM_NAMES_SUPP_DONE;
+    });
+    return FM_NAMES_SUPP;
+  }
   function loadStockInfo(opts){
     const lite=!!(opts&&opts.lite);
     if(infoLoaded)return Promise.resolve();
@@ -2672,6 +2707,21 @@
       if(c&&cu&&((JSON.parse(c).list)||[]).length){const o=JSON.parse(c),ou=JSON.parse(cu);STOCKNAME=o.map;STOCKLIST=o.list;STOCKNAME_US=ou.map;STOCKLIST_US=ou.list;infoLoaded=true;infoLoading=false;return}
     }catch(e){console.warn('[loadStockInfo:cacheRead]',e);recordGlobalError('loadStockInfo:cacheRead',e)}
     if(lite){infoLoading=false;return}  // 首頁：沒有快取就不抓，見 loadStockInfo 註解
+    // 先.八十一-19：名稱清單改 repo 為主——data/stock_names.json（scripts/build_stock_names.py：台股取 company_info、
+    // 美股取 SEC 名冊公司名），gzip 約 33KB，取代 FinMind TaiwanStockInfo＋USStockInfo（約 550KB）。
+    // 不寫進 alpha_info 快取（那份快取不會過期，repo 名單每天會變）。查不到的代號由 doSearch 觸發 FinMind 補查。
+    try{
+      const r=await fetch('data/stock_names.json?t='+Math.floor(Date.now()/3600000));
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const d=await r.json();
+      const tw=(d&&d.tw)||[],us=(d&&d.us)||[];
+      if(!tw.length)throw new Error('stock_names.json 台股清單為空');
+      STOCKNAME={};STOCKLIST=[];STOCKNAME_US={};STOCKLIST_US=[];
+      for(const [id,name,ind] of tw){STOCKNAME[id]=name;STOCKLIST.push({id,name:name||'',ind:ind||'',mkt:'TW'})}
+      for(const [id,name,ind] of us){STOCKNAME_US[id]=name;STOCKLIST_US.push({id,name:name||'',ind:ind||'',mkt:'US'})}
+      infoLoaded=true;INFO_SRC='repo';infoLoading=false;
+      return;
+    }catch(e){console.warn('[loadStockInfo:repo]',e);recordGlobalError('loadStockInfo:repo',e)}
     if(skipFinmind)finmindErr=new Error('FinMind 名稱清單本次工作階段已失敗，10 分鐘內不重打');
     else try{
       // 2026-09-08 兩個真缺陷一起修（實測抓到，不是預防性重構）：
@@ -2783,9 +2833,16 @@
     const resUS=STOCKLIST_US.filter(s=>s.id.startsWith(qU)||s.name.toUpperCase().includes(qU));
     const nStock=resTW.length+resUS.length;
     const res=[...resTW,...resUS].slice(0,30);
+    // 先.八十一-19：repo 名單查不到才向 FinMind 補查（整個工作階段一次），補完重跑；補查失敗寫明原因
+    let noHit='查無股票';
+    if(!nStock&&INFO_SRC==='repo'){
+      if(!FM_NAMES_SUPP){noHit='repo 名單查無，正在向 FinMind 完整名單補查…';finmindNamesSupplement().then(()=>{if(document.getElementById('search-input').value.trim()===q)doSearch()})}
+      else noHit='查無股票（repo 名單與 FinMind 補查都沒有）';
+      if(FM_NAMES_SUPP&&FM_NAMES_SUPP_DONE&&FM_NAMES_SUPP_DONE.errs.length)noHit=`查無股票（repo 名單沒有；FinMind 補查失敗：${_gsEsc(FM_NAMES_SUPP_DONE.errs.join('；'))}）`;
+    }
     out.push(`<div class="gs-group" data-group="stocks">`+_gsHead('股票',nStock,nStock>30?30:0)
       +(res.length?res.map(s=>`<div class="sr" onclick="pickStock('${s.id}')"><div><b>${_gsEsc(s.name)}</b> <span class="sub">${s.id} · ${s.mkt==='US'?'美股':'台股'}</span><div class="sub">${_gsEsc(s.ind)}</div></div><span class="act">${WL.includes(s.id)?'✓ 已加入':'＋ 加入'}</span></div>`).join('')
-        :`<div class="note" style="padding:8px 4px">查無股票</div>`)+`</div>`);
+        :`<div class="note gs-nohit" style="padding:8px 4px">${noHit}</div>`)+`</div>`);
     // 名稱／代號對到的台股（只在 ≤5 檔時用，避免輸入「2」這種短字串把整個市場的新聞事件都帶出來）
     const codeSet=new Set(resTW.length&&resTW.length<=5?resTW.map(s=>s.id):[]);
     // ② 新聞（新到舊）
@@ -4077,7 +4134,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-13.1030';
+  const APP_VERSION='2026-10-13.1046';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

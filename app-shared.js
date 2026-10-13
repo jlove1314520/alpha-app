@@ -81,17 +81,7 @@
       return [];
     }
   }
-  // 先.八十一-10：把 FinMind 失敗翻成白話原因
-  function fmErrReason(e){
-    const m=String((e&&e.message)||e||'');
-    if(/HTTP 402/.test(m))return 'FinMind 免費額度用盡（HTTP 402），約一小時後恢復';
-    if(/HTTP 429/.test(m))return 'FinMind 請求太頻繁（HTTP 429）';
-    if(/HTTP 5\d\d/.test(m))return 'FinMind 伺服器錯誤（'+m+'）';
-    if(/HTTP \d+/.test(m))return 'FinMind 回應錯誤（'+m+'）';
-    if(e&&e.name==='AbortError')return 'FinMind 逾時沒有回應';
-    if(e&&e.name==='TypeError')return 'FinMind 連不上（網路中斷或被擋）';
-    return 'FinMind 失敗（'+(m||'原因不明')+'）';
-  }
+  // 先.八十一-10：fmErrReason 移到 app.js（核心，首頁搜尋補查也要用），這裡直接呼叫全域那支
   function fmEmptyMsg(fallback){return FM_LAST_FAILED?((FM_LAST_ERR||'FinMind 連線失敗')+'，請稍後再試'):fallback}
   // 2026-08-27新增（B4：類股卡點擊→成分股清單）：data/company_info.json
   // （見 research/build_company_info.py，讀FinMind TaiwanStockInfo全市場快取）

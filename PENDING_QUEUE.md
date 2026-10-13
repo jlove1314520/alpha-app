@@ -19322,7 +19322,7 @@ C. 驗收
 - [x] **先.八十一-16 研究：「跟 0050 比」加口徑說明一行；紙上 B／C／D 建倉日記錄「10/11 事後決定、用 10/8 收盤」；禁止倒填建倉日寫進 MARATHON_PROTOCOL**（互動視窗執行）〔meta.method_note 口徑一行；B/C/D inception_note 倒填紀錄；MARATHON_PROTOCOL §9 禁止倒填；冒煙 #124〕
 - [x] **先.八十一-17 研究（事前登記、只跑一次）：可加槓桿波動管理曝險（0.5–1.5 倍，Moreira & Muir）＋同平均曝險隨機對照＋1990–2003 台股生存檢驗；判準先 commit**（互動視窗執行）〔事前登記 #439（定稿 commit 4d05ce86b）→ 單發 #440：MDD −77.68%、隨機對照第 78.8 百分位 → VIOLATES_SURVIVAL；已入墓園〕
 - [ ] **先.八十一-18 （補件，來源：先.八十一-9／10 自身驗收缺口）market.yml 下一班實跑驗證：by_code／scores*_list／industry_flow／futures_institutional 都由排程落地（Actions log＋commit 證據）；量測 by_code 每班改動檔數與 repo 增量，超過每日 20MB 改分桶或降頻**（互動視窗執行）
-- [ ] **先.八十一-19 （補件，來源：先.八十一-9 量測）搜尋名稱清單改 repo 為主：台股以 data/company_info.json 為主、FinMind TaiwanStockInfo（約 490KB）只補充；美股名稱同理找 repo 來源；附搜尋首次開啟前後下載量**（互動視窗執行）
+- [x] **先.八十一-19 （補件，來源：先.八十一-9 量測）搜尋名稱清單改 repo 為主：台股以 data/company_info.json 為主、FinMind TaiwanStockInfo（約 490KB）只補充；美股名稱同理找 repo 來源；附搜尋首次開啟前後下載量**（互動視窗執行）〔data/stock_names.json（33.5KB）取代 FinMind 名稱清單（549KB）；查無才 FinMind 補查並寫原因；冒煙 #125〕
 - [ ] **先.八十一-20 （補件，來源：BACKLOG 2026-09-15 登記待辦第 3 項）法說會列表＋MOPS 簡報 PDF 連結（只做列表與連結，不解析 PDF）；動工前先查證官方來源與頻率上限並寫進 CLAUDE.md 清單**（互動視窗執行）
 - [ ] **先.八十一-21 （補件，來源：先.八十一-10 #117 踩到的競態）冒煙測試全面掃描「等待條件被預設文字／骨架即滿足」的同類競態並修正，附掃描清單**（互動視窗執行）
 - [ ] **先.八十一-22 （補件，來源：先.八十一-10 剩餘 FinMind 依賴）個股營收圖的月底股價（目前 FinMind 430 日）改 repo：排程產生每檔近 18 個月月底收盤小檔（官方來源，查證頻率上限並記入 CLAUDE.md），FinMind 只補充；附前後請求數**（互動視窗執行）

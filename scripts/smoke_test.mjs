@@ -4095,6 +4095,41 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { incErrs.push(`測試本身出錯：${e.message || e}`); }
   record("124. 跟 0050 比顯示計算口徑、模擬 B／C／D 標明建倉日事後倒填、協定禁止倒填（先.八十一-16）", incErrs.length === 0, incErrs.join("; "));
 
+  // 125.【2026-10-13 先.八十一-19】搜尋名稱清單 repo 為主：打開搜尋讀 data/stock_names.json、不打 FinMind 名稱清單；
+  // 能搜到台股名稱與美股代號；repo 查不到時才向 FinMind 補查，補查失敗寫明原因。
+  const snErrs = [];
+  try {
+    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+    try {
+      const p = await ctx.newPage();
+      const urls = [];
+      p.on("request", (r) => urls.push(r.url()));
+      await p.route(/finmindtrade\.com.*dataset=(TaiwanStockInfo|USStockInfo)/, (r) => r.abort());
+      await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+      await p.waitForTimeout(1200);
+      await p.evaluate(() => openSearch());
+      await p.waitForFunction(() => typeof infoLoaded !== "undefined" && infoLoaded, null, { timeout: 15000 }).catch(() => null);
+      const a = await p.evaluate(() => {
+        const inp = document.getElementById("search-input");
+        inp.value = "台積電"; doSearch();
+        const tw = (document.querySelector('#search-results [data-group="stocks"]') || {}).textContent || "";
+        inp.value = "NVDA"; doSearch();
+        const us = (document.querySelector('#search-results [data-group="stocks"]') || {}).textContent || "";
+        return { tw, us, src: INFO_SRC };
+      });
+      if (!urls.some(u => /data\/stock_names\.json/.test(u))) snErrs.push("打開搜尋沒有讀 data/stock_names.json");
+      if (urls.some(u => /dataset=(TaiwanStockInfo|USStockInfo)/.test(u))) snErrs.push("打開搜尋仍向 FinMind 下載名稱清單");
+      if (a.src !== "repo") snErrs.push(`名稱來源不是 repo（${a.src}）`);
+      if (!/台積電/.test(a.tw) || !/2330/.test(a.tw)) snErrs.push("搜「台積電」找不到 2330");
+      if (!/NVDA/.test(a.us)) snErrs.push("搜「NVDA」找不到");
+      await p.evaluate(() => { const inp = document.getElementById("search-input"); inp.value = "ZQXW"; doSearch(); });
+      await p.waitForFunction(() => /(FinMind|公開資料) 補查失敗/.test((document.querySelector("#search-results .gs-nohit") || {}).textContent || ""), null, { timeout: 20000 }).catch(() => null);
+      const nh = await p.evaluate(() => (document.querySelector("#search-results .gs-nohit") || {}).textContent || "");
+      if (!/(FinMind|公開資料) 補查失敗/.test(nh) || !/連不上|失敗/.test(nh)) snErrs.push(`repo 查無時沒有補查或沒寫失敗原因：${nh}`);
+    } finally { await ctx.close(); }
+  } catch (e) { snErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("125. 搜尋名稱清單 repo 為主（不下載 FinMind 名單）、查無才 FinMind 補查並寫明失敗原因（先.八十一-19）", snErrs.length === 0, snErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4123,7 +4158,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
