@@ -1,0 +1,2990 @@
+{
+ "generated_at": "2026-10-14T01:10:24+08:00",
+ "universe_file": "us_universe_pit.json",
+ "universe_source": "SEC EDGAR full-index form.idx 1993Q1～2026Q3 全量；Form 25／25-NSE 逐筆解析 securityClassTitle（2010 以前的 Form 25 本文未抓）",
+ "universe_counts": {
+  "total": 49615,
+  "active": 8626,
+  "delisted": 5728,
+  "stopped_filing": 35261
+ },
+ "definition": "先.八十三-3a-2：美股 PIT 宇宙每月「在宇宙內／有代號」檔數表（只建資料，不計任何報酬、不登記試驗）。\n\n口徑（與先.八十三-3a 的表逐字相同，2026-10-14 用延伸前備份重算 2011-01／2015-01／\n2019-01／2023-01／2024-12 五個月份，十個數字全部一致才採用）：\n  - 在宇宙內：first_periodic_report ≤ 該月，且結束日 ≥ 該月\n    （結束日＝delisted_at；stopped_filing 用 last_periodic_report；active 視為未結束）；\n    SIC 已知（research/data/us_sic_universe.json）且不在 6000–6799（金融／SPAC）。\n  - 有代號：名冊的 ticker 欄非空（可能拿到 yfinance 價格；不代表真的有價）。\n\n延伸到 1994 以後多一個欄位 sic_unknown：2010 年以前就停止申報的公司不在 SIC 檔裡\n（SIC 檔只抓過 2010 版名冊的 21,315 個 CIK），3a 口徑會把它們整批排除；\n這裡另列出來，不偷偷算進也不偷偷丟掉。補抓它們的 SIC 是另一項工作（見 PENDING_QUEUE）。",
+ "rows": [
+  {
+   "month": "1994-01",
+   "in_universe": 56,
+   "has_ticker": 32,
+   "ticker_pct": 57.1,
+   "sic_unknown": 99,
+   "financial_excluded": 5
+  },
+  {
+   "month": "1994-02",
+   "in_universe": 171,
+   "has_ticker": 86,
+   "ticker_pct": 50.3,
+   "sic_unknown": 306,
+   "financial_excluded": 17
+  },
+  {
+   "month": "1994-03",
+   "in_universe": 567,
+   "has_ticker": 287,
+   "ticker_pct": 50.6,
+   "sic_unknown": 1104,
+   "financial_excluded": 125
+  },
+  {
+   "month": "1994-04",
+   "in_universe": 601,
+   "has_ticker": 304,
+   "ticker_pct": 50.6,
+   "sic_unknown": 1170,
+   "financial_excluded": 133
+  },
+  {
+   "month": "1994-05",
+   "in_universe": 646,
+   "has_ticker": 327,
+   "ticker_pct": 50.6,
+   "sic_unknown": 1314,
+   "financial_excluded": 159
+  },
+  {
+   "month": "1994-06",
+   "in_universe": 650,
+   "has_ticker": 331,
+   "ticker_pct": 50.9,
+   "sic_unknown": 1306,
+   "financial_excluded": 159
+  },
+  {
+   "month": "1994-07",
+   "in_universe": 652,
+   "has_ticker": 332,
+   "ticker_pct": 50.9,
+   "sic_unknown": 1300,
+   "financial_excluded": 159
+  },
+  {
+   "month": "1994-08",
+   "in_universe": 660,
+   "has_ticker": 335,
+   "ticker_pct": 50.8,
+   "sic_unknown": 1385,
+   "financial_excluded": 163
+  },
+  {
+   "month": "1994-09",
+   "in_universe": 666,
+   "has_ticker": 338,
+   "ticker_pct": 50.8,
+   "sic_unknown": 1378,
+   "financial_excluded": 163
+  },
+  {
+   "month": "1994-10",
+   "in_universe": 673,
+   "has_ticker": 341,
+   "ticker_pct": 50.7,
+   "sic_unknown": 1378,
+   "financial_excluded": 163
+  },
+  {
+   "month": "1994-11",
+   "in_universe": 680,
+   "has_ticker": 342,
+   "ticker_pct": 50.3,
+   "sic_unknown": 1437,
+   "financial_excluded": 166
+  },
+  {
+   "month": "1994-12",
+   "in_universe": 682,
+   "has_ticker": 342,
+   "ticker_pct": 50.1,
+   "sic_unknown": 1388,
+   "financial_excluded": 166
+  },
+  {
+   "month": "1995-01",
+   "in_universe": 690,
+   "has_ticker": 343,
+   "ticker_pct": 49.7,
+   "sic_unknown": 1393,
+   "financial_excluded": 166
+  },
+  {
+   "month": "1995-02",
+   "in_universe": 754,
+   "has_ticker": 367,
+   "ticker_pct": 48.7,
+   "sic_unknown": 1535,
+   "financial_excluded": 172
+  },
+  {
+   "month": "1995-03",
+   "in_universe": 860,
+   "has_ticker": 420,
+   "ticker_pct": 48.8,
+   "sic_unknown": 1824,
+   "financial_excluded": 224
+  },
+  {
+   "month": "1995-04",
+   "in_universe": 893,
+   "has_ticker": 435,
+   "ticker_pct": 48.7,
+   "sic_unknown": 1916,
+   "financial_excluded": 231
+  },
+  {
+   "month": "1995-05",
+   "in_universe": 1128,
+   "has_ticker": 523,
+   "ticker_pct": 46.4,
+   "sic_unknown": 2979,
+   "financial_excluded": 367
+  },
+  {
+   "month": "1995-06",
+   "in_universe": 1169,
+   "has_ticker": 535,
+   "ticker_pct": 45.8,
+   "sic_unknown": 3055,
+   "financial_excluded": 371
+  },
+  {
+   "month": "1995-07",
+   "in_universe": 1191,
+   "has_ticker": 543,
+   "ticker_pct": 45.6,
+   "sic_unknown": 3105,
+   "financial_excluded": 375
+  },
+  {
+   "month": "1995-08",
+   "in_universe": 1284,
+   "has_ticker": 565,
+   "ticker_pct": 44.0,
+   "sic_unknown": 3534,
+   "financial_excluded": 419
+  },
+  {
+   "month": "1995-09",
+   "in_universe": 1300,
+   "has_ticker": 570,
+   "ticker_pct": 43.8,
+   "sic_unknown": 3533,
+   "financial_excluded": 425
+  },
+  {
+   "month": "1995-10",
+   "in_universe": 1321,
+   "has_ticker": 580,
+   "ticker_pct": 43.9,
+   "sic_unknown": 3585,
+   "financial_excluded": 428
+  },
+  {
+   "month": "1995-11",
+   "in_universe": 1384,
+   "has_ticker": 599,
+   "ticker_pct": 43.3,
+   "sic_unknown": 4079,
+   "financial_excluded": 478
+  },
+  {
+   "month": "1995-12",
+   "in_universe": 1399,
+   "has_ticker": 603,
+   "ticker_pct": 43.1,
+   "sic_unknown": 4003,
+   "financial_excluded": 484
+  },
+  {
+   "month": "1996-01",
+   "in_universe": 1410,
+   "has_ticker": 605,
+   "ticker_pct": 42.9,
+   "sic_unknown": 4011,
+   "financial_excluded": 488
+  },
+  {
+   "month": "1996-02",
+   "in_universe": 1420,
+   "has_ticker": 609,
+   "ticker_pct": 42.9,
+   "sic_unknown": 4043,
+   "financial_excluded": 491
+  },
+  {
+   "month": "1996-03",
+   "in_universe": 1438,
+   "has_ticker": 614,
+   "ticker_pct": 42.7,
+   "sic_unknown": 4094,
+   "financial_excluded": 503
+  },
+  {
+   "month": "1996-04",
+   "in_universe": 1451,
+   "has_ticker": 617,
+   "ticker_pct": 42.5,
+   "sic_unknown": 4144,
+   "financial_excluded": 507
+  },
+  {
+   "month": "1996-05",
+   "in_universe": 1915,
+   "has_ticker": 777,
+   "ticker_pct": 40.6,
+   "sic_unknown": 6328,
+   "financial_excluded": 688
+  },
+  {
+   "month": "1996-06",
+   "in_universe": 2031,
+   "has_ticker": 801,
+   "ticker_pct": 39.4,
+   "sic_unknown": 6599,
+   "financial_excluded": 706
+  },
+  {
+   "month": "1996-07",
+   "in_universe": 2127,
+   "has_ticker": 828,
+   "ticker_pct": 38.9,
+   "sic_unknown": 6891,
+   "financial_excluded": 727
+  },
+  {
+   "month": "1996-08",
+   "in_universe": 2361,
+   "has_ticker": 899,
+   "ticker_pct": 38.1,
+   "sic_unknown": 7969,
+   "financial_excluded": 842
+  },
+  {
+   "month": "1996-09",
+   "in_universe": 2395,
+   "has_ticker": 915,
+   "ticker_pct": 38.2,
+   "sic_unknown": 8015,
+   "financial_excluded": 857
+  },
+  {
+   "month": "1996-10",
+   "in_universe": 2413,
+   "has_ticker": 921,
+   "ticker_pct": 38.2,
+   "sic_unknown": 8051,
+   "financial_excluded": 858
+  },
+  {
+   "month": "1996-11",
+   "in_universe": 2461,
+   "has_ticker": 935,
+   "ticker_pct": 38.0,
+   "sic_unknown": 8344,
+   "financial_excluded": 878
+  },
+  {
+   "month": "1996-12",
+   "in_universe": 2500,
+   "has_ticker": 946,
+   "ticker_pct": 37.8,
+   "sic_unknown": 8160,
+   "financial_excluded": 883
+  },
+  {
+   "month": "1997-01",
+   "in_universe": 2508,
+   "has_ticker": 948,
+   "ticker_pct": 37.8,
+   "sic_unknown": 8174,
+   "financial_excluded": 885
+  },
+  {
+   "month": "1997-02",
+   "in_universe": 2519,
+   "has_ticker": 949,
+   "ticker_pct": 37.7,
+   "sic_unknown": 8222,
+   "financial_excluded": 887
+  },
+  {
+   "month": "1997-03",
+   "in_universe": 2575,
+   "has_ticker": 971,
+   "ticker_pct": 37.7,
+   "sic_unknown": 8609,
+   "financial_excluded": 907
+  },
+  {
+   "month": "1997-04",
+   "in_universe": 2587,
+   "has_ticker": 972,
+   "ticker_pct": 37.6,
+   "sic_unknown": 8468,
+   "financial_excluded": 910
+  },
+  {
+   "month": "1997-05",
+   "in_universe": 2614,
+   "has_ticker": 977,
+   "ticker_pct": 37.4,
+   "sic_unknown": 8567,
+   "financial_excluded": 924
+  },
+  {
+   "month": "1997-06",
+   "in_universe": 2637,
+   "has_ticker": 981,
+   "ticker_pct": 37.2,
+   "sic_unknown": 8375,
+   "financial_excluded": 926
+  },
+  {
+   "month": "1997-07",
+   "in_universe": 2641,
+   "has_ticker": 982,
+   "ticker_pct": 37.2,
+   "sic_unknown": 8399,
+   "financial_excluded": 927
+  },
+  {
+   "month": "1997-08",
+   "in_universe": 2685,
+   "has_ticker": 994,
+   "ticker_pct": 37.0,
+   "sic_unknown": 8554,
+   "financial_excluded": 946
+  },
+  {
+   "month": "1997-09",
+   "in_universe": 2705,
+   "has_ticker": 998,
+   "ticker_pct": 36.9,
+   "sic_unknown": 8440,
+   "financial_excluded": 951
+  },
+  {
+   "month": "1997-10",
+   "in_universe": 2714,
+   "has_ticker": 1001,
+   "ticker_pct": 36.9,
+   "sic_unknown": 8436,
+   "financial_excluded": 951
+  },
+  {
+   "month": "1997-11",
+   "in_universe": 2766,
+   "has_ticker": 1014,
+   "ticker_pct": 36.7,
+   "sic_unknown": 8626,
+   "financial_excluded": 967
+  },
+  {
+   "month": "1997-12",
+   "in_universe": 2795,
+   "has_ticker": 1023,
+   "ticker_pct": 36.6,
+   "sic_unknown": 8293,
+   "financial_excluded": 973
+  },
+  {
+   "month": "1998-01",
+   "in_universe": 2801,
+   "has_ticker": 1027,
+   "ticker_pct": 36.7,
+   "sic_unknown": 8274,
+   "financial_excluded": 975
+  },
+  {
+   "month": "1998-02",
+   "in_universe": 2812,
+   "has_ticker": 1030,
+   "ticker_pct": 36.6,
+   "sic_unknown": 8299,
+   "financial_excluded": 977
+  },
+  {
+   "month": "1998-03",
+   "in_universe": 2859,
+   "has_ticker": 1048,
+   "ticker_pct": 36.7,
+   "sic_unknown": 8729,
+   "financial_excluded": 995
+  },
+  {
+   "month": "1998-04",
+   "in_universe": 2865,
+   "has_ticker": 1050,
+   "ticker_pct": 36.6,
+   "sic_unknown": 8461,
+   "financial_excluded": 1004
+  },
+  {
+   "month": "1998-05",
+   "in_universe": 2896,
+   "has_ticker": 1057,
+   "ticker_pct": 36.5,
+   "sic_unknown": 8577,
+   "financial_excluded": 1021
+  },
+  {
+   "month": "1998-06",
+   "in_universe": 2911,
+   "has_ticker": 1062,
+   "ticker_pct": 36.5,
+   "sic_unknown": 8376,
+   "financial_excluded": 1027
+  },
+  {
+   "month": "1998-07",
+   "in_universe": 2913,
+   "has_ticker": 1062,
+   "ticker_pct": 36.5,
+   "sic_unknown": 8407,
+   "financial_excluded": 1030
+  },
+  {
+   "month": "1998-08",
+   "in_universe": 2962,
+   "has_ticker": 1079,
+   "ticker_pct": 36.4,
+   "sic_unknown": 8532,
+   "financial_excluded": 1051
+  },
+  {
+   "month": "1998-09",
+   "in_universe": 2981,
+   "has_ticker": 1083,
+   "ticker_pct": 36.3,
+   "sic_unknown": 8372,
+   "financial_excluded": 1055
+  },
+  {
+   "month": "1998-10",
+   "in_universe": 2983,
+   "has_ticker": 1084,
+   "ticker_pct": 36.3,
+   "sic_unknown": 8375,
+   "financial_excluded": 1055
+  },
+  {
+   "month": "1998-11",
+   "in_universe": 3005,
+   "has_ticker": 1087,
+   "ticker_pct": 36.2,
+   "sic_unknown": 8468,
+   "financial_excluded": 1062
+  },
+  {
+   "month": "1998-12",
+   "in_universe": 3010,
+   "has_ticker": 1088,
+   "ticker_pct": 36.1,
+   "sic_unknown": 8170,
+   "financial_excluded": 1071
+  },
+  {
+   "month": "1999-01",
+   "in_universe": 3012,
+   "has_ticker": 1088,
+   "ticker_pct": 36.1,
+   "sic_unknown": 8144,
+   "financial_excluded": 1072
+  },
+  {
+   "month": "1999-02",
+   "in_universe": 3017,
+   "has_ticker": 1089,
+   "ticker_pct": 36.1,
+   "sic_unknown": 8155,
+   "financial_excluded": 1077
+  },
+  {
+   "month": "1999-03",
+   "in_universe": 3042,
+   "has_ticker": 1097,
+   "ticker_pct": 36.1,
+   "sic_unknown": 8508,
+   "financial_excluded": 1099
+  },
+  {
+   "month": "1999-04",
+   "in_universe": 3055,
+   "has_ticker": 1101,
+   "ticker_pct": 36.0,
+   "sic_unknown": 8155,
+   "financial_excluded": 1101
+  },
+  {
+   "month": "1999-05",
+   "in_universe": 3085,
+   "has_ticker": 1109,
+   "ticker_pct": 35.9,
+   "sic_unknown": 8201,
+   "financial_excluded": 1115
+  },
+  {
+   "month": "1999-06",
+   "in_universe": 3095,
+   "has_ticker": 1110,
+   "ticker_pct": 35.9,
+   "sic_unknown": 8000,
+   "financial_excluded": 1121
+  },
+  {
+   "month": "1999-07",
+   "in_universe": 3113,
+   "has_ticker": 1114,
+   "ticker_pct": 35.8,
+   "sic_unknown": 7981,
+   "financial_excluded": 1124
+  },
+  {
+   "month": "1999-08",
+   "in_universe": 3158,
+   "has_ticker": 1121,
+   "ticker_pct": 35.5,
+   "sic_unknown": 8165,
+   "financial_excluded": 1142
+  },
+  {
+   "month": "1999-09",
+   "in_universe": 3175,
+   "has_ticker": 1126,
+   "ticker_pct": 35.5,
+   "sic_unknown": 7984,
+   "financial_excluded": 1145
+  },
+  {
+   "month": "1999-10",
+   "in_universe": 3192,
+   "has_ticker": 1130,
+   "ticker_pct": 35.4,
+   "sic_unknown": 7990,
+   "financial_excluded": 1147
+  },
+  {
+   "month": "1999-11",
+   "in_universe": 3256,
+   "has_ticker": 1144,
+   "ticker_pct": 35.1,
+   "sic_unknown": 8269,
+   "financial_excluded": 1167
+  },
+  {
+   "month": "1999-12",
+   "in_universe": 3286,
+   "has_ticker": 1148,
+   "ticker_pct": 34.9,
+   "sic_unknown": 7898,
+   "financial_excluded": 1178
+  },
+  {
+   "month": "2000-01",
+   "in_universe": 3306,
+   "has_ticker": 1150,
+   "ticker_pct": 34.8,
+   "sic_unknown": 7906,
+   "financial_excluded": 1180
+  },
+  {
+   "month": "2000-02",
+   "in_universe": 3338,
+   "has_ticker": 1156,
+   "ticker_pct": 34.6,
+   "sic_unknown": 7978,
+   "financial_excluded": 1181
+  },
+  {
+   "month": "2000-03",
+   "in_universe": 3411,
+   "has_ticker": 1175,
+   "ticker_pct": 34.4,
+   "sic_unknown": 8373,
+   "financial_excluded": 1199
+  },
+  {
+   "month": "2000-04",
+   "in_universe": 3454,
+   "has_ticker": 1182,
+   "ticker_pct": 34.2,
+   "sic_unknown": 8232,
+   "financial_excluded": 1205
+  },
+  {
+   "month": "2000-05",
+   "in_universe": 3540,
+   "has_ticker": 1200,
+   "ticker_pct": 33.9,
+   "sic_unknown": 8495,
+   "financial_excluded": 1218
+  },
+  {
+   "month": "2000-06",
+   "in_universe": 3561,
+   "has_ticker": 1201,
+   "ticker_pct": 33.7,
+   "sic_unknown": 8333,
+   "financial_excluded": 1223
+  },
+  {
+   "month": "2000-07",
+   "in_universe": 3582,
+   "has_ticker": 1206,
+   "ticker_pct": 33.7,
+   "sic_unknown": 8345,
+   "financial_excluded": 1225
+  },
+  {
+   "month": "2000-08",
+   "in_universe": 3657,
+   "has_ticker": 1224,
+   "ticker_pct": 33.5,
+   "sic_unknown": 8532,
+   "financial_excluded": 1245
+  },
+  {
+   "month": "2000-09",
+   "in_universe": 3686,
+   "has_ticker": 1230,
+   "ticker_pct": 33.4,
+   "sic_unknown": 8355,
+   "financial_excluded": 1245
+  },
+  {
+   "month": "2000-10",
+   "in_universe": 3698,
+   "has_ticker": 1233,
+   "ticker_pct": 33.3,
+   "sic_unknown": 8348,
+   "financial_excluded": 1246
+  },
+  {
+   "month": "2000-11",
+   "in_universe": 3755,
+   "has_ticker": 1246,
+   "ticker_pct": 33.2,
+   "sic_unknown": 8494,
+   "financial_excluded": 1258
+  },
+  {
+   "month": "2000-12",
+   "in_universe": 3766,
+   "has_ticker": 1249,
+   "ticker_pct": 33.2,
+   "sic_unknown": 7968,
+   "financial_excluded": 1259
+  },
+  {
+   "month": "2001-01",
+   "in_universe": 3776,
+   "has_ticker": 1253,
+   "ticker_pct": 33.2,
+   "sic_unknown": 7907,
+   "financial_excluded": 1259
+  },
+  {
+   "month": "2001-02",
+   "in_universe": 3790,
+   "has_ticker": 1253,
+   "ticker_pct": 33.1,
+   "sic_unknown": 7912,
+   "financial_excluded": 1263
+  },
+  {
+   "month": "2001-03",
+   "in_universe": 3821,
+   "has_ticker": 1264,
+   "ticker_pct": 33.1,
+   "sic_unknown": 8110,
+   "financial_excluded": 1275
+  },
+  {
+   "month": "2001-04",
+   "in_universe": 3848,
+   "has_ticker": 1269,
+   "ticker_pct": 33.0,
+   "sic_unknown": 7909,
+   "financial_excluded": 1284
+  },
+  {
+   "month": "2001-05",
+   "in_universe": 3886,
+   "has_ticker": 1277,
+   "ticker_pct": 32.9,
+   "sic_unknown": 7922,
+   "financial_excluded": 1286
+  },
+  {
+   "month": "2001-06",
+   "in_universe": 3895,
+   "has_ticker": 1279,
+   "ticker_pct": 32.8,
+   "sic_unknown": 7661,
+   "financial_excluded": 1288
+  },
+  {
+   "month": "2001-07",
+   "in_universe": 3904,
+   "has_ticker": 1282,
+   "ticker_pct": 32.8,
+   "sic_unknown": 7638,
+   "financial_excluded": 1290
+  },
+  {
+   "month": "2001-08",
+   "in_universe": 3944,
+   "has_ticker": 1293,
+   "ticker_pct": 32.8,
+   "sic_unknown": 7671,
+   "financial_excluded": 1309
+  },
+  {
+   "month": "2001-09",
+   "in_universe": 3958,
+   "has_ticker": 1296,
+   "ticker_pct": 32.7,
+   "sic_unknown": 7418,
+   "financial_excluded": 1310
+  },
+  {
+   "month": "2001-10",
+   "in_universe": 3969,
+   "has_ticker": 1299,
+   "ticker_pct": 32.7,
+   "sic_unknown": 7401,
+   "financial_excluded": 1311
+  },
+  {
+   "month": "2001-11",
+   "in_universe": 3990,
+   "has_ticker": 1303,
+   "ticker_pct": 32.7,
+   "sic_unknown": 7488,
+   "financial_excluded": 1324
+  },
+  {
+   "month": "2001-12",
+   "in_universe": 4005,
+   "has_ticker": 1306,
+   "ticker_pct": 32.6,
+   "sic_unknown": 7031,
+   "financial_excluded": 1327
+  },
+  {
+   "month": "2002-01",
+   "in_universe": 4009,
+   "has_ticker": 1307,
+   "ticker_pct": 32.6,
+   "sic_unknown": 7059,
+   "financial_excluded": 1338
+  },
+  {
+   "month": "2002-02",
+   "in_universe": 4019,
+   "has_ticker": 1309,
+   "ticker_pct": 32.6,
+   "sic_unknown": 6966,
+   "financial_excluded": 1342
+  },
+  {
+   "month": "2002-03",
+   "in_universe": 4046,
+   "has_ticker": 1320,
+   "ticker_pct": 32.6,
+   "sic_unknown": 7261,
+   "financial_excluded": 1360
+  },
+  {
+   "month": "2002-04",
+   "in_universe": 4080,
+   "has_ticker": 1328,
+   "ticker_pct": 32.5,
+   "sic_unknown": 6981,
+   "financial_excluded": 1367
+  },
+  {
+   "month": "2002-05",
+   "in_universe": 4103,
+   "has_ticker": 1331,
+   "ticker_pct": 32.4,
+   "sic_unknown": 6944,
+   "financial_excluded": 1373
+  },
+  {
+   "month": "2002-06",
+   "in_universe": 4114,
+   "has_ticker": 1332,
+   "ticker_pct": 32.4,
+   "sic_unknown": 6705,
+   "financial_excluded": 1377
+  },
+  {
+   "month": "2002-07",
+   "in_universe": 4125,
+   "has_ticker": 1333,
+   "ticker_pct": 32.3,
+   "sic_unknown": 6678,
+   "financial_excluded": 1378
+  },
+  {
+   "month": "2002-08",
+   "in_universe": 4158,
+   "has_ticker": 1343,
+   "ticker_pct": 32.3,
+   "sic_unknown": 6723,
+   "financial_excluded": 1399
+  },
+  {
+   "month": "2002-09",
+   "in_universe": 4167,
+   "has_ticker": 1346,
+   "ticker_pct": 32.3,
+   "sic_unknown": 6440,
+   "financial_excluded": 1402
+  },
+  {
+   "month": "2002-10",
+   "in_universe": 4175,
+   "has_ticker": 1349,
+   "ticker_pct": 32.3,
+   "sic_unknown": 6422,
+   "financial_excluded": 1404
+  },
+  {
+   "month": "2002-11",
+   "in_universe": 4208,
+   "has_ticker": 1357,
+   "ticker_pct": 32.2,
+   "sic_unknown": 6475,
+   "financial_excluded": 1410
+  },
+  {
+   "month": "2002-12",
+   "in_universe": 4221,
+   "has_ticker": 1362,
+   "ticker_pct": 32.3,
+   "sic_unknown": 6016,
+   "financial_excluded": 1415
+  },
+  {
+   "month": "2003-01",
+   "in_universe": 4226,
+   "has_ticker": 1362,
+   "ticker_pct": 32.2,
+   "sic_unknown": 5986,
+   "financial_excluded": 1416
+  },
+  {
+   "month": "2003-02",
+   "in_universe": 4232,
+   "has_ticker": 1363,
+   "ticker_pct": 32.2,
+   "sic_unknown": 5955,
+   "financial_excluded": 1416
+  },
+  {
+   "month": "2003-03",
+   "in_universe": 4258,
+   "has_ticker": 1367,
+   "ticker_pct": 32.1,
+   "sic_unknown": 6483,
+   "financial_excluded": 1438
+  },
+  {
+   "month": "2003-04",
+   "in_universe": 4270,
+   "has_ticker": 1368,
+   "ticker_pct": 32.0,
+   "sic_unknown": 5983,
+   "financial_excluded": 1439
+  },
+  {
+   "month": "2003-05",
+   "in_universe": 4288,
+   "has_ticker": 1371,
+   "ticker_pct": 32.0,
+   "sic_unknown": 5935,
+   "financial_excluded": 1448
+  },
+  {
+   "month": "2003-06",
+   "in_universe": 4297,
+   "has_ticker": 1373,
+   "ticker_pct": 32.0,
+   "sic_unknown": 5763,
+   "financial_excluded": 1450
+  },
+  {
+   "month": "2003-07",
+   "in_universe": 4301,
+   "has_ticker": 1375,
+   "ticker_pct": 32.0,
+   "sic_unknown": 5729,
+   "financial_excluded": 1454
+  },
+  {
+   "month": "2003-08",
+   "in_universe": 4319,
+   "has_ticker": 1379,
+   "ticker_pct": 31.9,
+   "sic_unknown": 5740,
+   "financial_excluded": 1475
+  },
+  {
+   "month": "2003-09",
+   "in_universe": 4326,
+   "has_ticker": 1381,
+   "ticker_pct": 31.9,
+   "sic_unknown": 5532,
+   "financial_excluded": 1478
+  },
+  {
+   "month": "2003-10",
+   "in_universe": 4328,
+   "has_ticker": 1381,
+   "ticker_pct": 31.9,
+   "sic_unknown": 5494,
+   "financial_excluded": 1478
+  },
+  {
+   "month": "2003-11",
+   "in_universe": 4361,
+   "has_ticker": 1386,
+   "ticker_pct": 31.8,
+   "sic_unknown": 5506,
+   "financial_excluded": 1490
+  },
+  {
+   "month": "2003-12",
+   "in_universe": 4369,
+   "has_ticker": 1388,
+   "ticker_pct": 31.8,
+   "sic_unknown": 5217,
+   "financial_excluded": 1493
+  },
+  {
+   "month": "2004-01",
+   "in_universe": 4371,
+   "has_ticker": 1388,
+   "ticker_pct": 31.8,
+   "sic_unknown": 5184,
+   "financial_excluded": 1496
+  },
+  {
+   "month": "2004-02",
+   "in_universe": 4380,
+   "has_ticker": 1391,
+   "ticker_pct": 31.8,
+   "sic_unknown": 5175,
+   "financial_excluded": 1514
+  },
+  {
+   "month": "2004-03",
+   "in_universe": 4425,
+   "has_ticker": 1399,
+   "ticker_pct": 31.6,
+   "sic_unknown": 6161,
+   "financial_excluded": 1602
+  },
+  {
+   "month": "2004-04",
+   "in_universe": 4435,
+   "has_ticker": 1401,
+   "ticker_pct": 31.6,
+   "sic_unknown": 5212,
+   "financial_excluded": 1605
+  },
+  {
+   "month": "2004-05",
+   "in_universe": 4459,
+   "has_ticker": 1407,
+   "ticker_pct": 31.6,
+   "sic_unknown": 5213,
+   "financial_excluded": 1618
+  },
+  {
+   "month": "2004-06",
+   "in_universe": 4472,
+   "has_ticker": 1409,
+   "ticker_pct": 31.5,
+   "sic_unknown": 5056,
+   "financial_excluded": 1624
+  },
+  {
+   "month": "2004-07",
+   "in_universe": 4482,
+   "has_ticker": 1411,
+   "ticker_pct": 31.5,
+   "sic_unknown": 5028,
+   "financial_excluded": 1627
+  },
+  {
+   "month": "2004-08",
+   "in_universe": 4541,
+   "has_ticker": 1419,
+   "ticker_pct": 31.2,
+   "sic_unknown": 5050,
+   "financial_excluded": 1643
+  },
+  {
+   "month": "2004-09",
+   "in_universe": 4560,
+   "has_ticker": 1422,
+   "ticker_pct": 31.2,
+   "sic_unknown": 4934,
+   "financial_excluded": 1656
+  },
+  {
+   "month": "2004-10",
+   "in_universe": 4568,
+   "has_ticker": 1424,
+   "ticker_pct": 31.2,
+   "sic_unknown": 4902,
+   "financial_excluded": 1657
+  },
+  {
+   "month": "2004-11",
+   "in_universe": 4603,
+   "has_ticker": 1431,
+   "ticker_pct": 31.1,
+   "sic_unknown": 4927,
+   "financial_excluded": 1669
+  },
+  {
+   "month": "2004-12",
+   "in_universe": 4624,
+   "has_ticker": 1435,
+   "ticker_pct": 31.0,
+   "sic_unknown": 4651,
+   "financial_excluded": 1677
+  },
+  {
+   "month": "2005-01",
+   "in_universe": 4635,
+   "has_ticker": 1437,
+   "ticker_pct": 31.0,
+   "sic_unknown": 4617,
+   "financial_excluded": 1678
+  },
+  {
+   "month": "2005-02",
+   "in_universe": 4644,
+   "has_ticker": 1437,
+   "ticker_pct": 30.9,
+   "sic_unknown": 4606,
+   "financial_excluded": 1682
+  },
+  {
+   "month": "2005-03",
+   "in_universe": 4701,
+   "has_ticker": 1451,
+   "ticker_pct": 30.9,
+   "sic_unknown": 5957,
+   "financial_excluded": 1753
+  },
+  {
+   "month": "2005-04",
+   "in_universe": 4722,
+   "has_ticker": 1453,
+   "ticker_pct": 30.8,
+   "sic_unknown": 4360,
+   "financial_excluded": 1757
+  },
+  {
+   "month": "2005-05",
+   "in_universe": 4759,
+   "has_ticker": 1461,
+   "ticker_pct": 30.7,
+   "sic_unknown": 4348,
+   "financial_excluded": 1769
+  },
+  {
+   "month": "2005-06",
+   "in_universe": 4786,
+   "has_ticker": 1466,
+   "ticker_pct": 30.6,
+   "sic_unknown": 4148,
+   "financial_excluded": 1770
+  },
+  {
+   "month": "2005-07",
+   "in_universe": 4798,
+   "has_ticker": 1470,
+   "ticker_pct": 30.6,
+   "sic_unknown": 4124,
+   "financial_excluded": 1770
+  },
+  {
+   "month": "2005-08",
+   "in_universe": 4866,
+   "has_ticker": 1478,
+   "ticker_pct": 30.4,
+   "sic_unknown": 4219,
+   "financial_excluded": 1785
+  },
+  {
+   "month": "2005-09",
+   "in_universe": 4890,
+   "has_ticker": 1485,
+   "ticker_pct": 30.4,
+   "sic_unknown": 4005,
+   "financial_excluded": 1787
+  },
+  {
+   "month": "2005-10",
+   "in_universe": 4907,
+   "has_ticker": 1489,
+   "ticker_pct": 30.3,
+   "sic_unknown": 3975,
+   "financial_excluded": 1788
+  },
+  {
+   "month": "2005-11",
+   "in_universe": 4952,
+   "has_ticker": 1493,
+   "ticker_pct": 30.1,
+   "sic_unknown": 4008,
+   "financial_excluded": 1800
+  },
+  {
+   "month": "2005-12",
+   "in_universe": 4982,
+   "has_ticker": 1498,
+   "ticker_pct": 30.1,
+   "sic_unknown": 3749,
+   "financial_excluded": 1803
+  },
+  {
+   "month": "2006-01",
+   "in_universe": 4995,
+   "has_ticker": 1499,
+   "ticker_pct": 30.0,
+   "sic_unknown": 3718,
+   "financial_excluded": 1804
+  },
+  {
+   "month": "2006-02",
+   "in_universe": 5016,
+   "has_ticker": 1503,
+   "ticker_pct": 30.0,
+   "sic_unknown": 3715,
+   "financial_excluded": 1809
+  },
+  {
+   "month": "2006-03",
+   "in_universe": 5083,
+   "has_ticker": 1514,
+   "ticker_pct": 29.8,
+   "sic_unknown": 5303,
+   "financial_excluded": 1844
+  },
+  {
+   "month": "2006-04",
+   "in_universe": 5113,
+   "has_ticker": 1525,
+   "ticker_pct": 29.8,
+   "sic_unknown": 3596,
+   "financial_excluded": 1850
+  },
+  {
+   "month": "2006-05",
+   "in_universe": 5162,
+   "has_ticker": 1535,
+   "ticker_pct": 29.7,
+   "sic_unknown": 3599,
+   "financial_excluded": 1860
+  },
+  {
+   "month": "2006-06",
+   "in_universe": 5189,
+   "has_ticker": 1539,
+   "ticker_pct": 29.7,
+   "sic_unknown": 3487,
+   "financial_excluded": 1869
+  },
+  {
+   "month": "2006-07",
+   "in_universe": 5208,
+   "has_ticker": 1541,
+   "ticker_pct": 29.6,
+   "sic_unknown": 3446,
+   "financial_excluded": 1872
+  },
+  {
+   "month": "2006-08",
+   "in_universe": 5269,
+   "has_ticker": 1552,
+   "ticker_pct": 29.5,
+   "sic_unknown": 3631,
+   "financial_excluded": 1900
+  },
+  {
+   "month": "2006-09",
+   "in_universe": 5297,
+   "has_ticker": 1556,
+   "ticker_pct": 29.4,
+   "sic_unknown": 3318,
+   "financial_excluded": 1915
+  },
+  {
+   "month": "2006-10",
+   "in_universe": 5318,
+   "has_ticker": 1558,
+   "ticker_pct": 29.3,
+   "sic_unknown": 3254,
+   "financial_excluded": 1923
+  },
+  {
+   "month": "2006-11",
+   "in_universe": 5399,
+   "has_ticker": 1566,
+   "ticker_pct": 29.0,
+   "sic_unknown": 3264,
+   "financial_excluded": 1943
+  },
+  {
+   "month": "2006-12",
+   "in_universe": 5432,
+   "has_ticker": 1574,
+   "ticker_pct": 29.0,
+   "sic_unknown": 2938,
+   "financial_excluded": 1953
+  },
+  {
+   "month": "2007-01",
+   "in_universe": 5450,
+   "has_ticker": 1576,
+   "ticker_pct": 28.9,
+   "sic_unknown": 2908,
+   "financial_excluded": 1955
+  },
+  {
+   "month": "2007-02",
+   "in_universe": 5492,
+   "has_ticker": 1584,
+   "ticker_pct": 28.8,
+   "sic_unknown": 2915,
+   "financial_excluded": 1971
+  },
+  {
+   "month": "2007-03",
+   "in_universe": 5569,
+   "has_ticker": 1602,
+   "ticker_pct": 28.8,
+   "sic_unknown": 3945,
+   "financial_excluded": 2005
+  },
+  {
+   "month": "2007-04",
+   "in_universe": 5619,
+   "has_ticker": 1609,
+   "ticker_pct": 28.6,
+   "sic_unknown": 3266,
+   "financial_excluded": 2016
+  },
+  {
+   "month": "2007-05",
+   "in_universe": 5692,
+   "has_ticker": 1619,
+   "ticker_pct": 28.4,
+   "sic_unknown": 2794,
+   "financial_excluded": 2040
+  },
+  {
+   "month": "2007-06",
+   "in_universe": 5730,
+   "has_ticker": 1624,
+   "ticker_pct": 28.3,
+   "sic_unknown": 2597,
+   "financial_excluded": 2051
+  },
+  {
+   "month": "2007-07",
+   "in_universe": 5757,
+   "has_ticker": 1628,
+   "ticker_pct": 28.3,
+   "sic_unknown": 2582,
+   "financial_excluded": 2055
+  },
+  {
+   "month": "2007-08",
+   "in_universe": 5866,
+   "has_ticker": 1646,
+   "ticker_pct": 28.1,
+   "sic_unknown": 2600,
+   "financial_excluded": 2089
+  },
+  {
+   "month": "2007-09",
+   "in_universe": 5904,
+   "has_ticker": 1651,
+   "ticker_pct": 28.0,
+   "sic_unknown": 2468,
+   "financial_excluded": 2094
+  },
+  {
+   "month": "2007-10",
+   "in_universe": 5926,
+   "has_ticker": 1652,
+   "ticker_pct": 27.9,
+   "sic_unknown": 2373,
+   "financial_excluded": 2099
+  },
+  {
+   "month": "2007-11",
+   "in_universe": 6004,
+   "has_ticker": 1663,
+   "ticker_pct": 27.7,
+   "sic_unknown": 2383,
+   "financial_excluded": 2122
+  },
+  {
+   "month": "2007-12",
+   "in_universe": 6048,
+   "has_ticker": 1669,
+   "ticker_pct": 27.6,
+   "sic_unknown": 2074,
+   "financial_excluded": 2132
+  },
+  {
+   "month": "2008-01",
+   "in_universe": 6078,
+   "has_ticker": 1674,
+   "ticker_pct": 27.5,
+   "sic_unknown": 2055,
+   "financial_excluded": 2135
+  },
+  {
+   "month": "2008-02",
+   "in_universe": 6123,
+   "has_ticker": 1682,
+   "ticker_pct": 27.5,
+   "sic_unknown": 2050,
+   "financial_excluded": 2143
+  },
+  {
+   "month": "2008-03",
+   "in_universe": 6205,
+   "has_ticker": 1694,
+   "ticker_pct": 27.3,
+   "sic_unknown": 3089,
+   "financial_excluded": 2177
+  },
+  {
+   "month": "2008-04",
+   "in_universe": 6261,
+   "has_ticker": 1705,
+   "ticker_pct": 27.2,
+   "sic_unknown": 1920,
+   "financial_excluded": 2188
+  },
+  {
+   "month": "2008-05",
+   "in_universe": 6336,
+   "has_ticker": 1725,
+   "ticker_pct": 27.2,
+   "sic_unknown": 1903,
+   "financial_excluded": 2234
+  },
+  {
+   "month": "2008-06",
+   "in_universe": 6361,
+   "has_ticker": 1731,
+   "ticker_pct": 27.2,
+   "sic_unknown": 1719,
+   "financial_excluded": 2237
+  },
+  {
+   "month": "2008-07",
+   "in_universe": 6388,
+   "has_ticker": 1731,
+   "ticker_pct": 27.1,
+   "sic_unknown": 1671,
+   "financial_excluded": 2238
+  },
+  {
+   "month": "2008-08",
+   "in_universe": 6460,
+   "has_ticker": 1741,
+   "ticker_pct": 27.0,
+   "sic_unknown": 1643,
+   "financial_excluded": 2264
+  },
+  {
+   "month": "2008-09",
+   "in_universe": 6495,
+   "has_ticker": 1745,
+   "ticker_pct": 26.9,
+   "sic_unknown": 1454,
+   "financial_excluded": 2269
+  },
+  {
+   "month": "2008-10",
+   "in_universe": 6523,
+   "has_ticker": 1750,
+   "ticker_pct": 26.8,
+   "sic_unknown": 1423,
+   "financial_excluded": 2271
+  },
+  {
+   "month": "2008-11",
+   "in_universe": 6584,
+   "has_ticker": 1758,
+   "ticker_pct": 26.7,
+   "sic_unknown": 1409,
+   "financial_excluded": 2297
+  },
+  {
+   "month": "2008-12",
+   "in_universe": 6610,
+   "has_ticker": 1759,
+   "ticker_pct": 26.6,
+   "sic_unknown": 1016,
+   "financial_excluded": 2304
+  },
+  {
+   "month": "2009-01",
+   "in_universe": 6624,
+   "has_ticker": 1760,
+   "ticker_pct": 26.6,
+   "sic_unknown": 983,
+   "financial_excluded": 2313
+  },
+  {
+   "month": "2009-02",
+   "in_universe": 6651,
+   "has_ticker": 1765,
+   "ticker_pct": 26.5,
+   "sic_unknown": 948,
+   "financial_excluded": 2318
+  },
+  {
+   "month": "2009-03",
+   "in_universe": 6682,
+   "has_ticker": 1769,
+   "ticker_pct": 26.5,
+   "sic_unknown": 1186,
+   "financial_excluded": 2333
+  },
+  {
+   "month": "2009-04",
+   "in_universe": 6711,
+   "has_ticker": 1774,
+   "ticker_pct": 26.4,
+   "sic_unknown": 857,
+   "financial_excluded": 2337
+  },
+  {
+   "month": "2009-05",
+   "in_universe": 6739,
+   "has_ticker": 1776,
+   "ticker_pct": 26.4,
+   "sic_unknown": 811,
+   "financial_excluded": 2343
+  },
+  {
+   "month": "2009-06",
+   "in_universe": 6754,
+   "has_ticker": 1778,
+   "ticker_pct": 26.3,
+   "sic_unknown": 655,
+   "financial_excluded": 2344
+  },
+  {
+   "month": "2009-07",
+   "in_universe": 6770,
+   "has_ticker": 1780,
+   "ticker_pct": 26.3,
+   "sic_unknown": 597,
+   "financial_excluded": 2345
+  },
+  {
+   "month": "2009-08",
+   "in_universe": 6809,
+   "has_ticker": 1785,
+   "ticker_pct": 26.2,
+   "sic_unknown": 561,
+   "financial_excluded": 2364
+  },
+  {
+   "month": "2009-09",
+   "in_universe": 6817,
+   "has_ticker": 1787,
+   "ticker_pct": 26.2,
+   "sic_unknown": 412,
+   "financial_excluded": 2370
+  },
+  {
+   "month": "2009-10",
+   "in_universe": 6826,
+   "has_ticker": 1789,
+   "ticker_pct": 26.2,
+   "sic_unknown": 391,
+   "financial_excluded": 2373
+  },
+  {
+   "month": "2009-11",
+   "in_universe": 6863,
+   "has_ticker": 1797,
+   "ticker_pct": 26.2,
+   "sic_unknown": 371,
+   "financial_excluded": 2400
+  },
+  {
+   "month": "2009-12",
+   "in_universe": 6867,
+   "has_ticker": 1797,
+   "ticker_pct": 26.2,
+   "sic_unknown": 131,
+   "financial_excluded": 2408
+  },
+  {
+   "month": "2010-01",
+   "in_universe": 6872,
+   "has_ticker": 1798,
+   "ticker_pct": 26.2,
+   "sic_unknown": 109,
+   "financial_excluded": 2412
+  },
+  {
+   "month": "2010-02",
+   "in_universe": 6858,
+   "has_ticker": 1801,
+   "ticker_pct": 26.3,
+   "sic_unknown": 107,
+   "financial_excluded": 2409
+  },
+  {
+   "month": "2010-03",
+   "in_universe": 6862,
+   "has_ticker": 1808,
+   "ticker_pct": 26.3,
+   "sic_unknown": 110,
+   "financial_excluded": 2448
+  },
+  {
+   "month": "2010-04",
+   "in_universe": 6840,
+   "has_ticker": 1813,
+   "ticker_pct": 26.5,
+   "sic_unknown": 107,
+   "financial_excluded": 2388
+  },
+  {
+   "month": "2010-05",
+   "in_universe": 6847,
+   "has_ticker": 1823,
+   "ticker_pct": 26.6,
+   "sic_unknown": 107,
+   "financial_excluded": 2399
+  },
+  {
+   "month": "2010-06",
+   "in_universe": 6795,
+   "has_ticker": 1828,
+   "ticker_pct": 26.9,
+   "sic_unknown": 105,
+   "financial_excluded": 2377
+  },
+  {
+   "month": "2010-07",
+   "in_universe": 6780,
+   "has_ticker": 1828,
+   "ticker_pct": 27.0,
+   "sic_unknown": 105,
+   "financial_excluded": 2370
+  },
+  {
+   "month": "2010-08",
+   "in_universe": 6806,
+   "has_ticker": 1840,
+   "ticker_pct": 27.0,
+   "sic_unknown": 108,
+   "financial_excluded": 2384
+  },
+  {
+   "month": "2010-09",
+   "in_universe": 6750,
+   "has_ticker": 1844,
+   "ticker_pct": 27.3,
+   "sic_unknown": 109,
+   "financial_excluded": 2368
+  },
+  {
+   "month": "2010-10",
+   "in_universe": 6741,
+   "has_ticker": 1848,
+   "ticker_pct": 27.4,
+   "sic_unknown": 109,
+   "financial_excluded": 2362
+  },
+  {
+   "month": "2010-11",
+   "in_universe": 6774,
+   "has_ticker": 1860,
+   "ticker_pct": 27.5,
+   "sic_unknown": 110,
+   "financial_excluded": 2406
+  },
+  {
+   "month": "2010-12",
+   "in_universe": 6603,
+   "has_ticker": 1865,
+   "ticker_pct": 28.2,
+   "sic_unknown": 99,
+   "financial_excluded": 2349
+  },
+  {
+   "month": "2011-01",
+   "in_universe": 6567,
+   "has_ticker": 1871,
+   "ticker_pct": 28.5,
+   "sic_unknown": 99,
+   "financial_excluded": 2345
+  },
+  {
+   "month": "2011-02",
+   "in_universe": 6565,
+   "has_ticker": 1874,
+   "ticker_pct": 28.5,
+   "sic_unknown": 99,
+   "financial_excluded": 2344
+  },
+  {
+   "month": "2011-03",
+   "in_universe": 6580,
+   "has_ticker": 1881,
+   "ticker_pct": 28.6,
+   "sic_unknown": 104,
+   "financial_excluded": 2407
+  },
+  {
+   "month": "2011-04",
+   "in_universe": 6559,
+   "has_ticker": 1884,
+   "ticker_pct": 28.7,
+   "sic_unknown": 48,
+   "financial_excluded": 2379
+  },
+  {
+   "month": "2011-05",
+   "in_universe": 6573,
+   "has_ticker": 1892,
+   "ticker_pct": 28.8,
+   "sic_unknown": 52,
+   "financial_excluded": 2404
+  },
+  {
+   "month": "2011-06",
+   "in_universe": 6488,
+   "has_ticker": 1895,
+   "ticker_pct": 29.2,
+   "sic_unknown": 54,
+   "financial_excluded": 2364
+  },
+  {
+   "month": "2011-07",
+   "in_universe": 6457,
+   "has_ticker": 1893,
+   "ticker_pct": 29.3,
+   "sic_unknown": 54,
+   "financial_excluded": 2354
+  },
+  {
+   "month": "2011-08",
+   "in_universe": 6493,
+   "has_ticker": 1906,
+   "ticker_pct": 29.4,
+   "sic_unknown": 60,
+   "financial_excluded": 2364
+  },
+  {
+   "month": "2011-09",
+   "in_universe": 6425,
+   "has_ticker": 1911,
+   "ticker_pct": 29.7,
+   "sic_unknown": 59,
+   "financial_excluded": 2338
+  },
+  {
+   "month": "2011-10",
+   "in_universe": 6418,
+   "has_ticker": 1911,
+   "ticker_pct": 29.8,
+   "sic_unknown": 59,
+   "financial_excluded": 2332
+  },
+  {
+   "month": "2011-11",
+   "in_universe": 6437,
+   "has_ticker": 1924,
+   "ticker_pct": 29.9,
+   "sic_unknown": 58,
+   "financial_excluded": 2350
+  },
+  {
+   "month": "2011-12",
+   "in_universe": 6278,
+   "has_ticker": 1929,
+   "ticker_pct": 30.7,
+   "sic_unknown": 58,
+   "financial_excluded": 2286
+  },
+  {
+   "month": "2012-01",
+   "in_universe": 6265,
+   "has_ticker": 1929,
+   "ticker_pct": 30.8,
+   "sic_unknown": 58,
+   "financial_excluded": 2276
+  },
+  {
+   "month": "2012-02",
+   "in_universe": 6259,
+   "has_ticker": 1934,
+   "ticker_pct": 30.9,
+   "sic_unknown": 58,
+   "financial_excluded": 2271
+  },
+  {
+   "month": "2012-03",
+   "in_universe": 6279,
+   "has_ticker": 1947,
+   "ticker_pct": 31.0,
+   "sic_unknown": 57,
+   "financial_excluded": 2334
+  },
+  {
+   "month": "2012-04",
+   "in_universe": 6276,
+   "has_ticker": 1951,
+   "ticker_pct": 31.1,
+   "sic_unknown": 57,
+   "financial_excluded": 2291
+  },
+  {
+   "month": "2012-05",
+   "in_universe": 6308,
+   "has_ticker": 1966,
+   "ticker_pct": 31.2,
+   "sic_unknown": 63,
+   "financial_excluded": 2301
+  },
+  {
+   "month": "2012-06",
+   "in_universe": 6249,
+   "has_ticker": 1972,
+   "ticker_pct": 31.6,
+   "sic_unknown": 56,
+   "financial_excluded": 2258
+  },
+  {
+   "month": "2012-07",
+   "in_universe": 6229,
+   "has_ticker": 1976,
+   "ticker_pct": 31.7,
+   "sic_unknown": 56,
+   "financial_excluded": 2255
+  },
+  {
+   "month": "2012-08",
+   "in_universe": 6233,
+   "has_ticker": 1981,
+   "ticker_pct": 31.8,
+   "sic_unknown": 61,
+   "financial_excluded": 2259
+  },
+  {
+   "month": "2012-09",
+   "in_universe": 6179,
+   "has_ticker": 1985,
+   "ticker_pct": 32.1,
+   "sic_unknown": 60,
+   "financial_excluded": 2229
+  },
+  {
+   "month": "2012-10",
+   "in_universe": 6167,
+   "has_ticker": 1987,
+   "ticker_pct": 32.2,
+   "sic_unknown": 60,
+   "financial_excluded": 2224
+  },
+  {
+   "month": "2012-11",
+   "in_universe": 6189,
+   "has_ticker": 1996,
+   "ticker_pct": 32.3,
+   "sic_unknown": 61,
+   "financial_excluded": 2223
+  },
+  {
+   "month": "2012-12",
+   "in_universe": 6085,
+   "has_ticker": 2003,
+   "ticker_pct": 32.9,
+   "sic_unknown": 62,
+   "financial_excluded": 2186
+  },
+  {
+   "month": "2013-01",
+   "in_universe": 6044,
+   "has_ticker": 2005,
+   "ticker_pct": 33.2,
+   "sic_unknown": 62,
+   "financial_excluded": 2177
+  },
+  {
+   "month": "2013-02",
+   "in_universe": 6037,
+   "has_ticker": 2013,
+   "ticker_pct": 33.3,
+   "sic_unknown": 62,
+   "financial_excluded": 2163
+  },
+  {
+   "month": "2013-03",
+   "in_universe": 6040,
+   "has_ticker": 2026,
+   "ticker_pct": 33.5,
+   "sic_unknown": 65,
+   "financial_excluded": 2249
+  },
+  {
+   "month": "2013-04",
+   "in_universe": 6015,
+   "has_ticker": 2029,
+   "ticker_pct": 33.7,
+   "sic_unknown": 65,
+   "financial_excluded": 2206
+  },
+  {
+   "month": "2013-05",
+   "in_universe": 6026,
+   "has_ticker": 2036,
+   "ticker_pct": 33.8,
+   "sic_unknown": 67,
+   "financial_excluded": 2210
+  },
+  {
+   "month": "2013-06",
+   "in_universe": 6002,
+   "has_ticker": 2041,
+   "ticker_pct": 34.0,
+   "sic_unknown": 66,
+   "financial_excluded": 2198
+  },
+  {
+   "month": "2013-07",
+   "in_universe": 5979,
+   "has_ticker": 2040,
+   "ticker_pct": 34.1,
+   "sic_unknown": 66,
+   "financial_excluded": 2193
+  },
+  {
+   "month": "2013-08",
+   "in_universe": 6023,
+   "has_ticker": 2054,
+   "ticker_pct": 34.1,
+   "sic_unknown": 66,
+   "financial_excluded": 2195
+  },
+  {
+   "month": "2013-09",
+   "in_universe": 5987,
+   "has_ticker": 2062,
+   "ticker_pct": 34.4,
+   "sic_unknown": 65,
+   "financial_excluded": 2180
+  },
+  {
+   "month": "2013-10",
+   "in_universe": 5976,
+   "has_ticker": 2064,
+   "ticker_pct": 34.5,
+   "sic_unknown": 65,
+   "financial_excluded": 2178
+  },
+  {
+   "month": "2013-11",
+   "in_universe": 6020,
+   "has_ticker": 2084,
+   "ticker_pct": 34.6,
+   "sic_unknown": 70,
+   "financial_excluded": 2197
+  },
+  {
+   "month": "2013-12",
+   "in_universe": 5924,
+   "has_ticker": 2090,
+   "ticker_pct": 35.3,
+   "sic_unknown": 69,
+   "financial_excluded": 2133
+  },
+  {
+   "month": "2014-01",
+   "in_universe": 5912,
+   "has_ticker": 2091,
+   "ticker_pct": 35.4,
+   "sic_unknown": 69,
+   "financial_excluded": 2132
+  },
+  {
+   "month": "2014-02",
+   "in_universe": 5904,
+   "has_ticker": 2096,
+   "ticker_pct": 35.5,
+   "sic_unknown": 69,
+   "financial_excluded": 2127
+  },
+  {
+   "month": "2014-03",
+   "in_universe": 5933,
+   "has_ticker": 2117,
+   "ticker_pct": 35.7,
+   "sic_unknown": 71,
+   "financial_excluded": 2253
+  },
+  {
+   "month": "2014-04",
+   "in_universe": 5909,
+   "has_ticker": 2119,
+   "ticker_pct": 35.9,
+   "sic_unknown": 70,
+   "financial_excluded": 2210
+  },
+  {
+   "month": "2014-05",
+   "in_universe": 5947,
+   "has_ticker": 2143,
+   "ticker_pct": 36.0,
+   "sic_unknown": 72,
+   "financial_excluded": 2226
+  },
+  {
+   "month": "2014-06",
+   "in_universe": 5918,
+   "has_ticker": 2152,
+   "ticker_pct": 36.4,
+   "sic_unknown": 69,
+   "financial_excluded": 2218
+  },
+  {
+   "month": "2014-07",
+   "in_universe": 5902,
+   "has_ticker": 2154,
+   "ticker_pct": 36.5,
+   "sic_unknown": 69,
+   "financial_excluded": 2207
+  },
+  {
+   "month": "2014-08",
+   "in_universe": 5953,
+   "has_ticker": 2175,
+   "ticker_pct": 36.5,
+   "sic_unknown": 72,
+   "financial_excluded": 2222
+  },
+  {
+   "month": "2014-09",
+   "in_universe": 5924,
+   "has_ticker": 2183,
+   "ticker_pct": 36.9,
+   "sic_unknown": 72,
+   "financial_excluded": 2217
+  },
+  {
+   "month": "2014-10",
+   "in_universe": 5913,
+   "has_ticker": 2185,
+   "ticker_pct": 37.0,
+   "sic_unknown": 74,
+   "financial_excluded": 2213
+  },
+  {
+   "month": "2014-11",
+   "in_universe": 5923,
+   "has_ticker": 2203,
+   "ticker_pct": 37.2,
+   "sic_unknown": 75,
+   "financial_excluded": 2228
+  },
+  {
+   "month": "2014-12",
+   "in_universe": 5810,
+   "has_ticker": 2214,
+   "ticker_pct": 38.1,
+   "sic_unknown": 74,
+   "financial_excluded": 2208
+  },
+  {
+   "month": "2015-01",
+   "in_universe": 5773,
+   "has_ticker": 2215,
+   "ticker_pct": 38.4,
+   "sic_unknown": 74,
+   "financial_excluded": 2209
+  },
+  {
+   "month": "2015-02",
+   "in_universe": 5771,
+   "has_ticker": 2219,
+   "ticker_pct": 38.5,
+   "sic_unknown": 75,
+   "financial_excluded": 2203
+  },
+  {
+   "month": "2015-03",
+   "in_universe": 5788,
+   "has_ticker": 2236,
+   "ticker_pct": 38.6,
+   "sic_unknown": 76,
+   "financial_excluded": 2331
+  },
+  {
+   "month": "2015-04",
+   "in_universe": 5769,
+   "has_ticker": 2238,
+   "ticker_pct": 38.8,
+   "sic_unknown": 75,
+   "financial_excluded": 2252
+  },
+  {
+   "month": "2015-05",
+   "in_universe": 5781,
+   "has_ticker": 2251,
+   "ticker_pct": 38.9,
+   "sic_unknown": 78,
+   "financial_excluded": 2270
+  },
+  {
+   "month": "2015-06",
+   "in_universe": 5736,
+   "has_ticker": 2262,
+   "ticker_pct": 39.4,
+   "sic_unknown": 78,
+   "financial_excluded": 2257
+  },
+  {
+   "month": "2015-07",
+   "in_universe": 5719,
+   "has_ticker": 2267,
+   "ticker_pct": 39.6,
+   "sic_unknown": 78,
+   "financial_excluded": 2246
+  },
+  {
+   "month": "2015-08",
+   "in_universe": 5741,
+   "has_ticker": 2289,
+   "ticker_pct": 39.9,
+   "sic_unknown": 79,
+   "financial_excluded": 2244
+  },
+  {
+   "month": "2015-09",
+   "in_universe": 5684,
+   "has_ticker": 2301,
+   "ticker_pct": 40.5,
+   "sic_unknown": 79,
+   "financial_excluded": 2227
+  },
+  {
+   "month": "2015-10",
+   "in_universe": 5666,
+   "has_ticker": 2303,
+   "ticker_pct": 40.6,
+   "sic_unknown": 79,
+   "financial_excluded": 2224
+  },
+  {
+   "month": "2015-11",
+   "in_universe": 5668,
+   "has_ticker": 2323,
+   "ticker_pct": 41.0,
+   "sic_unknown": 86,
+   "financial_excluded": 2234
+  },
+  {
+   "month": "2015-12",
+   "in_universe": 5552,
+   "has_ticker": 2330,
+   "ticker_pct": 42.0,
+   "sic_unknown": 85,
+   "financial_excluded": 2191
+  },
+  {
+   "month": "2016-01",
+   "in_universe": 5528,
+   "has_ticker": 2331,
+   "ticker_pct": 42.2,
+   "sic_unknown": 85,
+   "financial_excluded": 2181
+  },
+  {
+   "month": "2016-02",
+   "in_universe": 5509,
+   "has_ticker": 2336,
+   "ticker_pct": 42.4,
+   "sic_unknown": 85,
+   "financial_excluded": 2173
+  },
+  {
+   "month": "2016-03",
+   "in_universe": 5492,
+   "has_ticker": 2343,
+   "ticker_pct": 42.7,
+   "sic_unknown": 86,
+   "financial_excluded": 2283
+  },
+  {
+   "month": "2016-04",
+   "in_universe": 5468,
+   "has_ticker": 2345,
+   "ticker_pct": 42.9,
+   "sic_unknown": 86,
+   "financial_excluded": 2207
+  },
+  {
+   "month": "2016-05",
+   "in_universe": 5460,
+   "has_ticker": 2356,
+   "ticker_pct": 43.2,
+   "sic_unknown": 86,
+   "financial_excluded": 2219
+  },
+  {
+   "month": "2016-06",
+   "in_universe": 5423,
+   "has_ticker": 2367,
+   "ticker_pct": 43.6,
+   "sic_unknown": 86,
+   "financial_excluded": 2217
+  },
+  {
+   "month": "2016-07",
+   "in_universe": 5395,
+   "has_ticker": 2366,
+   "ticker_pct": 43.9,
+   "sic_unknown": 86,
+   "financial_excluded": 2202
+  },
+  {
+   "month": "2016-08",
+   "in_universe": 5404,
+   "has_ticker": 2382,
+   "ticker_pct": 44.1,
+   "sic_unknown": 89,
+   "financial_excluded": 2210
+  },
+  {
+   "month": "2016-09",
+   "in_universe": 5340,
+   "has_ticker": 2389,
+   "ticker_pct": 44.7,
+   "sic_unknown": 88,
+   "financial_excluded": 2188
+  },
+  {
+   "month": "2016-10",
+   "in_universe": 5307,
+   "has_ticker": 2390,
+   "ticker_pct": 45.0,
+   "sic_unknown": 89,
+   "financial_excluded": 2176
+  },
+  {
+   "month": "2016-11",
+   "in_universe": 5338,
+   "has_ticker": 2414,
+   "ticker_pct": 45.2,
+   "sic_unknown": 92,
+   "financial_excluded": 2187
+  },
+  {
+   "month": "2016-12",
+   "in_universe": 5249,
+   "has_ticker": 2424,
+   "ticker_pct": 46.2,
+   "sic_unknown": 89,
+   "financial_excluded": 2156
+  },
+  {
+   "month": "2017-01",
+   "in_universe": 5225,
+   "has_ticker": 2426,
+   "ticker_pct": 46.4,
+   "sic_unknown": 90,
+   "financial_excluded": 2151
+  },
+  {
+   "month": "2017-02",
+   "in_universe": 5219,
+   "has_ticker": 2429,
+   "ticker_pct": 46.5,
+   "sic_unknown": 90,
+   "financial_excluded": 2144
+  },
+  {
+   "month": "2017-03",
+   "in_universe": 5226,
+   "has_ticker": 2447,
+   "ticker_pct": 46.8,
+   "sic_unknown": 91,
+   "financial_excluded": 2246
+  },
+  {
+   "month": "2017-04",
+   "in_universe": 5202,
+   "has_ticker": 2449,
+   "ticker_pct": 47.1,
+   "sic_unknown": 90,
+   "financial_excluded": 2181
+  },
+  {
+   "month": "2017-05",
+   "in_universe": 5204,
+   "has_ticker": 2463,
+   "ticker_pct": 47.3,
+   "sic_unknown": 92,
+   "financial_excluded": 2190
+  },
+  {
+   "month": "2017-06",
+   "in_universe": 5172,
+   "has_ticker": 2477,
+   "ticker_pct": 47.9,
+   "sic_unknown": 91,
+   "financial_excluded": 2181
+  },
+  {
+   "month": "2017-07",
+   "in_universe": 5151,
+   "has_ticker": 2479,
+   "ticker_pct": 48.1,
+   "sic_unknown": 91,
+   "financial_excluded": 2160
+  },
+  {
+   "month": "2017-08",
+   "in_universe": 5153,
+   "has_ticker": 2495,
+   "ticker_pct": 48.4,
+   "sic_unknown": 93,
+   "financial_excluded": 2176
+  },
+  {
+   "month": "2017-09",
+   "in_universe": 5121,
+   "has_ticker": 2501,
+   "ticker_pct": 48.8,
+   "sic_unknown": 90,
+   "financial_excluded": 2169
+  },
+  {
+   "month": "2017-10",
+   "in_universe": 5102,
+   "has_ticker": 2504,
+   "ticker_pct": 49.1,
+   "sic_unknown": 90,
+   "financial_excluded": 2164
+  },
+  {
+   "month": "2017-11",
+   "in_universe": 5109,
+   "has_ticker": 2526,
+   "ticker_pct": 49.4,
+   "sic_unknown": 90,
+   "financial_excluded": 2169
+  },
+  {
+   "month": "2017-12",
+   "in_universe": 5047,
+   "has_ticker": 2538,
+   "ticker_pct": 50.3,
+   "sic_unknown": 91,
+   "financial_excluded": 2131
+  },
+  {
+   "month": "2018-01",
+   "in_universe": 5016,
+   "has_ticker": 2540,
+   "ticker_pct": 50.6,
+   "sic_unknown": 91,
+   "financial_excluded": 2119
+  },
+  {
+   "month": "2018-02",
+   "in_universe": 5003,
+   "has_ticker": 2543,
+   "ticker_pct": 50.8,
+   "sic_unknown": 92,
+   "financial_excluded": 2115
+  },
+  {
+   "month": "2018-03",
+   "in_universe": 5010,
+   "has_ticker": 2564,
+   "ticker_pct": 51.2,
+   "sic_unknown": 94,
+   "financial_excluded": 2213
+  },
+  {
+   "month": "2018-04",
+   "in_universe": 4985,
+   "has_ticker": 2565,
+   "ticker_pct": 51.5,
+   "sic_unknown": 94,
+   "financial_excluded": 2164
+  },
+  {
+   "month": "2018-05",
+   "in_universe": 4982,
+   "has_ticker": 2583,
+   "ticker_pct": 51.8,
+   "sic_unknown": 96,
+   "financial_excluded": 2175
+  },
+  {
+   "month": "2018-06",
+   "in_universe": 4942,
+   "has_ticker": 2590,
+   "ticker_pct": 52.4,
+   "sic_unknown": 95,
+   "financial_excluded": 2186
+  },
+  {
+   "month": "2018-07",
+   "in_universe": 4927,
+   "has_ticker": 2591,
+   "ticker_pct": 52.6,
+   "sic_unknown": 95,
+   "financial_excluded": 2169
+  },
+  {
+   "month": "2018-08",
+   "in_universe": 4963,
+   "has_ticker": 2622,
+   "ticker_pct": 52.8,
+   "sic_unknown": 96,
+   "financial_excluded": 2168
+  },
+  {
+   "month": "2018-09",
+   "in_universe": 4945,
+   "has_ticker": 2634,
+   "ticker_pct": 53.3,
+   "sic_unknown": 94,
+   "financial_excluded": 2141
+  },
+  {
+   "month": "2018-10",
+   "in_universe": 4935,
+   "has_ticker": 2635,
+   "ticker_pct": 53.4,
+   "sic_unknown": 94,
+   "financial_excluded": 2135
+  },
+  {
+   "month": "2018-11",
+   "in_universe": 4951,
+   "has_ticker": 2657,
+   "ticker_pct": 53.7,
+   "sic_unknown": 98,
+   "financial_excluded": 2139
+  },
+  {
+   "month": "2018-12",
+   "in_universe": 4882,
+   "has_ticker": 2661,
+   "ticker_pct": 54.5,
+   "sic_unknown": 98,
+   "financial_excluded": 2106
+  },
+  {
+   "month": "2019-01",
+   "in_universe": 4860,
+   "has_ticker": 2662,
+   "ticker_pct": 54.8,
+   "sic_unknown": 97,
+   "financial_excluded": 2097
+  },
+  {
+   "month": "2019-02",
+   "in_universe": 4846,
+   "has_ticker": 2667,
+   "ticker_pct": 55.0,
+   "sic_unknown": 97,
+   "financial_excluded": 2091
+  },
+  {
+   "month": "2019-03",
+   "in_universe": 4847,
+   "has_ticker": 2680,
+   "ticker_pct": 55.3,
+   "sic_unknown": 97,
+   "financial_excluded": 2186
+  },
+  {
+   "month": "2019-04",
+   "in_universe": 4842,
+   "has_ticker": 2694,
+   "ticker_pct": 55.6,
+   "sic_unknown": 97,
+   "financial_excluded": 2108
+  },
+  {
+   "month": "2019-05",
+   "in_universe": 4854,
+   "has_ticker": 2713,
+   "ticker_pct": 55.9,
+   "sic_unknown": 97,
+   "financial_excluded": 2113
+  },
+  {
+   "month": "2019-06",
+   "in_universe": 4832,
+   "has_ticker": 2729,
+   "ticker_pct": 56.5,
+   "sic_unknown": 97,
+   "financial_excluded": 2106
+  },
+  {
+   "month": "2019-07",
+   "in_universe": 4817,
+   "has_ticker": 2729,
+   "ticker_pct": 56.7,
+   "sic_unknown": 97,
+   "financial_excluded": 2103
+  },
+  {
+   "month": "2019-08",
+   "in_universe": 4840,
+   "has_ticker": 2760,
+   "ticker_pct": 57.0,
+   "sic_unknown": 98,
+   "financial_excluded": 2100
+  },
+  {
+   "month": "2019-09",
+   "in_universe": 4809,
+   "has_ticker": 2765,
+   "ticker_pct": 57.5,
+   "sic_unknown": 95,
+   "financial_excluded": 2088
+  },
+  {
+   "month": "2019-10",
+   "in_universe": 4791,
+   "has_ticker": 2768,
+   "ticker_pct": 57.8,
+   "sic_unknown": 95,
+   "financial_excluded": 2083
+  },
+  {
+   "month": "2019-11",
+   "in_universe": 4785,
+   "has_ticker": 2789,
+   "ticker_pct": 58.3,
+   "sic_unknown": 97,
+   "financial_excluded": 2090
+  },
+  {
+   "month": "2019-12",
+   "in_universe": 4716,
+   "has_ticker": 2799,
+   "ticker_pct": 59.4,
+   "sic_unknown": 93,
+   "financial_excluded": 2065
+  },
+  {
+   "month": "2020-01",
+   "in_universe": 4683,
+   "has_ticker": 2798,
+   "ticker_pct": 59.7,
+   "sic_unknown": 92,
+   "financial_excluded": 2059
+  },
+  {
+   "month": "2020-02",
+   "in_universe": 4670,
+   "has_ticker": 2804,
+   "ticker_pct": 60.0,
+   "sic_unknown": 91,
+   "financial_excluded": 2057
+  },
+  {
+   "month": "2020-03",
+   "in_universe": 4679,
+   "has_ticker": 2824,
+   "ticker_pct": 60.4,
+   "sic_unknown": 93,
+   "financial_excluded": 2173
+  },
+  {
+   "month": "2020-04",
+   "in_universe": 4648,
+   "has_ticker": 2828,
+   "ticker_pct": 60.8,
+   "sic_unknown": 93,
+   "financial_excluded": 2114
+  },
+  {
+   "month": "2020-05",
+   "in_universe": 4638,
+   "has_ticker": 2842,
+   "ticker_pct": 61.3,
+   "sic_unknown": 96,
+   "financial_excluded": 2115
+  },
+  {
+   "month": "2020-06",
+   "in_universe": 4614,
+   "has_ticker": 2846,
+   "ticker_pct": 61.7,
+   "sic_unknown": 94,
+   "financial_excluded": 2118
+  },
+  {
+   "month": "2020-07",
+   "in_universe": 4592,
+   "has_ticker": 2847,
+   "ticker_pct": 62.0,
+   "sic_unknown": 94,
+   "financial_excluded": 2101
+  },
+  {
+   "month": "2020-08",
+   "in_universe": 4618,
+   "has_ticker": 2880,
+   "ticker_pct": 62.4,
+   "sic_unknown": 95,
+   "financial_excluded": 2106
+  },
+  {
+   "month": "2020-09",
+   "in_universe": 4618,
+   "has_ticker": 2897,
+   "ticker_pct": 62.7,
+   "sic_unknown": 94,
+   "financial_excluded": 2110
+  },
+  {
+   "month": "2020-10",
+   "in_universe": 4611,
+   "has_ticker": 2903,
+   "ticker_pct": 63.0,
+   "sic_unknown": 94,
+   "financial_excluded": 2111
+  },
+  {
+   "month": "2020-11",
+   "in_universe": 4680,
+   "has_ticker": 2969,
+   "ticker_pct": 63.4,
+   "sic_unknown": 96,
+   "financial_excluded": 2150
+  },
+  {
+   "month": "2020-12",
+   "in_universe": 4670,
+   "has_ticker": 2987,
+   "ticker_pct": 64.0,
+   "sic_unknown": 95,
+   "financial_excluded": 2150
+  },
+  {
+   "month": "2021-01",
+   "in_universe": 4662,
+   "has_ticker": 2993,
+   "ticker_pct": 64.2,
+   "sic_unknown": 94,
+   "financial_excluded": 2156
+  },
+  {
+   "month": "2021-02",
+   "in_universe": 4662,
+   "has_ticker": 3001,
+   "ticker_pct": 64.4,
+   "sic_unknown": 95,
+   "financial_excluded": 2152
+  },
+  {
+   "month": "2021-03",
+   "in_universe": 4757,
+   "has_ticker": 3075,
+   "ticker_pct": 64.6,
+   "sic_unknown": 100,
+   "financial_excluded": 2312
+  },
+  {
+   "month": "2021-04",
+   "in_universe": 4757,
+   "has_ticker": 3086,
+   "ticker_pct": 64.9,
+   "sic_unknown": 99,
+   "financial_excluded": 2251
+  },
+  {
+   "month": "2021-05",
+   "in_universe": 4823,
+   "has_ticker": 3139,
+   "ticker_pct": 65.1,
+   "sic_unknown": 100,
+   "financial_excluded": 2349
+  },
+  {
+   "month": "2021-06",
+   "in_universe": 4847,
+   "has_ticker": 3168,
+   "ticker_pct": 65.4,
+   "sic_unknown": 99,
+   "financial_excluded": 2401
+  },
+  {
+   "month": "2021-07",
+   "in_universe": 4852,
+   "has_ticker": 3177,
+   "ticker_pct": 65.5,
+   "sic_unknown": 97,
+   "financial_excluded": 2408
+  },
+  {
+   "month": "2021-08",
+   "in_universe": 4916,
+   "has_ticker": 3242,
+   "ticker_pct": 65.9,
+   "sic_unknown": 102,
+   "financial_excluded": 2442
+  },
+  {
+   "month": "2021-09",
+   "in_universe": 4945,
+   "has_ticker": 3282,
+   "ticker_pct": 66.4,
+   "sic_unknown": 102,
+   "financial_excluded": 2449
+  },
+  {
+   "month": "2021-10",
+   "in_universe": 4922,
+   "has_ticker": 3284,
+   "ticker_pct": 66.7,
+   "sic_unknown": 102,
+   "financial_excluded": 2439
+  },
+  {
+   "month": "2021-11",
+   "in_universe": 4982,
+   "has_ticker": 3336,
+   "ticker_pct": 67.0,
+   "sic_unknown": 106,
+   "financial_excluded": 2480
+  },
+  {
+   "month": "2021-12",
+   "in_universe": 4995,
+   "has_ticker": 3380,
+   "ticker_pct": 67.7,
+   "sic_unknown": 106,
+   "financial_excluded": 2519
+  },
+  {
+   "month": "2022-01",
+   "in_universe": 4981,
+   "has_ticker": 3382,
+   "ticker_pct": 67.9,
+   "sic_unknown": 105,
+   "financial_excluded": 2520
+  },
+  {
+   "month": "2022-02",
+   "in_universe": 4970,
+   "has_ticker": 3385,
+   "ticker_pct": 68.1,
+   "sic_unknown": 105,
+   "financial_excluded": 2512
+  },
+  {
+   "month": "2022-03",
+   "in_universe": 5026,
+   "has_ticker": 3431,
+   "ticker_pct": 68.3,
+   "sic_unknown": 114,
+   "financial_excluded": 2643
+  },
+  {
+   "month": "2022-04",
+   "in_universe": 5024,
+   "has_ticker": 3443,
+   "ticker_pct": 68.5,
+   "sic_unknown": 114,
+   "financial_excluded": 2582
+  },
+  {
+   "month": "2022-05",
+   "in_universe": 5030,
+   "has_ticker": 3460,
+   "ticker_pct": 68.8,
+   "sic_unknown": 117,
+   "financial_excluded": 2599
+  },
+  {
+   "month": "2022-06",
+   "in_universe": 4998,
+   "has_ticker": 3473,
+   "ticker_pct": 69.5,
+   "sic_unknown": 115,
+   "financial_excluded": 2599
+  },
+  {
+   "month": "2022-07",
+   "in_universe": 4986,
+   "has_ticker": 3474,
+   "ticker_pct": 69.7,
+   "sic_unknown": 115,
+   "financial_excluded": 2581
+  },
+  {
+   "month": "2022-08",
+   "in_universe": 4986,
+   "has_ticker": 3487,
+   "ticker_pct": 69.9,
+   "sic_unknown": 124,
+   "financial_excluded": 2586
+  },
+  {
+   "month": "2022-09",
+   "in_universe": 4956,
+   "has_ticker": 3493,
+   "ticker_pct": 70.5,
+   "sic_unknown": 123,
+   "financial_excluded": 2569
+  },
+  {
+   "month": "2022-10",
+   "in_universe": 4933,
+   "has_ticker": 3495,
+   "ticker_pct": 70.8,
+   "sic_unknown": 123,
+   "financial_excluded": 2559
+  },
+  {
+   "month": "2022-11",
+   "in_universe": 4936,
+   "has_ticker": 3518,
+   "ticker_pct": 71.3,
+   "sic_unknown": 128,
+   "financial_excluded": 2535
+  },
+  {
+   "month": "2022-12",
+   "in_universe": 4885,
+   "has_ticker": 3519,
+   "ticker_pct": 72.0,
+   "sic_unknown": 126,
+   "financial_excluded": 2496
+  },
+  {
+   "month": "2023-01",
+   "in_universe": 4851,
+   "has_ticker": 3520,
+   "ticker_pct": 72.6,
+   "sic_unknown": 125,
+   "financial_excluded": 2413
+  },
+  {
+   "month": "2023-02",
+   "in_universe": 4832,
+   "has_ticker": 3520,
+   "ticker_pct": 72.8,
+   "sic_unknown": 125,
+   "financial_excluded": 2389
+  },
+  {
+   "month": "2023-03",
+   "in_universe": 4841,
+   "has_ticker": 3539,
+   "ticker_pct": 73.1,
+   "sic_unknown": 130,
+   "financial_excluded": 2458
+  },
+  {
+   "month": "2023-04",
+   "in_universe": 4804,
+   "has_ticker": 3543,
+   "ticker_pct": 73.8,
+   "sic_unknown": 130,
+   "financial_excluded": 2329
+  },
+  {
+   "month": "2023-05",
+   "in_universe": 4783,
+   "has_ticker": 3551,
+   "ticker_pct": 74.2,
+   "sic_unknown": 134,
+   "financial_excluded": 2324
+  },
+  {
+   "month": "2023-06",
+   "in_universe": 4738,
+   "has_ticker": 3555,
+   "ticker_pct": 75.0,
+   "sic_unknown": 134,
+   "financial_excluded": 2298
+  },
+  {
+   "month": "2023-07",
+   "in_universe": 4718,
+   "has_ticker": 3559,
+   "ticker_pct": 75.4,
+   "sic_unknown": 134,
+   "financial_excluded": 2267
+  },
+  {
+   "month": "2023-08",
+   "in_universe": 4703,
+   "has_ticker": 3576,
+   "ticker_pct": 76.0,
+   "sic_unknown": 144,
+   "financial_excluded": 2258
+  },
+  {
+   "month": "2023-09",
+   "in_universe": 4675,
+   "has_ticker": 3585,
+   "ticker_pct": 76.7,
+   "sic_unknown": 143,
+   "financial_excluded": 2240
+  },
+  {
+   "month": "2023-10",
+   "in_universe": 4651,
+   "has_ticker": 3592,
+   "ticker_pct": 77.2,
+   "sic_unknown": 143,
+   "financial_excluded": 2231
+  },
+  {
+   "month": "2023-11",
+   "in_universe": 4643,
+   "has_ticker": 3608,
+   "ticker_pct": 77.7,
+   "sic_unknown": 150,
+   "financial_excluded": 2226
+  },
+  {
+   "month": "2023-12",
+   "in_universe": 4562,
+   "has_ticker": 3614,
+   "ticker_pct": 79.2,
+   "sic_unknown": 148,
+   "financial_excluded": 2196
+  },
+  {
+   "month": "2024-01",
+   "in_universe": 4526,
+   "has_ticker": 3616,
+   "ticker_pct": 79.9,
+   "sic_unknown": 148,
+   "financial_excluded": 2171
+  },
+  {
+   "month": "2024-02",
+   "in_universe": 4513,
+   "has_ticker": 3622,
+   "ticker_pct": 80.3,
+   "sic_unknown": 150,
+   "financial_excluded": 2163
+  },
+  {
+   "month": "2024-03",
+   "in_universe": 4500,
+   "has_ticker": 3634,
+   "ticker_pct": 80.8,
+   "sic_unknown": 154,
+   "financial_excluded": 2251
+  },
+  {
+   "month": "2024-04",
+   "in_universe": 4479,
+   "has_ticker": 3647,
+   "ticker_pct": 81.4,
+   "sic_unknown": 153,
+   "financial_excluded": 2185
+  },
+  {
+   "month": "2024-05",
+   "in_universe": 4447,
+   "has_ticker": 3655,
+   "ticker_pct": 82.2,
+   "sic_unknown": 159,
+   "financial_excluded": 2179
+  },
+  {
+   "month": "2024-06",
+   "in_universe": 4419,
+   "has_ticker": 3663,
+   "ticker_pct": 82.9,
+   "sic_unknown": 157,
+   "financial_excluded": 2178
+  },
+  {
+   "month": "2024-07",
+   "in_universe": 4397,
+   "has_ticker": 3664,
+   "ticker_pct": 83.3,
+   "sic_unknown": 157,
+   "financial_excluded": 2160
+  },
+  {
+   "month": "2024-08",
+   "in_universe": 4400,
+   "has_ticker": 3688,
+   "ticker_pct": 83.8,
+   "sic_unknown": 163,
+   "financial_excluded": 2164
+  },
+  {
+   "month": "2024-09",
+   "in_universe": 4365,
+   "has_ticker": 3694,
+   "ticker_pct": 84.6,
+   "sic_unknown": 163,
+   "financial_excluded": 2159
+  },
+  {
+   "month": "2024-10",
+   "in_universe": 4339,
+   "has_ticker": 3698,
+   "ticker_pct": 85.2,
+   "sic_unknown": 163,
+   "financial_excluded": 2153
+  },
+  {
+   "month": "2024-11",
+   "in_universe": 4332,
+   "has_ticker": 3722,
+   "ticker_pct": 85.9,
+   "sic_unknown": 166,
+   "financial_excluded": 2153
+  },
+  {
+   "month": "2024-12",
+   "in_universe": 4271,
+   "has_ticker": 3721,
+   "ticker_pct": 87.1,
+   "sic_unknown": 164,
+   "financial_excluded": 2142
+  }
+ ]
+}

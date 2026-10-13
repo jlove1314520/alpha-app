@@ -55,7 +55,15 @@ HEADERS = {"User-Agent": "AlphaResearch-USTrack contact@alpha-research-project.e
 SLEEP = 0.2
 STOPPED_FILING_MONTHS = 15
 
-QUARTERS = [(y, q) for y in range(2010, 2027) for q in (1, 2, 3, 4)
+# 先.八十三-3a-2（2026-10-13）：起始年可用 --from-year 往前延伸（預設維持 2010）。
+# 1994～2009 只多掃 form.idx（每季 1 請求，共 64 次）；那段期間的 Form 25 本文**不抓**
+# （--form25 只解析已快取的那批），所以 2010 以前下市的公司會以 stopped_filing 呈現，
+# 不會標 delisted——見 build() 的 note。
+FROM_YEAR = 2010
+for _i, _a in enumerate(sys.argv):
+    if _a == "--from-year" and _i + 1 < len(sys.argv):
+        FROM_YEAR = int(sys.argv[_i + 1])
+QUARTERS = [(y, q) for y in range(FROM_YEAR, 2027) for q in (1, 2, 3, 4)
             if not (y == 2026 and q == 4)]
 
 # 普通股的證券類別字樣（裁示一.1：Common Stock／Ordinary Shares／Class A/B）。
@@ -68,6 +76,13 @@ NONCOMMON_PAT = re.compile(
     r"preferred|warrant|unit[s]?\b|note[s]?\b|bond|debenture|right[s]?\b|"
     r"depositary\s+share|subordinat|trust\s+preferred|contingent\s+value", re.I)
 
+
+# 定期報告原件（不含 /A 修正版）。先.八十三-3a-2：1994～2009 年小型公司用 10KSB／10QSB
+# （2008～2009 年廢止）、2003 年以前很多公司用 10-K405，form.idx 裡的寫法**沒有連字號**
+# （實測 1996Q1：10QSB 289、10KSB 237、10-K405 995；2003Q1：10KSB 1,422、10QSB 1,274）。
+# 只認 10-K／10-Q 的話，早年小型股會整批不算「有定期報告」，母體系統性低估。
+# 2010 起這些表格幾乎不再出現，對既有 2010+ 名冊影響極小。
+PERIODIC_FORMS = ("10-K", "10-Q", "10-K405", "10KSB", "10QSB", "10KSB40")
 
 ROW_RE = re.compile(r"^(\S+)\s+(.*?)\s+(\d+)\s+(\d{4}-\d{2}-\d{2})\s+(edgar/\S+)\s*$")
 
@@ -128,7 +143,7 @@ def scan_index() -> dict:
             if not m:
                 continue
             ft, name, cik_s, dt, fn = m.group(1), m.group(2).strip(), m.group(3), m.group(4), m.group(5)
-            if ft not in ("25", "25-NSE", "10-K", "10-Q", "10-K/A", "10-Q/A"):
+            if ft not in ("25", "25-NSE") and ft not in PERIODIC_FORMS:
                 continue
             cik = int(cik_s)
             all_ciks.add(cik)
@@ -136,7 +151,7 @@ def scan_index() -> dict:
             if ft in ("25", "25-NSE"):
                 form25.append({"cik": cik, "name": name, "date": dt, "form": ft, "file": fn})
                 n25 += 1
-            elif ft in ("10-K", "10-Q"):  # 修正版不算 /A（原件才代表一次正式定期申報）
+            elif ft in PERIODIC_FORMS:  # 修正版不算 /A（原件才代表一次正式定期申報）
                 if dt > last_report.get(cik, ""):
                     last_report[cik] = dt
                 # first_report 是逐年母體表的關鍵：沒有它，2019 年才 IPO 的公司會被
@@ -246,7 +261,7 @@ def main() -> int:
     state_path = RAW / "us_universe_rebuild_state.json"
     state = json.loads(state_path.read_text(encoding="utf-8")) if state_path.exists() else {}
     if "--index" in args:
-        print("=== 步驟1：掃 form.idx 2010Q1～2026Q3 ===", flush=True)
+        print(f"=== 步驟1：掃 form.idx {FROM_YEAR}Q1～2026Q3 ===", flush=True)
         st = scan_index()
         state.update(st)
         state_path.write_text(json.dumps(state), encoding="utf-8")
@@ -325,11 +340,13 @@ def build(state: dict) -> None:
         uni[str(cik)] = rec
     doc = {"generated_at": datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds"),
            "schema": "v2",
-           "source": "SEC EDGAR full-index form.idx 2010Q1～2026Q3 全量；Form 25／25-NSE 逐筆解析 securityClassTitle",
+           "source": f"SEC EDGAR full-index form.idx {QUARTERS[0][0]}Q{QUARTERS[0][1]}～2026Q3 全量；Form 25／25-NSE 逐筆解析 securityClassTitle（2010 以前的 Form 25 本文未抓）",
            "note": ("v2（先.十八-一）：母體改為「2010 以來曾向 SEC 申報過 10-K／10-Q 或 Form 25 的所有 CIK」，"
                     "不再從現有 ticker 名冊出發，故含早已下市、現在沒有 ticker 的公司。"
                     "delisted 只在 Form 25 的證券類別為普通股時才標；非普通股（優先股／權證／票券等）不再誤判。"
-                    "另加 last_periodic_report 與 stopped_filing（>15 個月無定期報告）。"),
+                    "另加 last_periodic_report 與 stopped_filing（>15 個月無定期報告）。"
+                    "先.八十三-3a-2：form.idx 可往前延伸（--from-year），但 2010 以前的 Form 25 本文未解析，"
+                    "那段期間下市的公司只會以 stopped_filing（最後一次定期報告日）呈現。"),
            "quarters_scanned": [f"{y}Q{q}" for y, q in QUARTERS],
            "stopped_filing_months": STOPPED_FILING_MONTHS,
            "counts": {}, "universe": uni}
