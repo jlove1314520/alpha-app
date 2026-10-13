@@ -19340,3 +19340,4 @@ C. 驗收
 - [x] **先.八十一-34 （補件，來源：2026-10-13 11:1x 事故——互動視窗的提交指令在取鎖失敗後仍執行 release，放掉了本機新聞補班持有的 git_op_lock）git_op_lock 加持有者憑證：acquire 回傳 token、release 須帶相同 token 才刪鎖（舊呼叫端相容期），盤點所有呼叫端（三支 wrapper、local_git_commit、DevQueue）改用；附自測**（互動視窗執行）〔acquire 發 token、release --token 才刪（舊用法相容並記 log）；四支 python 呼叫端＋三支 wrapper＋自用工具改用；自測 6/6、冒煙 #129〕
 - [x] **先.八十一-35 （補件，來源：先.八十一-34 盤點）research/nightly_six_runner.py 取 git_op_lock 失敗時仍照常 commit／push（沒有鎖也做），改成取不到鎖就等或留給下一輪，與其他呼叫端一致；附自測**（互動視窗執行）〔取鎖改重試約 2 分鐘、拿不到就不提交留給下一輪；自測假鎖 0 次 git 呼叫；冒煙全綠〕
 - [ ] **先.八十一-36 （補件，來源：BACKLOG「尚未驗收／已知限制」603 檔 industry 分類歧義）company_info.json 的產業別改以官方公司基本資料為準（TWSE openapi t187ap03_L、TPEx 對應端點，先查證欄位與頻率上限寫進 CLAUDE.md），FinMind 只補缺；附前後歧義檔數**（互動視窗執行）
+- [ ] **先.八十一-37 （補件，來源：BACKLOG「尚未驗收／已知限制」technical 因子用未還原收盤）先查證目前 live_factors technical 因子是否仍用未還原收盤（price_history 已有 adj_close）；若是，改用還原收盤並列出受影響檔數與分數變化，屬資料正確性修正、不登記新試驗、不調參數**（互動視窗執行）
