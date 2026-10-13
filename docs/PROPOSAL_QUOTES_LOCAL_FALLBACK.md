@@ -1,6 +1,6 @@
 # 提案：盤中報價本機備援（GitHub 高頻排程不可靠）
 
-先.八十一-25｜2026-10-13｜狀態：**等總司令裁示，未動工**
+先.八十一-25｜2026-10-13｜狀態：**已裁示採用（先.八十二-4 裁示③：只做台股、門檻 15 分鐘），已實作**
 
 ## 1. 問題（有證據）
 
@@ -46,3 +46,9 @@
   1. 是否建立本機排程 AlphaQuotesFallback。
   2. 門檻用 12／15／20 分鐘哪一個。
   3. 是否也補美股時段（quotes_us.json，晚上電腦未必開著，建議先不做）。
+
+## 6. 裁示與實作（2026-10-13）
+
+- 總司令【先.八十二】4 裁示③：照本提案實作，只做台股，雲端落後門檻 15 分鐘，雲端已更新就略過。美股不做。
+- 實作：`scripts/quotes_local_fallback.py`＋`C:lphaun-quotes-fallback.ps1`／`run-quotes-fallback-hidden.vbs`；本機排程 **AlphaQuotesFallback**：週一至五 09:05 起每 10 分鐘，持續 4 小時 41 分（到 13:46），單次上限 9 分鐘、不重疊。
+- 每輪在 `research/quotes_local_fallback.jsonl` 記一行心跳。本機補抓的那份 `quotes_tw.json` 會在 meta.runner 標 `local_fallback` 與雲端落後分鐘數。

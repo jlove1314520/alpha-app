@@ -1,3 +1,18 @@
+## 2026-10-13 16:24（互動視窗）先.八十二-4 裁示③盤中台股報價本機備援（門檻 15 分鐘）
+
+- **裁示**：總司令【先.八十二】4 裁示③。照 docs/PROPOSAL_QUOTES_LOCAL_FALLBACK.md 實作：只做台股，雲端落後門檻 15 分鐘，雲端已更新就略過；附明天盤中實跑心跳證據。
+- **新程式 `scripts/quotes_local_fallback.py`**（比照新聞備援）：
+  - ① 週末或休市日（`data/trading_calendar.json`，含臨時停市）、盤外（09:05～13:45 以外）：只記心跳就結束。
+  - ② 看 origin/main 的 `data/quotes_tw.json` fetched_at，距今不到 15 分鐘就略過。
+  - ③ 落後 ≥15 分鐘才在本機跑同一支 `.github/scripts/fetch_quotes_tw.py`，共用 MIS 節流與封鎖紀錄。抓到的那份在 meta.runner 標 `local_fallback`。
+  - ④ 提交前再看一次雲端，已追上就作廢本機這輪；否則只提交 `data/quotes_tw.json`（取鎖帶 token，pull 衝突就作廢本機）。
+  - 每輪寫一行心跳到 `research/quotes_local_fallback.jsonl`。自身失敗只記 log。
+- **本機排程 AlphaQuotesFallback**（外層包裝 `C:\alpha\run-quotes-fallback.ps1`／`-hidden.vbs`，在 repo 外）：週一至五 09:05 起每 10 分鐘，持續 4 小時 41 分，單次上限 9 分鐘、不重疊。下次執行 2026-10-14 09:05。
+- **自測**：`scripts/selftest_quotes_local_fallback.py` 7/7 PASS。git、網路、抓取全部換成假的，涵蓋週末／休市／盤外／雲端新鮮略過／落後才抓且只提交 quotes_tw／抓完雲端追上作廢／抓取失敗不提交。
+- **實跑**：16:19 盤外，心跳 `skip_outside_window`。
+- **還差**：明天盤中的實跑心跳證據（裁示要求），所以本項先標 [~]；明天 09:05 後補證據再改 [x]。
+- AWAITING_REVIEW 先.八十一-25 結案，等待中 2→1。冒煙全套 137 PASS／0 FAIL。
+
 ## 2026-10-13 16:18（互動視窗）先.八十二-6 裁示⑤每日本益比快照（只累積、不進評分）＋market.yml allowlist
 
 - **裁示**：總司令【先.八十二】6 裁示⑤。開始每日留全市場「股價÷本益比」快照，只累積、不進評分，寫入 market.yml 的 allowlist（CLAUDE.md 第十節）。

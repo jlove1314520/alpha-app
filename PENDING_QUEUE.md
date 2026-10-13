@@ -19394,7 +19394,7 @@ C. 驗收
 - [x] **先.八十二-1 price_history.json 拆檔（每檔 <20MB）＋所有讀取端改＋前後讀出相同比對自測＋git 移除歷史大檔提案（只提案不執行）**（互動視窗執行）〔data/price_history/ 11 分桶＋_meta（最大 4.5MB、合計 45.9MB；截 90 筆後約 38MB）；scripts/price_history_store.py＋49 支讀寫端；拆檔前後讀出 IDENTICAL（sha256 相同）＋各讀取端輸出相同；冒煙 #137；git 歷史改寫只提案（AWAITING 3→4）〕
 - [x] **先.八十二-2 裁示①：Shioaji 維持 1.7.4 到解凍；解凍前置條件列升級＋演練 A／B；先.八十一-2 改 [x]、AWAITING_REVIEW 結案**（互動視窗執行）〔維持 1.7.4；docs/UNFREEZE_CHECKLIST.md 列升級＋preflight＋演練 A／B 為解凍前置條件；先.八十一-2 改 [x]；AWAITING 6→5〕
 - [x] **先.八十二-3 裁示②：選股榜剔除近 5 交易日無成交／不在官方快照者，排名空白標「近期無成交」；picks_ledger 標生效日 2026-10-14**（互動視窗執行）〔research/recent_trade_filter.py（近 5 交易日無成交／不在官方最新快照，資料日 ≥2026-10-14 生效）；三榜 rank 空白＋「近期無成交」＋原因；picks_ledger meta.rule_changes＋快照 no_recent_trade_rule；實測只剔 6173；自測 6/6、冒煙 #138；AWAITING 4→3〕
-- [ ] **先.八十二-4 裁示③：盤中報價本機備援（台股、門檻 15 分鐘、雲端已更新就略過）；附明天盤中實跑心跳證據**（互動視窗執行）
+- [~] **先.八十二-4 裁示③：盤中報價本機備援（台股、門檻 15 分鐘、雲端已更新就略過）；附明天盤中實跑心跳證據**（互動視窗執行）〔scripts/quotes_local_fallback.py＋排程 AlphaQuotesFallback（週一～五 09:05 起每 10 分鐘至 13:46；雲端落後 ≥15 分鐘才補、只提交 quotes_tw）；自測 7/7；待 10/14 盤中實跑心跳證據後改 [x]；AWAITING 2→1〕
 - [x] **先.八十二-5 裁示④：美股連結 ETF 限價偏離上限改 1%（只改設定與預覽，不送單）；零股即時報價列待評估**（互動視窗執行）〔00646 偏離 1%、其他 0.5%（dev_by_code，受硬限制約束）；預覽每列顯示上限；零股即時報價列待評估；自測 5/5＋既有 240 PASS；AWAITING 4→3〕
 - [x] **先.八十二-6 裁示⑤：每日全市場「股價÷本益比」快照（只累積不進評分），寫入 market.yml allowlist**（互動視窗執行）〔scripts/build_pe_snapshot.py → data/pe_snapshot/<資料日>.json（收盤／本益比／EPS_ttm，約 51KB／日，只累積不評分）；market.yml 新步驟＋git add 清單；首份 10/12 1,947 檔；AWAITING 3→2〕
 - [x] **先.八十二-7 裁示⑥：刪除 5 支過期一次性排程，前後清單附 PROGRESS**（互動視窗執行）〔5 支已刪（Alpha* 34→29 支，前後清單在 PROGRESS）；AWAITING 5→4〕
