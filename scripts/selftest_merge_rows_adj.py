@@ -42,6 +42,22 @@ res.append(("②新日期 adj＝close", r07["adj_close"] == 15.45))
 prices["2614"] = U.merge_rows(prices["2614"], row("2026-10-06", 15.96))
 r06 = next(r for r in prices["2614"] if r["date"] == "2026-10-06")
 res.append(("③比例＝1 的列取代後仍 adj＝close", r06["adj_close"] == 15.96))
+# ⑤（先.八十一-52）除息日前一天的列在事件套用「之後」才第一次插入：fix_inserted_rows 補上係數、移除 _ins
+p2 = {"6108": [row("2026-10-02", 25.0)]}
+p2["6108"] = U.merge_rows(p2["6108"], row("2026-10-07", 25.95))
+lg2 = {"events": {"6108": [{"ex_date": "2026-10-07", "cash": 1.0, "stock_ratio": 0.0, "rights_ratio": 0.0,
+                             "rights_price": 0.0, "type": "息", "first_seen": "2026-08-26", "applied": False}]}}
+for r in p2["6108"]:
+    r.pop("_ins", None)  # 視為前幾輪就已存在的列
+U.apply_dividend_adjustments(p2, lg2, "2026-10-07")
+f2 = lg2["events"]["6108"][0]["factor_applied"]
+p2["6108"] = U.merge_rows(p2["6108"], row("2026-10-06", 25.4))  # 晚到的 10/06（除息日前一天）
+p2["6108"] = U.merge_rows(p2["6108"], row("2026-10-08", 26.0))  # 今天最新一筆
+n5 = U.fix_inserted_rows(p2, lg2)
+r06 = next(r for r in p2["6108"] if r["date"] == "2026-10-06")
+r08 = next(r for r in p2["6108"] if r["date"] == "2026-10-08")
+res.append(("⑤晚到的除息日前一天列補上係數", n5 == 1 and abs(r06["adj_close"] - 25.4 * f2) < 1e-5))
+res.append(("⑤最新一筆維持 adj＝close、標記已移除", r08["adj_close"] == 26.0 and not any("_ins" in r for r in p2["6108"])))
 long = [row(f"2026-{1 + i // 28:02d}-{1 + i % 28:02d}", 10.0) for i in range(95)]
 res.append(("④保留最後 90 筆", len(U.merge_rows(long, row("2026-12-31", 10.0))) == U.PRICE_HISTORY_DAYS))
 for n_, ok in res:

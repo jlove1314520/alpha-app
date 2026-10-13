@@ -478,10 +478,49 @@ def merge_rows(existing: list[dict] | None, latest: dict) -> list[dict]:
         ratio = old["adj_close"] / old["close"]
         if abs(ratio - 1.0) > 1e-9:
             latest = dict(latest, adj_close=round(latest["close"] * ratio, 6))
+    elif old is None:
+        latest = dict(latest, _ins=1)  # 先.八十一-52：新插入的列，本輪最後由 fix_inserted_rows() 補上已套用事件的係數
     rows = [r for r in (existing or []) if r.get("date") != latest["date"]]
     rows.append(latest)
     rows.sort(key=lambda r: r["date"])
     return rows[-PRICE_HISTORY_DAYS:]
+
+
+def fix_inserted_rows(prices: dict, ledger: dict | None) -> int:
+    """先.八十一-52（2026-10-13）：本輪新插入（merge_rows 標 _ins）的列，若日期早於某個「已套用」的除權息／減資事件，
+    當初套用時這一列還不存在，會停在 adj＝close。這裡用跟缺日回補同一條公式補上：
+        adj_close ＝ close × 下一筆既有列的 adj/close × Π{ 已套用事件：本列日期 < 事件日期 ≤ 下一筆日期 } 係數
+    沒有下一筆（本列就是最新）時比例＝1。事件來源：帳本 events／reductions 的 factor_applied。回傳改動列數；
+    結束時一律移除 _ins 標記（不得寫進檔案）。"""
+    evs: dict = {}
+    for c, lst in ((ledger or {}).get("events") or {}).items():
+        evs.setdefault(c, []).extend((e["ex_date"], e["factor_applied"]) for e in lst if e.get("applied") and e.get("factor_applied"))
+    for c, lst in ((ledger or {}).get("reductions") or {}).items():
+        evs.setdefault(c, []).extend((e["resume_date"], e["factor_applied"]) for e in lst
+                                     if e.get("applied") and e.get("factor_applied") and e.get("resume_date"))
+    changed = 0
+    for code, rows in prices.items():
+        if not any(r.get("_ins") for r in rows):
+            continue
+        rows.sort(key=lambda r: r["date"])
+        for i, r in enumerate(rows):
+            if not r.pop("_ins", None) or not r.get("close"):
+                continue
+            nxt = next((x for x in rows[i + 1:] if x.get("close") and not x.get("_ins")), None)
+            if not nxt:
+                continue
+            ratio = (nxt.get("adj_close") or nxt["close"]) / nxt["close"]
+            for d, f in evs.get(code, []):
+                if r["date"] < d <= nxt["date"]:
+                    ratio *= f
+            new = round(r["close"] * ratio, 6)
+            if abs(new - (r.get("adj_close") or 0)) > 1e-9:
+                r["adj_close"] = new
+                changed += 1
+    for rows in prices.values():  # 保險：任何殘留標記都移除
+        for r in rows:
+            r.pop("_ins", None)
+    return changed
 
 
 def fetch_ex_dividend_announcements() -> list[dict]:
@@ -925,7 +964,21 @@ def main():
     except Exception as e:  # noqa: BLE001
         print(f"⚠ 寫 whitelist_price_status.json 失敗（不中止）：{e}")
 
+    # 先.八十一-52：本輪新插入、日期早於已套用事件的列補上係數（含 TPEx 在套用之後才合併、補洞晚到等情況）
+    inserted_fixed = 0
+    try:
+        inserted_fixed = fix_inserted_rows(prices, load_ex_dividend_ledger())
+        if inserted_fixed:
+            print(f"新插入列補乘已套用除權息／減資係數：{inserted_fixed} 列")
+    except Exception as e:  # noqa: BLE001 -- 失敗只記錄，並確保 _ins 標記不寫進檔案（十二節）
+        print(f"新插入列係數補正失敗（略過）：{e}")
+        errors.append(f"fix_inserted_rows: {e}")
+        for rows in prices.values():
+            for r in rows:
+                r.pop("_ins", None)
+
     payload.setdefault("meta", {})
+    payload["meta"]["inserted_rows_adj_fixed"] = inserted_fixed
     payload["meta"]["generated_at"] = datetime.now(TW_TZ).isoformat()
     payload["meta"]["source"] = "TWSE STOCK_DAY_ALL（上市）+ TPEx tpex_mainboard_quotes（上櫃）每日累積式寫回；adj_close由TWSE TWT48U除權息事件回溯調整；起始種子=research/build_price_history.py（FinMind快取）"  # 2026-09-03（P0三-三.3）
     payload["meta"]["twse_updated_count"] = twse_updated
