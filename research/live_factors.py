@@ -124,6 +124,22 @@ def earnings_growth(quarters: list[dict] | None) -> tuple[float | None, dict]:
 
 
 # ─────────────────────────────── 技術型態 ───────────────────────────────
+def _closes_adj(price_rows: list[dict] | None) -> list[float]:
+    """先.八十一-37（2026-10-13）：技術面與 60 日漲幅改用還原權息收盤（adj_close），該列沒有還原價才用原始收盤。
+    原本用未還原收盤，除權息／分割（例：00631L 1:22 分割）會在 MA60、區間位置、RSI 上造成假的大跌；
+    實測 2,945 檔中 235 檔 technical 分數改變（中位數 0.025，最大近 1.0）。資料正確性修正，不調因子權重與參數。"""
+    if not price_rows:
+        return []
+    out = []
+    for r in price_rows:
+        v = _f(r.get("adj_close"))
+        if v is None or v <= 0:
+            v = _f(r.get("close"))
+        if v is not None and v > 0:
+            out.append(v)
+    return out
+
+
 def _closes(price_rows: list[dict] | None, field: str = "close") -> list[float]:
     if not price_rows:
         return []
@@ -160,7 +176,7 @@ def technical(price_rows: list[dict] | None) -> tuple[float | None, dict]:
     有幾個算幾個（例如只有 20 天資料時 MA60 那項不算），全部算不出來才回 None。
     """
     comp: dict[str, Any] = {"ma_alignment": None, "range_position_60d": None, "rsi14": None, "volume_change": None}
-    closes = _closes(price_rows)
+    closes = _closes_adj(price_rows)  # 先.八十一-37：還原權息收盤
     if len(closes) < 6:
         return None, comp
 
@@ -197,7 +213,7 @@ def technical(price_rows: list[dict] | None) -> tuple[float | None, dict]:
 
 def gain_60d(price_rows: list[dict] | None) -> float | None:
     """近 60 個交易日漲幅（極端走勢防呆用，見 index.html renderExtremeMoveWarning）。"""
-    closes = _closes(price_rows)
+    closes = _closes_adj(price_rows)  # 先.八十一-37：還原權息收盤
     if len(closes) < 60:
         return None
     base = closes[-60]
