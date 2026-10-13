@@ -1,0 +1,455 @@
+# GRAVEYARD_AUTOPSY.md — 策略墓園死因分類（總司令裁示 先.八十三）
+
+**產生時間**：2026-10-13
+**對象**：`research/STRATEGY_GRAVEYARD.md`（4,396 行）全部條目
+**性質**：唯讀分類報告。只新增這一個檔案，沒有改任何其他檔案、沒有跑任何回測或試驗、沒有登記任何試驗、沒有碰 holdout、沒有碰 `alpha-data/alpha.db`。
+
+---
+
+## 1. 方法說明
+
+### 1.1 三種死因（裁示原文）
+
+- **A 流程錯**：程式、資料、成本、標籤出錯，而且這個錯誤**影響了判定**。
+- **B 資料不足**：資料拿不到、樣本太短，或檢定力不夠。
+- **C 流程對但沒有優勢**：測試做得正確，只是優勢不存在。常見情形有：扣成本後歸零、樣本外失效、輸給隨機控制組，或資料正確卻違反天條一。
+
+### 1.2 判定紀律
+
+- **A 要有具體證據**：條目本身或後續紀錄必須寫出一個具體錯誤，而且那個錯誤改變了判定。
+  - 如果錯誤在下判定前就修好了，或修正後重跑結論不變，就不算 A。例如 #46 的日期型別 bug、#48 的百分位公式、#63 的成本折數、#400 的 0050 分割污染。這些條目照實註記，但分類看「修正後的死因」。
+- **B 要找得到依據**，以下任一即可：
+  - 條目自己寫了「檢定力不足」或「樣本太小」。
+  - 資料確實拿不到。
+  - `TRIALS_POWER_AUDIT.md` 把它列為 DEGENERATE，而且失敗的地方正是統計顯著性。
+- **難以判斷時**，選最合理的一類，並標「（邊界）」加上理由。
+- **數字都來自原條目或帳本**，不另外編造。B 類的「需要樣本數」是用條目自己的效果量粗估，計算方式都寫在第 5 節。
+
+### 1.3 不改判準、不碰 holdout 聲明
+
+本報告只做**分類**，不重新判定任何條目的 PASS/FAIL，也不建議放寬任何事前綁定的門檻。
+
+報告裡出現的「可開案」或「跨市場候選」都只是**列名**，沒有事前登記，也沒有計入 N。真的要測，必須照現行紀律另立規格、事前登記，並計入 N。
+
+### 1.4 條目數核對：找到 128 個條目標題，拆成 129 列；與「134 條」的差異說明
+
+- `grep -c "^##\|^###" STRATEGY_GRAVEYARD.md` 結果是 **134**，跟裁示說的 134 條相同。但其中 **6 個標題不是陣亡條目**：
+
+| 行號 | 標題 | 為什麼不算 |
+|---|---|---|
+| 45 | `## 條目格式…` | 格式說明 |
+| 49 | `### <假設名稱>…` | 範本 |
+| 60 | `## 已知死亡模式索引` | 索引標題 |
+| 66 | `### 毛報酬有效、扣成本歸零` | 死亡模式索引 |
+| 82 | `### 控制組(b)延遲一週方向翻轉…` | 死亡模式索引 |
+| 280 | `## HYPOTHESIS_QUEUE.md 佇列本輪新測的陣亡紀錄` | 章節分隔 |
+
+- 扣掉這 6 個，**條目標題共 128 個**。
+- 其中「2026-10-09 D10 駁回」一個標題底下有兩個死因不同的項目：一個是投信作帳（C），一個是美股供給緊縮（B）。這裡拆成兩列，所以下表共 **129 列**。
+- **另外誠實註記**：以下標題本身是一次涵蓋多筆試驗或屬彙總性質，這裡各算一列，沒有展開：
+  - 「外部一改.3」一個標題含 5 條試驗。
+  - 「E-c／E-d」一個標題含 2 條。
+  - 兩個「家族層級結案」條目（行 2498、3256）是家族彙總。
+  - 「槓桿安全方案階段 1 作廢」是提案作廢，不是試驗。
+  - 巧合的是，若把外部一改.3 算 5、E-c／E-d 算 2、D10 算 2，也會得到 134。但「134」最直接的來源是上面的 grep 標題總數，這裡不硬湊成 134。
+
+---
+
+## 2. 統計
+
+| 分類 | 條數 | 其中邊界 |
+|---|---:|---:|
+| **A 流程錯** | **4** | 1 |
+| **B 資料不足** | **20** | 9 |
+| **C 流程對但沒有優勢** | **105** | 6 |
+| 合計 | **129** | **16** |
+
+- **A 類只有 4 條**：#22 四濾網合取、core_tilt 兩條、#4 股利率單發（規格誤套天條一）。
+- **C 類佔八成以上**。很多條目過程中出現過 A 型錯誤，但都在判定前修好，或修正後重跑結論不變，所以沒有算進 A。這些條目逐列註記，一共 10 條：
+  - #63 借券成本折數
+  - #243 regime 成本常數
+  - #400 的 0050 分割污染
+  - #19 前視偏誤（已重建成開盤到收盤版）
+  - E1 統計量用錯
+  - #81 日頻重疊假象（這條歸 B）
+  - #46 日期型別 bug
+  - #48 百分位公式
+  - #23 匯入函式不存在
+  - #76～#85 日頻重疊（已用不重疊抽樣重驗）
+
+---
+
+## 3. 逐條表（129 列）
+
+證據位置簡寫：
+- 「G:行號」＝`research/STRATEGY_GRAVEYARD.md` 的行號
+- 「LEDGER:行號」＝`research/TRIALS_LEDGER.md`
+- 「PA:行號」＝`research/TRIALS_POWER_AUDIT.md`
+
+| # | 編號／名稱 | 陣亡日期 | 分類 | 一句判斷依據 | 證據位置 |
+|---:|---|---|---|---|---|
+| 1 | fut_basis_carry（基差水位版，期貨） | 2026-08-25 | C | TRAIN 對隨機組 100 分，VAL 只有 46 分；717 倍報酬集中在 2000–02 三年。流程完整，樣本外沒有優勢 | G:98-110 |
+| 2 | f_rel_strength_regime_switch | 2026-08-26 | C | 排序能力存在，但扣真實成本後 TRAIN 三種成本情境全負 | G:112-126 |
+| 3 | f_us_low_vol（美股低波動，各市值分層） | 2026-08-26／09-19 家族結案 | C | 各分層深挖 TRAIN 百分位只有 8–48，連隨機組中位數都沒贏。註：PA 把它的便宜關卡列 DEGENERATE，價格源是 FinMind，未重跑 | G:128-152；PA:36 |
+| 4 | f_us_momentum_12m | 2026-09-22 | B | 條目自己判「檢定力不足＋樣本雜訊主導」：27–90 檔測四次，出現三種方向組合 | G:184-191；PA:37 |
+| 5 | f_us_value_bm／f_us_low_vol 乾淨宇宙版 | 2026-09-07 | B（邊界） | 資料源沒有未還原的原始價格，空頭腿報酬無法驗證是否真實。屬「拿不到正確資料」，也帶資料錯誤（A）色彩 | G:206-266 |
+| 6 | 原子.六 籌碼 Tier A（併入上櫃，#328） | 2026-09-22 | C | 覆蓋率升到 87.8% 後結論不變，條目明言不是檢定力問題 | G:282-289 |
+| 7 | 原子.六 籌碼 Tier A（#317） | 2026-09-20 | C | 全窗同號只有 4 個，低於樸素期望 6.69（p=0.913） | G:291-297 |
+| 8 | 原子.五 財報 depth-1（#316） | 2026-09-20 | C | 族層級調整後 p=0.0215，未達 0.01；條目判定流程對、沒有優勢 | G:299-305 |
+| 9 | 原子.五B 財報通道 B（#320） | 2026-09-21 | B | 條目明寫「流程對但檢定力不足」：只有 4 個獨立族 | G:307-314 |
+| 10 | weinstein_stage2_v2 | 2026-08-29 | C | 報酬主要來自 beta，純 alpha 很薄，3 倍成本就轉負；隨機組百分位 55／84 | G:316-343 |
+| 11 | fut_cta_momentum_12m | 2026-09-01 | C | 隨機組百分位 10，累積 −28.4%；人工檢查無 bug | G:345-372 |
+| 12 | pead_portfolio_v1 | 2026-09-01 | C | 兩期 alpha p=0.53／0.48，遠不顯著，報酬是 beta | G:374-399 |
+| 13 | dividend_yield_portfolio_v1 | 2026-09-02 | B（邊界） | 死在 alpha p=0.49／0.15（VAL 只有 4 年）。後來在新資料 2007–14 上 IR 顯著（p=0.013），顯示原判主要是檢定力不足；已開案，#399／#400 又都 FAIL | G:401-450、G:4078-4114 |
+| 14 | f_residual_momentum（#9） | 2026-09-02 | C | train／val 方向相反，雜訊主導 | G:452-492 |
+| 15 | 產業內相對強度（#11） | 2026-09-02 | C | 300 檔重跑後百分位反而降到 41.9，條目明言排除檢定力不足。產業分類歧義至今未修 | G:494-567 |
+| 16 | BAB 低 beta（#12） | 2026-09-02 | C | TRAIN IR 只有 0.009，等於零；累積校正也沒過 | G:569-626；PA:51 |
+| 17 | 三大法人連續買超（#13） | 2026-09-02 | C | 300 檔重跑後方向仍然相反，確認不是被錯殺 | G:628-672 |
+| 18 | 月營收公布事件（#14） | 2026-09-02 | C | VAL p=0.29，利差萎縮 73%，百分位 68。斷言 bug 在判定前已修好 | G:674-727 |
+| 19 | 波動度目標化（#15） | 2026-09-02 | C | Sharpe／CAGR 分別輸給 92%／97% 的隨機時序 | G:731-789 |
+| 20 | 低波動台股十分位多空（#7） | 2026-09-02 | C | VAL 虧 30%，隨機組百分位 85。放空腿的借券成本是假設值（第⑩條但書），但真實成本只會讓結果更差 | G:791-844 |
+| 21 | 配對交易（#16） | 2026-09-02 | C | 相關係數篩選贏不了隨機挑配對（百分位 56／39） | G:846-862 |
+| 22 | 52 週高點接近度策略層（#17） | 2026-09-02，最終 09-23 | B（邊界） | 引擎 bug 修好後表面翻轉，但 DSR 仍不過。條目結論是「VAL 只有 4 年、樣本太短、檢定力不足」；已開案做單發檢定（#398），仍 FAIL | G:864-949 |
+| 23 | 短期反轉 1 週（#18） | 2026-09-02 | C | 百分位 41.3，遠低於門檻 | G:951-974 |
+| 24 | 美股隔夜外溢（#19） | 2026-09-03（最終 09-24） | C（邊界） | 原版有前視偏誤（A，#346）；已改用開盤到收盤重建（#394），乾淨地死在參數高原（0/49 格） | G:976-1046 |
+| 25 | 純毛利率（#20） | 2026-09-03 | C | 百分位 48.4；實作健檢四點都沒有 bug | G:1048-1078 |
+| 26 | 月營收意外×低關注度（#21） | 2026-09-03 | C | 兩組都沒過（31.2 和 89.8），而且方向跟假設相反 | G:1080-1115 |
+| 27 | 四濾網合取（#22） | 2026-09-03 | A（邊界） | 五個因子在 2015–2021 的資料交集全為 0，判死門檻（≥30% 快照有候選）幾乎是由資料缺口決定的。原腳本不在 git（只剩 .pyc），當時 pit.py 也沒有 cash_flow_pit，結果無法重現 | G:1117-1145、G:1191-1210；LEDGER:584 |
+| 28 | Piotroski 排雷（#23） | 2026-09-03 | C | 無法重現的疑慮已重跑：sanity 一致、gate 方向一致，FAIL 維持 | G:1147-1249 |
+| 29 | 除權息季節（#24） | 2026-09-03 | C | 三個便宜關卡都沒過（87.0／86.2 仍未達 90） | G:1253-1272 |
+| 30 | 月轉效應（#25） | 2026-09-03 | C | TRAIN 過關，VAL 方向完全反轉 | G:1274-1300 |
+| 31 | 融資餘額成長率（#26） | 2026-09-03 | C | 兩種窗口的 train／val 都反號 | G:1302-1338 |
+| 32 | z-score 複合（#27） | 2026-09-04 | C（邊界） | 有 12.8% 隨機組合不輸它（百分位 87.2）。條目自承落在檢定力不足的邊緣區，但用的虛無分布機制不同，未驗證 | G:1340-1365 |
+| 33 | 廣度背離 overlay（#28） | 2026-09-04 | C | 對隨機時序百分位 54／51，完全沒有加值 | G:1367-1397 |
+| 34 | 等權再平衡（#29） | 2026-09-04 | C | 第 1–5 關都過，但逐年一致只有 4/6，未達 5/6；條目明言流程對 | G:1399-1442 |
+| 35 | 融資使用率（#30） | 2026-09-05 | C | TRAIN 百分位 1.0，兩期 alpha 都不顯著 | G:1444-1480 |
+| 36 | 選擇權 PCR overlay（#31） | 2026-09-05 | C | 兩期都大幅輸給買進持有；參數高原只有 7/49 格為正 | G:1482-1527 |
+| 37 | 台幣匯率（#32） | 2026-09-05 | C | train／val 反號 | G:1529-1559 |
+| 38 | 殖利率曲線（#33） | 2026-09-05 | C | VAL 百分位 52.8，而且方向跟預期相反 | G:1561-1596 |
+| 39 | 銅金比（#34） | 2026-09-05 | C | 拿掉 2019 年就翻負；連顯著性本身都是自相關造成的假象 | G:1598-1666 |
+| 40 | 台指 VRP（#35） | 2026-09-05 | B（邊界） | VAL t 檢定 p=0.0595 差一點；Wilcoxon 兩期都顯著，中位數兩期都為正。條目判定不是 bug，是均值檢定碰上肥尾分布時檢定力不足 | G:1670-1720 |
+| 41 | 多因子 loo_no_low_vol | 2026-09-05 | C | 換一批獨立樣本後，p 從 0.049 回到 0.565（挑選偏誤） | G:1722-1766 |
+| 42 | 融券使用率（#36） | 2026-09-05 | C（邊界） | 多頭鏡像版 TRAIN alpha p=0.37。原假設的放空腿因為引擎不支援放空、借券資料也沒接入，從來沒測過 | G:1768-1829 |
+| 43 | #37 當沖比重 | 2026-09-06 | C | VAL 期訊號消失（p=0.90） | G:1833-1883 |
+| 44 | #38 大戶籌碼集中度 | 2026-09-06 | B | 免費合規的歷史資料拿不到：TDCC 只給最新一週，FinMind 要付費 | G:1885-1931 |
+| 45 | #39 0050 成分股調整 | 2026-09-06 | B | 查了三個來源，都沒有歷史成分股名單 | G:1935-1958 |
+| 46 | #40 庫藏股買回 | 2026-09-06 | B（邊界） | VAL 只有 50 筆、百分位 84.5，條目自承樣本不足是主因之一；PA 列 DEGENERATE | G:1960-2001；PA:59 |
+| 47 | portfolio_multifactor_v2 家族 | 2026-09-06 | C | 樣本越大 alpha 越不顯著，條目明言不是檢定力問題；PIT 修正後重跑仍 FAIL | G:2003-2057 |
+| 48 | #41 內部人持股轉讓 | 2026-09-06 | B（邊界） | 只做到 30 檔試跑、沒有 VAL 期就停了；但樣本擴大後百分位退到 47.5，也像是沒有優勢 | G:2059-2092 |
+| 49 | #42 平均成對相關 | 2026-09-06 | C | 方向跟事前綁定的相反 | G:2094-2119 |
+| 50 | #43 法人買超集中度 | 2026-09-06 | C | 方向相反 | G:2121-2132 |
+| 51 | #44 景氣對策信號 | 2026-09-06 | B | 拿不到「當時發布版」的數字 | G:2134-2138 |
+| 52 | #45 ADR 溢價收斂 | 2026-09-06 | C | 排除台積電後 train／val 翻號 | G:2140-2170 |
+| 53 | #46 新股長期弱勢 | 2026-09-06 | C | 百分位 13.4；日期型別 bug 在判定前已修好 | G:2172-2213 |
+| 54 | #47 處置股 | 2026-09-06 | B | 官方只有近期快照，有歷史的版本要付費 | G:2215-2254 |
+| 55 | #48 股權質押 | 2026-09-06 | C | 方向相反；百分位公式 bug 已修，且不影響結論 | G:2256-2310 |
+| 56 | #49 隔夜／盤中報酬分解 | 2026-09-07 | B（邊界） | 死在 VAL 只有 4 年而且零容錯（4 年中 3 年同號）；條目自稱是小樣本假象，TRAIN 是 11/11 | G:2312-2372 |
+| 57 | #51 子事件 1（連續規格） | 2026-09-07 | C | 反號，百分位 19 | G:2374-2402 |
+| 58 | #51 子事件 1（二元規格） | 2026-09-07 | C | 反號，百分位 37.5 | G:2404-2428 |
+| 59 | #51 子事件 2 現金增資 | 2026-09-07 | B | 4 項判準過 3 項，只差 VAL p=0.155（n=40）；條目明寫樣本小、檢定力不足；PA 列 DEGENERATE | G:2430-2475；PA:61 |
+| 60 | #51 子事件 3 可轉債轉換價重設 | 2026-09-07 | C | 方向相反，百分位 8 | G:2477-2483 |
+| 61 | #51-US S&P 指數納入 | 2026-09-09 | C（邊界） | VAL n=197、百分位 97.8，但沒有嚴格超過控制組最大值；TRAIN 只有 25 筆 | G:2486-2495 |
+| 62 | 【家族】橫斷面離散度速度 | 2026-09-08 | C | 0 勝 5 敗，線性映射贏不了時序控制組（家族彙總，不是單一試驗） | G:2498-2545 |
+| 63 | #53 報酬離散度速度 | 2026-09-08 | C | 四項判定都沒有嚴格贏過控制組最大值 | G:2547-2553 |
+| 64 | #54 成交值集中度速度 | 2026-09-08 | C | sanity 階段方向就反了 | G:2555-2561 |
+| 65 | #55 法人流離散度速度 | 2026-09-08 | C | sanity 階段方向就反了 | G:2563-2570 |
+| 66 | #57 當沖比重離散度速度 | 2026-09-08 | C | 跟 #53 同一種死法 | G:2572-2579 |
+| 67 | Cybex.引擎套用 #53 | 2026-09-15 | C | 加了延遲確認降噪，還是輸 | G:2581-2587 |
+| 68 | #58 反向波動度加權 | 2026-09-08 | C | VAL 百分位 99，但沒有超過控制組最大值 | G:2589-2595 |
+| 69 | #59 最小變異數 | 2026-09-08 | C | 換手成本讓 TRAIN 1 倍成本下淨溢酬轉負 | G:2597-2602 |
+| 70 | #60 結算日效應 | 2026-09-08 | C | 結算前 3 日反號，當日 VAL 百分位 47.6。PA 因 VAL 約 48 個事件列 DEGENERATE，但結果離門檻很遠 | G:2604-2609；PA:69-70 |
+| 71 | #52-US 8-K Item 2.02 | 2026-09-08 | B（邊界） | 兩期同方向但量級不夠；條目自承 N=25 的小樣本檢定力只有四到五成。價格源是 FinMind，違反 09-08 裁示，未重跑 | G:2611-2648、G:2493 |
+| 72 | #52-US 8-K Item 5.02 | 2026-09-08 | C | TRAIN 0.500，VAL 方向相反 | G:2650-2682 |
+| 73 | #61 央行決策日 | 2026-09-08 | B | 兩期只有 12／16 場會議而且反號；2015–17 的會議日期拿不到；PA 列 DEGENERATE（12 筆） | G:2684-2689；PA:71 |
+| 74 | #52-US 8-K Item 1.01 | 2026-09-08 | C | 兩期都低於控制組平均 | G:2691-2723 |
+| 75 | #52-TW MOPS 重大訊息 | 2026-09-09 | C | 公告有反應但沒有延續，4 類在第 2 關全 FAIL | G:2725-2767 |
+| 76 | #62 鉅額交易 | 2026-09-09 | C | 三個窗口方向全反 | G:2769-2798 |
+| 77 | f_lending_fee_spike（#63） | 2026-09-09 | C | 原本用無折扣成本（A 型錯誤），已改用三個錨定情境重跑；N20 在最壞情境下 TRAIN 仍轉負，FAIL 不變 | G:2800-2866 |
+| 78 | f_lending_fee_spike v2 | 2026-09-19 | C | 成本重新錨定後 6 格過 4 格，未達事前規定的「至少 5 格」；沒過的兩格敗在統計顯著性 | G:2868-2911 |
+| 79 | fut_basis_regime_gate64 | 2026-09-09 | C | 百分位 97，但輸給區塊打散控制組的最大值 | G:2913-2934 |
+| 80 | 龍頭－族群落後（#65） | 2026-09-09 | C | IC 只有 0.007–0.009，百分位 87.5 | G:2936-2957 |
+| 81 | 美股稅損賣壓（#66） | 2026-09-09 | C | 4 項判準只過 1 項 | G:2959-2986 |
+| 82 | 零股委託簿失衡（#67） | 2026-09-10 | C | 隨機組百分位 33／13 | G:2988-3022 |
+| 83 | #68 券資比 | 2026-09-10 | C | IC 方向跟事前假設相反 | G:3024-3046 |
+| 84 | 外部一改.3 名家趨勢跟隨（5 條） | 2026-09-10 | C | 5 條百分位 7–78.8，全部沒過（其中獨立發現只有 2 個） | G:3049-3074 |
+| 85 | 未平倉量 PCR（#69） | 2026-09-10 | C | VAL 百分位 79 | G:3076-3097 |
+| 86 | #70 波動度偏斜 | 2026-09-10 | C | train／val 反號 | G:3099-3117 |
+| 87 | TAIEX 200 日均線 overlay（#243） | 2026-09-15 | C | 成本吃掉保護效果；成本常數改成 1.8 折重算後，淨回撤只縮小 14.6%，仍 FAIL | G:3119-3147、G:3318-3345 |
+| 88 | 台指期 200 日均線 overlay（#244） | 2026-09-15（09-19 網格） | C | 事前網格三格都無法同時過兩條門檻，是機制本身的結構天花板 | G:3149-3191 |
+| 89 | 回撤斷路器（候選 5） | 2026-09-19 | C | 幾乎卡在半倉不解除（準吸收態），上檔捕捉只有 62.7% | G:3193-3218 |
+| 90 | 已實現波動度（候選 3） | 2026-09-19 | C | 切換成本把效果吃光；成本重算後仍只有 19.4% | G:3220-3236 |
+| 91 | 市場廣度水位（候選 1） | 2026-09-19 | C | 淨回撤縮小為負值，上檔捕捉 64.6% | G:3238-3254 |
+| 92 | 【家族】門檻觸發式二元降曝險 | 2026-09-19 | C | 家族結案，明令不准再做第六個 | G:3256-3345 |
+| 93 | 融資餘額成長 overlay（候選 4） | 2026-09-19 | C | 在最大回撤期間根本沒有降曝險 | G:3347-3391 |
+| 94 | #71 減資事件 CAR | 2026-09-19 | C | 兩組都是方向跟事前綁定相反，或不顯著 | G:3393-3409 |
+| 95 | core_tilt TE 可行性重測（#281） | 2026-09-19 | A | 用隨機抽的 300 檔重建「全市場市值前 50 大」，結果單一檔佔 87.65%。TE 51% 是宇宙設計錯誤造成的；未查到用全市場重建的紀錄 | G:3411-3464；LEDGER:440；PA:72 |
+| 96 | #73 產業金流加速度 | 2026-09-19 | C | VAL 百分位 61.4 | G:3466-3484 |
+| 97 | core_tilt（#283，對 0050 真實報酬） | 2026-09-19 | A | 同一個抽樣宇宙錯誤：相關 0.01、TE 20%。條目自己寫「選股與傾斜邏輯未被證明有問題」。另外它跟上一條對「台積電在不在樣本裡」的說法互相矛盾 | G:3486-3527；LEDGER:438 |
+| 98 | #72 重大訂單 | 2026-09-20 | B | 合規來源只能從現在開始往後累積；唯一有歷史的查詢功能在 mopsov，該網域的 robots.txt 全站禁止 | G:3529-3577 |
+| 99 | 原子.二 depth-1 表達式 | 2026-09-20 | C | 全部危機視窗同號的比例 5.03%，低於純雜訊基準 6.25% | G:3579-3616 |
+| 100 | 原子.六 出借總量 TWT72U（#321） | 2026-09-22 | C | 篩選通過 0/28 | G:3618-3621 |
+| 101 | #75 美股內部人淨買 | 2026-09-20（09-23 補測） | C | 反號或方向錯；事件版在 t+10 就衰退成雜訊 | G:3624-3649 |
+| 102 | 事件驅動 SUE（E1／E2） | 2026-09-22（E1 於 09-23 更正） | C（邊界） | E1 原判用錯統計量（A，已更正）；更正後加上波動度配對，又崩 56.9%，FAIL。E2 兩關都失敗 | G:3651-3717 |
+| 103 | 月營收 SUE 連續分數 | 2026-09-23 | C | 加上波動度配對後百分位 84.4 | G:3719-3757 |
+| 104 | #76 VIX9D/VIX 比值 | 2026-09-22 | C | 反號；改用不重疊抽樣重驗仍 FAIL | G:3759-3776、G:4030-4040 |
+| 105 | #77 高收益債利差 | 2026-09-22 | B | FRED 只給近 3 年資料，TRAIN 期 0 筆 | G:3779-3783 |
+| 106 | #78 HYG/IEF 比值 | 2026-09-22 | C | 反號；四個窗口全部反號 | G:3786-3806 |
+| 107 | #80 失業率年增 | 2026-09-23 | C | VAL 百分位 88.2，而且方向相反 | G:3809-3829 |
+| 108 | E-c 移動停損／E-d MA200 出場 | 2026-09-23 | C（邊界） | 對隨機擇時 p=0.062／0.394，未達 0.01。條目說「檢定力不足以分開本事和運氣」，但 E-d 離門檻很遠，E-c 的參數又剛好是網格峰值 | G:3832-3859 |
+| 109 | #81 景氣對策信號 | 2026-09-23 | B（邊界） | 原本的 CHEAP_PASS 是日頻重疊造成的假象（A，已修）。修正後真實樣本只有 329 個月、VAL 46 個月，兩期 r≈−0.10 同號但不顯著 | G:3862-3888 |
+| 110 | #82 VIX 比值變動率 | 2026-09-23 | C | 反號 | G:3890-3908 |
+| 111 | #83 VIX 水位 | 2026-09-23 | C | 反號 | G:3910-3938 |
+| 112 | #84 HYG/IEF 變動率 | 2026-09-23 | C | 同號，但兩期 p 都大於 0.31 | G:3940-3963 |
+| 113 | #85 HYG/IEF 其他窗口 | 2026-09-23 | C | 三個窗口全部反號 | G:3965-4050 |
+| 114 | f52w 單發 2007–14（#398） | 2026-09-25 | C | 在乾淨的新資料上、沒有多重比較懲罰，IR p=0.061 仍未達 0.025 | G:4052-4076 |
+| 115 | 股利率單發 2007–14（#399） | 2026-09-25 | A | 唯一沒過的是 MDD −53.7%，但事後確認規格把「帳戶層級」的天條一誤套到股票部位（規格缺陷）。已用新候選 #400 修正後重測 | G:4078-4114 |
+| 116 | #400 股利率×帳戶 70/30（holdout） | 2026-09-27 | C | holdout 期 IR 為負。0050 分割污染（A）已修，修正後更負，判定不變 | G:4116-4169 |
+| 117 | #406 供給緊縮衛星 | 2026-10-01 | C | Sortino 輸 0050，隨機組、DSR 也都沒過 | G:4171-4208 |
+| 118 | #409 產業缺貨輪動 | 2026-10-05 | C | MDD −55.9%，違反天條一 | G:4210-4212 |
+| 119 | #413 SPY 趨勢槓桿 | 2026-10-06 | C | MDD −51.68%，基準本身也是 −55.2% | G:4214-4232 |
+| 120 | #414 0050 趨勢槓桿 | 2026-10-06 | C | MDD −53.37%。0050 價格瑕疵那次首跑已作廢，改走 FinMind 路徑重跑 | G:4234-4258 |
+| 121 | #416 1.5／0.5 倍跨市場 | 2026-10-06 | C | 8 個市場只有 4 個達標 | G:4260-4294 |
+| 122 | D10-a 季底投信作帳（駁回） | 2026-10-09 | C | 投信買超這條線已判死，不換參數重測（沒有實測，屬駁回） | G:4296-4298 |
+| 123 | D10-b 美股供給緊縮前置（駁回） | 2026-10-09 | B | 美股線在 #410 已因資料不可及結案（母體缺陷） | G:4299 |
+| 124 | B5 趨勢槓桿路線收斂 | 2026-10-10 | C | #413／#414／#416 的彙總結案 | G:4301-4304 |
+| 125 | #431 8-K 1.01 純商業協議 | 2026-10-11 | C | 隨機組百分位 43.5 | G:4306-4317 |
+| 126 | #434 美股客戶集中度 | 2026-10-11 | C | 百分位 19.5，方向相反 | G:4319-4332 |
+| 127 | #436 R1／S3 閘門 1990–2003 | 2026-10-12 | C | 1990 年崩盤時閘門無效，MDD −91.73% | G:4334-4360 |
+| 128 | 槓桿安全方案階段 1 作廢（提案，不是試驗） | 2026-10-13 | C | 依 #436 殺測結果作廢；保護假設在樣本外年代無效 | G:4362-4370 |
+| 129 | #440 波動管理槓桿 1990–2003 | 2026-10-13 | C | MDD −77.68%，對隨機對照只有第 78.8 百分位 | G:4372-4396 |
+
+---
+
+## 4. A 類清單：錯誤修好了沒、下一步
+
+本節只列建議，**不登記任何試驗**。
+
+| 條目 | 出錯在哪裡 | 修好了嗎 | 下一步 |
+|---|---|---|---|
+| **#22 四濾網合取**（G:1117） | ① 五個因子在 2015–2021 的資料交集全為 0，sanity 門檻幾乎由資料缺口決定（LEDGER:584）。② 原腳本 `composite_quality_revaccel_inst_lowvol_sanity.py` 不在 git 歷史裡，只殘留 `research/__pycache__/*.pyc`。③ 條目說當時「新增」了 `pit.py::cash_flow_pit()`，但 git 歷史在 2026-09-20 以前從來沒有這個函式（G:1191-1210） | **只修了一部分**：`cash_flow_pit()` 已在 2026-09-20 補上（`git log -S` 對應 commit `197568271`）；原腳本沒有找回，也沒有重跑 | **還沒修完，先修再登記**：重寫腳本，用修好的 PIT 先確認五個因子在 2015–2021 的覆蓋率，再決定要不要事前登記。註：條目同時有「四個濾網近似彼此獨立、看不到協同效果」的反證，建議優先度低 |
+| **core_tilt TE 可行性重測**（G:3411，#281） | 用 `factor_ic.sample_universe_ids(300)` 隨機抽樣宇宙，去重建「全市場市值前 50 大」。只有 89 檔有市值資料，台積電一檔佔 87.65%，TE 51% 是這個宇宙設計錯誤造成的 | **未查到修正紀錄**：在 REPORT／TRIALS_LEDGER 裡搜尋，09-19 之後沒有用全市場資料重建的紀錄 | **還沒修，先修再登記**：先建立全市場（不是抽樣）的市值排名。官方全市場股數與收盤價的歷史深度要先查證。重建組合對 0050 真實報酬的 TE 要先通過 ≤1% 的驗收，才能事前登記單發 |
+| **core_tilt（#283）**（G:3486） | 同上，抽樣宇宙錯誤（306 檔裡只有 146 檔有市值資料）。另外：本條寫「台積電很可能不在樣本裡」，上一條寫「台積電佔 87.65%」，**兩條互相矛盾** | **未查到修正紀錄** | 跟上一條合併處理。先查清楚台積電到底在不在那個抽樣宇宙裡，修好資料宇宙後再登記 |
+| **股利率單發 2007–14（#399）**（G:4078） | 規格把「帳戶層級」的天條一，誤套到「股票部位」層級（規格標籤錯誤，G:4102-4112） | **已修**：已用新候選 #400（帳戶 70/30）重新登記，並在 holdout 單發一次 | **已重測完畢，結果 FAIL**（G:4116）。holdout 已經用掉，**沒有再登記單發的空間**，不再列為候選 |
+
+**附註**：以下條目過程中有 A 型錯誤，但在判定前就修好，或修正後重跑結論不變，所以不列入 A 類。
+
+- #19（前視偏誤，已改成開盤到收盤版 #394 並重測）
+- #63／#243 系列（成本折數）
+- E1（統計量用錯）
+- #81（日頻重疊）
+- #400（0050 分割）
+- #46／#48／#23／#76～#85
+
+---
+
+## 5. B 類清單：缺什麼、官方能不能補、要多少樣本才有檢定力
+
+**怎麼粗估樣本數**：以下估計都是 80% 檢定力、雙尾 α=0.05，效果量直接取條目自己的數字。
+
+| 條目 | 怎麼算 |
+|---|---|
+| 相關係數類 | n ≈ (2.80／atanh r)² + 3 |
+| 平均數類 | 先用條目的 t 值或 p 值反推標準差，再算 n ≈ (2.80／d)²，d 是效果量 |
+| 比例類 | 二項常態近似 |
+
+這些都是**粗估**，不是正式的檢定力分析。
+
+| 條目 | 缺什麼 | 官方能補嗎 | 要多少樣本（假設） | 建議 |
+|---|---|---|---|---|
+| f_us_momentum_12m | 美股大樣本：之前只用 27–90 檔 | 能。宇宙用 SEC EDGAR（官方），價格用 yfinance（美股原生）。已下市股有 7.1% 沒有價格，必須附但書 | 粗估：假設每期 IC 平均 0.02、每期 IC 標準差 0.10（**這是假設，條目沒有給**），約需 196 個月度快照（約 16 年）；每期股票數越多，需要的期數越少 | **可開案**：新規格、事前登記、計入 N、附存活者偏誤但書 |
+| f_us_value_bm／low_vol 乾淨宇宙 | 未還原的原始價格；真實借券成本與可借量 | 原始價格要總司令核准註冊 Alpha Vantage／Stooq 的免費 key。借券資料目前沒有接入，空頭腿受第⑩條硬規則限制 | 無法計算 | **維持死亡**：空頭腿數字依第⑩條不得採信。只做多頭的版本（#22）已經 FAIL |
+| 原子.五B 財報通道 B | 足夠的獨立族：目前只有 4 族，因為多數表達式缺 2011 年那個窗口 | 官方 openapi 的財報只有最新一期；有歷史的 MOPS 網域被 robots 封鎖。歷史資料靠 FinMind（二手來源，目前已在使用） | 假設真實同號率 25%、對照基準 6.25%、p<0.01：4 族檢定力只有 5%，需要約 30 個獨立族才有約 80%（若再做 Bonferroni ×2 還要更多） | **條件式開案**：要先確認擴大財報快取後湊得到約 30 個獨立族，湊不到就維持死亡。要另立新規格，不得改成 K=4 之類的門檻 |
+| dividend_yield_portfolio_v1 | 樣本太短（VAL 只有 4 年） | 已補：用 2007–14 新資料做過單發 | — | **已開案**（#397／#399→#400）且都 FAIL，**維持死亡** |
+| 52 週高點策略層（#17） | 樣本太短，試驗數又太多 | 已補：用 2007–14 新資料做過單發 | — | **已開案**（#396／#398），FAIL，**維持死亡** |
+| 台指 VRP（#35） | 更多觀測值：目前 VAL 只有 n=190，均值 t 檢定在肥尾下檢定力不足 | 期交所選擇權日行情（台指選擇權 2001 年上市）的官方歷史下載能拿到多早，**需要查證**；2002–2014 這段本專案沒用過 | 由 VAL 反推：平均 0.76pp、標準差約 5.5pp，d≈0.14，約需 415 個每 5 日抽樣的觀測（約 8 年） | **條件式開案**：先查證期交所歷史資料。可在 2002–2014 做事前登記單發。賣選擇權有尾部風險，要同時檢查天條一 |
+| #38 大戶籌碼 | 股東持股分級的歷史週資料 | 不能。TDCC 官方 openapi 只給最新一週，只能從現在開始往後累積；FinMind 要付費 | 無法計算（機制從沒測過） | **維持死亡**：只能前向累積，需要好幾年 |
+| #39 0050 成分股調整 | 歷史成分股名單與生效日 | 不能。指數公司只有新聞稿，沒有結構化歷史；手動整理公告前要先做法遵確認 | 無法計算 | **維持死亡** |
+| #40 庫藏股買回 | VAL 事件數（只有 50 筆）、全部 725 檔 | **不能（合規上）**：`mops_buyback_client.py` 用的是 mopsov，已依 2026-09-15 裁示停用（client 第 86–93 行） | 由 VAL 反推：平均 2.12%、標準差約 8.3%，d≈0.25，VAL 約需 121 筆事件 | **維持死亡**：合規資料源停用 |
+| #41 內部人持股轉讓 | 全市場規模與 VAL 期 | **不能（合規上）**：`mops_insider_holdings_client.py` 也是打 mopsov | 無法計算（試跑階段沒有 VAL） | **維持死亡** |
+| #44 景氣對策信號 | 「當時發布版」的歷史數字 | 不能。data.gov.tw 只有修正後的最終版 | 無法計算 | **維持死亡** |
+| #47 處置股 | 處置股的歷史清單 | 不能。TWSE／TPEx 只有快照；FinMind 是付費資料，已標「待採購」 | 無法計算 | **維持死亡**，除非總司令核准採購 |
+| #49 隔夜／盤中分解 | 更長的評估窗口：目前 VAL 只有 4 年，在零容錯規則下真效果也只有約 66% 機率過關 | 官方加權指數 2010 年以前的每日開盤價能否取得，**需要查證** | 假設真實每年同號機率 0.9：4 年窗口過關機率 0.66，6 年 0.89，12 年（≥10/12）0.89。每個窗口至少要 6 年以上 | **條件式開案**：先查證 2010 年以前的開盤價資料，並事先估算「只持有隔夜」的每日換手成本（條目自己點名這可能是另一個死因） |
+| #51 子事件 2 現金增資 | 事件數：全部歷史只有約 118 筆 | 不能。全市場的事件已經全部用上了 | VAL IC=−0.229：α=0.10 約需 117 筆，α=0.05 約需 148 筆，**只算 VAL 就需要接近全部歷史** | **維持死亡**：台股要好幾十年才湊得到 |
+| #52-US 8-K 2.02 | 股票數（只有 22 檔），且價格源不合規 | 能。SEC EDGAR（官方）＋ yfinance。要先核對每檔 CIK 的歷史一致性 | 以同號比例 0.525 對 0.5 粗估，約需 3,100 個事件；通過標準是「嚴格超過控制組最大值」，實際需要更多 | **可開案**：新規格、事前登記、計入 N、附存活者偏誤但書 |
+| #61 央行決策日 | 會議場數（每年 4 場），2015–17 的日期拿不到 | 官方頁面查了三個管道都失敗 | 由 VAL 反推 d≈0.44：每期約需 41 場（約 10 年）；用 TRAIN 估 d≈0.38：約需 54 場（約 13 年） | **維持死亡**：樣本天生太少 |
+| #72 重大訂單 | 歷史深度 | 不能。合規來源只能從 2026-09-08 起往後累積；有歷史的 t51sb10 在 mopsov（robots 禁止） | 無法計算 | **維持死亡**：前向累積中；除非取得書面授權 |
+| #77 高收益債利差 | 2023 年以前的序列 | 不能。FRED 只給近 3 年，更早的要向 ICE 付費 | 無法計算 | **維持死亡**：用來代理的 #78 已測過，FAIL |
+| #81 景氣對策信號 | 不重疊的月頻觀測（目前 329 個） | 不能。這是月頻資料，樣本天生有限 | r≈−0.10 時約需 783 個不重疊月（約 65 年） | **維持死亡**：不可能補足 |
+| D10-b 美股供給緊縮 | 母體資料（#410 資料不可及） | 依 #410 的結論，不能 | 無法計算 | **維持死亡**（照原駁回） |
+
+**建議「開案」的 B 類**（都要新規格、事前登記、計入 N，且只能用沒碰過的資料或明確擴大樣本）：
+1. **f_us_momentum_12m**
+2. **#52-US 8-K 2.02**
+3. **原子.五B**（條件式）
+4. **台指 VRP #35**（條件式，先查證期交所歷史資料）
+5. **#49 隔夜／盤中分解**（條件式，先查證資料並估算成本）
+
+其餘 15 條維持死亡，原因都寫在上表。
+
+---
+
+## 6. C 類：不得調參重測；跨市場候選（只列，不登記）
+
+**重申規則**（總司令裁示）：C 類一律不得在原資料上調參數重測。修改版只能這樣做：
+- 用**沒碰過的市場資料**（韓、日、美長歷史）跨市場單發；
+- 事前登記；
+- 計入 N。
+
+方向反轉的版本（例如 #42、#43、#54、#55、#68、#71 實測方向跟假設相反的那些）也算新假設，同樣只能在沒碰過的市場上測。
+
+**以下家族已明文結案或禁止再開，不列入候選**：
+- 門檻觸發式二元降曝險 overlay 家族（G:3300-3304，不准第六個）
+- 趨勢槓桿路線（B5，G:4301）
+- HYG/IEF 比值（G:3987-3990）
+- #51、#52（含 #52-TW）
+- f_us_low_vol 家族（G:149-150）
+- 季底投信作帳／投信買超線（D10-a）
+
+**機制屬於通用型、適合跨市場單發的候選**（只列名，不登記；每個市場都要先照「原生資料源鐵律」查證資料，美股另附存活者偏誤但書）：
+
+| 候選（原條目） | 為什麼適合跨市場 | 可考慮的市場 |
+|---|---|---|
+| 名家趨勢跟隨（外部一改.3，G:3049） | 條目自己說，推翻趨勢跟隨需要「多商品版本」，單一台指期不夠；注意 #416 已用槓桿版在 8 個市場 FAIL，無槓桿多商品版是不同機制 | 美長歷史指數／期貨、日經、KOSPI |
+| 月轉效應（#25，G:1274） | 指數層級，機制（機構現金流時點）不限特定市場 | 美長歷史（S&P）、日經、KOSPI |
+| 等權再平衡溢酬（#29）／反向波動度加權（#58） | 投組建構類，不依賴台股特有資料 | 要有含下市股的宇宙；日韓資料源是否原生、能否取得要先查 |
+| 52 週高點接近度（#17／#398） | 原始文獻就在美股 | 美長歷史（附下市股 7.1% 無價但書）、日、韓 |
+| SUE／PEAD（#3、E1） | 原始文獻就在美股；SEC XBRL 是官方來源 | 美股（XBRL 約從 2009 年起） |
+| 波動度目標化（#15／#440） | Moreira & Muir 原始證據在美股；#440 只測了台股 1990–2003 | 美長歷史（不加槓桿版，或照現行槓桿規則另案） |
+
+---
+
+## 7. 機器可讀摘要
+
+```json
+{"generated":"2026-10-13","total":129,"counts":{"A":4,"B":20,"C":105},"borderline":16,"entries":[
+{"id":"GY-L98","name":"fut_basis_carry","class":"C","borderline":false},
+{"id":"GY-L112","name":"f_rel_strength_regime_switch","class":"C","borderline":false},
+{"id":"GY-L128","name":"f_us_low_vol","class":"C","borderline":false},
+{"id":"GY-L154","name":"f_us_momentum_12m","class":"B","borderline":false},
+{"id":"GY-L203","name":"f_us_value_bm/f_us_low_vol clean universe","class":"B","borderline":true},
+{"id":"GY-L282","name":"原子.六 籌碼Tier A 含上櫃 #328","class":"C","borderline":false},
+{"id":"GY-L291","name":"原子.六 籌碼Tier A #317","class":"C","borderline":false},
+{"id":"GY-L299","name":"原子.五 財報depth-1 #316","class":"C","borderline":false},
+{"id":"GY-L307","name":"原子.五B 財報通道B #320","class":"B","borderline":false},
+{"id":"GY-L316","name":"weinstein_stage2_v2","class":"C","borderline":false},
+{"id":"GY-L345","name":"fut_cta_momentum_12m","class":"C","borderline":false},
+{"id":"GY-L374","name":"pead_portfolio_v1","class":"C","borderline":false},
+{"id":"GY-L401","name":"dividend_yield_portfolio_v1","class":"B","borderline":true},
+{"id":"GY-L452","name":"f_residual_momentum #9","class":"C","borderline":false},
+{"id":"GY-L494","name":"sector-neutral relative strength #11","class":"C","borderline":false},
+{"id":"GY-L569","name":"BAB #12","class":"C","borderline":false},
+{"id":"GY-L628","name":"inst streak #13","class":"C","borderline":false},
+{"id":"GY-L674","name":"monthly revenue event #14","class":"C","borderline":false},
+{"id":"GY-L731","name":"vol targeting #15","class":"C","borderline":false},
+{"id":"GY-L791","name":"low vol TW decile LS #7","class":"C","borderline":false},
+{"id":"GY-L846","name":"pair trading #16","class":"C","borderline":false},
+{"id":"GY-L864","name":"52w high proximity portfolio #17","class":"B","borderline":true},
+{"id":"GY-L951","name":"short-term reversal 1w #18","class":"C","borderline":false},
+{"id":"GY-L976","name":"US overnight spillover #19","class":"C","borderline":true},
+{"id":"GY-L1048","name":"gross profitability #20","class":"C","borderline":false},
+{"id":"GY-L1080","name":"revenue trend surprise low attention #21","class":"C","borderline":false},
+{"id":"GY-L1117","name":"composite AND overlay #22","class":"A","borderline":true},
+{"id":"GY-L1147","name":"Piotroski gate #23","class":"C","borderline":false},
+{"id":"GY-L1253","name":"ex-dividend seasonal #24","class":"C","borderline":false},
+{"id":"GY-L1274","name":"turn of month #25","class":"C","borderline":false},
+{"id":"GY-L1302","name":"margin debt growth #26","class":"C","borderline":false},
+{"id":"GY-L1340","name":"z-score blend #27","class":"C","borderline":true},
+{"id":"GY-L1367","name":"breadth divergence #28","class":"C","borderline":false},
+{"id":"GY-L1399","name":"equal-weight rebalancing #29","class":"C","borderline":false},
+{"id":"GY-L1444","name":"margin utilization #30","class":"C","borderline":false},
+{"id":"GY-L1482","name":"option PCR overlay #31","class":"C","borderline":false},
+{"id":"GY-L1529","name":"fx_twd_gate #32","class":"C","borderline":false},
+{"id":"GY-L1561","name":"fred_yield_curve_gate #33","class":"C","borderline":false},
+{"id":"GY-L1598","name":"copper/gold ratio #34","class":"C","borderline":false},
+{"id":"GY-L1670","name":"TAIEX option VRP #35","class":"B","borderline":true},
+{"id":"GY-L1722","name":"portfolio_multifactor_v2_loo_no_low_vol","class":"C","borderline":false},
+{"id":"GY-L1768","name":"short sale utilization #36","class":"C","borderline":true},
+{"id":"GY-L1833","name":"#37 day-trading ratio","class":"C","borderline":false},
+{"id":"GY-L1885","name":"#38 holding shares concentration","class":"B","borderline":false},
+{"id":"GY-L1935","name":"#39 index reconstitution","class":"B","borderline":false},
+{"id":"GY-L1960","name":"#40 share buyback","class":"B","borderline":true},
+{"id":"GY-L2003","name":"portfolio_multifactor_v2 family","class":"C","borderline":false},
+{"id":"GY-L2059","name":"#41 insider holdings transfer","class":"B","borderline":true},
+{"id":"GY-L2094","name":"#42 average pairwise correlation","class":"C","borderline":false},
+{"id":"GY-L2121","name":"#43 institutional buying concentration","class":"C","borderline":false},
+{"id":"GY-L2134","name":"#44 NDC business cycle signal","class":"B","borderline":false},
+{"id":"GY-L2140","name":"#45 ADR premium convergence","class":"C","borderline":false},
+{"id":"GY-L2172","name":"#46 IPO long-run underperformance","class":"C","borderline":false},
+{"id":"GY-L2215","name":"#47 post-disposition reversion","class":"B","borderline":false},
+{"id":"GY-L2256","name":"#48 share pledge ratio","class":"C","borderline":false},
+{"id":"GY-L2312","name":"#49 overnight vs intraday","class":"B","borderline":true},
+{"id":"GY-L2374","name":"#51 sub1 forced covering continuous","class":"C","borderline":false},
+{"id":"GY-L2404","name":"#51 sub1 forced covering binary","class":"C","borderline":false},
+{"id":"GY-L2430","name":"#51 sub2 cash capital increase","class":"B","borderline":false},
+{"id":"GY-L2477","name":"#51 sub3 CB conversion reset","class":"C","borderline":false},
+{"id":"GY-L2486","name":"#51-US S&P addition run-up","class":"C","borderline":true},
+{"id":"GY-L2498","name":"family: cross-sectional dispersion velocity","class":"C","borderline":false},
+{"id":"GY-L2547","name":"#53 return dispersion velocity","class":"C","borderline":false},
+{"id":"GY-L2555","name":"#54 turnover concentration velocity","class":"C","borderline":false},
+{"id":"GY-L2563","name":"#55 institutional flow dispersion velocity","class":"C","borderline":false},
+{"id":"GY-L2572","name":"#57 day-trading ratio dispersion velocity","class":"C","borderline":false},
+{"id":"GY-L2581","name":"Cybex.engine on #53","class":"C","borderline":false},
+{"id":"GY-L2589","name":"#58 inverse-vol weighting","class":"C","borderline":false},
+{"id":"GY-L2597","name":"#59 minimum variance","class":"C","borderline":false},
+{"id":"GY-L2604","name":"#60 settlement date effect","class":"C","borderline":false},
+{"id":"GY-L2611","name":"#52-US 8-K Item 2.02","class":"B","borderline":true},
+{"id":"GY-L2650","name":"#52-US 8-K Item 5.02","class":"C","borderline":false},
+{"id":"GY-L2684","name":"#61 central bank decision","class":"B","borderline":false},
+{"id":"GY-L2691","name":"#52-US 8-K Item 1.01","class":"C","borderline":false},
+{"id":"GY-L2725","name":"#52-TW MOPS material news","class":"C","borderline":false},
+{"id":"GY-L2769","name":"#62 block trade","class":"C","borderline":false},
+{"id":"GY-L2800","name":"f_lending_fee_spike #63","class":"C","borderline":false},
+{"id":"GY-L2868","name":"f_lending_fee_spike v2","class":"C","borderline":false},
+{"id":"GY-L2913","name":"fut_basis_regime_gate64","class":"C","borderline":false},
+{"id":"GY-L2936","name":"f_leader_follower_lag #65","class":"C","borderline":false},
+{"id":"GY-L2959","name":"us_tax_loss_selling_gate66","class":"C","borderline":false},
+{"id":"GY-L2988","name":"odd_lot_imbalance_portfolio_v1 #67","class":"C","borderline":false},
+{"id":"GY-L3024","name":"#68 short-to-margin ratio","class":"C","borderline":false},
+{"id":"GY-L3049","name":"外部一改.3 classic trend following x5","class":"C","borderline":false},
+{"id":"GY-L3076","name":"option_oi_pcr_gate69","class":"C","borderline":false},
+{"id":"GY-L3099","name":"#70 volatility skew","class":"C","borderline":false},
+{"id":"GY-L3119","name":"TAIEX 200MA overlay #243","class":"C","borderline":false},
+{"id":"GY-L3149","name":"TX 200MA overlay #244","class":"C","borderline":false},
+{"id":"GY-L3193","name":"drawdown breaker regime cand5","class":"C","borderline":false},
+{"id":"GY-L3220","name":"realized vol regime cand3","class":"C","borderline":false},
+{"id":"GY-L3238","name":"breadth level regime cand1","class":"C","borderline":false},
+{"id":"GY-L3256","name":"family: threshold binary de-risk overlay","class":"C","borderline":false},
+{"id":"GY-L3347","name":"margin growth regime cand4","class":"C","borderline":false},
+{"id":"GY-L3393","name":"#71 capital reduction CAR","class":"C","borderline":false},
+{"id":"GY-L3411","name":"core_tilt TE feasibility retest #281","class":"A","borderline":false},
+{"id":"GY-L3466","name":"#73 sector flow acceleration","class":"C","borderline":false},
+{"id":"GY-L3486","name":"core_tilt #283","class":"A","borderline":false},
+{"id":"GY-L3529","name":"#72 order win announcement","class":"B","borderline":false},
+{"id":"GY-L3579","name":"原子.二 depth-1 expression map","class":"C","borderline":false},
+{"id":"GY-L3618","name":"原子.六 SBL lending TWT72U #321","class":"C","borderline":false},
+{"id":"GY-L3624","name":"#75 US insider net buying","class":"C","borderline":false},
+{"id":"GY-L3651","name":"event-driven SUE E1/E2","class":"C","borderline":true},
+{"id":"GY-L3719","name":"monthly revenue SUE continuous bucket","class":"C","borderline":false},
+{"id":"GY-L3759","name":"#76 VIX9D/VIX ratio","class":"C","borderline":false},
+{"id":"GY-L3779","name":"#77 HY OAS","class":"B","borderline":false},
+{"id":"GY-L3786","name":"#78 HYG/IEF ratio","class":"C","borderline":false},
+{"id":"GY-L3809","name":"#80 unemployment YoY","class":"C","borderline":false},
+{"id":"GY-L3832","name":"E-c trailing stop / E-d MA200 exit","class":"C","borderline":true},
+{"id":"GY-L3862","name":"#81 NDC business cycle signal regime","class":"B","borderline":true},
+{"id":"GY-L3890","name":"#82 VIX ratio rate of change","class":"C","borderline":false},
+{"id":"GY-L3910","name":"#83 VIX level","class":"C","borderline":false},
+{"id":"GY-L3940","name":"#84 HYG/IEF rate of change","class":"C","borderline":false},
+{"id":"GY-L3965","name":"#85 HYG/IEF other windows","class":"C","borderline":false},
+{"id":"GY-L4052","name":"f52w single-shot 2007-2014 #398","class":"C","borderline":false},
+{"id":"GY-L4078","name":"dividend single-shot 2007-2014 #399","class":"A","borderline":false},
+{"id":"GY-L4116","name":"#400 dividend x account 70/30 holdout","class":"C","borderline":false},
+{"id":"GY-L4171","name":"#406 supply_tightness_satellite_v1","class":"C","borderline":false},
+{"id":"GY-L4210","name":"#409 industry_shortage_v1","class":"C","borderline":false},
+{"id":"GY-L4214","name":"#413 trend_leverage_us_spy","class":"C","borderline":false},
+{"id":"GY-L4234","name":"#414 trend_leverage_tw_0050","class":"C","borderline":false},
+{"id":"GY-L4260","name":"#416 trend_scale_1_5x_0_5x_xmkt","class":"C","borderline":false},
+{"id":"GY-L4296a","name":"D10 先.四十五-四 季底投信作帳 駁回","class":"C","borderline":false},
+{"id":"GY-L4296b","name":"D10 先.十七 美股供給緊縮 駁回","class":"B","borderline":false},
+{"id":"GY-L4301","name":"B5 trend leverage route closure","class":"C","borderline":false},
+{"id":"GY-L4306","name":"#431 b18_8k_commercial_item101_drift_v1","class":"C","borderline":false},
+{"id":"GY-L4319","name":"#434 b30_us_customer_concentration_v1","class":"C","borderline":false},
+{"id":"GY-L4334","name":"#436 r1s3_gate_killtest_1990_2003","class":"C","borderline":false},
+{"id":"GY-L4362","name":"leverage safety plan stage 1 void (proposal)","class":"C","borderline":false},
+{"id":"GY-L4372","name":"#440 volmanaged_leverage_1990_2003","class":"C","borderline":false}
+]}
+```
