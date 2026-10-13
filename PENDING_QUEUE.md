@@ -19343,4 +19343,4 @@ C. 驗收
 - [ ] **先.八十一-37 （補件，來源：BACKLOG「尚未驗收／已知限制」technical 因子用未還原收盤）先查證目前 live_factors technical 因子是否仍用未還原收盤（price_history 已有 adj_close）；若是，改用還原收盤並列出受影響檔數與分數變化，屬資料正確性修正、不登記新試驗、不調參數**（互動視窗執行）
 - [ ] **先.八十一-38 （補件，來源：BACKLOG「尚未驗收／已知限制」979 檔缺 Q1 基準的財報季度）查現況：官方累計數差分（先.七十 系列）上線後還有幾檔缺單季、缺哪幾季、原因分類；能用既有官方檔補的補上，不能補的在個股頁誠實標示，附前後檔數**（互動視窗執行）
 - [ ] **先.八十一-39 （補件，來源：BACKLOG「尚未驗收／已知限制」TPEx 價量端點偶發 SSL 憑證錯誤）查近 30 天排程 log 的 TPEx CERTIFICATE_VERIFY_FAILED 次數與根因；若同央行／海關「中繼 CA 缺 SKI」，比照只關 VERIFY_X509_STRICT（不得 verify=False）並附驗證**（互動視窗執行）
-- [ ] **先.八十一-40 （補件，來源：BACKLOG「尚未驗收／已知限制」財報公布時段推估失敗）查 data/earnings_calendar.json 在 GitHub Actions 上 estimated_session 是否仍全為 unknown；若 Actions 正常、只是本機 DNS 問題，就在 BACKLOG 結案並在 App 說明，若仍失敗則查因**（互動視窗執行）
+- [x] **先.八十一-40 （補件，來源：BACKLOG「尚未驗收／已知限制」財報公布時段推估失敗）查 data/earnings_calendar.json 在 GitHub Actions 上 estimated_session 是否仍全為 unknown；若 Actions 正常、只是本機 DNS 問題，就在 BACKLOG 結案並在 App 說明，若仍失敗則查因**（互動視窗執行）〔雲端 earnings_calendar 6 檔 post 5／pre 1／unknown 0，只是本機 DNS 問題；BACKLOG 結案〕

@@ -2548,6 +2548,9 @@ B31/B32/B33。
   非程式 bug），`estimated_session` 誠實降級為 `unknown`；`next_earnings_date`
   本身（來自 `get_calendar()`）不受影響。GitHub Actions runner 環境不一定
   有同樣問題，之後排程實跑可能就會恢復正常。
+  **✅ 2026-10-13 先.八十一-40 查證結案**：雲端 market.yml 產出的 `data/earnings_calendar.json`（10/13 02:49 UTC
+  github-actions 提交）6 檔全部有 `estimated_session`（post 5、pre 1，依最近一次歷史公布時間推估），沒有 unknown——
+  確認只是本機 DNS 環境問題，雲端正常，不需改程式。
 - **IBKR `outsideRth` 旗標尚未實作**：使用者原話「先記進 BACKLOG，現在不
   實作」——未來若接 IBKR 下單，延長時段（盤前/盤後）下單需要帶這個旗標，
   目前完全沒有下單串接（見 CLAUDE.md 安全紅線：自動下單只做介面/下單計畫，
