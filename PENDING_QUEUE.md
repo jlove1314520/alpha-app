@@ -19404,6 +19404,7 @@ C. 驗收
 - [x] **先.八十二-11 融資維持率（CM 估）每日與籌碼K 校準（每週人工讀數存本機檔、誤差 >2pp 推播並重估係數；不爬籌碼K）**（互動視窗執行）〔scripts/ck_reading.py 登錄（本機檔）＋scripts/margin_ck_check.py 每日比對（只比 10/07 起同日方法；>2pp 推播＋reconcile／build_margin_calibration 重估、只提交校準檔；>8 天提醒）；排程 AlphaMarginCkCheck 平日 19:30；自測 6/6〕
 - [ ] **先.八十二-11a （補件，來源：先.八十二-1 冒煙 #58 失敗查證；屬第 11 項融資維持率）本機 AlphaData 排程 15:30（alpha-data/run_daily.py → compute_margin_maintenance.py）用舊格式改寫 alpha-app/data/margin_maintenance.json 當日紀錄，蓋掉雲端版 ratio_pct_ck／來源／generated_at 等欄位，且之後本機 git pull 會跟雲端同檔衝突。alpha-data 屬「動前先確認」區：先寫提案（停寫、改寫到 alpha-data 自己的檔、或只補缺不覆蓋），等裁示再改**（互動視窗執行）
 - [ ] **先.八十二-12 手機實機回歸：390×844 逐頁截圖比對前一版，每晚自動跑，差異大於門檻推播**（互動視窗執行）
+- [x] **先.八十二-12a （補件，來源：先.八十二-12 第一次手機回歸截圖；正式網址每頁都有紅色「程式錯誤 eventsIndex HTTP 404」）GitHub Pages 預設 Jekyll 會略過「_ 開頭」檔案，線上 data/by_code/_meta.json、data/events_by_code/_index.json、data/price_history/_meta.json 全部 404：根目錄加 .nojekyll，冒煙加檢查，推送後實測線上 200**（互動視窗執行）〔.nojekyll（Pages Jekyll 略過 _ 開頭檔，線上 by_code/_meta、events_by_code/_index、price_history/_meta 全 404）＋冒煙 #141；研究成績單工程說明改白話〕
 - [x] **先.八十二-13 處置股／注意股提醒：自選股或真錢持股被列入時推播（照現有 disposal_flags）**（互動視窗執行）〔scripts/disposal_alert.py（自選＋多清單＋live 自選、真錢白名單；同筆只推一次、未送達下輪重試）接在 run_disposal_flags.ps1 18:30 後；自測 5/5；目前 0 檔命中〕
 - [ ] **先.八十二-14 先.八十一-53、56、57、58、59、61、63、64 照原計畫做完**（互動視窗執行）
 

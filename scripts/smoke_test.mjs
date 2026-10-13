@@ -4532,6 +4532,24 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { rsErrs2.push(`測試本身出錯：${e.message || e}`); }
   record("140. 日誌頁研究成績單：試驗數、墓園 A／B／C、樣本外對 0050、結論由資料算出（先.八十二-9／先.八十三-5）", rsErrs2.length === 0, rsErrs2.join("; ") || rsInfo);
 
+  // 141.【2026-10-13 先.八十二-12a】GitHub Pages 預設用 Jekyll，會略過「_ 開頭」的檔案（線上 404）：
+  // data/by_code/_meta.json、data/events_by_code/_index.json、data/price_history/_meta.json 都是 App 會讀的檔。
+  // 根目錄必須有 .nojekyll（本機冒煙用 http.server 測不出這個問題，所以直接檢查檔案在不在、有沒有被 git 追蹤）。
+  const njErrs = [];
+  try {
+    const fsx = await import("node:fs");
+    const { execFileSync } = await import("node:child_process");
+    if (!fsx.existsSync(".nojekyll")) njErrs.push("根目錄缺 .nojekyll");
+    else {
+      let tracked = "";
+      try { tracked = execFileSync("git", ["ls-files", ".nojekyll"], { encoding: "utf8" }).trim(); } catch (e) { tracked = ""; }
+      if (tracked !== ".nojekyll") njErrs.push(".nojekyll 沒有被 git 追蹤（推上去才有效）");
+    }
+    const appFiles = ["data/by_code/_meta.json", "data/events_by_code/_index.json", "data/price_history/_meta.json"].filter(f => fsx.existsSync(f));
+    if (!appFiles.length) njErrs.push("找不到任何 _ 開頭的資料檔（測試前提不成立）");
+  } catch (e) { njErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("141. 根目錄有 .nojekyll，線上「_ 開頭」資料檔（by_code／events 索引／價格拆檔 meta）不會被 Pages 略過（先.八十二-12a）", njErrs.length === 0, njErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4560,7 +4578,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

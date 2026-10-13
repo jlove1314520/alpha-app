@@ -176,7 +176,7 @@
     const sec=(h,b)=>'<div style="margin-top:10px"><div style="font-weight:600;font-size:13px">'+h+'</div>'+b+'</div>';
     let h='<div style="font-size:14px;font-weight:600;line-height:1.5">'+esc(o.conclusion||'樣本外對照讀取失敗')+'</div>';
     h+=sec('一、測過幾種方法',t.error?'<div class="note">讀取失敗：'+esc(t.error)+'</div>':
-      '<div class="note">試驗帳本共 <b>'+n(t.count)+'</b> 筆（'+esc(t.count_rule||'')+'）。</div>'+
+      '<div class="note">試驗帳本共 <b>'+n(t.count)+'</b> 筆（就是多重比較用的試驗總數；框架自檢只列出、不計入）。</div>'+
       '<div class="note">'+(t.by_verdict||[]).map(([k,v])=>esc(k)+' '+n(v)).join('、')+'</div>'+
       '<div class="note" style="color:var(--ink-3)">「通過判準」多半只過了單一關卡或屬於配置類（例：#418 股債配置），不等於贏 0050；贏不贏看第三段。</div>');
     const rows=(a.rows||[]);
