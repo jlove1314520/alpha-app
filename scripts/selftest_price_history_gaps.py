@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """先.八十-9 全市場缺日自測（只讀 data/price_history.json，不連網）。
-①自 2026-08-03 起每個官方開市日（research/data/auto_trading/calendar_*.json 休市日以外的平日），
+①最近 90 個官方開市日（先.八十四-1；原為自 2026-08-03／06-01 起）每個官方開市日（research/data/auto_trading/calendar_*.json 休市日以外的平日），
   檔數都不得低於全期中位數的 90%（缺一個交易所或只回補一部分股票都會被抓到）
 ②每檔日期不得重複、必須遞增
 ③判定函式本身：人為拿掉某天一半股票 → 必須被判為缺日（防止自測恆真）
@@ -42,7 +42,8 @@ def _load_ph(tries=4):
 
 prices = _load_ph()
 gaps, counts, med = B.find_gaps(prices)
-check(f"①{B.START} 起每個開市日檔數 ≥ 中位數 {med:.0f} 的 90%（缺日：{[(d, counts.get(d, 0)) for d in gaps][:8]}）", not gaps)
+_w = B.window_days(max(counts)) if counts else []
+check(f"①最近 {len(_w)} 個開市日（{_w[0] if _w else B.START} 起，先.八十四-1 改為跟 90 筆保留一致）每個開市日檔數 ≥ 中位數 {med:.0f} 的 90%（缺日：{[(d, counts.get(d, 0)) for d in gaps][:8]}）", not gaps)
 bad = [c for c, rows in prices.items() if [r["date"] for r in rows] != sorted({r["date"] for r in rows})]
 check(f"②每檔日期遞增且不重複（違規 {len(bad)} 檔：{bad[:5]}）", not bad)
 day = sorted(counts)[-1] if counts else None

@@ -83,19 +83,27 @@ def open_days(start: str, end: str) -> list:
     return out
 
 
-def day_counts(prices: dict) -> dict:
+def day_counts(prices: dict, start: str = START) -> dict:
     c = {}
     for rows in prices.values():
         for r in rows:
-            if r.get("date", "") >= START:
+            if r.get("date", "") >= start:
                 c[r["date"]] = c.get(r["date"], 0) + 1
     return c
+
+
+def window_days(last: str) -> list:
+    """先.八十四-1（2026-10-13）：缺日判定只看「最近 PRICE_HISTORY_DAYS（90）個開市日」，START 只當下限。
+    原本固定從 06-01 看起，10/09 後 06-01～最新日超過 90 個開市日：update_price_history 每檔截到 90 筆，
+    這支又把被截掉的 6/1、6/2 判成缺日補回去（每班多打 2 天官方端點、每檔變 92 筆），兩條規則互相打架。"""
+    return open_days(START, last)[-U.PRICE_HISTORY_DAYS:]
 
 
 def find_gaps(prices: dict) -> tuple[list, dict, float]:
     counts = day_counts(prices)
     last = max(counts) if counts else START
-    days = open_days(START, last)
+    days = window_days(last)
+    counts = {d: n for d, n in counts.items() if not days or d >= days[0]}
     med = statistics.median([counts.get(d, 0) for d in days]) if days else 0
     return [d for d in days if counts.get(d, 0) < med * RATIO], counts, med
 
