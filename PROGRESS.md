@@ -1,3 +1,12 @@
+## 2026-10-13 22:33（互動視窗）先.八十五-1 佇列 9 項改 DevQueue 可執行＋每輪可執行項數檢查
+
+- **根因**：10/13 19:56 起佇列 12 項全標「（互動視窗執行）」，`dev_queue_runner.py` 的 `item_class()` 一律跳過，DevQueue 每輪 `NO_PENDING_ITEM_FOR_DEVQUEUE`／`QUEUE_EMPTY`（例 cycle 20261013-220101）。
+- **逐項重判（1a）**：9 項改標「（DevQueue 可執行）」：先.八十一-29／-33／-36、先.八十三-3a-2／-2a-1／-2b-1／-3b-1／-3d-1、先.八十四-9。3b-1、3d-1 只做資料查證，PREREG 草稿交 先.八十五-4 互動視窗；84-9 措辭改「只盤點、不動任何 stash」（原文的「刪除／裁示」字樣會被守門員擋）。
+- **留互動視窗**：先.八十四-5／-6（時間閘）、-7（時間閘＋提案）、先.八十五-2（改 CLAUDE.md）、-3（登記試驗）、-4（PREREG＋研究判定）。
+- **1b／1c**：PENDING_QUEUE 檔頭新增第 8 條「補件預設 DevQueue 可執行」；`dev_queue_runner.py` 新增 `eligible_precheck()`，每輪印 `DEVQUEUE_ELIGIBLE`（目前 9 項），不足 6 項印 `DEVQUEUE_ELIGIBLE_LOW`。`find_next()` 現在回 先.八十一-29。
+- 驗證：`selftest_dev_queue_guard.py` 25/25、`selftest_dev_queue_crunch.py` 23/23；冒煙 142 項全過。
+- 下一步：等下一輪 DevQueue cycle（每 30 分鐘）確認 reason 不是 QUEUE_EMPTY 且有實際提交，才改 [x]。
+
 ## 2026-10-13 19:56（互動視窗）先.八十三-2 A 類先修診斷（core_tilt 宇宙、#22 四濾網）
 
 - 先.八十三-2a／2b 診斷結果寫進 `research/AUTOPSY_ACTIONS.md`「A 類先修診斷」，兩項標 [~]（診斷完成、修正未做）。

@@ -342,6 +342,28 @@ def guard_precheck() -> list:
     return found
 
 
+# 先.八十五-1c：佇列 ≥12 項中至少 6 項要 DevQueue 可執行（非[研究]、非互動視窗、不被守門員擋）
+DEVQUEUE_ELIGIBLE_MIN = 6
+
+
+def eligible_precheck() -> int:
+    """印 DEVQUEUE_ELIGIBLE 計數；不足 DEVQUEUE_ELIGIBLE_MIN 印 _LOW 警告。只印、不改標記；自身失敗只降級。"""
+    try:
+        n = 0
+        for _i, ln in _pending_lines(_lines()):
+            if item_class(ln) in ("研究", "互動視窗"):
+                continue
+            h = guard_hits(re.sub(r"^\s*- \[ \]\s*", "", ln).strip())
+            if not (h["needs_user"] or h["irreversible"]):
+                n += 1
+        tag = "DEVQUEUE_ELIGIBLE_LOW" if n < DEVQUEUE_ELIGIBLE_MIN else "DEVQUEUE_ELIGIBLE"
+        _safe_print(f"{tag}：DevQueue 可執行的 - [ ] 共 {n} 項（下限 {DEVQUEUE_ELIGIBLE_MIN}，先.八十五-1c）")
+        return n
+    except Exception as e:  # noqa: BLE001
+        _safe_print(f"WARN_DETECTOR_CRASHED: eligible_precheck failed ({type(e).__name__})，本輪略過")
+        return -1
+
+
 # 先.六十七-5：條目寫著總司令已裁示解凍／核准，卻仍標 [!] → 標記與裁示不一致（例：-6 先.六十五 已解凍仍標 [!]）。
 # 排除「待／需／經／須／等／請 總司令核准」與「核准後／前」這類解除條件寫法，只抓已發生的裁示。
 APPROVAL_STALE_PAT = re.compile(r"(?<![待需經須等請])總司令(?:已|於[^。；，]{0,12})?(?:裁示)?(?:解凍|核准|同意)(?![後前？?])"
@@ -821,6 +843,7 @@ def build_prompt() -> int:
     # 問題），因為「這輪漏抓一次矛盾」永遠比「DevQueue整支崩潰3小時」代價低。
     guard_precheck()  # 先.六十二-3：只印警告，自身失敗已在函式內降級
     approval_precheck()  # 先.六十七-5：同上，只印警告
+    eligible_precheck()  # 先.八十五-1c：同上，只印計數／警告
     ambiguity = None
     try:
         ambiguity = _order_marker_ambiguity()
