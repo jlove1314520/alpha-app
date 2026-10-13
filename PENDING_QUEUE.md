@@ -19237,7 +19237,7 @@ C. 驗收
 - [x] **先.七十九-1 備份 config.local.json，只改 total_capital_twd 10000→2400；mode 維持 LIVE_WITH_VETO**（互動視窗執行）〔已備份（同資料夾 config.local.json.bak-before79-時間戳，不進 repo）；只有 total_capital_twd 一欄改動，mode 仍 LIVE_WITH_VETO、tranche_total 仍 4〕
 - [x] **先.七十九-2 重跑唯讀 --preflight，貼結果；config、cash_ready 須 PASS（金額不顯示）**（互動視窗執行）〔2026-10-11 19:36 唯讀 --preflight：PASS 19／FAIL 0（另 monthly_ok WARN、mode INFO，共 21 列）；config PASS、cash_ready PASS「足夠」，金額不顯示；go_live_ready=True〕
 - [x] **先.七十九-3 T1 預覽：預期 0050 2 股／00646 3 股／00697B 1 股、合計約 504；不符即停下回報**（互動視窗執行）〔load_prev_closes（10/08 昨收）＋plan_orders(dev 0.5)：0050 零股 2 股、00646 零股 3 股、00697B 零股 1 股，股數與預期完全相符；合計與預期差距在 1% 內（限價偏離設定 0.5% 與估算差異），[自行裁量] 判定相符（金額只在對話回報）；status 預覽與獨立重算一致〕
-- [~] **先.七十九-4 10/12 13:40 結算後對帳＋odd_lot_verification 三檔 match → 開 STOP 旗標並推播「流程驗證完成，自動投資已暫停」；不符也開 STOP 並回報差異**（互動視窗／排程執行，時間閘 2026-10-12 13:40）〔程式完成待 10/12 執行：auto_rebalance_bb90 --flow-verify-close（只讀本機、一律開 STOP、寫 strategy_frozen、推播；結算未完成且未到 14:30 先等）＋排程 AlphaFlowVerifyClose1012（10/12 14:00、14:30）；selftest_flow_verify_close 9/9；10/12 執行後由互動視窗補結果並改 [x]〕
+- [x] **先.七十九-4 10/12 13:40 結算後對帳＋odd_lot_verification 三檔 match → 開 STOP 旗標並推播「流程驗證完成，自動投資已暫停」；不符也開 STOP 並回報差異**（互動視窗／排程執行，時間閘 2026-10-12 13:40）〔程式完成待 10/12 執行：auto_rebalance_bb90 --flow-verify-close（只讀本機、一律開 STOP、寫 strategy_frozen、推播；結算未完成且未到 14:30 先等）＋排程 AlphaFlowVerifyClose1012（10/12 14:00、14:30）；selftest_flow_verify_close 9/9；10/12 執行後由互動視窗補結果並改 [x]〕〔10/12 14:00 執行結果 OK：13:40 結算完成、對帳通過、零股驗證三檔 match（0050 成交 2 股、00697B 1 股、00646 0 股＝未成交，持股差同為 0 故 match）；STOP 已開、strategy_frozen 已寫、推播「流程驗證完成，自動投資已暫停」；14:30 那次回 DONE_ALREADY 不重複〕
 - [x] **先.七十九-5 App 自動投資頁顯示「已暫停：等紙上策略打贏 0050」**（互動視窗執行）〔交易頁自動投資卡 bot-freeze、下一期、本期原因、紅色橫幅：STOP＋strategy_frozen → 「已暫停：等紙上策略打贏 0050」；單純緊急停止不混用；暫停前顯示 status.flow_verification_plan 說明；smoke #99〕
 - [x] **先.七十九-6 commit＋push（config.local.json 不進 repo）回報證據；禁止 --live-cancel-test、禁止印帳號金額**（互動視窗執行）〔commit 877f5ad38＋58aff3dcb 已 push（後者撤回 877f5ad38 誤帶入的 DevQueue 冒煙 #100，工作目錄保留）；config.local.json 未進 repo（research/data/ 已 gitignore）；未跑 --live-cancel-test、未印帳號金額〕
 
@@ -19304,7 +19304,7 @@ C. 驗收
 
 心跳：每完成一項把對應行標 - [x]（部分完成 [~]），並在 research/PROGRESS_HEARTBEAT.jsonl append 一行（source=interactive, item=先.八十一-N）。佇列深度 ≥12：做完一項就從 Cowork 全檢報告與 BACKLOG 補件，不得用新的 alpha 試驗湊數。
 
-- [ ] **先.八十一-1 market_tw 停在 10/8 查根因＋data_date＋落後時重試／rwd 備援＋App 標「大盤資料停在 MM/DD」＋冒煙檢查**（互動視窗執行）
+- [x] **先.八十一-1 market_tw 停在 10/8 查根因＋data_date＋落後時重試／rwd 備援＋App 標「大盤資料停在 MM/DD」＋冒煙檢查**（互動視窗執行）〔根因：04:03 時 TWSE／TAIFEX openapi 仍是 10/08、yfinance ^TWII 缺 10/12；加 data_date／expected_trading_day／stale_note，落後改 rwd MI_INDEX 帶日期，走勢改 FMTQIK 官方；App 顯示「大盤資料停在 MM/DD」；smoke #111；110 PASS／0 FAIL〕
 - [ ] **先.八十一-2 Shioaji 1.7.4→1.7.7（非交易時段；唯讀 --preflight＋SIMULATION 演練 A／B 全 PASS，失敗退回 1.7.4；禁止 1.7.6）**（互動視窗執行）
 - [ ] **先.八十一-3 STOP＋strategy_frozen 時 --run 只記 FROZEN 心跳後結束、不產生 REJECT／推播；看門狗不判故障；附自測**（互動視窗執行）
 - [ ] **先.八十一-4 【提案，不改程式】docs/PROPOSAL_US_LINKED_LIMIT.md：00646 限價基準（10/12 未成交原因、三種做法與風險）**（互動視窗執行）

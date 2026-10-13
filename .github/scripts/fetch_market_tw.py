@@ -216,12 +216,108 @@ def fetch_mi_index() -> tuple[dict | None, list[dict]]:
             signed = chg_pct
         if close is None or not name:
             continue
+        item = {"name": name, "close": close, "change_pct": signed, "data_date": _roc_to_iso(row.get("日期"))}
+        if name in HEADLINE_NAMES:
+            headline = item
+        elif name.endswith("類指數"):
+            sectors.append(item)
+    return headline, sectors
+
+
+# ───────── 先.八十一-1（2026-10-13）資料日核對與備援 ─────────
+# 根因（實測）：10/13 04:03 這輪抓到的 TWSE openapi MI_INDEX 與 TAIFEX openapi 都還是 10/08（openapi 隔日早上才刷新），
+# 走勢線用的 yfinance ^TWII 到 10/13 早上仍缺 10/12。price_history（STOCK_DAY_ALL）卻已有 10/12。
+# 做法：①每筆標 data_date ②資料日落後「應有的最後交易日」時，改問證交所 rwd MI_INDEX（帶日期參數、官方）
+# ③走勢線改以證交所 FMTQIK（官方逐月）為主、yfinance 為備援 ④仍落後就寫 stale_note，App 顯示「大盤資料停在 MM/DD」。
+TWSE_RWD_MI_INDEX = "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX"
+TWSE_FMTQIK = "https://www.twse.com.tw/rwd/zh/afterTrading/FMTQIK"
+PUBLISH_HOUR = 15  # 收盤資料當天 15:00 後才算「應該有」
+
+
+def _roc_to_iso(s: str | None) -> str | None:
+    s = str(s or "").strip().replace("/", "")
+    if len(s) == 7 and s.isdigit():
+        return f"{int(s[:3]) + 1911}-{s[3:5]}-{s[5:7]}"
+    if len(s) == 8 and s.isdigit():
+        return f"{s[:4]}-{s[4:6]}-{s[6:8]}"
+    return None
+
+
+def expected_last_trading_day(now_tw: datetime) -> str | None:
+    """官方休市日以外的最近一個交易日（今天 15:00 前不算今天）。日曆讀取失敗回 None（不做比對，不擋流程）。"""
+    try:
+        sys.path.insert(0, str(REPO_ROOT / "scripts"))
+        import backfill_price_history_gaps as B  # 同一份官方休市日判定（本機快取優先，雲端改問 TWSE holidaySchedule）
+        d = now_tw.date()
+        if now_tw.hour < PUBLISH_HOUR:
+            d -= timedelta(days=1)
+        for _ in range(15):
+            if d.weekday() < 5 and d.isoformat() not in B.closed_days(d.year):
+                return d.isoformat()
+            d -= timedelta(days=1)
+    except Exception as e:  # noqa: BLE001
+        print(f"[warn] 交易日曆判定失敗（不做資料日比對）：{e}")
+    return None
+
+
+def _sign_from_html(v) -> int:
+    t = str(v or "")
+    return -1 if "-" in t else (1 if "+" in t else 0)
+
+
+def fetch_mi_index_rwd(date_iso: str) -> tuple[dict | None, list[dict]]:
+    """證交所 rwd MI_INDEX（type=IND，帶日期）——openapi 落後時的官方備援。正負號取「漲跌(+/-)」欄、幅度取百分比絕對值。"""
+    r = _get_retry(TWSE_RWD_MI_INDEX, "twse_rwd", params={"date": date_iso.replace("-", ""), "type": "IND", "response": "json"}, timeout=30)
+    r.raise_for_status()
+    j = r.json()
+    if j.get("stat") != "OK" or _roc_to_iso(j.get("date")) != date_iso:
+        return None, []
+    tbl = next((t for t in j.get("tables") or [] if "價格指數(臺灣證券交易所)" in (t.get("title") or "")), None)
+    if not tbl:
+        return None, []
+    f = tbl["fields"]
+    i_n, i_c, i_s, i_p = f.index("指數"), f.index("收盤指數"), f.index("漲跌(+/-)"), f.index("漲跌百分比(%)")
+    headline, sectors = None, []
+    for row in tbl.get("data") or []:
+        name, close, pct = row[i_n], _num(row[i_c]), _num(row[i_p])
+        if close is None or not name:
+            continue
+        sg = _sign_from_html(row[i_s])
+        signed = None if pct is None else (abs(pct) * sg if sg else pct)
         item = {"name": name, "close": close, "change_pct": signed}
         if name in HEADLINE_NAMES:
             headline = item
         elif name.endswith("類指數"):
             sectors.append(item)
     return headline, sectors
+
+
+def fetch_taiex_history_twse(months: int = 4) -> tuple[list[float], list[str]]:
+    """證交所 FMTQIK 逐月的「發行量加權股價指數」日收盤（官方），近 months 個月。"""
+    now = datetime.now(TW_TZ)
+    ys = []
+    y, m = now.year, now.month
+    for _ in range(months):
+        ys.append((y, m))
+        m -= 1
+        if m == 0:
+            y, m = y - 1, 12
+    rows = {}
+    for y, m in reversed(ys):
+        r = _get_retry(TWSE_FMTQIK, "twse_rwd", params={"date": f"{y}{m:02d}01", "response": "json"}, timeout=30)
+        r.raise_for_status()
+        j = r.json()
+        if j.get("stat") != "OK":
+            continue
+        f = j["fields"]
+        i_d, i_x = f.index("日期"), f.index("發行量加權股價指數")
+        for row in j.get("data") or []:
+            d = _roc_to_iso(row[i_d])
+            v = _num(row[i_x])
+            if d and v is not None:
+                rows[d] = v
+    ds = sorted(rows)
+    return [rows[d] for d in ds], ds
 
 
 def fetch_taiex_sparkline() -> tuple[list[float], list[str]]:
@@ -468,25 +564,55 @@ def main():
     now_tw = datetime.now(TW_TZ)
     out = {"fetched_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "errors": []}
 
+    expected = expected_last_trading_day(now_tw)
+    out["expected_trading_day"] = expected
     try:
         headline, sectors = fetch_mi_index()
         out["taiex"] = headline
         out["sectors"] = sectors
+        if headline:
+            headline["source"] = "TWSE openapi MI_INDEX"
     except Exception as e:
         print(f"MI_INDEX 失敗：{e}")
         out["errors"].append(f"taiex/sectors: {e}")
+    # 先.八十一-1：openapi 資料日落後應有的最後交易日 → 改問 rwd MI_INDEX（帶日期）
+    cur = (out.get("taiex") or {}).get("data_date")
+    if expected and (not cur or cur < expected):
+        try:
+            h2, s2 = fetch_mi_index_rwd(expected)
+            if h2:
+                h2["data_date"], h2["source"] = expected, "TWSE rwd MI_INDEX（openapi 落後，改用帶日期官方端點）"
+                for x in s2:
+                    x["data_date"] = expected
+                print(f"openapi MI_INDEX 資料日 {cur} 落後 {expected}，改用 rwd MI_INDEX")
+                out["taiex"], out["sectors"] = h2, s2
+        except Exception as e:  # noqa: BLE001
+            print(f"rwd MI_INDEX 備援失敗：{e}")
+            out["errors"].append(f"taiex_rwd_fallback: {e}")
 
     if out.get("taiex"):
+        hist_v, hist_d = [], []
         try:
-            out["taiex"]["sparkline"], out["taiex"]["sparkline_dates"] = fetch_taiex_sparkline()
-        except Exception as e:
-            print(f"TAIEX sparkline(^TWII) 失敗：{e}")
-            out["errors"].append(f"taiex_sparkline: {e}")
-        try:
-            out["taiex"]["sparkline_60d"], out["taiex"]["sparkline_60d_dates"] = fetch_taiex_sparkline_60d()
-        except Exception as e:
-            print(f"TAIEX sparkline_60d(^TWII) 失敗：{e}")
-            out["errors"].append(f"taiex_sparkline_60d: {e}")
+            hist_v, hist_d = fetch_taiex_history_twse(4)
+            out["taiex"]["sparkline_source"] = "TWSE FMTQIK（官方逐月）"
+        except Exception as e:  # noqa: BLE001
+            print(f"FMTQIK 走勢失敗，改用 yfinance：{e}")
+            out["errors"].append(f"taiex_fmtqik: {e}")
+        if len(hist_v) >= 20:
+            out["taiex"]["sparkline"], out["taiex"]["sparkline_dates"] = hist_v[-20:], hist_d[-20:]
+            out["taiex"]["sparkline_60d"], out["taiex"]["sparkline_60d_dates"] = hist_v[-60:], hist_d[-60:]
+        else:
+            try:
+                out["taiex"]["sparkline"], out["taiex"]["sparkline_dates"] = fetch_taiex_sparkline()
+                out["taiex"]["sparkline_source"] = "yfinance ^TWII（備援）"
+            except Exception as e:
+                print(f"TAIEX sparkline(^TWII) 失敗：{e}")
+                out["errors"].append(f"taiex_sparkline: {e}")
+            try:
+                out["taiex"]["sparkline_60d"], out["taiex"]["sparkline_60d_dates"] = fetch_taiex_sparkline_60d()
+            except Exception as e:
+                print(f"TAIEX sparkline_60d(^TWII) 失敗：{e}")
+                out["errors"].append(f"taiex_sparkline_60d: {e}")
 
     try:
         out["tpex"] = fetch_tpex_index()
@@ -498,6 +624,8 @@ def main():
         contracts = fetch_taifex_contracts()
         out["tx_futures"] = contracts.get("TX")  # 保留舊欄位名給既有呼叫端相容
         out["futures"] = contracts  # 新欄位：TX/MTX/TE/TF 全部
+        if out["tx_futures"] is not None:
+            out["tx_futures"]["data_date"] = _roc_to_iso(out["tx_futures"].get("date"))
         hist = update_tx_history(out["tx_futures"])  # 先.八十-8：近月日線累積，給首頁膠囊畫走勢線
         if hist and out["tx_futures"] is not None:
             tail = hist["rows"][-20:]
@@ -507,6 +635,17 @@ def main():
     except Exception as e:
         print(f"TAIFEX 失敗：{e}")
         out["errors"].append(f"futures: {e}")
+
+    # 先.八十一-1：最後的資料日核對——仍落後就寫 stale_note，App 顯示「大盤資料停在 MM/DD」
+    out["data_date"] = (out.get("taiex") or {}).get("data_date")
+    lag = []
+    if expected:
+        if not out["data_date"] or out["data_date"] < expected:
+            lag.append(("大盤", out["data_date"]))
+        fd = (out.get("tx_futures") or {}).get("data_date")
+        if not fd or fd < expected:
+            lag.append(("台指期", fd))
+    out["stale_note"] = "；".join(f"{k}資料停在 {(d or '—')[5:].replace('-', '/')}" for k, d in lag) if lag else None
 
     per_stock_institutional = {}
     try:

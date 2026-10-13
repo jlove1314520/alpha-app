@@ -2142,14 +2142,18 @@
   // 更早（例如週一看到週五的）→前次收盤（MM-DD）。永遠帶日期。
   function twCloseDateLabel(twCache){
     let d=null;
+    // 先.八十一-1：優先用加權指數自己的資料日（data_date），落後時尾巴附「大盤資料停在 MM/DD」（stale_note 由排程寫入）
+    const dd=twCache&&(twCache.data_date||(twCache.taiex&&twCache.taiex.data_date));
+    const stale=twCache&&twCache.stale_note?`｜⚠ ${twCache.stale_note}`:'';
+    if(dd&&/^\d{4}-\d{2}-\d{2}$/.test(dd))d=new Date(`${dd}T14:00:00+08:00`);
     const raw=twCache&&((twCache.tpex&&twCache.tpex.date)||(twCache.taiex&&twCache.taiex.date));
-    if(raw&&/^\d{8}$/.test(raw))d=new Date(`${raw.slice(0,4)}-${raw.slice(4,6)}-${raw.slice(6,8)}T14:00:00+08:00`);
+    if(!d&&raw&&/^\d{8}$/.test(raw))d=new Date(`${raw.slice(0,4)}-${raw.slice(4,6)}-${raw.slice(6,8)}T14:00:00+08:00`);
     else if(twCache&&twCache.fetched_at)d=new Date(twCache.fetched_at);
-    if(!d||isNaN(d))return '收盤（日期不明）';
+    if(!d||isNaN(d))return '收盤（日期不明）'+stale;
     const z=_zonedParts(d,'Asia/Taipei'),n=_zonedParts(new Date(),'Asia/Taipei');
     const md=String(z.m).padStart(2,'0')+'-'+String(z.d).padStart(2,'0');
     const dayDiff=Math.round((Date.UTC(n.y,n.m-1,n.d)-Date.UTC(z.y,z.m-1,z.d))/86400000);
-    return (dayDiff<=0?'今日收盤':(dayDiff===1?'昨日收盤':'前次收盤'))+`（${md}）`;
+    return (dayDiff<=0?'今日收盤':(dayDiff===1?'昨日收盤':'前次收盤'))+`（${md}）`+stale;
   }
   function taiexRowSource(twCache){
     const {fresh,isTodayClose}=_intradaySourceFresh(INTRADAY_SINOPAC,'Asia/Taipei',isTwTradingWindowNow());
@@ -3857,7 +3861,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-12.0259';
+  const APP_VERSION='2026-10-13.0803';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
