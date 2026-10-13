@@ -19406,7 +19406,7 @@ C. 驗收
 - [x] **先.八十二-12 手機實機回歸：390×844 逐頁截圖比對前一版，每晚自動跑，差異大於門檻推播**（互動視窗執行）〔scripts/phone_regression.py（390×844 iPhone 模擬，7 頁截圖＋溢出／卡片位置寬度／第一屏變樣比對，超門檻推播）＋排程 AlphaPhoneRegression 每晚 22:30；首跑 7 頁 43 秒並抓到線上 _ 檔 404（-12a 已修）；自測 7/7〕
 - [x] **先.八十二-12a （補件，來源：先.八十二-12 第一次手機回歸截圖；正式網址每頁都有紅色「程式錯誤 eventsIndex HTTP 404」）GitHub Pages 預設 Jekyll 會略過「_ 開頭」檔案，線上 data/by_code/_meta.json、data/events_by_code/_index.json、data/price_history/_meta.json 全部 404：根目錄加 .nojekyll，冒煙加檢查，推送後實測線上 200**（互動視窗執行）〔.nojekyll（Pages Jekyll 略過 _ 開頭檔，線上 by_code/_meta、events_by_code/_index、price_history/_meta 全 404）＋冒煙 #141；研究成績單工程說明改白話〕
 - [x] **先.八十二-13 處置股／注意股提醒：自選股或真錢持股被列入時推播（照現有 disposal_flags）**（互動視窗執行）〔scripts/disposal_alert.py（自選＋多清單＋live 自選、真錢白名單；同筆只推一次、未送達下輪重試）接在 run_disposal_flags.ps1 18:30 後；自測 5/5；目前 0 檔命中〕
-- [ ] **先.八十二-14 先.八十一-53、56、57、58、59、61、63、64 照原計畫做完**（互動視窗執行）
+- [x] **先.八十二-14 先.八十一-53、56、57、58、59、61、63、64 照原計畫做完**（互動視窗執行）〔八項全 [x]；53/59/61 以本機補跑（1c41772a0）後驗證〕
 
 # 2026-10-13【先.八十三：墓園驗屍】（總司令裁示原文，動工前先寫入；只分類與重開，不改判準、不碰 holdout）
 
