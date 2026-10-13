@@ -54,16 +54,47 @@
       el.innerHTML=sysWeeklyHtml(await r.json());
     }catch(e){console.warn('[loadSysWeekly]',e);recordGlobalError('loadSysWeekly',e);el.textContent='讀取系統週報失敗（'+(e&&e.message||e)+'）'}
   }
+  // 先.八十二-10：真錢持股卡（/auto/ledger 的 holdings）。每次連線成功就存一份在手機（localStorage，只在本機），
+  // 電腦離線或讀取失敗時改顯示最後一次同步的內容與時間；從沒同步過就照實說。
+  const HOLD_KEY='alpha_live_holdings_v1';
+  function holdingsCacheSave(h){try{localStorage.setItem(HOLD_KEY,JSON.stringify({at:new Date().toISOString(),holdings:h}))}catch(e){console.warn('[holdingsCacheSave]',e)}}
+  function holdingsCacheLoad(){try{return JSON.parse(localStorage.getItem(HOLD_KEY)||'null')}catch(e){console.warn('[holdingsCacheLoad]',e);return null}}
+  function holdingsHtml(h){
+    const esc=_autoEsc,n=v=>v==null?'—':Number(v).toLocaleString('zh-TW',{maximumFractionDigits:2}),md=d=>d?String(d).slice(5).replace('-','/'):'—';
+    if(!Array.isArray(h))return '無法計算持股（'+esc((h&&h.error)||'伺服器未回傳')+'）';
+    if(!h.length)return '目前沒有自動交易買進的持股';
+    return h.map(x=>{
+      const up=(x.pnl||0)>=0,st=x.settlement||{};
+      const stTxt=st.status==='pending'?'<span style="color:#c9a35a">待交割（'+md(st.date)+' 扣款）</span>':'已交割（'+md(st.date)+'）';
+      return '<div style="padding:6px 0;border-bottom:1px solid var(--hairline)">'+
+        '<div style="display:flex;justify-content:space-between;gap:8px"><b>'+esc(x.symbol)+' '+esc(nameOf(x.symbol)!==x.symbol?nameOf(x.symbol):'')+'</b><span>'+n(x.qty)+' 股</span></div>'+
+        '<div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;margin-top:2px"><span>成本 '+n(x.cost)+' 元（均價 '+n(x.avg_cost)+'）</span><span>市值 '+n(x.value)+' 元</span></div>'+
+        '<div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;margin-top:2px"><span>損益 <b class="'+(up?'pos':'neg')+'">'+(up?'+':'')+n(x.pnl)+' 元'+(x.pnl_pct!=null?'（'+(x.pnl_pct>0?'+':'')+x.pnl_pct+'%）':'')+'</b></span><span>'+stTxt+'</span></div>'+
+        '<div style="font-size:10px;color:var(--ink-4);margin-top:2px">'+md(x.close_date)+' 收盤 '+n(x.close)+' 估值</div></div>';
+    }).join('')+'<div style="font-size:10px;color:var(--ink-4);margin-top:6px">只算自動交易買進的股數；未計手續費與稅；交割日依成交日起 T+2 交易日推算。</div>';
+  }
+  function renderHoldings(h,syncedNote){
+    const el=document.getElementById('journal-holdings');if(!el)return;
+    el.innerHTML=holdingsHtml(h)+(syncedNote?'<div class="note" data-ui-keep style="margin-top:4px;color:#c9a35a">'+_autoEsc(syncedNote)+'</div>':'');
+  }
+  function renderHoldingsFromCache(why){
+    const c=holdingsCacheLoad(),el=document.getElementById('journal-holdings');
+    if(!c||!c.holdings){if(el)el.textContent=why+'，尚未同步過持股資料';return}
+    const t=new Date(c.at),md=t.toLocaleDateString('zh-TW',{timeZone:'Asia/Taipei',month:'2-digit',day:'2-digit'});
+    renderHoldings(c.holdings,why+'，顯示 '+md+' '+fmtTzHHMM(t,'Asia/Taipei')+' 最後同步的資料');
+  }
   async function loadJournalLedger(){
     const pe=document.getElementById('journal-pnl'),te=document.getElementById('journal-trades');
     if(!pe||!te)return;
     // 先.七十二-B5／C8：離線時三張自動投資卡收起、只留一行
     const off=!LIVE.configured||!LIVE.url;
     try{const ln=document.getElementById('journal-offline-line');if(ln)ln.hidden=!off;document.querySelectorAll('#scr-journal [data-ui-live]').forEach(c=>{c.hidden=off})}catch(e){console.warn('[journal offline]',e);recordGlobalError('journal offline',e)}
+    if(off)_safeSync('renderHoldingsFromCache',()=>renderHoldingsFromCache('電腦未連線'));
     if(off){pe.textContent='連上電腦才看得到';te.innerHTML='<div class="note" style="padding:14px 2px">連上電腦才看得到</div>';setTxt('journal-perf','尚未連線本機伺服器，真錢績效對照只在本機計算。');setTxt('journal-review','尚未連線本機伺服器，盤後復盤只在本機產生。');return}
     try{
       const d=await loadAutoLedger();
       JOURNAL_LEDGER_CACHE=d;_safeAsync('loadWeeklyBrief',loadWeeklyBrief);
+      _safeSync('renderHoldings',()=>{const h=d&&d.holdings!==undefined?d.holdings:{error:'伺服器是舊版，沒有持股欄位（需重啟）'};if(Array.isArray(h))holdingsCacheSave(h);renderHoldings(h)});
       setTxt('journal-tm',fmtTzHHMM(new Date(),'Asia/Taipei'));
       const rows=d&&d.rows||[];
       te.innerHTML=rows.length?rows.map(autoLedgerRowHtml).join(''):'<div class="note" style="padding:14px 2px">首批尚未執行</div>';
@@ -77,6 +108,7 @@
       renderJournalChips();
     }catch(e){
       console.warn('[loadJournalLedger]',e);recordGlobalError('loadJournalLedger',e);
+      _safeSync('renderHoldingsFromCache',()=>renderHoldingsFromCache('電腦離線或讀取失敗'));
       pe.textContent='讀取真錢帳本失敗（'+(e&&e.message||e)+'）';
       te.innerHTML='<div class="note" style="padding:14px 2px">讀取失敗，請確認本機伺服器在線</div>';
       setTxt('journal-perf','讀取真錢帳本失敗，無法畫績效對照');

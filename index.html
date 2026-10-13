@@ -24,7 +24,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
      載不到時index.html::renderStockChart()自動退回既有SVG折線，不會讓個股頁空白。 -->
 <!-- 常備.開發-20（2026-10-11）：函式庫改為第一次畫K線時才載入（見 app.js ensureLwc()），不再佔首頁首次載入傳輸量。 -->
 <title>Alpha 台美股 AI 交易</title>
-<link rel="stylesheet" href="app.css?v=2026-10-13.1612">
+<link rel="stylesheet" href="app.css?v=2026-10-13.1637">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -883,6 +883,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div class="cta-line" id="journal-offline-line" hidden onclick="go('settings')">自動投資帳本：連上電腦才看得到 →</div>
     <!-- 先.六十-A4（2026-10-10）：日誌頁接真錢帳本。資料只從本機伺服器 /auto/ledger 讀（token 必檢、去識別化欄位），
          不存進 GitHub、不進公開心跳。損益以 price_history 收盤估值，只算自動交易買進的股數，未計手續費與稅。 -->
+    <!-- 先.八十二-10（2026-10-13）：真錢持股卡。讀本機 /auto/ledger 的 holdings（自動交易帳本成交彙總，以最新收盤估值，未計手續費與稅；
+         交割＝成交日起 T+2 交易日，依官方交易日曆推算）。刻意不加 data-ui-live：電腦離線時顯示手機上最後一次同步的內容與時間。 -->
+    <div class="card" id="journal-holdings-card">
+      <h3>真錢持股</h3>
+      <div id="journal-holdings" class="note">尚未同步</div>
+    </div>
     <div class="card" data-ui-live>
       <h3>自動投資損益<span class="press refresh-btn" style="float:right" onclick="refreshTap(this,'journal-tm',async()=>{await loadJournalLedger()})">重新整理</span></h3>
       <div id="journal-pnl" class="note">尚未連線本機伺服器</div>
@@ -1427,6 +1433,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-13.1612"></script>
+<script src="app.js?v=2026-10-13.1637"></script>
 </body>
 </html>

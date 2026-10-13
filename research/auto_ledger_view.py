@@ -80,6 +80,7 @@ def ledger_view(base: Path | None = None, price_doc: dict | None = None, today: 
     if not fills:
         out["pnl"] = None
         out["perf"] = None
+        out["holdings"] = []
         return out
     px = _prices(price_doc)
     series = {c: sorted(px.get(c) or [], key=lambda r: r["date"]) for c in AB.WHITELIST}
@@ -107,6 +108,10 @@ def ledger_view(base: Path | None = None, price_doc: dict | None = None, today: 
     out["pnl"] = {"as_of": as_of, "week_start": wk0,
                   "total": round(val - cost), "total_pct": round((val / cost - 1) * 100, 2) if cost else None,
                   "week": round(val - val_wk_prev - cost_wk)}
+    try:  # 先.八十二-10 持股卡：失敗只影響自己那一塊
+        out["holdings"] = holdings_view(fills, series, today)
+    except Exception as e:  # noqa: BLE001
+        out["holdings"] = {"error": f"持股計算失敗（{type(e).__name__}）"}
     try:  # 績效對照失敗只影響自己那一塊，不拖累損益與帳本列
         out["perf"] = perf_series(fills, series, as_of)
     except Exception as e:
@@ -133,6 +138,59 @@ def latest_review_view(base: Path | None = None) -> dict | None:
 
 def _fee(amount: float) -> float:
     return max(PERF_FEE_MIN, round(amount * PERF_FEE_RATE)) if amount > 0 else 0.0
+
+
+def _closed_days() -> set:
+    """台股休市日（data/trading_calendar.json：官方假日表＋臨時停市）；讀不到回空集合（只排除週末）。"""
+    try:
+        cal = json.loads((AB.REPO / "data" / "trading_calendar.json").read_text(encoding="utf-8")).get("tw") or {}
+        return {d for y in cal.values() for d in (y.get("closed") or []) + (y.get("unscheduled_closed") or [])}
+    except Exception:  # noqa: BLE001
+        return set()
+
+
+def _add_trading_days(d: str, n: int, closed: set) -> str:
+    x = date.fromisoformat(d)
+    while n > 0:
+        x += timedelta(days=1)
+        if x.weekday() < 5 and x.isoformat() not in closed:
+            n -= 1
+    return x.isoformat()
+
+
+def holdings_view(fills: list, series: dict, today: date | None = None) -> list:
+    """先.八十二-10：真錢持股卡。每檔：股數、成本（成交金額合計，未計手續費與稅）、均價、最新收盤與日期、市值、損益、
+    交割狀態（成交日起 T+2 交易日扣款；依官方交易日曆推算，不是券商回報）。只用自動交易帳本的成交，不讀券商餘額。"""
+    today = today or datetime.now(AB.TW).date()
+    closed = _closed_days()
+    agg: dict = {}
+    for r in fills:
+        sym = r.get("symbol")
+        if sym not in AB.WHITELIST:
+            continue
+        a = agg.setdefault(sym, {"qty": 0, "cost": 0.0, "settle": []})
+        a["qty"] += AB._filled(r)
+        a["cost"] += AB._filled_amount(r)
+        a["settle"].append(_add_trading_days(str(r.get("ts", ""))[:10], 2, closed))
+    out = []
+    for sym in [c for c in AB.WEIGHTS if c in AB.WHITELIST]:  # 0050、00646、00697B 順序
+        a = agg.get(sym)
+        if not a or a["qty"] <= 0:
+            continue
+        rows = series.get(sym) or []
+        last = rows[-1] if rows else {}
+        close = last.get("close")
+        val = a["qty"] * close if close else None
+        pending = sorted(d for d in a["settle"] if d > today.isoformat())
+        out.append({"symbol": sym, "qty": a["qty"], "cost": round(a["cost"]),
+                    "avg_cost": round(a["cost"] / a["qty"], 2), "close": close, "close_date": last.get("date"),
+                    "value": round(val) if val is not None else None,
+                    "pnl": round(val - a["cost"]) if val is not None else None,
+                    "pnl_pct": round((val / a["cost"] - 1) * 100, 2) if val is not None and a["cost"] else None,
+                    "settlement": ({"status": "pending", "date": pending[0]} if pending
+                                   else {"status": "settled", "date": max(a["settle"])}),
+                    "settlement_basis": "成交日起 T+2 交易日（依官方交易日曆推算）"})
+    return out
 
 
 def perf_series(fills: list, series: dict, as_of: str) -> dict:

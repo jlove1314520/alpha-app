@@ -4467,6 +4467,46 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { ntrErrs.push(`測試本身出錯：${e.message || e}`); }
   record("138. 選股榜剔除近期無成交（2026-10-14 起）：判定自測、標記者 rank 空白、picks_ledger 生效日（先.八十二-3）", ntrErrs.length === 0, ntrErrs.join("; ") || ntrInfo);
 
+  // 139.【2026-10-13 先.八十二-10】日誌頁真錢持股卡：用假的 /auto/ledger（替換 liveFetch，不連網、不下單）驗——
+  // 連線時顯示每檔股數／成本／市值／損益／交割狀態並存一份在手機；電腦未連線或讀取失敗時顯示最後同步的內容與時間；從沒同步過照實說。
+  const holdErrs = [];
+  try {
+    const r = await page.evaluate(async () => {
+      const saved = { lf: window.liveFetch, url: LIVE.url, conf: LIVE.configured, cache: localStorage.getItem("alpha_live_holdings_v1") };
+      const el = () => (document.getElementById("journal-holdings") || {}).textContent || "";
+      const o = {};
+      try {
+        localStorage.removeItem("alpha_live_holdings_v1");
+        LIVE.url = "https://smoke.invalid"; LIVE.configured = false;
+        await loadJournalLedger(); o.never = el();
+        const lg = { ok: true, rows: [], first_batch_done: true, pnl: { as_of: "2026-10-12", week_start: "2026-10-12", total: 3, total_pct: 1, week: 3 }, perf: null,
+          holdings: [{ symbol: "0050", qty: 2, cost: 228, avg_cost: 114, close: 114.8, close_date: "2026-10-12", value: 230, pnl: 2, pnl_pct: 0.7, settlement: { status: "pending", date: "2026-10-14" } },
+                     { symbol: "00697B", qty: 1, cost: 34, avg_cost: 34, close: 34.13, close_date: "2026-10-12", value: 34, pnl: 0, pnl_pct: 0.38, settlement: { status: "settled", date: "2026-10-14" } }] };
+        LIVE.configured = true;
+        window.liveFetch = async (p) => new Response(JSON.stringify(p === "/auto/ledger" ? lg : {}), { status: 200 });
+        await loadJournalLedger(); o.on = el(); o.saved = !!localStorage.getItem("alpha_live_holdings_v1");
+        LIVE.configured = false;
+        await loadJournalLedger(); o.off = el();
+        LIVE.configured = true;
+        window.liveFetch = async () => { throw new Error("Load failed"); };
+        await loadJournalLedger(); o.fail = el();
+        o.cardVisible = !document.getElementById("journal-holdings-card").hidden;
+      } finally {
+        window.liveFetch = saved.lf; LIVE.url = saved.url; LIVE.configured = saved.conf;
+        if (saved.cache == null) localStorage.removeItem("alpha_live_holdings_v1"); else localStorage.setItem("alpha_live_holdings_v1", saved.cache);
+      }
+      return o;
+    });
+    if (!r.never.includes("尚未同步過")) holdErrs.push(`從沒同步過應照實說：${r.never.slice(0, 80)}`);
+    for (const k of ["0050", "2 股", "成本 228", "市值 230", "+2 元", "待交割（10/14 扣款）", "00697B", "已交割（10/14）", "未計手續費與稅"])
+      if (!r.on.includes(k)) holdErrs.push(`連線畫面缺「${k}」：${r.on.slice(0, 160)}`);
+    if (!r.saved) holdErrs.push("連線成功後沒有存一份在手機");
+    if (!r.off.includes("2 股") || !r.off.includes("最後同步")) holdErrs.push(`未連線應顯示最後同步的內容與時間：${r.off.slice(0, 120)}`);
+    if (!r.fail.includes("讀取失敗") || !r.fail.includes("最後同步")) holdErrs.push(`讀取失敗應顯示最後同步：${r.fail.slice(0, 120)}`);
+    if (!r.cardVisible) holdErrs.push("電腦離線時持股卡不該被收起");
+  } catch (e) { holdErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("139. 日誌頁真錢持股卡：股數／成本／市值／損益／交割狀態，電腦離線顯示最後同步時間（先.八十二-10）", holdErrs.length === 0, holdErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4495,7 +4535,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
