@@ -24,7 +24,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
      載不到時index.html::renderStockChart()自動退回既有SVG折線，不會讓個股頁空白。 -->
 <!-- 常備.開發-20（2026-10-11）：函式庫改為第一次畫K線時才載入（見 app.js ensureLwc()），不再佔首頁首次載入傳輸量。 -->
 <title>Alpha 台美股 AI 交易</title>
-<link rel="stylesheet" href="app.css?v=2026-10-13.1124">
+<link rel="stylesheet" href="app.css?v=2026-10-13.1142">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -1257,6 +1257,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div id="sec-list" style="margin-top:6px"></div>
       <div class="note" style="margin-top:6px">資料時間：<b id="sec-tm">--:--</b>。統計視窗 24 小時，來源 IP 只顯示到 /24 網段。需要即時伺服器連線才讀得到。</div>
     </div>
+    <!-- 先.八十一-26：本機常駐服務相依套件每週檢查（data/dependency_status.json，AlphaDepCheck 週一 08:00，只回報不升級）。 -->
+    <div class="card" data-ui-advanced>
+      <h3>相依套件</h3>
+      <div class="note" id="dep-summary">檢查中…</div>
+      <div id="dep-list" style="margin-top:6px"></div>
+      <div class="note" style="margin-top:6px">每週一 08:00 本機排程向 PyPI 官方查一次，只回報「有新版」，不自動升級；要不要升級由總司令決定，升級後須照常駐服務發布紀律四步驗證。</div>
+    </div>
 
 
 
@@ -1420,6 +1427,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-13.1124"></script>
+<script src="app.js?v=2026-10-13.1142"></script>
 </body>
 </html>

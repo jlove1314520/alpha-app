@@ -167,6 +167,7 @@
     _safeAsync('loadAdjAnomalies',loadAdjAnomalies);  // 先.六十一
     _safeAsync('loadCoverage',()=>loadCoverage(false));    // 2026-09-15 稽核二.二，同樣獨立
     _safeAsync('loadSecurity',()=>loadSecurity(false));    // 2026-09-06 連線三.5
+    _safeAsync('loadDependencyStatus',loadDependencyStatus);  // 先.八十一-26，同樣獨立
     _safeAsync('loadSignalStatus',()=>loadSignalStatus(false));  // 2026-09-15 開發佇列源頭一.4
     _safeSync('renderLiveStatus',renderLiveStatus);  // 2026-09-03深夜 乙.4
     _safeAsync('loadTrials',loadTrials);  // 常備.開發-33 研究透明度，獨立包起來（常備.開發-29 順手修：原本被併進上一行註解裡，從未執行）
@@ -831,6 +832,26 @@
   // 2026-09-06（連線三.5）讀 /security。沒設定即時伺服器時誠實說「讀不到」，
   // 不要顯示成一片綠色的「安全無虞」——那比沒有更危險。
   let SECURITY_CACHE=null;
+  // 先.八十一-26：相依套件每週檢查結果（靜態檔，不需連上電腦）。檢查日超過 8 天標黃（每週一次的排程可能沒跑）。
+  async function loadDependencyStatus(){
+    const sum=document.getElementById('dep-summary'),list=document.getElementById('dep-list');
+    if(!sum||!list)return;
+    try{
+      const r=await fetch('data/dependency_status.json?t='+Math.floor(Date.now()/600000));
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const d=await r.json(),pk=Array.isArray(d.packages)?d.packages:[];
+      const esc=t=>String(t==null?'':t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+      const ts=Date.parse(d.generated_at),ageD=isNaN(ts)?null:(Date.now()-ts)/86400000;
+      const behind=pk.filter(p=>p.behind),errs=pk.filter(p=>p.error);
+      sum.innerHTML=`${behind.length?`<b style="color:var(--warn)">${behind.length} 個套件有新版</b>`:'<b style="color:var(--up)">✓ 都是最新版</b>'}／共 ${pk.length} 個`
+        +`｜檢查日 <b class="num" style="color:${ageD!=null&&ageD>8?'var(--warn)':'var(--ink-2)'}">${isNaN(ts)?'—':fmtTzMMDDHHMM(new Date(ts),'Asia/Taipei')}</b>${ageD!=null&&ageD>8?'（超過 8 天沒檢查，每週排程可能沒跑）':''}`
+        +(errs.length?`｜${errs.length} 個查詢失敗`:'');
+      list.innerHTML='<div class="facts">'+pk.map(p=>`<div class="f"><span>${esc(p.package)}</span><b class="num" style="color:${p.behind?'var(--warn)':'var(--ink-2)'}">${esc(p.pinned)}${p.behind?' → '+esc(p.latest):''}${p.error?'（查詢失敗）':''}</b></div>`).join('')+'</div>';
+    }catch(e){
+      console.warn('[loadDependencyStatus]',e);recordGlobalError('loadDependencyStatus',e);
+      sum.textContent='讀不到相依套件檢查結果（'+String(e&&e.message||e)+'）';list.innerHTML='';
+    }
+  }
   async function loadSecurity(force){
     const sum=document.getElementById('sec-summary'),list=document.getElementById('sec-list');
     if(!sum||!list)return;
