@@ -32,7 +32,7 @@
     const esc=_autoEsc,n=v=>Number(v).toLocaleString('zh-TW',{maximumFractionDigits:2});
     if(pv.error){el.hidden=false;el.innerHTML=`<div class="note">明天會買：算不出來（${esc(pv.error)}）</div>`;return}
     const rows=(pv.orders||[]).map(o=>`<div class="plan-row" style="display:flex;justify-content:space-between;gap:8px;font-size:12px;padding:3px 0;border-bottom:1px solid var(--hairline)">`+
-      `<span>${esc(o.symbol)} ${o.lot==='IntradayOdd'?'零股':'整股'} ${n(o.qty)} 股</span><span>限價 ${n(o.limit_price)}　${n(o.amount)} 元 ${o.cap_ok?'✓':'⚠ 超過單筆上限'}</span></div>`).join('');
+      `<span>${esc(o.symbol)} ${o.lot==='IntradayOdd'?'零股':'整股'} ${n(o.qty)} 股</span><span>限價 ${n(o.limit_price)}${o.dev_pct!=null?`（昨收上限 +${n(o.dev_pct)}%）`:''}　${n(o.amount)} 元 ${o.cap_ok?'✓':'⚠ 超過單筆上限'}</span></div>`).join('');
     const cash=pv.available_ok===true?'夠':pv.available_ok===false?'不足':'未知';
     el.hidden=false;
     el.innerHTML=`<div style="font-weight:600;font-size:13px;margin-bottom:4px">明天會買（${esc(pv.label||'')}）</div>${rows}`+

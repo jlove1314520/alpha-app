@@ -248,7 +248,8 @@ check("前日未結算：隔日不送新單、ERROR", r["state"] == "ERROR" and 
 
 # ---- 先.三十-一-4：INSUFFICIENT_CASH ----
 need = sum(o["qty"] * o["limit_price"]
-           for o in A.plan_orders({c: v[0] for c, v in PC.items()}, {}, 323_611 * 1.0, True)) * 1.003
+           for o in A.plan_orders({c: v[0] for c, v in PC.items()}, {}, 323_611 * 1.0, True,
+                         dev_map=A.dev_by_code({"max_price_dev_pct": 1.0}))) * 1.003  # 先.八十二-5：00646 偏離 1%
 p = setup(LIVEC); b = Fake(cash=need - 1)
 r = run(p, b)
 check("現金不足(差1元)：整批拒單、不送任何一張", r["state"] == "ERROR" and len(b.placed) == 0

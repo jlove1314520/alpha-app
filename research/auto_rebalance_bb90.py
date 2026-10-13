@@ -35,6 +35,19 @@ PRICE_HISTORY = REPO / "data" / "price_history.json"
 TW = timezone(timedelta(hours=8))
 
 WEIGHTS = {"0050": 0.45, "00646": 0.45, "00697B": 0.10}
+# 2026-10-13 總司令【先.八十二】5 裁示④：美股連結 ETF 的限價偏離上限改 1%（台股休市期間美股漲跌、零股簿較貴，
+# 0.5% 容易買不到，見 docs/PROPOSAL_US_LINKED_LIMIT.md）。仍受 max_price_dev_pct 硬限制（≤1%）約束。
+# 設定檔可用 us_linked_dev_pct 覆寫；凍結期間只影響預覽，不送單。
+US_LINKED = {"00646"}
+US_LINKED_DEV_PCT = 1.0
+
+
+def dev_by_code(cfg: dict) -> dict:
+    """各標的限價偏離（%）：一般＝min(0.5, 硬限制/2)；美股連結 ETF＝min(us_linked_dev_pct, 硬限制)。"""
+    hard = float(cfg.get("max_price_dev_pct", 1.0))
+    base = min(0.5, hard / 2)
+    us = min(float(cfg.get("us_linked_dev_pct", US_LINKED_DEV_PCT)), hard)
+    return {c: (us if c in US_LINKED else base) for c in WEIGHTS}
 WHITELIST = frozenset(WEIGHTS)
 MODES = ("SIMULATION", "LIVE_WITH_VETO", "LIVE")
 VETO_MINUTES = 30
@@ -320,8 +333,10 @@ def split_qty(qty: int, odd_ok: bool) -> list[tuple[str, int]]:
     return out
 
 
-def plan_orders(prices: dict, holdings: dict, budget: float, odd_ok: bool, dev_pct: float = 0.5) -> list[dict]:
-    """只買不賣：新資金優先補低配，剩餘資金按目標權重分。prices={code:prev_close}。"""
+def plan_orders(prices: dict, holdings: dict, budget: float, odd_ok: bool, dev_pct: float = 0.5,
+                dev_map: dict | None = None) -> list[dict]:
+    """只買不賣：新資金優先補低配，剩餘資金按目標權重分。prices={code:prev_close}。
+    dev_map＝各標的偏離（%），沒給的標的用 dev_pct（先.八十二-5）。"""
     total = budget + sum(holdings.get(c, 0) * prices[c] for c in WEIGHTS)
     deficit = {c: max(0.0, WEIGHTS[c] * total - holdings.get(c, 0) * prices[c]) for c in WEIGHTS}
     dsum = sum(deficit.values())
@@ -332,7 +347,7 @@ def plan_orders(prices: dict, holdings: dict, budget: float, odd_ok: bool, dev_p
         alloc = {c: deficit[c] + rest * WEIGHTS[c] for c in WEIGHTS}
     orders = []
     for c in WEIGHTS:
-        limit = round_down_tick(prices[c] * (1 + dev_pct / 100))
+        limit = round_down_tick(prices[c] * (1 + (dev_map or {}).get(c, dev_pct) / 100))
         for lot, q in split_qty(int(alloc[c] // limit), odd_ok):
             orders.append({"symbol": c, "action": "Buy", "qty": q, "limit_price": limit, "lot": lot,
                            "part": "C" if lot == "Common" else "O", "cond": "Cash", "amount": round(q * limit, 2)})
@@ -960,7 +975,7 @@ def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None =
             return res
         odd_ok = mode != "SIMULATION"
         orders = plan_orders({c: gate_px[c][0] for c in WEIGHTS}, positions, budget, odd_ok,
-                             dev_pct=min(0.5, cfg.get("max_price_dev_pct", 1.0) / 2))
+                             dev_pct=min(0.5, cfg.get("max_price_dev_pct", 1.0) / 2), dev_map=dev_by_code(cfg))
         for o in orders:
             o["key"] = f"{batch_id}-{o['symbol']}-{o['part']}"
         if not orders and batch and rnd > 1:
@@ -1724,16 +1739,18 @@ def plan_preview(paths: Paths, cfg: dict, prev_close: dict, avail_twd: float | N
         out["error"] = f"缺昨收：{missing}" if missing else "未設定資金"
         return out
     dev = min(0.5, cfg.get("max_price_dev_pct", 1.0) / 2)
-    orders = plan_orders({c: prev_close[c][0] for c in WEIGHTS}, hold, budget, True, dev_pct=dev)
+    dmap = dev_by_code(cfg)
+    orders = plan_orders({c: prev_close[c][0] for c in WEIGHTS}, hold, budget, True, dev_pct=dev, dev_map=dmap)
     cap = _num(cfg.get("per_order_cap_twd"))
     rows = []
     for o in orders:
         amt = o["qty"] * o["limit_price"]
         rows.append({"symbol": o["symbol"], "lot": o["lot"], "qty": o["qty"], "limit_price": o["limit_price"],
+                     "dev_pct": dmap.get(o["symbol"], dev),
                      "amount": round(amt, 2), "cap_ok": bool(cap > 0 and amt <= cap)})
     total = sum(r["amount"] for r in rows)
     need = total * CASH_BUFFER
-    out.update(dev_pct=dev, orders=rows, total=round(total, 2), need_with_buffer=round(need, 2),
+    out.update(dev_pct=dev, dev_by_code=dmap, orders=rows, total=round(total, 2), need_with_buffer=round(need, 2),
                all_cap_ok=all(r["cap_ok"] for r in rows) if rows else False,
                available_ok=(None if avail_twd is None else bool(avail_twd >= need)))
     return out
