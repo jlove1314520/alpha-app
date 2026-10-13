@@ -32,7 +32,7 @@ def _prices(price_doc: dict | None = None) -> dict:
     except OSError:
         return {}
     if _PX_CACHE["mtime"] != m:
-        _PX_CACHE["doc"] = AB._read_json(p) or {}
+        _PX_CACHE["doc"] = AB._read_json_retry(p) or {}  # 先.八十一-31：git pull 換檔中途重試
         _PX_CACHE["mtime"] = m
     return (_PX_CACHE["doc"] or {}).get("prices") or {}
 

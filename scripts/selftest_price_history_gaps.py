@@ -24,7 +24,19 @@ def check(name, ok):
     print(("PASS " if ok else "FAIL ") + name)
 
 
-prices = json.loads(B.PH.read_text(encoding="utf-8"))["prices"]
+# 先.八十一-31：本機 git pull 換 price_history.json（先刪再寫）的幾秒內會讀不到或讀到半個檔，重試 4 次、間隔 2 秒
+def _load_ph(tries=4):
+    import time
+    for i in range(tries):
+        try:
+            return json.loads(B.PH.read_text(encoding="utf-8"))["prices"]
+        except (FileNotFoundError, json.JSONDecodeError, UnicodeDecodeError, PermissionError):
+            if i == tries - 1:
+                raise
+            time.sleep(2)
+
+
+prices = _load_ph()
 gaps, counts, med = B.find_gaps(prices)
 check(f"①{B.START} 起每個開市日檔數 ≥ 中位數 {med:.0f} 的 90%（缺日：{[(d, counts.get(d, 0)) for d in gaps][:8]}）", not gaps)
 bad = [c for c, rows in prices.items() if [r["date"] for r in rows] != sorted({r["date"] for r in rows})]

@@ -123,6 +123,21 @@ def _read_json(p: Path):
         return None
 
 
+def _read_json_retry(p: Path, tries: int = 4, wait: float = 2.0):
+    """先.八十一-31：大檔（price_history.json 約 55MB）專用。本機排程 `git pull --rebase` 拉到雲端新版時，git 會先刪再寫，
+    中間有幾秒讀到「檔案不存在」或「寫到一半的 JSON」。這兩種情況重試（預設 4 次、間隔 2 秒）；其他錯誤與用盡重試仍回 None，
+    行為與 _read_json 相同（呼叫端照舊把 None 當缺資料、拒單）。只用在 price_history，狀態檔照舊用 _read_json（不存在是正常的）。"""
+    for i in range(tries):
+        try:
+            return json.loads(p.read_text(encoding="utf-8"))
+        except (FileNotFoundError, json.JSONDecodeError, UnicodeDecodeError, PermissionError):
+            if i < tries - 1:
+                time.sleep(wait)
+        except Exception:  # noqa: BLE001 — 其他錯誤與 _read_json 相同：回 None
+            return None
+    return None
+
+
 def _write_json(p: Path, obj) -> None:
     p.parent.mkdir(parents=True, exist_ok=True)
     tmp = p.with_suffix(p.suffix + ".tmp")
@@ -232,7 +247,7 @@ def report_error(paths: Paths, msg: str, rnd: str = "auto_rebalance", push_key: 
 # ---------- 資料 ----------
 def load_prev_closes(path: Path = PRICE_HISTORY) -> dict:
     """回傳 {code: (last_close, 'YYYY-MM-DD')}；缺資料的標的不出現。"""
-    doc = _read_json(path) or {}
+    doc = _read_json_retry(path) or {}  # 先.八十一-31
     px = doc.get("prices") or {}
     out = {}
     for c in WHITELIST:
@@ -1560,7 +1575,7 @@ def live_account_summary(paths: Paths | None = None, price_doc: dict | None = No
     fills = [r for r in latest.values() if _filled(r) > 0]
     if not fills:
         return {"empty": True}
-    doc = price_doc if price_doc is not None else (_read_json(PRICE_HISTORY) or {})
+    doc = price_doc if price_doc is not None else (_read_json_retry(PRICE_HISTORY) or {})  # 先.八十一-31
     px = doc.get("prices") or {}
     last = {c: _num(px[c][-1]["close"]) for c in WEIGHTS if px.get(c)}
     state = _read_json(paths.state) or {}

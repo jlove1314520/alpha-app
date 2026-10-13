@@ -1,3 +1,35 @@
+## 2026-10-13 11:06（互動視窗）先.八十一-31 price_history 換檔瞬間讀不到：根因 git pull，讀取端加重試
+
+### 2026-10-13 11:08 先.八十一-31 price_history.json 短暫消失的根因與讀檔重試（CC）
+
+**根因（有證據）**
+- 10:49（台北）雲端 market.yml 推了一個更新 `data/price_history.json` 的 commit（ab85b92e7）。
+- 10:52:29 本機 AlphaConnectivity 排程 `git pull --rebase --autostash`，reflog 記為「checkout ab85b92e7」，把這個約 55MB 的檔換成新版。
+- git 在 Windows 換檔是先刪再寫、不是原子替換，寫完前有幾秒「檔案不存在／只寫一半」。
+- 10:53 冒煙 #108 的自測剛好在這幾秒讀檔，得到 FileNotFoundError。
+- 「非原子替換」的是 git 本身，任何本機排程的 pull 都可能觸發，無法從寫入端修。
+
+**修正（讀取端重試）**
+- `research/auto_rebalance_bb90.py` 新增 `_read_json_retry()`，**只用在 price_history**：
+  - 遇到不存在或半個 JSON 時重試 4 次、間隔 2 秒。
+  - 其他錯誤與用盡重試仍回 None，呼叫端照舊當缺資料拒單，行為不變。
+  - 用在真錢引擎的前收讀取 `load_prev_closes()` 與帳戶市值 `live_account_summary()`。這兩處遇到換檔瞬間原本會誤判「沒有 0050 前收」而拒單。
+  - 狀態檔照舊用 `_read_json`，因為狀態檔不存在是正常狀態，不該等待。
+- `research/auto_ledger_view.py` 的價格快取改用同一支重試。原本換檔瞬間讀失敗，會把空內容配上新 mtime 快取起來，直到下次檔案變動。
+- `scripts/selftest_price_history_gaps.py`（冒煙 #108 用）讀檔加同樣重試。
+
+**驗證**
+- 單元自測：
+  - 檔案 1.5 秒後才出現 → 等到並讀到（2.0 秒）
+  - 檔案始終不存在 → 回 None
+  - 半個 JSON 稍後寫完 → 讀到完整內容
+  - 真實 price_history 前收正常（0050 114.8、00646 78.8、00697B 34.13，皆 10/12）
+- `selftest_auto_rebalance.py` 全 PASS、`selftest_frozen_run.py` 5/5、`selftest_price_history_gaps.py` 3/3。
+- 全套冒煙 2026/10/13 11:05:54 全部通過。
+- 未改任何模式、限價、下單邏輯。
+
+**影響檔案**：research/auto_rebalance_bb90.py、research/auto_ledger_view.py、scripts/selftest_price_history_gaps.py
+
 ## 2026-10-13 10:57（互動視窗）先.八十一-20 法說會列表（重大訊息公告）＋MOPS 簡報連結，不爬取
 
 ### 2026-10-13 11:00 先.八十一-20 法說會列表＋MOPS 簡報連結（CC）
