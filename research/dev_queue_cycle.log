@@ -17336,3 +17336,22 @@ lock: LOCK_ACQUIRED (cycle 20261013-190101)
 prompt: GUARD_PRECHECK：所有 - [ ] 項目都不會被守門員擋下 NO_PENDING_ITEM_FOR_DEVQUEUE：剩餘待辦皆為[研究]類或「（互動視窗執行」類，留給marathon／hypothesis_queue軌或互動視窗session (exit=3)
 finally: released .devqueue.lock (cycle_id=20261013-190101)
 ===== DevQueue cycle end: 2026-10-13 19:01:05 cycle_id=20261013-190101 reason=QUEUE_EMPTY exit= duration_min=0.1 =====
+
+===== DevQueue cycle start: 2026-10-13 19:31:02 cycle_id=20261013-193102 =====
+check_collision: YIELD: 有非機器寫入的檔案在最近20分鐘內被改動：app.js（0.2分鐘前）、research/generate_scores_live.py（1.2分鐘前）、scripts/backfill_price_history_gaps.py（4.6分鐘前）、scripts/check_local_schedule_heartbeat.py（0.6分鐘前）、scripts/selftest_claude_auth_detection.py（0.3分鐘前）、scripts/selftest_price_history_gaps.py（4.2分鐘前），判定有人正在中途，本輪讓路
+
+===== DevQueue cycle start: 2026-10-13 20:01:02 cycle_id=20261013-200102 =====
+check_collision: YIELD: 有非機器寫入的檔案在最近20分鐘內被改動：research/data/adjustment_anomaly_warnings.jsonl（7.6分鐘前），判定有人正在中途，本輪讓路
+
+===== DevQueue cycle start: 2026-10-13 20:31:02 cycle_id=20261013-203102 =====
+check_collision: YIELD: 有非機器寫入的檔案在最近20分鐘內被改動：research/data/adjustment_anomaly_warnings.jsonl（3.8分鐘前），判定有人正在中途，本輪讓路
+
+===== DevQueue cycle start: 2026-10-13 21:01:01 cycle_id=20261013-210101 =====
+check_collision: YIELD: 有非機器寫入的檔案在最近20分鐘內被改動：research/data/adjustment_anomaly_warnings.jsonl（18.4分鐘前），判定有人正在中途，本輪讓路
+
+===== DevQueue cycle start: 2026-10-13 21:31:01 cycle_id=20261013-213101 =====
+check_collision: WARN: research/data/adjustment_anomaly_warnings.jsonl 內容已 ≥60 分鐘未變、無執行中程序提到它（修改時間 3.7 分鐘前多半是其他排程 autostash 刷新），視為殘留、照常執行；請人工確認後 commit 或還原 PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20261013-213101)
+prompt: GUARD_PRECHECK_WARN：**先.八十四-7 （補件，來源：先.八十四-4 停擺告警觀察）DevQueue 改每 30 分鐘後，「三軌任一 ≤60… 會被擋（需總司令：裁示；不可逆：—）。只警告、不改標記，由互動視窗處理 GUARD_PRECHECK_WARN：**先.八十四-9 （補件，來源：先.八十四-1 拉取衝突）本機自動 autostash 殘留（今天又多 2 個）盤點：… 會被擋（需總司令：裁示；不可逆：刪除、不可逆）。只警告、不改標記，由互動視窗處理 NO_PENDING_ITEM_FOR_DEVQUEUE：剩餘待辦皆為[研究]類或「（互動視窗執行」類，留給marathon／hypothesis_queue軌或互動視窗session (exit=3)
+finally: released .devqueue.lock (cycle_id=20261013-213101)
+===== DevQueue cycle end: 2026-10-13 21:31:06 cycle_id=20261013-213101 reason=QUEUE_EMPTY exit= duration_min=0.1 =====
