@@ -89,6 +89,8 @@ import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price
 from pathlib import Path as _phs_Path
 _phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[1] / "scripts"))
 import price_history_store as PHS  # noqa: E402
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parent))
+import recent_trade_filter  # noqa: E402  先.八十二-3
 import re
 import sys
 from datetime import datetime, timezone, timedelta
@@ -715,8 +717,13 @@ def main():
         cs["liquidity_insufficient"] = (
             cs["liquidity_20d"].isna() | (cs["liquidity_20d"] < LIQUIDITY_FLOOR_20D_VALUE)
         )
-        ranked = cs.sort_values(["liquidity_insufficient", "total_score"], ascending=[True, False]).copy()
-        liquidity_ok_mask = ~ranked["liquidity_insufficient"]
+        # 先.八十二-3（2026-10-13 裁示②，2026-10-14 生效）：近 5 個交易日無成交、或不在官方最新快照者，排名留空、標「近期無成交」
+        _ntr, _ntr_info = recent_trade_filter.evaluate(PHS.load(PRICE_HISTORY_PATH).get("prices", {}) if PHS.exists(PRICE_HISTORY_PATH) else {})
+        print(f"  近期無成交判定：{_ntr_info}")
+        cs["no_recent_trade"] = [str(sid) in _ntr for sid in cs.index]
+        cs["rank_excluded"] = cs["liquidity_insufficient"] | cs["no_recent_trade"]
+        ranked = cs.sort_values(["rank_excluded", "total_score"], ascending=[True, False]).copy()
+        liquidity_ok_mask = ~ranked["rank_excluded"]
         ranked.loc[liquidity_ok_mask, "display_rank"] = range(1, int(liquidity_ok_mask.sum()) + 1)
 
         stocks = []
@@ -745,6 +752,8 @@ def main():
             flags = []
             if row["liquidity_insufficient"]:
                 flags.append("流動性不足")
+            if row["no_recent_trade"]:
+                flags.append(recent_trade_filter.FLAG)
             if row["coverage"] < COVERAGE_MIN_FOR_RANKING:
                 flags.append("資料稀疏，分數僅供參考")
             display_rank = row.get("display_rank")
@@ -756,7 +765,7 @@ def main():
                 "coverage": round(float(row["coverage"]), 2),
                 "missing_factors": missing,
                 "missing_factor_notes": missing_notes,
-                "liquidity_20d": _r(row.get("liquidity_20d")),
+                "liquidity_20d": _r(row.get("liquidity_20d")), "no_recent_trade_reason": _ntr.get(str(sid)),
                 "data_asof": as_of,
                 "summary": _summary(row, present),
                 "factors": factors_obj,
@@ -771,7 +780,7 @@ def main():
                 "data_asof": as_of, "market": "TW",
                 "universe_size": len(cs),
                 "avg_coverage": avg_coverage,
-                "liquidity_floor_20d_value": LIQUIDITY_FLOOR_20D_VALUE,
+                "liquidity_floor_20d_value": LIQUIDITY_FLOOR_20D_VALUE, "recent_trade_filter": _ntr_info,
                 "weights_hash": frozen["weights_sha256"],
                 "score_scheme": SCORE_SCHEME, "score_scheme_effective_from": SCORE_SCHEME_EFFECTIVE_FROM,
                 "backtest_status": BACKTEST_STATUS, "backtest_note": BACKTEST_NOTE,

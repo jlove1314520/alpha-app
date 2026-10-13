@@ -400,7 +400,7 @@
         <div class="num" style="width:24px;text-align:center;font-size:15px;font-weight:700;color:${topPick?'var(--gold)':'var(--ink-3)'}">${r.rank??'—'}</div>
         <div class="nm" style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b style="font-size:15.5px">${pickLabel(r)}</b>${r.industry?`<span style="font-size:9.5px;color:var(--ink-2);background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px">${r.industry}</span>`:''}</div>
-          <div style="font-size:11px;color:var(--ink-3);margin-top:4px">${r.summary||''}${lowCov?'<br><span style="color:#c9a35a">⚠ 資料稀疏，分數僅供參考'+(missingLabels.length?'（缺'+missingLabels.join('、')+'）':'')+'</span>':''}${lowLiq?'<br><span style="color:#c9524a">⚠ 流動性不足 · 不進數字排名</span>':''}</div>
+          <div style="font-size:11px;color:var(--ink-3);margin-top:4px">${r.summary||''}${lowCov?'<br><span style="color:#c9a35a">⚠ 資料稀疏，分數僅供參考'+(missingLabels.length?'（缺'+missingLabels.join('、')+'）':'')+'</span>':''}${lowLiq?'<br><span style="color:#c9524a">⚠ 流動性不足 · 不進數字排名</span>':''}${(r.flags||[]).includes('近期無成交')?'<br><span style="color:#c9524a">⚠ 近期無成交 · 不進數字排名'+(r.no_recent_trade_reason?'（'+r.no_recent_trade_reason+'）':'')+'</span>':''}</div>
           <div style="font-size:10px;color:var(--ink-4);margin-top:2px">近20日均成交值 ${fmtLiquidity(r.liquidity_20d)}元 · 資料完整度 ${Math.round(r.coverage*100)}%</div>
         </div>
         <div style="text-align:right;flex-shrink:0"><div class="num" style="font-size:20px;font-weight:700;color:${scoreColor(r.total_score)}">${r.total_score.toFixed(1)}</div><div style="font-size:9px;color:var(--ink-4)">/ 10</div></div>
@@ -447,7 +447,7 @@
     renderPicksChips(allRows);
     const listEl=document.getElementById('picks-list');
     if(!allRows.length){listEl.innerHTML='<div class="note">無資料</div>';return}
-    // rank 為 null 的股票是流動性不足、已被排除於排行榜之外（仍留在 allRows 供搜尋），
+    // rank 為 null 的股票是流動性不足或近期無成交（先.八十二-3，2026-10-14 起），已被排除於排行榜之外（仍留在 allRows 供搜尋），
     // 這裡的排行榜清單只顯示有 rank 的。
     // 2026-10-08（先.五十一-3）AI 選股候選排除處置期間內個股（分盤撮合＋預收款券，實際難以進出）。
     // 旗標檔沒載到時 isDisposalNow 一律回 false＝不排除，只在清單上方說明。

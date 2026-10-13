@@ -109,6 +109,8 @@ def build_snapshot(board: str, score_path: Path, quotes: dict, taiex_close: floa
         "taken_at": datetime.now(TW_TZ).isoformat(),
         "board": board,
         "engine_version": data["meta"].get("engine_version"),
+        # 先.八十二-3：2026-10-14 起排名剔除「近期無成交」（近 5 交易日無成交或不在官方最新快照）
+        "no_recent_trade_rule": bool((data["meta"].get("recent_trade_filter") or {}).get("applied")),
         # 價值成長榜恢復（2026-09-30）：新紀錄註明計分方案（A（恢復）=凍結八項權重；B=已撤銷的低波動方案）；既有歷史紀錄不回溯修改。
         "score_scheme": (f"計分方案 {data['meta']['score_scheme']}" if data["meta"].get("score_scheme") else None),
         "taiex_close_at_snapshot": taiex_close,
@@ -150,6 +152,13 @@ def main():
     ledger["meta"]["generated_at"] = ledger["meta"]["last_snapshot_at"]  # 2026-09-03（P0三-三.3）統一欄位名，跟其他資料檔一致
     ledger["meta"]["source"] = ".github/scripts/build_picks_ledger.py（market.yml排程；讀scores.json/scores_momentum.json/scores_future.json三榜Top20+quotes_all_tw.json收盤價+market_tw.json大盤收盤）"
     ledger["meta"]["total_snapshots"] = len(ledger["snapshots"])
+    # 先.八十二-3（2026-10-13 總司令裁示②）：成分規則變更紀錄，生效日之後的快照成分與之前不可直接比較
+    ledger["meta"]["rule_changes"] = [{
+        "effective_date": "2026-10-14",
+        "rule": "三榜排名剔除近 5 個交易日無成交、或不在官方最新快照的個股（排名留空、標「近期無成交」），做法同「流動性不足」",
+        "ruling": "總司令【先.八十二】3 裁示②",
+        "snapshot_field": "no_recent_trade_rule",
+    }]
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(ledger, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
     print(f"寫入 {OUT_PATH}：本輪新增 {added} 個快照，累計 {len(ledger['snapshots'])} 個")

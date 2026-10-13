@@ -4439,6 +4439,34 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { phsErrs.push(`測試本身出錯：${e.message || e}`); }
   record("137. 價格歷史拆檔：每檔 <20MB、舊單檔已移除、代號順序與分桶一致、拆檔前後讀出完全相同（先.八十二-1）", phsErrs.length === 0, phsErrs.join("; ") || phsInfo);
 
+  // 138.【2026-10-13 先.八十二-3】選股榜剔除「近期無成交」（2026-10-14 起）：判定自測通過；三榜若已帶判定資訊，
+  // 標「近期無成交」者一律 rank 空白，且 picks_ledger 有生效日 2026-10-14 的規則紀錄（雲端班次寫入後才檢查）。
+  const ntrErrs = [];
+  let ntrInfo = "";
+  try {
+    const fsx = await import("node:fs");
+    const { execFileSync } = await import("node:child_process");
+    const py = process.platform === "win32" ? "python" : "python3";
+    let out = "";
+    try { out = execFileSync(py, ["scripts/selftest_recent_trade_filter.py"], { encoding: "utf8", env: { ...process.env, PYTHONIOENCODING: "utf-8" }, timeout: 120000 }); }
+    catch (e) { out = String(e.stdout || ""); ntrErrs.push("判定自測未通過：" + out.split("\n").filter(l => /FAIL/.test(l)).join("；").slice(0, 300)); }
+    const parts = [(out.match(/合計 \d+ 項，失敗 \d+/) || [""])[0]];
+    for (const f of ["scores.json", "scores_momentum.json", "scores_future.json"]) {
+      const d = JSON.parse(fsx.readFileSync(f, "utf8"));
+      const rtf = (d.meta || {}).recent_trade_filter;
+      if (!rtf) { parts.push(`${f} 尚未帶判定資訊（雲端班次重產後才有）`); continue; }
+      const bad = (d.stocks || []).filter(s => (s.flags || []).includes("近期無成交") && s.rank != null).map(s => s.code);
+      if (bad.length) ntrErrs.push(`${f} 標近期無成交卻有排名：${bad.slice(0, 5).join("、")}`);
+      parts.push(`${f} 生效=${rtf.applied} 剔除 ${rtf.excluded}（會剔除 ${rtf.would_exclude}）`);
+    }
+    const lg = JSON.parse(fsx.readFileSync("data/picks_ledger.json", "utf8"));
+    const rc = ((lg.meta || {}).rule_changes || []).find(x => x.effective_date === "2026-10-14");
+    if (lg.meta && lg.meta.rule_changes && !rc) ntrErrs.push("picks_ledger 規則紀錄缺生效日 2026-10-14");
+    parts.push(rc ? "picks_ledger 已標生效日 2026-10-14" : "picks_ledger 規則紀錄待雲端班次寫入");
+    ntrInfo = parts.join("；");
+  } catch (e) { ntrErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("138. 選股榜剔除近期無成交（2026-10-14 起）：判定自測、標記者 rank 空白、picks_ledger 生效日（先.八十二-3）", ntrErrs.length === 0, ntrErrs.join("; ") || ntrInfo);
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4467,7 +4495,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
