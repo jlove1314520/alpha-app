@@ -19523,4 +19523,4 @@ C. 驗收
 - [ ] **先.八十七-2 免費管道覆蓋率實測：Stooq、Alpha Vantage、Tiingo 免費方案；每檔記錄拿不拿得到、價格起訖日、是否涵蓋真正交易期間（核對 delisted_at）；key 只放本機 .env**（互動視窗執行；時間閘：等總司令取得免費 key）
 - [ ] **先.八十七-3 Kenneth French Data Library 動能因子 UMD 月報酬 1927 起存本機參考序列（不是新試驗、不計 N；與 先.八十六-2b 同一件，做完兩條一起標）**（DevQueue 可執行）
 - [ ] **先.八十七-4 輸出 research/DATA_SOURCE_COVERAGE_TEST.md：每家覆蓋率、正確率、免費額度限制；免費管道補不到的研究案標「暫停：等 App 有收入再評估收費資料」，不自行採購**（互動視窗執行；時間閘：先.八十七-2 之後）
-- [ ] **先.八十七-5 省額度：DevQueue 連續 2 輪 QUEUE_EMPTY 時，第 3 輪起只寫心跳不叫模型，佇列有 DevQueue 可執行項目再恢復**（DevQueue 可執行）
+- [x] **先.八十七-5 省額度：DevQueue 連續 2 輪 QUEUE_EMPTY 時，第 3 輪起只寫心跳不叫模型，佇列有 DevQueue 可執行項目再恢復**（DevQueue 可執行）〔已成立：QUEUE_EMPTY 時 wrapper 不叫模型（每輪 0～0.1 分鐘）；另把 research/data/*.jsonl 加進機器寫檔白名單〕

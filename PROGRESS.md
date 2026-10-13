@@ -1,3 +1,9 @@
+## 2026-10-13 23:03（互動視窗）先.八十七-5 空佇列不叫模型（查證已成立）＋DevQueue 白名單補 research/data/*.jsonl
+
+- 查證 `C:\alpha\run-dev-queue-cycle.ps1`：`dev_queue_runner.py prompt` 回 exit 3（QUEUE_EMPTY）時，wrapper 只寫 cycle log、**不呼叫 `claude -p`**；只有 exit 0 才進到「交給 claude -p」分支。
+- 證據：10/13 21:31、22:01 兩輪 QUEUE_EMPTY 的 `duration_min` 是 0.1 與 0，模型用量為 0。也就是「空佇列不叫模型」從第 1 輪起就成立，比裁示要求的第 3 輪更省；不另加計數器（多一個狀態檔，反而多一個會壞的地方）。
+- 同時修了 先.八十五-1 驗收卡住的原因：`research/data/*.jsonl`（例如 `adjustment_anomaly_warnings.jsonl`，`adjust.py` 每次算還原價都會寫）不在 DevQueue 的機器寫檔白名單，23:01 那輪因此讓路。已加進 `MACHINE_WRITTEN`；`selftest_dev_queue_guard.py` 25/25、`selftest_dev_queue_crunch.py` 23/23。
+
 ## 2026-10-13 22:57（互動視窗）先.八十五-4 B4／B2 PREREG 草稿＋core_tilt 平線 bug 修正
 
 研究優先順序四件，本輪進度：

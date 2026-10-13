@@ -118,6 +118,7 @@ MACHINE_WRITTEN = [
     re.compile(r"^data/"),                    # 全部是排程產生的資料檔
     re.compile(r"^research/[^/]+\.log$"),     # 各 cycle 的執行日誌
     re.compile(r"^research/[^/]+\.jsonl$"),   # append-only 觀測紀錄
+    re.compile(r"^research/data/[^/]+\.jsonl$"),  # 先.八十五-1：research/data/ 底下的 append-only 紀錄（例 adjustment_anomaly_warnings.jsonl 由 adjust.py 每次還原價計算寫入；10/13 23:01 因它讓路）
     re.compile(r"^research/\.[^/]+$"),        # .pid / .lock / .*_state.json 等隱藏狀態檔
     re.compile(r"^research/DEV_QUEUE_PROMPT\.txt$"),  # 本專案每輪重寫的提示檔
 ]
