@@ -1,3 +1,13 @@
+## 2026-10-13 19:42（互動視窗）先.八十四-4 停擺監控門檻跟上每週排程＋自測不再寫死真資料
+
+- **修我自己在 先.八十二-8 造成的假警報**（純 bug 修復）：馬拉松／假設佇列改「每週日一輪」時，停擺監控的門檻沒跟著改。
+  - `scripts/check_local_schedule_heartbeat.py`：個別軌道 track_stalled 門檻 marathon／hypothesis_queue 由 6 小時改成 7 天＋1 小時（devqueue 維持 6 小時）；claude -p 心跳 STALLED_3H 門檻 marathon／hypothesis_queue 由 7 小時改 169 小時（devqueue 維持 3 小時）。不改的話明天起 App 會一直亮「研究線超過 7 小時沒執行」紅橫幅。
+  - `scripts/selftest_claude_auth_detection.py` 情境三改成「8 天無嘗試→STALLED」，新增「6 天無嘗試→仍 OK」；全部通過。`selftest_claude_auth_launchers`（22 項）、`selftest_local_heartbeats`（12 項）全過。
+  - `app.js` 紅橫幅文字「研究線 7 小時」→「研究線每週一輪，7 天」。
+  - **沒改**：「三軌任一 ≤60 分鐘即本機存活」的 60 分鐘是 2026-09-27 裁示原文。今天 16:32 那次雲端告警就是 DevQueue（改每 30 分鐘後）62 分鐘沒提交、剛好超過 60。只記錄，再發生就提案。
+- **修自測寫死真資料**：`scripts/selftest_recent_trade_filter.py` ⑥原本寫死「3085、8183 一定被剔除」。3085 在 10/13 恢復成交（2 張、16.2 元），冒煙 #138 因此失敗。改成依各檔真實最後成交日推出預期（8183 停止交易中必須剔除），6 項全過。
+- 冒煙：142 項全過。
+
 ## 2026-10-13 19:42（互動視窗）先.八十二-14 先.八十一 遺留八項收尾
 
 - 先.八十一-53、56、57、58、59、61、63、64 八項全部 [x]：

@@ -65,6 +65,11 @@ STALL_THRESHOLD_MIN = 60  # 裁示原文：「超過60分鐘沒有新commit」
 # 「某一條軌道是不是真的自己停了」這兩個問題分開回答，不互相掩蓋。
 TRACK_STALL_THRESHOLD_MIN = 360  # 個別軌道層級警告門檻（6小時），跟上面
 # 60分鐘的「本機整體存活」門檻是兩個不同層級的判斷，不是同一個數字。
+# 先.八十四-4（2026-10-13）：先.八十二-8 把 marathon／hypothesis_queue 改成每週日 00:05 一輪，
+# 6 小時門檻會讓它們一週六天半都被標 track_stalled（假警報）；改成每週＋1 小時容忍。devqueue 維持 6 小時。
+WEEKLY_STALL_MIN = 7 * 24 * 60 + 60
+TRACK_STALL_THRESHOLD_MIN_BY_TRACK = {"devqueue": TRACK_STALL_THRESHOLD_MIN,
+                                      "marathon": WEEKLY_STALL_MIN, "hypothesis_queue": WEEKLY_STALL_MIN}
 
 # 三條本機排程各自的commit message特徵樣式（實測抓自git log，見PENDING_QUEUE.md
 # 「警.一」／「乾.三」條目的查證紀錄）。用search不是match，因為都會夾帶
@@ -114,7 +119,8 @@ CLAUDE_AUTH_PATH = REPO_ROOT / "research" / "data" / "claude_launcher_heartbeat.
 CLAUDE_AUTH_STALL_HOURS = 3.0
 # 先.二十八：marathon／hypothesis_queue 降為每 6 小時一輪，門檻改 7 小時（6h 間隔＋1h 容忍）；
 # devqueue 維持每 15 分鐘，門檻仍 3 小時。狀態字串沿用 STALLED_3H 以免動到 App 與既有消費端。
-CLAUDE_AUTH_STALL_HOURS_BY_LAUNCHER = {"devqueue": 3.0, "marathon": 7.0, "hypothesis_queue": 7.0}
+# 先.八十四-4：marathon／hypothesis_queue 改每週一輪（先.八十二-8）→ 門檻 7 天＋1 小時。
+CLAUDE_AUTH_STALL_HOURS_BY_LAUNCHER = {"devqueue": 3.0, "marathon": 169.0, "hypothesis_queue": 169.0}
 CLAUDE_AUTH_LAUNCHERS = ("devqueue", "marathon", "hypothesis_queue")
 # 先.五十三-B5：正常無為。刻意不含 BLOCKED_BY_RULE（節流跳過）——10/3 事故就是節流持續 39 小時
 # 無任何實際執行，那種情況必須照報 STALLED_3H（selftest_claude_auth_launchers「10/3事故重演」守著）。
@@ -218,7 +224,7 @@ def evaluate() -> dict:
             "last_commit_sha": sha,
             "last_commit_at": ts.isoformat() if ts else None,
             "minutes_since": round(minutes, 1) if minutes is not None else None,
-            "track_stalled": (minutes is None) or (minutes > TRACK_STALL_THRESHOLD_MIN),
+            "track_stalled": (minutes is None) or (minutes > TRACK_STALL_THRESHOLD_MIN_BY_TRACK.get(name, TRACK_STALL_THRESHOLD_MIN)),
         }
 
     ibkr_sha, ibkr_ts = _git_log(IBKR_PATTERN)

@@ -4172,7 +4172,7 @@
       // 先.七十二-A3：兩段式；原始字樣（含「需要重新登入」「額度已用盡」「沒有實際執行」）保留在收合細節
       if(st==='AUTH_EXPIRED')uiRedBanner(banner,['⚠️ 本機 Claude 需要重新登入（偵測到登入過期）：'+(ca.detail||'')]);
       else if(st==='QUOTA_EXCEEDED')uiRedBanner(banner,['⚠️ 本機 Claude 額度已用盡：'+(ca.detail||'')]);
-      else if(st==='STALLED_3H')uiRedBanner(banner,['⚠️ 本機自走系統超過門檻時間（開發線 3 小時／研究線 7 小時）沒有實際執行：'+(ca.detail||'')]);
+      else if(st==='STALLED_3H')uiRedBanner(banner,['⚠️ 本機自走系統超過門檻時間（開發線 3 小時／研究線每週一輪，7 天）沒有實際執行：'+(ca.detail||'')]);
       else uiRedBanner(banner,[]);
     }catch(e){
       console.warn('[renderClaudeAuthBanner]',e);recordGlobalError('renderClaudeAuthBanner',e);
@@ -4199,7 +4199,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-13.1754';
+  const APP_VERSION='2026-10-13.1942';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

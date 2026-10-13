@@ -103,17 +103,25 @@ def test_aggregator(tmpdir: Path):
     r = hb._evaluate_claude_auth(now)
     check("情境二：devqueue AUTH_EXPIRED -> overall_status=AUTH_EXPIRED", r["overall_status"] == "AUTH_EXPIRED", str(r))
 
-    # 情境三：marathon 連續 8 小時沒有嘗試執行（超過7小時門檻，先.二十八）-> STALLED_3H
-    stale = (now - timedelta(hours=8)).astimezone().isoformat(timespec="seconds")
+    # 情境三：marathon 連續 8 天沒有嘗試執行（先.八十四-4：改每週一輪後門檻 7 天＋1 小時；原 先.二十八 為 8 小時）-> STALLED_3H
+    stale = (now - timedelta(days=8)).astimezone().isoformat(timespec="seconds")
     hb.CLAUDE_AUTH_PATH.write_text(json.dumps({
         "devqueue": {"last_reason": "OK", "last_attempt_at": fresh, "last_ok_at": fresh},
         "marathon": {"last_reason": "ERROR", "last_attempt_at": stale},
         "hypothesis_queue": {"last_reason": "QUEUE_EMPTY", "last_attempt_at": stale},
     }, ensure_ascii=False), encoding="utf-8")
     r = hb._evaluate_claude_auth(now)
-    check("情境三：marathon 8小時無嘗試 -> overall_status=STALLED_3H", r["overall_status"] == "STALLED_3H", str(r))
+    check("情境三：marathon 8天無嘗試 -> overall_status=STALLED_3H", r["overall_status"] == "STALLED_3H", str(r))
 
-    # 情境三之二（先.二十八）：marathon／hypothesis_queue 5 小時無嘗試（每 6 小時一輪的正常間隔）不得誤報
+    # 情境三之二（先.二十八；先.八十四-4 改每週）：marathon／hypothesis_queue 6 天無嘗試（每週一輪的正常間隔）不得誤報
+    mid6d = (now - timedelta(days=6)).astimezone().isoformat(timespec="seconds")
+    hb.CLAUDE_AUTH_PATH.write_text(json.dumps({
+        "devqueue": {"last_reason": "OK", "last_attempt_at": fresh, "last_ok_at": fresh},
+        "marathon": {"last_reason": "OK", "last_attempt_at": mid6d, "last_ok_at": mid6d},
+        "hypothesis_queue": {"last_reason": "OK", "last_attempt_at": mid6d, "last_ok_at": mid6d},
+    }, ensure_ascii=False), encoding="utf-8")
+    r = hb._evaluate_claude_auth(now)
+    check("情境三之二b：研究線 6天無嘗試 -> 仍 OK（每週門檻）", r["overall_status"] == "OK", str(r))
     mid = (now - timedelta(hours=5)).astimezone().isoformat(timespec="seconds")
     hb.CLAUDE_AUTH_PATH.write_text(json.dumps({
         "devqueue": {"last_reason": "OK", "last_attempt_at": fresh, "last_ok_at": fresh},
@@ -121,7 +129,7 @@ def test_aggregator(tmpdir: Path):
         "hypothesis_queue": {"last_reason": "OK", "last_attempt_at": mid, "last_ok_at": mid},
     }, ensure_ascii=False), encoding="utf-8")
     r = hb._evaluate_claude_auth(now)
-    check("情境三之二：研究線 5小時無嘗試 -> 仍 OK（7小時門檻）", r["overall_status"] == "OK", str(r))
+    check("情境三之二：研究線 5小時無嘗試 -> 仍 OK", r["overall_status"] == "OK", str(r))
 
     # 情境三之三（先.五十三-B5）：devqueue 佇列只剩時間閘／BLOCKED → GATED，5 小時沒有「嘗試」但每輪都有檢查 → 不得 STALLED_3H
     hb.CLAUDE_AUTH_PATH.write_text(json.dumps({

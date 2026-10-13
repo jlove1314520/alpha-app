@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """先.八十二-3（2026-10-13）：選股榜「近期無成交」判定自測。
 ① 近 5 交易日無成交 → 剔除  ② 不在最新快照（快照完整）→ 剔除  ③ 上櫃整批晚一天（最新日檔數不足 90%）→ 不因快照剔除
-④ 正常成交 → 不剔除  ⑤ 資料日早於生效日 2026-10-14 → 不剔除、只回報會剔除幾檔  ⑥ 真資料：3085、8183 會被剔除
+④ 正常成交 → 不剔除  ⑤ 資料日早於生效日 2026-10-14 → 不剔除、只回報會剔除幾檔  ⑥ 真資料：判定與各檔最後成交日一致（8183 停止交易中必須剔除）
 用法：python scripts/selftest_recent_trade_filter.py
 """
 import sys
@@ -46,7 +46,15 @@ res.append(("⑤資料日早於 2026-10-14→不剔除、只回報會剔除", ou
 real = S.load(codes=["0050", "3085", "8183"])["prices"]
 F.EFFECTIVE_DATE = "2000-01-01"  # 只為驗證真實資料的判定，不影響正式程式
 out, info = F.evaluate(real)
-res.append((f"⑥真資料 3085／8183 會被剔除（{out.get('3085')}；{out.get('8183')}）", "3085" in out and "8183" in out))
+# 先.八十四-4（2026-10-13）：原本寫死「3085、8183 一定被剔除」，3085 在 10/13 恢復成交（2 張、16.2 元）後此項必然失敗。
+# 改成依各檔真實最後成交日推出預期：最後一筆有量的日期早於判定視窗第一天 → 應剔除，否則不應剔除。
+win0 = (info.get("window") or [None])[0]
+def _expect(code):
+    traded = [r["date"] for r in real.get(code) or [] if (r.get("volume") or 0) > 0]
+    return bool(win0) and (not traded or traded[-1] < win0)
+exp = {c: _expect(c) for c in ("3085", "8183")}
+res.append((f"⑥真資料判定與最後成交日一致（視窗起 {win0}；3085 應剔除={exp['3085']} 實際={'3085' in out}；8183 應剔除={exp['8183']} 實際={'8183' in out}）",
+            all(("%s" % c in out) == e for c, e in exp.items()) and exp["8183"]))
 for n, ok in res:
     print(("PASS " if ok else "FAIL ") + n)
 bad = sum(1 for _, ok in res if not ok)
