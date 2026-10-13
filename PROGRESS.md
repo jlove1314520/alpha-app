@@ -1,3 +1,27 @@
+## 2026-10-13 11:06（互動視窗）先.八十一-18 market.yml 實跑驗證（部分）：新產出落地、期貨端點改接 JSON、by_code 增量量測
+
+### 2026-10-13 11:10 先.八十一-18 market.yml 實跑驗證新產出落地（部分完成）（CC）
+
+**實跑**：market.yml 原排 05:43（台北）的美股班次，實際延到 10:43 才開跑，run 38338222352，結果 success，commit ab85b92e7（10:49）。
+
+| 產出 | 落地 | 證據 |
+|---|---|---|
+| data/by_code/（4,385 檔） | ✅ | log「by_code：4385 檔（其中 2318 檔內容有變而重寫）」；commit 含 2,319 個 by_code 檔 |
+| scores*_list.json | ✅ | log「scores_list.json：1965 列，1326KB（原 7194KB）」 |
+| data/industry_flow.json | ✅ | log「48 個產業，資料日 2026-10-12」 |
+| data/trading_calendar.json | ✅ | log「台股2026 已公布 24 日；台股2027 尚未公布」 |
+| data/futures_institutional.json | ❌→已修 | log「回應不是預期的 CSV」。TAIFEX 同一端點依內容協商有時回 CSV（中文欄名）、有時回 JSON（英文欄名），Actions 上拿到 JSON。已改為明確要求 JSON 並兩種都能解析；同一天資料 CSV 與 JSON 解析結果完全相同。**待 17:13 班確認落地** |
+| data/stock_names.json | — | 步驟在這班開跑後（10:46）才加入，下一班驗證 |
+
+**repo 增量量測**（ab85b92e7 新增物件，git 壓縮後大小，未計打包時的差分壓縮）
+- by_code：2,319 檔，原始 26.1MB，壓縮後 **5.6MB**。
+- 整個 commit：3,326 檔，壓縮後 7.2MB。
+- 每日三班若都像這班：by_code 約 17MB／日，低於門檻 20MB／日，不需分桶或降頻。GitHub 打包時對小幅變動的 JSON 會再做差分壓縮，實際增量更小。
+
+**狀態**：標 [~]。期貨檔與名稱清單要等 17:13（台北）班次確認後才標完成。
+
+**影響檔案**：.github/scripts/fetch_futures_institutional.py、data/futures_institutional.json
+
 ## 2026-10-13 11:06（互動視窗）先.八十一-31 price_history 換檔瞬間讀不到：根因 git pull，讀取端加重試
 
 ### 2026-10-13 11:08 先.八十一-31 price_history.json 短暫消失的根因與讀檔重試（CC）

@@ -29,6 +29,11 @@ WHO = {"自營商": "dealer", "投信": "trust", "外資及陸資": "foreign"}
 PRODUCTS = {"臺股期貨": "TX", "小型臺指期貨": "MTX", "微型臺指期貨": "TMF", "電子期貨": "TE", "金融期貨": "TF"}
 FIELDS = {"long_oi": "多方未平倉口數", "short_oi": "空方未平倉口數", "net_oi": "多空未平倉口數淨額",
           "net_trade": "多空交易口數淨額", "net_oi_amount_k": "多空未平倉契約金額淨額(千元)"}
+# 2026-10-13 實測：同一端點依內容協商有時回 CSV（中文欄名）、有時回 JSON（英文欄名）；GitHub Actions 上拿到的是 JSON，
+# 第一版只認 CSV 而判定失敗。兩種都接受，欄位用名稱對應。
+JSON_KEYS = {"date": "Date", "product": "ContractCode", "who": "Item",
+             "long_oi": "OpenInterest(Long)", "short_oi": "OpenInterest(Short)", "net_oi": "OpenInterest(Net)",
+             "net_trade": "TradingVolume(Net)", "net_oi_amount_k": "ContractValueofOpenInterest(Net)(Thousands)"}
 TW = timezone(timedelta(hours=8))
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -69,17 +74,26 @@ def _int(x):
 
 
 def parse(text: str) -> dict:
-    """回傳 {日期ISO: {商品代碼: {foreign/trust/dealer: {欄位: 值}}}}。"""
-    rows = list(csv.DictReader(io.StringIO(text.lstrip("﻿"))))
-    if not rows or "商品名稱" not in rows[0] or "身份別" not in rows[0]:
-        raise ValueError("回應不是預期的 CSV（缺商品名稱／身份別欄）")
+    """回傳 {日期ISO: {商品代碼: {foreign/trust/dealer: {欄位: 值}}}}。接受 JSON（英文欄名）或 CSV（中文欄名）。"""
+    t = text.lstrip("﻿").lstrip()
+    recs = []
+    if t.startswith("["):
+        for r in json.loads(t):
+            recs.append((r.get(JSON_KEYS["product"]), r.get(JSON_KEYS["who"]), r.get(JSON_KEYS["date"]),
+                         {k: _int(r.get(JSON_KEYS[k])) for k in FIELDS}))
+    else:
+        rows = list(csv.DictReader(io.StringIO(t)))
+        if not rows or "商品名稱" not in rows[0] or "身份別" not in rows[0]:
+            raise ValueError(f"回應既不是 JSON 陣列也不是預期的 CSV（開頭：{t[:60]!r}）")
+        for r in rows:
+            recs.append((r.get("商品名稱"), r.get("身份別"), r.get("日期"), {k: _int(r.get(v)) for k, v in FIELDS.items()}))
     out = {}
-    for r in rows:
-        p, w, d = PRODUCTS.get((r.get("商品名稱") or "").strip()), WHO.get((r.get("身份別") or "").strip()), (r.get("日期") or "").strip()
+    for prod, who, d, vals in recs:
+        p, w, d = PRODUCTS.get((prod or "").strip()), WHO.get((who or "").strip()), (d or "").strip()
         if not p or not w or len(d) != 8:
             continue
         iso = f"{d[:4]}-{d[4:6]}-{d[6:]}"
-        out.setdefault(iso, {}).setdefault(p, {})[w] = {k: _int(r.get(v)) for k, v in FIELDS.items()}
+        out.setdefault(iso, {}).setdefault(p, {})[w] = vals
     if not out:
         raise ValueError("CSV 裡找不到任何目標商品（臺股期貨等）")
     return out
@@ -89,7 +103,7 @@ def main() -> int:
     try:
         _gate()
         r = requests.get(URL, headers={"User-Agent": "Mozilla/5.0 (compatible; AlphaAppMarketFetcher/1.0)",
-                                       "Accept": "text/csv,application/json"}, timeout=30)
+                                       "Accept": "application/json"}, timeout=30)
         if r.status_code in (402, 403, 428, 429):
             _block(r.status_code)
             raise RuntimeError(f"HTTP {r.status_code}，已標記封鎖 2 小時")
