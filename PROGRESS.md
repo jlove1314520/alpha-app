@@ -1,3 +1,28 @@
+## 2026-10-13 10:57（互動視窗）先.八十一-20 法說會列表（重大訊息公告）＋MOPS 簡報連結，不爬取
+
+### 2026-10-13 11:00 先.八十一-20 法說會列表＋MOPS 簡報連結（CC）
+
+**查證**（動工前，已寫進 C:\alpha\CLAUDE.md 頻率清單）
+- TWSE／TPEx openapi swagger 都沒有法說會一覽表或簡報檔端點，只有 ESG「投資人溝通」彙總。
+- `mopsov.twse.com.tw/robots.txt` 對一般 User-Agent **全站 Disallow**；`mops.twse.com.tw/robots.txt` 回安全性錯誤頁。
+- 結論：**不抓 MOPS 法說會頁面與簡報 PDF**，只用既有官方重大訊息裡的法說會公告，簡報給連結讓使用者自己點開。
+
+**做了什麼**
+- `scripts/split_events_by_code.py` 同班多寫 `data/ir_events.json`：events.json 裡 type＝法說會、近 60 天公告的列，新到舊。目前 240 則，gzip 5.5KB，零額外請求。news_events.yml 與本機新聞備援的提交清單已加入這個檔。
+- 市場頁「更多」新增「近期法說會」卡：
+  - 顯示最近 20 則：公告日、公司名＋代號、公告標題、「MOPS簡報↗」連結（既有 `mopsIrLinkHtml`）。點列跳個股頁。
+  - 說明列寫明「日期是重大訊息公告日，不一定是法說會舉行日；簡報 PDF 請點 MOPS 連結自行開啟（MOPS 不開放程式抓取）」。
+
+**驗證**：冒煙新增 #126。檢查內容：
+- 檔案有資料時卡片有列
+- 第一列有代號與 MOPS 簡報連結（t100sb07_1，帶 co_id）
+- 說明寫明公告日與不爬取
+- 所有列日期格式正確
+
+全套冒煙第一次跑 #108 失敗：自測當下 `data/price_history.json` 短暫不存在（FileNotFoundError），疑似其他本機程序正在替換該檔，與本項無關。直接跑該自測 PASS，未改任何程式重跑全套 2026/10/13 10:57:08 全部通過。這個競態另記待查。
+
+**影響檔案**：scripts/split_events_by_code.py、data/ir_events.json、index.html、app-market.js、.github/workflows/news_events.yml、scripts/news_local_fallback.py、scripts/smoke_test.mjs
+
 ## 2026-10-13 10:46（互動視窗）先.八十一-19 搜尋名稱清單改 repo 為主、FinMind 只補充（549→33.5KB）
 
 ### 2026-10-13 10:50 先.八十一-19 搜尋名稱清單改 repo 為主、FinMind 只補充（CC）

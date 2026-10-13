@@ -4130,6 +4130,31 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { snErrs.push(`測試本身出錯：${e.message || e}`); }
   record("125. 搜尋名稱清單 repo 為主（不下載 FinMind 名單）、查無才 FinMind 補查並寫明失敗原因（先.八十一-19）", snErrs.length === 0, snErrs.join("; "));
 
+  // 126.【2026-10-13 先.八十一-20】市場頁「近期法說會」：讀 data/ir_events.json（重大訊息裡的法說會公告），每列有公司、
+  // 公告日、MOPS 簡報連結；註明日期是公告日、簡報不爬取。
+  const irErrs = [];
+  try {
+    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+    try {
+      const p = await ctx.newPage();
+      await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+      await p.evaluate(() => { const b = document.querySelector('nav#nav button[data-scr="market"]'); if (b) b.click(); });
+      await p.waitForFunction(() => document.querySelectorAll("#ir-events-rows .ir-row").length > 0 || /失敗|沒有法說會/.test((document.getElementById("ir-events-rows") || {}).textContent || ""), null, { timeout: 20000 }).catch(() => null);
+      const r = await p.evaluate(() => {
+        const rows = [...document.querySelectorAll("#ir-events-rows .ir-row")];
+        const a = rows[0] ? rows[0].querySelector("a.mops-ir-link") : null;
+        return { n: rows.length, href: a ? a.getAttribute("href") : "", txt: rows[0] ? rows[0].textContent : "", note: (document.getElementById("ir-events-datatime") || {}).textContent || "" };
+      });
+      const data = JSON.parse((await import("node:fs")).readFileSync("data/ir_events.json", "utf8"));
+      if ((data.count || 0) > 0 && !r.n) irErrs.push("ir_events.json 有資料但卡片沒有列");
+      if (r.n && !/mopsov\.twse\.com\.tw\/mops\/web\/ajax_t100sb07_1.*co_id=/.test(r.href)) irErrs.push(`第一列缺 MOPS 簡報連結：${r.href}`);
+      if (r.n && !/\d{4}/.test(r.txt)) irErrs.push("第一列沒有公司代號");
+      if (!/公告日/.test(r.note) || !/不開放程式抓取/.test(r.note)) irErrs.push(`說明沒寫明公告日與不爬取：${r.note}`);
+      if ((data.events || []).some(e => !/^\d{4}-\d\d-\d\d$/.test(String(e.date || "")))) irErrs.push("ir_events.json 有日期格式不對的列");
+    } finally { await ctx.close(); }
+  } catch (e) { irErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("126. 市場頁近期法說會列表（重大訊息公告＋MOPS 簡報連結，標明公告日、不爬取）（先.八十一-20）", irErrs.length === 0, irErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4158,7 +4183,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

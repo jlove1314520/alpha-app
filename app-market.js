@@ -561,7 +561,7 @@
     // 這些後續程式碼整批不執行，變成「一個面板壞掉、其他面板的收尾也跟著壞」。
     // 2026-09-08（金流一.3）產業金流併入同一批 allSettled——它自己有 try/catch，
     // 掛了只影響自己那張卡，不會拖垮其他面板（錯誤隔離原則）。
-    const results=await Promise.allSettled([loadMarketIndex(),loadHeatmap(),loadInstTotal(),loadFutInst(),loadMarginMaintenance(),renderSectorFlow(),loadCustomsTrade(),loadIndustrialProduction(),loadScanners()]);
+    const results=await Promise.allSettled([loadMarketIndex(),loadHeatmap(),loadInstTotal(),loadFutInst(),loadMarginMaintenance(),renderSectorFlow(),loadCustomsTrade(),loadIndustrialProduction(),loadScanners(),loadIrEvents()]);
     const labels=['loadMarketIndex','loadHeatmap','loadInstTotal','loadFutInst','loadMarginMaintenance','renderSectorFlow','loadCustomsTrade','loadIndustrialProduction','loadScanners'];
     results.forEach((r,i)=>{if(r.status==='rejected'){console.warn('['+labels[i]+']',r.reason);recordGlobalError(labels[i],r.reason)}});
     _safeAsync('loadMarketBrief',loadMarketBrief);  // 常備.開發-2
@@ -572,6 +572,24 @@
   }
   // 2026-09-15（源頭二.3第9名）全國進出口貿易統計，market-tw-panel卡片。
   let CUSTOMS_TRADE_CACHE=null;
+  // 先.八十一-20：近期法說會列表（重大訊息公告，官方）。每列：公告日、公司、標題、MOPS 簡報連結（使用者自己點開，不爬取）。
+  let IR_EVENTS_CACHE=null;
+  async function loadIrEvents(){
+    const el=document.getElementById('ir-events-rows');if(!el)return;
+    try{
+      if(!IR_EVENTS_CACHE){const r=await fetch('data/ir_events.json?t='+Math.floor(Date.now()/600000));if(!r.ok)throw new Error('HTTP '+r.status);IR_EVENTS_CACHE=await r.json()}
+      const d=IR_EVENTS_CACHE,ev=(d.events||[]).slice(0,20);
+      const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      el.innerHTML=ev.length?ev.map(e=>`<div class="ir-row" style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-top:1px solid var(--hairline);cursor:pointer" onclick="openStock('${esc(e.code)}')">
+          <span class="num" style="font-size:10px;color:var(--ink-4);min-width:34px;padding-top:2px">${esc(String(e.date||'').slice(5).replace('-','/'))}</span>
+          <span style="flex:1;font-size:12px;color:var(--ink-2);line-height:1.5"><b style="color:var(--ink)">${esc(e.name||'')} ${esc(e.code)}</b>・${esc(e.title)}${mopsIrLinkHtml({type:'法說會',code:e.code},true)}</span></div>`).join('')
+        :'<div class="note">近 60 天沒有法說會公告</div>';
+      document.getElementById('ir-events-datatime').textContent=`近 60 天共 ${d.count||0} 則${(d.count||0)>20?'，只顯示最近 20 則':''}；日期是重大訊息公告日，不一定是法說會舉行日。簡報 PDF 請點「MOPS簡報」自行開啟（MOPS 不開放程式抓取）。`;
+    }catch(e){
+      console.warn('[loadIrEvents]',e);recordGlobalError('loadIrEvents',e);
+      el.innerHTML='<div class="note">法說會列表載入失敗（'+String(e&&e.message||e).replace(/[&<>]/g,'')+'）</div>';
+    }
+  }
   async function loadCustomsTrade(){
     const el=document.getElementById('customs-trade-rows');if(!el)return;
     if(!CUSTOMS_TRADE_CACHE){

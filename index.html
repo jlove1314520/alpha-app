@@ -24,7 +24,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
      載不到時index.html::renderStockChart()自動退回既有SVG折線，不會讓個股頁空白。 -->
 <!-- 常備.開發-20（2026-10-11）：函式庫改為第一次畫K線時才載入（見 app.js ensureLwc()），不再佔首頁首次載入傳輸量。 -->
 <title>Alpha 台美股 AI 交易</title>
-<link rel="stylesheet" href="app.css?v=2026-10-13.1046">
+<link rel="stylesheet" href="app.css?v=2026-10-13.1057">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -264,6 +264,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <!-- 先.七十二-B7（2026-10-11）：比較少看的卡收進「更多」（卡片 id 與載入函式不變，只是預設收合） -->
       <details class="ui-more" data-ui-more>
         <summary>更多</summary>
+        <!-- 先.八十一-20：近期法說會（data/ir_events.json＝重大訊息裡的法說會公告；簡報 PDF 只給 MOPS 連結，不爬取）。 -->
+              <div class="card">
+                <h3>近期法說會</h3>
+                <div id="ir-events-rows"><div class="skel-line w80"></div><div class="skel-line w60"></div></div>
+                <div class="note" id="ir-events-datatime"></div>
+              </div>
         <!-- 2026-09-15（源頭二.3第9名）全國進出口貿易統計，財政部關務署官方開放資料免金鑰。 -->
               <div class="card">
                 <h3>進出口統計</h3>
@@ -1414,6 +1420,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-13.1046"></script>
+<script src="app.js?v=2026-10-13.1057"></script>
 </body>
 </html>

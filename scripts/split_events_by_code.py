@@ -69,6 +69,17 @@ def main() -> int:
         if p.stem not in by_code:
             text = _dump({"fetched_at": doc.get("fetched_at"), "source": source, "code": p.stem, "events": []})
             emptied += _write_if_changed(p, text)
+    # 先.八十一-20：法說會列表（市場頁「近期法說會」卡用）＝ events.json 裡 type＝法說會、近 60 天公告的列，新到舊。
+    # 來源是 TWSE／TPEx 重大訊息（官方）；MOPS 法說會一覽表沒有開放 API、mopsov robots.txt 全站 Disallow，不爬簡報 PDF，
+    # App 只給「MOPS 簡報」連結讓使用者自己點開。
+    from datetime import date, timedelta
+    cut = (date.today() - timedelta(days=60)).isoformat()
+    ir = sorted((e for e in events if (e or {}).get("type") == "法說會" and str(e.get("date") or "") >= cut),
+                key=lambda e: (str(e.get("date") or ""), str(e.get("code") or "")), reverse=True)
+    _write_if_changed(ROOT / "data" / "ir_events.json", _dump({
+        "fetched_at": doc.get("fetched_at"), "source": "data/events.json（TWSE／TPEx 重大訊息）type＝法說會、近 60 天；scripts/split_events_by_code.py",
+        "note": "日期是重大訊息公告日，不一定是法說會舉行日；簡報 PDF 請點 MOPS 連結自行開啟（MOPS 不開放程式抓取）",
+        "count": len(ir), "events": [{k: e.get(k) for k in ("code", "name", "date", "title", "source", "url")} for e in ir]}))
     _write_if_changed(OUT_DIR / "_index.json", _dump({"fetched_at": doc.get("fetched_at"), "source": source,
                                                       "note": "目前有事件的代號（不在清單內＝沒有事件，App 不發請求）",
                                                       "codes": sorted(by_code)}))
