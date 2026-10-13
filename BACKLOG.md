@@ -2539,6 +2539,9 @@ B31/B32/B33。
 - **603 檔 industry 分類歧義**：FinMind `TaiwanStockInfo` 原始資料本身在
   同一天對同一檔股票有超過一種產業分類，`company_info.json` 誠實回傳
   None，需要更權威的產業分類來源或人工判斷才能解決。
+  **✅ 2026-10-13 先.八十一-36 改官方為準**：`scripts/apply_official_industry.py` 讀 TWSE t187ap03_L／TPEx mopsfin_t187ap03_O／_R 的產業別代碼，
+  代碼→名稱用 TPEx tpex_index_consti（官方中文名稱）對出（35 碼、零衝突）；官方清單內 2,352 檔一律改官方名稱（改動 408 檔、補進 13 檔），
+  同代碼多種寫法由 8 碼降為 0、缺產業別剩 1 檔（非官方清單內證券）。ETF 等官方清單外維持原值。
 - **TPEx 價量端點偶發 SSL 憑證錯誤**：`www.tpex.org.tw` 這幾天間歇性回傳
   `CERTIFICATE_VERIFY_FAILED`（對方伺服器端問題），`_get_retry()` 有正確
   重試+記錄失敗，不是這裡的 bug，但代表 TPEx 股票的 turnover/最新價量
