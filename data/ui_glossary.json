@@ -59,6 +59,11 @@
     {"term": "Cloudflare Access", "regex": "Cloudflare\\s*Access"},
     {"term": "yfinance", "regex": "yfinance", "flags": "i"},
     {"term": "NAV", "regex": "\\bNAV\\b"},
-    {"term": "BAA10Y", "regex": "BAA10Y"}
+    {"term": "BAA10Y", "regex": "BAA10Y"},
+    {"term": "commit", "regex": "\\bcommit\\b", "flags": "i"},
+    {"term": "GitHub Actions", "regex": "GitHub Actions|\\bActions\\b"},
+    {"term": "程式檔名 .py", "regex": "\\b[\\w-]+\\.py\\b"},
+    {"term": "repo", "regex": "\\brepo\\b"},
+    {"term": "price_history", "regex": "price_history"}
   ]
 }

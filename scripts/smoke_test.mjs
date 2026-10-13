@@ -4356,6 +4356,28 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { mrErrs.push(`測試本身出錯：${e.message || e}`); }
   record("135. 價格歷史合併同日列保留還原比例（除息後落後資料不得蓋回未調整）（先.八十一-51）", mrErrs.length === 0, mrErrs.join("; "));
 
+  // 136.【2026-10-13 先.八十一-45】錯誤訊息／空狀態的工程術語（commit、GitHub Actions、程式檔名、repo、price_history）
+  // 經顯示層白話規則後不得殘留：拿原始碼裡實際存在的錯誤／空狀態字串逐一過 uiPlain，再用 ui_glossary 的禁用詞檢查。
+  const errCopyErrs = [];
+  try {
+    const fsg = await import("node:fs");
+    const g = JSON.parse(fsg.readFileSync("data/ui_glossary.json", "utf8"));
+    const samples = [
+      "尚未產生 scores.json，或載入失敗。此清單由 research/generate_scores_v2.py 在本機/排程產生後 commit 進 repo，不是即時計算。",
+      "此清單由排程每日產生後 commit 進 repo。",
+      "· 盤中 延遲約5分(GitHub Actions)", "· 已收盤 · Actions 最後一筆 約3分前", "· 近即時（Actions排程）",
+      "代表 scripts/data_audit.py 尚未產生 data/audit_report.json，或排程沒有落地",
+      "財報日：此代號不在財報行事曆追蹤清單（fetch_earnings_calendar.py）",
+      "來源：證交所／櫃買每日收盤（repo price_history，資料日 2026-10-12）", "DevQueue 最近一次commit 10:00",
+    ];
+    const out = await page.evaluate((ss) => ss.map(s => uiPlain(s)), samples);
+    const re = g.forbidden_front.filter(f => ["commit", "GitHub Actions", "程式檔名 .py", "repo", "price_history"].includes(f.term)).map(f => [f.term, new RegExp(f.regex, f.flags || "")]);
+    if (re.length !== 5) errCopyErrs.push(`ui_glossary 缺新禁用詞（${re.length}/5）`);
+    out.forEach((t, i) => { for (const [term, r] of re) if (r.test(t)) errCopyErrs.push(`「${samples[i].slice(0, 24)}…」改寫後仍有 ${term}：${t.slice(0, 50)}`); });
+    if (out.some(t => /程式 程式|排程排程|產生後\s*由排程產生後/.test(t))) errCopyErrs.push("改寫後出現重複字串");
+  } catch (e) { errCopyErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("136. 錯誤訊息／空狀態的工程術語經白話規則後不殘留（commit／GitHub Actions／.py／repo／price_history）（先.八十一-45）", errCopyErrs.length === 0, errCopyErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4384,7 +4406,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

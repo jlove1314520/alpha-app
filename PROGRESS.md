@@ -1,3 +1,35 @@
+## 2026-10-13 13:23（互動視窗）先.八十一-45 錯誤訊息／空狀態工程術語全面白話化
+
+### 2026-10-13 13:26 先.八十一-45 錯誤訊息／空狀態的工程術語全面掃描（CC）
+
+**掃描**：grep app*.js 的使用者可見字串，排除 console／recordGlobalError／註解。找到仍露出的術語：
+- 「commit 進 repo」：選股頁、個股頁空狀態
+- 「最近一次 commit」：設定頁
+- 「(GitHub Actions)」「Actions 最後一筆」「Actions排程」：首頁報價說明
+- `scripts/data_audit.py`、`fetch_earnings_calendar.py`、`generate_scores_*.py` 等程式檔名：設定頁、個股頁錯誤狀態
+
+**修正**：顯示層白話對照表 UI_PLAIN_MAP 新增規則，對所有畫面文字生效，原字串不動：
+
+| 原文 | 改寫 |
+|---|---|
+| commit 進 repo | 存進本站 |
+| 最近一次 commit | 最近一次更新 |
+| 排程 commit 時 | 排程更新時 |
+| （GitHub Actions）／GitHub Actions／Actions 排程 | 雲端排程 |
+| Actions 最後一筆 | 雲端排程最後一筆 |
+| research／scripts 路徑或單獨的 xxx.py | 程式 |
+
+例：「此清單由 research/generate_scores_v2.py 在本機/排程產生後 commit 進 repo」→「此清單由 程式 在本機/排程產生後存進本站」。
+
+**稽核同步**：`data/ui_glossary.json` 禁用詞清單新增 commit、GitHub Actions、程式檔名 .py、repo、price_history（只插 5 行，不重排整份檔），ux_copy_audit 之後會一併抓。
+
+**驗證**：
+- ux_copy_audit 全部分頁／子分頁／美股／離線狀態合計 0 處。
+- 冒煙新增 #136：拿原始碼裡 9 句實際的錯誤／空狀態字串過 uiPlain，不得殘留 5 個新禁用詞，也不得出現「排程排程」這類重複。
+- 全套冒煙 2026/10/13 13:23:21 全部通過。
+
+**影響檔案**：app.js、data/ui_glossary.json、scripts/smoke_test.mjs
+
 ## 2026-10-13 13:14（互動視窗）先.八十一-60 待裁示一頁摘要（6 件）
 
 ### 2026-10-13 13:25 先.八十一-60 待裁示一頁摘要（CC）
