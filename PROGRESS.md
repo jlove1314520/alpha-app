@@ -1,3 +1,11 @@
+## 2026-10-14 07:53（互動視窗）先.九十三-2 autostash 71 份盤點（0 份可刪）
+
+- 71 份 autostash（2026-09-04～10-14）逐份逐檔比對：暫存版本與 HEAD 版本的檔案雜湊全部相同才算「內容已完整存在於 HEAD」。
+- 結果：**0 份符合 → 一份都沒刪**；刪除前後各列一次，都是 71 份。
+- 53 份只有機器自動寫的檔不同；18 份含非機器檔差異（例：research/US_LEADS.md、scripts/long_job_progress_heartbeat.py、index.html、research/alpha_live_server.py、app.js）。
+- 清單 `research/AUTOSTASH_INVENTORY_2026-10-14.md`（每份的日期、改了哪些檔、與 HEAD 不同的檔與差異統計；只列檔名、不貼內容）交 Cowork 審閱。先.八十四-9 一併結案。
+- 冒煙：只改文件，沿用 145/145。
+
 ## 2026-10-14 07:47（互動視窗）先.九十三-3 DevQueue 長抓取 45 分鐘自行存檔收尾
 
 - 根因：`C:\alpha\run-dev-queue-cycle.ps1` 每輪 60 分鐘強制砍掉 claude（10/14 03:01、06:31 兩輪 TIMEOUT，正在跑 SIC／Tiingo 長抓取），沒存的進度會丟。
