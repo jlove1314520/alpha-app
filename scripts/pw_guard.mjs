@@ -8,13 +8,16 @@
 //      run-dev-queue-cycle.ps1 每輪收尾只依「自己的擁有者標記」清理殘留的 chrome／node（只清自己啟動的）。
 //   2. close()：browser.close() 超過 30 秒沒完成 → 用標記參數找出本次啟動的 chrome 程序強制結束。
 //   3. 整體硬上限（預設 20 分鐘）、SIGINT／SIGTERM、未接住的例外 → 一律先 close() 再結束行程。
+// 先.八十一-15（2026-10-13）：PID 檔改放系統暫存目錄（%TEMP%\alpha_pw_pids，可用 ALPHA_PW_PID_DIR 覆寫），
+//   不再在 repo 裡留下 research/.pw_pids/。瀏覽器執行檔可用環境變數 ALPHA_PW_EXECUTABLE（或 Playwright 慣用的
+//   PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH）指定；沒設就用 Playwright 自己裝的版本，不寫死任何版本路徑。
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const PID_DIR = path.join(ROOT, "research", ".pw_pids");
+export const PID_DIR = process.env.ALPHA_PW_PID_DIR || path.join(os.tmpdir(), "alpha_pw_pids");
+export const PW_EXECUTABLE = process.env.ALPHA_PW_EXECUTABLE || process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || "";
 export const OWNER = (process.env.ALPHA_PW_OWNER || "manual").replace(/[^A-Za-z0-9_.-]/g, "_");
 const CLOSE_TIMEOUT_MS = 30 * 1000;
 
@@ -35,7 +38,9 @@ function forceKillOwnChrome(label) {
 
 export async function launchGuarded(browserType, launchOpts = {}, { label = "playwright", hardTimeoutMs = 20 * 60 * 1000 } = {}) {
   const args = [...(launchOpts.args || []), `--alpha-pw-owner=${OWNER}`, `--alpha-pw-node=${process.pid}`];
-  const browser = await browserType.launch({ ...launchOpts, args });
+  const exe = launchOpts.executablePath || PW_EXECUTABLE;
+  if (exe && !fs.existsSync(exe)) console.warn(`[${label}] 指定的瀏覽器執行檔不存在：${exe}（改用 Playwright 預設）`);
+  const browser = await browserType.launch({ ...launchOpts, args, ...(exe && fs.existsSync(exe) ? { executablePath: exe } : {}) });
   let pidFile = null;
   try {
     fs.mkdirSync(PID_DIR, { recursive: true });

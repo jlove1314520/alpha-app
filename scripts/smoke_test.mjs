@@ -61,6 +61,8 @@
 
 import { chromium } from "@playwright/test";
 import { launchGuarded } from "./pw_guard.mjs";
+import os from "node:os";
+import path from "node:path";
 
 const TABS = ["home", "market", "picks", "trade", "journal", "settings"];
 
@@ -1772,7 +1774,7 @@ async function runSmokeTest(baseUrl, headless = true) {
     if (!r.highHasPct) supplyErrors.push("覆蓋率達標（模擬0.9）後未顯示百分位或仍顯示資料準備中");
     if (r.nOpt > 1 && r.filtered === false) supplyErrors.push("產業篩選後仍有他產業列");
     supplyInfo = `覆蓋率${(r.cov*100).toFixed(1)}%：低覆蓋不顯示百分位=${r.lowNoPct}、達標模擬顯示百分位=${r.highHasPct}；列數${r.rows}、產業選項${r.nOpt - 1}、篩選後${r.nFiltered ?? "-"}列、排序前後首列：${r.first1}→${r.first2}→${r.first3}`;
-    await page.screenshot({ path: "scripts/_supply_tab.png", fullPage: false });
+    await page.screenshot({ path: path.join(os.tmpdir(), "alpha_smoke_supply_tab.png"), fullPage: false });  // 先.八十一-15：截圖寫暫存目錄，不在 repo 留殘檔
     await page.evaluate(() => switchPicksBoard("value"));
     await page.waitForTimeout(300);
     const back = await page.evaluate(() => ({ lb: document.getElementById("picks-list-card").offsetParent !== null, sup: document.getElementById("picks-supply-card").offsetParent !== null }));
@@ -4046,6 +4048,27 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { staleErrs.push(`測試本身出錯：${e.message || e}`); }
   record("122. 過期資料標出資料月份與原因（進出口／工業生產／供給觀察），dependency_status 每週落地（先.八十一-14）", staleErrs.length === 0, staleErrs.join("; "));
 
+  // 123.【2026-10-13 先.八十一-15】冒煙不留殘檔：截圖與 Playwright PID 檔一律寫系統暫存目錄，repo 內不得出現
+  // scripts/_supply_tab.png、research/.pw_pids/；瀏覽器可用 ALPHA_PW_EXECUTABLE 指定（不寫死 Playwright 版本路徑）。
+  const resErrs = [];
+  try {
+    const fsr = await import("node:fs");
+    const { PID_DIR } = await import("./pw_guard.mjs");
+    const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1")), "..");
+    if (fsr.existsSync(path.join(repoRoot, "scripts", "_supply_tab.png"))) resErrs.push("repo 內有殘檔 scripts/_supply_tab.png");
+    if (fsr.existsSync(path.join(repoRoot, "research", ".pw_pids"))) resErrs.push("repo 內有殘留目錄 research/.pw_pids/");
+    if (path.resolve(PID_DIR).toLowerCase().startsWith(repoRoot.toLowerCase())) resErrs.push(`PID 目錄仍在 repo 內：${PID_DIR}`);
+    const src = fsr.readFileSync(path.join(repoRoot, "scripts", "smoke_test.mjs"), "utf8") + fsr.readFileSync(path.join(repoRoot, "scripts", "pw_guard.mjs"), "utf8");
+    if (/ms-playwright[\\/]+chromium[-_]/i.test(src)) resErrs.push("程式碼寫死了 Playwright 瀏覽器版本路徑");
+    // 指定執行檔：用 Playwright 自己的 chromium 路徑當 ALPHA_PW_EXECUTABLE，子行程經 launchGuarded 啟動要成功
+    const { execFileSync } = await import("node:child_process");
+    const exe = chromium.executablePath();
+    const code = `import { chromium } from "@playwright/test";import { launchGuarded } from "./scripts/pw_guard.mjs";const g=await launchGuarded(chromium,{headless:true},{label:"exe_check"});console.log("VER "+g.browser.version());await g.close();g.clearHard();`;
+    const out = execFileSync(process.execPath, ["--input-type=module", "-e", code], { cwd: repoRoot, env: { ...process.env, ALPHA_PW_EXECUTABLE: exe }, encoding: "utf8", timeout: 90000 });
+    if (!/VER \d+/.test(out)) resErrs.push(`ALPHA_PW_EXECUTABLE 指定瀏覽器啟動失敗：${out.slice(0, 120)}`);
+  } catch (e) { resErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("123. 冒煙不留殘檔（截圖／PID 檔寫暫存目錄）、支援 ALPHA_PW_EXECUTABLE 指定瀏覽器（先.八十一-15）", resErrs.length === 0, resErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4074,7 +4097,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

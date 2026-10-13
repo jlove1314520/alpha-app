@@ -30,6 +30,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from datetime import datetime, timezone, timedelta
 
@@ -59,7 +60,9 @@ def run_smoke_test(base_url: str, headless: bool = True) -> dict:
         print(f"{'PASS' if passed else 'FAIL'} - {name}" + (f"：{detail}" if detail else ""))
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=headless)
+        # 先.八十一-15：可用 ALPHA_PW_EXECUTABLE／PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH 指定瀏覽器，沒設就用 Playwright 預設
+        _exe = os.environ.get("ALPHA_PW_EXECUTABLE") or os.environ.get("PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH") or ""
+        browser = p.chromium.launch(headless=headless, **({"executable_path": _exe} if _exe and os.path.exists(_exe) else {}))
         page = browser.new_page(viewport={"width": 393, "height": 852})
 
         page_errors = []

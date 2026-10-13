@@ -1,3 +1,27 @@
+## 2026-10-13 10:24（互動視窗）先.八十一-15 冒煙不留殘檔、支援 ALPHA_PW_EXECUTABLE 指定瀏覽器
+
+### 2026-10-13 10:28 先.八十一-15 冒煙不留殘檔、支援指定瀏覽器執行檔（CC）
+
+**做了什麼**
+- `scripts/_supply_tab.png`：冒煙第 39 類供給觀察截圖改寫到系統暫存目錄（`%TEMP%\alpha_smoke_supply_tab.png`）。
+- `research/.pw_pids/`：`scripts/pw_guard.mjs` 的 PID 檔改放 `%TEMP%\alpha_pw_pids`，可用環境變數 `ALPHA_PW_PID_DIR` 覆寫。
+  - DevQueue 收尾清理（`C:\alpha\run-dev-queue-cycle.ps1`，repo 外）同步改讀新位置，舊位置一併清（過渡期）。
+  - 兩個舊殘檔已刪。
+- **指定瀏覽器**：`launchGuarded()` 讀環境變數 `ALPHA_PW_EXECUTABLE`（或 Playwright 慣用的 `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`）。
+  - 指定的檔不存在時警告並改用 Playwright 預設。
+  - `smoke_test.py` 同樣支援。
+  - 查證程式碼中原本沒有寫死的版本路徑；冒煙會擋住日後有人寫死。
+
+**驗證**：冒煙新增 #123。檢查內容：
+- repo 內沒有 `_supply_tab.png`、`.pw_pids/`
+- PID 目錄不在 repo 內
+- 程式碼沒有寫死 `ms-playwright\chromium-*`
+- 用 `ALPHA_PW_EXECUTABLE`（指向 Playwright 自己的 chromium）經 launchGuarded 啟動成功
+
+全套冒煙 2026/10/13 10:24:41 全部通過；跑完後 `git status` 在 scripts／research 下沒有任何新的未追蹤檔。
+
+**影響檔案**：scripts/pw_guard.mjs、scripts/smoke_test.mjs、scripts/smoke_test.py；repo 外：C:\alpha\run-dev-queue-cycle.ps1
+
 ## 2026-10-13 10:19（互動視窗）先.八十一-14 過期資料逐一查：dependency_status 排程補提交、各檔標資料月份與原因
 
 ### 2026-10-13 10:22 先.八十一-14 過期資料逐一查（CC）
