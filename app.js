@@ -1358,8 +1358,10 @@
   }
   // 先.八十一-5：曲線檔 candidacy（例：模擬 B／C 閘門殺測失敗）顯示在該線最上方；data-ui-cite＝照裁示原文保留試驗編號
   const scCandHtml=l=>l&&l.candidacy?`<div class="note sc-cand" data-ui-cite data-ui-keep style="margin:2px 0 6px;font-weight:600;color:var(--critical,#e5534b)">⛔ ${_uiEsc(l.candidacy)}</div>`:'';
+  // 先.八十一-16：建倉日事後倒填的線（模擬 B／C／D）照實標明
+  const scInceptionHtml=l=>l&&l.inception_note?`<div class="note sc-inception" data-ui-keep style="margin:2px 0 6px;color:var(--warn)">⚠ ${_uiEsc(l.inception_note)}</div>`:'';
   function scLineBlock(l){
-    return scCandHtml(l)+_scLineBlockInner(l);
+    return scCandHtml(l)+scInceptionHtml(l)+_scLineBlockInner(l);
   }
   function _scLineBlockInner(l){
     if(!l)return '<div class="note sc-notyet" style="color:var(--ink-3)">現在還沒有資料</div>';
@@ -1487,7 +1489,8 @@
     if(!SC_DATA||!SC_DATA.lines){bodyEl.innerHTML='<div class="note" style="color:var(--ink-3)">策略曲線資料尚未產生</div>';tabsEl.innerHTML='';return}
     const chip=(on,label,js,attr,dim)=>`<span class="press sc-tab" ${attr} style="padding:3px 9px;border-radius:14px;font-size:11px;white-space:nowrap;border:1px solid ${on?'var(--accent)':'var(--hairline)'};color:${on?'var(--accent)':'var(--ink-2)'};cursor:pointer;opacity:${dim?'.45':'1'}" onclick="${js}">${label}</span>`;
     tabsEl.innerHTML=SC_TABS.map(([k,lb])=>{const has=scTabHasData(k);return chip(k===SC_TAB,lb,`SC_TAB='${k}';renderStrategyCurves()`,`data-tab="${k}" data-has-data="${has?1:0}"`,!has)}).join('');
-    let html='';
+    // 先.八十一-16：計算口徑一行（還原價、0050 含息、現金計息），每個分頁都顯示
+    let html=SC_DATA.meta&&SC_DATA.meta.method_note?`<div class="note sc-method" data-ui-keep style="margin:0 0 6px;font-size:10.5px;color:var(--ink-3)">${_uiEsc(SC_DATA.meta.method_note)}</div>`:'';
     if(SC_TAB==='boards'){
       html+=`<div style="display:flex;gap:6px;margin-bottom:6px">${SC_BOARDS.map(([k,lb])=>{const has=scHasData(scById('board_'+k));return chip(k===SC_BOARD,lb,`SC_BOARD='${k}';renderStrategyCurves()`,`data-board="${k}"`,!has)}).join('')}</div>`;
       html+=scLineBlock(scById('board_'+SC_BOARD));
@@ -4074,7 +4077,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-13.1019';
+  const APP_VERSION='2026-10-13.1030';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

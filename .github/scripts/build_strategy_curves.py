@@ -323,6 +323,10 @@ def paper_lines(px: Px) -> list:
     design_note = {"paper_4": "看過 2025–26 結果後才設計"}
     # 先.八十一-5（2026-10-13 總司令裁示①）：信用利差閘門 1990–2003 殺測失敗（#435/#436）——繼續紙上追蹤，但不再是真錢候選
     candidacy = {"paper_3": "閘門殺測失敗（#435/#436），不再是真錢候選", "paper_4": "閘門殺測失敗（#435/#436），不再是真錢候選"}
+    # 先.八十一-16（2026-10-13 總司令裁示）：模擬 B／C／D 的建倉日是 10/11 事後決定、用 10/08 收盤倒填，照實標明；
+    # 之後一律禁止事後倒填建倉日（research/MARATHON_PROTOCOL.md §9）
+    backdated = {k: "建倉日 10/08 是 10/11 事後決定、用 10/08 收盤倒填（之後新策略一律禁止事後倒填建倉日）"
+                 for k in ("paper_1b", "paper_3", "paper_4")}
     for id_, label, path, vk, book, planned in specs:
         evs = _jsonl(path)
         if book:
@@ -349,6 +353,8 @@ def paper_lines(px: Px) -> list:
             ln["design_note"] = design_note[id_]
         if candidacy.get(id_):
             ln["candidacy"] = candidacy[id_]
+        if backdated.get(id_):
+            ln["inception_note"] = backdated[id_]
         out.append(ln)
     return out
 
@@ -397,6 +403,8 @@ def build() -> dict:
                      "price_asof": px.cal[-1], "correction": CORRECTION,
                      "rules": {"min_days": MIN_DAYS, "ann_days": ANN_DAYS, "bootstrap": f"區塊自助法、{BOOT_N} 次、90% 區間"},
                      "positioning": POSITIONING,
+                     # 先.八十一-16：先.八十-12（10/12）起的計算口徑，前台「跟 0050 比」頁固定顯示這一行
+                     "method_note": "口徑（10/12 起）：各線用還原權息收盤；0050 灰線同樣含息（還原權息收盤）；模擬帳戶的現金與定存按一個月定存利率計息；建倉已扣手續費",
                      "disclaimer": ""},
             "lines": lines}
 

@@ -19319,7 +19319,7 @@ C. 驗收
 - [x] **先.八十一-13 雜項：假日表 2027＋讀官方日曆檔；時鐘初始化順序；「全市場前 99%」改直覺說法；ADR 溢價改 quotes_all_tw；自選股卡紅線；兩個 404 不請求**（互動視窗執行）〔2027 假日表＋TWSE/NYSE 官方日曆檔；時鐘 TDZ 修正；最差 N%；ADR 4/4；紅線；選用檔 404 不重打；冒煙 #120〕
 - [x] **先.八十一-14 過期資料逐一查（coverage／signal_status／dependency_status／supply_watchlist／進出口／工業生產），修好或 App 標資料月份與原因**（互動視窗執行）〔coverage/signal_status 正常；dependency_status 根因＝排程不 commit，已修並落地；supply 內容未變加註；進出口/工業生產標落後月數與原因；冒煙 #122〕
 - [x] **先.八十一-15 冒煙不留殘檔（_supply_tab.png、.pw_pids/ 改暫存目錄）；smoke_test 支援 executablePath 環境變數**（互動視窗執行）〔截圖與 PID 檔改系統暫存目錄、舊殘檔已刪、DevQueue 清理同步；ALPHA_PW_EXECUTABLE 指定瀏覽器；冒煙 #123〕
-- [ ] **先.八十一-16 研究：「跟 0050 比」加口徑說明一行；紙上 B／C／D 建倉日記錄「10/11 事後決定、用 10/8 收盤」；禁止倒填建倉日寫進 MARATHON_PROTOCOL**（互動視窗執行）
+- [x] **先.八十一-16 研究：「跟 0050 比」加口徑說明一行；紙上 B／C／D 建倉日記錄「10/11 事後決定、用 10/8 收盤」；禁止倒填建倉日寫進 MARATHON_PROTOCOL**（互動視窗執行）〔meta.method_note 口徑一行；B/C/D inception_note 倒填紀錄；MARATHON_PROTOCOL §9 禁止倒填；冒煙 #124〕
 - [ ] **先.八十一-17 研究（事前登記、只跑一次）：可加槓桿波動管理曝險（0.5–1.5 倍，Moreira & Muir）＋同平均曝險隨機對照＋1990–2003 台股生存檢驗；判準先 commit**（互動視窗執行）
 - [ ] **先.八十一-18 （補件，來源：先.八十一-9／10 自身驗收缺口）market.yml 下一班實跑驗證：by_code／scores*_list／industry_flow／futures_institutional 都由排程落地（Actions log＋commit 證據）；量測 by_code 每班改動檔數與 repo 增量，超過每日 20MB 改分桶或降頻**（互動視窗執行）
 - [ ] **先.八十一-19 （補件，來源：先.八十一-9 量測）搜尋名稱清單改 repo 為主：台股以 data/company_info.json 為主、FinMind TaiwanStockInfo（約 490KB）只補充；美股名稱同理找 repo 來源；附搜尋首次開啟前後下載量**（互動視窗執行）
