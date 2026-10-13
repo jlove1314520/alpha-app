@@ -138,9 +138,12 @@ def _launch() -> int:
 
 
 def _commit(paths: list[str], msg: str) -> str:
-    got = False
+    got, tok = False, None
     try:
-        got = subprocess.run([sys.executable, str(LOCK_PY), "acquire"], cwd=ROOT, capture_output=True, timeout=60).returncode == 0
+        r = subprocess.run([sys.executable, str(LOCK_PY), "acquire"], cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
+        got = r.returncode == 0
+        m = re.search(r"token=(\w+)", r.stdout or "")  # 先.八十一-34：持有者憑證
+        tok = m.group(1) if m else None
     except Exception:  # noqa: BLE001
         pass
     try:
@@ -153,7 +156,7 @@ def _commit(paths: list[str], msg: str) -> str:
         return "已 push" if g("push").returncode == 0 else "push 失敗"
     finally:
         if got:
-            subprocess.run([sys.executable, str(LOCK_PY), "release"], cwd=ROOT, capture_output=True, timeout=60)
+            subprocess.run([sys.executable, str(LOCK_PY), "release", *(["--token", tok] if tok else [])], cwd=ROOT, capture_output=True, timeout=60)
 
 
 def reopen_queue_item(summary: str) -> bool:

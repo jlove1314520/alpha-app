@@ -4203,6 +4203,19 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { mcErrs.push(`測試本身出錯：${e.message || e}`); }
   record("128. 營收圖月底股價 repo 為主、FinMind 只補缺月並寫明失敗原因（先.八十一-22）", mcErrs.length === 0, mcErrs.join("; "));
 
+  // 129.【2026-10-13 先.八十一-34】git_op_lock 持有者憑證：錯 token 的 release 不得刪別人的鎖（scripts/selftest_git_op_lock.py 六項）。
+  const lockErrs = [];
+  try {
+    const { execFileSync } = await import("node:child_process");
+    const fsl = await import("node:fs");
+    const py = fsl.existsSync("C:/Program Files/Python313/python.exe") ? "C:/Program Files/Python313/python.exe" : "python";
+    let out = "";
+    try { out = execFileSync(py, ["scripts/selftest_git_op_lock.py"], { encoding: "utf8", env: { ...process.env, PYTHONIOENCODING: "utf-8" }, timeout: 60000 }); }
+    catch (e) { out = String(e.stdout || "") + String(e.stderr || ""); }
+    if (!/合計 6 項，失敗 0/.test(out)) lockErrs.push(out.split("\n").filter(l => /FAIL|Error/.test(l)).slice(0, 3).join(" | ") || out.slice(-200));
+  } catch (e) { lockErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("129. git_op_lock 持有者憑證：錯 token 不刪鎖、對 token 才刪、舊用法相容（先.八十一-34）", lockErrs.length === 0, lockErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4231,7 +4244,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

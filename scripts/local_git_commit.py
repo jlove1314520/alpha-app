@@ -13,6 +13,7 @@ detached HEAD、push 全失敗。現在：①開始前若 repo 已在 rebase 中
 """
 from __future__ import annotations
 
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -34,8 +35,11 @@ def commit_paths(paths: list[str], msg: str, drop_on_conflict: bool = False) -> 
     if rebase_in_progress():
         return "repo 正在 rebase 中（別的程序留下的），本輪不動，留給人工或下一輪"
     try:
-        if subprocess.run([sys.executable, str(LOCK), "acquire"], cwd=ROOT, capture_output=True, timeout=60).returncode != 0:
+        r = subprocess.run([sys.executable, str(LOCK), "acquire"], cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
+        if r.returncode != 0:
             return "鎖被其他排程持有，本輪跳過"
+        m = re.search(r"token=(\w+)", r.stdout or "")  # 先.八十一-34：持有者憑證，release 時帶回
+        tok = m.group(1) if m else None
     except Exception as e:  # noqa: BLE001
         return f"取鎖失敗（{type(e).__name__}），本輪跳過"
     try:
@@ -72,7 +76,7 @@ def commit_paths(paths: list[str], msg: str, drop_on_conflict: bool = False) -> 
         return f"提交流程失敗（{type(e).__name__}: {e}）"
     finally:
         try:
-            subprocess.run([sys.executable, str(LOCK), "release"], cwd=ROOT, capture_output=True, timeout=60)
+            subprocess.run([sys.executable, str(LOCK), "release", *(["--token", tok] if tok else [])], cwd=ROOT, capture_output=True, timeout=60)
         except Exception:  # noqa: BLE001
             pass
 

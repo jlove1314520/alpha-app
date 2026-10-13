@@ -27,11 +27,21 @@ commit->pull->push 這段收尾，直接消除「兩個 autostash 同時發生�
       # always exit 0（釋放一把已經是空的鎖不是錯誤）
 
 鎖檔（`.git_op.lock`，跟 `.marathon.lock` 同一層、同樣 gitignored，
-是暫態本機狀態不是專案歷史）格式：`pid|unix_ts`。
+是暫態本機狀態不是專案歷史）格式：`pid|unix_ts|token`（舊格式 `pid|unix_ts` 仍可讀）。
+
+2026-10-13 先.八十一-34：持有者憑證。事故：互動視窗的提交指令在 acquire 失敗後仍執行 release，把本機新聞補班
+正在持有的鎖刪掉（acquire 與 release 是兩個不同的 python 行程，無法用 pid 判斷持有者）。現在：
+    python research/git_op_lock.py acquire
+      # exit 0 + "LOCK_ACQUIRED token=<16位hex>"；呼叫端要記下 token
+    python research/git_op_lock.py release --token <token>
+      # token 相符才刪鎖；不符（鎖已被別人持有）印 "LOCK_NOT_OWNER" 不刪，exit 0
+    python research/git_op_lock.py release
+      # 舊用法（相容期）：照舊刪鎖，但記一行到 research/git_op_lock.log，方便找出還沒改的呼叫端
 """
 from __future__ import annotations
 
 import os
+import secrets
 import sys
 import time
 from pathlib import Path
@@ -40,14 +50,23 @@ STALE_MINUTES = 5  # 見模組docstring：git commit->pull->push正常應在數�
 # 5分鐘是遠高於正常耗時的保守上限，卡超過代表持鎖行程已死，不是還在正常工作。
 
 LOCK_PATH = Path(__file__).parent / ".git_op.lock"  # gitignored，暫態本機狀態
+LEGACY_LOG = Path(__file__).parent / "git_op_lock.log"  # 相容期：沒帶 token 的 release 記在這裡
 
 
 def _read_lock() -> tuple[str, float]:
     try:
-        pid_str, ts_str = LOCK_PATH.read_text(encoding="utf-8").strip().split("|")
-        return pid_str, float(ts_str)
+        parts = LOCK_PATH.read_text(encoding="utf-8").strip().split("|")
+        return parts[0], float(parts[1])
     except (ValueError, IndexError, OSError):
         return "unknown", 0.0
+
+
+def _lock_token() -> str | None:
+    try:
+        parts = LOCK_PATH.read_text(encoding="utf-8").strip().split("|")
+        return parts[2] if len(parts) > 2 else None
+    except OSError:
+        return None
 
 
 def acquire() -> bool:
@@ -58,12 +77,25 @@ def acquire() -> bool:
             print(f"LOCK_HELD by {pid_str} since {ts} ({age_minutes:.1f} min ago)")
             return False
         print(f"LOCK_STALE (held by {pid_str}, {age_minutes:.1f} min old) -- recovering")
-    LOCK_PATH.write_text(f"{os.getpid()}|{time.time()}", encoding="utf-8")
-    print("LOCK_ACQUIRED")
+    token = secrets.token_hex(8)
+    LOCK_PATH.write_text(f"{os.getpid()}|{time.time()}|{token}", encoding="utf-8")
+    print(f"LOCK_ACQUIRED token={token}")
     return True
 
 
-def release() -> None:
+def release(token: str | None = None) -> None:
+    if token is not None:
+        held = _lock_token()
+        if LOCK_PATH.exists() and held is not None and held != token:
+            print("LOCK_NOT_OWNER（鎖目前由別人持有，不刪）")
+            return
+    else:
+        try:
+            if LOCK_PATH.exists():
+                with LEGACY_LOG.open("a", encoding="utf-8") as f:
+                    f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} legacy release（未帶 token）ppid={os.getppid()} argv0={sys.argv[0]}" + "\n")
+        except OSError:
+            pass
     try:
         LOCK_PATH.unlink()
     except FileNotFoundError:
@@ -76,7 +108,8 @@ if __name__ == "__main__":
     if cmd == "acquire":
         sys.exit(0 if acquire() else 1)
     elif cmd == "release":
-        release()
+        tok = sys.argv[sys.argv.index("--token") + 1] if "--token" in sys.argv and sys.argv.index("--token") + 1 < len(sys.argv) else None
+        release(tok)
         sys.exit(0)
     else:
         print("usage: python git_op_lock.py [acquire|release]")

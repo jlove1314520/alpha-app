@@ -1,3 +1,39 @@
+## 2026-10-13 11:32（互動視窗）先.八十一-34 git_op_lock 持有者憑證：錯 token 不得刪別人的鎖
+
+### 2026-10-13 11:35 先.八十一-34 git_op_lock 持有者憑證（CC）
+
+**事故**（2026-10-13 11:1x，照實記錄）：互動視窗補件時用的提交指令是「acquire && commit && push; release」。acquire 因本機新聞補班（PID 427196）持有鎖而失敗，但 `;` 之後的 release 照樣執行，把別人正在持有的鎖刪掉了。那一輪新聞補班當時正在 git 操作中；之後它照常完成提交（22173544d），沒有造成衝突或資料損失。根因有兩個：
+1. 我的指令寫錯。
+2. `git_op_lock.py release` 不檢查持有者。acquire 與 release 是兩個不同的 python 行程，無法用 pid 判斷。
+
+**修正**
+- `research/git_op_lock.py`：
+  - acquire 產生 16 位隨機 token 寫進鎖檔（格式 `pid|ts|token`，舊格式仍可讀），印 `LOCK_ACQUIRED token=…`。
+  - `release --token X` 只有 token 相符才刪；不符印 `LOCK_NOT_OWNER` 不刪。
+  - 不帶 token 的舊用法相容期照舊刪，但記一行到 `research/git_op_lock.log`（已加入 .gitignore），方便找出還沒改的呼叫端。
+- 改用 token 的呼叫端（release 帶回 acquire 拿到的 token）：
+  - `scripts/local_git_commit.py`
+  - `research/nightly_six_runner.py`
+  - `scripts/long_job_progress_heartbeat.py`
+  - `scripts/orphan_process_scan.py`
+  - repo 外三支 wrapper：`C:\alpha\run-dev-queue-cycle.ps1`、`run-hypothesis-queue-cycle.ps1`、`run-marathon-cycle.ps1`（保留 BOM，PowerShell 語法解析前後都通過）
+  - 互動視窗自用的提交小工具
+- 盤點時順帶發現：`nightly_six_runner.py` 取鎖失敗時仍照常 commit／push（沒有鎖也做）。這是既有設計，本項未改，列為已知。
+
+**驗證**：
+- 新增 `scripts/selftest_git_op_lock.py`，共 6 項全 PASS：
+  - 拿到 token
+  - 第二次 acquire 被擋
+  - 錯 token 不刪鎖
+  - 對 token 才刪
+  - 不帶 token 相容並記 log
+  - 舊格式鎖檔可刪
+- 冒煙新增 #129。
+- `selftest_local_heartbeats.py` 12/12。
+- 全套冒煙 2026/10/13 11:31:43 全部通過。
+
+**影響檔案**：research/git_op_lock.py、scripts/local_git_commit.py、research/nightly_six_runner.py、scripts/long_job_progress_heartbeat.py、scripts/orphan_process_scan.py、scripts/selftest_git_op_lock.py、scripts/smoke_test.mjs、.gitignore；repo 外：三支 run-*-cycle.ps1
+
 ## 2026-10-13 11:24（互動視窗）先.八十一-22 營收圖月底股價改 repo 為主，FinMind 只補缺月
 
 ### 2026-10-13 11:27 先.八十一-22 營收圖月底股價改 repo 為主（CC）

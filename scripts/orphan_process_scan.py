@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
@@ -36,8 +37,10 @@ def _commit_push(msg: str) -> str:
         r = subprocess.run([sys.executable, str(LOCK_PY), "acquire"], cwd=ROOT, capture_output=True, text=True,
                            encoding="utf-8", errors="replace", timeout=60)
         got = r.returncode == 0
+        m = re.search(r"token=(\w+)", r.stdout or "")  # 先.八十一-34：持有者憑證
+        tok = m.group(1) if m else None
     except Exception:  # noqa: BLE001
-        got = False
+        got, tok = False, None
     try:
         _git("add", OUT_REL)
         c = _git("commit", "-o", OUT_REL, "-m", msg)
@@ -51,7 +54,7 @@ def _commit_push(msg: str) -> str:
     finally:
         if got:
             try:
-                subprocess.run([sys.executable, str(LOCK_PY), "release"], cwd=ROOT, capture_output=True, timeout=60)
+                subprocess.run([sys.executable, str(LOCK_PY), "release", *(["--token", tok] if tok else [])], cwd=ROOT, capture_output=True, timeout=60)
             except Exception:  # noqa: BLE001
                 pass
 
