@@ -19638,7 +19638,7 @@ B. 權證研究線（先查資料，不登記試驗）：
 C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查證照做，併入本條。
 每項完成標 - [x]，在 research/PROGRESS_HEARTBEAT.jsonl append item=先.九十二-N。B-1 與 A 的墓園回補可由 DevQueue 執行。
 
-- [ ] **先.九十二-A1 新規則寫進 research/MARATHON_PROTOCOL.md 與 CLAUDE.md 七之三：FAIL／VIOLATES_SURVIVAL／不可行結論必附 ≥3 個變形方向（反向、換工具、換時機或條件、換交易對手；各寫機制假設、所需資料、是否免費、用哪段沒碰過的資料驗證）；變形不得在原資料調參重測，只能新資料／新市場／新工具事前登記單發並計入 N**（互動視窗執行；動 CLAUDE.md）
+- [x] **先.九十二-A1 新規則寫進 research/MARATHON_PROTOCOL.md 與 CLAUDE.md 七之三：FAIL／VIOLATES_SURVIVAL／不可行結論必附 ≥3 個變形方向（反向、換工具、換時機或條件、換交易對手；各寫機制假設、所需資料、是否免費、用哪段沒碰過的資料驗證）；變形不得在原資料調參重測，只能新資料／新市場／新工具事前登記單發並計入 N**（互動視窗執行；動 CLAUDE.md）〔CLAUDE.md 七之三＋MARATHON_PROTOCOL §11；#442 補第一份變形方向〕
 - [ ] **先.九十二-A2 墓園 C 類 105 條回補「變形方向」欄位，每次做 10 條（做完 10 條就提交、本條維持 - [ ] 直到 105 條全補），寫在 research/GRAVEYARD_AUTOPSY.md C 類表**（DevQueue 可執行）
 - [ ] **先.九十二-B1 三來源查證台股權證免費官方資料：每日收盤價、基本資料（標的、履約價、行使比例、到期日、發行券商）、可追溯起點；目標是能用 Black-Scholes 反推每檔每天隱含波動；結果寫 research/WARRANT_DATA_SURVEY.md；只查資料、不登記試驗**（DevQueue 可執行）
 - [ ] **先.九十二-B2 依 B1 結果寫 PREREG 草稿：①低隱含波動買進 ②重大事件前買進 ③發行券商定價比較（④方向訊號放大暫緩）；每份含買賣價差、手續費、證交稅 0.1%、時間價值流失、降隱波風險；列 AWAITING_REVIEW，不自行登記**（互動視窗執行；時間閘：先.九十二-B1 之後）
