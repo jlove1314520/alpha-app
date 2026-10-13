@@ -19560,7 +19560,7 @@ C. 驗收
 6. 每項完成標 - [x]，在 research/PROGRESS_HEARTBEAT.jsonl append item=先.八十九-N。
 
 - [x] **先.八十九-1 認定正確目標＝私人群組邀請連結（第 3 題誤填 @Shioaji 造成 resolve_target ValueError）**（互動視窗執行；動憑證設定）〔目標認定為私人群組邀請連結〕
-- [ ] **先.八十九-2 用 write_env_key 只改本機 .env 的 TELEGRAM_TARGET_CHAT 為邀請連結；不讀出、不印出、不提交 .env 其他值與 session**（互動視窗執行；動憑證設定）
+- [x] **先.八十九-2 用 write_env_key 只改本機 .env 的 TELEGRAM_TARGET_CHAT 為邀請連結；不讀出、不印出、不提交 .env 其他值與 session**（互動視窗執行；動憑證設定）〔write_env_key 只改 TELEGRAM_TARGET_CHAT；未印出其他值〕
 - [ ] **先.八十九-3 在總司令看得到的視窗重跑登入流程解析邀請連結、寫入 TELEGRAM_TARGET_CHAT_ID；若又問手機或驗證碼就停下回報、不代填**（互動視窗執行；動憑證設定）
 - [ ] **先.八十九-4 成功後手動跑一次只讀擷取：心跳寫入、新訊息落地本機 telegram_export（不進 repo）、ReadOnlyClient 沒有任何寫入**（互動視窗執行；動憑證設定）
 - [ ] **先.八十九-5 設定工具加「只改目標群組」選項：已連線時不再問 api_id／api_hash，只問群組**（互動視窗執行；動憑證設定）

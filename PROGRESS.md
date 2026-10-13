@@ -1,3 +1,7 @@
+## 2026-10-13 23:30（互動視窗）先.八十九-2 本機 .env 只改目標群組一鍵
+
+- 用 `telegram_reader.write_env_key` 只改本機 .env 的 TELEGRAM_TARGET_CHAT；只核對「等於邀請連結：True」，沒有印出其他鍵的值；.env 已被 git 忽略、未提交。
+
 ## 2026-10-13 23:30（互動視窗）先.八十九-1 Telegram 目標改用邀請連結
 
 - 第 3 題誤填 @Shioaji 是公開帳號名稱，不是群組，resolve_target 因此報 ValueError。正確目標改用私人群組邀請連結。冒煙沿用本輪 142/142（未動 App）。
