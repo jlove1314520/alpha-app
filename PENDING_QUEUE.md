@@ -19338,4 +19338,4 @@ C. 驗收
 - [ ] **先.八十一-32 （補件，來源：先.八十一-31）常駐 alpha_live_server 重啟以載入 auto_ledger_view 讀檔重試新碼：非交易時段、照 CLAUDE.md 七之二四步驗證（重啟→比對 build sha→OPTIONS 預檢→stale_process=false），附輸出；不切模式、不送單**（互動視窗執行）
 - [ ] **先.八十一-33 （補件，來源：BACKLOG 2026-09-15 登記待辦第 1 項）美股篩選（成交量／漲跌幅／市值門檻）：動工前三來源查證資料源與頻率上限（yfinance 批次／IBKR Scanner 是否受 paper 帳戶限制）寫進 CLAUDE.md；只做描述性篩選、標回測資料品質，不做選股訊號**（互動視窗執行）
 - [x] **先.八十一-34 （補件，來源：2026-10-13 11:1x 事故——互動視窗的提交指令在取鎖失敗後仍執行 release，放掉了本機新聞補班持有的 git_op_lock）git_op_lock 加持有者憑證：acquire 回傳 token、release 須帶相同 token 才刪鎖（舊呼叫端相容期），盤點所有呼叫端（三支 wrapper、local_git_commit、DevQueue）改用；附自測**（互動視窗執行）〔acquire 發 token、release --token 才刪（舊用法相容並記 log）；四支 python 呼叫端＋三支 wrapper＋自用工具改用；自測 6/6、冒煙 #129〕
-- [ ] **先.八十一-35 （補件，來源：先.八十一-34 盤點）research/nightly_six_runner.py 取 git_op_lock 失敗時仍照常 commit／push（沒有鎖也做），改成取不到鎖就等或留給下一輪，與其他呼叫端一致；附自測**（互動視窗執行）
+- [x] **先.八十一-35 （補件，來源：先.八十一-34 盤點）research/nightly_six_runner.py 取 git_op_lock 失敗時仍照常 commit／push（沒有鎖也做），改成取不到鎖就等或留給下一輪，與其他呼叫端一致；附自測**（互動視窗執行）〔取鎖改重試約 2 分鐘、拿不到就不提交留給下一輪；自測假鎖 0 次 git 呼叫；冒煙全綠〕

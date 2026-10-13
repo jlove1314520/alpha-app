@@ -19,6 +19,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -139,13 +140,20 @@ def _launch() -> int:
 
 def _commit(paths: list[str], msg: str) -> str:
     got, tok = False, None
-    try:
-        r = subprocess.run([sys.executable, str(LOCK_PY), "acquire"], cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
-        got = r.returncode == 0
-        m = re.search(r"token=(\w+)", r.stdout or "")  # 先.八十一-34：持有者憑證
-        tok = m.group(1) if m else None
-    except Exception:  # noqa: BLE001
-        pass
+    # 先.八十一-35：取不到鎖就等（最多約 2 分鐘），仍拿不到就不提交、留給下一輪——不再「沒有鎖也照做」
+    for _ in range(40):
+        try:
+            r = subprocess.run([sys.executable, str(LOCK_PY), "acquire"], cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
+            got = r.returncode == 0
+            m = re.search(r"token=(\w+)", r.stdout or "")  # 先.八十一-34：持有者憑證
+            tok = m.group(1) if m else None
+        except Exception:  # noqa: BLE001
+            got = False
+        if got:
+            break
+        time.sleep(3)
+    if not got:
+        return "git_op_lock 一直被其他排程持有（約 2 分鐘），本輪不提交，留給下一輪"
     try:
         g = lambda *a: subprocess.run(["git", *a], cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=180)  # noqa: E731
         g("add", "-f", *paths)

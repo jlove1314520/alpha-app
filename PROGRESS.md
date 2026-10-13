@@ -1,3 +1,18 @@
+## 2026-10-13 11:36（互動視窗）先.八十一-35 nightly_six_runner 取不到鎖時不再無鎖提交
+
+### 2026-10-13 11:42 先.八十一-35 nightly_six_runner 取不到 git_op_lock 時不再照常提交（CC）
+
+**問題**（先.八十一-34 盤點時發現）：`research/nightly_six_runner.py` 的 `_commit()` 取鎖失敗時仍照常 `git add／commit／pull --rebase／push`，等於沒有鎖也做，正是 git_op_lock 要防的「兩支排程同時 pull --rebase --autostash」競態。
+
+**修正**：取鎖改為最多重試 40 次、每次間隔 3 秒（約 2 分鐘），與互動視窗工具同一做法；仍拿不到就回傳「本輪不提交，留給下一輪」，不做任何 git 操作。拿到鎖時照舊帶 token 釋放（先.八十一-34）。
+
+**驗證**：
+- 自測：用永遠回「被持有」的假鎖，`_commit()` 回「留給下一輪」，且 git 呼叫次數 0。
+- py_compile 通過。
+- 全套冒煙 2026/10/13 11:36:47 全部通過。
+
+**影響檔案**：research/nightly_six_runner.py
+
 ## 2026-10-13 11:32（互動視窗）先.八十一-34 git_op_lock 持有者憑證：錯 token 不得刪別人的鎖
 
 ### 2026-10-13 11:35 先.八十一-34 git_op_lock 持有者憑證（CC）
