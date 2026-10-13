@@ -160,3 +160,36 @@
       '<div>下期：<b>'+(nx?esc(nx.date)+' '+esc(nx.time||'')+'（'+esc(AUTO_REASON_LABEL[nx.reason]||nx.reason)+'）':'讀不到交易日曆')+'</b></div>'+
       '<div style="margin-top:6px;font-size:10px;color:var(--ink-4)">滑價＝成交均價÷參考價−1（買進，正值＝買貴）；參考價＝永豐平盤參考價，標 * 者為前一交易日收盤後備。產生於 '+esc(String(rv.generated_at||'').slice(0,16).replace('T',' '))+'。唯讀；非投資建議</div>';
   }
+  // 先.八十二-9／先.八十三-5（2026-10-13）：研究成績單——試驗帳本＋墓園驗屍（A／B／C）＋樣本外對 0050。
+  // 資料檔 data/research_scorecard.json（scripts/build_research_scorecard.py，每日排程只讀既有檔重產）；結論句由資料算出，這裡只畫。
+  async function loadResearchScorecard(){
+    const el=document.getElementById('journal-research');if(!el)return;
+    try{
+      const r=await fetch('data/research_scorecard.json?t='+Date.now());
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      el.innerHTML=researchScorecardHtml(await r.json());el.dataset.loaded='1';
+    }catch(e){console.warn('[loadResearchScorecard]',e);recordGlobalError('loadResearchScorecard',e);el.textContent='讀取研究成績單失敗（'+(e&&e.message||e)+'）';el.dataset.loaded='err'}
+  }
+  function researchScorecardHtml(d){
+    const esc=_autoEsc,n=v=>v==null?'—':Number(v).toLocaleString('zh-TW',{maximumFractionDigits:2}),pp=v=>v==null?'—':(v>0?'+':'')+n(v);
+    const t=d.trials||{},a=d.autopsy||{},o=d.oos||{},c=a.counts||{},lb=a.labels||{};
+    const sec=(h,b)=>'<div style="margin-top:10px"><div style="font-weight:600;font-size:13px">'+h+'</div>'+b+'</div>';
+    let h='<div style="font-size:14px;font-weight:600;line-height:1.5">'+esc(o.conclusion||'樣本外對照讀取失敗')+'</div>';
+    h+=sec('一、測過幾種方法',t.error?'<div class="note">讀取失敗：'+esc(t.error)+'</div>':
+      '<div class="note">試驗帳本共 <b>'+n(t.count)+'</b> 筆（'+esc(t.count_rule||'')+'）。</div>'+
+      '<div class="note">'+(t.by_verdict||[]).map(([k,v])=>esc(k)+' '+n(v)).join('、')+'</div>'+
+      '<div class="note" style="color:var(--ink-3)">「通過判準」多半只過了單一關卡或屬於配置類（例：#418 股債配置），不等於贏 0050；贏不贏看第三段。</div>');
+    const rows=(a.rows||[]);
+    h+=sec('二、各自為什麼死（墓園 '+n(a.total)+' 條）',a.error?'<div class="note">讀取失敗：'+esc(a.error)+'</div>':
+      ['A','B','C'].map(k=>'<div class="note"><b>'+k+' '+esc(lb[k]||'')+'</b>：'+n(c[k])+' 條</div>').join('')+
+      '<div class="note" style="color:var(--ink-3)">其中 '+n(a.borderline)+' 條是邊界判斷。A 類要先修再重新事前登記；B 類補得到資料才開案；C 類不得調參重測。</div>'+
+      '<details style="margin-top:6px"><summary class="press" style="font-size:12px;color:var(--accent)">看全部 '+rows.length+' 條死因</summary>'+
+      rows.map(x=>'<div style="padding:5px 0;border-bottom:1px solid var(--hairline);font-size:11.5px"><b>'+esc(x.class)+(x.borderline?'（邊界）':'')+'</b> '+esc(x.name)+'<span style="color:var(--ink-4)">（'+esc(x.date)+'）</span><br>'+esc(x.why)+'</div>').join('')+'</details>');
+    const ls=(o.lines||[]).filter(x=>x.days);
+    h+=sec('三、樣本外對照 0050（上線後的真實走勢）',o.error?'<div class="note">讀取失敗：'+esc(o.error)+'</div>':
+      ls.map(x=>'<div style="padding:5px 0;border-bottom:1px solid var(--hairline);font-size:12px"><div style="display:flex;justify-content:space-between;gap:8px"><b>'+esc(x.label)+'</b><span>'+esc(x.judge)+'</span></div>'+
+        '<div style="color:var(--ink-3)">'+esc(String(x.start||'').slice(5))+'～'+esc(String(x.as_of||'').slice(5))+'（'+n(x.days)+' 個交易日）：策略 '+pp(x.ret_pct)+'%，同期 0050 '+pp(x.bench_pct)+'%，差 '+pp(x.gap_pp)+' 個百分點；最大回撤 '+n(x.mdd_pct)+'%（0050 '+n(x.bench_mdd_pct)+'%）</div></div>').join('')+
+      '<div class="note" style="color:var(--ink-3)">樣本外滿 '+n(o.min_days)+' 個交易日才拿來判斷贏輸；天數不足的領先或落後都只是暫時的。</div>');
+    h+='<div style="margin-top:8px;font-size:10px;color:var(--ink-4)">資料：試驗帳本、墓園驗屍（研究紀錄）、策略曲線；產生於 '+esc(String((d.meta||{}).generated_at||'').slice(0,16).replace('T',' '))+'；研究紀錄整理。</div>';
+    return h;
+  }
