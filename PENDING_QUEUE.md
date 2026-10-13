@@ -19616,7 +19616,7 @@ C. 驗收
 4. 只做資料整理。若有值得測的標的，寫 PREREG 草稿列入 AWAITING_REVIEW，不得自行登記。每項完成標 - [x]，在 research/PROGRESS_HEARTBEAT.jsonl append item=先.九十一-5-N。
 
 - [x] **先.九十一-5-1 權證不做（散戶只能買、站在付波動溢價一方，與 #444 方向相反）：寫進 docs 與研究成績單說明**（互動視窗執行；與 先.九十一-1 研究成績單一起改）〔docs/VOL_PREMIUM_ROUTES.md＋研究成績單四、研究說明（01830d835）〕
-- [ ] **先.九十一-5-2 掩護性買權（covered call）ETF 查證：台股與美股各列可交易標的，寫策略做法、費用率、上市日、規模、配息與稅務、上市以來對 0050／S&P 500 的報酬與最大跌幅；三來源查證；輸出 research/COVERED_CALL_ETF_SURVEY.md；只做資料整理**（DevQueue 可執行）
+- [ ] **先.九十一-5-2 掩護性買權（covered call）ETF 查證：台股與美股各列可交易標的，寫策略做法、費用率、上市日、規模、配息與稅務、上市以來對 0050／S&P 500 的報酬與最大跌幅；三來源查證；輸出 research/COVERED_CALL_ETF_SURVEY.md；只做資料整理**（DevQueue 可執行）〔進度 2026-10-14 DevQueue 20261014-053102 第 1 批：台股找到 00401A（摩根，規模 37.5 億、月配）、00406A（中信，選擇權名目 0～25%，ETFortune 規模 755.32 億待核對）兩檔主動式，寫進 research/COVERED_CALL_ETF_SURVEY.md 本文；費用率／上市日／上市以來報酬、第三檔查證、美股全部待下一批〕
 - [x] **先.九十一-5-3 查證期交所是否有比台指選擇權（每點 50 元）更小的指數選擇權商品，附官方連結；結果寫進 research/COVERED_CALL_ETF_SURVEY.md 附錄**（DevQueue 可執行）〔完成 2026-10-14 DevQueue 20261014-053102：寫進 research/COVERED_CALL_ETF_SURVEY.md 附錄 A。結論：期交所沒有小型／微型台指選擇權（只有 TXO 每點 50 元，週三／週五到期同規格）；名目金額較小的是電子 TEO、金融 TFO（每點 250 元，10/13 收盤一口約 76.0 萬／91.9 萬元，TXO 約 241.7 萬元），但標的是類股指數不是加權指數。三來源：期交所規格頁 tXO／tEO／tFO、期交所 OpenAPI AnnualTradingIndexOptions＋IndexFuturesAndOptionsMargining、網路搜尋（小型個股選擇權規劃未在官網查到，標未查證）〕
 - [ ] **先.九十一-5-4 5-2／5-3 若有值得測的標的，寫 PREREG 草稿列入 AWAITING_REVIEW（不自行登記、不送單）；沒有就在本條寫「無」**（DevQueue 可執行；先.九十一-5-2／-3 之後）
 
