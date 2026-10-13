@@ -1,3 +1,18 @@
+## 2026-10-13 16:31（互動視窗）先.八十二-13 處置股／注意股提醒推播（自選股與真錢持股）
+
+- **裁示**：總司令【先.八十二】13。自選股或真錢持股被列入處置／注意股時推播；資料照現有 disposal_flags。
+- **新程式 `scripts/disposal_alert.py`**：
+  - 讀 `data/disposal_flags.json`：Shioaji api.punish／notice，加 TWSE／TPEx 官方備援，每日 18:30 產生。
+  - 自選股：App 跨裝置同步的 `research/data/user_settings.json`（主清單＋多清單 watchlists.lists，只讀這兩個欄位），加上常駐伺服器的 `.live_watchlist.json`。
+  - 真錢持股：自動交易白名單 0050／00646／00697B，只用代號。
+  - 命中就用既有 Web Push（`research/web_push.py`）推播，例如「2330 台積電（自選股）列入處置股 10-14～10-27，20分鐘撮合」。
+  - 同一筆（類別＋代號＋起始／公告日）只推一次，狀態存 `research/data/disposal_alert_state.json`（.gitignore）。推播沒送達就不記已推，下一輪再試。
+- **接線**：`scripts/run_disposal_flags.ps1`（AlphaDisposalFlags 每日 18:30）在產生旗標檔、守門員檢查之後呼叫它。自身失敗只記 log，不擋旗標檔發布。腳本維持純 ASCII，PowerShell 語法剖析 0 錯誤。
+- **本程式不讀 VAPID 私鑰**，由 web_push 模組自己在記憶體讀；只印檔數與命中代號。
+- **實跑（試跑模式）**：自選 5 檔、持股 3 檔，目前 0 檔命中，不推播。
+- **自測**：`scripts/selftest_disposal_alert.py` 5/5 PASS（自選股處置推一次且含代號名稱期間／持股注意標「真錢持股」／同筆不重推／不相干不推／沒送達下一輪重試）。
+- 冒煙全套 137 PASS／0 FAIL。
+
 ## 2026-10-13 16:24（互動視窗）先.八十二-4 裁示③盤中台股報價本機備援（門檻 15 分鐘）
 
 - **裁示**：總司令【先.八十二】4 裁示③。照 docs/PROPOSAL_QUOTES_LOCAL_FALLBACK.md 實作：只做台股，雲端落後門檻 15 分鐘，雲端已更新就略過；附明天盤中實跑心跳證據。

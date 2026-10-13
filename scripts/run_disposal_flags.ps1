@@ -29,6 +29,11 @@ Add-Content -Path $logPath -Value ($out -join "`n") -Encoding utf8
 $g = & $pythonExe scripts\data_schema_guard.py guard --label run_disposal_flags --push $outFile 2>&1
 Add-Content -Path $logPath -Value ($g -join "`n") -Encoding utf8
 
+# xian.82-13: push an alert when a watchlist or real-money code is newly on the disposal/notice list.
+# Each listing is pushed once (state in research/data, gitignored). Self-failure only logs (rule 12).
+$al = & $pythonExe scripts\disposal_alert.py 2>&1
+Add-Content -Path $logPath -Value ($al -join "`n") -Encoding utf8
+
 git add -- $outFile 2>&1 | Out-Null
 git diff --cached --quiet -- $outFile
 if ($LASTEXITCODE -ne 1) {
