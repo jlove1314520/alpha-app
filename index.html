@@ -24,7 +24,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
      載不到時index.html::renderStockChart()自動退回既有SVG折線，不會讓個股頁空白。 -->
 <!-- 常備.開發-20（2026-10-11）：函式庫改為第一次畫K線時才載入（見 app.js ensureLwc()），不再佔首頁首次載入傳輸量。 -->
 <title>Alpha 台美股 AI 交易</title>
-<link rel="stylesheet" href="app.css?v=2026-10-13.1942">
+<link rel="stylesheet" href="app.css?v=2026-10-14.0010">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -471,6 +471,18 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" style="color:#c9524a;font-weight:600;margin-bottom:6px">⚠ 只是資料排序，還沒回測過</div>
       <div class="note" id="picks-us-meta" style="margin-bottom:6px">載入中…</div>
       <div id="picks-us-list"></div>
+    </div>
+    <!-- 2026-10-13 先.八十一-33：美股描述性篩選（成交額／漲跌幅／市值門檻）。資料 data/us_screener.json
+    （.github/scripts/build_us_screener.py：yfinance 日線一次批次＋SEC 流通股數估市值）。不排名、不是選股訊號。 -->
+    <div class="card picks-lb-only" id="us-screen-panel" style="display:none">
+      <h3>美股篩選 <span data-ui-aux style="font-size:11px;color:#c9a35a;font-weight:600">只篩資料，不是選股訊號</span></h3>
+      <div style="display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:13px;margin-bottom:6px">
+        <label>日均成交額 ≥ <input id="us-scr-dv" type="number" min="0" step="10" value="100" style="width:64px"> 百萬美元</label>
+        <label>漲跌幅 <input id="us-scr-chmin" type="number" step="0.5" placeholder="不限" style="width:56px"> ～ <input id="us-scr-chmax" type="number" step="0.5" placeholder="不限" style="width:56px"> %</label>
+        <label>市值 ≥ <input id="us-scr-cap" type="number" min="0" step="1" placeholder="不限" style="width:56px"> 十億美元</label>
+      </div>
+      <div class="note" id="us-scr-meta" style="margin-bottom:6px">載入中…</div>
+      <div id="us-scr-list"></div>
     </div>
     <div class="card picks-lb-only" id="picks-fut-panel" style="display:none">
       <h3>期貨策略訊號</h3>
@@ -1439,6 +1451,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-13.1942"></script>
+<script src="app.js?v=2026-10-14.0010"></script>
 </body>
 </html>

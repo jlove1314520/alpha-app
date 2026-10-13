@@ -231,6 +231,8 @@
     document.getElementById('picks-us-panel').style.display=mkt==='US'?'':'none';
     document.getElementById('picks-fut-panel').style.display=mkt==='FUT'?'':'none';
     if(mkt==='US')loadUsScoresV0().catch(e=>{console.warn('[loadUsScoresV0]',e);recordGlobalError('loadUsScoresV0',e)});
+    document.getElementById('us-screen-panel').style.display=mkt==='US'?'':'none';
+    if(mkt==='US')loadUsScreener().catch(e=>{console.warn('[loadUsScreener]',e);recordGlobalError('loadUsScreener',e)});
   }
   // 2026-10-11 常備.開發-17：美股評分 v0（價值/成長/品質三分項）。失敗只影響本面板。
   let US_SCORES_V0=null;
@@ -263,6 +265,46 @@
     }catch(e){
       console.warn('[loadUsScoresV0]',e);recordGlobalError('loadUsScoresV0',e);
       metaEl.textContent='美股評分 v0 載入失敗（'+(e&&e.message||e)+'）';listEl.innerHTML='';
+    }
+  }
+  // 2026-10-13 先.八十一-33：美股描述性篩選（成交額／漲跌幅／市值門檻），前端依門檻過濾 data/us_screener.json。
+  // 不排名、不是選股訊號；依日均成交額由大到小列前 50 檔。失敗只影響本面板。
+  let US_SCREENER=null;
+  function _usScrNum(id){const v=(document.getElementById(id)||{}).value;return v===''||v==null||isNaN(+v)?null:+v}
+  function usScreenFilter(rows,f){
+    return rows.filter(r=>{
+      if(r.close==null)return false;
+      if(f.dv!=null&&!(r.avg_dollar_volume_20d!=null&&r.avg_dollar_volume_20d>=f.dv*1e6))return false;
+      if(f.chmin!=null&&!(r.change_pct!=null&&r.change_pct>=f.chmin))return false;
+      if(f.chmax!=null&&!(r.change_pct!=null&&r.change_pct<=f.chmax))return false;
+      if(f.cap!=null&&!(r.market_cap_est!=null&&r.market_cap_est>=f.cap*1e9))return false;
+      return true;
+    }).sort((a,b)=>(b.avg_dollar_volume_20d||0)-(a.avg_dollar_volume_20d||0));
+  }
+  function _usBig(v,unit){if(v==null)return '—';return unit==='B'?(v/1e9).toFixed(v>=1e11?0:1)+'B':(v/1e6).toFixed(0)+'M'}
+  function renderUsScreener(){
+    const metaEl=document.getElementById('us-scr-meta'),listEl=document.getElementById('us-scr-list');
+    if(!metaEl||!listEl||!US_SCREENER)return;
+    const m=US_SCREENER.meta||{},rows=US_SCREENER.stocks||[];
+    const f={dv:_usScrNum('us-scr-dv'),chmin:_usScrNum('us-scr-chmin'),chmax:_usScrNum('us-scr-chmax'),cap:_usScrNum('us-scr-cap')};
+    const hit=usScreenFilter(rows,f);
+    metaEl.innerHTML=`資料日 ${_usEsc(m.as_of||'—')}（美東收盤）｜ 符合 <b class="num" id="us-scr-count">${hit.length}</b> / ${m.priced_count||0} 檔，依日均成交額排序、列前 50 檔<br>只把資料依門檻篩出，沒有排名、沒有回測、不是選股訊號。樣本：${_usEsc(m.universe_note||'')} 市值有值 ${m.market_cap_count||0} 檔。<details style="margin-top:3px"><summary class="sub" style="cursor:pointer">資料品質說明</summary>${(m.data_quality||[]).map(t=>'<div class="sub">・'+_usEsc(t)+'</div>').join('')}</details>`;
+    listEl.innerHTML=hit.length?hit.slice(0,50).map(r=>{
+      const ch=r.change_pct,col=ch==null?'':(ch>0?'color:var(--up,#e0524a)':ch<0?'color:var(--down,#3aa676)':'');
+      const fl=(r.flags&&r.flags.length)?`<div class="sub" style="color:#c9a35a">${_usEsc(r.flags.join('；'))}</div>`:'';
+      return `<div class="us-scr-row press" style="display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--hairline)" onclick="openStock('${_usEsc(r.code)}')"><span><b>${_usEsc(r.code)}</b> <span class="sub">${_usEsc(r.name||'')}</span><div class="sub">日均成交額 ${_usBig(r.avg_dollar_volume_20d)} ・ 市值 ${_usBig(r.market_cap_est,'B')}</div>${fl}</span><span style="text-align:right"><b class="num">${r.close==null?'—':r.close}</b><div class="sub num" style="${col}">${ch==null?'—':(ch>0?'+':'')+ch.toFixed(2)+'%'}</div></span></div>`;
+    }).join(''):'<div class="note">沒有符合門檻的股票，放寬條件再試。</div>';
+  }
+  async function loadUsScreener(){
+    const metaEl=document.getElementById('us-scr-meta'),listEl=document.getElementById('us-scr-list');
+    if(!metaEl||!listEl)return;
+    try{
+      if(!US_SCREENER){const r=await fetch('data/us_screener.json?t='+Date.now());if(!r.ok)throw new Error('HTTP '+r.status);US_SCREENER=await r.json()}
+      ['us-scr-dv','us-scr-chmin','us-scr-chmax','us-scr-cap'].forEach(id=>{const el=document.getElementById(id);if(el&&!el._bound){el._bound=1;el.addEventListener('input',()=>{try{renderUsScreener()}catch(e){console.warn('[renderUsScreener]',e);recordGlobalError('renderUsScreener',e)}})}});
+      renderUsScreener();
+    }catch(e){
+      console.warn('[loadUsScreener]',e);recordGlobalError('loadUsScreener',e);
+      metaEl.textContent='美股篩選資料載入失敗（'+(e&&e.message||e)+'）';listEl.innerHTML='';
     }
   }
   // 2026-09-05（新一.6）每個因子「為什麼這檔沒有」的真實原因。八因子現在全部有資料源

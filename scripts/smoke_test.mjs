@@ -4619,6 +4619,48 @@ async function runSmokeTest(baseUrl, headless = true) {
     luInfo = `${(out.match(/合計 \d+ 項，失敗 \d+/) || [""])[0]}；${r.c}`;
   } catch (e) { luErrs.push(`測試本身出錯：${e.message || e}`); }
   record("143. 在市名冊：官方終止上市＋疑似停止交易判定、App 無報價文字依狀態顯示（先.八十一-57）", luErrs.length === 0, luErrs.join("; ") || luInfo);
+  // 144.【2026-10-13 先.八十一-33】美股描述性篩選：選股頁切美股才顯示；預設門檻（日均成交額 ≥100 百萬美元）與改門檻後的
+  // 符合檔數＝測試端用 data/us_screener.json 獨立算出的檔數；市值門檻只留有市值且達標者；切回台股隱藏。
+  const uscErrs = [];
+  let uscInfo = "";
+  try {
+    const fsx = await import("node:fs");
+    const doc = readJsonRetry(fsx, "data/us_screener.json");
+    const rows = doc.stocks || [];
+    const expect = (dv, chmin, cap) => rows.filter(r => r.close != null
+      && (dv == null || (r.avg_dollar_volume_20d != null && r.avg_dollar_volume_20d >= dv * 1e6))
+      && (chmin == null || (r.change_pct != null && r.change_pct >= chmin))
+      && (cap == null || (r.market_cap_est != null && r.market_cap_est >= cap * 1e9))).length;
+    if (!doc.meta || !doc.meta.as_of) uscErrs.push("us_screener.json 缺 meta.as_of");
+    if ((doc.meta || {}).priced_count < 50) uscErrs.push(`有收盤檔數過少：${(doc.meta || {}).priced_count}`);
+    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+    try {
+      const p = await ctx.newPage();
+      await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+      await p.waitForTimeout(1500);
+      await p.evaluate(() => { const b = document.querySelector('nav#nav button[data-scr="picks"]'); if (b) b.click(); });
+      await p.waitForFunction(() => typeof setMarketToggle === "function" && document.querySelector("#picks-board-toggle .mtg-opt"), null, { timeout: 20000 }).catch(() => null);
+      await p.evaluate(() => setMarketToggle("picks", "US"));
+      await p.waitForFunction(() => document.getElementById("us-scr-count"), null, { timeout: 20000 }).catch(() => null);
+      const vis = () => p.evaluate(() => { const el = document.getElementById("us-screen-panel"); return !!el && el.getClientRects().length > 0 && getComputedStyle(el).display !== "none"; });
+      if (!(await vis())) uscErrs.push("美股模式下篩選卡沒顯示");
+      const count = () => p.evaluate(() => +((document.getElementById("us-scr-count") || {}).textContent || NaN));
+      const c0 = await count(), e0 = expect(100, null, null);
+      if (c0 !== e0) uscErrs.push(`預設門檻符合檔數 ${c0} ≠ 獨立計算 ${e0}`);
+      const nRows = await p.evaluate(() => document.querySelectorAll("#us-scr-list .us-scr-row").length);
+      if (nRows !== Math.min(50, e0)) uscErrs.push(`列表列數 ${nRows} ≠ min(50, ${e0})`);
+      await p.fill("#us-scr-chmin", "1");
+      await p.fill("#us-scr-cap", "100");
+      await p.waitForTimeout(200);
+      const c1 = await count(), e1 = expect(100, 1, 100);
+      if (c1 !== e1) uscErrs.push(`改門檻後符合檔數 ${c1} ≠ 獨立計算 ${e1}`);
+      await p.evaluate(() => setMarketToggle("picks", "TW"));
+      await p.waitForTimeout(200);
+      if (await vis()) uscErrs.push("切回台股後篩選卡仍顯示");
+      uscInfo = `資料日 ${doc.meta.as_of}；預設 ${c0} 檔、漲幅≥1%＋市值≥1000億 ${c1} 檔；有市值 ${doc.meta.market_cap_count}/${doc.meta.count}`;
+    } finally { await ctx.close(); }
+  } catch (e) { uscErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("144. 美股描述性篩選：只在美股模式顯示、門檻過濾檔數＝獨立計算、市值門檻只留有市值者（先.八十一-33）", uscErrs.length === 0, uscErrs.join("; ") || uscInfo);
 
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
@@ -4648,7 +4690,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

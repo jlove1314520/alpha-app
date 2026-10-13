@@ -134,6 +134,7 @@ SCHEMAS: dict[str, dict] = {
     "data/us_13f_holdings.json": _S(ts=_FETCHED, req={"filers": "dict"}),
     "data/us_financials.json": _S(req={"financials": "dict"}),
     "data/us_scores_v0.json": _S(ts=_MG, req={**_META, "stocks": "list"}),
+    "data/us_screener.json": _S(ts=_MG, req={**_META, "stocks": "list"}),
     "data/us_analyst_reco.json": _S(req={"tickers": "dict"}),
 }
 
