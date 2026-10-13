@@ -2543,6 +2543,9 @@ B31/B32/B33。
   `CERTIFICATE_VERIFY_FAILED`（對方伺服器端問題），`_get_retry()` 有正確
   重試+記錄失敗，不是這裡的 bug，但代表 TPEx 股票的 turnover/最新價量
   可能延遲一天更新。
+  **✅ 2026-10-13 先.八十一-39 查證結案**：近 15 班 market.yml（10/06～10/13）log 的 `CERTIFICATE_VERIFY_FAILED` 皆 0 次；
+  同日互動視窗對 www.tpex.org.tw（afterTrading/otc、exDailyQ）數十次請求全部正常。判定為當時對方伺服器端暫時問題，
+  目前不需比照央行／海關關閉 VERIFY_X509_STRICT；`_get_retry()` 的重試與記錄維持原樣。
 - **財報公布時段（盤前/盤後）推估失敗**：`get_earnings_dates()` 在這台
   機器持續遇到 `curl_cffi` 對 `guce.yahoo.com` 的 DNS 解析問題（環境特定，
   非程式 bug），`estimated_session` 誠實降級為 `unknown`；`next_earnings_date`
