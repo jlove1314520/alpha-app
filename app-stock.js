@@ -1265,6 +1265,8 @@
   // 其他錯誤才退回整份檔。整份檔已在記憶體就直接用。
   async function eventsForStock(code){
     if(EVENTS_CACHE&&Date.now()-EVENTS_AT<10*60*1000)return EVENTS_CACHE;
+    const idx=await eventsIndex();  // 先.八十一-11：索引裡沒有＝沒有事件，不發請求
+    if(idx&&!idx.has(String(code)))return {events:[]};
     try{
       const r=await fetch('data/events_by_code/'+encodeURIComponent(code)+'.json?t='+Math.floor(Date.now()/60000));
       if(r.status===404)return {events:[]};

@@ -2055,16 +2055,36 @@
     }
     return NEWS_CACHE;
   }
+  // 先.八十一-11：名稱＋代號（名稱依序取名稱清單／quote_lite 小檔／事件本身帶的公司名；都沒有才只顯示代號）
+  function _holdName(code,evName){
+    const n=nameOf(code);
+    const nm=(n&&n!==code)?n:((evName&&evName[code])||'');
+    return nm?`${String(nm).replace(/</g,'&lt;')} ${code}`:code;
+  }
   async function loadMyHoldingsEvents(){
     const card=document.getElementById('home-my-events-card'),el=document.getElementById('my-holdings-events');
     if(!el)return;
     try{
-      const codes=new Set(WL);  // 先.八十-6：停用 strategy_performance.json（舊前向紙上持倉），只用自選股
+      // 先.八十一-11：範圍＝自選股＋真錢持股（本機 /auto/ledger 去識別化帳本裡有成交的代號），不含研究策略／模擬持股。
+      // 真錢持股要連上電腦才讀得到；讀不到時只列自選股，並在說明寫明原因。
+      const codes=new Set(WL),realCodes=new Set();
+      let realNote='';
+      if(LIVE.configured&&LIVE.url){
+        try{
+          const lg=await loadAutoLedger();
+          ((lg&&lg.rows)||[]).forEach(r=>{if((r.filled_qty||0)>0&&/^[0-9A-Z]{4,6}$/.test(String(r.symbol||'')))realCodes.add(r.symbol)});
+        }catch(e){
+          if(_isOfflineErr(e))realNote='電腦離線，真錢持股暫未列入';
+          else{console.warn('[loadMyHoldingsEvents:ledger]',e);recordGlobalError('loadMyHoldingsEvents:ledger',e);realNote='讀取真錢帳本失敗，真錢持股暫未列入'}
+        }
+      }else realNote='未連上電腦，真錢持股暫未列入';
+      realCodes.forEach(c=>codes.add(c));
       if(!codes.size){card.hidden=true;return}
-      const [evDoc,newsDoc]=await Promise.all([loadEventsForCodes([...codes]),ensureNews()]);
-      const items=[];
+      const [evDoc,newsDoc]=await Promise.all([loadEventsForCodes([...codes]),ensureNews(),ensureQuoteLite([...codes]).catch(e=>{console.warn('[loadMyHoldingsEvents:names]',e)})]);
+      const items=[],evName={};
       (evDoc.events||[]).forEach(e=>{
         if(!codes.has(e.code))return;
+        if(e.name)evName[e.code]=e.name;
         const ts=Date.parse(e.date);
         if(!isNaN(ts))items.push({ts,dateTxt:String(e.date).slice(5),code:e.code,title:e.title,kind:e.type||'事件',url:e.url});
       });
@@ -2086,10 +2106,10 @@
         return `<div style="display:flex;gap:9px;align-items:flex-start;padding:6px 0;border-top:1px solid var(--hairline);cursor:pointer" onclick="openStock('${it.code}')">
           <span class="num" style="font-size:10px;color:var(--ink-4);min-width:32px;padding-top:2px">${it.dateTxt}</span>
           <span style="font-size:9.5px;font-weight:700;color:${c};border:1px solid ${c};border-radius:5px;padding:1px 5px;flex-shrink:0;margin-top:1px">${it.kind}</span>
-          <span style="flex:1;font-size:12px;color:var(--ink-2);line-height:1.5"><b style="color:var(--ink)">${it.code}</b> ${nameOf(it.code)||''}・${t}${it.kind==='法說會'?mopsIrLinkHtml({type:it.kind,code:it.code},true):''}</span>
+          <span style="flex:1;font-size:12px;color:var(--ink-2);line-height:1.5"><b style="color:var(--ink)">${_holdName(it.code,evName)}</b>${realCodes.has(it.code)?' <span style="font-size:9.5px;color:var(--gold)">真錢持股</span>':''}・${t}${it.kind==='法說會'?mopsIrLinkHtml({type:it.kind,code:it.code},true):''}</span>
         </div>`;
       }).join('')
-        +`<div class="note" data-ui-explain style="margin-top:8px">自選股與模擬持股共 ${codes.size} 檔、${items.length} 則事件新聞${items.length>20?'，只顯示最近20筆':''}。來源：data/events.json（MOPS重大訊息／TWSE月營收／除權息）＋data/news.json（僅已命中股票代號者，本輪查證300篇裡僅34篇有命中代號，覆蓋率有限）。點一列跳個股頁。</div>`;
+        +`<div class="note" data-ui-explain style="margin-top:8px">自選股 ${WL.length} 檔＋真錢持股 ${realCodes.size} 檔（不含研究策略／模擬持股）${realNote?'（'+realNote+'）':''}，共 ${items.length} 則事件新聞${items.length>20?'，只顯示最近20筆':''}。來源：data/events.json（MOPS重大訊息／TWSE月營收／除權息）＋data/news.json（僅已命中股票代號者，覆蓋率有限）。點一列跳個股頁。</div>`;
     }catch(e){
       console.warn('[loadMyHoldingsEvents]',e);recordGlobalError('loadMyHoldingsEvents',e);
       el.innerHTML='<div class="note">載入失敗：'+e.message+'</div>';
@@ -3918,10 +3938,24 @@
   // data/events_by_code/{代號}.json（scripts/split_events_by_code.py 由整份 events.json 切出，
   // 內容相同），不再為此下載整份 events.json（gzip 約 347KB）。404＝該代號目前沒有事件。
   // 整份檔已經在記憶體（例如先開過搜尋）就直接用整份，不重複下載。
+  // 先.八十一-11：data/events_by_code/_index.json＝目前有事件的代號清單（split_events_by_code.py 同班產生），
+  // 只對清單內代號發請求，沒事件的代號不再打出 404。索引讀不到回 null，呼叫端照舊逐檔請求（404 視為沒事件）。
+  let EVENTS_INDEX_P=null,EVENTS_INDEX_AT=0;
+  function eventsIndex(){
+    if(!EVENTS_INDEX_P||Date.now()-EVENTS_INDEX_AT>10*60*1000){
+      EVENTS_INDEX_AT=Date.now();
+      EVENTS_INDEX_P=fetch('data/events_by_code/_index.json?t='+Math.floor(Date.now()/60000))
+        .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})
+        .then(d=>new Set((d&&d.codes)||[]))
+        .catch(e=>{EVENTS_INDEX_P=null;console.warn('[eventsIndex]',e);recordGlobalError('eventsIndex',e);return null});
+    }
+    return EVENTS_INDEX_P;
+  }
   async function loadEventsForCodes(codes){
     if(EVENTS_CACHE&&Date.now()-EVENTS_AT<10*60*1000)return EVENTS_CACHE;
     const t=Math.floor(Date.now()/60000);
-    const res=await Promise.allSettled(codes.filter(c=>/^[0-9A-Za-z]{2,10}$/.test(String(c))).map(c=>
+    const idx=await eventsIndex();
+    const res=await Promise.allSettled(codes.filter(c=>/^[0-9A-Za-z]{2,10}$/.test(String(c))&&(!idx||idx.has(String(c)))).map(c=>
       fetch('data/events_by_code/'+c+'.json?t='+t).then(r=>r.ok?r.json():{events:[]})));
     const events=[];
     res.forEach(x=>{
@@ -4008,7 +4042,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-13.0936';
+  const APP_VERSION='2026-10-13.0947';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

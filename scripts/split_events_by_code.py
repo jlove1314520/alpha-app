@@ -10,6 +10,8 @@
 - 已不在 events.json 裡的代號（事件過了保留天數被移除）：不刪檔，改寫成空清單，
   否則首頁會一直顯示整份檔早已移除的舊事件。
 - 自身失敗只印警告、exit 0，不中斷 news_events.yml 的 commit 步驟（CLAUDE.md 第十二節）。
+- 先.八十一-11（2026-10-13）：另寫 data/events_by_code/_index.json（目前有事件的代號清單），App 只對清單內
+  的代號發請求——從沒有事件的代號（例如 8054、6693）不再每次開 App 打出 404。
 """
 import json
 import re
@@ -62,10 +64,15 @@ def main() -> int:
         text = _dump({"fetched_at": doc.get("fetched_at"), "source": source, "code": code, "events": evs})
         written += _write_if_changed(OUT_DIR / f"{code}.json", text)
     for p in OUT_DIR.glob("*.json"):
+        if p.stem.startswith("_"):
+            continue  # _index.json 等索引檔，不是代號
         if p.stem not in by_code:
             text = _dump({"fetched_at": doc.get("fetched_at"), "source": source, "code": p.stem, "events": []})
             emptied += _write_if_changed(p, text)
-    print(f"events 拆檔：{len(events)} 筆、{len(by_code)} 個代號，重寫 {written} 檔，清空已移除代號 {emptied} 檔")
+    _write_if_changed(OUT_DIR / "_index.json", _dump({"fetched_at": doc.get("fetched_at"), "source": source,
+                                                      "note": "目前有事件的代號（不在清單內＝沒有事件，App 不發請求）",
+                                                      "codes": sorted(by_code)}))
+    print(f"events 拆檔：{len(events)} 筆、{len(by_code)} 個代號，重寫 {written} 檔，清空已移除代號 {emptied} 檔；索引 _index.json")
     return 0
 
 

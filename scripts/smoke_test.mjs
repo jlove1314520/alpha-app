@@ -3880,6 +3880,37 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { r10Errs.push(`測試本身出錯：${e.message || e}`); }
   record("117. 個股走勢／主流題材／期貨法人以 repo 檔為主、FinMind 只補充，兩邊都失敗寫明原因（先.八十一-10）", r10Errs.length === 0, r10Errs.join("; "));
 
+  // 118.【2026-10-13 先.八十一-11】「我的持股事件」只列自選股＋真錢持股（不含研究策略持股）、顯示股名；沒事件的代號
+  // （8054、6693）不再打出 events_by_code 404；說明寫明範圍與真錢持股未列入的原因。
+  const hevErrs = [];
+  try {
+    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+    try {
+      await ctx.addInitScript(() => { try { localStorage.setItem("alpha_wl", JSON.stringify(["2330", "8054", "6693", "2317"])); localStorage.removeItem("alpha_wl_lists"); } catch (e) {} });
+      const p = await ctx.newPage();
+      const bad = [];
+      p.on("response", (r) => { if (/events_by_code\//.test(r.url()) && r.status() === 404) bad.push(r.url().replace(/\?.*$/, "")); });
+      await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+      await p.evaluate(() => { if (typeof uiLoadLazyAll === "function") uiLoadLazyAll(); });
+      await p.waitForFunction(() => { const c = document.getElementById("home-my-events-card"); const el = document.getElementById("my-holdings-events"); return c && !c.hidden && el && /不含研究策略/.test(el.textContent || ""); }, null, { timeout: 25000 }).catch(() => null);
+      const st = await p.evaluate(() => {
+        const el = document.getElementById("my-holdings-events");
+        const rows = [...(el ? el.querySelectorAll("b") : [])].map(b => b.textContent.trim());
+        return { rows, note: ((el && el.querySelector(".note")) || {}).textContent || "", hidden: document.getElementById("home-my-events-card").hidden };
+      });
+      if (st.hidden) hevErrs.push("卡片沒顯示（自選股 2330 應有事件）");
+      if (!/自選股 4 檔＋真錢持股 \d+ 檔（不含研究策略／模擬持股）/.test(st.note)) hevErrs.push(`說明沒寫明範圍：${st.note.slice(0, 90)}`);
+      if (!/真錢持股暫未列入|真錢持股 [1-9]/.test(st.note)) hevErrs.push(`沒連電腦時沒說明真錢持股未列入：${st.note.slice(0, 90)}`);
+      const r2330 = st.rows.filter(x => /2330/.test(x));
+      if (!r2330.length || !r2330.every(x => /台積電 2330/.test(x))) hevErrs.push(`2330 的列沒顯示股名：${r2330.slice(0, 2).join("、")}`);
+      if (st.rows.some(x => /^(\d{4}) \1$/.test(x))) hevErrs.push("出現「代號 代號」重複顯示");
+      if (bad.length) hevErrs.push("仍有事件檔 404：" + bad.map(u => u.replace(/^.*\//, "")).join("、"));
+      const idxOk = await p.evaluate(async () => { const s = await eventsIndex(); return !!s && s.size > 100 && !s.has("8054"); });
+      if (!idxOk) hevErrs.push("events_by_code/_index.json 沒讀到或內容不對");
+    } finally { await ctx.close(); }
+  } catch (e) { hevErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("118. 我的持股事件只列自選股＋真錢持股、顯示股名、沒事件代號不打 404（先.八十一-11）", hevErrs.length === 0, hevErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -3908,7 +3939,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
