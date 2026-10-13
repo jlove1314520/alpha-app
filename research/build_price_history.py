@@ -43,6 +43,10 @@ Rate`兩個欄位單位錯誤——未除以10/1000，查.三/修.七已在`adju
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[1] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import re
 from pathlib import Path
 
@@ -174,9 +178,9 @@ def main():
     print(f"快取涵蓋：價量 {len(codes)} 檔")
 
     payload = {"meta": {}, "prices": {}}
-    if OUT_PATH.exists():
+    if PHS.exists(OUT_PATH):
         try:
-            payload = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+            payload = PHS.load(OUT_PATH)
         except Exception:
             pass
     prices = payload.setdefault("prices", {})
@@ -212,7 +216,7 @@ def main():
         "update_price_history.py每日排程用TWSE官方TWT48U接續回溯調整新事件。"
         "merge-safe，既有較新資料不會被覆蓋。"
     )
-    OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
+    PHS.save(payload, OUT_PATH)
     print(f"寫入 {OUT_PATH}，{new_count} 檔有資料（merge前既有 {prior_count} 檔，"
           f"{backfilled} 檔補進更多天數歷史）")
 

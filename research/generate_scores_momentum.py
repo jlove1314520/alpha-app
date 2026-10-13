@@ -52,6 +52,10 @@ BACKLOG.md的B16（兩榜回測驗證）已提升為P0，回測完成、使用�
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[1] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import re
 import sys
 from datetime import datetime, timezone, timedelta
@@ -485,7 +489,7 @@ def compute_group_breadth(quotes_all: dict, industry_map: dict[str, str]) -> dic
 def build_rows() -> pd.DataFrame:
     fundamentals = _load_json(FUNDAMENTALS_PATH).get("fundamentals", {})
     stock_detail = _load_json(STOCK_DETAIL_PATH).get("stocks", {})
-    price_history = _load_json(PRICE_HISTORY_PATH).get("prices", {}) if PRICE_HISTORY_PATH.exists() else {}
+    price_history = PHS.load(PRICE_HISTORY_PATH).get("prices", {}) if PHS.exists(PRICE_HISTORY_PATH) else {}
     company_info = _load_json(COMPANY_INFO_PATH).get("companies", {}) if COMPANY_INFO_PATH.exists() else {}
     quotes_all = _load_json(QUOTES_ALL_TW_PATH).get("quotes", {}) if QUOTES_ALL_TW_PATH.exists() else {}
     market_tw = _load_json(MARKET_TW_PATH) if MARKET_TW_PATH.exists() else {}
@@ -683,7 +687,7 @@ def main():
             # 印警告後跳過整段停滯價格過濾——不是本次adj_close修正造成的，是
             # 這段程式碼從一開始就沒有存取到它需要的變數，過期價格過濾實際上
             # 從未真正執行過。
-            price_history = _load_json(PRICE_HISTORY_PATH).get("prices", {}) if PRICE_HISTORY_PATH.exists() else {}
+            price_history = PHS.load(PRICE_HISTORY_PATH).get("prices", {}) if PHS.exists(PRICE_HISTORY_PATH) else {}
             _last = {c: (rows[-1].get("date") or "") for c, rows in price_history.items() if rows}
             _latest = max((d for d in _last.values() if d), default=None)
             if _latest:

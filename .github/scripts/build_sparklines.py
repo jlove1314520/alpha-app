@@ -21,6 +21,10 @@ TPEx tpex_mainboard_quotes 全上櫃）把全市場 OHLCV append 進 `price_hist
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[2] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -32,9 +36,9 @@ SPARK_DAYS = 20
 
 
 def main() -> None:
-    if not PRICE_HISTORY_PATH.exists():
+    if not PHS.exists(PRICE_HISTORY_PATH):
         raise SystemExit(f"{PRICE_HISTORY_PATH} 不存在——要先跑 update_price_history.py")
-    doc = json.loads(PRICE_HISTORY_PATH.read_text(encoding="utf-8"))
+    doc = PHS.load(PRICE_HISTORY_PATH)
     prices = doc.get("prices") or {}
 
     # 2026-09-17（總司令裁示【稽核.四.1修正版】(a)顯示層）：先掃一輪求出「當日

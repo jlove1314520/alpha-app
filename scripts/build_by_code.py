@@ -23,6 +23,10 @@ institutional_history 220KB、sector_flow 120KB…，合計約 2.8MB）只為了
 用法：python scripts/build_by_code.py
 """
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[0] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import re
 import sys
 from pathlib import Path
@@ -118,7 +122,7 @@ def main() -> int:
     other = {n: {r.get("code"): r for r in ((_load(p) or {}).get("stocks") or [])} for n, p in OTHER_BOARDS.items()}
     company = (_load(DATA / "company_info.json") or {}).get("companies") or {}
     mclose = (_load(DATA / "monthly_close.json") or {}).get("closes") or {}  # 先.八十一-22：營收圖月底股價
-    ph = (_load(DATA / "price_history.json") or {}).get("prices") or {}
+    ph = (PHS.load(DATA / "price_history.json") if PHS.exists(DATA / "price_history.json") else {}).get("prices") or {}
     codes = set()
     for n, d in docs.items():
         for k, h in hows[n].items():

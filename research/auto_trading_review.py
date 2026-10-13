@@ -83,7 +83,7 @@ def build_review(paths: AB.Paths, day: str, now: datetime | None = None, price_d
     orders, rejects = [], []
     if price_doc is None and any(r.get("event") == "SUBMITTED" and not r.get("ref_price") for rs in by_key.values() for r in rs):
         try:
-            price_doc = AB._read_json(AB.PRICE_HISTORY) or {}   # 約 55MB，只在需要後備參考價時讀一次
+            price_doc = AB._read_json_retry(AB.PRICE_HISTORY) or {}   # 約 55MB，只在需要後備參考價時讀一次
         except Exception as e:
             print(f"[warn] 復盤：讀 price_history 失敗：{type(e).__name__}", flush=True)
             price_doc = {}

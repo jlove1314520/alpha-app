@@ -15,6 +15,10 @@
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[0] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -44,8 +48,8 @@ def main() -> int:
     stale_codes: set[str] = set()
     ph_path = ROOT / "data" / "price_history.json"
     market_latest = None
-    if ph_path.exists():
-        prices = json.loads(ph_path.read_text(encoding="utf-8")).get("prices", {})
+    if PHS.exists(ph_path):
+        prices = PHS.load(ph_path).get("prices", {})
         per_code = {}
         for code, rows in prices.items():
             if rows:

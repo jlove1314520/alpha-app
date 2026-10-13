@@ -51,6 +51,10 @@ T+5/T+20/T+60/T+120交易日，到了就查當時的收盤價+大盤指數，算
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[2] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -187,7 +191,7 @@ def main():
         print(f"{LEDGER_PATH} 沒有快照可以回填，結束")
         return
 
-    price_history = _load_json(PRICE_HISTORY_PATH).get("prices", {})
+    price_history = (PHS.load(PRICE_HISTORY_PATH) if PHS.exists(PRICE_HISTORY_PATH) else {}).get("prices", {})
     calendar_series = price_history.get(CALENDAR_PROXY_CODE)
     if not calendar_series:
         print(f"  price_history.json裡沒有{CALENDAR_PROXY_CODE}，退而求其次挑資料筆數最多的任一檔當日曆代表")

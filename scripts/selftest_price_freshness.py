@@ -4,6 +4,10 @@
 用法：python scripts/selftest_price_freshness.py（僅唯讀，網路只打官方MI_INDEX、每次間隔3秒）。
 全部通過 exit 0，否則 exit 1。"""
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[0] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import sys
 import tempfile
 import time
@@ -41,7 +45,7 @@ def latest_trading_day_via_mi_index(max_back=10):
     return None
 
 
-ph = json.load(open(ROOT / "data" / "price_history.json", encoding="utf-8"))
+ph = PHS.load(ROOT / "data" / "price_history.json")
 last_0050 = ph["prices"]["0050"][-1]["date"]
 truth = latest_trading_day_via_mi_index()
 check("0050最新日期＝MI_INDEX最近一個有資料的交易日", truth is not None and last_0050 == truth,

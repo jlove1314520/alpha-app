@@ -15,6 +15,10 @@
 用法：python scripts/build_monthly_close.py
 """
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[0] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -30,7 +34,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 def main() -> int:
     try:
-        ph = json.loads((DATA / "price_history.json").read_text(encoding="utf-8")).get("prices") or {}
+        ph = PHS.load(DATA / "price_history.json").get("prices") or {}
     except (OSError, ValueError) as e:
         print(f"[warn] 讀不到 price_history.json（{type(e).__name__}），monthly_close.json 維持原狀")
         return 0

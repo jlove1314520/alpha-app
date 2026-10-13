@@ -44,6 +44,10 @@ B20（AI質性研判，使用者規則：不計入量化總分，另闢區塊呈
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[1] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import re
 import sys
 from datetime import datetime, timezone, timedelta
@@ -158,7 +162,7 @@ def _capacity_utilization_proxy(quarters: list[dict], non_current_assets: float 
 def build_rows() -> pd.DataFrame:
     stock_detail = _load_json(STOCK_DETAIL_PATH).get("stocks", {})
     company_info = _load_json(COMPANY_INFO_PATH).get("companies", {}) if COMPANY_INFO_PATH.exists() else {}
-    price_history = _load_json(PRICE_HISTORY_PATH).get("prices", {}) if PRICE_HISTORY_PATH.exists() else {}
+    price_history = PHS.load(PRICE_HISTORY_PATH).get("prices", {}) if PHS.exists(PRICE_HISTORY_PATH) else {}
 
     non_stock_codes = {code for code, v in company_info.items() if v.get("industry") in NON_STOCK_INDUSTRIES}
     non_stock_codes |= {code for code in stock_detail if _NON_STOCK_CODE_PATTERN.match(code)}

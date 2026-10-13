@@ -1,6 +1,10 @@
 """先.二十七-一：紙.一b 模擬日期 dry-run（2026-11-02 inception、2026-11-30 月底再平衡、重跑不重複）。
 全程在沙盒目錄執行，並斷言正式紀錄檔／摘要／心跳檔的雜湊前後不變。"""
 import hashlib, json, random, subprocess, sys, tempfile
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[0] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -55,7 +59,7 @@ def rows(sb: Path):
 
 
 before = {p: h(p) for p in OFFICIAL}
-real = json.loads((ROOT / "data" / "price_history.json").read_text(encoding="utf-8"))["prices"]
+real = PHS.load(ROOT / "data" / "price_history.json")["prices"]
 with tempfile.TemporaryDirectory() as td:
     td = Path(td)
     sb = td / "sb"

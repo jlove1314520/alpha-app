@@ -7,6 +7,10 @@
 """
 import copy
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[0] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import sys
 from pathlib import Path
 
@@ -29,7 +33,7 @@ def _load_ph(tries=4):
     import time
     for i in range(tries):
         try:
-            return json.loads(B.PH.read_text(encoding="utf-8"))["prices"]
+            return PHS.load(B.PH)["prices"]
         except (FileNotFoundError, json.JSONDecodeError, UnicodeDecodeError, PermissionError):
             if i == tries - 1:
                 raise

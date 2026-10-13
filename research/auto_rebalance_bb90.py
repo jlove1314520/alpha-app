@@ -13,6 +13,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[1] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import math
 import os
 import re
@@ -142,7 +146,7 @@ def _read_json_retry(p: Path, tries: int = 4, wait: float = 2.0):
     行為與 _read_json 相同（呼叫端照舊把 None 當缺資料、拒單）。只用在 price_history，狀態檔照舊用 _read_json（不存在是正常的）。"""
     for i in range(tries):
         try:
-            return json.loads(p.read_text(encoding="utf-8"))
+            return PHS.load(p)  # 先.八十二-1：單檔不存在就讀拆檔資料夾
         except (FileNotFoundError, json.JSONDecodeError, UnicodeDecodeError, PermissionError):
             if i < tries - 1:
                 time.sleep(wait)

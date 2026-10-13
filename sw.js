@@ -9,7 +9,7 @@
    ——完全不呼叫 respondWith()，讓瀏覽器照平常方式直接打網路，成功拿新資料、
    失敗就是網路錯誤，由 App 的 fetch 呼叫端（index.html 的 fm()）自己顯示
    「連線失敗，請重試」，不會被這裡默默塞舊資料進去。 */
-const CACHE = 'alpha-v2026-10-13.1529'; // 2026-08-28起改用時間戳格式，由.git/hooks/pre-commit在每次commit時自動改寫
+const CACHE = 'alpha-v2026-10-13.1603'; // 2026-08-28起改用時間戳格式，由.git/hooks/pre-commit在每次commit時自動改寫
 // 2026-10-11 常備.開發-20：index.html 的 CSS／JS 拆成 app.css／app.js，一併列為外殼，離線仍可開啟。
 // index.html 以 app.css?v=…／app.js?v=… 引用；isShellRequest 只比對路徑（不含查詢字串），
 // 離線回退用 ignoreSearch 讓安裝時預快取的無查詢字串版本也對得上。
@@ -28,7 +28,7 @@ const SHELL_URLS = ['./', './index.html', './app.css', './app.js', './app-shared
 //   沒存過→照常打網路並存起來。cache:'no-store'／'reload' 的請求（檢查、測試）照舊直通網路。
 //   排除：price_history.json（55MB，App 不讀）。scores*.json、FinMind 等其他請求照舊不攔截。
 const DATA_CACHE = 'alpha-data-v1';  // 與外殼版本無關：換版不清掉資料，讓第二次開永遠有東西先顯示
-const DATA_EXCLUDE = /\/data\/price_history\.json$/;
+const DATA_EXCLUDE = /\/data\/price_history(\.json$|\/)/;  // 先.八十二-1：拆檔資料夾也不進快取
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE).then(c =>

@@ -26,7 +26,7 @@ def finmind_rows(code):
 
 
 def main():
-    px = {c: list(rows) for c, rows in ((A._read_json(A.PRICE_HISTORY) or {}).get("prices") or {}).items()}
+    px = {c: list(rows) for c, rows in ((A._read_json_retry(A.PRICE_HISTORY) or {}).get("prices") or {}).items()}
     used_fm = []
     for c in A.WHITELIST:
         have = {r["date"] for r in px.get(c, [])}

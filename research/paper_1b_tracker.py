@@ -36,6 +36,10 @@
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[1] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -85,7 +89,7 @@ def _targets() -> dict:
 
 
 def _load_prices() -> dict:
-    d = json.loads(PRICE_HISTORY_PATH.read_text(encoding="utf-8"))
+    d = PHS.load(PRICE_HISTORY_PATH)
     return d.get("prices") or {}
 
 

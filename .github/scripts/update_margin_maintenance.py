@@ -35,6 +35,10 @@ fetch_institutional_aggregate()` 的既有慣例）。**FinMind 呼叫已完全�
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[2] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -267,7 +271,7 @@ def closes_from_price_history(day: str) -> dict[str, float]:
     """price_history.json 裡指定日期的逐股收盤（本 repo 每日管線產物，TWSE STOCK_DAY_ALL＋TPEx 衍生）。
     只在 STOCK_DAY_ALL 日期與融資日期不同時拿來補同一天的收盤，讀不到回空 dict。"""
     try:
-        ph = json.loads((REPO_ROOT / "data" / "price_history.json").read_text(encoding="utf-8")).get("prices") or {}
+        ph = PHS.load(REPO_ROOT / "data" / "price_history.json").get("prices") or {}
     except Exception as e:
         print(f"讀 price_history.json 失敗：{type(e).__name__}")
         return {}

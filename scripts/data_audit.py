@@ -44,6 +44,10 @@ Cybex 第 448 輪的教訓是「稽核自己重播引擎邏輯，再拿重播結
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[0] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import re
 import ssl
 import sys
@@ -754,7 +758,7 @@ def main():
     loc = {
         "quotes_all": (load_json(DATA / "quotes_all_tw.json") or {}).get("quotes", {}),
         "quotes_tw": (load_json(DATA / "quotes_tw.json") or {}).get("quotes", {}),
-        "price_hist": (load_json(DATA / "price_history.json") or {}).get("prices", {}),
+        "price_hist": (PHS.load(DATA / "price_history.json") if PHS.exists(DATA / "price_history.json") else {}).get("prices", {}),
         "sparks": (load_json(DATA / "sparklines.json") or {}).get("sparklines", {}),
         # 2026-09-17（稽核.四.1修正版(b)）：sparklines.json新增的stale_dates，
         # 供_sparklines_close()判斷該代號的走勢線最後一點是不是落後日期。

@@ -37,6 +37,10 @@ volume_breakout/new_high_breakout/volume_price_coordination）至少要
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[1] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import re
 import time
 from datetime import datetime, timezone
@@ -225,7 +229,7 @@ def target_codes() -> list[str]:
     2026年新資料，列數過關但視窗其實充滿缺口，算出來的因子是垃圾數字
     （實測創新高因子算出+375%）。改成「列數不足 OR 最近60列有日曆缺口」
     都算需要回補。"""
-    payload = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+    payload = PHS.load(OUT_PATH)
     prices = payload.get("prices", {})
 
     fund = json.loads(FUNDAMENTALS_PATH.read_text(encoding="utf-8")).get("fundamentals", {}) if FUNDAMENTALS_PATH.exists() else {}
@@ -264,11 +268,11 @@ def merge_backfill(existing: list[dict] | None, backfill: list[dict]) -> list[di
 
 
 def main():
-    if not OUT_PATH.exists():
+    if not PHS.exists(OUT_PATH):
         print(f"錯誤：{OUT_PATH} 不存在")
         raise SystemExit(1)
 
-    payload = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+    payload = PHS.load(OUT_PATH)
     prices = payload.setdefault("prices", {})
     prior_count = len(prices)
 
@@ -334,7 +338,7 @@ def main():
         f"失敗（配額/無資料）、{skipped_no_gain}檔查到資料但沒有新增天數"
         + (f"、{blocked_skip}檔因偵測到FinMind進入封鎖冷卻而中止未處理（留待下次）。" if blocked_skip else "。")
     )
-    OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
+    PHS.save(payload, OUT_PATH)
     print(f"寫入 {OUT_PATH}：目標{len(codes)}檔，成功補進{backfilled}檔、失敗{failed}檔、無增益{skipped_no_gain}檔")
 
 

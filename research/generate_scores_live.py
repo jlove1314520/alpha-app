@@ -85,6 +85,10 @@ None。改讀`research/build_company_info.py`一次性建置的`data/company_inf
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[1] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import re
 import sys
 from datetime import datetime, timezone, timedelta
@@ -250,10 +254,10 @@ def _chips_signal(institutional: dict | None) -> float | None:
 
 
 def _load_price_history() -> dict:
-    if not PRICE_HISTORY_PATH.exists():
+    if not PHS.exists(PRICE_HISTORY_PATH):
         return {}
     try:
-        return _load_json(PRICE_HISTORY_PATH).get("prices", {})
+        return PHS.load(PRICE_HISTORY_PATH).get("prices", {})
     except Exception:
         return {}
 
@@ -311,9 +315,9 @@ def build_rows() -> pd.DataFrame:
     fundamentals = _load_json(FUNDAMENTALS_PATH).get("fundamentals", {})
     stock_detail = _load_json(STOCK_DETAIL_PATH).get("stocks", {})
     price_history = {}
-    if PRICE_HISTORY_PATH.exists():
+    if PHS.exists(PRICE_HISTORY_PATH):
         try:
-            price_history = _load_json(PRICE_HISTORY_PATH).get("prices", {})
+            price_history = PHS.load(PRICE_HISTORY_PATH).get("prices", {})
         except Exception:
             price_history = {}
     # 2026-08-27修正（真bug，題材動能榜開發時交叉測試才發現）：原本沒有過濾

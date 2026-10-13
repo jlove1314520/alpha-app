@@ -17,6 +17,10 @@
 用法：python scripts/backfill_price_history_gaps.py [--dry-run] [--all]（排程每輪最多補 10 天；--all 一次補完，僅互動視窗手動用）
 """
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[0] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import statistics
 import sys
 import time
@@ -155,7 +159,7 @@ def adj_factor(rows: list, d: str, events: list) -> float:
 
 
 def main(dry: bool) -> int:
-    doc = json.loads(PH.read_text(encoding="utf-8"))
+    doc = PHS.load(PH)
     prices = doc["prices"]
     gaps, counts, med = find_gaps(prices)
     print(f"開市日中位數 {med:.0f} 檔；缺日（<{RATIO:.0%}）：{[(d, counts.get(d, 0)) for d in gaps]}")
@@ -210,7 +214,7 @@ def finish(doc, added, errors, gaps) -> int:
         "note": "先.八十-9 全市場缺日補齊：TWSE MI_INDEX＋TPEx afterTrading/otc 官方逐日收盤，只補缺的（代號,日期），不覆蓋既有列；"
                 "adj_close 以後一筆既有列係數×其間已入帳除權息係數推回（08-03～08-25 期間除權息不在帳本，可能少乘一次）",
         "days": gaps, "rows_added": added, "errors": errors}
-    PH.write_text(json.dumps(doc, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")  # 與 update_price_history.py 相同格式
+    PHS.save(doc, PH)  # 與 update_price_history.py 相同格式（先.八十二-1 拆檔）
     print(f"寫檔完成：補入 {added} 列；錯誤 {len(errors)} 筆")
     return 0 if not errors else 1
 

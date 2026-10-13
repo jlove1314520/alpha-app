@@ -22,6 +22,9 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))  # 先.八十二-1：price_history 拆檔存取
+import price_history_store as PHS  # noqa: E402
+
 try:
     import requests
 except ImportError:
@@ -159,8 +162,9 @@ def describe_price_history(path: Path) -> dict:
     """price_history.json（2026-08-27新增，給generate_scores_live.py的technical
     因子用）——TWSE STOCK_DAY_ALL+TPEx tpex_mainboard_quotes累積式OHLCV快照，
     起始種子由research/build_price_history.py讀本機FinMind parquet快取回補。
-    2026-08-27新增adj_close（還原權息收盤價，見ex_dividend_events.json）。"""
-    d = json.loads(path.read_text(encoding="utf-8"))
+    2026-08-27新增adj_close（還原權息收盤價，見ex_dividend_events.json）。
+    2026-10-13 先.八十二-1：改拆檔 data/price_history/，用 price_history_store 讀回（與單檔相同）。"""
+    d = PHS.load(path)
     meta = d.get("meta", {})
     prices = d.get("prices", {})
     depths = [len(v) for v in prices.values() if v]
@@ -629,6 +633,17 @@ def build_data_files() -> list[dict]:
             entry["status"] = status_from_age(info.get("generated_at"), STALE_HOURS.get(rel, 24))
         out.append(entry)
 
+    # 先.八十二-1：price_history 改拆檔資料夾，不在 data/*.json 底下，另外補一列（門檻沿用原單檔）
+    ph_logical = DATA_DIR / "price_history.json"
+    if not ph_logical.exists() and PHS.exists(ph_logical):
+        try:
+            info = describe_price_history(ph_logical)
+        except Exception as e:  # noqa: BLE001 — 單一檔描述失敗只標 error，不中斷整份 STATUS
+            info = {"generated_at": None, "records": None, "source": "price_history 拆檔讀取失敗", "detail": type(e).__name__}
+        entry = {"path": "data/price_history/", **info}
+        entry["status"] = status_from_age(info.get("generated_at"), STALE_HOURS.get("data/price_history.json", 24))
+        out.append(entry)
+
     scores_path = REPO_ROOT / "scores.json"
     if scores_path.exists():
         info = describe_scores(scores_path)
@@ -803,6 +818,8 @@ def _daily_rule(now: datetime, ts: datetime | None, tz, run_hm, grace_h: float) 
 
 def _file_ts(rel: str) -> datetime | None:
     path = REPO_ROOT / rel
+    if not path.exists() and (path.with_suffix("") / "_meta.json").exists():
+        path = path.with_suffix("") / "_meta.json"  # 先.八十二-1：拆檔資料夾的 _meta.json 帶原 meta
     if not path.exists():
         return None
     try:

@@ -36,6 +36,10 @@ FinMind歷史parquet快取一次回補（2101檔、90個交易日），這支腳
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[2] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import re
 import time
 from datetime import datetime, timedelta, timezone
@@ -814,12 +818,12 @@ def apply_reduction_adjustments(prices: dict, ledger: dict, today_iso: str) -> i
 
 
 def main():
-    if not OUT_PATH.exists():
+    if not PHS.exists(OUT_PATH):
         print(f"錯誤：{OUT_PATH} 不存在——這支腳本設計上只做累積更新，"
               "第一次的完整快照要用 research/build_price_history.py 手動產生並 commit。")
         raise SystemExit(1)
 
-    payload = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+    payload = PHS.load(OUT_PATH)
     prices = payload.setdefault("prices", {})
 
     errors = []
@@ -1004,7 +1008,8 @@ def main():
           f"{'PASS' if check_ok else 'FAIL'}")
     if not check_ok:
         errors.append(f"self_check_0050_latest: 0050最新日期={actual_0050} != 最近上市交易日={twse_latest_date}")
-    OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
+    ph_sizes = PHS.save(payload, OUT_PATH)  # 先.八十二-1：寫拆檔（每檔 <20MB），刪舊單檔
+    print(f"[拆檔] data/price_history/ 各檔大小（MB）：" + "、".join(f"{k} {v / 1048576:.1f}" for k, v in ph_sizes.items()))
     print(f"寫入 {OUT_PATH}：TWSE {twse_updated} 檔+TPEx {tpex_updated} 檔（合計 {len(prices)} 檔有資料），"
           f"除權息事件本輪新增 {ex_div_added} 筆、套用回溯調整 {ex_div_applied} 筆")
     if errors:

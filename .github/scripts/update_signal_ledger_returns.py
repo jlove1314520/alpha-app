@@ -8,6 +8,10 @@ price_stale 守門與「找不到就不猜」規則），這裡不重寫。已�
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[2] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -25,7 +29,7 @@ def main() -> None:
     if not all_sigs:
         print(f"{LEDGER_PATH} 沒有訊號，結束")
         return
-    prices = upl._load_json(upl.PRICE_HISTORY_PATH).get("prices", {})
+    prices = (PHS.load(upl.PRICE_HISTORY_PATH) if PHS.exists(upl.PRICE_HISTORY_PATH) else {}).get("prices", {})
     cal_rows = prices.get(upl.CALENDAR_PROXY_CODE) or max(prices.values(), key=len, default=[])
     calendar = sorted(r["date"] for r in cal_rows)
     if not calendar:

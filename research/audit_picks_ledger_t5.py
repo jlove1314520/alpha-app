@@ -8,6 +8,10 @@ tradingStock）。只讀，不改任何資料；壞價時由呼叫者另行修�
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[1] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import sys
 import time
 from pathlib import Path
@@ -96,7 +100,7 @@ def official_close(code: str, date: str) -> tuple[float | None, str]:
 
 def main() -> int:
     led = json.loads(LEDGER.read_text(encoding="utf-8"))
-    ph = json.loads(PRICES.read_text(encoding="utf-8"))["prices"]
+    ph = PHS.load(PRICES)["prices"]
     cal = sorted({r["date"] for r in ph.get("0050", [])})
     rows = []
     for s in led["snapshots"]:

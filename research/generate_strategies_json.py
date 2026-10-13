@@ -28,6 +28,10 @@
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[1] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -187,7 +191,7 @@ def paper_field(board_key: str) -> dict | None:
     snapshots.sort(key=lambda s: s.get("snapshot_date", ""))
     first = snapshots[0]
 
-    price_history = _load_json(PRICE_HISTORY_PATH)
+    price_history = PHS.load(PRICE_HISTORY_PATH) if PHS.exists(PRICE_HISTORY_PATH) else {}
     prices = (price_history or {}).get("prices", {})
 
     rets = []

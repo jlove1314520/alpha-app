@@ -19391,7 +19391,7 @@ C. 驗收
 
 心跳：每完成一項把對應行標 - [x]（部分完成 [~]），並在 research/PROGRESS_HEARTBEAT.jsonl append 一行（source=interactive, item=先.八十二-N）。
 
-- [ ] **先.八十二-1 price_history.json 拆檔（每檔 <20MB）＋所有讀取端改＋前後讀出相同比對自測＋git 移除歷史大檔提案（只提案不執行）**（互動視窗執行）
+- [x] **先.八十二-1 price_history.json 拆檔（每檔 <20MB）＋所有讀取端改＋前後讀出相同比對自測＋git 移除歷史大檔提案（只提案不執行）**（互動視窗執行）〔data/price_history/ 11 分桶＋_meta（最大 4.5MB、合計 45.9MB；截 90 筆後約 38MB）；scripts/price_history_store.py＋49 支讀寫端；拆檔前後讀出 IDENTICAL（sha256 相同）＋各讀取端輸出相同；冒煙 #137；git 歷史改寫只提案（AWAITING 3→4）〕
 - [x] **先.八十二-2 裁示①：Shioaji 維持 1.7.4 到解凍；解凍前置條件列升級＋演練 A／B；先.八十一-2 改 [x]、AWAITING_REVIEW 結案**（互動視窗執行）〔維持 1.7.4；docs/UNFREEZE_CHECKLIST.md 列升級＋preflight＋演練 A／B 為解凍前置條件；先.八十一-2 改 [x]；AWAITING 6→5〕
 - [ ] **先.八十二-3 裁示②：選股榜剔除近 5 交易日無成交／不在官方快照者，排名空白標「近期無成交」；picks_ledger 標生效日 2026-10-14**（互動視窗執行）
 - [ ] **先.八十二-4 裁示③：盤中報價本機備援（台股、門檻 15 分鐘、雲端已更新就略過）；附明天盤中實跑心跳證據**（互動視窗執行）

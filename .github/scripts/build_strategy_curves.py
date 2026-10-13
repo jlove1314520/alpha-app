@@ -23,6 +23,10 @@
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[2] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import math
 import random
 import sys
@@ -375,7 +379,7 @@ def live_line(perf: dict | None) -> dict:
 
 
 def build() -> dict:
-    px = Px(_load(DATA / "price_history.json", {}) or {})
+    px = Px(PHS.load(DATA / "price_history.json") if PHS.exists(DATA / "price_history.json") else {})
     if not px.cal:
         raise SystemExit("price_history.json 讀不到 0050 日線")
     ledger = _load(DATA / "picks_ledger.json", {}) or {}

@@ -41,6 +41,10 @@ history.json`只保留最近一段滾動窗口的0050日線（見該檔`meta`欄
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[1] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -75,10 +79,9 @@ def _load_0050_price_series() -> list[dict]:
     """從data/price_history.json讀0050日線（滾動窗口，非全歷史），按日期
     升冪排序。這是既有排程(update_price_history.py)已經在維護的資料，本
     腳本零額外網路請求。"""
-    if not PRICE_HISTORY_PATH.exists():
+    if not PHS.exists(PRICE_HISTORY_PATH):
         return []
-    with open(PRICE_HISTORY_PATH, encoding="utf-8") as f:
-        data = json.load(f)
+    data = PHS.load(PRICE_HISTORY_PATH)
     rows = data.get("prices", {}).get(STOCK_ID, [])
     return sorted(rows, key=lambda r: r["date"])
 
@@ -96,8 +99,7 @@ def _check_price_freshness(prices: list[dict], today_iso: str | None = None) -> 
         return False, "0050在price_history.json沒有任何資料"
     last = prices[-1]["date"]
     try:
-        with open(PRICE_HISTORY_PATH, encoding="utf-8") as f:
-            doc = json.load(f)
+        doc = PHS.load(PRICE_HISTORY_PATH)
         others = [rows[-1]["date"] for rows in doc.get("prices", {}).values() if rows]
         market_max = max(others) if others else last
     except Exception as e:  # noqa: BLE001 - 守門員自身失敗只降級，見十二節

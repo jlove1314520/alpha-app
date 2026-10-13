@@ -11,6 +11,10 @@ Trading_money 算「近 5 日均成交值 ÷ 近 20 日均成交值 − 1」。�
 成分股 <5 檔的產業不列（樣本太小）。用法：python scripts/build_industry_flow.py
 """
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[0] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -26,7 +30,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 def main() -> int:
     try:
-        ph = json.loads((DATA / "price_history.json").read_text(encoding="utf-8")).get("prices") or {}
+        ph = PHS.load(DATA / "price_history.json").get("prices") or {}
         comp = json.loads((DATA / "company_info.json").read_text(encoding="utf-8")).get("companies") or {}
     except (OSError, ValueError) as e:
         print(f"[warn] 讀不到 price_history／company_info（{type(e).__name__}），industry_flow.json 維持原狀")

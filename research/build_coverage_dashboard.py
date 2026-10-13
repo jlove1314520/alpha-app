@@ -36,6 +36,10 @@ growth這一個因子，全市場2xxx檔裡有幾%算出來、剩下的因為什
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[1] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -65,9 +69,9 @@ def main():
     fundamentals = gsl._load_json(gsl.FUNDAMENTALS_PATH).get("fundamentals", {})
     stock_detail = gsl._load_json(gsl.STOCK_DETAIL_PATH).get("stocks", {})
     price_history = {}
-    if gsl.PRICE_HISTORY_PATH.exists():
+    if PHS.exists(gsl.PRICE_HISTORY_PATH):
         try:
-            price_history = gsl._load_json(gsl.PRICE_HISTORY_PATH).get("prices", {})
+            price_history = PHS.load(gsl.PRICE_HISTORY_PATH).get("prices", {})
         except Exception:
             price_history = {}
     events_source_available = gsl.EVENTS_PATH.exists()

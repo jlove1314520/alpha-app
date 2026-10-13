@@ -13,6 +13,10 @@
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[1] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import sys
 import time
 from datetime import date, datetime, timedelta, timezone
@@ -130,7 +134,7 @@ def main() -> int:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     except Exception:
         pass
-    ph = json.loads((REPO / "data" / "price_history.json").read_text(encoding="utf-8")).get("prices") or {}
+    ph = PHS.load(REPO / "data" / "price_history.json").get("prices") or {}
     recs, skipped = [], []
     for a, b in RANGES:
         d = date.fromisoformat(a)

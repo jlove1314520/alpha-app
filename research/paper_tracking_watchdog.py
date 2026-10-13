@@ -20,6 +20,10 @@ App 端另檢查 generated_at 是否過舊（監控的監控，CLAUDE.md 十一�
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[1] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -39,6 +43,11 @@ SAFE_LEG = "00697B"
 
 def _read_json(p: Path):
     return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
+
+
+def _read_ph(p: Path) -> dict:
+    """先.八十二-1：price_history 單檔或拆檔資料夾都讀得到；都沒有回空 dict。"""
+    return PHS.load(p) if PHS.exists(p) else {}
 
 
 def _read_log(p: Path) -> list[dict]:
@@ -73,7 +82,7 @@ def _confirmed_month_ends(dates: list[str], after: str, same_day: bool) -> list[
 
 def evaluate(root: Path, now: datetime) -> dict:
     items: list[dict] = []
-    prices = _read_json(root / "data" / "price_history.json") or {}
+    prices = _read_ph(root / "data" / "price_history.json")
     log1 = _read_log(root / "research" / "data" / "paper_7030_log.jsonl")
     log1b = _read_log(root / "research" / "data" / "paper_1b_log.jsonl")
     s1 = _read_json(root / "data" / "paper_7030.json") or {}

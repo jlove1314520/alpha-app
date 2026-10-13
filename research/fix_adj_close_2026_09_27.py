@@ -18,6 +18,10 @@ adj_close改變了多少（供App分數變化回報使用）。
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[1] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 from pathlib import Path
 
 import pandas as pd
@@ -48,7 +52,7 @@ def recompute_adj_close_for_code(code: str, dates_needed: list[str]) -> dict[str
 
 
 def main() -> None:
-    payload = json.loads(PRICE_HISTORY_PATH.read_text(encoding="utf-8"))
+    payload = PHS.load(PRICE_HISTORY_PATH)
     prices = payload.get("prices", {})
     print(f"[修.七] 讀取 {PRICE_HISTORY_PATH}，共 {len(prices)} 檔")
 
@@ -81,7 +85,7 @@ def main() -> None:
         if (i + 1) % 500 == 0:
             print(f"  進度 {i+1}/{len(prices)}（目前已發現 {n_stocks_changed} 檔改變）")
 
-    PRICE_HISTORY_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
+    PHS.save(payload, PRICE_HISTORY_PATH)
     print(f"[修.七] 已就地更新 {PRICE_HISTORY_PATH}：{n_stocks_changed} 檔股票、{n_rows_changed} 列的adj_close改變")
 
     changed_report.sort(key=lambda x: -x["max_diff_pct"])

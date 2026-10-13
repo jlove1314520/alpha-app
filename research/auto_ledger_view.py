@@ -27,9 +27,8 @@ def _prices(price_doc: dict | None = None) -> dict:
     if price_doc is not None:
         return price_doc.get("prices") or {}
     p = AB.PRICE_HISTORY
-    try:
-        m = p.stat().st_mtime
-    except OSError:
+    m = AB.PHS.latest_mtime(p)  # 先.八十二-1：單檔或拆檔資料夾的最後修改時間
+    if m is None:
         return {}
     if _PX_CACHE["mtime"] != m:
         _PX_CACHE["doc"] = AB._read_json_retry(p) or {}  # 先.八十一-31：git pull 換檔中途重試

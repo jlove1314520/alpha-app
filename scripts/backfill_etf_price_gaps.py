@@ -13,6 +13,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[0] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import sys
 import time
 from datetime import date
@@ -85,7 +89,7 @@ def main() -> int:
     ap.add_argument("--months", type=int, default=4)
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
-    doc = json.loads(PH.read_text(encoding="utf-8"))
+    doc = PHS.load(PH)
     px = doc["prices"]
     s = requests.Session()
     added = {}
@@ -111,16 +115,7 @@ def main() -> int:
         doc.setdefault("meta", {})["etf_gap_backfill_note"] = (
             "2026-10-10 先.五十七-A2：0050／00646（TWSE STOCK_DAY）、00697B（TPEx tradingStock）官方單股月資料補缺日，"
             "只補不覆蓋，逐筆標 source；adj_close 暫等於 close。")
-        tmp = PH.with_suffix(".json.tmp")
-        tmp.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
-        for i in range(10):                          # Windows：目標檔可能被讀取中，短暫重試
-            try:
-                tmp.replace(PH)
-                break
-            except PermissionError:
-                time.sleep(1.0)
-        else:
-            raise PermissionError("price_history.json 被佔用，重試 10 次仍無法寫回")
+        PHS.save(doc, PH)  # 先.八十二-1：拆檔寫回（每檔暫存檔＋os.replace，佔用時重試）
     print(json.dumps({k: len(v) for k, v in added.items()}, ensure_ascii=False))
     return 0
 

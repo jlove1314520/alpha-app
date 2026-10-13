@@ -33,6 +33,10 @@ holdout `(VAL_END=2024-12-31, today]`，回補等於解鎖 holdout，需總司�
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[0] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import statistics
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
@@ -147,7 +151,7 @@ def main() -> int:
     companies = ci.get("companies") or {}
     uni = _load(D / "listed_universe.json", {}) or {}
     active = set(uni.get("active") or [])
-    closes = _closes(_load(D / "price_history.json", {}) or {})
+    closes = _closes(PHS.load(D / "price_history.json") if PHS.exists(D / "price_history.json") else {})
 
     usable = [w for w in WINDOWS if n_dates >= w]
     missing = {str(w): w - n_dates for w in WINDOWS if n_dates < w}

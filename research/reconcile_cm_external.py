@@ -9,6 +9,10 @@
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[1] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import statistics as st
 import sys
 from datetime import date, datetime
@@ -78,7 +82,7 @@ def main() -> int:
     except Exception:
         pass
     ext = json.loads(EXT.read_text(encoding="utf-8"))["points"]
-    ph = json.loads((REPO / "data" / "price_history.json").read_text(encoding="utf-8")).get("prices") or {}
+    ph = PHS.load(REPO / "data" / "price_history.json").get("prices") or {}
     detail, excluded, missing = [], [], []
     for day, bal_100m, ext_pct in ext:
         r = _ours(day, ph)

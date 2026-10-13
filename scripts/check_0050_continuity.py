@@ -2,6 +2,10 @@
 休市日以 TWSE 官方 holidaySchedule 為準；平日且非休市日卻缺列即 FAIL。
 用法：python scripts/check_0050_continuity.py 2026-09-24 2026-09-29"""
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[0] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -23,8 +27,7 @@ def holidays() -> set[str]:
 
 
 def main(start: str, end: str) -> int:
-    prices = json.loads((Path(__file__).resolve().parent.parent / "data" / "price_history.json")
-                        .read_text(encoding="utf-8"))["prices"]
+    prices = PHS.load(Path(__file__).resolve().parent.parent / "data" / "price_history.json")["prices"]
     have = {r["date"] for r in prices.get("0050", [])}
     hol = holidays()
     d = datetime.strptime(start, "%Y-%m-%d")

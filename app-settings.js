@@ -600,7 +600,7 @@
     // 判斷跟著失真。改成只串流讀檔案開頭幾 KB 抓它自己的 generated_at（三檔的 meta.generated_at 都在前 1KB 內），讀到就中止下載。
     {label:'個股基本面 PER/月營收',file:'data/fundamentals.json',kind:'daily',tz:'UTC',run:[6,10],grace:3,head:true},
     {label:'個股財報/法人/融資',file:'data/stock_detail.json',kind:'daily',tz:'UTC',run:[6,10],grace:3,head:true},
-    {label:'個股價量歷史',file:'data/price_history.json',kind:'daily',tz:'UTC',run:[6,10],grace:3,head:true},
+    {label:'個股價量歷史',file:'data/price_history/_meta.json',kind:'daily',tz:'UTC',run:[6,10],grace:3,head:true},
   ];
   // 只讀檔案開頭 maxBytes（Range＋串流，伺服器不支援 Range 也會在讀夠後中止），回傳第一個 "generated_at" 的時間
   async function _headGeneratedAt(url,maxBytes){

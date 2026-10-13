@@ -21,6 +21,10 @@
 from __future__ import annotations
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[1] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import os
 import sys
 import time
@@ -567,7 +571,7 @@ class LiveSource:
         """官方 TWSE/TPEx 原始開盤價（data/price_history.json，約最近 90 個交易日）；查不到回 None。"""
         if self._ph is None:
             try:
-                self._ph = json.loads(PRICE_HISTORY_PATH.read_text(encoding="utf-8")).get("prices", {})
+                self._ph = PHS.load(PRICE_HISTORY_PATH).get("prices", {})
             except Exception:  # noqa: BLE001
                 self._ph = {}
         for row in self._ph.get(code, []):

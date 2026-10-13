@@ -81,6 +81,10 @@ import mem_guard  # 稽核.六續一（2026-09-20）：全市場/多檔全歷史
 mem_guard.install()
 
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[1] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import os
 import pickle
 import sys
@@ -145,7 +149,7 @@ def liquidity_ranked_universe_ids(n: int, lookback_days: int = LIQUIDITY_LOOKBAC
     }
     u = build_universe()
     valid_ids = set(u[~u["industry_category"].isin(non_stock_industries)]["stock_id"])
-    payload = json.loads(PRICE_HISTORY_PATH.read_text(encoding="utf-8"))
+    payload = PHS.load(PRICE_HISTORY_PATH)
     prices = payload.get("prices", {})
     ranked = []
     for sid, rows in prices.items():

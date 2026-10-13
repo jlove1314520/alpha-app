@@ -18,6 +18,10 @@ adj/close 比例推回；除權息帳本（data/ex_dividend_events.json）08-26 
 每次請求間隔 ≥3 秒，402/403/428/429 立刻停止。用法：python scripts/fix_backfill_exdiv.py [--dry-run]
 """
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[0] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import sys
 import time
 from pathlib import Path
@@ -118,7 +122,7 @@ def recompute(rows: list, events: list) -> int:
 
 
 def main(dry: bool) -> int:
-    doc = json.loads(PH.read_text(encoding="utf-8"))
+    doc = PHS.load(PH)
     prices = doc.get("prices") or {}
     off, led = official_events(), ledger_events()
     print(f"官方除權息 {len(off)} 筆（{START}～{END}）；帳本事件 {len(led)} 筆（08-26 起除權息＋減資）")
@@ -144,7 +148,7 @@ def main(dry: bool) -> int:
         "note": "先.八十一-49：6/1 以後 adj_close 以最後一列為錨、依官方除權息（TWT49U／exDailyQ，6/1～8/25）＋帳本除權息與減資係數整段重算",
         "official_events": len(off), "ledger_events": len(led), "codes_changed": codes_changed, "rows_changed": rows_changed,
         "holdings_watch": watch}
-    PH.write_text(json.dumps(doc, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
+    PHS.save(doc, PH)
     print("寫檔完成")
     return 0
 

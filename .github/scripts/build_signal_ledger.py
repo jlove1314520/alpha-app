@@ -15,6 +15,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
+from pathlib import Path as _phs_Path
+_phs_sys.path.insert(0, str(_phs_Path(__file__).resolve().parents[2] / "scripts"))
+import price_history_store as PHS  # noqa: E402
 import sys
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
@@ -142,7 +146,7 @@ def main() -> None:
 
     events = _load_json(EVENTS_PATH).get("events", [])
     news = _load_json(NEWS_PATH).get("news", [])
-    prices = _load_json(PRICE_HISTORY_PATH).get("prices", {})
+    prices = PHS.load(PRICE_HISTORY_PATH).get("prices", {})
     for rows in prices.values():
         rows.sort(key=lambda r: r["date"])
 

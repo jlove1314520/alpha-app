@@ -74,6 +74,35 @@ const PANEL_IDS = [
   "picks-list",
 ];
 
+// 先.八十二-1：price_history 改拆檔（data/price_history/_meta.json＋b0～b9／bx.json，依代號最後一碼分桶）。
+// 冒煙一律用這兩個讀法（單檔還在時照舊讀單檔，過渡期相容）。codes 省略＝全部。
+function phBucket(code) { const c = String(code).slice(-1); return /[0-9]/.test(c) ? c : "x"; }
+function readPH(fsx, codes) {
+  if (fsx.existsSync("data/price_history.json")) return JSON.parse(fsx.readFileSync("data/price_history.json", "utf8"));
+  const head = JSON.parse(fsx.readFileSync("data/price_history/_meta.json", "utf8"));
+  const bs = codes ? [...new Set(codes.map(phBucket))] : ["0","1","2","3","4","5","6","7","8","9","x"];
+  const prices = {};
+  for (const b of bs) Object.assign(prices, JSON.parse(fsx.readFileSync(`data/price_history/b${b}.json`, "utf8")).prices || {});
+  return { meta: head.meta, prices, code_order: head.code_order };
+}
+// 頁面內（fetch）版：回傳 {meta, prices, total}
+const PH_FETCH_SRC = `async (codes) => {
+  const b = c => { const x = String(c).slice(-1); return /[0-9]/.test(x) ? x : "x"; };
+  const m = await fetch("data/price_history/_meta.json?t=" + Date.now(), { cache: "no-store" });
+  if (!m.ok) {
+    const r = await fetch("data/price_history.json?t=" + Date.now(), { cache: "no-store" });
+    if (!r.ok) return { error: "HTTP " + m.status + "/" + r.status };
+    const d = await r.json(); return { meta: d.meta, prices: d.prices || {}, total: Object.keys(d.prices || {}).length };
+  }
+  const head = await m.json(); const prices = {};
+  for (const k of [...new Set(codes.map(b))]) {
+    const r = await fetch("data/price_history/b" + k + ".json?t=" + Date.now(), { cache: "no-store" });
+    if (!r.ok) return { error: "b" + k + ".json HTTP " + r.status };
+    Object.assign(prices, (await r.json()).prices || {});
+  }
+  return { meta: head.meta, prices, total: (head.code_order || []).length };
+}`;
+
 function parseArgs() {
   const args = process.argv.slice(2);
   let url = "http://localhost:8792";
@@ -1092,14 +1121,13 @@ async function runSmokeTest(baseUrl, headless = true) {
   //    快取還是渲染，只要使用者看不到線就會被抓到。
   const dataGateErrors = [];
   try {
-    const ph = await page.evaluate(async () => {
-      const r = await fetch("data/price_history.json?t=" + Date.now());
-      if (!r.ok) return { error: "HTTP " + r.status };
-      const d = await r.json();
-      const p = d.prices || {};
+    const ph = await page.evaluate(async (src) => {
       const need = ["2330", "2454", "3008", "5274"];
-      return { total: Object.keys(p).length, have: need.filter(c => (p[c] || []).length >= 2), lens: need.map(c => [c, (p[c] || []).length]) };
-    });
+      const d = await (0, eval)(src)(need);  // 先.八十二-1：拆檔讀法
+      if (d.error) return { error: d.error };
+      const p = d.prices || {};
+      return { total: d.total, have: need.filter(c => (p[c] || []).length >= 2), lens: need.map(c => [c, (p[c] || []).length]) };
+    }, PH_FETCH_SRC);
     if (ph.error) dataGateErrors.push(`price_history.json 讀取失敗：${ph.error}`);
     else if (ph.have.length !== 4) dataGateErrors.push(`price_history.json 缺高價股歷史：${JSON.stringify(ph.lens)}`);
     results.price_history_total = ph.total;
@@ -2836,13 +2864,13 @@ async function runSmokeTest(baseUrl, headless = true) {
   // (b) 0050 灰線累計報酬＝price_history 同期實際收盤報酬（±0.1pp）；(c) 卡片 UI：改名、八個分頁可切換、<60 日判讀固定文字。
   const scErrs = [], scInfo = [];
   try {
-    const sc = await page.evaluate(async () => {
+    const sc = await page.evaluate(async (src) => {
       const a = await (await fetch("data/strategy_curves.json", { cache: "no-store" })).json();
-      const p = await (await fetch("data/price_history.json", { cache: "no-store" })).json();
+      const p = await (0, eval)(src)(["0050"]);  // 先.八十二-1：拆檔讀法
       const px = {};
       for (const r of (p.prices && p.prices["0050"]) || []) px[r.date] = r.close;
       return { lines: a.lines || [], px };
-    });
+    }, PH_FETCH_SRC);
     let nChecked = 0;
     for (const l of sc.lines) {
       if (!l.started || !l.nav || l.nav.length < 2) continue;
@@ -3616,10 +3644,12 @@ async function runSmokeTest(baseUrl, headless = true) {
   const rsErrs = [];
   try {
     const fsx = await import("node:fs");
-    const ph = JSON.parse(fsx.readFileSync("data/price_history.json", "utf8"));
+    const ph = readPH(fsx, ["00631L"]);  // 先.八十二-1
     const l = ph.prices["00631L"] || [];
     const pre = l.filter(r => r.date < "2026-03-31"), post = l.filter(r => r.date >= "2026-03-31");
-    if (!pre.length || pre.some(r => Math.abs(r.adj_close * 22 - r.close) > 0.01 * r.close)) rsErrs.push("00631L 分割前 adj_close 不等於 close÷22");
+    // 先.八十二-1：價格歷史只留最近 90 筆後，分割日（03-31）以前的列會滾出視窗；沒有分割前的列時只驗 meta 紀錄（下方）
+    if (pre.some(r => Math.abs(r.adj_close * 22 - r.close) > 0.01 * r.close)) rsErrs.push("00631L 分割前 adj_close 不等於 close÷22");
+    if (!l.length) rsErrs.push("價格歷史沒有 00631L");
     if (post.some(r => r.adj_close != null && Math.abs(r.adj_close - r.close) > 0.01 * r.close)) rsErrs.push("00631L 分割後不該再除");
     if (!(ph.meta.splits_applied || []).includes("00631L@2026-03-31x22.0")) rsErrs.push("meta.splits_applied 缺 00631L 紀錄");
     const cv = JSON.parse(fsx.readFileSync("data/strategy_curves.json", "utf8"));
@@ -3642,7 +3672,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   try {
     const fsx = await import("node:fs");
     const mt = JSON.parse(fsx.readFileSync("data/market_tw.json", "utf8"));
-    const ph = JSON.parse(fsx.readFileSync("data/price_history.json", "utf8"));
+    const ph = readPH(fsx, ["0050"]);  // 先.八十二-1
     const last = ((ph.prices["0050"] || []).slice(-1)[0] || {}).date;
     const dd = mt.data_date || (mt.taiex || {}).data_date;
     if (!dd) mdErrs.push("market_tw 缺 data_date");
@@ -3761,7 +3791,7 @@ async function runSmokeTest(baseUrl, headless = true) {
         const line = document.getElementById("data-stale-line");
         const keys = await caches.keys();
         const dc = keys.includes("alpha-data-v1") ? await caches.open("alpha-data-v1") : null;
-        const ph = dc ? !!(await dc.match(location.origin + location.pathname.replace(/index\.html$/, "") + "data/price_history.json")) : false;
+        const ph = dc ? (await dc.keys()).some(q => /\/data\/price_history(\.json|\/)/.test(q.url)) : false;  // 先.八十二-1：單檔或拆檔都不得進快取
         return { a: a.headers.get("x-alpha-from-cache"), aAt: a.headers.get("x-alpha-cached-at"), b: b.headers.get("x-alpha-from-cache"),
                  line: line && !line.hidden ? line.textContent : "", keys, ph };
       });
@@ -3769,7 +3799,7 @@ async function runSmokeTest(baseUrl, headless = true) {
       if (r.b) swrErrs.push("cache:'no-store' 不該走存檔");
       if (!/先顯示上次存的資料/.test(r.line)) swrErrs.push(`首頁缺「先顯示上次存的資料」提示：${r.line}`);
       if (!r.keys.includes("alpha-data-v1")) swrErrs.push("沒有資料快取 alpha-data-v1");
-      if (r.ph) swrErrs.push("price_history.json 不該進資料快取");
+      if (r.ph) swrErrs.push("price_history（單檔或拆檔）不該進資料快取");
     } finally { await ctx.close(); }
   } catch (e) { swrErrs.push(`測試本身出錯：${e.message || e}`); }
   record("115. SW 資料檔先顯示上次存檔、背景更新：回應帶存檔標記、首頁顯示「上次資料」提示、no-store 直通網路（先.八十一-8）", swrErrs.length === 0, swrErrs.join("; "));
@@ -4378,6 +4408,37 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { errCopyErrs.push(`測試本身出錯：${e.message || e}`); }
   record("136. 錯誤訊息／空狀態的工程術語經白話規則後不殘留（commit／GitHub Actions／.py／repo／price_history）（先.八十一-45）", errCopyErrs.length === 0, errCopyErrs.join("; "));
 
+  // 137.【2026-10-13 先.八十二-1】price_history 拆檔：data/price_history/ 有 _meta.json＋11 個分桶、每檔 <20MB、
+  // 舊單檔已移除、_meta 的代號順序與分桶內代號一一對應；並跑「拆檔前後讀出完全相同」自測。
+  const phsErrs = [];
+  let phsInfo = "";
+  try {
+    const fsx = await import("node:fs");
+    const { execFileSync } = await import("node:child_process");
+    if (fsx.existsSync("data/price_history.json")) phsErrs.push("舊單檔 data/price_history.json 仍存在");
+    const head = JSON.parse(fsx.readFileSync("data/price_history/_meta.json", "utf8"));
+    const seen = new Set();
+    let maxMB = 0, totMB = 0;
+    for (const b of ["0","1","2","3","4","5","6","7","8","9","x"]) {
+      const f = `data/price_history/b${b}.json`;
+      const mb = fsx.statSync(f).size / 1048576;
+      maxMB = Math.max(maxMB, mb); totMB += mb;
+      if (mb >= 20) phsErrs.push(`${f} ${mb.toFixed(1)}MB ≥ 20MB`);
+      for (const c of Object.keys(JSON.parse(fsx.readFileSync(f, "utf8")).prices || {})) {
+        if (phBucket(c) !== b) phsErrs.push(`${c} 放錯分桶 b${b}`);
+        seen.add(c);
+      }
+    }
+    const order = head.code_order || [];
+    if (order.length !== seen.size || order.some(c => !seen.has(c))) phsErrs.push(`_meta 代號順序 ${order.length} 檔與分桶 ${seen.size} 檔不一致`);
+    const py = process.platform === "win32" ? "python" : "python3";
+    let out = "";
+    try { out = execFileSync(py, ["scripts/selftest_price_history_split.py"], { encoding: "utf8", env: { ...process.env, PYTHONIOENCODING: "utf-8" }, timeout: 240000 }); }
+    catch (e) { out = String(e.stdout || "") + String(e.stderr || ""); phsErrs.push("拆檔前後一致性自測未通過：" + out.split("\n").filter(l => /FAIL/.test(l)).join("；").slice(0, 300)); }
+    phsInfo = `${seen.size} 檔、最大分桶 ${maxMB.toFixed(1)}MB、合計 ${totMB.toFixed(1)}MB；${(out.match(/合計 \d+ 項，失敗 \d+/) || [""])[0]}`;
+  } catch (e) { phsErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("137. 價格歷史拆檔：每檔 <20MB、舊單檔已移除、代號順序與分桶一致、拆檔前後讀出完全相同（先.八十二-1）", phsErrs.length === 0, phsErrs.join("; ") || phsInfo);
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4406,7 +4467,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

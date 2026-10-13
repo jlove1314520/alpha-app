@@ -101,7 +101,10 @@ SCHEMAS: dict[str, dict] = {
     "data/stock_detail_eps.json": _S(ts=_MG, req={**_META, "stocks": "dict"}),
     "data/holders.json": _S(ts=_MG, req={**_META, "stocks": "dict"}),
     "data/cash_flow.json": _S(req={"stocks": "dict"}),
-    "data/price_history.json": _S(ts=_MG, req={**_META, "prices": "dict"}, nonempty=("prices",)),
+    # 先.八十二-1：price_history 改拆檔（scripts/price_history_store.py）；舊單檔不再登記，
+    # 否則單檔被刪會被當成「讀檔失敗」而從 HEAD 還原回 72MB 大檔。
+    "data/price_history/_meta.json": _S(ts=_MG, req={**_META, "code_order": "list"}, nonempty=("code_order",)),
+    **{f"data/price_history/b{_b}.json": _S(ts=None, req={"prices": "dict"}) for _b in list("0123456789") + ["x"]},
     "data/listed_universe.json": _S(ts=_MG, req={**_META, "active": "list", "last_seen": "dict"},
                                     nonempty=("active",)),
     "data/events.json": _S(ts=_FETCHED, req={"events": "list"}),
