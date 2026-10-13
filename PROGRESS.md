@@ -1,3 +1,7 @@
+## 2026-10-13 23:30（互動視窗）先.八十九-補-1 群組 ID 已設定
+
+- 本機 .env 有 TELEGRAM_TARGET_CHAT_ID，且是數字（只印了 True／True，沒有印值）。
+
 ## 2026-10-13 23:30（互動視窗）先.八十九-5 Telegram 設定工具加只改目標群組選項
 
 - `C:\alpha\setup_ca\setup_telegram.ps1`（不在 repo）：偵測到已有 api_id／api_hash 且有登入檔時，直接按 Enter＝**只改目標群組**（不問 api_id／api_hash），輸入 all 才完整重設；目標群組提示改成建議貼邀請連結。PowerShell 語法檢查 0 錯誤。
