@@ -1,3 +1,11 @@
+## 2026-10-13 19:18（互動視窗）先.八十四-2 AlphaData 融資維持率改寫到自己的檔，冒煙 #58 恢復
+
+- 總司令【先.八十四】2 裁示採甲：`C:\alpha\alpha-data\compute_margin_maintenance.py` 的 `OUTPUT_PATH` 從 `alpha-app/data/margin_maintenance.json` 改成 `alpha-data/margin_maintenance_local.json`（只改這一個路徑常數＋兩行註解；不動 fetch.py／parsers.py／alpha.db）。alpha-data 不是 git repo，改動只在本機；改前備份在 session 暫存區。
+- 用今天（10/13，15:45 被蓋掉那天）重跑一次 `compute_margin_maintenance.main()`：寫入 `alpha-data/margin_maintenance_local.json`（本站舊算法 196.16%，累積 1 天）；`alpha-app/data/margin_maintenance.json` 重跑前後 sha256 相同、與 HEAD（雲端版）一致。
+- 冒煙 #58 恢復通過：主數字 173.6%（籌碼K口徑）｜本站 196.16%｜近 58 日最大誤差 2.06。全套 142 項全過、0 失敗。
+- `research/AWAITING_REVIEW.md`：「先.八十二-11a 提案」移到已結案；等待中 0 件。
+- 之後每天 15:30 AlphaData 不會再碰 App 的檔；App 的融資維持率只由雲端 market.yml（或本機補跑同一支腳本）產生。
+
 ## 2026-10-13 19:18（互動視窗）先.八十四-3 git 歷史不改，先.八十一-50 結案
 
 - 總司令【先.八十四】3 裁示採甲：**不改 git 歷史**。舊 `data/price_history.json` 大檔留在歷史中（壓縮後約 33MB，整包 223MB），不執行 filter-repo、不強制推送。
