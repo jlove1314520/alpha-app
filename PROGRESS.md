@@ -1,3 +1,22 @@
+## 2026-10-13 09:36（互動視窗）先.八十一-10 個股走勢／主流題材／期貨法人改 repo 主來源，FinMind 只補充並寫明失敗原因
+
+### 2026-10-13 09:40 先.八十一-10 個股走勢／類股排行（主流題材）／期貨法人改 repo 為主來源（CC）
+
+**做了什麼**
+- **個股走勢**：`app.js` 新增 `twPxRepoFirst()`，台股日線主來源改為 `data/by_code/<代號>.json` 的近 60 個交易日價（取自 price_history.json，每日三班排程；by_code 加收成交值欄位、由 30 日加到 60 日以涵蓋報告頁的 60 日低點／均線）。小檔沒有價格才打 FinMind 補。個股頁走勢註記改為「證交所／櫃買每日收盤（repo price_history，資料日 …）」；盤中有永豐即時價時另加「走勢圖：…」標明圖的來源。選股報告頁的分批進場計畫（台股）也改讀同一來源。
+- **類股排行／主流題材**：新增 `scripts/build_industry_flow.py` → `data/industry_flow.json`（price_history 成交值依 company_info 產業加總，沿用原公式「近 5 日÷近 20 日均成交值−1」與擁擠度規則；涵蓋 48 個產業，原本只有 FinMind 8 個產業指數）。選股頁主流題材改讀此檔，chip 下方標來源與資料日；讀不到才退回 FinMind 8 個產業指數。市場頁「類股表現」本來就讀 market_tw.json（證交所官方類股指數），查證無 FinMind 呼叫，不需改。
+- **期貨法人**：新增 `.github/scripts/fetch_futures_institutional.py` → `data/futures_institutional.json`（TAIFEX 官方 openapi「三大法人-區分各期貨契約-依日期」，CSV，累積 60 日；與 rate_limit_state 共用節流／封鎖，來源名 taifex_openapi；CLAUDE.md 頻率清單已補）。市場頁期貨法人改讀此檔（台指期未平倉淨口數），讀不到才退回 FinMind。
+- **FinMind 失敗寫明原因**：`fm()` 記錄白話原因（額度用盡 402／太頻繁 429／伺服器錯誤／逾時／連不上），`fmEmptyMsg()` 一律帶出；期貨法人兩邊都失敗時寫「repo 檔讀取失敗（原因）；FinMind 補充也失敗（原因）」，不再只顯示「—」。
+- `market.yml` 加兩個步驟（產業資金流入、期貨三大法人）並加進 git add。
+
+**仍使用 FinMind 的地方（補充用途，誠實列出）**：個股營收圖的月底股價（需 430 日，repo 只留 90 日）、美股日線、搜尋用的完整名稱清單。
+
+**驗證**：冒煙新增 #117（個股走勢註記 repo price_history、主流題材註記 repo、期貨法人註記期交所官方，且不打 FinMind 期貨法人／產業指數／個股短期日線；擋掉 repo 期貨檔＋FinMind 時畫面寫明兩邊原因；fmEmptyMsg 帶原因）。過程中發現走勢註記的預設文字就是「來源：日收盤價」，檢查要等真正寫入，已修正測試的等待條件。全套冒煙 2026/10/13 09:35:56 全部通過。
+
+**影響檔案**：app.js、app-stock.js、app-shared.js、app-picks.js、app-market.js、index.html、scripts/build_by_code.py、scripts/build_industry_flow.py、.github/scripts/fetch_futures_institutional.py、data/by_code/、data/industry_flow.json、data/futures_institutional.json、data/rate_limit_state.json、.github/workflows/market.yml、scripts/smoke_test.mjs
+
+**下一步**：先.八十一-11（我的持股事件只列自選股＋真錢持股並顯示名稱，修 8054／6693 事件檔 404）。
+
 ## 2026-10-13 09:20（互動視窗）先.八十一-9 個股頁／選股頁改每檔小檔（by_code＋精簡清單），附前後量測
 
 ### 2026-10-13 09:25 先.八十一-9 個股頁／選股頁改為每檔一個小檔（CC）

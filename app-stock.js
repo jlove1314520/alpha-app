@@ -656,7 +656,10 @@
     await Promise.allSettled([ensureQuoteLite([code]),ensureListedUniverse()]);
     if(currentCode!==code)return;
     const [px,fund,inst]=await Promise.all([
-      fm('TaiwanStockPrice',code,_d(35)),loadFundamentals(code),instNet(code),ensureSinopacQuotes()]);
+      twPxRepoFirst(code,_d(35)),loadFundamentals(code),instNet(code),ensureSinopacQuotes()]);  // 先.八十一-10：repo 為主、FinMind 補充
+    const pxSrcTxt=px._src==='repo'
+      ?`證交所／櫃買每日收盤（repo price_history${px.length?'，資料日 '+px[px.length-1].date:''}）`
+      :'FinMind TaiwanStockPrice（repo 無此檔日線，改用 FinMind 補）';
     if(currentCode!==code)return;  // 2026-09-06：await 期間已切到別檔，作廢（見 canonicalPrice 註解）
     const per=fund.ratios?[fund.ratios]:[];
     const rev=fund.month_revenue?fund.month_revenue.map(r=>({revenue_year:r.year,revenue_month:r.month,revenue:r.revenue,yoyPre:r.yoy!=null?r.yoy*100:null})):[];
@@ -672,7 +675,7 @@
       _safeSync('applyLimitBadge',()=>applyLimitBadge(code,iq.price,iq.prev_close,iq));
       const ce=document.getElementById('sh-chg');ce.textContent=`${(iq.change||0)>=0?'+':''}${(+(iq.change||0)).toFixed(1)}（${(iq.change_pct||0)>=0?'+':''}${(iq.change_pct||0).toFixed(2)}%）`;ce.className=cls;
       if(px.length)renderStockChart(code,px,false);
-      setTxt('trend-note',`來源：Shioaji${intradayTagText(iq)}`);  // 2026-09-08 實測.七
+      setTxt('trend-note',`來源：Shioaji${intradayTagText(iq)}${px.length?`；走勢圖：${pxSrcTxt}`:''}`);  // 2026-09-08 實測.七；先.八十一-10 加註走勢圖來源
     }else if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].close:last.close-last.spread;
       const chg=last.spread!=null?last.spread:last.close-prev;const pct=prev?chg/prev*100:0;const cls=chg>=0?'pos':'neg';
       const pe=document.getElementById('sh-price');pe.textContent=nf(last.close);pe.className=cls;
@@ -680,7 +683,7 @@
       renderStockChart(code,px,false);
       // 2026-09-06（實測.三）沒有即時源時也要判漲跌停，用日線的前一筆收盤當前收
       _safeSync('applyLimitBadge:daily',()=>applyLimitBadge(code,last.close,prev,null));
-      setTxt('trend-note',`來源：FinMind TaiwanStockPrice · 近 ${px.length} 個交易日收盤（日線收盤，非當下報價，原始未還原股價）`);
+      setTxt('trend-note',`來源：${pxSrcTxt} · 近 ${px.length} 個交易日收盤（日線收盤，非當下報價，原始未還原股價）`);
     }else{
       // 2026-09-06（實測.一）FinMind 沒有（冷門股或額度用盡）時退回統一回退鏈的後兩層：
       // quotes_all_tw（全市場收盤）→ sparklines（歷史最後收盤）。原本這裡直接寫死
@@ -700,7 +703,7 @@
         _safeSync('applyLimitBadge:fallback',()=>applyLimitBadge(code,fb.price,fb.prev_close,null));
         const sp=fb.sparkline||sparkFor(code);
         if(sp&&sp.length>=2)renderStockChart(code,sp.map(c=>({close:c})),false);
-        setTxt('trend-note',`來源：${QUOTE_TIER_LABEL[fb.tier]||fb.tier}${fb.asof?'（'+fb.asof+'）':''}${fb.is_stale?'　⚠ 落後大盤當日最新日期，非現價':''}　FinMind 本次無資料`);
+        setTxt('trend-note',`來源：${QUOTE_TIER_LABEL[fb.tier]||fb.tier}${fb.asof?'（'+fb.asof+'）':''}${fb.is_stale?'　⚠ 落後大盤當日最新日期，非現價':''}　repo 無此檔日線，FinMind 補充也沒有資料${FM_LAST_FAILED&&FM_LAST_ERR?'（'+FM_LAST_ERR+'）':''}`);
       }else{
         setTxt('sh-price','—');setTxt('sh-chg',noQuoteLabel(code,false));
         document.getElementById('trend-chart').innerHTML='<div class="note">'+noQuoteLabel(code,false)+'</div>';

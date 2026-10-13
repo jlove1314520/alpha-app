@@ -1186,6 +1186,8 @@
   // 回退舊資料，回傳空陣列讓呼叫端顯示「查無資料」的同時，設 FM_LAST_FAILED=true，
   // 讓呼叫端可以用 fmEmptyMsg() 分辨「這次是連線失敗」還是「這檔本來就沒資料」。
   let FM_LAST_FAILED=false;
+  // 先.八十一-10：FinMind 失敗時記下白話原因（額度用盡／網路／逾時…），fmEmptyMsg 一併顯示，不只顯示「—」。
+  let FM_LAST_ERR='';
   // 2026-08-25 修正：原本線的顏色是看「這段sparkline最後一天vs第一天」（多日趨勢），
   // 跟旁邊直接顯示的「今日漲跌%」徽章是兩個不同的比較基準，兩者顏色常常對不上
   // （例如過去9天總體是漲的、但今天是跌的，線會畫成漲色、徽章卻是跌色），使用者
@@ -1937,6 +1939,25 @@
     for(const [k,h] of Object.entries(sec.shape||{})){if(h==='dict')out[k]=part[k]||{};else if(h==='list')out[k]=part[k]||[]}
     out._byCode=code;
     return out;
+  }
+  // 先.八十一-10：台股個股日線主來源改為 repo（by_code 小檔的近 60 日價，取自 price_history.json，每日三班排程），
+  // 小檔沒有價格（新上市、ETF 未收錄等）才打 FinMind 補。回傳 FinMind TaiwanStockPrice 同形狀的列，
+  // 陣列上掛 _src（'repo'｜'finmind'）供畫面標來源。
+  async function twPxRepoFirst(code,fmStart){
+    const d=await byCode(code);
+    const rows=(d&&Array.isArray(d.price))?d.price:[];
+    if(rows.length>=2){
+      const out=rows.map((r,i)=>{
+        const [date,open,high,low,close,volume,turnover]=r;
+        const pc=i?rows[i-1][4]:null;
+        return {date,open,max:high,min:low,close,Trading_Volume:volume,Trading_money:turnover,spread:(pc!=null&&close!=null)?+(close-pc).toFixed(4):null};
+      });
+      out._src='repo';
+      return out;
+    }
+    const px=await fm('TaiwanStockPrice',code,fmStart||_d(35));
+    px._src='finmind';
+    return px;
   }
   // 整份檔已在記憶體就用整份；否則先讀這一檔的小檔，小檔讀不到才下載整份。
   async function stockScoped(code,name,full,loadFull){
@@ -3987,7 +4008,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-13.0920';
+  const APP_VERSION='2026-10-13.0936';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

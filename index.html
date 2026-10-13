@@ -24,7 +24,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
      載不到時index.html::renderStockChart()自動退回既有SVG折線，不會讓個股頁空白。 -->
 <!-- 常備.開發-20（2026-10-11）：函式庫改為第一次畫K線時才載入（見 app.js ensureLwc()），不再佔首頁首次載入傳輸量。 -->
 <title>Alpha 台美股 AI 交易</title>
-<link rel="stylesheet" href="app.css?v=2026-10-13.0920">
+<link rel="stylesheet" href="app.css?v=2026-10-13.0936">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -425,6 +425,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <span class="press refresh-btn" id="mainstream-refresh" onclick="refreshTap(this,null,loadMainstreamIndustries)">重新整理</span>
       </div>
       <div id="mainstream-chips" style="display:flex;gap:8px;margin-top:8px;overflow-x:auto;padding-bottom:4px"><div class="skel-block" style="height:26px;width:70px;border-radius:14px;flex:0 0 auto"></div><div class="skel-block" style="height:26px;width:70px;border-radius:14px;flex:0 0 auto"></div><div class="skel-block" style="height:26px;width:70px;border-radius:14px;flex:0 0 auto"></div></div>
+      <div id="mainstream-src" class="note" style="margin-top:2px"></div>
       <div class="note" style="margin-top:2px">⚠ 動能/主流本質是擁擠交易，資金集中太久、漲幅過大容易反轉——不是「資金正在流入」就代表可以追高</div>
     </div>
 
@@ -1413,6 +1414,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-13.0920"></script>
+<script src="app.js?v=2026-10-13.0936"></script>
 </body>
 </html>

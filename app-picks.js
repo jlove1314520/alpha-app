@@ -110,20 +110,39 @@
       // 「連線失敗」兩種語意完全不同的狀態糊成一句話，使用者看了不知道該不該按
       // 重新整理。FM_LAST_FAILED本來就已經能明確分辨是哪一種，這裡改成兩句
       // 各自獨立、不含糊的訊息。
-      el.innerHTML='<div class="note">'+(FM_LAST_FAILED?fmEmptyMsg(''):'目前沒有產業呈現5日/20日資金淨流入')+'</div>';
+      el.innerHTML='<div class="note">'+(FM_LAST_FAILED&&/FinMind/.test(MAINSTREAM_SRC)?'repo 檔與 FinMind 都讀不到：'+fmEmptyMsg(''):'目前沒有產業呈現5日/20日資金淨流入')+'</div>';
       return;
     }
+    const srcEl=document.getElementById('mainstream-src');if(srcEl)srcEl.textContent=MAINSTREAM_SRC;
     el.innerHTML=MAINSTREAM_CACHE.map(r=>{
-      const scoreInd=HEAT_TO_SCORE_INDUSTRY[r.id];
+      const scoreInd=r.scoreInd||HEAT_TO_SCORE_INDUSTRY[r.id];
       const active=PICKS_INDUSTRY===scoreInd;
       return `<span class="press" style="flex-shrink:0;font-size:12px;font-weight:${active?600:400};color:${active?'#1a1005':'var(--ink-2)'};background:${active?'var(--gold-grad)':'rgba(255,255,255,.05)'};border:1px solid ${active?'transparent':'rgba(255,255,255,.08)'};padding:6px 13px;border-radius:999px;cursor:pointer;white-space:nowrap" onclick="filterPicksByIndustry('${scoreInd}')">${r.label} <span style="color:${active?'#1a1005':'var(--up)'}">+${r.inflow.toFixed(1)}%</span>${r.crowded?' ⚠ 已擁擠':''}</span>`;
     }).join('');
   }
+  // 先.八十一-10：主流題材主來源改為 repo 的 data/industry_flow.json（scripts/build_industry_flow.py：price_history
+  // 成交值依產業加總，同一條「近5日÷近20日均成交值」公式，涵蓋全部產業、名稱與選股榜一致）；讀不到才退回
+  // 上面 8 個 FinMind 產業指數。MAINSTREAM_SRC 記來源與資料日，畫在 chips 下方。
+  let MAINSTREAM_SRC='';
   async function loadMainstreamIndustries(){
     const el=document.getElementById('mainstream-chips');if(!el)return;
     el.innerHTML='<div class="skel-block" style="height:26px;width:70px;border-radius:14px;flex:0 0 auto"></div><div class="skel-block" style="height:26px;width:70px;border-radius:14px;flex:0 0 auto"></div><div class="skel-block" style="height:26px;width:70px;border-radius:14px;flex:0 0 auto"></div>';  // 2026-09-15 P0產品.四：骨架屏
+    let repoErr='';
+    try{
+      const r=await fetch('data/industry_flow.json?t='+Math.floor(Date.now()/600000));
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const d=await r.json();
+      const rows=(d&&d.industries)||[];
+      if(!rows.length)throw new Error('檔案沒有任何產業');
+      MAINSTREAM_CACHE=rows.filter(x=>x.inflow_pct!=null&&x.inflow_pct>0).slice(0,5)
+        .map(x=>({id:x.industry,label:x.industry,scoreInd:x.industry,inflow:x.inflow_pct,pct:x.pct,streak:x.streak,cumGain:x.cum_gain_pct,crowded:x.crowded,date:x.date}));
+      MAINSTREAM_SRC=`來源：repo 每日收盤成交值依產業加總（資料日 ${(d.meta&&d.meta.data_date)||'—'}）`;
+      renderMainstreamChips();
+      return;
+    }catch(e){repoErr=String(e&&e.message||e);console.warn('[loadMainstreamIndustries:repo]',e);recordGlobalError('loadMainstreamIndustries:repo',e)}
     const results=await Promise.all(HEAT_CATS.map(fetchIndustryFlow));
     MAINSTREAM_CACHE=results.filter(r=>r.inflow!=null&&r.inflow>0).sort((a,b)=>b.inflow-a.inflow).slice(0,5);
+    MAINSTREAM_SRC=`來源：FinMind 產業指數（repo industry_flow.json 讀取失敗：${repoErr}）`;
     renderMainstreamChips();
   }
   // 選股榜每列展開/收合（不離開排行榜頁），跟點整列導去完整報告頁分開——點展開箭頭
@@ -591,7 +610,8 @@
     try{
       const usCode=isUS(row.code);
       // 常備.開發-20（先.六十七）：首頁不再整份載入 sparklines／quotes_all_tw，防線二的真值要自己備妥這一檔的小檔
-      const [pxS]=await Promise.allSettled([fm(usCode?'USStockPrice':'TaiwanStockPrice',row.code,_d(70)),ensureQuoteLite([row.code])]);
+      // 先.八十一-10：台股改讀 repo（by_code 近 60 日價）為主、FinMind 補充；美股照舊
+      const [pxS]=await Promise.allSettled([usCode?fm('USStockPrice',row.code,_d(70)):twPxRepoFirst(row.code,_d(70)),ensureQuoteLite([row.code])]);
       if(pxS.status==='rejected')throw pxS.reason;
       const px=pxS.value;
       // 防線一：await 期間使用者已經切到別檔，這批結果作廢（不作廢就會把這一檔的

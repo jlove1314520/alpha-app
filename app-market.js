@@ -273,18 +273,37 @@
     await Promise.allSettled([loadInstTotal(),loadMarginMaintenance()]);
   }
 
+  // 先.八十一-10：主來源改為 repo 的 data/futures_institutional.json（.github/scripts/fetch_futures_institutional.py，
+  // TAIFEX 官方三大法人-區分各期貨契約，每日三班排程）；讀不到或沒有台指期才退回 FinMind，兩者都失敗寫明原因。
+  const setFut=(id,v)=>{const el=document.getElementById(id);if(!el)return;el.textContent=(v>=0?'+':'')+nf(v)+' 口';el.className=v>=0?'pos':'neg'};
   async function loadFutInst(){
+    let repoErr='';
+    try{
+      const r=await fetch('data/futures_institutional.json?t='+Math.floor(Date.now()/600000));
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const d=await r.json();
+      const h=((d&&d.history)||[]).slice(-1)[0];
+      const tx=h&&h.products&&h.products.TX;
+      if(!tx)throw new Error('檔案裡沒有台指期（TX）資料');
+      const v=k=>(tx[k]&&tx[k].net_oi)||0;
+      setFut('fut-foreign',v('foreign'));setFut('fut-trust',v('trust'));setFut('fut-dealer',v('dealer'));setFut('fut-total',v('foreign')+v('trust')+v('dealer'));
+      setTxt('fut-note',`最新 ${h.date} · 台指期未平倉淨口數 · 來源：期交所官方（repo 排程）`);
+      return;
+    }catch(e){repoErr=String(e&&e.message||e);console.warn('[loadFutInst:repo]',e);recordGlobalError('loadFutInst:repo',e)}
     const raw=await fm('TaiwanFuturesInstitutionalInvestors','TX',_d(10));
-    if(!raw.length){['fut-foreign','fut-trust','fut-dealer','fut-total'].forEach(id=>setTxt(id,'—'));return}
+    if(!raw.length){
+      ['fut-foreign','fut-trust','fut-dealer','fut-total'].forEach(id=>setTxt(id,'—'));
+      setTxt('fut-note',`無法取得期貨法人部位：repo 檔讀取失敗（${repoErr}）；FinMind 補充${FM_LAST_FAILED?'也失敗（'+(FM_LAST_ERR||'原因不明')+'）':'查無資料'}`);
+      return;
+    }
     const last=raw[raw.length-1].date;
     let f=0,t=0,d=0;
     raw.filter(r=>r.date===last).forEach(r=>{
       const net=(r.long_open_interest_balance_volume||0)-(r.short_open_interest_balance_volume||0);
       if(r.institutional_investors==='外資')f=net;else if(r.institutional_investors==='投信')t=net;else if(r.institutional_investors==='自營商')d=net;
     });
-    const setFut=(id,v)=>{const el=document.getElementById(id);if(!el)return;el.textContent=(v>=0?'+':'')+nf(v)+' 口';el.className=v>=0?'pos':'neg'};
     setFut('fut-foreign',f);setFut('fut-trust',t);setFut('fut-dealer',d);setFut('fut-total',f+t+d);
-    setTxt('fut-note',`最新 ${last} · FinMind 期貨三大法人（TX）`);
+    setTxt('fut-note',`最新 ${last} · FinMind 期貨三大法人（TX）（repo 檔讀取失敗：${repoErr}，改用 FinMind 補充）`);
   }
   // 常備.開發-14（2026-10-11）盤勢解讀（規則版）：四行只把既有檔案的數字翻成白話——
   // ①大盤漲跌（market_tw.json taiex）②類股強弱前三（market_tw.json sectors 依漲跌幅排序，最強／最弱各三）

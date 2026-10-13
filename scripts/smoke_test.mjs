@@ -3830,6 +3830,56 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { bcErrs.push(`測試本身出錯：${e.message || e}`); }
   record("116. 個股頁讀每檔小檔（不下載整份檔、卡片有內容）、選股頁讀精簡清單且展開／報告補完整明細（先.八十一-9）", bcErrs.length === 0, bcErrs.join("; "));
 
+  // 117.【2026-10-13 先.八十一-10】個股走勢、主流題材、期貨法人改用 repo 檔當主來源（FinMind 只當補充）：
+  // 個股頁走勢註記來源為 repo price_history、選股頁主流題材註記 repo、市場頁期貨法人註記期交所官方且不打 FinMind 期貨法人；
+  // 擋掉 repo 期貨檔與 FinMind 時，畫面要寫明兩邊失敗原因，不能只有「—」。
+  const r10Errs = [];
+  try {
+    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+    try {
+      const p = await ctx.newPage();
+      const urls = [];
+      p.on("request", (r) => urls.push(r.url()));
+      await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+      await p.waitForTimeout(2500);
+      await p.evaluate(() => { Promise.resolve(openStock("2330")).catch(() => {}); });
+      await p.waitForFunction(() => /個交易日|走勢圖：|repo 無此檔/.test((document.getElementById("trend-note") || {}).textContent || ""), null, { timeout: 20000 }).catch(() => null);  // 預設文字就是「來源：日收盤價」，要等真正寫入
+      const tn = await p.evaluate(() => (document.getElementById("trend-note") || {}).textContent || "");
+      // 盤中有 Shioaji 即時價時，註記另加「走勢圖：…repo price_history」
+      if (!/repo price_history/.test(tn)) r10Errs.push(`個股走勢來源不是 repo：${tn.slice(0, 80)}`);
+      await p.evaluate(() => { const b = document.querySelector('nav#nav button[data-scr="picks"]'); if (b) b.click(); });
+      await p.waitForFunction(() => /來源：/.test((document.getElementById("mainstream-src") || {}).textContent || ""), null, { timeout: 20000 }).catch(() => null);
+      const ms = await p.evaluate(() => (document.getElementById("mainstream-src") || {}).textContent || "");
+      if (!/repo/.test(ms)) r10Errs.push(`主流題材來源不是 repo：${ms}`);
+      await p.evaluate(() => { const b = document.querySelector('nav#nav button[data-scr="market"]'); if (b) b.click(); });
+      await p.waitForFunction(() => /最新/.test((document.getElementById("fut-note") || {}).textContent || ""), null, { timeout: 20000 }).catch(() => null);
+      const fn = await p.evaluate(() => (document.getElementById("fut-note") || {}).textContent || "");
+      if (!/期交所官方/.test(fn)) r10Errs.push(`期貨法人來源不是期交所官方 repo 檔：${fn}`);
+      const fmHits = urls.filter(u => /finmindtrade/.test(u) && /dataset=(TaiwanFuturesInstitutionalInvestors|TaiwanStockPrice&data_id=(Semiconductor|Electronic)|TaiwanStockPrice&data_id=2330&start_date=\d{4}-\d\d-\d\d$)/.test(u));
+      const pxShort = urls.filter(u => /dataset=TaiwanStockPrice&data_id=2330/.test(u)).filter(u => { const m = u.match(/start_date=(\d{4}-\d\d-\d\d)/); return m && (Date.now() - Date.parse(m[1])) < 100 * 86400000; });
+      if (urls.some(u => /dataset=TaiwanFuturesInstitutionalInvestors/.test(u))) r10Errs.push("市場頁仍打 FinMind 期貨法人");
+      if (urls.some(u => /dataset=TaiwanStockPrice&data_id=(Semiconductor|Electronic|Optoelectronic)/.test(u))) r10Errs.push("選股頁仍打 FinMind 產業指數");
+      if (pxShort.length) r10Errs.push("個股頁走勢仍打 FinMind 短期日線（repo 有資料時不該打）");
+      void fmHits;
+    } finally { await ctx.close(); }
+    // 失敗原因：擋 repo 期貨檔＋FinMind
+    const ctx2 = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+    try {
+      const p2 = await ctx2.newPage();
+      await p2.route(/futures_institutional\.json/, (r) => r.fulfill({ status: 404, body: "" }));
+      await p2.route(/finmindtrade\.com/, (r) => r.abort());
+      await p2.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+      await p2.waitForTimeout(1500);
+      await p2.evaluate(() => { const b = document.querySelector('nav#nav button[data-scr="market"]'); if (b) b.click(); });
+      await p2.waitForFunction(() => /無法取得/.test((document.getElementById("fut-note") || {}).textContent || ""), null, { timeout: 20000 }).catch(() => null);
+      const fn2 = await p2.evaluate(() => (document.getElementById("fut-note") || {}).textContent || "");
+      if (!/repo 檔讀取失敗（HTTP 404）/.test(fn2) || !/FinMind|公開資料/.test(fn2) || !/連不上|失敗/.test(fn2)) r10Errs.push(`兩邊都失敗時沒寫明原因：${fn2}`);
+      const em = await p2.evaluate(async () => { await fm('TaiwanStockPrice', '2330', '2026-01-01'); return fmEmptyMsg('x'); });
+      if (!/FinMind 連不上/.test(em)) r10Errs.push(`fmEmptyMsg 沒帶失敗原因：${em}`);
+    } finally { await ctx2.close(); }
+  } catch (e) { r10Errs.push(`測試本身出錯：${e.message || e}`); }
+  record("117. 個股走勢／主流題材／期貨法人以 repo 檔為主、FinMind 只補充，兩邊都失敗寫明原因（先.八十一-10）", r10Errs.length === 0, r10Errs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -3858,7 +3908,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

@@ -12,8 +12,8 @@ institutional_history 220KB、sector_flow 120KB…，合計約 2.8MB）只為了
   App 讀一次後跟小檔合併成「原本整份檔的同樣結構」；個股頁用不到的大區塊（sector_flow.sectors）不收
 - scores.json（價值成長榜）只留這一檔那一列，另把「同產業百分位」先算好放進 row._industry_pct，
   不把同產業所有列複製進每個小檔（第一版這樣做，4385 檔合計 1.3GB，不可行）
-- price：price_history 該檔最近 30 個交易日，精簡成 [日期,開,高,低,收,量] 陣列（個股頁總覽走勢用；
-  技術分析長圖仍走 FinMind）
+- price：price_history 該檔最近 60 個交易日，精簡成 [日期,開,高,低,收,量,成交值] 陣列（個股頁走勢、
+  報告頁分批進場的主來源，先.八十一-10；營收圖的月底股價要 430 日，仍由 FinMind 補充）
 - company：company_info 該檔（名稱／產業）
 - scores_momentum／scores_future：這一檔在題材動能榜／未來性濾網的完整列（選股頁清單改讀精簡檔
   scores*_list.json，展開與報告時才讀這裡的完整列，見 scripts/build_scores_list.py）
@@ -46,8 +46,8 @@ SOURCES = {  # 小檔裡的節名 → 來源檔
 SCORES_FILE = ROOT / "scores.json"
 OTHER_BOARDS = {"scores_momentum": ROOT / "scores_momentum.json", "scores_future": ROOT / "scores_future.json"}  # 選股頁展開／報告用的完整列
 DROP = {"sector_flow": {"sectors"}}  # 個股頁用不到、又大的共用區塊
-PRICE_DAYS = 30
-PRICE_COLS = ("date", "open", "high", "low", "close", "volume")
+PRICE_DAYS = 60  # 先.八十一-10：個股走勢與報告頁分批進場（用到近 60 日低點／均線）都改讀這裡
+PRICE_COLS = ("date", "open", "high", "low", "close", "volume", "turnover")
 
 
 def _load(p: Path):

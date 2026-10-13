@@ -69,7 +69,7 @@
       const j=await r.json();
       const d=(j&&Array.isArray(j.data))?j.data:[];
       fmCacheWrite(k,d);
-      FM_LAST_FAILED=false;
+      FM_LAST_FAILED=false;FM_LAST_ERR='';
       return d;
     }catch(e){
       // 2026-08-27：這裡刻意不call recordGlobalError()——fm()是高頻呼叫的資料層
@@ -77,11 +77,22 @@
       // 會淹沒真正的程式邏輯bug。這類失敗已經有專門的UI機制處理（FM_LAST_FAILED+
       // fmEmptyMsg()讓每個面板顯示「連線失敗」），不需要疊加一份錯誤log。
       console.warn('[Alpha] FinMind 抓取失敗（不回退舊資料，誠實回報查無資料）：',ds,id,e);
-      FM_LAST_FAILED=true;
+      FM_LAST_FAILED=true;FM_LAST_ERR=fmErrReason(e);
       return [];
     }
   }
-  function fmEmptyMsg(fallback){return FM_LAST_FAILED?'連線失敗，請重試（重新整理或稍後再試）':fallback}
+  // 先.八十一-10：把 FinMind 失敗翻成白話原因
+  function fmErrReason(e){
+    const m=String((e&&e.message)||e||'');
+    if(/HTTP 402/.test(m))return 'FinMind 免費額度用盡（HTTP 402），約一小時後恢復';
+    if(/HTTP 429/.test(m))return 'FinMind 請求太頻繁（HTTP 429）';
+    if(/HTTP 5\d\d/.test(m))return 'FinMind 伺服器錯誤（'+m+'）';
+    if(/HTTP \d+/.test(m))return 'FinMind 回應錯誤（'+m+'）';
+    if(e&&e.name==='AbortError')return 'FinMind 逾時沒有回應';
+    if(e&&e.name==='TypeError')return 'FinMind 連不上（網路中斷或被擋）';
+    return 'FinMind 失敗（'+(m||'原因不明')+'）';
+  }
+  function fmEmptyMsg(fallback){return FM_LAST_FAILED?((FM_LAST_ERR||'FinMind 連線失敗')+'，請稍後再試'):fallback}
   // 2026-08-27新增（B4：類股卡點擊→成分股清單）：data/company_info.json
   // （見 research/build_company_info.py，讀FinMind TaiwanStockInfo全市場快取）
   // 供代號→名稱/產業分類查詢；data/quotes_all_tw.json（見
