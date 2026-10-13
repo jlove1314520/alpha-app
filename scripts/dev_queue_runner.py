@@ -553,7 +553,9 @@ def _entry_key_class(entry: str) -> tuple[str, str]:
 
 
 INLINE_CLASS_TAG = re.compile(r"\*\*[^*]+\*\*\s*(\[研究\]|\[產品\])")
-INLINE_INTERACTIVE_TAG = re.compile(r"\*\*[^*]+\*\*\s*（互動視窗(?!或)")
+# 2026-10-13（cycle 20261013-103102）：標題內含「*」（如 scores*_list、Alpha*）時 [^*]+ 對不上，
+# 先.八十一-18／-27 被誤判成債務派給 DevQueue；改成非貪婪 .+? 允許標題內出現單一星號
+INLINE_INTERACTIVE_TAG = re.compile(r"\*\*.+?\*\*\s*（互動視窗(?!或)")
 
 
 def item_class(text: str) -> str:
