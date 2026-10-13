@@ -1,3 +1,17 @@
+## 2026-10-13 15:19（互動視窗）先.八十二-7 裁示⑥刪除 5 支過期一次性排程（前後清單）
+
+- **裁示**：總司令【先.八十二】7 裁示⑥——刪除 5 支過期一次性排程。
+- **刪除前**（Alpha* 共 34 支）：5 支皆 State=Ready、無下次執行時間、最後執行結果 0x0：
+  - AlphaFlowVerifyClose1012（最後 2026-10-12 14:30）
+  - AlphaNightDrillFinish1007_0800（最後 2026-10-07 08:00）
+  - AlphaPreflight1007_0830（最後 2026-10-07 08:30）
+  - AlphaPreflight1007_1400（最後 2026-10-07 14:00）
+  - AlphaPreflightReminder1011_2000（最後 2026-10-11 20:00）
+- **刪除**：`Unregister-ScheduledTask` 逐支刪除，5 支皆回 deleted；再查 5 個名稱皆不存在。
+- **刪除後**（Alpha* 共 29 支）：AlphaAutoRun0905、AlphaAutoRun0940、AlphaAutoSettle1340、AlphaAutoWatchRun、AlphaAutoWatchSettle、AlphaConnectivity、AlphaData、AlphaDataAudit、AlphaDepCheck、AlphaDevQueue、AlphaDisposalFlags、AlphaFinMindWarmup、AlphaHypothesisQueue、AlphaIbkrGateway、AlphaIbkrQuotes、AlphaLiveServer、AlphaMarathon、AlphaMoeaPitSnapshot、AlphaNewsFallback、AlphaNightlySix、AlphaOrphanScan、AlphaPaperSupplyV2、AlphaRfMonthly、AlphaShioajiQuotes、AlphaTdccHolders、AlphaTelegram0815、AlphaTelegram2015、AlphaTwsePublishProbe、AlphaWeeklyReport。
+- research/AWAITING_REVIEW.md 該列結案，等待中 5→4。
+- 冒煙：全套 135 PASS／0 FAIL。
+
 ## 2026-10-13 15:11（互動視窗）先.八十二-2 裁示①Shioaji 維持 1.7.4 到解凍、解凍前置條件清單、AWAITING 結案
 
 - **裁示**：總司令【先.八十二】2 裁示①——Shioaji 維持 1.7.4 到解凍。
