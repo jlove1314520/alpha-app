@@ -1,3 +1,7 @@
+## 2026-10-13 23:30（互動視窗）先.八十九-4 只讀擷取實測 OK（11 則）
+
+- 視窗顯示「登入成功，目標群組可讀取：Shioaji（ID 已寫入 .env）」。\n- 手動只讀擷取一次：心跳 `OK`、新訊息 11 則，落地在 `C:\alpha\telegram_export\sinopac_api\2026-10-13.jsonl`（repo 外）。\n- 寫入防線：擷取過程沒有觸發 ReadOnlyViolation；`selftest_telegram_reader.py` 全過（含「只讀包裝擋寫入方法」「設定模式也擋寫入方法」）。\n- 註：第一次手動跑用錯 Python（沒有 telethon，ModuleNotFoundError），改用排程同一個 WindowsApps python 後成功；那次失敗心跳 23:28 ERROR 已被 23:29 OK 接上。
+
 ## 2026-10-13 23:30（互動視窗）先.八十九-3 邀請連結解析成功、群組 ID 寫入
 
 - 開了一個總司令看得到的 PowerShell 視窗跑 `research/telegram_reader.py --login`：登入檔已存在，**沒有再問手機號碼或驗證碼**；邀請連結解析成功，數字 ID 已寫入 TELEGRAM_TARGET_CHAT_ID。
