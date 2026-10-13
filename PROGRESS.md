@@ -1,3 +1,21 @@
+## 2026-10-13 17:18（互動視窗）先.八十一-63 常駐伺服器四步驗證不必讀 token（啟動雜湊＋模組雜湊＋驗證工具）
+
+- **原計畫**：公開 /health 加 build git sha 與 stale_process，讓七之二四步驗證不必讀 token（先.八十二-14 要求照原計畫做完）。
+- **改用等效做法**：原計畫和既有規則衝突。2026-09-06 連線三.2 刻意讓公開 /health 只回 {ok, ts}，因為 build sha 等於版本情報；CLAUDE.md 四之二也規定免 token 端點不得洩漏伺服器狀態。所以**公開 /health 不改**，改成不碰公開介面、也不讀 token 的做法：
+  - `research/alpha_live_server.py`：
+    - 啟動時另印一行 `[build] source_hash=… deps=…`。
+    - 除了本檔，也記下延後 import 的本地模組（auto_rebalance_bb90、auto_ledger_view、web_push、price_history_store）的內容雜湊。原本只涵蓋本檔，今天先.八十二-1 改了這些模組，行程不重啟就會一直找舊單檔，原設計看不出來。
+    - 帶 token 的 /health 多回 `deps_stale`（哪些模組改了未重啟）。
+  - 新增 `scripts/live_server_verify.py`，一個指令跑完四步：
+    - ① /health 200；
+    - ② log 的 build sha＝HEAD（或兩者之間伺服器相關檔無差異）；
+    - ③ OPTIONS 預檢回精確來源＋allow-credentials；
+    - ④ 用同一套演算法重算各檔雜湊，和啟動時記下的比對，等於 stale_process＝false 而且多涵蓋模組。
+  - **只讀 log 裡「[build]」開頭的行**；同一份 log 的 token 行逐行丟棄、不保存、不印出。今天稍早我用 tail 看 log 時曾把 token 印到工具輸出，這支工具就是為了避免再發生。
+- **自測**：`scripts/selftest_live_server_verify.py` 4/4 PASS（取最後一次啟動、舊啟動的雜湊不沿用、結果裡沒有 token、讀到新雜湊）。
+- **重啟前實跑**：①②③ PASS；④ FAIL「log 沒有 source_hash（伺服器是舊版，需重啟一次）」，符合預期。重啟後結果見下一則。
+- 冒煙全套 140 PASS／0 FAIL。
+
 ## 2026-10-13 17:12（互動視窗）先.八十二-12 手機實機回歸：390×844 逐頁截圖比對、每晚自動、超門檻推播
 
 - **裁示**：總司令【先.八十二】12。手機實機回歸：用 iPhone 尺寸（390×844）逐頁截圖，比對前一版有沒有版面跑掉；做成每晚自動跑，差異大於門檻時推播。

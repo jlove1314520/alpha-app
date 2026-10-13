@@ -234,6 +234,27 @@ def _source_mtime() -> float:
 
 
 SOURCE_HASH_AT_START = _source_hash()
+# 先.八十一-63（2026-10-13）：上面的雜湊只涵蓋本檔；本檔延後 import 的本地模組改了也要看得出來（例：先.八十二-1 改了
+# auto_ledger_view／auto_rebalance_bb90 的價格讀法，行程不重啟就還在找舊單檔）。啟動時記下這些檔的內容雜湊並印在
+# [build] 行，scripts/live_server_verify.py 不必讀 token 就能做七之二第四步（重算雜湊比對）；帶 token 的 /health 另回 deps_stale。
+# 公開 /health 照 2026-09-06 連線三.2 與 CLAUDE.md 四之二維持只回 {ok, ts}（不洩漏伺服器狀態）。
+DEP_FILES = {"auto_rebalance_bb90": Path(__file__).parent / "auto_rebalance_bb90.py",
+             "auto_ledger_view": Path(__file__).parent / "auto_ledger_view.py",
+             "web_push": Path(__file__).parent / "web_push.py",
+             "price_history_store": _REPO_ROOT / "scripts" / "price_history_store.py"}
+
+
+def _deps_hash() -> dict:
+    out = {}
+    for k, f in DEP_FILES.items():
+        try:
+            out[k] = hashlib.sha256(f.read_bytes()).hexdigest()[:12]
+        except OSError:
+            out[k] = ""
+    return out
+
+
+DEPS_HASH_AT_START = _deps_hash()
 
 # ── CORS 白名單 ────────────────────────────────────────────────────────────
 # 2026-09-06（Cloudflare 網域上線準備 CF.2）：改成「精確來源 + 允許憑證」。
@@ -1818,6 +1839,7 @@ def health(x_alpha_local_token: str | None = Header(default=None)):
         "source_hash": SOURCE_HASH_AT_START,
         "stale_process": bool(SOURCE_HASH_AT_START and _source_hash()
                               and SOURCE_HASH_AT_START != _source_hash()),
+        "deps_stale": sorted(k for k, v in _deps_hash().items() if v != DEPS_HASH_AT_START.get(k)),
         "shioaji_connected": bool(_tick_age is not None and _tick_age < 120),
         "shioaji_connected_note": "定義＝120 秒內有收到 tick。收盤時段沒有 tick 是正常的，"
                                   "不代表 shioaji_quotes.py 沒在跑",
@@ -1856,6 +1878,8 @@ def health(x_alpha_local_token: str | None = Header(default=None)):
 if __name__ == "__main__":
     print(f"[build] git sha={BUILD_SHA}　原始碼修改時間="
           f"{datetime.fromtimestamp(_source_mtime(), TW_TZ).isoformat()}", flush=True)
+    print(f"[build] source_hash={SOURCE_HASH_AT_START} deps="
+          + ",".join(f"{k}:{v}" for k, v in DEPS_HASH_AT_START.items()), flush=True)
     print(f"本機即時報價伺服器啟動於 http://0.0.0.0:{SERVER_PORT}", flush=True)
     print(f"本機驗證token（貼進App設定頁「即時伺服器」卡片）：{LOCAL_TOKEN}", flush=True)
     print(f"熱檔路徑：{LIVE_STATE_PATH}（備援）；tick ingress udp://{TICK_INGRESS_HOST}:{TICK_INGRESS_PORT}；stream_mode=有新鮮tick時{SSE_MODE_PUSH}、否則{SSE_MODE_POLL}；kbars_mode={KBARS_MODE}", flush=True)
