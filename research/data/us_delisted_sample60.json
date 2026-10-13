@@ -1,0 +1,1940 @@
+{
+ "generated_at": "2026-10-14T02:25:37+08:00",
+ "ruling": "先.八十七-1（2026-10-13 總司令【先.八十七（修正版：只用免費管道）】1）",
+ "purpose": "先.八十八-3 Tiingo 免費版下市股覆蓋率實測的固定受測清單；不計報酬、不登記試驗、不計 N、不碰 holdout",
+ "seed": 20261014,
+ "frame": {
+  "definition": "SEC EDGAR Form 25／25-NSE（2010 起）普通股下市事件（標題含普通股且不含權證／單位等字樣；事件日 ≤2026-01-14），日期＝us_universe_pit.json 判定的下市日（排除轉板），且曾申報 10-K／10-Q；交易所取自 Form 25 原文",
+  "n": 3671,
+  "by_exchange": {
+   "Nasdaq": 2411,
+   "判斷不出": 34,
+   "NYSE": 1042,
+   "NYSE American": 180,
+   "其他:CHICAGO STOCK EXCHANGE INC": 2,
+   "NYSE Arca": 1,
+   "其他:BATS Exchange inc": 1
+  },
+  "by_stratum": {
+   "2010-2012|Nasdaq": 513,
+   "2010-2012|NYSE": 157,
+   "2010-2012|NYSE American": 50,
+   "2013-2015|Nasdaq": 411,
+   "2013-2015|NYSE": 203,
+   "2013-2015|NYSE American": 36,
+   "2016-2018|Nasdaq": 454,
+   "2016-2018|NYSE": 245,
+   "2016-2018|NYSE American": 31,
+   "2019-2021|Nasdaq": 365,
+   "2019-2021|NYSE": 199,
+   "2019-2021|NYSE American": 30,
+   "2022-2024|Nasdaq": 471,
+   "2022-2024|NYSE": 176,
+   "2022-2024|NYSE American": 29,
+   "2025-2026|Nasdaq": 197,
+   "2025-2026|NYSE": 62,
+   "2025-2026|NYSE American": 4
+  }
+ },
+ "design": {
+  "year_buckets": [
+   "2010-2012",
+   "2013-2015",
+   "2016-2018",
+   "2019-2021",
+   "2022-2024",
+   "2025-2026"
+  ],
+  "quota_per_bucket": {
+   "Nasdaq": 4,
+   "NYSE": 4,
+   "NYSE American": 2
+  },
+  "rule": "每層固定種子洗牌，依序解析下市前代號，解析到才收，解析不到換同層下一檔並記錄"
+ },
+ "ticker_resolution": {
+  "sources_in_order": [
+   "下市前最後一份定期報告主文件 iXBRL dei:TradingSymbol",
+   "同申報 XBRL instance dei:TradingSymbol"
+  ],
+  "not_used": "封面頁文字句型（試跑誤抓收購方代號：KSW→TPC）；SEC 現行 company_tickers.json／submissions.tickers（下市代號常被沿用，會對到錯的公司）",
+  "tried": 136,
+  "resolved": 60,
+  "resolve_rate_pct": 44.1,
+  "caveat": "清單只含「解析得到下市前代號」的公司；解析不到的（多為 2010～2012 年未附 XBRL 代號的小型股）被換掉，故本清單對 Tiingo 是偏樂觀的受測母體，覆蓋率結果要連同這個解析率一起讀"
+ },
+ "sec_requests_used": 16,
+ "cells": [
+  {
+   "stratum": "2010-2012|Nasdaq",
+   "frame_n": 513,
+   "quota": 4,
+   "picked": 4,
+   "tried": 22,
+   "skipped_no_ticker": [
+    {
+     "cik": 1368582,
+     "name": "ArcSight Inc",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 916230,
+     "name": "PROTECTION ONE INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1045014,
+     "name": "GAMETECH INTERNATIONAL INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 91741,
+     "name": "SONESTA INTERNATIONAL HOTELS CORP",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1337899,
+     "name": "Fortunet, Inc.",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 921365,
+     "name": "MERIX CORP",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 716646,
+     "name": "NOVITRON INTERNATIONAL INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1381325,
+     "name": "BigBand Networks, Inc.",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1004125,
+     "name": "KSW INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": "TPC"
+    },
+    {
+     "cik": 1105519,
+     "name": "RADVISION LTD",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1039889,
+     "name": "P F CHANGS CHINA BISTRO INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 902272,
+     "name": "ALDILA INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1339729,
+     "name": "Digital Music Group, Inc.",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1108924,
+     "name": "OPNET TECHNOLOGIES INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1323033,
+     "name": "Tennessee Commerce Bancorp, Inc.",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 913665,
+     "name": "AMERICAN MOBILE SATELLITE CORP",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1081206,
+     "name": "R & R RANCHING INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1034755,
+     "name": "BRIGHAM EXPLORATION CO",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    }
+   ]
+  },
+  {
+   "stratum": "2010-2012|NYSE",
+   "frame_n": 157,
+   "quota": 4,
+   "picked": 4,
+   "tried": 21,
+   "skipped_no_ticker": [
+    {
+     "cik": 1089044,
+     "name": "LABRANCHE & CO INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 887637,
+     "name": "RAILAMERICA INC /DE",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 831967,
+     "name": "KINETIC CONCEPTS INC /TX/",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1495569,
+     "name": "Motorola Mobility Holdings, Inc",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 790730,
+     "name": "AMERON INC/DE",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 4611,
+     "name": "AMERICAN BILTRITE INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1268984,
+     "name": "REDDY ICE HOLDINGS INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": "FRZ"
+    },
+    {
+     "cik": 1058083,
+     "name": "IMS HEALTH INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1103078,
+     "name": "WASATCH WEB ADVISORS INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1066107,
+     "name": "EL PASO ENERGY CORP/DE",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1047699,
+     "name": "KING PHARMACEUTICALS INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1084887,
+     "name": "W HOLDING CO INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 803352,
+     "name": "ZANART ENTERTAINMENT INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 41133,
+     "name": "GERBER SCIENTIFIC INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1120462,
+     "name": "IOWA TELECOMMUNICATIONS SERVICES INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1283605,
+     "name": "STRATS SM TRUST FOR HISTORIC TW INC SEC SER 2004-5",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 731939,
+     "name": "TEMPLE INLAND INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    }
+   ]
+  },
+  {
+   "stratum": "2010-2012|NYSE American",
+   "frame_n": 50,
+   "quota": 2,
+   "picked": 2,
+   "tried": 20,
+   "skipped_no_ticker": [
+    {
+     "cik": 1297024,
+     "name": "UNIVERSAL FLIRTS CORP.",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 787251,
+     "name": "DRACO HOLDING CORP/NV",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1089590,
+     "name": "BIO AQUA SYSTEMS INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 356841,
+     "name": "FRANKLIN ELECTRONIC PUBLISHERS INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1222497,
+     "name": "MAINE & MARITIMES CORP",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 726845,
+     "name": "LEADVILLE MINING & MILLING CORP",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1021422,
+     "name": "CAPITAL ALLIANCE INCOME TRUST REAL ESTATE & INVESTMENT TRUS",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1094320,
+     "name": "EMPIRE FINANCIAL HOLDING CO",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1004608,
+     "name": "PINNACLE DATA SYSTEMS INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 886432,
+     "name": "HEALTH FITNESS PHYSICAL THERAPY INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 857073,
+     "name": "PROCESS EQUIPMENT INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 915127,
+     "name": "PHC INC /MA/",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1168556,
+     "name": "STRATEGIKA INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 314606,
+     "name": "GEOKINETICS INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 849240,
+     "name": "HAWK CORP",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1162747,
+     "name": "PUREZZA GROUP INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 202375,
+     "name": "LAZARE KAPLAN INTERNATIONAL INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 57139,
+     "name": "LABARGE INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    }
+   ]
+  },
+  {
+   "stratum": "2013-2015|Nasdaq",
+   "frame_n": 411,
+   "quota": 4,
+   "picked": 4,
+   "tried": 10,
+   "skipped_no_ticker": [
+    {
+     "cik": 1388855,
+     "name": "Tag Events Corp.",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1223112,
+     "name": "ADA-ES INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 862480,
+     "name": "K SWISS INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 69499,
+     "name": "MYLAN LABORATORIES INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 820096,
+     "name": "PERRIGO CO",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1209821,
+     "name": "CROSSTEX ENERGY INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": "XTXI"
+    }
+   ]
+  },
+  {
+   "stratum": "2013-2015|NYSE",
+   "frame_n": 203,
+   "quota": 4,
+   "picked": 4,
+   "tried": 8,
+   "skipped_no_ticker": [
+    {
+     "cik": 916863,
+     "name": "WPS RESOURCES CORP",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1287339,
+     "name": "STRUCTURED PRODUCTS CORP CORTS TRUST II GOLDMAN SACHS CAP I",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 64279,
+     "name": "MCMORAN EXPLORATION CO /DE/",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1495925,
+     "name": "Fortegra Financial Corp",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    }
+   ]
+  },
+  {
+   "stratum": "2013-2015|NYSE American",
+   "frame_n": 36,
+   "quota": 2,
+   "picked": 2,
+   "tried": 3,
+   "skipped_no_ticker": [
+    {
+     "cik": 896726,
+     "name": "NEURO NAVIGATIONAL CORP",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    }
+   ]
+  },
+  {
+   "stratum": "2016-2018|Nasdaq",
+   "frame_n": 454,
+   "quota": 4,
+   "picked": 4,
+   "tried": 11,
+   "skipped_no_ticker": [
+    {
+     "cik": 1681689,
+     "name": "Bioverativ Inc.",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1085706,
+     "name": "PENNSYLVANIA COMMERCE BANCORP INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1499807,
+     "name": "K2M GROUP HOLDINGS, INC.",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1036030,
+     "name": "WAYNE SAVINGS BANCSHARES INC /OH/",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 5768,
+     "name": "AMERICAN SCIENCE & ENGINEERING INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 700733,
+     "name": "NATIONAL PENN BANCSHARES INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1344596,
+     "name": "American Railcar Industries, Inc./DE",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    }
+   ]
+  },
+  {
+   "stratum": "2016-2018|NYSE",
+   "frame_n": 245,
+   "quota": 4,
+   "picked": 4,
+   "tried": 8,
+   "skipped_no_ticker": [
+    {
+     "cik": 866121,
+     "name": "ALLIANT TECHSYSTEMS INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1170991,
+     "name": "DIVIDEND CAPITAL TRUST INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 1040719,
+     "name": "HANOVER CAPITAL MORTGAGE HOLDINGS INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    },
+    {
+     "cik": 886035,
+     "name": "GENERAL CABLE CORP /DE/",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    }
+   ]
+  },
+  {
+   "stratum": "2016-2018|NYSE American",
+   "frame_n": 31,
+   "quota": 2,
+   "picked": 2,
+   "tried": 3,
+   "skipped_no_ticker": [
+    {
+     "cik": 1281922,
+     "name": "PELOTON RESOURCES INC",
+     "reason": "XBRL 裡沒有 dei:TradingSymbol",
+     "cover_page_guess_NOT_USED": null
+    }
+   ]
+  },
+  {
+   "stratum": "2019-2021|Nasdaq",
+   "frame_n": 365,
+   "quota": 4,
+   "picked": 4,
+   "tried": 4,
+   "skipped_no_ticker": []
+  },
+  {
+   "stratum": "2019-2021|NYSE",
+   "frame_n": 199,
+   "quota": 4,
+   "picked": 4,
+   "tried": 4,
+   "skipped_no_ticker": []
+  },
+  {
+   "stratum": "2019-2021|NYSE American",
+   "frame_n": 30,
+   "quota": 2,
+   "picked": 2,
+   "tried": 2,
+   "skipped_no_ticker": []
+  },
+  {
+   "stratum": "2022-2024|Nasdaq",
+   "frame_n": 471,
+   "quota": 4,
+   "picked": 4,
+   "tried": 4,
+   "skipped_no_ticker": []
+  },
+  {
+   "stratum": "2022-2024|NYSE",
+   "frame_n": 176,
+   "quota": 4,
+   "picked": 4,
+   "tried": 4,
+   "skipped_no_ticker": []
+  },
+  {
+   "stratum": "2022-2024|NYSE American",
+   "frame_n": 29,
+   "quota": 2,
+   "picked": 2,
+   "tried": 2,
+   "skipped_no_ticker": []
+  },
+  {
+   "stratum": "2025-2026|Nasdaq",
+   "frame_n": 197,
+   "quota": 4,
+   "picked": 4,
+   "tried": 4,
+   "skipped_no_ticker": []
+  },
+  {
+   "stratum": "2025-2026|NYSE",
+   "frame_n": 62,
+   "quota": 4,
+   "picked": 4,
+   "tried": 4,
+   "skipped_no_ticker": []
+  },
+  {
+   "stratum": "2025-2026|NYSE American",
+   "frame_n": 4,
+   "quota": 2,
+   "picked": 2,
+   "tried": 2,
+   "skipped_no_ticker": []
+  }
+ ],
+ "sample": [
+  {
+   "cik": 1028087,
+   "name": "AMERICAN DENTAL PARTNERS INC",
+   "delisted_at": "2012-02-09",
+   "form25_accession": "0001354457-12-000032",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "1998-05-11",
+   "last_periodic_report": "2011-11-09",
+   "exchange": "Nasdaq",
+   "ticker": "ADPI",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "adpi-20110930.xml: >AMERICAN DENTAL PARTNERS INC</dei:EntityRegistrantName> <dei:TradingSymbol contextRef=\"Duration_1_1_2011_To_9_30_2011\">adpi</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1028087/000119312511304330/d224643d10q.htm",
+   "ticker_report_date": "2011-11-09",
+   "sic": "8090",
+   "sic_description": "Services-Misc Health & Allied Services, NEC",
+   "stratum": "2010-2012|Nasdaq"
+  },
+  {
+   "cik": 874495,
+   "name": "JEFFERSONVILLE BANCORP",
+   "delisted_at": "2012-06-04",
+   "form25_accession": "0001193125-12-258656",
+   "form25_type": "25",
+   "form25_class_titles": [
+    "Common Stock, par value $0.50"
+   ],
+   "first_periodic_report": "1996-05-15",
+   "last_periodic_report": "2012-08-14",
+   "exchange": "Nasdaq",
+   "ticker": "JFBC",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "jfbc-20120331.xml: 2012\">Smaller Reporting Company</dei:EntityFilerCategory> <dei:TradingSymbol contextRef=\"Context_3ME_31-Mar-2012\">jfbc</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/874495/000114420412028950/v310453_10q.htm",
+   "ticker_report_date": "2012-05-15",
+   "sic": "6021",
+   "sic_description": "National Commercial Banks",
+   "stratum": "2010-2012|Nasdaq"
+  },
+  {
+   "cik": 935226,
+   "name": "BENIHANA INC",
+   "delisted_at": "2012-08-21",
+   "form25_accession": "0001354457-12-000189",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "1995-08-08",
+   "last_periodic_report": "2012-06-15",
+   "exchange": "Nasdaq",
+   "ticker": "BNHN",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "bnhn-20120401.xml: K0008_STD_371_20120401_0\">No</dei:EntityVoluntaryFilers> <dei:TradingSymbol contextRef=\"eol_PE3746----1210-K0008_STD_371_20120401_0\">BNHN</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/935226/000118811212001968/t73854_10k.htm",
+   "ticker_report_date": "2012-06-15",
+   "sic": "5812",
+   "sic_description": "Retail-Eating  Places",
+   "stratum": "2010-2012|Nasdaq"
+  },
+  {
+   "cik": 277928,
+   "name": "TII INDUSTRIES INC",
+   "delisted_at": "2012-07-31",
+   "form25_accession": "0001354457-12-000164",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common stock"
+   ],
+   "first_periodic_report": "1995-05-15",
+   "last_periodic_report": "2012-05-15",
+   "exchange": "Nasdaq",
+   "ticker": "TIII",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "tiii-20120331.xml: F7F-57A57564507C_1_4\">Q1</dei:DocumentFiscalPeriodFocus> <dei:TradingSymbol contextRef=\"eol_PE10499---1210-Q0001_STD_91_20120331_0\" id=\"id_23172_3810FF5E-9E0F-4B11-9C17-AF26BD9B1CF4_1_400000\">TIII</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/277928/000114420412028857/v313032_10q.htm",
+   "ticker_report_date": "2012-05-15",
+   "sic": "3613",
+   "sic_description": "Switchgear & Switchboard Apparatus",
+   "stratum": "2010-2012|Nasdaq"
+  },
+  {
+   "cik": 1010775,
+   "name": "SOUTHERN ENERGY INC",
+   "delisted_at": "2010-12-07",
+   "form25_accession": "0000876661-10-000453",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2000-11-14",
+   "last_periodic_report": "2010-11-05",
+   "exchange": "NYSE",
+   "ticker": "MIR",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "mir-20100930.xml: 010_To_9_30_2010\">MIRANT CORP</dei:EntityRegistrantName> <dei:TradingSymbol contextRef=\"Duration_1_1_2010_To_9_30_2010\">mir</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1010775/000119312510248962/d10q.htm",
+   "ticker_report_date": "2010-11-05",
+   "sic": "4911",
+   "sic_description": "Electric Services",
+   "stratum": "2010-2012|NYSE"
+  },
+  {
+   "cik": 840467,
+   "name": "BECKMAN INSTRUMENTS INC",
+   "delisted_at": "2011-06-30",
+   "form25_accession": "0000876661-11-000293",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "1994-02-09",
+   "last_periodic_report": "2011-05-10",
+   "exchange": "NYSE",
+   "ticker": "BEC",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "bec-20110331.xml: _31_2011\">BECKMAN COULTER INC</dei:EntityRegistrantName> <dei:TradingSymbol contextRef=\"Duration_1_1_2011_To_3_31_2011\">bec</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/840467/000119312511134016/d10q.htm",
+   "ticker_report_date": "2011-05-10",
+   "sic": "3826",
+   "sic_description": "Laboratory Analytical Instruments",
+   "stratum": "2010-2012|NYSE"
+  },
+  {
+   "cik": 1478085,
+   "name": "Graham Packaging Co Inc.",
+   "delisted_at": "2011-09-09",
+   "form25_accession": "0000876661-11-000390",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2010-03-05",
+   "last_periodic_report": "2011-08-12",
+   "exchange": "NYSE",
+   "ticker": "GRM",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "grm-20110630.xml: 6_STD_181_20110630_0\">Q2</dei:DocumentFiscalPeriodFocus> <dei:TradingSymbol contextRef=\"eol_PE818001--1110-Q0006_STD_181_20110630_0\">GRM</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1478085/000119312511221009/d10q.htm",
+   "ticker_report_date": "2011-08-12",
+   "sic": "3080",
+   "sic_description": "Miscellaneous Plastics Products",
+   "stratum": "2010-2012|NYSE"
+  },
+  {
+   "cik": 1035884,
+   "name": "COMMSCOPE INC",
+   "delisted_at": "2011-01-14",
+   "form25_accession": "0000876661-11-000014",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "1997-08-14",
+   "last_periodic_report": "2010-10-27",
+   "exchange": "NYSE",
+   "ticker": "CTV",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "ctv-20100930.xml: 0_To_9_30_2010\">COMMSCOPE INC</dei:EntityRegistrantName> <dei:TradingSymbol contextRef=\"Duration_1_1_2010_To_9_30_2010\">ctv</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1035884/000119312510238134/d10q.htm",
+   "ticker_report_date": "2010-10-27",
+   "sic": "3663",
+   "sic_description": "Radio & Tv Broadcasting & Communications Equipment",
+   "stratum": "2010-2012|NYSE"
+  },
+  {
+   "cik": 854860,
+   "name": "WILLIAMS CONTROLS INC",
+   "delisted_at": "2012-12-18",
+   "form25_accession": "0001143313-12-000106",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "1995-05-15",
+   "last_periodic_report": "2012-12-12",
+   "exchange": "NYSE American",
+   "ticker": "WMCO",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "wmco-20120930.xml: 011_To_9_30_2012\">No</dei:EntityWellKnownSeasonedIssuer> <dei:TradingSymbol contextRef=\"Duration_10_1_2011_To_9_30_2012\">wmco</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/854860/000117120012001033/i00461_wmco-10k.htm",
+   "ticker_report_date": "2012-12-12",
+   "sic": "3714",
+   "sic_description": "Motor Vehicle Parts & Accessories",
+   "stratum": "2010-2012|NYSE American"
+  },
+  {
+   "cik": 1325460,
+   "name": "Federal Services Acquisition CORP",
+   "delisted_at": "2012-04-02",
+   "form25_accession": "0001143313-12-000024",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Shares"
+   ],
+   "first_periodic_report": "2005-12-02",
+   "last_periodic_report": "2011-11-14",
+   "exchange": "NYSE American",
+   "ticker": "ATSC",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "atsc-20110930.xml: -2011\">Smaller Reporting Company</dei:EntityFilerCategory> <dei:TradingSymbol contextRef=\"Context_9ME_30-Sep-2011\">atsc</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1325460/000114420411064551/v238190_10q.htm",
+   "ticker_report_date": "2011-11-14",
+   "sic": "8742",
+   "sic_description": "Services-Management Consulting Services",
+   "stratum": "2010-2012|NYSE American"
+  },
+  {
+   "cik": 783739,
+   "name": "SOUTH ALABAMA BANCORPORATION INC /DE/",
+   "delisted_at": "2013-02-19",
+   "form25_accession": "0001354457-13-000038",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "1995-08-11",
+   "last_periodic_report": "2012-11-13",
+   "exchange": "Nasdaq",
+   "ticker": "BTFG",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "btfg-20120930.xml: ABC-26B66660F0DB_1_4\">Q3</dei:DocumentFiscalPeriodFocus> <dei:TradingSymbol contextRef=\"eol_PE5313----1210-Q0008_STD_274_20120930_0\" id=\"id_62510_8AE3812F-4DCE-40B0-AAFC-85DFC40F411C_1_400000\">BTFG</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/783739/000115752312006000/a50470355.htm",
+   "ticker_report_date": "2012-11-13",
+   "sic": "6021",
+   "sic_description": "National Commercial Banks",
+   "stratum": "2013-2015|Nasdaq"
+  },
+  {
+   "cik": 1093649,
+   "name": "IDENIX PHARMACEUTICALS INC",
+   "delisted_at": "2014-08-05",
+   "form25_accession": "0001354457-14-000119",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2004-08-26",
+   "last_periodic_report": "2014-07-31",
+   "exchange": "Nasdaq",
+   "ticker": "IDIX",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "idix-20140630.xml: curitiesExcludedFromComputationOfEarningsPerShareAmount> <dei:TradingSymbol contextRef=\"eol_PE107188--1410-Q0005_STD_181_20140630_0\" id=\"id_3787991_25A86647-9AD1-42B6-B777-6C3B6BBCB5BF_1_400000\">IDIX</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1093649/000119312514289752/d757677d10q.htm",
+   "ticker_report_date": "2014-07-31",
+   "sic": "2834",
+   "sic_description": "Pharmaceutical Preparations",
+   "stratum": "2013-2015|Nasdaq"
+  },
+  {
+   "cik": 1459266,
+   "name": "ZS Pharma, Inc.",
+   "delisted_at": "2015-12-17",
+   "form25_accession": "0001354457-15-000248",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2014-08-14",
+   "last_periodic_report": "2015-11-09",
+   "exchange": "Nasdaq",
+   "ticker": "ZSPH",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "zsph-20150930.xml: reMinimumRentalPaymentsForOperatingLeasesTableTextBlock> <dei:TradingSymbol contextRef=\"eol_PE801589--1510-Q0007_STD_273_20150930_0\" id=\"id_6597358_A338D70F-0CCF-4C92-AFEE-8C98617A1B38_1_0\">ZSPH</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1459266/000119312515371791/d41305d10q.htm",
+   "ticker_report_date": "2015-11-09",
+   "sic": "2834",
+   "sic_description": "Pharmaceutical Preparations",
+   "stratum": "2013-2015|Nasdaq"
+  },
+  {
+   "cik": 778734,
+   "name": "MEASUREMENT SPECIALTIES INC",
+   "delisted_at": "2014-10-09",
+   "form25_accession": "0001354457-14-000161",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "1995-08-14",
+   "last_periodic_report": "2014-08-06",
+   "exchange": "Nasdaq",
+   "ticker": "MEAS",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "meas-20140630.xml: Factid_595\">Accelerated Filer</dei:EntityFilerCategory> <dei:TradingSymbol contextRef=\"P04_01_2014To06_30_2014\" id=\"Factid_596\">MEAS</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/778734/000114420414047371/v384144_10q.htm",
+   "ticker_report_date": "2014-08-06",
+   "sic": "3829",
+   "sic_description": "Measuring & Controlling Devices, NEC",
+   "stratum": "2013-2015|Nasdaq"
+  },
+  {
+   "cik": 1159297,
+   "name": "MEADWESTVACO CORP",
+   "delisted_at": "2015-07-02",
+   "form25_accession": "0000876661-15-000283",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2002-03-18",
+   "last_periodic_report": "2015-05-11",
+   "exchange": "NYSE",
+   "ticker": "MWV",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "mwv-20150331.xml: B_1_400001\">MEADWESTVACO CORP</dei:EntityRegistrantName> <dei:TradingSymbol contextRef=\"eol_PE91526---1510-Q0006_STD_90_20150331_0\" id=\"id_4805256_7CD62AC7-B592-4E1F-A739-C28F78FF748B_1_400000\">MWV</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1159297/000119312515182097/d895807d10q.htm",
+   "ticker_report_date": "2015-05-11",
+   "sic": "2621",
+   "sic_description": "Paper Mills",
+   "stratum": "2013-2015|NYSE"
+  },
+  {
+   "cik": 1492832,
+   "name": "EQUAL ENERGY LTD.",
+   "delisted_at": "2014-07-31",
+   "form25_accession": "0000876661-14-000444",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2013-03-15",
+   "last_periodic_report": "2014-08-07",
+   "exchange": "NYSE",
+   "ticker": "EQU",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "equ-20140331.xml: ationIncomeLossFromDiscontinuedOperationBeforeIncomeTax> <dei:TradingSymbol contextRef=\"eol_PE829626--1410-Q0003_STD_90_20140331_0\" id=\"id_5335912_895CF517-E7BC-40F9-BAE1-BEB2D1C2B27A_1_400000\">EQU</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1492832/000119312514190363/d702424d10q.htm",
+   "ticker_report_date": "2014-05-08",
+   "sic": "1311",
+   "sic_description": "Crude Petroleum & Natural Gas",
+   "stratum": "2013-2015|NYSE"
+  },
+  {
+   "cik": 1277406,
+   "name": "SPIRIT FINANCE CORP",
+   "delisted_at": "2013-07-22",
+   "form25_accession": "0000876661-13-000640",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock of Spirit Realty Capital, Inc. ('Old Spirit')"
+   ],
+   "first_periodic_report": "2005-03-24",
+   "last_periodic_report": "2013-05-09",
+   "exchange": "NYSE",
+   "ticker": "SRC",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "src-20130331.xml: tageOfPropertiesOperatedInRelationToInvestmentPortfolio> <dei:TradingSymbol contextRef=\"eol_PE617470--1310-Q0012_STD_90_20130331_0\" id=\"id_1528061_C0DD2DF5-9EAF-4607-882C-C9F1AE6C8657_1_400000\">SRC</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1277406/000119312513209432/d516213d10q.htm",
+   "ticker_report_date": "2013-05-09",
+   "sic": "6798",
+   "sic_description": "Real Estate Investment Trusts",
+   "stratum": "2013-2015|NYSE"
+  },
+  {
+   "cik": 789073,
+   "name": "AMERICAN BRANDS INC /DE/",
+   "delisted_at": "2014-04-30",
+   "form25_accession": "0000876661-14-000184",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "1994-03-28",
+   "last_periodic_report": "2014-02-18",
+   "exchange": "NYSE",
+   "ticker": "BEAM",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "beam-20131231.xml: o4217_USD\">845700000</beam:NetSalesExcludingExciseTaxes> <dei:TradingSymbol contextRef=\"eol_PE9142----1310-K0018_STD_365_20131231_0\" id=\"id_3871452_4707129F-1705-461B-BF0C-48EC664DB4AA_1_400000\">BEAM</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/789073/000119312514057299/d659544d10k.htm",
+   "ticker_report_date": "2014-02-18",
+   "sic": "2080",
+   "sic_description": "Beverages",
+   "stratum": "2013-2015|NYSE"
+  },
+  {
+   "cik": 1404592,
+   "name": "Revett Minerals Inc.",
+   "delisted_at": "2015-06-16",
+   "form25_accession": "0001143313-15-000026",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2007-11-13",
+   "last_periodic_report": "2015-05-05",
+   "exchange": "NYSE American",
+   "ticker": "RVM",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "rvm-20150331.xml: TO_31_March_2015\">--12-31</dei:CurrentFiscalYearEndDate> <dei:TradingSymbol contextRef=\"cx_01_January_2015_TO_31_March_2015\">rvm</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1404592/000106299315002377/form10q.htm",
+   "ticker_report_date": "2015-05-05",
+   "sic": "1040",
+   "sic_description": "Gold and Silver Ores",
+   "stratum": "2013-2015|NYSE American"
+  },
+  {
+   "cik": 1078383,
+   "name": "IPARTY CORP",
+   "delisted_at": "2013-05-14",
+   "form25_accession": "0001143313-13-000068",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "1999-10-22",
+   "last_periodic_report": "2013-05-23",
+   "exchange": "NYSE American",
+   "ticker": "IPT",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "ipt-20121229.xml: curitiesExcludedFromComputationOfEarningsPerShareAmount> <dei:TradingSymbol contextRef=\"eol_PE10693---1210-K0016_STD_364_20121229_0\" id=\"id_1141572_3042443D-740E-4CDB-953C-C827E6026692_1_400000\">IPT</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1078383/000115752313001607/a50597489.htm",
+   "ticker_report_date": "2013-03-29",
+   "sic": "5940",
+   "sic_description": "Retail-Miscellaneous Shopping Goods Stores",
+   "stratum": "2013-2015|NYSE American"
+  },
+  {
+   "cik": 870753,
+   "name": "NUMEREX CORP /PA/",
+   "delisted_at": "2017-12-07",
+   "form25_accession": "0001354457-17-000245",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Class A Common Stock"
+   ],
+   "first_periodic_report": "1996-06-12",
+   "last_periodic_report": "2017-11-07",
+   "exchange": "Nasdaq",
+   "ticker": "NMRX",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "nmrx-20170930.xml: _Sep_2017T00_00_00\">0000870753</dei:EntityCentralIndexKey> <dei:TradingSymbol contextRef=\"Context_9ME_01_Jan_2017T00_00_00_TO_30_Sep_2017T00_00_00\">nmrx</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/870753/000114420417056922/tv478188_10q.htm",
+   "ticker_report_date": "2017-11-07",
+   "sic": "3669",
+   "sic_description": "Communications Equipment, NEC",
+   "stratum": "2016-2018|Nasdaq"
+  },
+  {
+   "cik": 1076939,
+   "name": "HOLLYWOOD ENTERTAINMENT NETWORK INC/CA",
+   "delisted_at": "2016-02-23",
+   "form25_accession": "0001354457-16-000309",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2000-04-14",
+   "last_periodic_report": "2014-11-14",
+   "exchange": "Nasdaq",
+   "ticker": "SKBI",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "skbi-20140930.xml: 90\">Smaller Reporting Company</dei:EntityFilerCategory> <dei:TradingSymbol contextRef=\"P01_01_2014To09_30_2014\" id=\"Factid_791\">SKBI</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1076939/000114420414068847/v393723_10q.htm",
+   "ticker_report_date": "2014-11-14",
+   "sic": "2834",
+   "sic_description": "Pharmaceutical Preparations",
+   "stratum": "2016-2018|Nasdaq"
+  },
+  {
+   "cik": 1100917,
+   "name": "ONVIA COM INC",
+   "delisted_at": "2017-11-17",
+   "form25_accession": "0001354457-17-000229",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2000-05-15",
+   "last_periodic_report": "2017-11-14",
+   "exchange": "Nasdaq",
+   "ticker": "ONVI",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "onvi-20170930.xml: 7-09-30\" id=\"c-8\">No</dei:EntityWellKnownSeasonedIssuer> <dei:TradingSymbol contextRef=\"d_2017-01-01_2017-09-30\" id=\"c-3\">onvi</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1100917/000117184317006997/f10q_111417p.htm",
+   "ticker_report_date": "2017-11-14",
+   "sic": "7389",
+   "sic_description": "Services-Business Services, NEC",
+   "stratum": "2016-2018|Nasdaq"
+  },
+  {
+   "cik": 1017793,
+   "name": "SUN BANCORP INC /NJ/",
+   "delisted_at": "2018-01-31",
+   "form25_accession": "0001354457-18-000019",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "1996-09-24",
+   "last_periodic_report": "2017-11-09",
+   "exchange": "Nasdaq",
+   "ticker": "SNBC",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "snbc-20170930.xml: 93_20170101_20170930\">Q3</dei:DocumentFiscalPeriodFocus> <dei:TradingSymbol id=\"F_000005\" contextRef=\"C_0001017793_20170101_20170930\">SNBC</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1017793/000156459017023287/snbc-10q_20170930.htm",
+   "ticker_report_date": "2017-11-09",
+   "sic": "6029",
+   "sic_description": "Commercial Banks, NEC",
+   "stratum": "2016-2018|Nasdaq"
+  },
+  {
+   "cik": 1636023,
+   "name": "WestRock Co",
+   "delisted_at": "2018-11-05",
+   "form25_accession": "0000876661-18-001168",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2015-08-10",
+   "last_periodic_report": "2018-08-03",
+   "exchange": "NYSE",
+   "ticker": "WRK",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "wrk-20180630.xml: 23_20171001_20180630\">Q3</dei:DocumentFiscalPeriodFocus> <dei:TradingSymbol id=\"F_000005\" contextRef=\"C_0001636023_20171001_20180630\">WRK</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1636023/000156459018019008/wrk-10q_20180630.htm",
+   "ticker_report_date": "2018-08-03",
+   "sic": "2650",
+   "sic_description": "Paperboard Containers & Boxes",
+   "stratum": "2016-2018|NYSE"
+  },
+  {
+   "cik": 1010858,
+   "name": "FMSA HOLDINGS INC",
+   "delisted_at": "2018-06-01",
+   "form25_accession": "0000876661-18-000653",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2014-11-13",
+   "last_periodic_report": "2018-05-10",
+   "exchange": "NYSE",
+   "ticker": "FMSA",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "fmsa-20180331.xml: 58_20180101_20180331\">Q1</dei:DocumentFiscalPeriodFocus> <dei:TradingSymbol id=\"F_000005\" contextRef=\"C_0001010858_20180101_20180331\">FMSA</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1010858/000156459018013031/fmsa-10q_20180331.htm",
+   "ticker_report_date": "2018-05-10",
+   "sic": "1400",
+   "sic_description": "Mining & Quarrying of  Nonmetallic Minerals (No Fuels)",
+   "stratum": "2016-2018|NYSE"
+  },
+  {
+   "cik": 1138951,
+   "name": "LEAPFROG ENTERPRISES INC",
+   "delisted_at": "2016-04-05",
+   "form25_accession": "0000876661-16-000898",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Class A Common Stock"
+   ],
+   "first_periodic_report": "2002-08-29",
+   "last_periodic_report": "2016-02-09",
+   "exchange": "NYSE",
+   "ticker": "LF",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "lf-20151231.xml: =\"Factid_9\">Accelerated Filer</dei:EntityFilerCategory> <dei:TradingSymbol contextRef=\"P04_01_2015To12_31_2015\" id=\"Factid_10\">LF</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1138951/000114420416080034/v429658_10q.htm",
+   "ticker_report_date": "2016-02-09",
+   "sic": "3944",
+   "sic_description": "Games, Toys & Children's Vehicles (No Dolls & Bicycles)",
+   "stratum": "2016-2018|NYSE"
+  },
+  {
+   "cik": 68270,
+   "name": "MORRISON RESTAURANTS INC/",
+   "delisted_at": "2017-12-22",
+   "form25_accession": "0000876661-17-000802",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "1994-01-14",
+   "last_periodic_report": "2017-10-16",
+   "exchange": "NYSE",
+   "ticker": "RT",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "rt-20170905.xml: 7-09-05\" id=\"c-8\">No</dei:EntityWellKnownSeasonedIssuer> <dei:TradingSymbol contextRef=\"d_2017-06-07_2017-09-05\" id=\"c-3\">rt</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/68270/000143774917017185/rt20170905b_10q.htm",
+   "ticker_report_date": "2017-10-16",
+   "sic": "5812",
+   "sic_description": "Retail-Eating  Places",
+   "stratum": "2016-2018|NYSE"
+  },
+  {
+   "cik": 803647,
+   "name": "VERSAR INC",
+   "delisted_at": "2017-11-06",
+   "form25_accession": "0001143313-17-000045",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "1995-02-14",
+   "last_periodic_report": "2017-09-25",
+   "exchange": "NYSE American",
+   "ticker": "VSR",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "vsr-20170630.xml: 5\">Smaller Reporting Company</dei:EntityFilerCategory> <dei:TradingSymbol contextRef=\"P06_28_2014To06_26_2015\">VSR</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/803647/000165495417008786/a10k_v1.htm",
+   "ticker_report_date": "2017-09-25",
+   "sic": "8711",
+   "sic_description": "Services-Engineering Services",
+   "stratum": "2016-2018|NYSE American"
+  },
+  {
+   "cik": 1088162,
+   "name": "MAD CATZ INTERACTIVE INC",
+   "delisted_at": "2017-04-04",
+   "form25_accession": "0001143313-17-000004",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2005-07-12",
+   "last_periodic_report": "2017-02-02",
+   "exchange": "NYSE American",
+   "ticker": "MCZ",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "mcz-20161231.xml: 62_20160401_20161231\">Q3</dei:DocumentFiscalPeriodFocus> <dei:TradingSymbol id=\"F_000006\" contextRef=\"C_0001088162_20160401_20161231\">MCZ</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1088162/000156459017000901/mcz-10q_20161231.htm",
+   "ticker_report_date": "2017-02-02",
+   "sic": "3944",
+   "sic_description": "Games, Toys & Children's Vehicles (No Dolls & Bicycles)",
+   "stratum": "2016-2018|NYSE American"
+  },
+  {
+   "cik": 1365101,
+   "name": "Primo Water Corp",
+   "delisted_at": "2020-03-02",
+   "form25_accession": "0001354457-20-000105",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2010-12-07",
+   "last_periodic_report": "2019-11-06",
+   "exchange": "Nasdaq",
+   "ticker": "PRMW",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "prmw-20190930.xml: 019-09-30\" id=\"c-32\">Common Stock</dei:Security12bTitle> <dei:TradingSymbol contextRef=\"d_2019-01-01_2019-09-30\" id=\"c-19\">prmw</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1365101/000143774919021768/prmw20190930_10q.htm",
+   "ticker_report_date": "2019-11-06",
+   "sic": "5141",
+   "sic_description": "Wholesale-Groceries, General Line",
+   "stratum": "2019-2021|Nasdaq"
+  },
+  {
+   "cik": 1630132,
+   "name": "Bojangles', Inc.",
+   "delisted_at": "2019-01-28",
+   "form25_accession": "0001354457-19-000033",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2015-06-11",
+   "last_periodic_report": "2018-11-08",
+   "exchange": "Nasdaq",
+   "ticker": "BOJA",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "boja-20180930.xml: ementByShareBasedPaymentAwardOptionsGrantsInPeriodGross> <dei:TradingSymbol contextRef=\"eol_PE962218--1810-Q0013_STD_273_20180930_0\" id=\"id_10459577_E36DAA35-A9AB-430A-AA4F-DFB1F422EA74_1_400000\">BOJA</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1630132/000119312518322573/d628896d10q.htm",
+   "ticker_report_date": "2018-11-08",
+   "sic": "5812",
+   "sic_description": "Retail-Eating  Places",
+   "stratum": "2019-2021|Nasdaq"
+  },
+  {
+   "cik": 1714798,
+   "name": "Prevail Therapeutics Inc.",
+   "delisted_at": "2021-01-22",
+   "form25_accession": "0001354457-21-000090",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "common stock"
+   ],
+   "first_periodic_report": "2019-08-14",
+   "last_periodic_report": "2020-11-13",
+   "exchange": "Nasdaq",
+   "ticker": "PRVL",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "prvl-20200930.xml: 98_20200101_20200930\">Q3</dei:DocumentFiscalPeriodFocus> <dei:TradingSymbol id=\"F_000005\" contextRef=\"C_0001714798_20200101_20200930\">PRVL</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1714798/000156459020053728/prvl-10q_20200930.htm",
+   "ticker_report_date": "2020-11-13",
+   "sic": "2836",
+   "sic_description": "Biological Products, (No Diagnostic Substances)",
+   "stratum": "2019-2021|Nasdaq"
+  },
+  {
+   "cik": 354908,
+   "name": "FLIR SYSTEMS INC",
+   "delisted_at": "2021-05-14",
+   "form25_accession": "0001354457-21-000563",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "1996-05-15",
+   "last_periodic_report": "2021-05-06",
+   "exchange": "Nasdaq",
+   "ticker": "FLIR",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": "ib898ae07efe341fba0aded20e3e42873_D20210101-20210331\" name=\"dei:TradingSymbol\" id=\"id3VybDovL2RvY3MudjEvZG9jOjA3ZmJlNDc1MWY2NjRhYWY5OGE2OTFhNTUwYmMzMzQ1L3NlYzowN2ZiZTQ3NTFmNjY0YWFmOThhNjkxYTU1MGJjMzM0NV8xL2ZyYWc6ZjY1MDU3NjFlYjY3NDY5ZGJmZTQ4",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/354908/000035490821000066/flir-20210331.htm",
+   "ticker_report_date": "2021-05-06",
+   "sic": "3812",
+   "sic_description": "Search, Detection, Navigation, Guidance, Aeronautical Sys",
+   "stratum": "2019-2021|Nasdaq"
+  },
+  {
+   "cik": 823094,
+   "name": "SOTHEBYS HOLDINGS INC",
+   "delisted_at": "2019-10-03",
+   "form25_accession": "0000876661-19-001019",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "1994-03-31",
+   "last_periodic_report": "2019-11-12",
+   "exchange": "NYSE",
+   "ticker": "BID",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": "084917e1004-wk-Fact-FDD5197C397A595FDE09E6CB1F57C796\" name=\"dei:TradingSymbol\" contextRef=\"FD2019Q2YTD\">BID</ix:nonNum",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/823094/000082309419000029/bid6302019-10q.htm",
+   "ticker_report_date": "2019-07-30",
+   "sic": "7389",
+   "sic_description": "Services-Business Services, NEC",
+   "stratum": "2019-2021|NYSE"
+  },
+  {
+   "cik": 890319,
+   "name": "TAUBMAN CENTERS INC",
+   "delisted_at": "2020-12-29",
+   "form25_accession": "0000876661-20-001274",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "1996-05-07",
+   "last_periodic_report": "2020-11-09",
+   "exchange": "NYSE",
+   "ticker": "TCO",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": "4136999e882-wk-Fact-E6D2C4C08BA77B672B730710A3148349\" name=\"dei:TradingSymbol\" contextRef=\"FD2020Q3YTD_us-gaap_StatementClassOfStockAxis_us-gaap_CommonStockMember\">TCO</ix:nonNum",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/890319/000089031920000106/tco-20200930x10q.htm",
+   "ticker_report_date": "2020-11-09",
+   "sic": "6798",
+   "sic_description": "Real Estate Investment Trusts",
+   "stratum": "2019-2021|NYSE"
+  },
+  {
+   "cik": 1616314,
+   "name": "MedEquities Realty Trust, Inc.",
+   "delisted_at": "2019-05-17",
+   "form25_accession": "0000876661-19-000497",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2016-11-10",
+   "last_periodic_report": "2019-05-09",
+   "exchange": "NYSE",
+   "ticker": "MRT",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "mrt-20190331.xml: 14_20190101_20190331\">Q1</dei:DocumentFiscalPeriodFocus> <dei:TradingSymbol id=\"F_000005\" contextRef=\"C_0001616314_20190101_20190331\">MRT</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1616314/000156459019017360/mrt-10q_20190331.htm",
+   "ticker_report_date": "2019-05-09",
+   "sic": "6798",
+   "sic_description": "Real Estate Investment Trusts",
+   "stratum": "2019-2021|NYSE"
+  },
+  {
+   "cik": 1158863,
+   "name": "WAGEWORKS, INC.",
+   "delisted_at": "2019-08-30",
+   "form25_accession": "0000876661-19-000898",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2012-08-09",
+   "last_periodic_report": "2019-08-08",
+   "exchange": "NYSE",
+   "ticker": "WAGE",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": "5450435e701-wk-Fact-8C28EF0525A664F34C28FC046E5A5A08\" name=\"dei:TradingSymbol\" contextRef=\"FD2019Q2YTD\">WAGE</ix:nonNum",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1158863/000115886319000056/wage-q22019x10q.htm",
+   "ticker_report_date": "2019-08-08",
+   "sic": "7389",
+   "sic_description": "Services-Business Services, NEC",
+   "stratum": "2019-2021|NYSE"
+  },
+  {
+   "cik": 1140310,
+   "name": "ZBB ENERGY CORP",
+   "delisted_at": "2019-03-20",
+   "form25_accession": "0001143313-19-000027",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2007-10-10",
+   "last_periodic_report": "2018-11-13",
+   "exchange": "NYSE American",
+   "ticker": "ESNC",
+   "ticker_source": "xbrl_instance_dei_TradingSymbol",
+   "ticker_evidence": "esnc-20180930.xml: 9_30_2018\">Non-accelerated Filer</dei:EntityFilerCategory> <dei:TradingSymbol id=\"Factid_2027929\" contextRef=\"P07_01_2018To09_30_2018\">ESNC</dei:Tradi",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1140310/000114420418058922/tv505964_10q.htm",
+   "ticker_report_date": "2018-11-13",
+   "sic": "4911",
+   "sic_description": "Electric Services",
+   "stratum": "2019-2021|NYSE American"
+  },
+  {
+   "cik": 1071993,
+   "name": "MGPX VENTURES INC",
+   "delisted_at": "2021-12-08",
+   "form25_accession": "0001143313-21-000051",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "1999-02-12",
+   "last_periodic_report": "2021-11-15",
+   "exchange": "NYSE American",
+   "ticker": "MCF",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": "uration_1_1_2021_To_9_30_2021_K-uyOsOz8Uqz0JV8ULQAMA\" name=\"dei:TradingSymbol\" id=\"Tc_ZLcIp2xvDE2gMdoxFrAOLw_1_1\">MCF</ix:nonNum",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1071993/000107199321000029/mcf-20210930x10q.htm",
+   "ticker_report_date": "2021-11-15",
+   "sic": "1311",
+   "sic_description": "Crude Petroleum & Natural Gas",
+   "stratum": "2019-2021|NYSE American"
+  },
+  {
+   "cik": 1102934,
+   "name": "CABOT MICROELECTRONICS CORP",
+   "delisted_at": "2022-07-06",
+   "form25_accession": "0001354457-22-000381",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2000-05-17",
+   "last_periodic_report": "2022-05-05",
+   "exchange": "Nasdaq",
+   "ticker": "CCMP",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": "i77afb85a9e9d46d08442478759ad1144_D20211001-20220331\" name=\"dei:TradingSymbol\" id=\"id3VybDovL2RvY3MudjEvZG9jOjMxODVjYjk3MjllMTRmODhhYzdmN2UxMmY0YmU4NWJmL3NlYzozMTg1Y2I5NzI5ZTE0Zjg4YWM3ZjdlMTJmNGJlODViZl8xL2ZyYWc6N2Q3N2Y3MjEwNDQyNDA0MThjYTZj",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1102934/000110293422000013/ccmp-20220331.htm",
+   "ticker_report_date": "2022-05-05",
+   "sic": "3674",
+   "sic_description": "Semiconductors & Related Devices",
+   "stratum": "2022-2024|Nasdaq"
+  },
+  {
+   "cik": 1273931,
+   "name": "MONEYGRAM INTERNATIONAL INC",
+   "delisted_at": "2023-06-01",
+   "form25_accession": "0001354457-23-000371",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2004-08-13",
+   "last_periodic_report": "2023-04-28",
+   "exchange": "Nasdaq",
+   "ticker": "MGI",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": "i6210b444409f4274a4c098441910696d_D20230101-20230331\" name=\"dei:TradingSymbol\" id=\"id3VybDovL2RvY3MudjEvZG9jOjE1OTBlNjRhOGMzZjQwNTM5MjZlNGJkNWJkZTVkZTBmL3NlYzoxNTkwZTY0YThjM2Y0MDUzOTI2ZTRiZDViZGU1ZGUwZl8xL2ZyYWc6NTFhYmEwMmYzY2U2NGIwN2EyYWI1",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1273931/000127393123000071/mgi-20230331.htm",
+   "ticker_report_date": "2023-04-28",
+   "sic": "7389",
+   "sic_description": "Services-Business Services, NEC",
+   "stratum": "2022-2024|Nasdaq"
+  },
+  {
+   "cik": 1042074,
+   "name": "CymaBay Therapeutics, Inc.",
+   "delisted_at": "2024-03-22",
+   "form25_accession": "0001354457-24-000200",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2013-11-25",
+   "last_periodic_report": "2024-02-28",
+   "exchange": "Nasdaq",
+   "ticker": "CBAY",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": "yle=\"font-weight:bold;display:inline;\"><ix:nonNumeric name=\"dei:TradingSymbol\" contextRef=\"P01_01_2023To12_31_2023\" id=\"ixv-20273\">CBAY</ix:nonNum",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1042074/000119312524050758/d719301d10k.htm",
+   "ticker_report_date": "2024-02-28",
+   "sic": "2834",
+   "sic_description": "Pharmaceutical Preparations",
+   "stratum": "2022-2024|Nasdaq"
+  },
+  {
+   "cik": 1797336,
+   "name": "Ayala Pharmaceuticals, Inc.",
+   "delisted_at": "2023-01-19",
+   "form25_accession": "0001354457-23-000028",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2020-06-22",
+   "last_periodic_report": "2023-03-31",
+   "exchange": "Nasdaq",
+   "ticker": "AYLA",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": "; vertical-align: top\"><ix:nonNumeric contextRef=\"c0\" name=\"dei:TradingSymbol\"><span style=\"font-family: Times New Roman, Times, Serif; font-size: 10pt\"><b>AYLA</b></span>",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1797336/000121390022068975/f10q0922_ayalapharma.htm",
+   "ticker_report_date": "2022-11-03",
+   "sic": "2836",
+   "sic_description": "Biological Products, (No Diagnostic Substances)",
+   "stratum": "2022-2024|Nasdaq"
+  },
+  {
+   "cik": 1421182,
+   "name": "Verso Paper Corp.",
+   "delisted_at": "2022-03-31",
+   "form25_accession": "0000876661-22-000328",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Class A Common Stock"
+   ],
+   "first_periodic_report": "2008-08-07",
+   "last_periodic_report": "2022-02-28",
+   "exchange": "NYSE",
+   "ticker": "VRS",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": "i88c8acf50b274821b150222b03667911_D20210101-20211231\" name=\"dei:TradingSymbol\" id=\"id3VybDovL2RvY3MudjEvZG9jOjE2NjRlYWE1YTlmMDQ2MTdiZWFlZmZhNzdhODg3OTM3L3NlYzoxNjY0ZWFhNWE5ZjA0NjE3YmVhZWZmYTc3YTg4NzkzN18xL2ZyYWc6ZTNiZmNkMTdmODZjNDVkZGE1MTQ4",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1421182/000142118222000006/vrs-20211231.htm",
+   "ticker_report_date": "2022-02-28",
+   "sic": "2621",
+   "sic_description": "Paper Mills",
+   "stratum": "2022-2024|NYSE"
+  },
+  {
+   "cik": 1113256,
+   "name": "ARVINMERITOR INC",
+   "delisted_at": "2022-08-03",
+   "form25_accession": "0000876661-22-000609",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2000-08-14",
+   "last_periodic_report": "2022-08-02",
+   "exchange": "NYSE",
+   "ticker": "MTOR",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": "i641b6e7d83494e4e9905f9bd85d9c366_D20211001-20220630\" name=\"dei:TradingSymbol\" id=\"id3VybDovL2RvY3MudjEvZG9jOjUwNTZkOWQ0MzI4YzQ4N2E5NDFkNTdmMjVlZjUxMmQ1L3NlYzo1MDU2ZDlkNDMyOGM0ODdhOTQxZDU3ZjI1ZWY1MTJkNV8xL2ZyYWc6YzgyMTI5NDU4ZTdjNDhiYmEyZjhm",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1113256/000111325622000070/mtor-20220703.htm",
+   "ticker_report_date": "2022-08-02",
+   "sic": "3714",
+   "sic_description": "Motor Vehicle Parts & Accessories",
+   "stratum": "2022-2024|NYSE"
+  },
+  {
+   "cik": 1866390,
+   "name": "Babylon Holdings Ltd",
+   "delisted_at": "2023-07-17",
+   "form25_accession": "0000876661-23-000587",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Class A Ordinary Shares"
+   ],
+   "first_periodic_report": "2023-03-16",
+   "last_periodic_report": "2023-05-10",
+   "exchange": "NYSE",
+   "ticker": "BBLN",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": "if500fe28829e499394bf7e8ad30f148e_D20230101-20230331\" name=\"dei:TradingSymbol\" id=\"id3VybDovL2RvY3MudjEvZG9jOmFiZjY5OTMxN2M3ZDQ0YzE4NDNjMGM2OTJiNjgxZjM1L3NlYzphYmY2OTkzMTdjN2Q0NGMxODQzYzBjNjkyYjY4MWYzNV8xL2ZyYWc6MjhkYzQ2MjA2MGQzNGY5YzkxODk4",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1866390/000186639023000089/bbln-20230331.htm",
+   "ticker_report_date": "2023-05-10",
+   "sic": "8000",
+   "sic_description": "Services-Health Services",
+   "stratum": "2022-2024|NYSE"
+  },
+  {
+   "cik": 1757932,
+   "name": "RMG Acquisition Corp.",
+   "delisted_at": "2022-10-17",
+   "form25_accession": "0000876661-22-000847",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2019-03-29",
+   "last_periodic_report": "2022-08-08",
+   "exchange": "NYSE",
+   "ticker": "RMO",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": "i64d7c5449e01442f951c84c78a683adb_D20220101-20220630\" name=\"dei:TradingSymbol\" id=\"id3VybDovL2RvY3MudjEvZG9jOjllOTk0ODU0YjM1YzQzNWNhZTdlMWMyOWNhMjI3Y2I1L3NlYzo5ZTk5NDg1NGIzNWM0MzVjYWU3ZTFjMjljYTIyN2NiNV8xL2ZyYWc6OWEzODA0ZjAwZjcwNDE5OTliN2Ux",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1757932/000175793222000047/rmo-20220630.htm",
+   "ticker_report_date": "2022-08-08",
+   "sic": "3714",
+   "sic_description": "Motor Vehicle Parts & Accessories",
+   "stratum": "2022-2024|NYSE"
+  },
+  {
+   "cik": 319458,
+   "name": "ASPEN EXPLORATION CORP",
+   "delisted_at": "2024-11-19",
+   "form25_accession": "0001143313-24-000115",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common stock"
+   ],
+   "first_periodic_report": "1995-11-07",
+   "last_periodic_report": "2024-12-30",
+   "exchange": "NYSE American",
+   "ticker": "ENSV",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": ":normal;text-align:center;margin:0pt;\"><ix:nonNumeric name=\"dei:TradingSymbol\" contextRef=\"d_2024-01-01_2024-06-30\" id=\"ixv-10101\">ENSV</ix:nonNum",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/319458/000143774924026825/ensv20240630d_10q.htm",
+   "ticker_report_date": "2024-08-14",
+   "sic": "1389",
+   "sic_description": "Oil & Gas Field Services, NEC",
+   "stratum": "2022-2024|NYSE American"
+  },
+  {
+   "cik": 1529463,
+   "name": "FTS International, Inc.",
+   "delisted_at": "2022-03-07",
+   "form25_accession": "0001143313-22-000018",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Class A Common Stock"
+   ],
+   "first_periodic_report": "2018-03-09",
+   "last_periodic_report": "2021-11-05",
+   "exchange": "NYSE American",
+   "ticker": "FTSI",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": "uration_1_1_2021_To_9_30_2021_1C-Wicsge0uvzR0NQ4NwPA\" name=\"dei:TradingSymbol\" id=\"Tc_ln9khNnKo0WFYJa_VY_qiA_2_2\"><span style=\"font-size:8pt;\">FTSI</span></ix",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1529463/000155837021014842/ftsi-20210930x10q.htm",
+   "ticker_report_date": "2021-11-05",
+   "sic": "1389",
+   "sic_description": "Oil & Gas Field Services, NEC",
+   "stratum": "2022-2024|NYSE American"
+  },
+  {
+   "cik": 1680379,
+   "name": "Sterling Bancorp, Inc.",
+   "delisted_at": "2025-04-01",
+   "form25_accession": "0001104659-25-030477",
+   "form25_type": "25",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2018-03-28",
+   "last_periodic_report": "2025-03-14",
+   "exchange": "Nasdaq",
+   "ticker": "SBT",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": "ration_1_1_2024_To_12_31_2024_-p_kExPO-UerZvaXcgcIYA\" name=\"dei:TradingSymbol\" id=\"Tc_qca2vINiMEKztPRRSabCQA_2_2\"><span style=\"font-size:7pt;\">SBT</span></ix",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1680379/000141057825000346/sbt-20241231x10k.htm",
+   "ticker_report_date": "2025-03-14",
+   "sic": "6035",
+   "sic_description": "Savings Institution, Federally Chartered",
+   "stratum": "2025-2026|Nasdaq"
+  },
+  {
+   "cik": 1412100,
+   "name": "Maiden Holdings, Ltd.",
+   "delisted_at": "2025-05-28",
+   "form25_accession": "0001354457-25-000466",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2008-06-20",
+   "last_periodic_report": "2025-05-12",
+   "exchange": "Nasdaq",
+   "ticker": "MHLD",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": "400;line-height:100%\"><ix:nonNumeric contextRef=\"c-1\" name=\"dei:TradingSymbol\" id=\"f-16\">MHLD</ix:nonNum",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1412100/000141210025000043/mhld-20250331.htm",
+   "ticker_report_date": "2025-05-12",
+   "sic": "6331",
+   "sic_description": "Fire, Marine & Casualty Insurance",
+   "stratum": "2025-2026|Nasdaq"
+  },
+  {
+   "cik": 1610618,
+   "name": "Cidara Therapeutics, Inc.",
+   "delisted_at": "2026-01-07",
+   "form25_accession": "0001354457-26-000017",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2015-05-21",
+   "last_periodic_report": "2025-11-06",
+   "exchange": "Nasdaq",
+   "ticker": "CDTX",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": "400;line-height:100%\"><ix:nonNumeric contextRef=\"c-1\" name=\"dei:TradingSymbol\" id=\"f-17\">CDTX</ix:nonNum",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1610618/000161061825000096/cdtx-20250930.htm",
+   "ticker_report_date": "2025-11-06",
+   "sic": "2836",
+   "sic_description": "Biological Products, (No Diagnostic Substances)",
+   "stratum": "2025-2026|Nasdaq"
+  },
+  {
+   "cik": 1492674,
+   "name": "T2 Biosystems, Inc.",
+   "delisted_at": "2025-07-10",
+   "form25_accession": "0001354457-25-000634",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2014-09-19",
+   "last_periodic_report": "2024-11-14",
+   "exchange": "Nasdaq",
+   "ticker": "TTOO",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": "\" contextRef=\"C_a38425f2-470f-4dd2-b38f-be145fd0202f\" name=\"dei:TradingSymbol\"><span style=\"color:#000000;white-space:pre-wrap;min-width:fit-content;\">TTOO</span></ix",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1492674/000095017024126996/ttoo-20240930.htm",
+   "ticker_report_date": "2024-11-14",
+   "sic": "3841",
+   "sic_description": "Surgical & Medical Instruments & Apparatus",
+   "stratum": "2025-2026|Nasdaq"
+  },
+  {
+   "cik": 4447,
+   "name": "AMERADA HESS CORP",
+   "delisted_at": "2025-07-18",
+   "form25_accession": "0000876661-25-000523",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "1994-03-29",
+   "last_periodic_report": "2025-05-08",
+   "exchange": "NYSE",
+   "ticker": "HES",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": "400;line-height:100%\"><ix:nonNumeric contextRef=\"c-1\" name=\"dei:TradingSymbol\" id=\"f-16\">HES</ix:nonNum",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/4447/000162828025023790/hes-20250331.htm",
+   "ticker_report_date": "2025-05-08",
+   "sic": "2911",
+   "sic_description": "Petroleum Refining",
+   "stratum": "2025-2026|NYSE"
+  },
+  {
+   "cik": 1821160,
+   "name": "Guild Holdings Co",
+   "delisted_at": "2025-11-28",
+   "form25_accession": "0000876661-25-000916",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Class A Common Stock"
+   ],
+   "first_periodic_report": "2020-12-04",
+   "last_periodic_report": "2025-11-06",
+   "exchange": "NYSE",
+   "ticker": "GHLD",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": "700;line-height:120%\"><ix:nonNumeric contextRef=\"c-1\" name=\"dei:TradingSymbol\" id=\"f-16\">GHLD</ix:nonNum",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1821160/000162828025050292/ghld-20250930.htm",
+   "ticker_report_date": "2025-11-06",
+   "sic": "6162",
+   "sic_description": "Mortgage Bankers & Loan Correspondents",
+   "stratum": "2025-2026|NYSE"
+  },
+  {
+   "cik": 1621563,
+   "name": "Summit Materials, Inc.",
+   "delisted_at": "2025-02-11",
+   "form25_accession": "0000876661-25-000075",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Class A Common Stock"
+   ],
+   "first_periodic_report": "2015-05-05",
+   "last_periodic_report": "2024-10-31",
+   "exchange": "NYSE",
+   "ticker": "SUM",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": "400;line-height:100%\"><ix:nonNumeric contextRef=\"c-1\" name=\"dei:TradingSymbol\" id=\"f-17\">SUM</ix:nonNum",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1621563/000162828024044485/sum-20240928.htm",
+   "ticker_report_date": "2024-10-31",
+   "sic": "1400",
+   "sic_description": "Mining & Quarrying of  Nonmetallic Minerals (No Fuels)",
+   "stratum": "2025-2026|NYSE"
+  },
+  {
+   "cik": 1318568,
+   "name": "Global Cash Access Holdings, Inc.",
+   "delisted_at": "2025-07-01",
+   "form25_accession": "0000876661-25-000476",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "2006-03-23",
+   "last_periodic_report": "2025-05-12",
+   "exchange": "NYSE",
+   "ticker": "EVRI",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": "400;line-height:100%\"><ix:nonNumeric contextRef=\"c-1\" name=\"dei:TradingSymbol\" id=\"f-17\">EVRI</ix:nonNum",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/1318568/000131856825000047/evri-20250331.htm",
+   "ticker_report_date": "2025-05-12",
+   "sic": "7990",
+   "sic_description": "Services-Miscellaneous Amusement & Recreation",
+   "stratum": "2025-2026|NYSE"
+  },
+  {
+   "cik": 842518,
+   "name": "EVANS BANCORP INC",
+   "delisted_at": "2025-05-05",
+   "form25_accession": "0001143313-25-000023",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common stock"
+   ],
+   "first_periodic_report": "1996-08-05",
+   "last_periodic_report": "2025-03-06",
+   "exchange": "NYSE American",
+   "ticker": "EVBN",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": ": 0;margin-top: 0;text-align: center;\"><ix:nonNumeric name=\"dei:TradingSymbol\" id=\"ct-nonNumeric-0bf8cf7b-1fc3-4b01-8e5b-97d535384f44\" contextRef=\"Duration_1_1_2024_To_12_31_2024\"><span style=\"white-space:pre-wrap; font-family: 'Times New R",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/842518/000084251825000008/evbn-20241231x10k.htm",
+   "ticker_report_date": "2025-03-06",
+   "sic": "6021",
+   "sic_description": "National Commercial Banks",
+   "stratum": "2025-2026|NYSE American"
+  },
+  {
+   "cik": 89140,
+   "name": "SERVOTRONICS INC /DE/",
+   "delisted_at": "2025-07-01",
+   "form25_accession": "0001143313-25-000040",
+   "form25_type": "25-NSE",
+   "form25_class_titles": [
+    "Common Stock"
+   ],
+   "first_periodic_report": "1995-05-12",
+   "last_periodic_report": "2025-05-09",
+   "exchange": "NYSE American",
+   "ticker": "SVT",
+   "ticker_source": "ixbrl_dei_TradingSymbol",
+   "ticker_evidence": "mal; margin: 0pt; text-align: center;\"><ix:nonNumeric name=\"dei:TradingSymbol\" contextRef=\"d_2025-01-01_2025-03-31\" id=\"ixv-7042\">SVT</ix:nonNum",
+   "ticker_doc_url": "https://www.sec.gov/Archives/edgar/data/89140/000143774925015641/svt20250331_10q.htm",
+   "ticker_report_date": "2025-05-09",
+   "sic": "3420",
+   "sic_description": "Cutlery, Handtools & General Hardware",
+   "stratum": "2025-2026|NYSE American"
+  }
+ ]
+}
