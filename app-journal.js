@@ -189,7 +189,11 @@
     h+=sec('三、樣本外對照 0050（上線後的真實走勢）',o.error?'<div class="note">讀取失敗：'+esc(o.error)+'</div>':
       ls.map(x=>'<div style="padding:5px 0;border-bottom:1px solid var(--hairline);font-size:12px"><div style="display:flex;justify-content:space-between;gap:8px"><b>'+esc(x.label)+'</b><span>'+esc(x.judge)+'</span></div>'+
         '<div style="color:var(--ink-3)">'+esc(String(x.start||'').slice(5))+'～'+esc(String(x.as_of||'').slice(5))+'（'+n(x.days)+' 個交易日）：策略 '+pp(x.ret_pct)+'%，同期 0050 '+pp(x.bench_pct)+'%，差 '+pp(x.gap_pp)+' 個百分點；最大回撤 '+n(x.mdd_pct)+'%（0050 '+n(x.bench_mdd_pct)+'%）</div></div>').join('')+
-      '<div class="note" style="color:var(--ink-3)">樣本外滿 '+n(o.min_days)+' 個交易日才拿來判斷贏輸；天數不足的領先或落後都只是暫時的。</div>');
+      '<div class="note" style="color:var(--ink-3)">樣本外滿 '+n(o.min_days)+' 個交易日才拿來判斷贏輸；天數不足的領先或落後都只是暫時的。</div>'+
+      // 先.九十一-1：還沒開始的線也列出（含設計註記，例：模擬 F 學界已知現象、只是研究）
+      (o.lines||[]).filter(x=>!x.days&&(x.design_note||x.candidacy)).map(x=>'<div class="note sc-soon-note" style="font-size:11.5px;color:var(--ink-3)">即將開始：<b>'+esc(x.label)+'</b>（'+esc(String(x.start||'').slice(5).replace('-','/'))+' 起）'+(x.design_note?'；'+esc(x.design_note):'')+(x.candidacy?'；'+esc(x.candidacy):'')+'</div>').join(''));
+    // 先.九十一-1／-5-1：四、研究說明（已知現象與不做的路線）
+    if((d.notes||[]).length)h+=sec('四、研究說明',(d.notes||[]).map(x=>'<div class="note rs-note" style="padding:4px 0"><b>'+esc(x.title)+'</b><br>'+esc(x.body)+'</div>').join(''));
     h+='<div style="margin-top:8px;font-size:10px;color:var(--ink-4)">資料：試驗帳本、墓園驗屍（研究紀錄）、策略曲線；產生於 '+esc(String((d.meta||{}).generated_at||'').slice(0,16).replace('T',' '))+'；研究紀錄整理。</div>';
     return h;
   }

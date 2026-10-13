@@ -125,6 +125,7 @@ SCHEMAS: dict[str, dict] = {
     "data/paper_1b.json": _S(req={"started": "bool"}),
     "data/paper_3.json": _S(req={"started": "bool"}),
     "data/paper_4.json": _S(req={"started": "bool"}),
+    "data/paper_5.json": _S(req={"started": "bool"}),  # 先.九十一-1 模擬 F
     "data/paper_tracking_watch.json": _S(req={"items": "list"}),
     "data/paper_trades.json": _S(ts_nullable=True, req={"strategies": "list"}),
     # 美股

@@ -51,9 +51,9 @@ CORRECTION = "10/11 更正：舊算法重複計算，數字放大約 5 倍；10/
 # 先.七十-5（2026-10-11 總司令裁示）：每條線的「設計目標」。裁示沒有指定的線（紙.一b、紙.二）標「未標示」，不自行推定。
 # 先.七十二-A4：前台改白話（守回撤（天條一）→守住回檔；贏大盤＋守回撤→贏大盤也守回檔）；內部代號只留在 id。
 GOALS = {"live_bb90": "守住回檔", "paper_1": "守住回檔", "paper_3": "守住回檔",
-         "paper_4": "贏大盤也守回檔", "board_value": "選股研究", "board_momentum": "選股研究", "board_future": "選股研究"}
+         "paper_4": "贏大盤也守回檔", "paper_5": "賺波動溢價（只是研究）", "board_value": "選股研究", "board_momentum": "選股研究", "board_future": "選股研究"}
 # 先.七十五-5：尚未開始的模擬寫明原因（卡片「X 月 X 日開始」下方顯示）
-PLANNED_WHY = {"paper_2": "選股資料還在預熱"}
+PLANNED_WHY = {"paper_2": "選股資料還在預熱", "paper_5": "11 月起用當月真實資料開始記，不倒填"}
 POSITIONING = "守回檔的策略大漲時會落後 0050，這是設計；看滿 60 個交易日與最大跌幅"
 
 
@@ -313,6 +313,28 @@ def paper_line_from_log(events: list, px: Px, value_key: str = "values_post", bo
     return {"dates": dates, "nav": nav, "comp": comp}
 
 
+def nav_line_from_log(events: list, px: Px):
+    """先.九十一-1：模擬 F（選擇權）沒有 price_history 收盤可估值，直接用帳本每天記的 nav（tracker 用期交所當日收盤重估）。
+    對齊 0050 交易日曆、缺日沿用前值；comp 留空（成分最大漲跌幅檢查不適用，同真錢線）。"""
+    ev = sorted([e for e in events if e.get("date") and e.get("nav") is not None], key=lambda e: (e["date"], e.get("logged_at", "")))
+    if not ev:
+        return None
+    i_start = px.idx(ev[0]["date"])
+    if i_start is None:
+        return None
+    by = {}
+    for e in ev:
+        by[e["date"]] = float(e["nav"])
+    dates, nav, last = [], [], None
+    for d in px.cal[i_start:]:
+        last = by.get(d, last)
+        if last is None:
+            continue
+        dates.append(d)
+        nav.append(last)
+    return {"dates": dates, "nav": nav, "comp": []}
+
+
 def paper_lines(px: Px) -> list:
     rf = _load(DATA / "rf_monthly.json", {})
     out = []
@@ -322,11 +344,12 @@ def paper_lines(px: Px) -> list:
         ("paper_2", "模擬 E 供給緊縮", RDATA / "paper_supply_v2_log.jsonl", "values_post", None, "2026-11-16"),
         ("paper_3", "模擬 B 景氣閘門", RDATA / "paper_3_log.jsonl", "values_post", None, "2026-10-08"),
         ("paper_4", "模擬 C 加速", RDATA / "paper_4_log.jsonl", "values_post", "R1-C", "2026-10-08"),
+        ("paper_5", "模擬 F 賣波動", RDATA / "paper_5_log.jsonl", "nav_log", None, "2026-11-02"),  # 先.九十一-1：#444 紙上追蹤，11 月起不倒填
     ]
     # 先.八十-7（2026-10-12）：模擬 C（R1 信用利差閘門）是看過 2025–26 樣本外結果之後才設計的，前台必須標明
-    design_note = {"paper_4": "看過 2025–26 結果後才設計"}
+    design_note = {"paper_4": "看過 2025–26 結果後才設計", "paper_5": "學界已知現象、只是研究"}
     # 先.八十一-5（2026-10-13 總司令裁示①）：信用利差閘門 1990–2003 殺測失敗（#435/#436）——繼續紙上追蹤，但不再是真錢候選
-    candidacy = {"paper_3": "閘門殺測失敗（#435/#436），不再是真錢候選", "paper_4": "閘門殺測失敗（#435/#436），不再是真錢候選"}
+    candidacy = {"paper_5": "不提請真錢：試驗 #444 通過但 DSR 算不出、年化約 4.6%、每組名目約數百萬元（先.九十一-1）", "paper_3": "閘門殺測失敗（#435/#436），不再是真錢候選", "paper_4": "閘門殺測失敗（#435/#436），不再是真錢候選"}
     # 先.八十一-16（2026-10-13 總司令裁示）：模擬 B／C／D 的建倉日是 10/11 事後決定、用 10/08 收盤倒填，照實標明；
     # 之後一律禁止事後倒填建倉日（research/MARATHON_PROTOCOL.md §9）
     backdated = {k: "建倉日 10/08 是 10/11 事後決定、用 10/08 收盤倒填（之後新策略一律禁止事後倒填建倉日）"
@@ -337,15 +360,18 @@ def paper_lines(px: Px) -> list:
             evs = [e for e in evs if e.get("book") == book]
         built = None
         try:
-            built = paper_line_from_log(evs, px, vk, rf_doc=rf) if evs else None
+            built = (nav_line_from_log(evs, px) if vk == "nav_log" else paper_line_from_log(evs, px, vk, rf_doc=rf)) if evs else None
         except Exception as e:  # noqa: BLE001 -- 單一紙上追蹤壞掉只影響自己那條線（十二節）
             print(f"[warn] {label} 曲線失敗：{type(e).__name__}: {e}")
         if not built or len(built["dates"]) < 1:
             why = PLANNED_WHY.get(id_, "")
             out.append(_placeholder(id_, label, "paper", "模擬中", planned, f"{planned[5:].replace('-', '/')} 開始" + (f"（{why}）" if why else ""),
-                                    extra={"why": why} if why else None))
+                                    extra={k: v for k, v in (("why", why), ("design_note", design_note.get(id_)),
+                                                             ("candidacy", candidacy.get(id_))) if v} or None))
             continue
         note = "依每天還原權息收盤估算；現金與定存按一個月定存利率計息；建倉已扣手續費"
+        if vk == "nav_log":
+            note = "每月賣 1 組台指選擇權價平跨式、持有到期（1 倍名目、滑價每口 1 點、手續費與期交稅已扣）；每天用期交所收盤重估，到期用官方最後結算價"
         # 先.七十五-3：月中建倉的第一期是部分期（到第一個月底為止），報表標明
         first = next((e for e in sorted(evs, key=lambda e: e.get("date", "")) if e.get("event") == "inception"), None)
         if first and first.get("partial_first_period"):

@@ -1250,13 +1250,13 @@
   // 舊卡「依序串接複利」把重疊的 5 日報酬串接、誤放大約 5 倍，已刪除）＋本機 /auto/strategy_line（真錢 Bb-90，
   // 帳本只在本機）。每條線從自己的起始日歸一為 100，灰線為同期 0050；指標與「金礦判讀」都由 Python 端同一支
   // metrics() 算好，這裡只畫——判讀文字是固定規則（<60 日「尚不足以判斷」），前端不自行產生任何推論文字。
-  // 先.七十三（2026-10-11）：「全部疊加」排第一且為預設；其後 自動投資、模擬 A～E、選股榜單。內部 id 不變。
+  // 先.七十三（2026-10-11）：「全部疊加」排第一且為預設；其後 自動投資、模擬 A～F（先.九十一-1 加 F）、選股榜單。內部 id 不變。
   let SC_DATA=null,SC_LIVE=null,SC_LIVE_ERR='',SC_TAB='all',SC_BOARD='value';
   const SC_TABS=[['all','全部疊加'],['live','自動投資'],['paper_1','模擬 A'],['paper_3','模擬 B'],['paper_4','模擬 C'],
-    ['paper_1b','模擬 D'],['paper_2','模擬 E'],['boards','選股榜單']];
+    ['paper_1b','模擬 D'],['paper_2','模擬 E'],['paper_5','模擬 F'],['boards','選股榜單']];
   const SC_BOARDS=[['value','估值'],['momentum','動能'],['future','未來']];
   // 每條線固定顏色（疊圖與單線圖一致）；0050 固定灰色
-  const SC_COLOR_BY={live_bb90:'#2f81f7',paper_1:'#d4a017',paper_3:'#3fb950',paper_4:'#db61a2',paper_1b:'#f0883e',paper_2:'#a371f7',
+  const SC_COLOR_BY={live_bb90:'#2f81f7',paper_1:'#d4a017',paper_3:'#3fb950',paper_4:'#db61a2',paper_1b:'#f0883e',paper_2:'#a371f7',paper_5:'#79c0ff',
     board_value:'#56d4dd',board_momentum:'#e5534b',board_future:'#b5d334'};
   const SC_BENCH_COLOR='#8b8b8b';
   const scColor=id=>SC_COLOR_BY[id]||'#9e9e9e';
@@ -1387,8 +1387,10 @@
   const scCandHtml=l=>l&&l.candidacy?`<div class="note sc-cand" data-ui-cite data-ui-keep style="margin:2px 0 6px;font-weight:600;color:var(--critical,#e5534b)">⛔ ${_uiEsc(l.candidacy)}</div>`:'';
   // 先.八十一-16：建倉日事後倒填的線（模擬 B／C／D）照實標明
   const scInceptionHtml=l=>l&&l.inception_note?`<div class="note sc-inception" data-ui-keep style="margin:2px 0 6px;color:var(--warn)">⚠ ${_uiEsc(l.inception_note)}</div>`:'';
+  // 先.九十一-1：還沒開始的線也標設計註記（模擬 F：學界已知現象、只是研究）；已開始的線註記已併入 note
+  const scDesignHtml=l=>l&&l.design_note&&!scHasData(l)?`<div class="note sc-design" data-ui-keep style="margin:2px 0 6px;color:var(--ink-3)">ⓘ ${_uiEsc(l.design_note)}</div>`:'';
   function scLineBlock(l){
-    return scCandHtml(l)+scInceptionHtml(l)+_scLineBlockInner(l);
+    return scCandHtml(l)+scInceptionHtml(l)+scDesignHtml(l)+_scLineBlockInner(l);
   }
   function _scLineBlockInner(l){
     if(!l)return '<div class="note sc-notyet" style="color:var(--ink-3)">現在還沒有資料</div>';
@@ -1526,7 +1528,7 @@
       const all=scLines(),started=all.filter(scHasData),soon=all.filter(l=>!scHasData(l));
       html+=started.length?`<div style="margin-top:4px">${scSvg(started)}</div>`+scLegendHtml(started):scNotYetHtml(null);
       // 「即將加入」是資料清單不是說明文字，不用 .note（不會被收成「ⓘ 說明」）
-      if(soon.length)html+=`<div class="sc-soon" style="margin-top:4px;font-size:11.5px;line-height:1.6;color:var(--ink-3)">即將加入：${soon.map(l=>`${_uiEsc(l.label.replace(/\s*(三檔分散|供給緊縮|景氣閘門|加速|穩健)$/,''))}（${scShortDate(l)}）`).join('、')}</div>`;
+      if(soon.length)html+=`<div class="sc-soon" style="margin-top:4px;font-size:11.5px;line-height:1.6;color:var(--ink-3)">即將加入：${soon.map(l=>`${_uiEsc(l.label.replace(/\s*(三檔分散|供給緊縮|景氣閘門|加速|穩健|賣波動)$/,''))}（${scShortDate(l)}）`).join('、')}</div>`;
       html+=`<div class="note" style="font-size:10px;color:var(--ink-3)">各線從自己的起始日接在當天 0050 的位置；按住圖看各線自己的報酬</div>`;
     }else{
       html+=scLineBlock(scById(SC_TAB==='live'?'live_bb90':SC_TAB));
@@ -4199,7 +4201,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-14.0010';
+  const APP_VERSION='2026-10-14.0123';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

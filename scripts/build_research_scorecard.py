@@ -79,7 +79,8 @@ def oos_block() -> dict:
         m = l.get("metrics") or {}
         if not m.get("days"):
             lines.append({"id": l.get("id"), "label": l.get("label"), "group": l.get("group"), "status": l.get("status"),
-                          "days": 0, "note": "尚未開始或沒有資料"})
+                          "days": 0, "note": "尚未開始或沒有資料", "start": l.get("start_date"),
+                          "design_note": l.get("design_note"), "candidacy": l.get("candidacy")})
             continue
         days, gap = m.get("days"), m.get("cum_gap_pp")
         judge = ("贏 0050" if gap > 0 else "輸 0050") if days >= MIN_DAYS else (
@@ -87,7 +88,8 @@ def oos_block() -> dict:
         lines.append({"id": l.get("id"), "label": l.get("label"), "group": l.get("group"), "status": l.get("status"),
                       "start": l.get("start_date"), "as_of": l.get("as_of"), "days": days,
                       "ret_pct": m.get("cum_pct"), "bench_pct": m.get("bench_cum_pct"), "gap_pp": gap,
-                      "mdd_pct": m.get("mdd_pct"), "bench_mdd_pct": m.get("bench_mdd_pct"), "judge": judge})
+                      "mdd_pct": m.get("mdd_pct"), "bench_mdd_pct": m.get("bench_mdd_pct"), "judge": judge,
+                      "design_note": l.get("design_note"), "candidacy": l.get("candidacy")})
     winners = [x for x in lines if x.get("days", 0) >= MIN_DAYS and (x.get("gap_pp") or 0) > 0]
     longest = max((x.get("days", 0) for x in lines), default=0)
     if winners:
@@ -99,10 +101,23 @@ def oos_block() -> dict:
             "source": "data/strategy_curves.json（上線後的真實走勢，與同期 0050 還原含息比較）"}
 
 
+# 先.九十一-1／-5-1（2026-10-14 總司令裁示）：研究成績單「四、研究說明」——已知現象與不做的路線，照實寫原因
+NOTES = [
+    {"title": "賣波動（模擬 F）：學界已知現象、只是研究",
+     "body": "試驗 #444：2002–2014 台指選擇權的隱含波動度平均比事後實際波動高約 3 個百分點，每月賣一組價平跨式扣成本後月均約 +0.38%，"
+             "但年化只有約 4.6%、最差一個月 −16%、最大回撤 37%，試驗間比較數字（DSR）也算不出來。"
+             "所以不提請真錢（每組名目約數百萬元，選擇權真錢需另案核准）；2026-11 起只做紙上追蹤，不倒填。"},
+    {"title": "權證不做（賺波動溢價這條路）",
+     "body": "台股權證散戶只能買、不能發行，買權證就是站在「付波動溢價」的一方，跟模擬 F 的賣方方向相反。"
+             "所以權證不能拿來賺波動溢價。權證只當買方工具另外研究（先.九十二 權證研究線，先查資料、不登記試驗）。"},
+]
+
+
 def main() -> int:
     doc = {"meta": {"generated_at": datetime.now(TW).isoformat(timespec="seconds"),
                     "source": "scripts/build_research_scorecard.py：data/trials_index.json＋research/GRAVEYARD_AUTOPSY.md＋data/strategy_curves.json",
                     "note": "研究紀錄整理，非投資建議"}}
+    doc["notes"] = NOTES
     for k, fn in (("trials", trials_block), ("autopsy", autopsy_block), ("oos", oos_block)):
         try:
             doc[k] = fn()

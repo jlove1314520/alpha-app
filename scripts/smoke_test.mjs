@@ -2931,7 +2931,7 @@ async function runSmokeTest(baseUrl, headless = true) {
     else {
       if (ui.title !== "跟 0050 比") uiErrs.push(`標題是「${ui.title}」`);
       if (ui.old) uiErrs.push("舊「我們 vs 0050」卡仍在");
-      if (ui.tabs.length !== 8) uiErrs.push(`分頁數 ${ui.tabs.length}（應為 8）`);
+      if (ui.tabs.length !== 9) uiErrs.push(`分頁數 ${ui.tabs.length}（應為 9；先.九十一-1 加模擬 F）`);
       for (const t of ui.tabs) if (t.len < 10) uiErrs.push(`分頁 ${t.t} 內容空白`);
       if (!ui.correction) uiErrs.push("選股榜單分頁沒有更正註記");
       if (ui.positioning !== "守回檔的策略大漲時會落後 0050，這是設計；看滿 60 個交易日與最大跌幅") uiErrs.push(`卡頂定位句不符：「${ui.positioning}」`);
@@ -3156,7 +3156,7 @@ async function runSmokeTest(baseUrl, headless = true) {
     if (r.firstTab !== "all" || !r.firstOn) scfErrs.push(`第一個分頁應為全部疊加且選中（${r.firstTab}）`);
     if (r.nStarted && r.legend.length !== r.nStarted + 1) scfErrs.push(`圖例 ${r.legend.length} 項 ≠ 有資料的線 ${r.nStarted}＋1`);
     if (r.legend[0] !== "0050") scfErrs.push(`圖例第一個應為 0050，實為「${r.legend[0]}」`);
-    for (const lb of r.notStartedLabels) { const short = lb.replace(/\s*(三檔分散|供給緊縮|景氣閘門|加速|穩健)$/, ""); if (!r.soon.includes(short)) scfErrs.push(`「即將加入」缺 ${short}`); }
+    for (const lb of r.notStartedLabels) { const short = lb.replace(/\s*(三檔分散|供給緊縮|景氣閘門|加速|穩健|賣波動)$/, ""); if (!r.soon.includes(short)) scfErrs.push(`「即將加入」缺 ${short}`); }
     if (r.nStarted && !(r.tipShown && r.tipRows === r.nStarted + 1 && r.tipHidden)) scfErrs.push(`按住圖應顯示 ${r.nStarted + 1} 列數值、放開收起（shown=${r.tipShown} rows=${r.tipRows} hidden=${r.tipHidden}）`);
     for (const t of r.tabs) {
       if (t.emptySvg) scfErrs.push(`分頁 ${t.t} 出現空白 svg`);
@@ -4661,6 +4661,42 @@ async function runSmokeTest(baseUrl, headless = true) {
     } finally { await ctx.close(); }
   } catch (e) { uscErrs.push(`測試本身出錯：${e.message || e}`); }
   record("144. 美股描述性篩選：只在美股模式顯示、門檻過濾檔數＝獨立計算、市值門檻只留有市值者（先.八十一-33）", uscErrs.length === 0, uscErrs.join("; ") || uscInfo);
+  // 145.【2026-10-14 先.九十一-1／-5-1】模擬 F 賣波動：tracker 自測（11 月前不寫帳本、不倒填、進場／重估／結算規則）全過；
+  // 「跟 0050 比」有「模擬 F」分頁，未開始時顯示「11 月 2 日開始」＋「學界已知現象、只是研究」＋「不提請真錢」；
+  // 研究成績單有「四、研究說明」含權證不做原因，且列出即將開始的模擬 F。
+  const pfErrs = [];
+  let pfInfo = "";
+  try {
+    const { execFileSync } = await import("node:child_process");
+    const py = process.platform === "win32" ? "python" : "python3";
+    let out = "";
+    try { out = execFileSync(py, ["scripts/selftest_paper_5.py"], { encoding: "utf8", env: { ...process.env, PYTHONIOENCODING: "utf-8" }, timeout: 120000 }); }
+    catch (e) { out = String(e.stdout || ""); pfErrs.push("模擬 F 自測未通過：" + out.split("\n").filter(l => /^FAIL/.test(l)).join("；").slice(0, 300)); }
+    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+    try {
+      const p = await ctx.newPage();
+      await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+      await p.evaluate(() => { if (typeof uiLoadLazyAll === "function") uiLoadLazyAll(); });
+      await p.waitForFunction(() => typeof SC_DATA !== "undefined" && SC_DATA && SC_DATA.lines, null, { timeout: 25000 }).catch(() => null);
+      const r = await p.evaluate(() => {
+        const tabs = typeof SC_TABS !== "undefined" ? SC_TABS.map(x => x[0]) : [];
+        const l = typeof scById === "function" ? scById("paper_5") : null;
+        const blk = l && typeof scLineBlock === "function" ? scLineBlock(l) : "";
+        return { tabs, started: l ? l.started : null, blk };
+      });
+      if (!r.tabs.includes("paper_5")) pfErrs.push("分頁沒有模擬 F（paper_5）");
+      if (r.started === false) {
+        for (const k of ["11 月 2 日開始", "學界已知現象、只是研究", "不提請真錢"]) if (!r.blk.includes(k)) pfErrs.push(`模擬 F 未開始畫面缺「${k}」`);
+      } else if (r.started === null) pfErrs.push("曲線檔沒有 paper_5");
+      await p.evaluate(() => go("journal"));
+      await p.waitForFunction(() => { const e = document.getElementById("journal-research"); return e && e.dataset.loaded; }, null, { timeout: 15000 }).catch(() => null);
+      const t = await p.evaluate(() => (document.getElementById("journal-research") || {}).textContent || "");
+      for (const k of ["四、研究說明", "權證不做", "賣波動（模擬 F）：學界已知現象、只是研究"]) if (!t.includes(k)) pfErrs.push(`研究成績單缺「${k}」`);
+      if (r.started === false && !t.includes("即將開始：模擬 F 賣波動")) pfErrs.push("研究成績單沒列即將開始的模擬 F");
+      pfInfo = `${(out.match(/合計 \d+ [^\n]*/) || [""])[0]}；模擬 F ${r.started ? "已開始" : "未開始（11/02 起）"}`;
+    } finally { await ctx.close(); }
+  } catch (e) { pfErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("145. 模擬 F 賣波動：自測全過、分頁與「只是研究／不提請真錢」標示、研究成績單含權證不做說明（先.九十一-1／-5-1）", pfErrs.length === 0, pfErrs.join("; ") || pfInfo);
 
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
