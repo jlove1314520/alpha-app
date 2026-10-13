@@ -279,9 +279,13 @@
     const m=d.meta||{};
     const covPct=m.coverage_period!=null?(m.coverage_period*100).toFixed(1)+'%':'—';
     const lowCov=m.coverage_period!=null&&m.coverage_period<0.8;
+    // 先.八十一-14：as_of 是「內容最後一次有變動」的日期，不是最後檢查日——本機排程每晚 23:00 重算，內容沒變不改寫。
+    // 基準季在下一季法定期限過後才會換，畫面寫明，避免看起來像排程停了。
+    const _nextDl={Q1:'8/14（第二季）',Q2:'11/14（第三季）',Q3:'隔年 3/31（年報）',Q4:'5/15（第一季）'}[String(m.period||'').slice(-2)]||'';
+    const _unchangedTxt=`<br><span style="color:var(--ink-3)">內容自 ${esc(m.as_of)} 起沒有變動：每晚 23:00 本機排程重算，基準季仍是 ${esc(m.period)}${_nextDl?'，下一季財報法定期限 '+_nextDl+' 過後才會換季':''}。</span>`;
     document.getElementById('supply-meta-line').innerHTML=
       `基準季 <b>${esc(m.period)}</b>（法定公告期限 ${esc(m.period_deadline)} 已過）· 資料日 ${esc(m.as_of)}<br>名冊 ${m.n_universe} 檔，已入庫該季財報 ${m.n_with_period} 檔（${covPct}），可計百分位 ${m.n_scored} 檔`
-      +(lowCov?`<br><span style="color:#c9a35a">資料準備中（已涵蓋 ${m.n_with_period}／${m.n_universe.toLocaleString('en-US')} 檔）：財報入庫覆蓋率未達 80%，暫不顯示桶內百分位，下列僅列已入庫股票的原始變化值</span>`:'');
+      +(lowCov?`<br><span style="color:#c9a35a">資料準備中（已涵蓋 ${m.n_with_period}／${m.n_universe.toLocaleString('en-US')} 檔）：財報入庫覆蓋率未達 80%，暫不顯示桶內百分位，下列僅列已入庫股票的原始變化值</span>`:'')+_unchangedTxt;
     const rows=d.rows||[];
     const inds=[...new Set(rows.map(r=>r.i))].sort();
     const sel=document.getElementById('supply-industry');

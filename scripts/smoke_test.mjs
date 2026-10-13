@@ -4018,6 +4018,34 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { zeroErrs.push(`測試本身出錯：${e.message || e}`); }
   record("121. 排程報價 stale 列（昨收頂上）不當報價、自選股漲跌不得整排 0.00%（先.八十一-24）", zeroErrs.length === 0, zeroErrs.join("; "));
 
+  // 122.【2026-10-13 先.八十一-14】過期資料逐一處理：進出口／工業生產標出資料月、落後月數與原因（官方開放資料檔本身落後）；
+  // 供給觀察標「內容自某日起沒變動」與換季時點；dependency_status.json 已由排程提交（7 天內）。
+  const staleErrs = [];
+  try {
+    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+    try {
+      const p = await ctx.newPage();
+      await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+      await p.evaluate(() => { const b = document.querySelector('nav#nav button[data-scr="market"]'); if (b) b.click(); });
+      await p.waitForFunction(() => typeof loadCustomsTrade === "function" && !window.__lazyStubOnly, null, { timeout: 20000 }).catch(() => null);
+      const t = await p.evaluate(async () => {
+        await loadCustomsTrade(); await loadIndustrialProduction();
+        return { c: (document.getElementById("customs-trade-datatime") || {}).textContent || "", i: (document.getElementById("ip-index-datatime") || {}).textContent || "" };
+      });
+      if (!/資料月 \d{4}-\d\d/.test(t.c) || !/開放資料檔本身/.test(t.c)) staleErrs.push(`進出口沒標資料月與原因：${t.c}`);
+      if (!/資料月 \d{4}-\d\d/.test(t.i) || !/開放資料檔本身/.test(t.i)) staleErrs.push(`工業生產沒標資料月與原因：${t.i}`);
+      await p.evaluate(() => { const b = document.querySelector('nav#nav button[data-scr="picks"]'); if (b) b.click(); });
+      await p.waitForFunction(() => typeof switchSupplyView === "function", null, { timeout: 20000 }).catch(() => null);
+      await p.evaluate(() => switchSupplyView());
+      await p.waitForFunction(() => /內容自/.test((document.getElementById("supply-meta-line") || {}).textContent || ""), null, { timeout: 15000 }).catch(() => null);
+      const sm = await p.evaluate(() => (document.getElementById("supply-meta-line") || {}).textContent || "");
+      if (!/內容自 \d{4}-\d\d-\d\d 起沒有變動/.test(sm)) staleErrs.push(`供給觀察沒說明內容未變：${sm.slice(0, 80)}`);
+      const dep = await p.evaluate(async () => { const d = await (await fetch("data/dependency_status.json?t=" + Date.now())).json(); return d.generated_at; });
+      if (!dep || (Date.now() - Date.parse(dep)) > 8 * 86400000) staleErrs.push(`dependency_status.json 超過 8 天沒更新（${dep}）`);
+    } finally { await ctx.close(); }
+  } catch (e) { staleErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("122. 過期資料標出資料月份與原因（進出口／工業生產／供給觀察），dependency_status 每週落地（先.八十一-14）", staleErrs.length === 0, staleErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4046,7 +4074,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

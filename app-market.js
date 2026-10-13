@@ -592,7 +592,8 @@
       `<div class="f"><span>進口總值</span><b>${toYi(d.latest.import_total)}${yoy&&yoy.import_yoy_pct!=null?`（YoY ${yoy.import_yoy_pct>=0?'+':''}${yoy.import_yoy_pct.toFixed(1)}%）`:''}</b></div>`,
       `<div class="f"><span>出入超（貿易${d.latest.trade_balance>=0?'順':'逆'}差）</span><b class="${balCls}">${d.latest.trade_balance>=0?'+':''}${toYi(d.latest.trade_balance)}</b></div>`,
     ].join('');
-    document.getElementById('customs-trade-datatime').textContent=`資料月 ${d.latest.date}（財政部關務署官方每月更新）`;
+    // 先.八十一-14：抓取每天三班都成功，資料月落後是官方開放資料檔本身更新慢（新聞稿較早、開放資料檔較晚），畫面寫明原因與落後月數
+    document.getElementById('customs-trade-datatime').textContent=`資料月 ${d.latest.date}${_monthLagTxt(d.latest.date)}（財政部關務署官方開放資料檔本身最新只到這個月；每日排程照常抓取${d.fetched_at?'，最後抓取 '+fmtTzMMDDHHMM(new Date(d.fetched_at),'Asia/Taipei'):''}）`;
   }
   // 2026-09-15（源頭二.3第10名）工業生產指數，market-tw-panel卡片。
   // 2026-10-11 常備.開發-21：同檔 export_orders 欄位接外銷訂單總金額（data.gov.tw#101580 地區別總計），缺就誠實顯示未取得。
@@ -628,7 +629,14 @@
       rows.push(`<div class="f"><span>外銷訂單</span><b>本次未取得</b></div>`);
     }
     el.innerHTML=rows.join('');
-    document.getElementById('ip-index-datatime').textContent=`生產指數資料月 ${d.latest.date}${eo&&eo.date?`、外銷訂單資料月 ${eo.date}`:''}（經濟部官方每月更新）`;
+    document.getElementById('ip-index-datatime').textContent=`生產指數資料月 ${d.latest.date}${_monthLagTxt(d.latest.date)}${eo&&eo.date?`、外銷訂單資料月 ${eo.date}`:''}（經濟部官方開放資料檔本身最新只到這個月，通常落後 2 個月以上；每日排程照常抓取${d.fetched_at?'，最後抓取 '+fmtTzMMDDHHMM(new Date(d.fetched_at),'Asia/Taipei'):''}）`;
+  }
+  // 先.八十一-14：「YYYY-MM」距今（台北）幾個月
+  function _monthLagTxt(ym){
+    const m=/^(\d{4})-(\d{2})/.exec(String(ym||''));if(!m)return '';
+    const z=_zonedParts(new Date(),'Asia/Taipei');
+    const lag=(z.y-+m[1])*12+(z.m-+m[2]);
+    return lag>0?`，距今 ${lag} 個月`:'';
   }
   function fmtFlowAmt(v){
     if(v==null||!isFinite(v))return '—';
