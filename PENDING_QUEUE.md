@@ -19347,4 +19347,4 @@ C. 驗收
 - [ ] **先.八十一-39 （補件，來源：BACKLOG「尚未驗收／已知限制」TPEx 價量端點偶發 SSL 憑證錯誤）查近 30 天排程 log 的 TPEx CERTIFICATE_VERIFY_FAILED 次數與根因；若同央行／海關「中繼 CA 缺 SKI」，比照只關 VERIFY_X509_STRICT（不得 verify=False）並附驗證**（互動視窗執行）
 - [x] **先.八十一-40 （補件，來源：BACKLOG「尚未驗收／已知限制」財報公布時段推估失敗）查 data/earnings_calendar.json 在 GitHub Actions 上 estimated_session 是否仍全為 unknown；若 Actions 正常、只是本機 DNS 問題，就在 BACKLOG 結案並在 App 說明，若仍失敗則查因**（互動視窗執行）〔雲端 earnings_calendar 6 檔 post 5／pre 1／unknown 0，只是本機 DNS 問題；BACKLOG 結案〕
 - [ ] **先.八十一-41 （補件，來源：BACKLOG「尚未驗收／已知限制」earnings_growth 的 PER 反推 EPS 備援）先查證現況：官方季報累計差分上線後 earnings_growth 缺值檔數多少、是否仍需要 PER 反推；仍需要才評估（資料正確性，不調因子權重、不登記新試驗）**（互動視窗執行）
-- [ ] **先.八十一-42 （補件，來源：先.八十一-27 巡檢；註：全檢報告與 BACKLOG 可做項目已用盡，改用本日查證過的發現補件）過期一次性排程 5 支（AlphaFlowVerifyClose1012／NightDrillFinish1007_0800／Preflight1007_0830／1400／PreflightReminder1011_2000）：列用途與最後執行，寫進 AWAITING_REVIEW 請裁示是否刪除；未裁示前不刪**（互動視窗執行）
+- [x] **先.八十一-42 （補件，來源：先.八十一-27 巡檢；註：全檢報告與 BACKLOG 可做項目已用盡，改用本日查證過的發現補件）過期一次性排程 5 支（AlphaFlowVerifyClose1012／NightDrillFinish1007_0800／Preflight1007_0830／1400／PreflightReminder1011_2000）：列用途與最後執行，寫進 AWAITING_REVIEW 請裁示是否刪除；未裁示前不刪**（互動視窗執行）〔已列清單寫入 AWAITING_REVIEW 等裁示，未刪除〕
