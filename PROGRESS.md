@@ -1,3 +1,7 @@
+## 2026-10-13 23:30（互動視窗）先.八十九-3 邀請連結解析成功、群組 ID 寫入
+
+- 開了一個總司令看得到的 PowerShell 視窗跑 `research/telegram_reader.py --login`：登入檔已存在，**沒有再問手機號碼或驗證碼**；邀請連結解析成功，數字 ID 已寫入 TELEGRAM_TARGET_CHAT_ID。
+
 ## 2026-10-13 23:30（互動視窗）先.八十九-2 本機 .env 只改目標群組一鍵
 
 - 用 `telegram_reader.write_env_key` 只改本機 .env 的 TELEGRAM_TARGET_CHAT；只核對「等於邀請連結：True」，沒有印出其他鍵的值；.env 已被 git 忽略、未提交。
