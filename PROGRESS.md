@@ -1,3 +1,7 @@
+## 2026-10-13 23:30（互動視窗）先.八十九-補-2 只讀擷取確認 OK
+
+- 手動只讀擷取（不加 --login，排程同一個 Python）：`{"state": "OK", "new": 11}`；心跳 23:29 OK；新訊息落地本機 telegram_export（repo 外，git status 無 telegram 相關變更）；沒有任何 ReadOnlyViolation，自測全過。
+
 ## 2026-10-13 23:30（互動視窗）先.八十九-補-1 群組 ID 已設定
 
 - 本機 .env 有 TELEGRAM_TARGET_CHAT_ID，且是數字（只印了 True／True，沒有印值）。
