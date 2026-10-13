@@ -1286,7 +1286,12 @@
     return `<div class="note sc-notyet" style="margin:10px 0 2px;color:var(--ink-3)">${_uiEsc(scStartText(l))}，現在還沒有資料</div>`+
       (l&&l.why?`<div class="note sc-notyet-why" style="margin:0 0 10px;color:var(--ink-4)">原因：${_uiEsc(l.why)}</div>`:'');
   }
+  // 先.八十一-5：曲線檔 candidacy（例：模擬 B／C 閘門殺測失敗）顯示在該線最上方；data-ui-cite＝照裁示原文保留試驗編號
+  const scCandHtml=l=>l&&l.candidacy?`<div class="note sc-cand" data-ui-cite data-ui-keep style="margin:2px 0 6px;font-weight:600;color:var(--critical,#e5534b)">⛔ ${_uiEsc(l.candidacy)}</div>`:'';
   function scLineBlock(l){
+    return scCandHtml(l)+_scLineBlockInner(l);
+  }
+  function _scLineBlockInner(l){
     if(!l)return '<div class="note sc-notyet" style="color:var(--ink-3)">現在還沒有資料</div>';
     if(!scHasData(l))return `<div class="note sc-goal" style="margin:6px 0 2px">設計目標：<b style="color:var(--ink-2)">${l.goal||'未標示'}</b></div>`+scNotYetHtml(l)+scHistBlockHtml(l);
     // 先.七十五：剛建倉只有一天時不畫只有一個點的大空圖，改一行說明（歷史段圖裡會畫出起點）
@@ -3861,7 +3866,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-13.0803';
+  const APP_VERSION='2026-10-13.0814';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
@@ -4061,7 +4066,7 @@ function uiTermFixNode(n){
   try{
     if(!n||n.nodeType!==3)return;
     const v=n.nodeValue;if(!v||!UI_TERM_TEST.test(v))return;
-    const el=n.parentElement;if(!el||/^(SCRIPT|STYLE|NOSCRIPT|TEXTAREA)$/.test(el.tagName)||el.closest('[data-ui-advanced],[data-ui-raw]'))return;
+    const el=n.parentElement;if(!el||/^(SCRIPT|STYLE|NOSCRIPT|TEXTAREA)$/.test(el.tagName)||el.closest('[data-ui-advanced],[data-ui-raw],[data-ui-cite]'))return;
     const nv=uiPlainRaw(v);if(nv!==v)n.nodeValue=nv;
   }catch(e){console.warn('[uiTermFixNode]',e)}
 }

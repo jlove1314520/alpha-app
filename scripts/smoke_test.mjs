@@ -3648,6 +3648,35 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { mdErrs.push(`測試本身出錯：${e.message || e}`); }
   record("111. 大盤資料日＝價格歷史最後交易日、走勢線同日；落後時顯示「大盤資料停在 MM/DD」（先.八十一-1）", mdErrs.length === 0, mdErrs.join("; "));
 
+  // 112.【2026-10-13 先.八十一-5 裁示①】模擬 B（紙.三）／模擬 C（紙.四）標「閘門殺測失敗（#435/#436），不再是真錢候選」：
+  // 交易頁兩張紙上卡、跟 0050 比的 B／C 區塊都要有，試驗編號照原文保留（data-ui-cite，不被前台用詞守門改寫）；舊的「槓桿真錢提案最早 2027-04」不得再出現。
+  const killErrs = [];
+  try {
+    const KL = "閘門殺測失敗（#435/#436），不再是真錢候選";
+    const r = await page.evaluate(async (KL) => {
+      await window.go("trade");
+      const b = [...document.querySelectorAll("#trade-tabs button")].find(x => x.dataset.sub === "strategy"); if (b) b.click();
+      for (let i = 0; i < 40 && !document.getElementById("paper4-card"); i++) await new Promise(r => setTimeout(r, 200));
+      await new Promise(r => setTimeout(r, 600));
+      const card = document.getElementById("paper-7030-card");
+      const kills = card ? [...card.querySelectorAll(".paper-kill")].map(e => e.textContent) : [];
+      const old = card ? /槓桿真錢提案最早/.test(card.textContent) : null;
+      await window.go("home");
+      const out = { kills, old, sc: {} };
+      for (const id of ["paper_3", "paper_4", "paper_1b"]) {
+        SC_TAB = id; renderStrategyCurves();
+        out.sc[id] = (document.querySelector("#sc-body .sc-cand") || {}).textContent || "";
+      }
+      SC_TAB = "all"; renderStrategyCurves();
+      return out;
+    }, KL);
+    if (r.kills.length !== 2 || !r.kills.every(t => t.includes(KL))) killErrs.push(`交易頁紙上卡標籤應 2 處且原文含 #435/#436：${JSON.stringify(r.kills)}`);
+    if (r.old) killErrs.push("交易頁仍有「槓桿真錢提案最早 2027-04」");
+    for (const id of ["paper_3", "paper_4"]) if (!r.sc[id].includes(KL)) killErrs.push(`跟 0050 比 ${id} 缺標籤或編號被改寫：${r.sc[id]}`);
+    if (r.sc.paper_1b) killErrs.push(`模擬 D 不該有殺測標籤：${r.sc.paper_1b}`);
+  } catch (e) { killErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("112. 模擬 B／C 標「閘門殺測失敗（#435/#436），不再是真錢候選」（交易頁＋跟 0050 比，編號不被改寫）、舊真錢提案字樣移除（先.八十一-5）", killErrs.length === 0, killErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -3676,7 +3705,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

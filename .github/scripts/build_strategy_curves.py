@@ -321,6 +321,8 @@ def paper_lines(px: Px) -> list:
     ]
     # 先.八十-7（2026-10-12）：模擬 C（R1 信用利差閘門）是看過 2025–26 樣本外結果之後才設計的，前台必須標明
     design_note = {"paper_4": "看過 2025–26 結果後才設計"}
+    # 先.八十一-5（2026-10-13 總司令裁示①）：信用利差閘門 1990–2003 殺測失敗（#435/#436）——繼續紙上追蹤，但不再是真錢候選
+    candidacy = {"paper_3": "閘門殺測失敗（#435/#436），不再是真錢候選", "paper_4": "閘門殺測失敗（#435/#436），不再是真錢候選"}
     for id_, label, path, vk, book, planned in specs:
         evs = _jsonl(path)
         if book:
@@ -345,6 +347,8 @@ def paper_lines(px: Px) -> list:
         ln = _line(id_, label, "paper", "模擬中", built["dates"], built["nav"], built["comp"], note=note, px=px)
         if design_note.get(id_):
             ln["design_note"] = design_note[id_]
+        if candidacy.get(id_):
+            ln["candidacy"] = candidacy[id_]
         out.append(ln)
     return out
 

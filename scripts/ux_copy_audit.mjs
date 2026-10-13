@@ -63,7 +63,8 @@ export async function auditVisible(page, glossary, scope) {
     const seen = new Set();
     for (let n = walker.nextNode(); n; n = walker.nextNode()) {
       const el = n.parentElement;
-      if (!el || ["SCRIPT", "STYLE", "NOSCRIPT"].includes(el.tagName) || inAdv(el) || !vis(el)) continue;
+      // 先.八十一-5：[data-ui-cite]＝總司令裁示指定保留的引用文字（例：閘門殺測失敗（#435/#436）），不算內部代號違規
+      if (!el || ["SCRIPT", "STYLE", "NOSCRIPT"].includes(el.tagName) || inAdv(el) || el.closest("[data-ui-cite]") || !vis(el)) continue;
       const t = n.textContent;
       for (const [term, r] of re) {
         if (r.test(t)) { const k = term + "|" + txt(t).slice(0, 30); if (!seen.has(k)) { seen.add(k); out.terms.push(`${term}：${txt(t).slice(0, 50)}`); } }

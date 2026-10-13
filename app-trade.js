@@ -184,7 +184,7 @@
         _paperRow('閘門目前',_paperGateHtml(j.gate_now,j.pending_switch))
         +_paperCommonRows(j,w||'—')
         +_paperRow('對照 Bb-90（同日起算）',sg(j.bench_bb90_return_pct))
-        +_paperRow('對照 0050 全持有',sg(j.bench_0050_return_pct))+err+oos);
+        +_paperRow('對照 0050 全持有',sg(j.bench_0050_return_pct))+err+oos+_paperKillHtml());
     }catch(e){
       console.warn('[_renderPaper3]',e);recordGlobalError('_renderPaper3',e);
       return _paperCardHtml(title,sub,'<div class="note" style="margin-top:8px">載入失敗：'+_paperEsc(e.message)+'</div>');
@@ -192,10 +192,14 @@
   }
   // 2026-10-10（先.五十九-A1／A2）：紙.四 R1（0050＋信用利差閘門×00631L），R1-C 為主、R1-A 並列。
   // 只讀 data/paper_4.json（兩本帳）與 data/paper_3.json（對照紙.三累積報酬）；揭露文字固定顯示。
+  // 先.八十一-5（2026-10-13 總司令裁示①）：模擬 B（紙.三 S3-C6）／模擬 C（紙.四 R1）共用的信用利差閘門在 1990–2003 殺測失敗，
+  // 繼續紙上追蹤但不再是真錢候選。試驗編號照裁示原文保留——用 data-ui-cite 標成引用，前台用詞守門與文案稽核不改寫、不計違規。
+  const PAPER_KILL_LABEL='閘門殺測失敗（#435/#436），不再是真錢候選';
+  const _paperKillHtml=()=>'<div class="note paper-kill" data-ui-cite data-ui-keep style="margin-top:6px;font-size:11.5px;font-weight:600;color:var(--critical,#e5534b)">⛔ '+PAPER_KILL_LABEL+'</div>';
   const PAPER4_DISCLOSURE='看過 2025–26 結果後才設計；回測 2003–2024 年化 15.1%／MDD −36.2%；同一閘門在 2025–26 樣本外 21 個月中有 13 個月關閉並大幅落後 0050；無樣本外驗證，僅紙上追蹤';
   async function _renderPaper4(){
     const title='紙.四 R1 信用利差閘門',sub='主：R1-C 0050 50%＋00631L 50%｜並列：R1-A 70%／30%（閘門關時 00631L 改現金）';
-    const disc='<div class="note" id="paper4-disclosure" style="margin-top:6px;font-size:11px;color:var(--warn)">⚠ '+_paperEsc(PAPER4_DISCLOSURE)+'。槓桿真錢提案最早 2027-04（紙.四 滿 6 個月）且須符合安全方案其餘前提。</div>';
+    const disc='<div class="note" id="paper4-disclosure" style="margin-top:6px;font-size:11px;color:var(--warn)">⚠ '+_paperEsc(PAPER4_DISCLOSURE)+'。</div>'+_paperKillHtml();
     try{
       const [j,p3]=await Promise.all([_fetchPaperJson('data/paper_4.json'),_fetchPaperJson('data/paper_3.json').catch(e=>{console.warn('[_renderPaper4] paper_3',e);return {started:false}})]);
       const err=j.last_error?'<div class="note" style="margin-top:6px;font-size:11px;color:var(--down,#e5534b)">最近一次未記帳：'+_paperEsc(j.last_error.reason||j.last_error.status)+'</div>':'';
