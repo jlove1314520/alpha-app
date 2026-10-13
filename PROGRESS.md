@@ -1,3 +1,26 @@
+## 2026-10-13 12:13（互動視窗）先.八十一-46 自走軌道不得接走互動視窗專屬項目（兩份 prompt 補規則）
+
+### 2026-10-13 12:16 先.八十一-46 自走軌道誤接「互動視窗執行」項目的根因與修正（CC）
+
+**事故**：先.八十一-42 標「（互動視窗執行）」。HypothesisQueue 軌道（Sonnet，12:05:02～12:06:34 那一輪）在 12:05:40 把它做完並提交（5b91c2550：列清單送審，未刪排程），與互動視窗重工。互動視窗 12:12 要做時才發現。對方內容經核對正確，**互動視窗未重做、未覆寫**。
+
+**根因**：
+- DevQueue 的派工由程式判斷（`scripts/dev_queue_runner.py` 的 `INLINE_INTERACTIVE_TAG`，今早 7d952473b 才修過星號問題），會排除「（互動視窗執行）」。
+- HypothesisQueue 與 Marathon 兩軌是靠 prompt 文字判斷，prompt 只寫了排除「〔互動視窗執行中 YYYY-MM-DD HH:MM〕」標記，**沒有排除「（互動視窗執行）」專屬標記**。
+
+**修正**：
+- `research/HYPOTHESIS_QUEUE_CONTINUATION_PROMPT.txt` 與 `research/MARATHON_CONTINUATION_PROMPT.txt` 各加「互動視窗專屬」規則，與 DevQueue 同一規則：
+  - 標題後直接寫「（互動視窗執行」的一律不接、不代做、不標 [x]。
+  - 只有「（互動視窗或DevQueue皆可）」可接。
+  - 佇列全是互動視窗專屬時，照「交辦佇列已清空」處理並回報讓行。
+- 新增 `scripts/selftest_interactive_tag.py`，共 7 項：
+  - DevQueue 判定 5 個樣本：含星號標題、執行中標記判「互動視窗專屬」；「皆可」與無標記判「可接」。
+  - 兩份 prompt 都有規則。
+
+**驗證**：自測 7/7、冒煙新增 #134、全套冒煙 2026/10/13 12:13:46 全部通過。目前佇列 11 項 `- [ ]`，DevQueue runner 判定全為互動視窗專屬。
+
+**影響檔案**：research/HYPOTHESIS_QUEUE_CONTINUATION_PROMPT.txt、research/MARATHON_CONTINUATION_PROMPT.txt、scripts/selftest_interactive_tag.py、scripts/smoke_test.mjs
+
 ## 2026-10-13 12:07（互動視窗）先.八十一-44 本日新增畫面說明的工程術語白話化（repo→本站…）
 
 ### 2026-10-13 12:10 先.八十一-44 本日新增畫面說明的工程術語白話化（CC）
