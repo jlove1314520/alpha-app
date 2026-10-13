@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated_at": "2026-10-13T10:48:42.637787+08:00",
-    "last_fetch_count": 11,
-    "reductions_generated_at": "2026-10-13T10:48:44.060467+08:00"
+    "generated_at": "2026-10-13T19:15:54.362030+08:00",
+    "last_fetch_count": 14,
+    "reductions_generated_at": "2026-10-13T19:15:54.709849+08:00"
   },
   "events": {
     "01010T": [
@@ -1699,6 +1699,16 @@
         "first_seen": "2026-09-10",
         "applied": true,
         "factor_applied": 0.9911158493248046
+      },
+      {
+        "ex_date": "2026-10-15",
+        "cash": 0.131,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.0,
+        "rights_price": 0.0,
+        "type": "息",
+        "first_seen": "2026-10-13",
+        "applied": false
       }
     ],
     "00936": [
@@ -2230,7 +2240,8 @@
         "rights_price": 0.0,
         "type": "權",
         "first_seen": "2026-09-23",
-        "applied": false
+        "applied": true,
+        "factor_applied": 0.9026932593601482
       }
     ],
     "1463": [
@@ -2314,6 +2325,42 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-10-12",
+        "applied": false
+      }
+    ],
+    "2025": [
+      {
+        "ex_date": "2026-10-28",
+        "cash": 0.0,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.23166845,
+        "rights_price": 0.0,
+        "type": "權",
+        "first_seen": "2026-10-13",
+        "applied": false
+      }
+    ],
+    "2762": [
+      {
+        "ex_date": "2026-10-29",
+        "cash": 1.807197,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.0,
+        "rights_price": 0.0,
+        "type": "息",
+        "first_seen": "2026-10-13",
+        "applied": false
+      }
+    ],
+    "3563": [
+      {
+        "ex_date": "2026-10-29",
+        "cash": 1.0,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.0,
+        "rights_price": 0.0,
+        "type": "息",
+        "first_seen": "2026-10-13",
         "applied": false
       }
     ]
