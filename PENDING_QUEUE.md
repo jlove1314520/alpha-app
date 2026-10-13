@@ -19507,3 +19507,20 @@ C. 驗收
 - [ ] **先.八十六-2b Kenneth French Data Library 動能因子 UMD 月報酬 1927 起存成本機參考序列（B1 現象對照；不是新試驗、不計 N）**（DevQueue 可執行）
 - [ ] **先.八十六-2c 期交所 TXO 2002–2014 年度檔下載供 B4（併 先.八十三-3d-1，做完兩條一起標）**（DevQueue 可執行）
 - [ ] **先.八十六-3 美股已下市股價格來源比較表：Stooq、Alpha Vantage、Tiingo 與收費的含下市股資料商；每家寫是否含已下市股、歷史起點、費用、使用條款是否允許自用研究；key 只放本機 .env、不進 repo 或對話**（DevQueue 可執行）
+
+# 2026-10-13【先.八十七（修正版：只用免費管道）：合法資料管道實測】（總司令裁示原文，動工前先寫入）
+
+先.八十七（修正版：只用免費管道）　合法資料管道實測
+原則：總司令裁示「App 賺錢前不花錢買資料」。只用官方公開端點與免費 key，照各家流量限制；不申請付費試用（避免自動扣款）；不破解驗證碼、不繞過登入或付費。
+1. 從 SEC EDGAR Form 25 抽 60 檔已下市美股（分散年份與交易所），固定這份清單並 commit。
+2. 用免費管道測覆蓋率：Stooq、Alpha Vantage、Tiingo 免費方案（總司令申請 key 後才測，key 只放本機 .env）。每檔記錄拿不拿得到、價格起訖日，以及是否涵蓋真正的交易期間（照「下市股：取得不等於正確」核對 delisted_at）。
+3. Kenneth French Data Library：下載動能因子（UMD）月報酬 1927 起，存本機參考序列。這不是新試驗，不計 N。
+4. 輸出 research/DATA_SOURCE_COVERAGE_TEST.md，每家列覆蓋率、正確率、免費額度限制。免費管道補不到的研究案標「暫停：等 App 有收入再評估付費資料」，不得自行採購。
+5. 省額度：DevQueue 連續 2 輪 QUEUE_EMPTY 時，第 3 輪起只寫心跳不叫模型，等佇列有 DevQueue 可執行項目再恢復。
+6. 每項完成標 - [x]，在 research/PROGRESS_HEARTBEAT.jsonl append item=先.八十七-N。
+
+- [ ] **先.八十七-1 從 SEC EDGAR Form 25 抽 60 檔已下市美股（分散年份與交易所），固定清單並 commit**（DevQueue 可執行）
+- [ ] **先.八十七-2 免費管道覆蓋率實測：Stooq、Alpha Vantage、Tiingo 免費方案；每檔記錄拿不拿得到、價格起訖日、是否涵蓋真正交易期間（核對 delisted_at）；key 只放本機 .env**（互動視窗執行；時間閘：等總司令取得免費 key）
+- [ ] **先.八十七-3 Kenneth French Data Library 動能因子 UMD 月報酬 1927 起存本機參考序列（不是新試驗、不計 N；與 先.八十六-2b 同一件，做完兩條一起標）**（DevQueue 可執行）
+- [ ] **先.八十七-4 輸出 research/DATA_SOURCE_COVERAGE_TEST.md：每家覆蓋率、正確率、免費額度限制；免費管道補不到的研究案標「暫停：等 App 有收入再評估收費資料」，不自行採購**（互動視窗執行；時間閘：先.八十七-2 之後）
+- [ ] **先.八十七-5 省額度：DevQueue 連續 2 輪 QUEUE_EMPTY 時，第 3 輪起只寫心跳不叫模型，佇列有 DevQueue 可執行項目再恢復**（DevQueue 可執行）
