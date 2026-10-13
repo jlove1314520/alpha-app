@@ -4086,6 +4086,21 @@
     const events=d.rows.map(r=>{const [code,date,ti,title,ui,si]=r;const o={code};if(d.has_name!==false)o.name=(r.length>6&&r[6]!==0)?r[6]:names[code];o.date=date;o.type=d.t[ti];o.title=title;o.source=d.s[si];o.url=d.u[ui];if(r.length>7&&r[7])Object.assign(o,r[7]);return o});
     return Object.assign({},d.top||{},{events});
   }
+  // 先.八十一-56：精簡版與整份事件檔要同一班產生。只讀整份檔開頭幾 KB 取它的 fetched_at（頂層第一個欄位）來比；
+  // 讀不到（離線、伺服器不支援）回 null＝不比（不擋精簡版）。
+  async function _eventsFullFetchedAt(){
+    try{
+      const ac=new AbortController();
+      const r=await fetch('data/events.json?t='+Math.floor(Date.now()/60000),{headers:{Range:'bytes=0-4095'},signal:ac.signal});
+      if(!r.ok&&r.status!==206)return null;
+      let txt='';
+      if(r.body&&r.body.getReader){const rd=r.body.getReader(),dec=new TextDecoder();let n=0;
+        try{while(n<8192){const {done,value}=await rd.read();if(done)break;n+=value.length;txt+=dec.decode(value,{stream:true});if(/"fetched_at"\s*:\s*"[^"]+"/.test(txt))break}}
+        finally{try{ac.abort()}catch(e){console.warn('[_eventsFullFetchedAt] abort',e)}}}
+      else txt=(await r.text()).slice(0,8192);
+      const m=txt.match(/"fetched_at"\s*:\s*"([^"]+)"/);return m?m[1]:null;
+    }catch(e){console.warn('[_eventsFullFetchedAt]',e);return null}
+  }
   async function ensureEvents(){
     if(EVENTS_CACHE&&Date.now()-EVENTS_AT<10*60*1000)return EVENTS_CACHE;
     try{
@@ -4094,11 +4109,15 @@
         const rs=await fetch('data/events_search.json?t='+Math.floor(Date.now()/60000));
         if(!rs.ok)throw new Error('HTTP '+rs.status);
         d=_expandEventsSearch(await rs.json());
+        const full=await _eventsFullFetchedAt();
+        if(full&&d.fetched_at&&full!==d.fetched_at)throw new Error('精簡版（'+d.fetched_at+'）與整份事件檔（'+full+'）不同班');
+        d._source='search';
       }catch(e1){
         console.warn('[ensureEvents:search→full]',e1);
         const r=await fetch('data/events.json?t='+Math.floor(Date.now()/60000));
         if(!r.ok)throw new Error('HTTP '+r.status);
         d=await r.json();
+        d._source='full';d._fallback_reason=String(e1&&e1.message||e1);  // 標示：這次是退回整份檔
       }
       EVENTS_CACHE=d;EVENTS_AT=Date.now();
     }catch(e){
@@ -4172,7 +4191,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-13.1704';
+  const APP_VERSION='2026-10-13.1735';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

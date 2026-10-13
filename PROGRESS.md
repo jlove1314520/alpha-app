@@ -1,3 +1,16 @@
+## 2026-10-13 17:35（互動視窗）先.八十一-56 事件精簡版與整份檔同班檢查：不同班時 App 退回整份並標示
+
+- **原計畫**（來源：先.八十一-49 冒煙 #132 偶發）：events_search.json 必須和 events.json 同一班產生。雲端或本機流程若拆檔步驟失敗，App 會讀到舊精簡版而不自知。要在 _index／精簡版加來源 fetched_at，App 與冒煙比對，不一致時退回整份並標示。
+- **資料端**：`scripts/split_events_by_code.py` 本來就把 events.json 的 fetched_at 寫進 `_index.json`、`events_search.json`（top.fetched_at）與每檔小檔，不用改。
+- **App**（`app.js` ensureEvents）：
+  - 讀精簡版後，多讀整份 `events.json` 開頭最多 8KB，只取頂層第一個欄位 fetched_at（Range 請求，讀到就中止，不下載整份）來比。
+  - 不同班就退回整份 events.json，結果標 `_source='full'` 和原因「精簡版（…）與整份事件檔（…）不同班」。
+  - 同一班標 `_source='search'`。整份檔開頭讀不到（離線等）就不比，不擋精簡版。
+- **冒煙**：
+  - 新增 #142：三檔 fetched_at 一致；用假的舊精簡版模擬不同班時，App 退回整份、標原因、筆數相同（13,838 筆）。
+  - 調整 #132「精簡版正常時不得下載整份」：只算沒有 Range 標頭的完整下載。開頭 8KB 的比對請求是刻意的，不算。
+- 冒煙全套 **141 PASS／0 FAIL**。
+
 ## 2026-10-13 17:24（互動視窗）先.八十一-64 新聞本機補班：拆檔提前、工作區不一致窗口縮到幾秒
 
 - **問題**（來源：先.八十一-49 冒煙 #132 偶發的根因）：本機新聞補班照 workflow 順序跑：抓新聞與事件 → sitemap → 內文萃取（約 7 分鐘）→ 題材 → 拆檔。這 7 分鐘內，工作區的 `events.json` 已是新版，`events_search.json`／`events_by_code/`／`ir_events.json` 還是舊版，讀本機工作區的冒煙或伺服器會看到不一致。

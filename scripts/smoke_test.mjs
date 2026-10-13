@@ -4307,7 +4307,7 @@ async function runSmokeTest(baseUrl, headless = true) {
         const p = await ctx.newPage();
         if (broken) await p.route(/data\/events_search\.json/, (r) => r.fulfill({ status: 404, body: "" }));
         const urls = [];
-        p.on("request", (r) => urls.push(r.url()));
+        p.on("request", (r) => urls.push({ u: r.url(), range: (r.headers() || {})["range"] }));  // 先.八十一-56：只讀開頭幾 KB 比對 fetched_at 的 Range 請求不算下載整份
         await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
         await p.waitForTimeout(1200);
         await p.evaluate(() => openSearch());
@@ -4321,7 +4321,7 @@ async function runSmokeTest(baseUrl, headless = true) {
         if (r.n !== full.events.length) esErrs.push(`${tag}還原筆數 ${r.n} ≠ 整份 ${full.events.length}`);
         if (r.fetched !== full.fetched_at) esErrs.push(`${tag}頂層 fetched_at 不同`);
         if (!/事件\s*[1-9]\d* 筆/.test(r.g)) esErrs.push(`${tag}搜「除權息」沒有事件結果：${r.g.slice(0, 60)}`);
-        const gotFull = urls.some(u => /data\/events\.json/.test(u));
+        const gotFull = urls.some(x => /data\/events\.json/.test(x.u) && !x.range);
         if (!broken && gotFull) esErrs.push("精簡版正常時仍下載整份 events.json");
         if (broken && !gotFull) esErrs.push("精簡版讀不到時沒有退回整份 events.json");
       } finally { await ctx.close(); }
@@ -4550,6 +4550,39 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { njErrs.push(`測試本身出錯：${e.message || e}`); }
   record("141. 根目錄有 .nojekyll，線上「_ 開頭」資料檔（by_code／events 索引／價格拆檔 meta）不會被 Pages 略過（先.八十二-12a）", njErrs.length === 0, njErrs.join("; "));
 
+  // 142.【2026-10-13 先.八十一-56】事件精簡版與整份檔同一班：events.json、events_search.json、events_by_code/_index.json 的 fetched_at 相同；
+  // App 讀精簡版時會比對整份檔開頭的 fetched_at，不同就退回整份並標示（_source='full'＋原因）。
+  const evsErrs = [];
+  let evsInfo = "";
+  try {
+    const fsx = await import("node:fs");
+    const full = JSON.parse(fsx.readFileSync("data/events.json", "utf8")).fetched_at;
+    const srch = ((JSON.parse(fsx.readFileSync("data/events_search.json", "utf8")).top) || {}).fetched_at;
+    const idx = JSON.parse(fsx.readFileSync("data/events_by_code/_index.json", "utf8")).fetched_at;
+    if (!(full && full === srch && full === idx)) evsErrs.push(`三檔 fetched_at 不一致：整份 ${full}／精簡 ${srch}／索引 ${idx}`);
+    const r = await page.evaluate(async () => {
+      const realFetch = window.fetch, o = {};
+      try {
+        EVENTS_CACHE = null;
+        const ok = await ensureEvents(); o.okSrc = ok._source; o.okN = (ok.events || []).length;
+        EVENTS_CACHE = null;
+        window.fetch = async (u, opt) => {
+          const res = await realFetch(u, opt);
+          if (!/events_search\.json/.test(String(u))) return res;
+          const d = await res.json(); d.top = Object.assign({}, d.top, { fetched_at: "2000-01-01T00:00:00+08:00" });
+          return new Response(JSON.stringify(d), { status: 200, headers: { "content-type": "application/json" } });
+        };
+        const fb = await ensureEvents(); o.fbSrc = fb._source; o.fbWhy = fb._fallback_reason || ""; o.fbN = (fb.events || []).length;
+      } finally { window.fetch = realFetch; EVENTS_CACHE = null; }
+      return o;
+    });
+    if (r.okSrc !== "search") evsErrs.push(`同一班時應讀精簡版，實際 ${r.okSrc}`);
+    if (r.fbSrc !== "full" || !/不同班/.test(r.fbWhy)) evsErrs.push(`不同班時應退回整份並標原因，實際 ${r.fbSrc}／${r.fbWhy}`);
+    if (r.fbN !== r.okN) evsErrs.push(`退回整份後筆數 ${r.fbN} ≠ 精簡版 ${r.okN}`);
+    evsInfo = `fetched_at ${full}；精簡版 ${r.okN} 筆、不同班時退回整份 ${r.fbN} 筆`;
+  } catch (e) { evsErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("142. 事件精簡版與整份檔同一班（fetched_at 一致）；不同班時 App 退回整份並標示（先.八十一-56）", evsErrs.length === 0, evsErrs.join("; ") || evsInfo);
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4578,7 +4611,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
