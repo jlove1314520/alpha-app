@@ -1,0 +1,50 @@
+{
+ "trial": 443,
+ "prereg": "docs/PREREG_txo_vrp_2002_2014_FINAL.md",
+ "layer1": {
+  "n_atm": 3226,
+  "n_with_rv": 3205,
+  "n_sampled": 641,
+  "A": {
+   "label": "A_2002_2008",
+   "n": 347,
+   "mean": 0.03597065917015458,
+   "median": 0.04214319250516187,
+   "pct_positive": 0.7435158501440923,
+   "t_p": 1.813473838255098e-20,
+   "wilcoxon_p": 7.236710516494974e-21
+  },
+  "B": {
+   "label": "B_2009_2014",
+   "n": 294,
+   "mean": 0.029832369054910372,
+   "median": 0.028351695598618908,
+   "pct_positive": 0.7482993197278912,
+   "t_p": 4.3306785642301144e-16,
+   "wilcoxon_p": 3.238882902508782e-19
+  },
+  "gate_magnitude": true,
+  "gate_same_sign_positive": true,
+  "gate_significance": true
+ },
+ "layer2": {
+  "n_months": 156,
+  "missing": 0,
+  "net_mean_by_slippage_pts": {
+   "1": 0.0038194749184261023,
+   "2": 0.0035246407929722854,
+   "3": 0.003229806667518468
+  },
+  "mdd_s1_all": 0.37079223261928806,
+  "mdd_s1_2008": 0.3199308852023204,
+  "worst_month_s1": -0.16039521835642284,
+  "sortino_m_s1": 0.4515168976952359,
+  "gate_c": true,
+  "gate_d": 1.0,
+  "benchmark_taiex_bh": {
+   "sortino_m": 0.405942179104006,
+   "mdd": 0.5625776795652929
+  }
+ },
+ "verdict": "PASS"
+}
