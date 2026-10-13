@@ -1,3 +1,18 @@
+## 2026-10-13 08:09（互動視窗）先.八十一-3 停止期間排程安靜化：凍結時 --run 只記 FROZEN 心跳、看門狗不判故障＋自測
+
+- **改法**（`research/auto_rebalance_bb90.py`）：新增 `is_frozen()`。「凍結」的定義是 STOP 旗標開著，而且 LIVE status 裡有 `strategy_frozen`（先.七十九-4 寫入）。
+  - **`--run` 遇到凍結**：直接記一筆 FROZEN 心跳後結束。不判斷觸發、不建立券商連線、不建單、不寫 REJECT、不推播。
+  - **單純緊急停止**（沒有 strategy_frozen）：照原流程處理。
+  - **SIMULATION 演練**（`--mode-override`／`--drill-label`）：不受凍結影響。
+  - 判斷本身失敗時一律當作「沒凍結」，交給原本的 STOP 守門處理（十二節）。
+- **看門狗**：當天 run 的最後一筆心跳是 FROZEN 時，回報 FROZEN，不算漏跑、不報錯。App 端只檢查「有沒有心跳」，FROZEN 心跳本來就算有。
+- **排程時間確認**：run 在 09:05 與 09:40 各跑一次，看門狗 09:55 只看 09:30 以後的心跳，所以 09:40 那筆 FROZEN 會被算到。
+- **自測**：新增 `scripts/selftest_frozen_run.py`，5/5。
+  - 它跑的是真正的 `main()`，用暫存目錄；券商換成假的，只要有程式試圖連線就算失敗。
+  - 既有的 auto_rebalance、bb90_t1_guards、flow_verify_close 自測全部仍然通過。
+- **冒煙**：110 PASS／0 FAIL。
+- **今天會實地驗證**：今天 09:05／09:40 的 run 應該只留下 FROZEN 心跳，結果會補在回報裡。
+
 ## 2026-10-13 08:03（互動視窗）先.八十一-1 market_tw 資料日核對：openapi 落後改 rwd 帶日期、走勢改 FMTQIK、落後時 App 標示＋冒煙 #111
 
 - **根因（實測）**：10/13 04:03 那輪抓取時，TWSE openapi MI_INDEX 和 TAIFEX openapi 都還是 10/08 的資料（openapi 要到隔天早上才刷新），走勢線用的 yfinance ^TWII 到 10/13 早上也還缺 10/12。price_history 用的是 STOCK_DAY_ALL，已經有 10/12，所以兩邊對不上。

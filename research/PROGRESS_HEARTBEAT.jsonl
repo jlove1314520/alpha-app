@@ -761,3 +761,4 @@
 {"ts": "2026-10-13T06:08:00+08:00", "track": "hypothesis_queue", "round": "20261013-0605", "item": "核對交辦與阻塞項無可執行；#1~82全結案；新軸候選(處置股/董監質押#48)皆重複，不編造#83；修正協定holdout舊敘述", "artifacts_changed": ["research/MARATHON_LOG.md", "research/PROGRESS_HEARTBEAT.jsonl", "research/HYPOTHESIS_QUEUE_PROTOCOL.md"], "note": "上一輪鎖檔LOCK_STALE(720min)被回收；倉庫停在他軌rebase edit停點，commit僅本機、未push"}
 {"ts": "2026-10-13T07:42:39+08:00", "source": "interactive", "item": "先.七十九-4", "summary": "10/12 流程驗證收尾 OK、STOP 已開；00646 未成交"}
 {"ts": "2026-10-13T08:03:18+08:00", "source": "interactive", "item": "先.八十一-1", "summary": "market_tw 資料日核對：openapi 落後改 rwd 帶日期、走勢改 FMTQIK、落後時 App 標示＋冒煙 #111"}
+{"ts": "2026-10-13T08:09:55+08:00", "source": "interactive", "item": "先.八十一-3", "summary": "停止期間排程安靜化：凍結時 --run 只記 FROZEN 心跳、看門狗不判故障＋自測"}

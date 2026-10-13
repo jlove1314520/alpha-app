@@ -19306,7 +19306,7 @@ C. 驗收
 
 - [x] **先.八十一-1 market_tw 停在 10/8 查根因＋data_date＋落後時重試／rwd 備援＋App 標「大盤資料停在 MM/DD」＋冒煙檢查**（互動視窗執行）〔根因：04:03 時 TWSE／TAIFEX openapi 仍是 10/08、yfinance ^TWII 缺 10/12；加 data_date／expected_trading_day／stale_note，落後改 rwd MI_INDEX 帶日期，走勢改 FMTQIK 官方；App 顯示「大盤資料停在 MM/DD」；smoke #111；110 PASS／0 FAIL〕
 - [ ] **先.八十一-2 Shioaji 1.7.4→1.7.7（非交易時段；唯讀 --preflight＋SIMULATION 演練 A／B 全 PASS，失敗退回 1.7.4；禁止 1.7.6）**（互動視窗執行）
-- [ ] **先.八十一-3 STOP＋strategy_frozen 時 --run 只記 FROZEN 心跳後結束、不產生 REJECT／推播；看門狗不判故障；附自測**（互動視窗執行）
+- [x] **先.八十一-3 STOP＋strategy_frozen 時 --run 只記 FROZEN 心跳後結束、不產生 REJECT／推播；看門狗不判故障；附自測**（互動視窗執行）〔is_frozen()（STOP＋strategy_frozen）→ --run 只記 FROZEN 心跳後結束（不連券商、不寫 REJECT、不推播）；看門狗見 FROZEN 回 FROZEN 不報漏跑；單純 STOP 與 SIMULATION 演練不受影響；selftest_frozen_run 5/5；110 PASS／0 FAIL；今日 09:05／09:40 實地驗證待補〕
 - [ ] **先.八十一-4 【提案，不改程式】docs/PROPOSAL_US_LINKED_LIMIT.md：00646 限價基準（10/12 未成交原因、三種做法與風險）**（互動視窗執行）
 - [ ] **先.八十一-5 裁示①：模擬 B／C 繼續紙上追蹤、App 標「閘門殺測失敗（#435/#436），不再是真錢候選」；槓桿階段 1 提案作廢入墓園；AWAITING_REVIEW 結案**（互動視窗執行）
 - [ ] **先.八十一-6 裁示②：#418 聯集日曆整串重跑（#421／#424／#429／達標機率），App 改顯示更正值；Bb-90 MDD −47.29% 加註「接近天條一」；AWAITING_REVIEW 結案**（互動視窗執行）

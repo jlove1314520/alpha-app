@@ -145,6 +145,20 @@ def load_config(paths: Paths) -> dict:
     return cfg
 
 
+def is_frozen(paths: Paths) -> dict | None:
+    """先.八十一-3（2026-10-13）：策略資金凍結＝STOP 旗標開著，且 LIVE 族 status 有 strategy_frozen（先.七十九-4 流程驗證收尾寫入）。
+    凍結期間 --run 只記 FROZEN 心跳就結束；單純 STOP（緊急停止、沒有 strategy_frozen）維持原本行為。"""
+    try:
+        shared = Paths(paths.base, paths.heartbeat)
+        if not shared.stop_flag.exists():
+            return None
+        fz = (_read_json(shared.scoped("LIVE").status) or {}).get("strategy_frozen")
+        return fz if isinstance(fz, dict) and fz.get("since") else None
+    except Exception as e:  # noqa: BLE001 -- 判斷失敗 fail open：當作沒凍結，交給原本的 STOP 守門（十二節）
+        print(f"[warn] 凍結狀態判斷失敗：{type(e).__name__}", flush=True)
+        return None
+
+
 def is_stopped(paths: Paths) -> bool:
     return paths.stop_flag.exists()
 
@@ -1298,6 +1312,8 @@ def watchdog(paths: Paths, now: datetime, which: str, cal: dict | None = None) -
         if not seen:
             report_error(paths, f"排程漏跑：交易日 {d} 的 {which} 任務沒有心跳（工作排程器未觸發或本機未開機）", "auto_trading_watchdog")
             return "MISSED"
+        if seen[-1].get("outcome") == "FROZEN":
+            return "FROZEN"  # 先.八十一-3：凍結期間 run 只記 FROZEN 心跳——有跑、且是刻意不動作，不是故障
         return "OK"
     except Exception as e:
         print(f"[warn] 看門狗自身失敗，fail open：{type(e).__name__}", flush=True)
@@ -2052,6 +2068,13 @@ def main() -> int:
             a.mode_override = "SIMULATION"
             task = "drill"  # 不是 run／settle：不寫進公開心跳、不滿足看門狗，避免混淆排程實證
         mode = _eff_mode(cfg, a.mode_override)
+        if a.run and not a.mode_override and not a.drill_label:
+            fz = is_frozen(paths)
+            if fz:
+                # 先.八十一-3：策略資金凍結中——不判斷觸發、不連券商、不建單、不寫 REJECT、不推播，只留 FROZEN 心跳
+                sched_heartbeat(paths, task, "FROZEN", since=fz.get("since"), reason=fz.get("reason"))
+                print(f"策略資金凍結中（{fz.get('reason') or ''}，自 {fz.get('since')}），本日不動作")
+                return 0
         if a.run:
             reason = "mode_override"
             if not a.mode_override:
