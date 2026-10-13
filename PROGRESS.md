@@ -1,3 +1,33 @@
+## 2026-10-13 11:46（互動視窗）先.八十一-27 本機 Alpha* 排程健康巡檢（34 支，附落地比對表）
+
+### 2026-10-13 12:05 先.八十一-27 本機 Alpha* 排程健康巡檢（CC）
+
+**範圍**：`Get-ScheduledTask Alpha*` 共 34 支，逐一看三件事：上次結果、上次執行時間、產出檔是否真的落地。
+
+**結果**：34 支上次結果全部 0x0。有追蹤產出的逐一比對如下。
+
+| 排程 | 上次執行 | 產出最後提交 | 判定 |
+|---|---|---|---|
+| AlphaAutoRun0905／0940、AlphaAutoWatchRun | 10/13 09:05／09:40／09:55 | 心跳 FROZEN ×2、看門狗 FROZEN | ✅ 凍結期安靜化正常（先.八十一-3 實跑驗證） |
+| AlphaConnectivity | 10/13 11:42 | external_connectivity 10/13 10:52（每小時提交一次） | ✅ |
+| AlphaNewsFallback | 10/13 11:35 | news.json 10/13 11:12 | ✅ |
+| AlphaDepCheck | 10/12 08:00 | dependency_status 10/13 10:14 | ⚠→✅ 原本只寫檔不提交，已在先.八十一-14 修好 |
+| AlphaDataAudit | 10/12 23:00 | audit_report 10/12 22:31 | ✅ |
+| AlphaDisposalFlags | 10/12 18:30 | disposal_flags 10/12 18:30 | ✅ |
+| AlphaTdccHolders | 10/09 20:00（每週五） | holders 10/09 20:00 | ✅ |
+| AlphaRfMonthly | 10/13 09:20（每日） | rf_monthly 10/02 | ✅ log：「monthly series unchanged, no commit」（最新月 2026-09 不變） |
+| AlphaMoeaPitSnapshot | 10/13 10:30 | moea_pit 10/02 | ✅ log：「no new snapshot, no commit」（官方仍 115/07） |
+| AlphaWeeklyReport | 10/11 20:00（每週日） | weekly_report 10/11 20:00 | ✅ |
+| 供給觀察（23:00） | 10/12 23:00 | supply_watchlist 10/03 | ✅ log：「內容與既有檔相同，不改寫」（先.八十一-14 已在 App 標明） |
+| AlphaShioajiQuotes | 每 2 分鐘檢查，常駐 PID 195448 自 08:31 起 | quotes_sinopac 10/12 13:47 | ✅ **設計如此**：盤中只寫秒級熱檔給手機，`data/quotes_sinopac.json` 收盤後才寫一次並提交（shioaji_quotes.py:786） |
+| AlphaData | 10/12 15:30 | alpha.db（不進 repo） | ✅ |
+
+**一次性、已過期的排程**：AlphaFlowVerifyClose1012、AlphaNightDrillFinish1007_0800、AlphaPreflight1007_0830／1400、AlphaPreflightReminder1011_2000。都沒有下次執行，不會再跑；刪除排程屬不可逆的系統變更，**本項不刪**，列出供裁示是否清理。
+
+**結論**：除已修好的 AlphaDepCheck 外，沒有「有跑卻沒落地」的排程。盤中沒有近即時報價的根因在雲端 quotes.yml 被 GitHub 丟班，見先.八十一-24／25。
+
+**影響檔案**：無程式變更
+
 ## 2026-10-13 11:44（互動視窗）先.八十一-25 【提案】盤中報價本機備援（等裁示）
 
 ### 2026-10-13 11:58 先.八十一-25 【提案，不改程式】盤中報價本機備援（CC）
