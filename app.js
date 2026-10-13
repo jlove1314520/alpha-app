@@ -587,12 +587,19 @@
   // 三個檔案裡都有，就是後者。
   let LISTED_UNIVERSE=null;
   // 2026-10-09（先.五十六-A1）：官方停止交易清單（TPEx tpex_cmode／TWSE TWTAWU），來自 listed_universe.json 的 suspended
-  let LISTED_SUSPENDED={};
+  let LISTED_SUSPENDED={},LISTED_SUSPECTED={};
   function suspendedInfo(code){return (LISTED_SUSPENDED&&LISTED_SUSPENDED[code]&&LISTED_SUSPENDED[code].trading_status==='SUSPENDED_OFFICIAL')?LISTED_SUSPENDED[code]:null}
+  // 先.八十一-57：官方終止上市（近 365 天）、疑似停止交易（仍在名冊但連續 ≥5 個交易日不在官方收盤快照、無公告）
+  function delistedInfo(code){return (LISTED_SUSPENDED&&LISTED_SUSPENDED[code]&&LISTED_SUSPENDED[code].trading_status==='DELISTED_OFFICIAL')?LISTED_SUSPENDED[code]:null}
+  function suspectedInfo(code){return (LISTED_SUSPECTED&&LISTED_SUSPECTED[code])||null}
   // 沒有報價時要顯示的文字：官方停止交易者顯示「停止交易（官方）」，取代「無報價」
   function noQuoteLabel(code,us){
     const s=!us&&suspendedInfo(code);
     if(s)return '停止交易（官方'+(s.since?'，'+s.since+' 起':(s.as_of?'，資料日 '+s.as_of:''))+'）';
+    const dl=!us&&delistedInfo(code);
+    if(dl)return '終止上市（官方'+(dl.since?'，'+dl.since:'')+'）';
+    const sp=!us&&suspectedInfo(code);
+    if(sp)return '疑似停止交易（'+(sp.last_quoted?String(sp.last_quoted).slice(5).replace('-','/')+' 後':'')+'官方收盤表找不到，無公告）';
     return '無報價（'+noQuoteReason(code,us)+'）';
   }
   async function ensureListedUniverse(){
@@ -603,6 +610,7 @@
       const d=await r.json();
       LISTED_UNIVERSE=new Set(d.active||[]);
       LISTED_SUSPENDED=(d.suspended&&typeof d.suspended==='object')?d.suspended:{};
+      LISTED_SUSPECTED=(d.suspected_halt&&typeof d.suspected_halt==='object')?d.suspected_halt:{};
     }catch(e){
       console.warn('[ensureListedUniverse]',e);recordGlobalError('ensureListedUniverse',e);
       if(!LISTED_UNIVERSE)LISTED_UNIVERSE=new Set();
@@ -4191,7 +4199,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-13.1735';
+  const APP_VERSION='2026-10-13.1754';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

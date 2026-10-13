@@ -44,6 +44,12 @@ TPEX_ROSTER = "https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap03_O"
 # （SuspensionOfTrading=Ｙ）；TWSE「集中市場暫停交易證券」（TradingHaltDate／TradingResumptionDate）。
 TPEX_CMODE = "https://www.tpex.org.tw/openapi/v1/tpex_cmode"
 TWSE_TWTAWU = "https://openapi.twse.com.tw/v1/exchangeReport/TWTAWU"
+# 先.八十一-57（2026-10-13）：官方終止上市清單、上櫃歷史暫停／恢復交易（各每日 1 次；官方未公布次數上限，見 C:\alpha\CLAUDE.md）
+TWSE_DELISTED = "https://openapi.twse.com.tw/v1/company/suspendListingCsvAndHtml"
+TPEX_SPENDI_HIST = "https://www.tpex.org.tw/openapi/v1/tpex_spendi_history"
+# 沒有公告、但連續這麼多個交易日不在官方「當日收盤快照」（STOCK_DAY_ALL／TPEx quotes）→ 標「疑似停止交易」。
+# 名冊（公司基本資料）只代表還掛牌，不代表有交易，所以不算「有出現」（8183 就是名冊一直在、10/01 後快照都找不到）。
+SUSPECT_TRADING_DAYS = 5
 
 OUT = ROOT / "data" / "listed_universe.json"
 TZ = timezone(timedelta(hours=8))
@@ -53,12 +59,16 @@ INACTIVE_DAYS = 30  # 連續 30 天沒在任何官方名冊/快照出現才判�
 def collect_today(sess) -> tuple[set[str], dict]:
     seen: set[str] = set()
     meta: dict = {}
+    quoted: set[str] = set()  # 先.八十一-57：只來自當日收盤快照（有成交價）的代號
+    meta["_quoted"] = quoted
 
     def add(codes, key, extra=None):
         n = 0
         for c in codes:
             if is_stock_code(c):
                 seen.add(c)
+                if key in ("twse_quotes", "tpex_quotes"):
+                    quoted.add(c)
                 n += 1
         meta[key] = {"ok": True, "usable": n, **(extra or {})}
 
@@ -130,13 +140,73 @@ def collect_suspended(sess, today: str) -> tuple[dict, dict]:
         meta["twse_twtawu"] = {"ok": True, "rows": len(rows), "suspended": n}
     except Exception as e:
         meta["twse_twtawu"] = {"ok": False, "error": f"{type(e).__name__}: {e}"}
+    recent_from = (datetime.fromisoformat(today) - timedelta(days=365)).date().isoformat()
+    try:  # 先.八十一-57：官方終止上市清單（DelistingDate 民國 115/09/01）
+        rows = sess.get(TWSE_DELISTED, timeout=90).json()
+        n = 0
+        for r in rows:
+            code = str(r.get("Code", "")).strip()
+            t = str(r.get("DelistingDate", "")).replace("/", "")
+            d = _roc(t.zfill(7)) if t.isdigit() else None
+            # 清單從 2002 年起；舊代號可能被新公司沿用，只收近 365 天內終止上市的（今天仍有收盤價者另在 main 排除）
+            if is_stock_code(code) and d and recent_from <= d <= today:
+                out[code] = {"trading_status": "DELISTED_OFFICIAL", "source": "TWSE suspendListingCsvAndHtml", "since": d}
+                n += 1
+        meta["twse_delisted"] = {"ok": True, "rows": len(rows), "delisted": n}
+    except Exception as e:
+        meta["twse_delisted"] = {"ok": False, "error": f"{type(e).__name__}: {e}"}
+    try:  # 先.八十一-57：上櫃歷史暫停／恢復交易，同代號取最後一個事件；最後是「暫停」→ 停止交易中
+        rows = sess.get(TPEX_SPENDI_HIST, timeout=90).json()
+        last: dict = {}
+        for r in rows:
+            code = str(r.get("SecuritiesCompanyCode", "")).strip()
+            hs, rs = _roc(r.get("DateOfSuspendedTrading")), _roc(r.get("DateOfResumedTrading"))
+            for d, kind in ((hs, "halt"), (rs, "resume")):
+                if is_stock_code(code) and d and d <= today and (code not in last or d >= last[code][0]):
+                    last[code] = (d, kind)
+        n = 0
+        for code, (d, kind) in last.items():
+            if kind == "halt" and code not in out:
+                out[code] = {"trading_status": "SUSPENDED_OFFICIAL", "source": "TPEx tpex_spendi_history", "since": d}
+                n += 1
+        meta["tpex_spendi_history"] = {"ok": True, "rows": len(rows), "suspended": n}
+    except Exception as e:
+        meta["tpex_spendi_history"] = {"ok": False, "error": f"{type(e).__name__}: {e}"}
     return out, meta
+
+
+def trading_days_between(a: str, b: str) -> int:
+    """a（不含）到 b（含）之間的台股交易日數；休市日讀 data/trading_calendar.json，讀不到只扣週末。"""
+    try:
+        cal = json.loads((ROOT / "data" / "trading_calendar.json").read_text(encoding="utf-8")).get("tw") or {}
+        closed = {d for y in cal.values() for d in (y.get("closed") or []) + (y.get("unscheduled_closed") or [])}
+    except Exception:  # noqa: BLE001
+        closed = set()
+    from datetime import date as _d
+    x, end, n = _d.fromisoformat(a), _d.fromisoformat(b), 0
+    while x < end:
+        x += timedelta(days=1)
+        if x.weekday() < 5 and x.isoformat() not in closed:
+            n += 1
+    return n
+
+
+def seed_last_quoted() -> dict:
+    """第一次跑（舊檔沒有 last_quoted）：用價格歷史每檔最後一筆日期當起點，免得第一天全部被判「沒出現」。"""
+    try:
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import price_history_store as PHS
+        return {c: rows[-1]["date"] for c, rows in (PHS.load().get("prices") or {}).items() if rows and rows[-1].get("date")}
+    except Exception as e:  # noqa: BLE001
+        print(f"  ! 讀價格歷史當 last_quoted 起點失敗：{type(e).__name__}")
+        return {}
 
 
 def main() -> int:
     today = datetime.now(TZ).date().isoformat()
     sess = make_session()
     seen, meta = collect_today(sess)
+    quoted = meta.pop("_quoted", set())
 
     ok_sources = [k for k, v in meta.items() if v.get("ok")]
     if not seen or not ok_sources:
@@ -148,16 +218,20 @@ def main() -> int:
 
     prev = {}
     prev_susp = {}
+    prev_q = None
     if OUT.exists():
         try:
             _old = json.loads(OUT.read_text(encoding="utf-8"))
             prev = _old.get("last_seen", {})
             prev_susp = _old.get("suspended", {}) or {}
+            prev_q = _old.get("last_quoted")
         except Exception as e:
             print(f"  ! 舊檔讀不到，重新開始累積：{type(e).__name__} {e}")
     suspended, susp_meta = collect_suspended(sess, today)
     # 某個來源抓不到時沿用該來源上一份標記（標 stale），不把停止交易股誤判成「恢復」
-    for src_key, src_name in (("tpex_cmode", "TPEx tpex_cmode"), ("twse_twtawu", "TWSE TWTAWU")):
+    for src_key, src_name in (("tpex_cmode", "TPEx tpex_cmode"), ("twse_twtawu", "TWSE TWTAWU"),
+                              ("twse_delisted", "TWSE suspendListingCsvAndHtml"),
+                              ("tpex_spendi_history", "TPEx tpex_spendi_history")):
         if not susp_meta.get(src_key, {}).get("ok"):
             for c, v in prev_susp.items():
                 if v.get("source") == src_name and c not in suspended:
@@ -167,6 +241,27 @@ def main() -> int:
     last_seen = dict(prev)
     for c in seen:
         last_seen[c] = today
+
+    # 先.八十一-57：last_quoted 只在兩個收盤快照都抓到時才更新（任一快照失敗就整批不更新，免得把另一市場全判成沒出現）
+    last_quoted = dict(prev_q) if isinstance(prev_q, dict) else seed_last_quoted()
+    quotes_ok = meta.get("twse_quotes", {}).get("ok") and meta.get("tpex_quotes", {}).get("ok")
+    if quotes_ok:
+        for c in quoted:
+            last_quoted[c] = today
+    # 今天仍有收盤價的代號，就算出現在終止上市清單也不算（代號沿用）
+    for c in [c for c, v in suspended.items() if v.get("trading_status") == "DELISTED_OFFICIAL" and c in quoted]:
+        suspended.pop(c)
+    suspected = {}
+    cut30 = (datetime.now(TZ).date() - timedelta(days=INACTIVE_DAYS)).isoformat()
+    if quotes_ok:
+        for c in sorted(c for c, d in last_seen.items() if d >= cut30):  # 仍算在市（30 天規則內）的代號
+            lq = last_quoted.get(c)
+            if c in suspended:
+                continue  # 已有官方公告
+            gap = trading_days_between(lq, today) if lq else None
+            if gap is None or gap >= SUSPECT_TRADING_DAYS:
+                suspected[c] = {"trading_status": "SUSPECTED_HALT", "last_quoted": lq, "trading_days_absent": gap,
+                                "rule": f"仍在官方名冊，但連續 {SUSPECT_TRADING_DAYS} 個交易日以上不在官方當日收盤快照（無公告）"}
 
     cutoff = (datetime.now(TZ).date() - timedelta(days=INACTIVE_DAYS)).isoformat()
     active = sorted(c for c, d in last_seen.items() if d >= cutoff)
@@ -184,10 +279,13 @@ def main() -> int:
         "inactive": inactive,
         "last_seen": last_seen,
         "suspended": dict(sorted(suspended.items())),
+        "last_quoted": dict(sorted(last_quoted.items())),
+        "suspected_halt": suspected,
     }, ensure_ascii=False, indent=1), encoding="utf-8")
 
     print(f"今日官方可見代號 {len(seen)} 檔（來源：{'、'.join(ok_sources)}）")
-    print(f"active {len(active)} 檔、inactive {len(inactive)} 檔、官方停止交易 {len(suspended)} 檔 → {OUT.relative_to(ROOT)}")
+    print(f"active {len(active)} 檔、inactive {len(inactive)} 檔、官方停止交易／終止上市 {len(suspended)} 檔、"
+          f"疑似停止交易 {len(suspected)} 檔 → {OUT}")
     return 0
 
 

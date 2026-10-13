@@ -4594,6 +4594,32 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { evsErrs.push(`測試本身出錯：${e.message || e}`); }
   record("142. 事件精簡版與整份檔同一班（fetched_at 一致）；不同班時 App 退回整份並標示（先.八十一-56）", evsErrs.length === 0, evsErrs.join("; ") || evsInfo);
 
+  // 143.【2026-10-13 先.八十一-57】在市名冊：官方終止上市與「疑似停止交易」判定自測通過；App 無報價文字依狀態顯示
+  // 「停止交易（官方…）」「終止上市（官方…）」「疑似停止交易（MM/DD 後官方收盤表找不到，無公告）」。
+  const luErrs = [];
+  let luInfo = "";
+  try {
+    const { execFileSync } = await import("node:child_process");
+    const py = process.platform === "win32" ? "python" : "python3";
+    let out = "";
+    try { out = execFileSync(py, ["scripts/selftest_listed_universe_suspect.py"], { encoding: "utf8", env: { ...process.env, PYTHONIOENCODING: "utf-8" }, timeout: 120000 }); }
+    catch (e) { out = String(e.stdout || ""); luErrs.push("名冊判定自測未通過：" + out.split("\n").filter(l => /^FAIL/.test(l)).join("；").slice(0, 300)); }
+    const r = await page.evaluate(() => {
+      const s0 = LISTED_SUSPENDED, s1 = LISTED_SUSPECTED;
+      try {
+        LISTED_SUSPENDED = { "1111": { trading_status: "SUSPENDED_OFFICIAL", since: "2026-10-01" }, "2867": { trading_status: "DELISTED_OFFICIAL", since: "2026-09-01" } };
+        LISTED_SUSPECTED = { "8183": { trading_status: "SUSPECTED_HALT", last_quoted: "2026-09-22", trading_days_absent: 12 } };
+        return { a: noQuoteLabel("1111", false), b: noQuoteLabel("2867", false), c: noQuoteLabel("8183", false), d: noQuoteLabel("8183", true) };
+      } finally { LISTED_SUSPENDED = s0; LISTED_SUSPECTED = s1; }
+    });
+    if (!/停止交易（官方，2026-10-01 起）/.test(r.a)) luErrs.push(`官方停止交易文字不對：${r.a}`);
+    if (!/終止上市（官方，2026-09-01）/.test(r.b)) luErrs.push(`終止上市文字不對：${r.b}`);
+    if (!/疑似停止交易（09\/22 後官方收盤表找不到，無公告）/.test(r.c)) luErrs.push(`疑似停止交易文字不對：${r.c}`);
+    if (/疑似/.test(r.d)) luErrs.push("美股不該套台股名冊狀態");
+    luInfo = `${(out.match(/合計 \d+ 項，失敗 \d+/) || [""])[0]}；${r.c}`;
+  } catch (e) { luErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("143. 在市名冊：官方終止上市＋疑似停止交易判定、App 無報價文字依狀態顯示（先.八十一-57）", luErrs.length === 0, luErrs.join("; ") || luInfo);
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4622,7 +4648,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
