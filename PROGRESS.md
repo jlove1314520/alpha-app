@@ -1,3 +1,39 @@
+## 2026-10-13 11:24（互動視窗）先.八十一-22 營收圖月底股價改 repo 為主，FinMind 只補缺月
+
+### 2026-10-13 11:27 先.八十一-22 營收圖月底股價改 repo 為主（CC）
+
+**查證**（替代來源都不能直接用）
+- TWSE openapi `exchangeReport/FMSRFK_ALL`（上市個股月成交資訊）：
+  - 只有最新一個月（115/09），**沒有收盤價**，只有最高、最低、加權均價。
+  - 回應超過 7MB，兩次下載都在中途被斷線。
+  - 2 次請求後停止，未再試。
+- 本機 FinMind 快取（research/data/raw）只到 2024-12-31；alpha.db 的 daily_price 只有 27,595 列，幾天份。
+
+**做了什麼**
+- 新增 `scripts/build_monthly_close.py` → `data/monthly_close.json`，掛進 market.yml，排在 build_by_code 之前：
+  - 每次排程從 price_history 取每檔「**市場當月最後交易日**」的收盤（該日至少 500 檔有資料才算市場交易日），往前累積、保留 24 個月。
+  - 某檔當天沒收盤就不收那個月：實測 1,936 檔的 90 筆裡夾著 2019～2024 年零星舊列，若取「該檔當月最後一筆」會把月中收盤冒充月底。
+  - 目前 2,634 檔、2026-06 起，gzip 42KB。
+- by_code 小檔帶 `monthly_close`。營收圖先用它，8 個營收月份有缺的才向 FinMind 補。
+  - FinMind 請求起日改為「最早缺的那個月 1 日」，原本固定 430 天。
+  - 說明列標「月底股價：repo N/8 個月，FinMind 補 M 個月」；補充失敗時寫原因。
+
+**前後請求**（個股 2330，營收月份 2026-02～09）
+
+| | 改前 | 改後（今天） | repo 累積滿 8 個月後（約 2027-02） |
+|---|---|---|---|
+| FinMind 日線請求 | 1 次，起日 430 天前（約 14 個月日線） | 1 次，起日 2026-02-01（約 8 個月日線）；repo 供 4／8 個月 | 0 次 |
+
+**驗證**：冒煙新增 #128。檢查內容：
+- 說明列有「repo N/8 個月」且 N≥1。
+- FinMind 起日是某月 1 日、不超過 400 天前；repo 已涵蓋 8 個月時不得再請求。
+- 擋掉 FinMind 時寫明補充失敗原因。
+- monthly_close.json 有 2330 且至少 3 個月。
+
+全套冒煙 2026/10/13 11:23:58 全部通過。
+
+**影響檔案**：scripts/build_monthly_close.py、data/monthly_close.json、scripts/build_by_code.py、data/by_code/、app-stock.js、.github/workflows/market.yml、scripts/smoke_test.mjs
+
 ## 2026-10-13 11:12（互動視窗）先.八十一-21 冒煙等待條件競態全面掃描（0 筆可疑）＋掃描器常駐冒煙
 
 ### 2026-10-13 11:15 先.八十一-21 冒煙等待條件競態全面掃描（CC）

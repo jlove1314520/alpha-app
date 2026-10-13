@@ -117,6 +117,7 @@ def main() -> int:
     sc_by_code = {r.get("code"): r for r in sc_rows}
     other = {n: {r.get("code"): r for r in ((_load(p) or {}).get("stocks") or [])} for n, p in OTHER_BOARDS.items()}
     company = (_load(DATA / "company_info.json") or {}).get("companies") or {}
+    mclose = (_load(DATA / "monthly_close.json") or {}).get("closes") or {}  # 先.八十一-22：營收圖月底股價
     ph = (_load(DATA / "price_history.json") or {}).get("prices") or {}
     codes = set()
     for n, d in docs.items():
@@ -157,6 +158,8 @@ def main() -> int:
             doc["price"] = [[r.get(c) for c in PRICE_COLS] for r in rows[-PRICE_DAYS:]]
         if code in company:
             doc["company"] = company[code]
+        if mclose.get(code):
+            doc["monthly_close"] = mclose[code]
         changed += _write_if_changed(OUT / f"{code}.json", doc)
         keep.add(f"{code}.json")
     stale = [p for p in OUT.glob("*.json") if p.name not in keep]

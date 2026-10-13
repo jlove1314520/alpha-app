@@ -506,13 +506,23 @@
     const amtEl=document.getElementById('rev-chart-amt'),yoyEl=document.getElementById('rev-chart-yoy'),lblEl=document.getElementById('rev-chart-labels');
     if(!amtEl)return;
     if(!rev.length){amtEl.innerHTML='<div class="note">查無月營收</div>';yoyEl.innerHTML='';lblEl.innerHTML='';setTxt('kn-yoy','—');REV_ROWS=[];return}
-    const px=await fm('TaiwanStockPrice',code,_d(430));
+    // 先.八十一-22：月底股價改 repo 為主——by_code 小檔的 monthly_close（scripts/build_monthly_close.py，往前累積的
+    // 市場月底交易日收盤）；這 8 個營收月份有缺的才向 FinMind 要 430 天日線補。
+    const bars=rev.slice(-8);
+    const mkey=(y,m)=>`${y}-${String(m).padStart(2,'0')}`;
+    const bc=await byCode(code);
     if(currentCode!==code)return;
-    const priceAt=(y,m)=>{
+    const mc=(bc&&bc.monthly_close)||{};
+    const need=bars.filter(r=>mc[mkey(r.revenue_year,r.revenue_month)]==null);
+    let px=[];
+    // 只向 FinMind 要「最早缺的那個月」起的日線（原本固定 430 天）
+    if(need.length){const f=need[0];px=await fm('TaiwanStockPrice',code,mkey(f.revenue_year,f.revenue_month)+'-01');if(currentCode!==code)return}
+    const fmAt=(y,m)=>{
       const inMonth=px.filter(p=>{const d=p.date.split('-');return +d[0]===y&&+d[1]===m});
       return inMonth.length?inMonth[inMonth.length-1].close:null;
     };
-    const bars=rev.slice(-8);
+    const priceAt=(y,m)=>{const v=mc[mkey(y,m)];return v!=null?v:fmAt(y,m)};
+    const pxSrc=`月底股價：repo ${bars.length-need.length}/${bars.length} 個月${need.length?`，FinMind 補 ${need.length} 個月${FM_LAST_FAILED&&!px.length?`（補充失敗：${FM_LAST_ERR||'原因不明'}）`:''}`:''}`;
     REV_ROWS=bars.map(r=>{
       let py=r.revenue_year,pm=r.revenue_month-1;if(pm===0){pm=12;py--}
       const prev=rev.find(x=>x.revenue_year===py&&x.revenue_month===pm);
@@ -533,7 +543,7 @@
     lblEl.innerHTML=REV_ROWS.map(r=>`<span>${r.revenue_month}月</span>`).join('');
     const rl=REV_ROWS[REV_ROWS.length-1];
     const ye=document.getElementById('kn-yoy');ye.textContent=rl.yoy!=null?(rl.yoy>=0?'+':'')+rl.yoy.toFixed(1)+'%':'—';ye.className=rl.yoy>=0?'pos':'neg';
-    document.getElementById('rev-note').innerHTML=`${rl.revenue_year}/${rl.revenue_month} 月營收 ${nf(Math.round(rl.revenue/1e8))} 億${rl.yoy!=null?` · YoY <b class="${rl.yoy>=0?'pos':'neg'}">${rl.yoy>=0?'+':''}${rl.yoy.toFixed(1)}%</b>`:''} · research快照`;
+    document.getElementById('rev-note').innerHTML=`${rl.revenue_year}/${rl.revenue_month} 月營收 ${nf(Math.round(rl.revenue/1e8))} 億${rl.yoy!=null?` · YoY <b class="${rl.yoy>=0?'pos':'neg'}">${rl.yoy>=0?'+':''}${rl.yoy.toFixed(1)}%</b>`:''} · research快照<span class="rev-px-src" style="display:block;font-size:10px;color:var(--ink-4)">${pxSrc}</span>`;
   }
 
   // 2026-09-15（P0產品.二）個股頁「選股理由」卡：獨立於選股頁的hydratePicks流程，

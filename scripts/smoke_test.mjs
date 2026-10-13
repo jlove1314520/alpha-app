@@ -4172,6 +4172,37 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { swErrs.push(`測試本身出錯：${e.message || e}`); }
   record("127. 冒煙等待條件不得被頁面預設文字即滿足（scan_smoke_waits.py）（先.八十一-21）", swErrs.length === 0, swErrs.join("; "));
 
+  // 128.【2026-10-13 先.八十一-22】個股營收圖月底股價 repo 為主（by_code monthly_close）：說明列標「repo N/8 個月」，
+  // FinMind 只補缺的月份（請求起日＝最早缺的月份 1 日，不再固定 430 天）；FinMind 失敗時寫明原因。
+  const mcErrs = [];
+  try {
+    for (const blockFm of [false, true]) {
+      const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+      try {
+        const p = await ctx.newPage();
+        const fmReq = [];
+        if (blockFm) await p.route(/finmindtrade\.com/, (r) => r.abort());
+        p.on("request", (r) => { if (/dataset=TaiwanStockPrice&data_id=2330/.test(r.url())) fmReq.push(r.url()); });
+        await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+        await p.waitForTimeout(1500);
+        await p.evaluate(() => { Promise.resolve(openStock("2330")).catch(() => {}); });
+        await p.waitForFunction(() => document.querySelector("#rev-note .rev-px-src"), null, { timeout: 20000 }).catch(() => null);
+        const t = await p.evaluate(() => (document.querySelector("#rev-note .rev-px-src") || {}).textContent || "");
+        const m = t.match(/repo (\d+)\/(\d+) 個月/);
+        if (!m || +m[1] < 1) mcErrs.push(`${blockFm ? "[擋FinMind] " : ""}營收圖沒標 repo 月底股價（${t}）`);
+        const need = m ? +m[2] - +m[1] : 0;
+        const starts = fmReq.map(u => (u.match(/start_date=(\d{4}-\d\d-\d\d)/) || [])[1]).filter(Boolean);
+        if (!blockFm) {
+          if (need === 0 && starts.length) mcErrs.push("repo 已涵蓋 8 個月仍向 FinMind 要日線");
+          if (starts.some(s => !/-01$/.test(s) || (Date.now() - Date.parse(s)) > 400 * 86400000)) mcErrs.push(`FinMind 起日不是最早缺月的 1 日：${starts.join(",")}`);
+        } else if (need > 0 && !/補充失敗/.test(t)) mcErrs.push(`FinMind 失敗時沒寫原因：${t}`);
+      } finally { await ctx.close(); }
+    }
+    const mc = JSON.parse((await import("node:fs")).readFileSync("data/monthly_close.json", "utf8"));
+    if (!mc.closes || !mc.closes["2330"] || Object.keys(mc.closes["2330"]).length < 3) mcErrs.push("monthly_close.json 缺 2330 或月份太少");
+  } catch (e) { mcErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("128. 營收圖月底股價 repo 為主、FinMind 只補缺月並寫明失敗原因（先.八十一-22）", mcErrs.length === 0, mcErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4200,7 +4231,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
