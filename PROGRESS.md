@@ -1,3 +1,11 @@
+## 2026-10-13 22:35（互動視窗）先.八十五-2 美股存活者偏誤但書改新宇宙口徑（採甲）
+
+- CLAUDE.md 七之三：但書改為「存活者偏誤未完全修正：已下市股約 97%（抽樣 58／60）無價格來源。」附抽樣方法：2026-10-05 先.十九，v2 宇宙 21,315 CIK（已下市 5,728），種子 20261005 抽 60 檔，yfinance 2 檔有價、Stooq 0 檔，58 檔連代號都沒有（`research/data/us_delisted_price_probe.json`）。舊文字「7.1%（775／10,863 檔）」保留並加 ⚠️ 標「v1 口徑已過時」。
+- 同步更新：DATA.md、docs/US_PRICE_SOURCES.md（兩處）、docs/UX_REDESIGN_PROPOSAL.md、prototype/ux_v2.html、research/av_price_client.py 註解、research/GRAVEYARD_AUTOPSY.md（兩處）。正式 App（index.html／app.js）沒有引用這個數字。
+- 刻意不改：已登記試驗的規格與程式（B18／B30 SPEC 與 gate、insider_dera_g0c_fill.py）、日誌類（HYPOTHESIS_QUEUE、MARATHON_LOG、TRIALS_LEDGER、REPORT…）與 docs/BLOCKED_TRIAGE_2026-09-27.md 這類當時的快照——改了等於改寫當時紀錄。docs/FEASIBILITY_us_supply_tightness.md 早已自行更正。
+- AWAITING_REVIEW 結案，等待中 2→1。
+- 冒煙：只改文件與註解，沿用本輪 142/142。
+
 ## 2026-10-13 22:33（互動視窗）先.八十五-1 佇列 9 項改 DevQueue 可執行＋每輪可執行項數檢查
 
 - **根因**：10/13 19:56 起佇列 12 項全標「（互動視窗執行）」，`dev_queue_runner.py` 的 `item_class()` 一律跳過，DevQueue 每輪 `NO_PENDING_ITEM_FOR_DEVQUEUE`／`QUEUE_EMPTY`（例 cycle 20261013-220101）。

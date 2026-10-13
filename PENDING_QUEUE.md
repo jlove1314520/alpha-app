@@ -19483,7 +19483,7 @@ C. 驗收
 4. 研究優先順序：B4 台指 VRP 寫 PREREG（要同時檢查天條一，因為賣選擇權有尾部風險）→ B2 8-K 2.02 寫 PREREG → A 類 core_tilt 修宇宙（先查「重建組合 beta 0.0009、淨值近平線」是不是新 bug）→ #22 四濾網低優先。每份 PREREG 寫完先列入 AWAITING_REVIEW 等放行，不得自行登記。
 
 - [~] **先.八十五-1 【最優先】佇列逐項重判可否交 DevQueue；新補件預設 DevQueue 可執行；≥12 項其中 ≥6 項 DevQueue 可執行；互動視窗 /loop 每 30 分鐘續跑；驗收：下一輪 DevQueue cycle log reason 非 QUEUE_EMPTY 且有實際提交**（互動視窗執行）〔進行中：9 項改 DevQueue 可執行、檔頭第 8 條、eligible_precheck 印 9 項；等下一輪 DevQueue 有實際提交〕
-- [ ] **先.八十五-2 裁示採甲：CLAUDE.md 七之三美股存活者偏誤但書改新宇宙口徑（附抽樣方法與日期），舊文字保留加 ⚠️；App 與 docs 引用處同步；AWAITING_REVIEW 結案**（互動視窗執行；動 CLAUDE.md 核心檔）
+- [x] **先.八十五-2 裁示採甲：CLAUDE.md 七之三美股存活者偏誤但書改新宇宙口徑（附抽樣方法與日期），舊文字保留加 ⚠️；App 與 docs 引用處同步；AWAITING_REVIEW 結案**（互動視窗執行；動 CLAUDE.md 核心檔）〔CLAUDE.md 七之三改「約 97%（抽樣 58／60）」附方法；舊文字加 ⚠️；DATA.md 等 6 檔同步；AWAITING 結案〕
 - [ ] **先.八十五-3 裁示放行 B5 PREREG（滑價每邊 1／2／3 點都要過；1999–2009 單發取代隨機對照組）：先查證台指期 1999 起官方歷史→定稿→登記→只跑一次→結果寫墓園或候選；AWAITING_REVIEW 結案**（互動視窗執行；登記試驗）
 - [ ] **先.八十五-4 研究優先順序：B4 台指 VRP PREREG（含天條一）→ B2 8-K 2.02 PREREG → A 類 core_tilt 修宇宙（先查 beta 0.0009／淨值近平線是否新 bug）→ #22 四濾網低優先；每份 PREREG 先列 AWAITING_REVIEW，不得自行登記**（互動視窗執行）
 
