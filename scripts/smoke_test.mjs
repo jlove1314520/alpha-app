@@ -3990,6 +3990,34 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { miscErrs.push(`測試本身出錯：${e.message || e}`); }
   record("120. 雜項：2027 假日表＋官方日曆檔、時鐘初始化順序、「最差 N%」說法、ADR 四檔、紅線、選用檔 404 不重打（先.八十一-13）", miscErrs.length === 0, miscErrs.join("; "));
 
+  // 121.【2026-10-13 先.八十一-24】quotes_tw.json 裡 stale:true 的列（MIS 沒成交也沒委買賣、用昨收頂上、漲跌固定 0）不得當報價；
+  // 首頁自選股漲跌不得整排都是 +0.00%（10/13 上午 GitHub 排程沒跑時就是整排 +0.00%）。
+  const zeroErrs = [];
+  try {
+    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+    try {
+      const p = await ctx.newPage();
+      await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+      await p.waitForSelector("#wl-list .swipe-row .px", { timeout: 20000 }).catch(() => null);
+      await p.waitForTimeout(2500);
+      const tags = await p.evaluate(() => [...document.querySelectorAll("#wl-list .chg-tag")].map(x => x.textContent.trim()));
+      if (tags.length >= 3 && tags.every(t => /^\+?0\.00%$/.test(t))) zeroErrs.push(`自選股漲跌整排都是 0.00%（${tags.length} 列）`);
+      const r = await p.evaluate(() => {
+        const keep = INTRADAY_TW;
+        try {
+          INTRADAY_TW = { fetched_at: new Date().toISOString(), quotes: { "2330": { price: 2540, change: 0, change_pct: 0, prev_close: 2540, stale: true } } };
+          const a = resolveQuote("2330", false);
+          INTRADAY_TW = { fetched_at: new Date().toISOString(), quotes: { "2330": { price: 2550, change: 10, change_pct: 0.39, prev_close: 2540, stale: false } } };
+          const b = resolveQuote("2330", false);
+          return { a: a && a.tier, b: b && b.tier };
+        } finally { INTRADAY_TW = keep; }
+      });
+      if (r.a === "quotes") zeroErrs.push("stale:true 的列仍被當成排程報價");
+      if (r.b !== "quotes" && r.b !== "live") zeroErrs.push(`正常的排程報價沒被採用（${r.b}）`);
+    } finally { await ctx.close(); }
+  } catch (e) { zeroErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("121. 排程報價 stale 列（昨收頂上）不當報價、自選股漲跌不得整排 0.00%（先.八十一-24）", zeroErrs.length === 0, zeroErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4018,7 +4046,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

@@ -628,7 +628,10 @@
 
     const cold=(us?INTRADAY_US:INTRADAY_TW);
     const raw=cold&&cold.quotes?cold.quotes[code]:null;
-    if(raw&&raw.price!=null){
+    // 先.八十一-24：stale:true＝MIS 這檔沒有成交也沒有委買賣，fetch_quotes_tw.py 用「昨收」頂上（漲跌固定 0）。
+    // 2026-10-13 上午 GitHub 排程整段沒跑，07:50 開盤前那份全是這種列，首頁自選股整排顯示「+0.00%」像是今天平盤。
+    // 這種列不是報價，跳過，交給下一層（全市場盤後收盤，帶真實日期與當日漲跌）。
+    if(raw&&raw.price!=null&&raw.stale!==true){
       return {price:raw.price,change:raw.change??null,change_pct:raw.change_pct??null,
               prev_close:raw.prev_close??null,sparkline:raw.sparkline,
               source:'quotes_file',tier:'quotes',
@@ -1838,7 +1841,11 @@
       // 上面那個3個交易日的寬鬆門檻），總司令原話「不准把落後一天的收盤當現價顯示」，
       // 兩個條件任一成立就視為過期，不得只用「即時/現價」字樣呈現。
       const histStaleDays=(q.tier==='history')?tradingDaysSince(q.asof,'Asia/Taipei',TW_HOLIDAYS):null;
-      const priceIsStale=(histStaleDays!=null&&histStaleDays>3)||q.is_stale===true;
+      // 先.八十一-24：台股盤中（交易時段內）若只拿得到「前一交易日以前」的收盤（全市場盤後檔／歷史層），同樣標日期、
+      // 不顯示漲跌%——那是昨天的漲跌，不是今天的（10/13 上午排程沒跑時就是這個情況）。
+      const _twToday=(()=>{const z=_zonedParts(new Date(),'Asia/Taipei');return _ymd(z)})();
+      const oldCloseInSession=!us&&q.tier!=='live'&&q.tier!=='quotes'&&isTwTradingWindowNow()&&!!q.asof&&String(q.asof).slice(0,10)<_twToday;
+      const priceIsStale=(histStaleDays!=null&&histStaleDays>3)||q.is_stale===true||oldCloseInSession;
       const priceLabel=priceIsStale
         ?`${q.asof?String(q.asof).slice(5).replace('-','/'):'?'}收盤 ${us?'$':''}${nf(price)}`
         :`${us?'$':''}${nf(price)}`;
@@ -4067,7 +4074,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-13.1005';
+  const APP_VERSION='2026-10-13.1011';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
