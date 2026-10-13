@@ -3772,6 +3772,64 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { swrErrs.push(`測試本身出錯：${e.message || e}`); }
   record("115. SW 資料檔先顯示上次存檔、背景更新：回應帶存檔標記、首頁顯示「上次資料」提示、no-store 直通網路（先.八十一-8）", swrErrs.length === 0, swrErrs.join("; "));
 
+  // 116.【2026-10-13 先.八十一-9】個股頁／選股頁每檔小檔：個股頁 2330 不再下載整份 fundamentals／scores／events／holders／
+  // institutional_history／sector_flow 與 FinMind 名稱清單，但各卡片仍有內容（本益比、千張大戶、外資持股、選股理由含同產業百分位）；
+  // 選股頁讀 scores_list.json，展開列會補上因子說明、點列進報告頁看得到完整明細。
+  const bcErrs = [];
+  try {
+    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+    try {
+      const p = await ctx.newPage();
+      const pe = [];
+      p.on("pageerror", (e) => pe.push(String(e.message || e)));
+      await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+      await p.waitForTimeout(3000);
+      const urls = [];
+      p.on("request", (r) => urls.push(r.url()));
+      await p.evaluate(() => { Promise.resolve(openStock("2330")).catch(() => {}); });
+      await p.waitForFunction(() => {
+        const t = (id) => (document.getElementById(id) || {}).textContent || "";
+        return /%/.test(t("tdcc-big-ratio")) && /%/.test(t("fh-ratio")) && /同產業\(\d+檔\)/.test(t("stock-reason-card"));
+      }, null, { timeout: 20000 }).catch(() => null);
+      await p.evaluate(() => { const b = [...document.querySelectorAll("#stock-tabs button[data-sub]")].find(x => /events/.test(x.dataset.subs || x.dataset.sub)); if (b) b.click(); });
+      await p.waitForTimeout(1500);
+      const st = await p.evaluate(() => {
+        const t = (id) => ((document.getElementById(id) || {}).textContent || "").trim();
+        return { per: t("kn-per"), tdcc: t("tdcc-big-ratio"), fh: t("fh-ratio"), reason: t("stock-reason-card").slice(0, 300), ev: t("stock-events-list").slice(0, 80) };
+      });
+      const bad = urls.filter(u => /\/(data\/(fundamentals|events|holders|institutional_history|sector_flow|foreign_holding|securities_lending_sell|short_lending_available|cash_flow)\.json|scores\.json)|dataset=TaiwanStockInfo/.test(u));
+      if (bad.length) bcErrs.push("個股頁仍下載整份檔：" + bad.map(u => u.replace(/\?.*$/, "").replace(/^.*\//, "")).join("、"));
+      if (!urls.some(u => /data\/by_code\/2330\.json/.test(u))) bcErrs.push("個股頁沒有讀 data/by_code/2330.json");
+      if (!/^\d/.test(st.per)) bcErrs.push(`本益比沒有數字：${st.per}`);
+      if (!/%/.test(st.tdcc)) bcErrs.push(`千張大戶沒有數字：${st.tdcc}`);
+      if (!/%/.test(st.fh)) bcErrs.push(`外資持股沒有數字：${st.fh}`);
+      if (!/同產業\(\d+檔\)/.test(st.reason)) bcErrs.push(`選股理由缺同產業百分位：${st.reason.slice(0, 80)}`);
+      if (!st.ev || /載入中/.test(st.ev)) bcErrs.push(`事件分頁沒內容：${st.ev}`);
+      // 選股頁
+      const urls2 = [];
+      p.on("request", (r) => urls2.push(r.url()));
+      await p.evaluate(() => { const b = document.querySelector('nav#nav button[data-scr="picks"]'); if (b) b.click(); });
+      await p.waitForFunction(() => document.querySelectorAll("#picks-list [id^=pick-detail-]").length > 0, null, { timeout: 20000 }).catch(() => null);
+      if (!urls2.some(u => /scores_list\.json/.test(u))) bcErrs.push("選股頁沒有讀 scores_list.json");
+      if (urls2.some(u => /\/scores\.json/.test(u))) bcErrs.push("選股頁清單仍下載整份 scores.json");
+      const exp = await p.evaluate(async () => {
+        const el = document.querySelector("#picks-list [id^=pick-detail-]");
+        if (!el) return { err: "清單沒有任何列" };
+        togglePickDetail(el.id);
+        for (let i = 0; i < 40 && el.querySelectorAll(".fr-reason").length === 0; i++) await new Promise(r => setTimeout(r, 250));
+        const reasons = [...el.querySelectorAll(".fr-reason")].map(x => x.textContent.trim()).filter(Boolean);
+        return { n: reasons.length, code: el.dataset.code || el.id.split("-").pop() };
+      });
+      if (exp.err || !exp.n) bcErrs.push(`展開列沒有補上因子說明：${exp.err || exp.n}`);
+      await p.evaluate((c) => showReport(c), exp.code || "");
+      await p.waitForFunction(() => { const s = document.getElementById("scr-report"); return s && s.classList.contains("active") && s.querySelectorAll(".fr-reason").length > 0; }, null, { timeout: 15000 }).catch(() => null);
+      const rep = await p.evaluate(() => { const s = document.getElementById("scr-report"); return s ? { on: s.classList.contains("active"), n: s.querySelectorAll(".fr-reason").length } : null; });
+      if (!rep || !rep.on || !rep.n) bcErrs.push(`報告頁沒有完整因子明細：${JSON.stringify(rep)}`);
+      if (pe.length) bcErrs.push("頁面錯誤：" + pe.slice(0, 2).join(" | "));
+    } finally { await ctx.close(); }
+  } catch (e) { bcErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("116. 個股頁讀每檔小檔（不下載整份檔、卡片有內容）、選股頁讀精簡清單且展開／報告補完整明細（先.八十一-9）", bcErrs.length === 0, bcErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -3800,7 +3858,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

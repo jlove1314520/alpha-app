@@ -131,6 +131,38 @@
   function togglePickDetail(id){
     const el=document.getElementById(id);if(!el)return;
     el.style.display=el.style.display==='none'?'':'none';
+    // 先.八十一-9：清單是精簡檔（因子沒有說明文字），第一次展開才讀這一檔的完整列
+    if(el.style.display===''&&el.dataset.lite){
+      const board=el.dataset.board,code=el.dataset.code;delete el.dataset.lite;
+      _safeAsync('pickDetailFull',async()=>{
+        const full=await fullPickRow(board,code);
+        if(!full){el.innerHTML='<div class="note">因子明細載入失敗，請稍後再試或點列看完整報告</div>';return}
+        const cfg=BOARD_CONFIG[board],c=cfg.cacheGet();
+        el.innerHTML=pickDetailInner(full,cfg,(c&&c.stocks)||[]);
+      });
+    }
+  }
+  // 先.八十一-9：選股頁清單改讀 scores*_list.json（因子只有分數與百分位）。展開／報告要完整列時讀
+  // data/by_code/<代號>.json 裡這一榜的列；讀不到才退回下載整份 scores*.json（並以完整檔取代精簡清單）。
+  async function fullPickRow(board,code){
+    const cfg=BOARD_CONFIG[board];
+    const c=cfg.cacheGet();
+    const hit=c&&!c._lite&&(c.stocks||[]).find(r=>r.code===code);
+    if(hit)return hit;
+    const d=await byCode(code);
+    const row=d&&d[cfg.byCodeKey];
+    if(row&&row.code===code){const x=Object.assign({},row);delete x._industry_pct;return x}
+    try{
+      const res=await fetch(cfg.file+'?_='+Date.now());
+      if(!res.ok)throw new Error('HTTP '+res.status);
+      const full=await res.json();cfg.cacheSet(full);
+      return (full.stocks||[]).find(r=>r.code===code)||null;
+    }catch(e){console.warn('[fullPickRow]',e);recordGlobalError('fullPickRow',e);return null}
+  }
+  function pickDetailInner(r,boardCfg,allRows){
+    const weights=(boardCfg.cacheGet()&&boardCfg.cacheGet().weights)||{};
+    return `<div class="note" style="margin:8px 0 4px">${buildReasonSummary(r,boardCfg)}</div>
+        ${boardCfg.factorOrder.map(k=>factorContribRowHtml(k,r,boardCfg.factorLabels,weights,allRows||[])).join('')}`;
   }
   let PICKS_BOARD='value'; // 'value' | 'momentum' | 'future'
   let REPORT_CACHE=null;
@@ -165,7 +197,9 @@
     const listEl=document.getElementById('picks-list');
     listEl.innerHTML=skeletonRowsHtml(6);  // 2026-09-15 P0產品.四：骨架屏取代純文字「載入中」
     try{
-      const res=await fetch(cfg.file+'?_='+Date.now());
+      // 先.八十一-9：先讀精簡清單（gzip 約為完整檔的一成多），讀不到才讀完整檔
+      let res=await fetch(cfg.listFile+'?_='+Date.now()).catch(e=>{console.warn('[loadPicks:list]',e);return null});
+      if(!res||!res.ok)res=await fetch(cfg.file+'?_='+Date.now());
       if(!res.ok)throw new Error('HTTP '+res.status);
       const json=await res.json();
       cfg.cacheSet(json);
@@ -337,7 +371,6 @@
     // 2026-09-15（P0產品.二）選股榜每列可展開：點展開箭頭才切換下面這塊因子拆解，
     // 不影響點列其他地方導去showReport()看完整報告（含分批進場計畫）的既有行為。
     const detailId='pick-detail-'+PICKS_BOARD+'-'+r.code;
-    const weights=(boardCfg.cacheGet()&&boardCfg.cacheGet().weights)||{};
     return `
     <div class="row press rise" style="flex-direction:column;align-items:stretch;gap:8px;cursor:pointer;background:var(--card-grad);border:1px solid ${topPick?'rgba(216,176,112,.3)':'var(--hairline)'};border-radius:16px;padding:14px;margin-bottom:10px;opacity:${lowCov?0.62:1}" onclick="showReport('${r.code}')">
       <div style="display:flex;align-items:center;gap:12px">
@@ -351,9 +384,8 @@
         <button type="button" class="press" style="flex-shrink:0;background:none;border:none;color:var(--ink-3);font-size:16px;padding:2px 6px;line-height:1" onclick="event.stopPropagation();togglePickDetail('${detailId}')" aria-label="展開選股理由">⌄</button>
       </div>
       <div class="meter" style="height:5px;margin-top:0"><i style="width:${(r.total_score*10).toFixed(0)}%;background:${barFill(r.coverage)}"></i></div>
-      <div id="${detailId}" style="display:none" onclick="event.stopPropagation()">
-        <div class="note" style="margin:8px 0 4px">${buildReasonSummary(r,boardCfg)}</div>
-        ${boardCfg.factorOrder.map(k=>factorContribRowHtml(k,r,labelsForBoard,weights,allRows||[])).join('')}
+      <div id="${detailId}" style="display:none" onclick="event.stopPropagation()"${r._lite?` data-lite="1" data-board="${PICKS_BOARD}" data-code="${r.code}"`:''}>
+        ${r._lite?`<div class="note" style="margin:8px 0 4px">${buildReasonSummary(r,boardCfg)}</div>`+skeletonHtml(3):pickDetailInner(r,boardCfg,allRows)}
       </div>
     </div>`;
   }
@@ -430,10 +462,15 @@
     const cache=currentPicksCache();
     const row=(cache&&cache.stocks||[]).find(r=>r.code===code);
     if(!row){toast('查無這檔的評分資料');return}
-    REPORT_CACHE=row;
-    REPORT_CACHE_BOARD=PICKS_BOARD;
-    ENTRY_PLAN_CACHE=null;
-    go('report');
+    const board=PICKS_BOARD;
+    const open=r=>{REPORT_CACHE=r;REPORT_CACHE_BOARD=board;ENTRY_PLAN_CACHE=null;go('report')};
+    if(!row._lite){open(row);return}
+    // 先.八十一-9：清單是精簡列（沒有 raw／說明文字），報告頁要完整列，先讀這一檔的完整列再進報告
+    _safeAsync('showReport:full',async()=>{
+      const full=await fullPickRow(board,code);
+      if(!full){toast('這檔的完整評分明細載入失敗，請稍後再試');return}
+      open(full);
+    });
   }
   let EXTREME_MOVE_ACTIVE=false;
   function factorRowHtml(key){

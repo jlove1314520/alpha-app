@@ -67,6 +67,11 @@ jobs:
       # 都進不了repo，等於白做。改成always()後，就算後面步驟真的掛了，
       # 至少自檢欄位（跟已經commit過的既有報告內容）能落地，不是繼續
       # 沉默停擺。
+      # 先.八十一-9：剔除下市股後同步更新選股頁精簡清單（零外部請求），已加進下方 git add。自身失敗只警告。
+      - name: 選股頁精簡清單 scores*_list.json
+        continue-on-error: true
+        run: python scripts/build_scores_list.py
+
       - name: Commit 稽核結果
         if: always()
         run: |
@@ -78,6 +83,7 @@ jobs:
           python scripts/data_schema_guard.py guard --report data/schema_guard/audit.json --label audit || true
           git add -- data/schema_guard/audit.json 2>/dev/null || true
           git add data/audit_report.json data/listed_universe.json scores.json scores_momentum.json scores_future.json
+          git add -- scores_list.json scores_momentum_list.json scores_future_list.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "稽核結果與上次相同，不產生 commit"
           else

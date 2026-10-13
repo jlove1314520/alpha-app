@@ -205,9 +205,9 @@
   // ternary——board id → {資料檔名, cache getter/setter, 產生腳本說明,
   // 因子標籤/順序}，往後再加第四個榜單只要在這裡加一筆設定。
   const BOARD_CONFIG={
-    value:{file:'scores.json',cacheGet:()=>PICKS_CACHE,cacheSet:v=>PICKS_CACHE=v,label:'generate_scores_v2.py',factorLabels:FACTOR_LABELS,factorOrder:FACTOR_ORDER,title:'價值成長榜'},
-    momentum:{file:'scores_momentum.json',cacheGet:()=>PICKS_MOMENTUM_CACHE,cacheSet:v=>PICKS_MOMENTUM_CACHE=v,label:'generate_scores_momentum.py',factorLabels:MOMENTUM_FACTOR_LABELS,factorOrder:MOMENTUM_FACTOR_ORDER,title:'題材動能榜'},
-    future:{file:'scores_future.json',cacheGet:()=>PICKS_FUTURE_CACHE,cacheSet:v=>PICKS_FUTURE_CACHE=v,label:'generate_scores_future.py',factorLabels:FUTURE_FACTOR_LABELS,factorOrder:FUTURE_FACTOR_ORDER,title:'未來性濾網'},
+    value:{file:'scores.json',listFile:'scores_list.json',byCodeKey:'scores',cacheGet:()=>PICKS_CACHE,cacheSet:v=>PICKS_CACHE=v,label:'generate_scores_v2.py',factorLabels:FACTOR_LABELS,factorOrder:FACTOR_ORDER,title:'價值成長榜'},
+    momentum:{file:'scores_momentum.json',listFile:'scores_momentum_list.json',byCodeKey:'scores_momentum',cacheGet:()=>PICKS_MOMENTUM_CACHE,cacheSet:v=>PICKS_MOMENTUM_CACHE=v,label:'generate_scores_momentum.py',factorLabels:MOMENTUM_FACTOR_LABELS,factorOrder:MOMENTUM_FACTOR_ORDER,title:'題材動能榜'},
+    future:{file:'scores_future.json',listFile:'scores_future_list.json',byCodeKey:'scores_future',cacheGet:()=>PICKS_FUTURE_CACHE,cacheSet:v=>PICKS_FUTURE_CACHE=v,label:'generate_scores_future.py',factorLabels:FUTURE_FACTOR_LABELS,factorOrder:FUTURE_FACTOR_ORDER,title:'未來性濾網'},
   };
   // 2026-08-24 改版：分數文字用金/白/暗三階（不再用紅黃綠號誌色，跟金色主題
   // 衝突），讀條一律金色漸層（資料完整度低才用調暗的扁平金色，見 barFill()）。
@@ -322,7 +322,8 @@
       :'<span style="color:var(--ink-4)">· 中性</span>';
     const pctBadge=typeof f.percentile==='number'
       ?`<span style="font-size:9px;color:var(--ink-2);background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px">全市場前${pctLabel(f.percentile)}</span>`:'';
-    const ip=industryPercentileFor(allRows,row.industry,key,f.score);
+    // 先.八十一-9：個股頁讀 by_code 小檔時沒有同產業整批列，用 build_by_code.py 先算好的 row._industry_pct（同一套算法）
+    const ip=row._industry_pct?(row._industry_pct[key]||null):industryPercentileFor(allRows,row.industry,key,f.score);
     const indBadge=ip?`<span style="font-size:9px;color:var(--ink-2);background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px">同產業(${ip.n}檔)前${pctLabel(ip.pct)}</span>`:'';
     return `<div class="factor-row">
       <div class="fr-top"><span class="fr-name">${labels[key]} <span style="font-size:9.5px;color:var(--ink-4)">${wTxt}</span></span><span class="fr-score" style="color:${scoreColor(f.score)}">${f.score.toFixed(1)}</span></div>

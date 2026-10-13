@@ -114,8 +114,11 @@
     const p=Promise.resolve().then(()=>loadStockInfo()).catch(e=>{console.warn('[_namesForPage]',e);recordGlobalError('_namesForPage',e)});
     return Promise.race([p,new Promise(r=>setTimeout(r,2500))]);
   }
+  // 先.八十一-9：個股頁／選股頁不需要整份名稱清單（個股名稱由 quote_lite／by_code 小檔補、選股列自帶名稱），
+  // 不再為這兩頁下載約 490KB 的 FinMind TaiwanStockInfo；搜尋與其他分頁照舊。
+  const _NO_NAMES_MODS={stock:1,picks:1};
   function _lazyCall(mod,name,args){
-    return Promise.all([loadAppModule(mod),_namesForPage()]).then(()=>{
+    return Promise.all([loadAppModule(mod),_NO_NAMES_MODS[mod]?null:_namesForPage()]).then(()=>{
       const f=window[name];
       if(typeof f!=='function'||f._lazyStub)throw new Error('分頁程式 app-'+mod+'.js 已載入但找不到 '+name);
       return f.apply(window,args);
@@ -1899,8 +1902,54 @@
   // 不呼叫 FinMind。這份檔案是手動快照非排程自動更新（該腳本docstring已揭露原因），
   // 只查得到「產生當下研究端剛好有快取」的股票，查不到時回傳空物件，呼叫端會
   // 自然顯示「—」而不是崩潰。
+  // 先.八十一-9（2026-10-13）：個股頁每檔一個小檔 data/by_code/<代號>.json（scripts/build_by_code.py，
+  // 從 fundamentals／holders／institutional_history／events／sector_flow… 等整份檔切出這一檔）＋共用
+  // data/by_code/_meta.json（各檔的 meta 等共用欄位）。byCodeSection(code,name) 回傳「跟整份檔同結構、
+  // 只含這一檔」的物件；小檔讀不到（網路錯誤）回 null，呼叫端退回整份檔。404＝這檔在所有來源都沒資料，
+  // 回傳只有共用欄位的空殼（等同整份檔裡查不到這檔）。子集不寫進整份檔的全域快取（其他頁要全市場）。
+  let BY_CODE_META_P=null,BY_CODE_META_AT=0;const BY_CODE_P=new Map();
+  function _byCodeMeta(){
+    if(!BY_CODE_META_P||Date.now()-BY_CODE_META_AT>10*60*1000){
+      BY_CODE_META_AT=Date.now();
+      BY_CODE_META_P=fetch('data/by_code/_meta.json?t='+Math.floor(Date.now()/60000))
+        .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})
+        .catch(e=>{BY_CODE_META_P=null;console.warn('[byCode:meta]',e);recordGlobalError('byCode:meta',e);return null});
+    }
+    return BY_CODE_META_P;
+  }
+  function byCode(code){
+    code=String(code||'').toUpperCase();
+    if(!/^[0-9A-Z]{4,6}$/.test(code))return Promise.resolve(null);
+    const hit=BY_CODE_P.get(code);
+    if(hit&&Date.now()-hit.at<10*60*1000)return hit.p;
+    const p=fetch('data/by_code/'+code+'.json?t='+Math.floor(Date.now()/60000))
+      .then(r=>{if(r.status===404)return {code};if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})
+      .catch(e=>{BY_CODE_P.delete(code);console.warn('[byCode]',code,e);recordGlobalError('byCode',e);return null});
+    BY_CODE_P.set(code,{p,at:Date.now()});
+    if(BY_CODE_P.size>40)BY_CODE_P.delete(BY_CODE_P.keys().next().value);
+    return p;
+  }
+  async function byCodeSection(code,name){
+    const [m,d]=await Promise.all([_byCodeMeta(),byCode(code)]);
+    const sec=m&&m.sections&&m.sections[name];
+    if(!sec||!d)return null;
+    const part=d[name]||{},out=Object.assign({},sec.common||{});
+    for(const [k,h] of Object.entries(sec.shape||{})){if(h==='dict')out[k]=part[k]||{};else if(h==='list')out[k]=part[k]||[]}
+    out._byCode=code;
+    return out;
+  }
+  // 整份檔已在記憶體就用整份；否則先讀這一檔的小檔，小檔讀不到才下載整份。
+  async function stockScoped(code,name,full,loadFull){
+    if(full)return full;
+    const s=code?await byCodeSection(code,name):null;
+    return s||loadFull();
+  }
   let FUNDAMENTALS_CACHE=null;
   async function loadFundamentals(code){
+    if(!FUNDAMENTALS_CACHE&&code){
+      const s=await byCodeSection(code,'fundamentals');
+      if(s&&!FUNDAMENTALS_CACHE)return (s.fundamentals&&s.fundamentals[code])||{};
+    }
     if(!FUNDAMENTALS_CACHE){
       try{const r=await fetch('data/fundamentals.json?t='+Date.now());if(r.ok)FUNDAMENTALS_CACHE=await r.json()}catch(e){console.warn('[loadFundamentals]',e);recordGlobalError('loadFundamentals',e);FUNDAMENTALS_CACHE={fundamentals:{}}}
     }
@@ -3938,7 +3987,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-13.0859';
+  const APP_VERSION='2026-10-13.0920';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

@@ -1,3 +1,32 @@
+## 2026-10-13 09:20（互動視窗）先.八十一-9 個股頁／選股頁改每檔小檔（by_code＋精簡清單），附前後量測
+
+### 2026-10-13 09:25 先.八十一-9 個股頁／選股頁改為每檔一個小檔（CC）
+
+**做了什麼**
+- 新增 `scripts/build_by_code.py`：把 fundamentals／holders／institutional_history／foreign_holding／securities_lending_sell／short_lending_available／cash_flow／sector_flow（只取個股那一筆）＋三榜 scores 這一檔的列＋近 30 日價＋公司名，切成 `data/by_code/<代號>.json`（4,385 檔，每檔 gzip 約 1–5KB）；各檔共用的 meta 集中在 `data/by_code/_meta.json`（gzip 4.8KB），不重複寫進四千多個檔。價值成長榜的「同產業百分位」先在建檔時算好（與 App `industryPercentileFor` 同一算法），不把同產業整批列複製進每檔。
+  - 第一版把同產業 scores 列與 sector_flow.sectors 整包放進每檔，合計 1.3GB，作廢重寫；現版合計約 24MB，內容沒變的檔不重寫。
+- 事件不放進小檔（每 30 分鐘更新），個股頁改讀既有、與 events.json 同班切出的 `data/events_by_code/<代號>.json`。
+- 新增 `scripts/build_scores_list.py`：三榜各出一份精簡清單 `scores*_list.json`（因子只留 score／percentile，拿掉 raw／說明文字）；選股頁清單改讀精簡檔，**展開列或點進報告時才讀這一檔的完整列**（by_code，讀不到退回整份 scores*.json）。
+- App：`app.js` 新增 `byCode()`／`byCodeSection()`／`stockScoped()`（整份檔已在記憶體就用整份；否則讀小檔；小檔讀不到才下載整份）；個股頁各卡（基本面、千張大戶、外資持股、借券、可借額度、現金流、法人歷史、產業金流徽章、選股理由、事件、個股簡報）改走小檔；個股頁與選股頁不再等待整份 FinMind 名稱清單（約 490KB）。
+- 排程：`market.yml` 在 split_stock_detail 後跑兩支建檔腳本並加進 git add；`audit.yml` 剔除下市股後重出精簡清單。holders（本機週排程）、cash_flow（手動）更新後最晚在下一班 market.yml 反映。
+
+**前後量測**（`node scripts/measure_page_loads.mjs`，全新瀏覽器、無快取、無 SW，個股頁含點四個子分頁）
+| | 改前 | 改後 |
+|---|---|---|
+| 個股頁 2330 合計 | 2,859.3 KB（19 請求） | 132.1 KB（10 請求） |
+| 　其中資料 | 約 2,700 KB | **約 25.6 KB**（by_code 4.9＋_meta 4.8＋FinMind 日線 9.9＋處置旗標 3.5＋其他 2.5） |
+| 　其中程式／圖表庫（首次才下載，之後 SW 快取） | — | 109.6 KB（圖表庫 64.3＋app-stock 32.1＋app-shared 13.2） |
+| 選股頁合計 | 1,090.2 KB（14 請求） | 154.9 KB（12 請求） |
+| 　scores 清單 | 517.9 KB＋FinMind 名稱清單 491.7 KB | 108.4 KB（scores_list.json），不再抓名稱清單 |
+
+驗收「個股頁下載量 <50KB」：資料部分 25.6KB 達標；首次開個股頁另有 109.6KB 程式與圖表庫（之後走快取）。圖表庫（技術分析長圖用的 lightweight-charts）若要再省，可改成點技術分析才載，未在本項處理。
+
+**驗證**：冒煙新增 #116（個股頁不下載任何整份檔／名稱清單、本益比／千張大戶／外資持股／選股理由含同產業百分位／事件分頁都有內容；選股頁讀 scores_list.json、不下載 scores.json、展開列補上因子說明、點列進報告頁有完整明細）。全套冒煙 2026/10/13 09:19:47 全部通過。
+
+**影響檔案**：scripts/build_by_code.py、scripts/build_scores_list.py、scripts/measure_page_loads.mjs、data/by_code/、scores*_list.json、app.js、app-stock.js、app-shared.js、app-picks.js、.github/workflows/market.yml、.github/workflows/audit.yml、scripts/smoke_test.mjs
+
+**下一步**：先.八十一-10（個股走勢改 repo 主來源，by_code 已附近 30 日價）。
+
 ## 2026-10-13 08:59（互動視窗）先.八十一-8 裁示④：資料檔先顯示上次存檔、背景更新，第二次開資料 293ms＋冒煙 #115
 
 - **Service Worker**（`sw.js`）：同網域的 `data/*.json` 改成 stale-while-revalidate，也就是「先顯示上次資料、背景更新」。

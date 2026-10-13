@@ -143,7 +143,7 @@
   async function renderChipBadges(code){
     const host=document.getElementById('chip-badges');if(!host)return;
     host.innerHTML='';
-    const d=await ensureSectorFlow();
+    const d=await stockScoped(code,'sector_flow',SECTOR_FLOW,ensureSectorFlow);  // 先.八十一-9
     const e=d&&d.stocks&&d.stocks[code];
     if(!e)return;
     const m=d.meta||{},badges=[];
@@ -248,7 +248,7 @@
   }
   async function loadForeignHoldingChip(code){
     try{
-      const d=await loadForeignHoldingCache();
+      const d=await stockScoped(code,'foreign_holding',FOREIGN_HOLDING_CACHE,loadForeignHoldingCache);  // 先.八十一-9
       const e=d.stocks&&d.stocks[code];
       if(!e||e.foreign_holding_ratio==null){
         setTxt('fh-ratio','—');setTxt('fh-can-invest','—');
@@ -269,11 +269,11 @@
   let SHORT_LENDING_CACHE=null;
   async function loadShortLendingChip(code){
     try{
-      if(!SHORT_LENDING_CACHE){
+      const d=await stockScoped(code,'short_lending_available',SHORT_LENDING_CACHE,async()=>{  // 先.八十一-9
         try{const r=await fetch('data/short_lending_available.json?t='+Date.now());if(r.ok)SHORT_LENDING_CACHE=await r.json()}
         catch(e){console.warn('[loadShortLendingChip:fetch]',e);recordGlobalError('loadShortLendingChip:fetch',e)}
-      }
-      const d=SHORT_LENDING_CACHE;
+        return SHORT_LENDING_CACHE;
+      });
       const twseVol=d&&d.twse&&d.twse[code];
       const vol=twseVol!=null?twseVol:(d&&d.otc&&d.otc[code]);
       if(vol==null){
@@ -293,11 +293,12 @@
   let TDCC_HOLDERS_CACHE=null;
   async function loadTdccHoldersChip(code){
     try{
-      if(!TDCC_HOLDERS_CACHE){
+      const hd=await stockScoped(code,'holders',TDCC_HOLDERS_CACHE,async()=>{  // 先.八十一-9
         try{const r=await fetch('data/holders.json?t='+Date.now());if(r.ok)TDCC_HOLDERS_CACHE=await r.json()}
         catch(e){console.warn('[loadTdccHoldersChip:fetch]',e);recordGlobalError('loadTdccHoldersChip:fetch',e)}
-      }
-      const rec=TDCC_HOLDERS_CACHE&&TDCC_HOLDERS_CACHE.stocks&&TDCC_HOLDERS_CACHE.stocks[code];
+        return TDCC_HOLDERS_CACHE;
+      });
+      const rec=hd&&hd.stocks&&hd.stocks[code];
       if(!rec){
         setTxt('tdcc-big-ratio',fmEmptyMsg('查無資料'));
         setTxt('tdcc-small-ratio','—');setTxt('tdcc-week-chg','—');setTxt('tdcc-streak','—');
@@ -320,11 +321,11 @@
   let SBL_SELL_CACHE=null;
   async function loadSblSellChip(code){
     try{
-      if(!SBL_SELL_CACHE){
+      const d=await stockScoped(code,'securities_lending_sell',SBL_SELL_CACHE,async()=>{  // 先.八十一-9
         try{const r=await fetch('data/securities_lending_sell.json?t='+Date.now());if(r.ok)SBL_SELL_CACHE=await r.json()}
         catch(e){console.warn('[loadSblSellChip:fetch]',e);recordGlobalError('loadSblSellChip:fetch',e)}
-      }
-      const d=SBL_SELL_CACHE;
+        return SBL_SELL_CACHE;
+      });
       const tw=d&&d.twse&&d.twse[code];
       const otc=d&&d.tpex&&d.tpex[code];
       if(!tw&&!otc){
@@ -477,7 +478,7 @@
     // 官方 openapi 無現金流量表端點；查不到時說明原因，不留「—」讓人猜。
     let fcfNote='FCF：';
     try{
-      const cf=await loadCashFlow(),x=cf&&cf.stocks&&cf.stocks[code];
+      const cf=await stockScoped(code,'cash_flow',CASH_FLOW_CACHE,loadCashFlow),x=cf&&cf.stocks&&cf.stocks[code];  // 先.八十一-9
       if(currentCode!==code)return;
       if(x&&x.fcf_ttm!=null){
         const e=document.getElementById('fin-fcf');e.textContent=(x.fcf_ttm/1e8).toFixed(1)+' 億';e.className=x.fcf_ttm>=0?'pos':'neg';
@@ -539,7 +540,7 @@
   // 讓使用者從自選股/搜尋直接進個股頁也看得到（不必先去逛過選股頁才會有cache）。
   // 只讀scores.json（價值成長榜，六因子這輪擴充成八因子的既有資料），不打任何新端點。
   async function ensureValueScores(){
-    if(PICKS_CACHE)return PICKS_CACHE;
+    if(PICKS_CACHE&&!PICKS_CACHE._lite)return PICKS_CACHE;  // 先.八十一-9：選股頁載入的精簡清單不含因子說明，要完整檔
     try{
       const res=await fetch('scores.json?_='+Date.now());
       if(!res.ok)throw new Error('HTTP '+res.status);
@@ -551,11 +552,18 @@
     const host=document.getElementById('stock-reason-card');if(!host)return;
     if(isUS(code)){host.innerHTML='<div class="note">美股暫無選股理由（因子評分目前僅涵蓋台股，見 scores.json meta.market:"TW"）</div>';return}
     host.innerHTML=skeletonHtml(4);  // 2026-09-15 P0產品.四：骨架屏
-    const cache=await ensureValueScores();
+    // 先.八十一-9：整份 scores.json（約 520KB）沒在記憶體時，改讀 by_code 小檔裡這一檔的列（同產業百分位已先算好）
+    let cache=PICKS_CACHE&&!PICKS_CACHE._lite?PICKS_CACHE:null;
+    if(!cache){
+      const [m,bc]=await Promise.all([_byCodeMeta(),byCode(code)]);
+      const sc=m&&m.sections&&m.sections.scores;
+      if(sc&&bc)cache={meta:(sc.common||{}).meta,weights:(sc.common||{}).weights,stocks:bc.scores?[bc.scores]:[],_byCodeTotal:sc.total_rows};
+    }
+    if(!cache)cache=await ensureValueScores();
     if(currentCode!==code)return;  // await期間已切到別檔，作廢（同renderReport的世代守衛精神，避免A檔理由畫到B檔頁面）
     if(!cache){host.innerHTML='<div class="note">尚未產生 scores.json，或載入失敗。此清單由 research/generate_scores_v2.py 在本機/排程產生後 commit 進 repo，不是即時計算。</div>';return}
     const row=(cache.stocks||[]).find(r=>r.code===code);
-    if(!row){host.innerHTML='<div class="note">這檔不在選股評分樣本內（可能資料完整度不足或流動性不足未進榜，樣本涵蓋 '+(cache.stocks||[]).length+' 檔，非全市場逐檔掃描）。</div>';return}
+    if(!row){host.innerHTML='<div class="note">這檔不在選股評分樣本內（可能資料完整度不足或流動性不足未進榜，樣本涵蓋 '+(cache._byCodeTotal||(cache.stocks||[]).length)+' 檔，非全市場逐檔掃描）。</div>';return}
     const boardCfg=BOARD_CONFIG.value;
     const weights=cache.weights||{};
     const allRows=cache.stocks||[];
@@ -1120,7 +1128,9 @@
     const el=document.getElementById('ai-brief-body');if(!el)return;
     if(isUS(code)){el.innerHTML='<div class="note">美股暫不提供規則簡報（五個來源檔都是台股官方資料）。</div>';return}
     el.innerHTML='<div class="note">載入中…</div>';
-    const [fund,detail,hist,,ev]=await Promise.allSettled([loadFundamentals(code),loadStockDetail(code),ensureInstHistory(),ensureDisposalFlags(),ensureEvents()]);
+    const [fund,detail,hist,,ev]=await Promise.allSettled([loadFundamentals(code),loadStockDetail(code),
+      stockScoped(code,'institutional_history',INST_HIST_CACHE,ensureInstHistory),ensureDisposalFlags(),
+      eventsForStock(code)]);  // 先.八十一-9
     if(currentCode!==code)return;
     const v=r=>r.status==='fulfilled'?r.value:null;
     const todayIso=_twTodayIso();
@@ -1247,11 +1257,25 @@
   // 個股頁「事件」分頁（P0產品.三框架）：跟上面研究報告頁的事件卡是同一份資料，
   // 差別是這裡不需要scores.json的row（總覽/搜尋進來的股票未必在評分樣本內），
   // 而且空狀態要用總司令裁示的「尚未 X｜原因｜下一步」一行格式。
+  // 先.八十一-9：個股頁只要這一檔的事件——讀 data/events_by_code/<代號>.json（news_events.yml 與 events.json
+  // 同一班切出，內容同步），不再下載整份 events.json（gzip 約 400KB）。404＝這檔目前沒有事件；
+  // 其他錯誤才退回整份檔。整份檔已在記憶體就直接用。
+  async function eventsForStock(code){
+    if(EVENTS_CACHE&&Date.now()-EVENTS_AT<10*60*1000)return EVENTS_CACHE;
+    try{
+      const r=await fetch('data/events_by_code/'+encodeURIComponent(code)+'.json?t='+Math.floor(Date.now()/60000));
+      if(r.status===404)return {events:[]};
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const d=await r.json();
+      if(d&&Array.isArray(d.events))return d;
+      throw new Error('格式不符');
+    }catch(e){console.warn('[eventsForStock]',code,e);recordGlobalError('eventsForStock',e);return ensureEvents()}
+  }
   async function renderStockEventsTab(code){
     const host=document.getElementById('stock-events-list');if(!host)return;
     if(isUS(code)){await renderUsEventsTab(code,host);return}
     host.innerHTML=skeletonRowsHtml(3);  // 2026-09-15 P0產品.四：骨架屏
-    const d=await ensureEvents();
+    const d=await eventsForStock(code);  // 先.八十一-9
     if(currentCode!==code)return;  // await期間已切到別檔，作廢
     const mine=recentEventsFor(d,code,30);
     if(!mine.length){
