@@ -19576,3 +19576,16 @@ C. 驗收
 - [x] **先.八十九-補-1 確認本機 .env 有 TELEGRAM_TARGET_CHAT_ID 且是數字（不印出值）**（互動視窗執行；動憑證設定）〔有、是數字（值未印出）〕
 - [x] **先.八十九-補-2 手動跑一次只讀擷取（不加 --login）：心跳 OK、telegram_export 有新訊息落地（不進 repo）、ReadOnlyClient 沒有任何寫入；失敗回報錯誤類型**（互動視窗執行；動憑證設定）〔心跳 OK、新 11 則落地本機、無寫入〕
 - [x] **先.八十九-補-3 修亂碼：設定工具與 telegram_reader.py 啟動時 stdout／stderr 改 UTF-8（errors=replace），PowerShell 啟動腳本加 chcp 65001／$OutputEncoding；修完重跑 --login 確認中文正常**（互動視窗執行；動憑證設定）〔stdout/stderr UTF-8＋chcp 65001／OutputEncoding；重跑 --login 中文正常〕
+
+# 2026-10-14【先.九十：兩件 PREREG 裁示＋佇列整理】（總司令裁示原文，動工前先寫入）
+
+先.九十　兩件 PREREG 裁示＋佇列整理（每項標 - [x]，在 research/PROGRESS_HEARTBEAT.jsonl append item=先.九十-N）
+1. 裁示：B4 台指 VRP（docs/PREREG_DRAFT_txo_vrp_2002_2014.md）放行，照草稿的三個參數：①兩期切點 2002–2008／2009–2014；②天條一檢查部位＝每月賣 1 組價平跨式、持有到期、1 倍名目、不避險；③流動性門檻 80%。TXO 年度檔下載完成後定稿、登記、只跑一次，結果寫墓園或候選。即使通過也只是研究，選擇權真錢需另案核准。AWAITING_REVIEW 結案。
+2. 裁示：B2 美股 8-K 2.02（docs/PREREG_DRAFT_us_8k_202_v2.md）暫不放行。等先.八十八 的 Tiingo 下市股覆蓋率結果出來：≥80% 且正確 → 改用 Tiingo 價格後重新送審；偏低 → 標「暫停：免費管道補不到下市股價格」。AWAITING_REVIEW 改列「等先.八十八」。
+3. 先.八十七-2 已被先.八十八 取代（Alpha Vantage 免費版只給最近 100 筆，不測；Stooq 暫不申請），改 [x] 並加註取代來源；先.八十七-4 併入先.八十八-5。
+4. core_tilt（先.八十三-2a）：9/19 reindex bug 已修。下一步寫 PREREG 草稿，用修好的引擎、全市場時點正確的市值排名宇宙；列入 AWAITING_REVIEW 等放行，不得自行登記。
+
+- [ ] **先.九十-1 B4 台指 VRP 放行（三參數照草稿）：TXO 年度檔下載完成後定稿→登記→只跑一次→結果寫墓園或候選；通過也只是研究，選擇權真錢另案；AWAITING_REVIEW 結案**（互動視窗執行；登記試驗）
+- [ ] **先.九十-2 B2 8-K 2.02 暫不放行：AWAITING_REVIEW 改列「等先.八十八」；先.八十八 ≥80% 且正確 → 改用 Tiingo 價格重新送審；偏低 → 標「暫停：免費管道補不到下市股價格」**（互動視窗執行；時間閘：先.八十八-5 之後）
+- [ ] **先.九十-3 先.八十七-2 改 [x]（被先.八十八 取代）；先.八十七-4 併入先.八十八-5**（互動視窗執行）
+- [ ] **先.九十-4 core_tilt PREREG 草稿：修好的引擎＋全市場時點正確市值排名宇宙；列 AWAITING_REVIEW，不自行登記**（互動視窗執行；PREREG 研究判定）
