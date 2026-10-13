@@ -19504,7 +19504,7 @@ C. 驗收
 
 - [ ] **先.八十六-1 GRAVEYARD_AUTOPSY B 類 20 條＋先.八十三-3a 逐條分甲（免費公開未抓）／乙（要總司令申請 key 或收費方案）／丙（歷史不存在或統計上限）；每條附三來源查證；輸出 research/DATA_GAP_PLAN.md**（DevQueue 可執行）
 - [ ] **先.八十六-2a SEC EDGAR full-index 1993 起美股時點宇宙（併 先.八十三-3a-2，做完兩條一起標）**（DevQueue 可執行）
-- [ ] **先.八十六-2b Kenneth French Data Library 動能因子 UMD 月報酬 1927 起存成本機參考序列（B1 現象對照；不是新試驗、不計 N）**（DevQueue 可執行）
+- [x] **先.八十六-2b Kenneth French Data Library 動能因子 UMD 月報酬 1927 起存成本機參考序列（B1 現象對照；不是新試驗、不計 N）**（DevQueue 可執行）〔DevQueue 20261013-233102：research/fetch_french_umd.py（Tuck 官方 F-F_Momentum_Factor_CSV.zip，1 請求、robots 未禁止）→ research/data/french_umd_monthly.json（本機、gitignore）：Mom 1927-01～2026-08 共 1,196 個月，月均 0.613%、標準差 4.694%（CRSP 202608 版）；未登記試驗、不計 N；冒煙 143 項全過〕
 - [x] **先.八十六-2c 期交所 TXO 2002–2014 年度檔下載供 B4（併 先.八十三-3d-1，做完兩條一起標）**（DevQueue 可執行）〔2026-10-14 互動視窗接手完成：research/data/raw/taifex_opt_yearly/2002～2014.zip（不進 repo）；併 先.八十三-3d-1〕
 - [ ] **先.八十六-3 美股已下市股價格來源比較表：Stooq、Alpha Vantage、Tiingo 與收費的含下市股資料商；每家寫是否含已下市股、歷史起點、費用、使用條款是否允許自用研究；key 只放本機 .env、不進 repo 或對話**（DevQueue 可執行）
 
