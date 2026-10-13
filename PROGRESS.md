@@ -1,3 +1,17 @@
+## 2026-10-13 19:40（互動視窗）先.八十四-1 10/13 台股主班本機補跑＋17:30 落地檢查排程
+
+- **查證結論：GitHub 沒觸發，不是拆檔改壞**。`gh run list --workflow=market.yml`：10/13 只有 02:43Z（台北 10:43，run 38338222352，success）一班；17:13（09:13Z）主班、18:41（10:41Z）補救班**都沒有建立任何 run**（不是失敗，是沒觸發）。market.yml 語法檢查正常、工作流程狀態 active；同時段其他工作流程（news 08:31Z、quotes 07:38Z）都有觸發。
+- **本機補跑**：新增 `scripts/market_local_catchup.py`——在 repo 外的獨立 worktree（從 origin/main 乾淨簽出，跟雲端一樣）直接讀 market.yml，逐一執行每個 `run:` 步驟（略過 pip install 與 commit 步驟；沒標 continue-on-error 的步驟失敗就停後續、同 GitHub 行為），再用 market.yml 自己那一行 `git add -A …` 清單提交（從 yml 擷取，不另抄一份），持 git_op_lock、push 失敗 fetch+rebase 重試 5 次。不改 git config（worktree 共用 .git/config）。
+  - 19:13 首跑：60 步驟、7.5 分鐘，commit **1c41772a0**；其中 6 個美股步驟（SIC／Form 4／8-K／CFTC／13F／BLS）因本機主控台 cp950 印「・」失敗（雲端 UTF-8 不會）→ 子行程一律 `PYTHONIOENCODING=utf-8`／`PYTHONUTF8=1`，加 `--only` 只重跑指定步驟，19:25 補跑 6 步全過，commit **ee8b0700a**。
+  - 心跳：`research/data/market_local_catchup.jsonl`（`result=catchup_ran`、`market_tw_data_date_before=2026-10-12`、`after=2026-10-13`、各步 rc／秒數）。
+- **驗收**：
+  - `data/price_history` 有 2026-10-13：2,359／2,961 檔最後一筆是 10/13（其餘為停牌／下市舊代號）。
+  - `data/market_tw.json` data_date＝2026-10-13（線上 GitHub Pages 同樣 2026-10-13）。
+  - App 首頁（本機伺服器、iPhone 尺寸）顯示「已收盤(10/13)」「資料到 10/13（最後交易日）」。
+- **17:30 落地檢查**：新排程 **AlphaMarketCatchup**（平日 17:30，`C:\alpha\run-market-catchup.ps1`／`-hidden.vbs`，限時 2 小時、錯過補跑）。origin/main 的 market_tw 已是今天 → 記「landed」；雲端 market.yml 正在排隊／執行 → 記「cloud_running」不搶；休市日 → 略過（data/trading_calendar.json 含臨時停市）；否則本機補跑並提交。
+- 拉取時本機排程留下的未提交檔（by_code/_meta.json、rate_limit_state.json）跟補跑結果衝突，取剛提交的新版解決；autostash 殘留未刪。
+- 冒煙：142 項全過。
+
 ## 2026-10-13 19:18（互動視窗）先.八十四-2 AlphaData 融資維持率改寫到自己的檔，冒煙 #58 恢復
 
 - 總司令【先.八十四】2 裁示採甲：`C:\alpha\alpha-data\compute_margin_maintenance.py` 的 `OUTPUT_PATH` 從 `alpha-app/data/margin_maintenance.json` 改成 `alpha-data/margin_maintenance_local.json`（只改這一個路徑常數＋兩行註解；不動 fetch.py／parsers.py／alpha.db）。alpha-data 不是 git repo，改動只在本機；改前備份在 session 暫存區。
