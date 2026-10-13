@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-10-13T06:31:34.283027+08:00",
- "duration_sec": 6.3,
+ "generated_at": "2026-10-13T23:00:02.844064+08:00",
+ "duration_sec": 9.2,
  "reference": {
   "twse": {
    "ok": true,
@@ -27,19 +27,22 @@
   "e_pe"
  ],
  "a4_mixed_date": {
-  "max_date": "2026-10-12",
+  "max_date": "2026-10-13",
   "checked": 2112,
-  "mixed_date_count": 0,
-  "mixed_date_rate": 0.0,
-  "mixed_date_codes_sample": [],
+  "mixed_date_count": 2,
+  "mixed_date_rate": 0.00095,
+  "mixed_date_codes_sample": [
+   "2321",
+   "5906"
+  ],
   "note": "全市場（universe=官方今日有收盤價的普通股/ETF）比對price_history.json每檔最後一筆日期與當日最大日期，落後>=1個交易日即計入，不設價差門檻。刻意獨立於violation_rate/informational_only_checks之外，見check_a4_mixed_date()docstring。"
  },
- "total_violations": 601,
+ "total_violations": 599,
  "by_check": {
   "a_price_source": {
-   "checked": 6565,
+   "checked": 3913,
    "violations": 0,
-   "unverifiable": 1883,
+   "unverifiable": 4535,
    "note": ""
   },
   "a2_not_in_official": {
@@ -49,20 +52,20 @@
    "note": "歷史檔案（price_history）另有 512 個已下市代號，屬正常歷史保留，不列違規"
   },
   "a3_stale_price": {
-   "checked": 1977,
+   "checked": 1978,
    "violations": 2,
    "unverifiable": 1,
    "note": ""
   },
   "c_range": {
-   "checked": 2111,
+   "checked": 885,
    "violations": 0,
-   "unverifiable": 1,
+   "unverifiable": 1227,
    "note": ""
   },
   "e_pe": {
    "checked": 695,
-   "violations": 30,
+   "violations": 28,
    "unverifiable": 848,
    "note": ""
   },
@@ -79,13 +82,13 @@
    "note": ""
   },
   "f_null_as_number": {
-   "checked": 104,
+   "checked": 116,
    "violations": 0,
    "unverifiable": 0,
    "note": ""
   },
   "g_comma_parsing": {
-   "checked": 45,
+   "checked": 48,
    "violations": 0,
    "unverifiable": 0,
    "note": ""
@@ -98,7 +101,7 @@
    "name": "聯穎",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 8.935141660703064e+17,
-   "official": 199.17,
+   "official": 206.67,
    "diff_pct": 100.0,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
@@ -108,8 +111,8 @@
    "name": "好樂迪",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 8.3,
-   "official": 12.24,
-   "diff_pct": 47.41,
+   "official": 12.29,
+   "diff_pct": 48.02,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -118,18 +121,8 @@
    "name": "如興",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 38.33,
-   "official": 53.8,
-   "diff_pct": 40.35,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "6477",
-   "name": "安集",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 831.25,
-   "official": 1123.33,
-   "diff_pct": 35.14,
+   "official": 53.67,
+   "diff_pct": 40.01,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -144,12 +137,22 @@
   },
   {
    "check": "e_pe",
+   "code": "6477",
+   "name": "安集",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 831.25,
+   "official": 1108.33,
+   "diff_pct": 33.33,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
    "code": "3583",
    "name": "辛耘",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 36.67,
-   "official": 45.15,
-   "diff_pct": 23.13,
+   "official": 46.32,
+   "diff_pct": 26.32,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -158,8 +161,8 @@
    "name": "菱光",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 15.72,
-   "official": 19.26,
-   "diff_pct": 22.5,
+   "official": 19.73,
+   "diff_pct": 25.49,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -168,8 +171,8 @@
    "name": "正道",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 240.75,
-   "official": 192.0,
-   "diff_pct": 20.25,
+   "official": 192.6,
+   "diff_pct": 20.0,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -184,12 +187,12 @@
   },
   {
    "check": "e_pe",
-   "code": "4807",
-   "name": "日成-KY",
+   "code": "4906",
+   "name": "正文",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 11.51,
-   "official": 13.7,
-   "diff_pct": 19.08,
+   "ours": 301.43,
+   "official": 351.67,
+   "diff_pct": 16.67,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -198,8 +201,8 @@
    "name": "華泰",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 16.96,
-   "official": 19.87,
-   "diff_pct": 17.15,
+   "official": 19.69,
+   "diff_pct": 16.09,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -208,18 +211,18 @@
    "name": "新美齊",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 2.37,
-   "official": 2.76,
-   "diff_pct": 16.56,
+   "official": 2.74,
+   "diff_pct": 15.71,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
    "check": "e_pe",
-   "code": "4582",
-   "name": "聚恆-創",
+   "code": "4807",
+   "name": "日成-KY",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 8.26,
-   "official": 9.61,
-   "diff_pct": 16.32,
+   "ours": 11.51,
+   "official": 13.3,
+   "diff_pct": 15.6,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -228,18 +231,58 @@
    "name": "凌航",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 5.85,
-   "official": 6.8,
-   "diff_pct": 16.23,
+   "official": 6.75,
+   "diff_pct": 15.38,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
    "check": "e_pe",
-   "code": "4906",
-   "name": "正文",
+   "code": "6241",
+   "name": "鑫永洋",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 301.43,
-   "official": 348.33,
-   "diff_pct": 15.56,
+   "ours": 25.55,
+   "official": 22.09,
+   "diff_pct": 13.53,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "7610",
+   "name": "聯友金屬-創",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 53.92,
+   "official": 46.93,
+   "diff_pct": 12.97,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "4582",
+   "name": "聚恆-創",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 8.26,
+   "official": 9.24,
+   "diff_pct": 11.84,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "6944",
+   "name": "兆聯實業",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 23.59,
+   "official": 20.8,
+   "diff_pct": 11.83,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "9941",
+   "name": "裕融",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 9.88,
+   "official": 11.03,
+   "diff_pct": 11.58,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -248,58 +291,18 @@
    "name": "台汽電",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 14.77,
-   "official": 16.79,
-   "diff_pct": 13.71,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "6241",
-   "name": "鑫永洋",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 26.17,
-   "official": 22.64,
-   "diff_pct": 13.49,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "3002",
-   "name": "歐格",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 213.89,
-   "official": 187.5,
-   "diff_pct": 12.34,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "6796",
-   "name": "晉弘",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 140.0,
-   "official": 157.22,
-   "diff_pct": 12.3,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "2545",
-   "name": "皇翔",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 40.65,
-   "official": 35.95,
-   "diff_pct": 11.56,
+   "official": 16.43,
+   "diff_pct": 11.27,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   }
  ],
  "violations": [
   {
    "check": "a3_stale_price",
-   "code": "3085",
-   "name": "新零售",
-   "detail": "這一檔在選股榜單上，但本地價格已落後官方最新交易日 12 天",
-   "ours": "2026-09-30",
+   "code": "1589",
+   "name": "永冠-KY",
+   "detail": "這一檔在選股榜單上，但本地價格已落後官方最新交易日 650 天",
+   "ours": "2024-12-31",
    "official": "2026-10-12",
    "diff_pct": null,
    "source": "quotes_all_tw.json / price_history.json"
@@ -360,8 +363,8 @@
    "name": "正道",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 240.75,
-   "official": 192.0,
-   "diff_pct": 20.25,
+   "official": 192.6,
+   "diff_pct": 20.0,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -370,8 +373,8 @@
    "name": "堤維西",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 30.87,
-   "official": 27.5,
-   "diff_pct": 10.92,
+   "official": 27.66,
+   "diff_pct": 10.4,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -433,16 +436,6 @@
    "official": "2026Q4 當期",
    "diff_pct": null,
    "source": "stock_detail.json"
-  },
-  {
-   "check": "e_pe",
-   "code": "1711",
-   "name": "永光",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 321.07,
-   "official": 355.77,
-   "diff_pct": 10.81,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
    "check": "e_quarters_stale",
@@ -556,6 +549,16 @@
   },
   {
    "check": "e_quarters_stale",
+   "code": "2064",
+   "name": "晉椿",
+   "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
+   "ours": "2024Q4",
+   "official": "2026Q4 當期",
+   "diff_pct": null,
+   "source": "stock_detail.json"
+  },
+  {
+   "check": "e_quarters_stale",
    "code": "2065",
    "name": "世豐",
    "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
@@ -630,8 +633,8 @@
    "name": "華泰",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 16.96,
-   "official": 19.87,
-   "diff_pct": 17.15,
+   "official": 19.69,
+   "diff_pct": 16.09,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -640,8 +643,8 @@
    "name": "海悅",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 15.26,
-   "official": 17.02,
-   "diff_pct": 11.55,
+   "official": 16.97,
+   "diff_pct": 11.22,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -650,8 +653,8 @@
    "name": "新美齊",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 2.37,
-   "official": 2.76,
-   "diff_pct": 16.56,
+   "official": 2.74,
+   "diff_pct": 15.71,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -670,18 +673,8 @@
    "name": "皇翔",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 40.65,
-   "official": 35.95,
-   "diff_pct": 11.56,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "2547",
-   "name": "日勝生",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 90.55,
-   "official": 81.17,
-   "diff_pct": 10.35,
+   "official": 36.37,
+   "diff_pct": 10.52,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -1066,33 +1059,13 @@
   },
   {
    "check": "e_quarters_stale",
-   "code": "2941",
-   "name": "米斯特",
+   "code": "2949",
+   "name": "欣新網",
    "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
    "ours": "2024Q4",
    "official": "2026Q4 當期",
    "diff_pct": null,
    "source": "stock_detail.json"
-  },
-  {
-   "check": "e_pe",
-   "code": "3002",
-   "name": "歐格",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 213.89,
-   "official": 187.5,
-   "diff_pct": 12.34,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "3008",
-   "name": "大立光",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 39.43,
-   "official": 35.42,
-   "diff_pct": 10.18,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
    "check": "e_quarters_stale",
@@ -1230,8 +1203,18 @@
    "name": "凌航",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 5.85,
-   "official": 6.8,
-   "diff_pct": 16.23,
+   "official": 6.75,
+   "diff_pct": 15.38,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "3138",
+   "name": "耀登",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 36.51,
+   "official": 40.28,
+   "diff_pct": 10.32,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -1296,16 +1279,6 @@
   },
   {
    "check": "e_quarters_stale",
-   "code": "3171",
-   "name": "炎洲流通",
-   "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
-   "ours": "2024Q4",
-   "official": "2026Q4 當期",
-   "diff_pct": null,
-   "source": "stock_detail.json"
-  },
-  {
-   "check": "e_quarters_stale",
    "code": "3178",
    "name": "公準",
    "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
@@ -1323,16 +1296,6 @@
    "official": "2026Q4 當期",
    "diff_pct": null,
    "source": "stock_detail.json"
-  },
-  {
-   "check": "e_pe",
-   "code": "3189",
-   "name": "景碩",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 179.66,
-   "official": 199.44,
-   "diff_pct": 11.01,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
    "check": "e_quarters_stale",
@@ -1398,16 +1361,6 @@
    "check": "e_quarters_stale",
    "code": "3221",
    "name": "台嘉碩",
-   "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
-   "ours": "2024Q4",
-   "official": "2026Q4 當期",
-   "diff_pct": null,
-   "source": "stock_detail.json"
-  },
-  {
-   "check": "e_quarters_stale",
-   "code": "3226",
-   "name": "龍鋒",
    "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
    "ours": "2024Q4",
    "official": "2026Q4 當期",
@@ -1860,7 +1813,7 @@
    "name": "聯穎",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 8.935141660703064e+17,
-   "official": 199.17,
+   "official": 206.67,
    "diff_pct": 100.0,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
@@ -1960,8 +1913,8 @@
    "name": "辛耘",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 36.67,
-   "official": 45.15,
-   "diff_pct": 23.13,
+   "official": 46.32,
+   "diff_pct": 26.32,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -1983,6 +1936,16 @@
    "official": "2026Q4 當期",
    "diff_pct": null,
    "source": "stock_detail.json"
+  },
+  {
+   "check": "e_pe",
+   "code": "3605",
+   "name": "宏致",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 42.62,
+   "official": 47.11,
+   "diff_pct": 10.54,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
    "check": "e_quarters_stale",
@@ -2380,8 +2343,8 @@
    "name": "如興",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 38.33,
-   "official": 53.8,
-   "diff_pct": 40.35,
+   "official": 53.67,
+   "diff_pct": 40.01,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -2488,6 +2451,16 @@
    "check": "e_quarters_stale",
    "code": "4527",
    "name": "方土霖",
+   "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
+   "ours": "2024Q4",
+   "official": "2026Q4 當期",
+   "diff_pct": null,
+   "source": "stock_detail.json"
+  },
+  {
+   "check": "e_quarters_stale",
+   "code": "4530",
+   "name": "宏易",
    "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
    "ours": "2024Q4",
    "official": "2026Q4 當期",
@@ -2650,8 +2623,8 @@
    "name": "聚恆-創",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 8.26,
-   "official": 9.61,
-   "diff_pct": 16.32,
+   "official": 9.24,
+   "diff_pct": 11.84,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -2830,8 +2803,8 @@
    "name": "日成-KY",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 11.51,
-   "official": 13.7,
-   "diff_pct": 19.08,
+   "official": 13.3,
+   "diff_pct": 15.6,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -2860,8 +2833,8 @@
    "name": "正文",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 301.43,
-   "official": 348.33,
-   "diff_pct": 15.56,
+   "official": 351.67,
+   "diff_pct": 16.67,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -2963,16 +2936,6 @@
    "official": "2026Q4 當期",
    "diff_pct": null,
    "source": "stock_detail.json"
-  },
-  {
-   "check": "e_pe",
-   "code": "4958",
-   "name": "臻鼎-KY",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 63.64,
-   "official": 70.06,
-   "diff_pct": 10.09,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
    "check": "e_quarters_stale",
@@ -3178,6 +3141,16 @@
    "check": "e_quarters_stale",
    "code": "5274",
    "name": "信驊",
+   "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
+   "ours": "2024Q4",
+   "official": "2026Q4 當期",
+   "diff_pct": null,
+   "source": "stock_detail.json"
+  },
+  {
+   "check": "e_quarters_stale",
+   "code": "5276",
+   "name": "達輝-KY",
    "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
    "ours": "2024Q4",
    "official": "2026Q4 當期",
@@ -3608,6 +3581,16 @@
    "check": "e_quarters_stale",
    "code": "5516",
    "name": "雙喜",
+   "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
+   "ours": "2024Q4",
+   "official": "2026Q4 當期",
+   "diff_pct": null,
+   "source": "stock_detail.json"
+  },
+  {
+   "check": "e_quarters_stale",
+   "code": "5520",
+   "name": "力泰",
    "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
    "ours": "2024Q4",
    "official": "2026Q4 當期",
@@ -4219,9 +4202,9 @@
    "code": "6241",
    "name": "鑫永洋",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 26.17,
-   "official": 22.64,
-   "diff_pct": 13.49,
+   "ours": 25.55,
+   "official": 22.09,
+   "diff_pct": 13.53,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -4530,8 +4513,8 @@
    "name": "安集",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 831.25,
-   "official": 1123.33,
-   "diff_pct": 35.14,
+   "official": 1108.33,
+   "diff_pct": 33.33,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -4648,16 +4631,6 @@
    "check": "e_quarters_stale",
    "code": "6538",
    "name": "倉和",
-   "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
-   "ours": "2024Q4",
-   "official": "2026Q4 當期",
-   "diff_pct": null,
-   "source": "stock_detail.json"
-  },
-  {
-   "check": "e_quarters_stale",
-   "code": "6542",
-   "name": "隆中",
    "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
    "ours": "2024Q4",
    "official": "2026Q4 當期",
@@ -4955,6 +4928,16 @@
    "source": "stock_detail.json"
   },
   {
+   "check": "e_pe",
+   "code": "6672",
+   "name": "騰輝電子-KY",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 81.81,
+   "official": 90.33,
+   "diff_pct": 10.42,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
    "check": "e_quarters_stale",
    "code": "6679",
    "name": "鈺太",
@@ -5056,6 +5039,16 @@
   },
   {
    "check": "e_quarters_stale",
+   "code": "6730",
+   "name": "常廣",
+   "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
+   "ours": "2024Q4",
+   "official": "2026Q4 當期",
+   "diff_pct": null,
+   "source": "stock_detail.json"
+  },
+  {
+   "check": "e_quarters_stale",
    "code": "6735",
    "name": "美達科技",
    "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
@@ -5105,16 +5098,6 @@
    "source": "stock_detail.json"
   },
   {
-   "check": "e_pe",
-   "code": "6770",
-   "name": "力積電",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 21.77,
-   "official": 24.07,
-   "diff_pct": 10.57,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
    "check": "e_quarters_stale",
    "code": "6781",
    "name": "AES-KY",
@@ -5150,8 +5133,8 @@
    "name": "晉弘",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 140.0,
-   "official": 157.22,
-   "diff_pct": 12.3,
+   "official": 155.56,
+   "diff_pct": 11.11,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -5286,16 +5269,6 @@
   },
   {
    "check": "e_quarters_stale",
-   "code": "6881",
-   "name": "潤德",
-   "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
-   "ours": "2024Q4",
-   "official": "2026Q4 當期",
-   "diff_pct": null,
-   "source": "stock_detail.json"
-  },
-  {
-   "check": "e_quarters_stale",
    "code": "6884",
    "name": "海柏特",
    "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
@@ -5328,16 +5301,6 @@
    "check": "e_quarters_stale",
    "code": "6903",
    "name": "巨漢",
-   "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
-   "ours": "2024Q4",
-   "official": "2026Q4 當期",
-   "diff_pct": null,
-   "source": "stock_detail.json"
-  },
-  {
-   "check": "e_quarters_stale",
-   "code": "6904",
-   "name": "伯鑫",
    "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
    "ours": "2024Q4",
    "official": "2026Q4 當期",
@@ -5383,6 +5346,16 @@
    "official": "2026Q4 當期",
    "diff_pct": null,
    "source": "stock_detail.json"
+  },
+  {
+   "check": "e_pe",
+   "code": "6944",
+   "name": "兆聯實業",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 23.59,
+   "official": 20.8,
+   "diff_pct": 11.83,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
    "check": "e_quarters_gap",
@@ -5473,6 +5446,16 @@
    "official": "2026Q4 當期",
    "diff_pct": null,
    "source": "stock_detail.json"
+  },
+  {
+   "check": "e_pe",
+   "code": "7610",
+   "name": "聯友金屬-創",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 53.92,
+   "official": 46.93,
+   "diff_pct": 12.97,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
    "check": "e_quarters_stale",
@@ -5810,8 +5793,8 @@
    "name": "菱光",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 15.72,
-   "official": 19.26,
-   "diff_pct": 22.5,
+   "official": 19.73,
+   "diff_pct": 25.49,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -5868,16 +5851,6 @@
    "check": "e_quarters_stale",
    "code": "8299",
    "name": "群聯",
-   "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
-   "ours": "2024Q4",
-   "official": "2026Q4 當期",
-   "diff_pct": null,
-   "source": "stock_detail.json"
-  },
-  {
-   "check": "e_quarters_stale",
-   "code": "8342",
-   "name": "益張",
    "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
    "ours": "2024Q4",
    "official": "2026Q4 當期",
@@ -5948,6 +5921,16 @@
    "check": "e_quarters_stale",
    "code": "8404",
    "name": "百和興業-KY",
+   "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
+   "ours": "2024Q4",
+   "official": "2026Q4 當期",
+   "diff_pct": null,
+   "source": "stock_detail.json"
+  },
+  {
+   "check": "e_quarters_stale",
+   "code": "8409",
+   "name": "商之器",
    "detail": "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
    "ours": "2024Q4",
    "official": "2026Q4 當期",
@@ -6140,8 +6123,8 @@
    "name": "台汽電",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 14.77,
-   "official": 16.79,
-   "diff_pct": 13.71,
+   "official": 16.43,
+   "diff_pct": 11.27,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -6240,8 +6223,8 @@
    "name": "泰銘",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 11.63,
-   "official": 10.42,
-   "diff_pct": 10.37,
+   "official": 10.34,
+   "diff_pct": 11.06,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -6250,8 +6233,8 @@
    "name": "裕融",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 9.88,
-   "official": 10.93,
-   "diff_pct": 10.57,
+   "official": 11.03,
+   "diff_pct": 11.58,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -6260,8 +6243,8 @@
    "name": "好樂迪",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 8.3,
-   "official": 12.24,
-   "diff_pct": 47.41,
+   "official": 12.29,
+   "diff_pct": 48.02,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -6313,20 +6296,16 @@
   "2026-09-15（稽核二.三）e_pe 降級為 informational_only_checks：官方 BWIBBU_ALL 本益比未公開計算基礎（合併/個別、TTM窗口定義皆未載明），跟我方用 stock_detail.json 近四季EPS自行推算的值不保證同一把尺，繼續記錄差異供查閱但不計入 violation_rate/gate_pass。同一次修正了 hit() 呼叫時 ours/official 標籤反向的bug（原本把官方值標成ours、推算值標成official，順序寫反）。"
  ],
  "local_task_health": {
-  "checked_at": "2026-10-12T22:57:01.826370+08:00",
+  "checked_at": "2026-10-13T22:57:02.674011+08:00",
   "registry": "data/seed/pipeline_registry.json",
   "alert": true,
-  "stalled_count": 13,
+  "stalled_count": 9,
   "stalled": [
-   "AlphaMarathon：research/marathon_cycle.log 已 292 分鐘沒有新產出（預期每 30 分鐘，門檻 90 分鐘；檔案修改時間）",
-   "AlphaHypothesisQueue：research/hypothesis_queue_cycle.log 已 291 分鐘沒有新產出（預期每 30 分鐘，門檻 90 分鐘；檔案修改時間）",
-   "AlphaData：C:/alpha/alpha-data/alpha.db 已 7137 分鐘沒有新產出（預期每 1440 分鐘，門檻 4320 分鐘；各表 max(date)：daily_price=2026-10-08、inst_trades=2026-10-08、valuation=2026-10-08、taifex_large=20261002）",
-   "AlphaMarketSparklines：data/sparklines.json 已連續錯過 2 個應跑班次（門檻 2 班，最近應跑 2026-10-12 18:30；JSON 欄位 meta.generated_at）",
-   "AlphaMarketTW：data/market_tw.json 已連續錯過 2 個應跑班次（門檻 2 班，最近應跑 2026-10-12 18:30；JSON 欄位 fetched_at）",
-   "AlphaFundamentals：data/fundamentals.json 已連續錯過 2 個應跑班次（門檻 2 班，最近應跑 2026-10-12 18:30；JSON 欄位 meta.generated_at）",
-   "AlphaPriceHistory：data/price_history.json 已連續錯過 2 個應跑班次（門檻 2 班，最近應跑 2026-10-12 18:30；JSON 欄位 meta.generated_at）",
-   "AlphaQuotesTW：data/quotes_tw.json 已連續錯過 11 個應跑班次（門檻 3 班，最近應跑 2026-10-12 22:50；JSON 欄位 fetched_at）",
-   "【使用者可見】阻塞已19個交易日未處理：⛔（2026-09-15）【使用者可見】sparklines.json過期直接影響使用者在App",
+   "AlphaMarathon：research/marathon_cycle.log 已 651 分鐘沒有新產出（預期每 30 分鐘，門檻 90 分鐘；檔案修改時間）",
+   "AlphaHypothesisQueue：research/hypothesis_queue_cycle.log 已 650 分鐘沒有新產出（預期每 30 分鐘，門檻 90 分鐘；檔案修改時間）",
+   "AlphaPriceHistory：產出檔 data/price_history.json 不存在",
+   "AlphaQuotesTW：data/quotes_tw.json 已連續錯過 14 個應跑班次（門檻 3 班，最近應跑 2026-10-13 22:50；JSON 欄位 fetched_at）",
+   "【使用者可見】阻塞已20個交易日未處理：⛔（2026-09-15）【使用者可見】sparklines.json過期直接影響使用者在App",
    "合規.三：research/backfill_stock_financials_gap_2025.py 硬寫黑名單網域字串但未import net_guard（見audit_preflight.py）",
    "合規.三：research/irb130_pledge_probe.py 硬寫黑名單網域字串但未import net_guard（見audit_preflight.py）",
    "合規.三：scripts/extract_company_products.py 硬寫黑名單網域字串但未import net_guard（見audit_preflight.py）",
@@ -6340,7 +6319,7 @@
     "expected_interval_min": 1,
     "freshness": "mtime",
     "source": "檔案修改時間",
-    "last_output": "2026-10-12T22:57:02.688783+08:00",
+    "last_output": "2026-10-13T22:57:02.674338+08:00",
     "age_min": -0.0,
     "stall_limit_min": 3,
     "status": "ok"
@@ -6352,7 +6331,7 @@
     "expected_interval_min": 2,
     "freshness": "mtime",
     "source": "檔案修改時間",
-    "last_output": "2026-10-12T22:57:07.563904+08:00",
+    "last_output": "2026-10-13T22:57:07.249164+08:00",
     "age_min": -0.1,
     "stall_limit_min": 6,
     "status": "ok"
@@ -6364,7 +6343,7 @@
     "expected_interval_min": 1440,
     "freshness": "json_field",
     "source": "JSON 欄位 checked_at",
-    "last_output": "2026-10-12T13:47:02.461758+08:00",
+    "last_output": "2026-10-13T13:47:02.579265+08:00",
     "age_min": 550.0,
     "stall_limit_min": 4320,
     "status": "ok"
@@ -6376,8 +6355,8 @@
     "expected_interval_min": 5,
     "freshness": "mtime",
     "source": "檔案修改時間",
-    "last_output": "2026-10-12T22:56:42.017031+08:00",
-    "age_min": 0.3,
+    "last_output": "2026-10-13T22:56:37.834237+08:00",
+    "age_min": 0.4,
     "stall_limit_min": 15,
     "status": "ok"
    },
@@ -6388,7 +6367,7 @@
     "expected_interval_min": 5,
     "freshness": "json_field",
     "source": "JSON 欄位 fetched_at",
-    "last_output": "2026-10-12T22:56:36.648150+08:00",
+    "last_output": "2026-10-13T22:56:36.695959+08:00",
     "age_min": 0.4,
     "stall_limit_min": 15,
     "status": "ok"
@@ -6400,7 +6379,7 @@
     "expected_interval_min": 5,
     "freshness": "jsonl_last_field",
     "source": "JSONL 末筆 ts",
-    "last_output": "2026-10-12T22:52:01.924856+08:00",
+    "last_output": "2026-10-13T22:52:02.700606+08:00",
     "age_min": 5.0,
     "stall_limit_min": 15,
     "status": "ok"
@@ -6421,8 +6400,8 @@
     "expected_interval_min": 15,
     "freshness": "mtime",
     "source": "檔案修改時間",
-    "last_output": "2026-10-12T22:46:04.296031+08:00",
-    "age_min": 11.0,
+    "last_output": "2026-10-13T22:32:19.282561+08:00",
+    "age_min": 24.7,
     "stall_limit_min": 45,
     "status": "ok"
    },
@@ -6433,8 +6412,8 @@
     "expected_interval_min": 30,
     "freshness": "mtime",
     "source": "檔案修改時間",
-    "last_output": "2026-10-12T18:05:25.422702+08:00",
-    "age_min": 291.6,
+    "last_output": "2026-10-13T12:05:55.675469+08:00",
+    "age_min": 651.1,
     "stall_limit_min": 90,
     "status": "stalled"
    },
@@ -6445,8 +6424,8 @@
     "expected_interval_min": 30,
     "freshness": "mtime",
     "source": "檔案修改時間",
-    "last_output": "2026-10-12T18:05:32.401779+08:00",
-    "age_min": 291.5,
+    "last_output": "2026-10-13T12:06:34.758729+08:00",
+    "age_min": 650.5,
     "stall_limit_min": 90,
     "status": "stalled"
    },
@@ -6456,11 +6435,11 @@
     "artifact": "C:/alpha/alpha-data/alpha.db",
     "expected_interval_min": 1440,
     "freshness": "sqlite_max_date",
-    "source": "各表 max(date)：daily_price=2026-10-08、inst_trades=2026-10-08、valuation=2026-10-08、taifex_large=20261002",
-    "last_output": "2026-10-08T00:00:00+08:00",
-    "age_min": 7137.0,
+    "source": "各表 max(date)：daily_price=2026-10-12、inst_trades=2026-10-12、valuation=2026-10-12、taifex_large=20261002",
+    "last_output": "2026-10-12T00:00:00+08:00",
+    "age_min": 2817.0,
     "stall_limit_min": 4320,
-    "status": "stalled"
+    "status": "ok"
    },
    {
     "task": "AlphaDepCheck",
@@ -6469,8 +6448,8 @@
     "expected_interval_min": 10080,
     "freshness": "json_field",
     "source": "JSON 欄位 generated_at",
-    "last_output": "2026-09-28T08:00:03.933711+08:00",
-    "age_min": 21057.0,
+    "last_output": "2026-10-13T10:14:12.764251+08:00",
+    "age_min": 762.8,
     "stall_limit_min": 30240,
     "status": "ok"
    },
@@ -6481,13 +6460,13 @@
     "expected_interval_min": 1440,
     "freshness": "json_field",
     "source": "JSON 欄位 meta.generated_at",
-    "last_output": "2026-10-10T09:19:20.132191+08:00",
-    "age_min": 3697.7,
+    "last_output": "2026-10-13T19:16:10.936623+08:00",
+    "age_min": 220.9,
     "shift_profile": "market_yml",
-    "missed_shifts": 2,
+    "missed_shifts": 0,
     "missed_shift_threshold": 2,
-    "latest_due_shift": "2026-10-12 18:30",
-    "status": "stalled"
+    "latest_due_shift": null,
+    "status": "ok"
    },
    {
     "task": "AlphaMarketTW",
@@ -6496,13 +6475,13 @@
     "expected_interval_min": 1440,
     "freshness": "json_field",
     "source": "JSON 欄位 fetched_at",
-    "last_output": "2026-10-11T17:35:04+00:00",
-    "age_min": 1282.0,
+    "last_output": "2026-10-13T11:14:33+00:00",
+    "age_min": 222.5,
     "shift_profile": "market_yml",
-    "missed_shifts": 2,
+    "missed_shifts": 0,
     "missed_shift_threshold": 2,
-    "latest_due_shift": "2026-10-12 18:30",
-    "status": "stalled"
+    "latest_due_shift": null,
+    "status": "ok"
    },
    {
     "task": "AlphaFundamentals",
@@ -6511,13 +6490,13 @@
     "expected_interval_min": 1440,
     "freshness": "json_field",
     "source": "JSON 欄位 meta.generated_at",
-    "last_output": "2026-10-10T09:18:30.172874+08:00",
-    "age_min": 3698.5,
+    "last_output": "2026-10-13T19:15:29.077605+08:00",
+    "age_min": 221.6,
     "shift_profile": "market_yml",
-    "missed_shifts": 2,
+    "missed_shifts": 0,
     "missed_shift_threshold": 2,
-    "latest_due_shift": "2026-10-12 18:30",
-    "status": "stalled"
+    "latest_due_shift": null,
+    "status": "ok"
    },
    {
     "task": "AlphaPriceHistory",
@@ -6525,14 +6504,8 @@
     "artifact": "data/price_history.json",
     "expected_interval_min": 1440,
     "freshness": "json_field",
-    "source": "JSON 欄位 meta.generated_at",
-    "last_output": "2026-10-10T09:19:16.895853+08:00",
-    "age_min": 3697.7,
-    "shift_profile": "market_yml",
-    "missed_shifts": 2,
-    "missed_shift_threshold": 2,
-    "latest_due_shift": "2026-10-12 18:30",
-    "status": "stalled"
+    "status": "missing",
+    "reason": "產出檔不存在"
    },
    {
     "task": "AlphaQuotesTW",
@@ -6541,12 +6514,12 @@
     "expected_interval_min": 60,
     "freshness": "json_field",
     "source": "JSON 欄位 fetched_at",
-    "last_output": "2026-10-12T13:00:35+00:00",
-    "age_min": 116.4,
+    "last_output": "2026-10-13T12:35:59+00:00",
+    "age_min": 141.1,
     "shift_profile": "quotes_yml",
-    "missed_shifts": 11,
+    "missed_shifts": 14,
     "missed_shift_threshold": 3,
-    "latest_due_shift": "2026-10-12 22:50",
+    "latest_due_shift": "2026-10-13 22:50",
     "status": "stalled"
    },
    {
@@ -6556,12 +6529,12 @@
     "expected_interval_min": 30,
     "freshness": "json_field",
     "source": "JSON 欄位 fetched_at",
-    "last_output": "2026-10-12T22:05:04.129567+08:00",
+    "last_output": "2026-10-13T22:05:04.047478+08:00",
     "age_min": 52.0,
     "shift_profile": "news_events_yml",
     "missed_shifts": 1,
     "missed_shift_threshold": 3,
-    "latest_due_shift": "2026-10-12 22:30",
+    "latest_due_shift": "2026-10-13 22:30",
     "status": "ok"
    },
    {
@@ -6571,8 +6544,8 @@
     "expected_interval_min": 1440,
     "freshness": "json_field",
     "source": "JSON 欄位 generated_at",
-    "last_output": "2026-10-11T23:00:02.931940+08:00",
-    "age_min": 1437.0,
+    "last_output": "2026-10-13T06:31:34.283027+08:00",
+    "age_min": 985.5,
     "shift_profile": "audit_yml",
     "missed_shifts": 0,
     "missed_shift_threshold": 2,
@@ -6586,7 +6559,7 @@
     "expected_interval_min": 1440,
     "freshness": "mtime",
     "source": "檔案修改時間",
-    "last_output": "2026-10-12T18:30:14.267379+08:00",
+    "last_output": "2026-10-13T18:30:14.881598+08:00",
     "age_min": 266.8,
     "stall_limit_min": 4320,
     "status": "ok"
