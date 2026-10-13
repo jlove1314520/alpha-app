@@ -1674,6 +1674,33 @@
   const WL_DETAIL_OPEN=new Set();
   function toggleWlDetail(code){const d=document.querySelector(`[data-wl-detail="${code}"]`);if(!d)return;const open=d.hidden;d.hidden=!open;if(open)WL_DETAIL_OPEN.add(code);else WL_DETAIL_OPEN.delete(code)}
   let HYDRATE_HOME_SEQ=0;
+  // 先.八十一-7（常備.開發-20 第三招）：首頁下方卡片捲到才載。#home-lazy-sentinel 真的進入畫面時才執行（不預留邊界：實測哨兵在首屏下緣 23px，預留 300px 等於沒有延後）；
+  // 同一個名稱只排一次，已執行過就直接再跑（例如重新整理首頁）。不支援 IntersectionObserver 的瀏覽器直接執行。
+  // uiLoadLazyAll()：立刻把排隊中的全部執行（冒煙測試開頁後呼叫一次，讓既有檢查照常看得到資料）。
+  const UI_LAZY={q:new Map(),seen:false,obs:null,armed:false};
+  function uiLazyHome(name,fn){
+    if(UI_LAZY.seen||typeof IntersectionObserver==='undefined'){_safeAsync(name,fn);return}
+    UI_LAZY.q.set(name,fn);
+    if(UI_LAZY.armed)return;
+    UI_LAZY.armed=true;
+    const s=document.getElementById('home-lazy-sentinel');
+    if(!s){uiLoadLazyAll();return}
+    // 頁面剛開時卡片還沒長出來，哨兵會短暫出現在畫面裡、之後才被推到下方——所以不在開頁當下判斷：
+    // ①捲動時（capture：首頁可能在內層容器捲動）只要哨兵頂端已在畫面下緣之上（捲到或捲過）就載入——直接跳過哨兵也算
+    // ②版面穩定（2 秒）後哨兵本來就在畫面裡（例如很高的桌機視窗）就直接載入
+    let tick=false;
+    const onScroll=()=>{if(tick||UI_LAZY.seen)return;tick=true;requestAnimationFrame(()=>{tick=false;
+      try{if(!UI_LAZY.seen&&s.getBoundingClientRect().top<innerHeight){document.removeEventListener('scroll',onScroll,true);uiLoadLazyAll()}}catch(e){console.warn('[uiLazyHome:scroll]',e)}})};
+    document.addEventListener('scroll',onScroll,{passive:true,capture:true});
+    setTimeout(()=>{try{if(!UI_LAZY.seen&&s.getBoundingClientRect().top<innerHeight)uiLoadLazyAll()}catch(e){console.warn('[uiLazyHome:settle]',e)}},2000);
+  }
+  function uiLoadLazyAll(){
+    UI_LAZY.seen=true;
+    if(UI_LAZY.obs){UI_LAZY.obs.disconnect();UI_LAZY.obs=null}
+    const q=[...UI_LAZY.q];UI_LAZY.q.clear();
+    q.forEach(([n,f])=>_safeAsync(n,f));
+  }
+  window.uiLoadLazyAll=uiLoadLazyAll;
   async function hydrateHome(){
     _safeSync('renderWLTabs',renderWLTabs);  // 常備.開發-8
     const el=document.getElementById('wl-list');if(!el)return;
@@ -1689,12 +1716,12 @@
     _safeAsync('loadHomeIndex',loadHomeIndex);
     _safeAsync('loadTodayEvents',loadTodayEvents);
     _safeAsync('loadHomeBrief',loadHomeBrief);  // 常備.開發-2 盤前日報（規則摘要）
-    _safeAsync('loadMyHoldingsEvents',loadMyHoldingsEvents);  // 2026-09-15 開發佇列自走，承接自競品一
+    uiLazyHome('loadMyHoldingsEvents',loadMyHoldingsEvents);  // 2026-09-15 開發佇列自走；先.八十一-7 捲到才載
     _safeAsync('loadAutoTrading',loadAutoTrading);
-    _safeAsync('renderBtPath',async()=>{renderBtPath()});
+    // 先.八十一-7：破億試算在設定頁，設定頁 hydrateSettings 自己會呼叫 renderBtPath，首頁不再提早抓 strategy_history
     _safeAsync('loadHomeExecCard',loadHomeExecCard);  // 常備.開發-11 真錢執行總覽卡（唯讀）
     _safeAsync('loadHomeBrokerCard',loadHomeBrokerCard);  // 2026-09-15 開發佇列自走，週六.五：總資產卡吃/live/positions+/live/balance真數字
-    _safeAsync('loadStrategyCurves',async()=>{await Promise.allSettled([loadStrategyCurves(),loadStrategyHistory()]);renderStrategyCurves()});  // 2026-10-11 先.六十八 策略vs0050
+    uiLazyHome('loadStrategyCurves',async()=>{await Promise.allSettled([loadStrategyCurves(),loadStrategyHistory()]);renderStrategyCurves()});  // 先.六十八；先.八十一-7 捲到才載
     await loadIntradayQuotes();
     if(!WL.length){el.innerHTML='<div class="note" style="padding:14px 2px">尚無自選股，點右上「管理」搜尋加入</div>';return}
     // 2026-09-06（實測.一）三份檔案一起備妥再畫：sparklines（走勢線＋回退鏈最後一層）、
@@ -3867,7 +3894,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-13.0819';
+  const APP_VERSION='2026-10-13.0845';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
@@ -4021,7 +4048,8 @@
   // 不是新版。
   _safeAsync('loadAboutVersions',loadAboutVersions);
   // 2026-10-08（先.五十二-5）：新版提示——載入時、每 30 分鐘、切回畫面時各檢查一次
-  _safeAsync('checkNewVersion',checkNewVersion);
+  // 先.八十一-7（第二招）：第一次開（還沒有 SW 接管）頁面本身就是最新版，不必再抓一次 sw.js 比版本——那次跟 register() 重複
+  _safeAsync('checkNewVersion',()=>('serviceWorker' in navigator&&navigator.serviceWorker.controller)?checkNewVersion():Promise.resolve());
   try{
     setInterval(()=>{checkNewVersion().catch(e=>{console.warn('[checkNewVersion:interval]',e);recordGlobalError('checkNewVersion:interval',e)})},30*60*1000);
     setInterval(()=>{if('serviceWorker' in navigator)navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(e=>console.warn('[serviceWorker.update:interval] 離線時正常，不記錄',e))},30*60*1000);
@@ -4044,7 +4072,7 @@
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('sw.js').then(reg=>{
       watchSwUpdate(reg);
-      reg.update().catch(e=>console.warn('[serviceWorker.update] 離線時正常，不記錄',e));
+      // 先.八十一-7（第二招：合併重複抓取）：register() 本身就會檢查 sw.js 有沒有新版，啟動時不再多叫一次 reg.update()（量測顯示 sw.js 被抓兩次）
     }).catch(e=>{console.warn('[serviceWorker]',e);recordGlobalError('serviceWorker',e)});
     // 只有使用者點了「有新版」才因換版重載；第一次安裝時的 clients.claim() 也會觸發 controllerchange，不能重載
     navigator.serviceWorker.addEventListener('controllerchange',()=>{if(SW_APPLY_CLICKED){SW_APPLY_CLICKED=false;location.reload()}});

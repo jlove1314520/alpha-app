@@ -1,3 +1,38 @@
+## 2026-10-13 08:45（互動視窗）先.八十一-7 裁示③：首頁三招減量，首次載入 238.2 KB（<350KB）＋冒煙 #114
+
+- **三招（常備.開發-20）**：
+  - ①**自選股走勢改每檔小檔**：已經在用 `data/quote_lite/<代號>.json`（先.六十七），首頁只抓自選股那幾檔，不下載整份 sparklines。
+  - ②**合併重複抓取**：量測時 `sw.js` 被抓了兩次，原因有兩個，都已移除：
+    - 啟動時多呼叫了一次 `reg.update()`；`register()` 本身就會檢查有沒有新版。
+    - 第一次開的時候 `checkNewVersion()` 又抓一次 sw.js 比版本；改成只有 SW 已經接管時才比，第一次開頁面本身就是最新版。
+    - 30 分鐘與切回畫面時的新版檢查照舊保留。
+  - ③**下方卡片捲到才載**：在「跟 0050 比」上方加一個哨兵 `#home-lazy-sentinel`。
+    - 「跟 0050 比」（strategy_curves／history）與「我的持股事件」（news.json）改成捲到才載。
+    - 判斷規則：捲動時，哨兵頂端已經在畫面下緣之上（捲到或捲過）就載入；版面穩定 2 秒後，若哨兵本來就在畫面裡（例如很高的桌機視窗），也直接載入。
+    - 實測發現：開頁當下卡片還沒長出來，哨兵會短暫出現在畫面裡，所以不能在開頁當下就判斷。
+    - 破億試算本來就在設定頁，首頁不再提早呼叫 `renderBtPath`。
+- **量測**（`node scripts/measure_first_load.mjs`：全新瀏覽器環境、無快取、無 SW、393×852、等 8 秒）：
+  - 上次正式量測 497 KB；今天開工時 281.5 KB；**改完 238.2 KB（29 個請求，無重複）**，達成 <350 KB 的驗收。
+- **冒煙**：
+  - 開頁後會呼叫一次 `uiLoadLazyAll()`，讓既有檢查看得到資料；量測腳本不呼叫，所以量到的是真實的延後效果。
+  - **新增 #114**：用全新分頁檢查三件事：捲動前不抓 news／strategy_history、sw.js 不重複、真的捲動後才載入並畫出資料。
+  - 結果：113 PASS／0 FAIL。
+- **量測輸出（前 12 列）**：
+```
+   114749  gzip    http://localhost:8792/app.js
+    33057  gzip    http://localhost:8792/index.html
+    25826  browser https://fonts.gstatic.com/s/sora/v17/xMQ9uFFYT72X5wkB_18qmnndmSdSnh2BAfO5mnuyOo1lfiQwV6-x.woff2
+    20481  gzip    http://localhost:8792/data/STATUS.json
+    12994  gzip    http://localhost:8792/data/listed_universe.json
+    11605  gzip    http://localhost:8792/app.css
+     4732  gzip    http://localhost:8792/data/quotes_tw.json
+     3315  gzip    http://localhost:8792/sw.js
+     2836  gzip    http://localhost:8792/data/margin_maintenance.json
+     2300  gzip    http://localhost:8792/data/market_tw.json
+     2070  gzip    http://localhost:8792/data/quotes_sinopac.json
+     2041  gzip    http://localhost:8792/data/quotes_us.json
+```
+
 ## 2026-10-13 08:19（互動視窗）先.八十一-6 裁示②：#418 聯集日曆整串重跑、App 顯示更正值、Bb-90 標接近天條一
 
 - **整串重跑**：新增 `research/rerun_418_chain_unioncal.py`，依下列順序以聯集日曆重跑，事前參數一律不改：

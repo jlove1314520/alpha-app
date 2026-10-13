@@ -140,6 +140,9 @@ async function runSmokeTest(baseUrl, headless = true) {
   await page.addInitScript(() => { window.__ALPHA_FETCH_MEMCACHE_OFF = true; });
 
   await page.goto(`${baseUrl}/index.html`, { waitUntil: "networkidle", timeout: 20000 });
+  // 先.八十一-7：首頁下方卡片改成捲到才載；冒煙其餘檢查需要資料，開頁後立刻全部載入（量測首次載入的 measure_first_load.mjs 不呼叫）
+  await page.evaluate(() => { if (typeof uiLoadLazyAll === "function") uiLoadLazyAll(); });
+  await page.waitForTimeout(800);
   await page.waitForTimeout(1500);
 
   // 1. 無uncaught error / unhandledrejection——直接讀index.html自己的
@@ -3703,6 +3706,33 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { ucErrs.push(`測試本身出錯：${e.message || e}`); }
   record("113. #418 聯集日曆整串重跑：回測段讀更正值、月報酬同步、原結果檔不覆蓋、Bb-90 標「接近天條一」、破億年化更正（先.八十一-6）", ucErrs.length === 0, ucErrs.join("; "));
 
+  // 114.【2026-10-13 先.八十一-7 裁示③】首頁下方卡片捲到才載：全新分頁開首頁、不捲動時不得抓 news.json／strategy_history.json，
+  // 捲到「跟 0050 比」附近才抓；首次載入時 sw.js 不得被抓兩次（合併重複抓取）。
+  const lzErrs = [];
+  try {
+    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+    const p2 = await ctx.newPage();
+    const urls = [];
+    p2.on("request", (rq) => urls.push(rq.url()));
+    try {
+      await p2.goto(`${baseUrl}/index.html`, { waitUntil: "networkidle", timeout: 30000 });
+      await p2.waitForTimeout(1500);
+      const before = urls.slice();
+      const n = (re, arr) => arr.filter(u => re.test(u.split("?")[0])).length;
+      if (n(/\/data\/news\.json$/, before)) lzErrs.push("沒捲動就抓了 news.json");
+      if (n(/\/data\/strategy_history\.json$/, before)) lzErrs.push("沒捲動就抓了 strategy_history.json");
+      if (n(/\/sw\.js$/, before) > 1) lzErrs.push(`首次載入 sw.js 被抓 ${n(/\/sw\.js$/, before)} 次`);
+      await p2.mouse.wheel(0, 900);  // 真的捲動（觸發捲動事件），不是直接跳位
+      await p2.waitForTimeout(300);
+      await p2.evaluate(() => document.getElementById("strategy-curves-card").scrollIntoView());
+      await p2.waitForTimeout(2500);
+      if (!n(/\/data\/strategy_history\.json$/, urls)) lzErrs.push("捲到「跟 0050 比」後仍沒抓 strategy_history.json");
+      const has = await p2.evaluate(() => !!(SC_DATA && SC_DATA.lines && SC_DATA.lines.length));
+      if (!has) lzErrs.push("捲到後「跟 0050 比」沒有畫出資料");
+    } finally { await ctx.close(); }
+  } catch (e) { lzErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("114. 首頁下方卡片捲到才載（news／strategy_history 捲動前不抓）、首次載入 sw.js 不重複（先.八十一-7）", lzErrs.length === 0, lzErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -3731,7 +3761,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
