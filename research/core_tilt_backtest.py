@@ -295,9 +295,16 @@ def simulate_equity_curve(data: dict, market_df: pd.DataFrame, industry_map: dic
     # `limit=5`（5個交易日，約一週，合理涵蓋連假/短暫停牌），超過5天
     # 還是缺值就維持NaN，讓既有的NaN過濾邏輯（下面的`prices_today`
     # 篩選）正確地把這檔股票排除在當天估值之外，不再無限期裝作沒事。
+    #
+    # 2026-10-13 先.八十五-4 第三次修正（第二版 fix 引入的新 bug）：`data[sid]["date"]`
+    # 是純字串，直接 reindex 到 DatetimeIndex 會「全部對不上」→ 971 天全是 NaN →
+    # 從頭到尾一張股票都沒買，淨值只剩每次再平衡扣的手續費（實測 2330 非空 0/971）。
+    # #283 的 TE 20.47%（≈0050 自己的波動）、9 組 TE 全是 0.762%、beta 0.0009 都是這個
+    # bug 的產物。修法：價格序列的 index 先轉 Timestamp 再 reindex。
     full_calendar_index = pd.DatetimeIndex(calendar)
     price_idx = {
-        sid: d.set_index("date")["adj_close"].reindex(full_calendar_index).ffill(limit=5)
+        sid: d.assign(date=pd.to_datetime(d["date"])).set_index("date")["adj_close"]
+              .reindex(full_calendar_index).ffill(limit=5)
         for sid, d in data.items()
     }
     shares: dict[str, float] = {}
