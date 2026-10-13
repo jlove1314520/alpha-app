@@ -1,8 +1,8 @@
 {
- "generated_at": "2026-09-28T08:00:03.933711+08:00",
+ "generated_at": "2026-10-13T10:14:12.764251+08:00",
  "source": "PyPI 官方 JSON API",
  "policy": "只回報不自動升級；升級須照 CLAUDE.md 七之二 四步驗證",
- "behind_count": 4,
+ "behind_count": 6,
  "packages": [
   {
    "package": "certifi",
@@ -12,9 +12,44 @@
    "error": null
   },
   {
+   "package": "cryptography",
+   "pinned": "50.0.0",
+   "latest": "50.0.2",
+   "behind": true,
+   "error": null
+  },
+  {
    "package": "fastapi",
    "pinned": "0.141.1",
-   "latest": "0.141.1",
+   "latest": "0.143.0",
+   "behind": true,
+   "error": null
+  },
+  {
+   "package": "http_ece",
+   "pinned": "1.2.1",
+   "latest": "1.2.1",
+   "behind": false,
+   "error": null
+  },
+  {
+   "package": "py-vapid",
+   "pinned": "1.9.4",
+   "latest": "1.9.4",
+   "behind": false,
+   "error": null
+  },
+  {
+   "package": "pyaes",
+   "pinned": "1.6.1",
+   "latest": "1.6.1",
+   "behind": false,
+   "error": null
+  },
+  {
+   "package": "pywebpush",
+   "pinned": "2.5.0",
+   "latest": "2.5.0",
    "behind": false,
    "error": null
   },
@@ -26,10 +61,24 @@
    "error": null
   },
   {
+   "package": "rsa",
+   "pinned": "4.9.1",
+   "latest": "4.9.1",
+   "behind": false,
+   "error": null
+  },
+  {
    "package": "starlette",
    "pinned": "1.6.0",
    "latest": "1.7.0",
    "behind": true,
+   "error": null
+  },
+  {
+   "package": "telethon",
+   "pinned": "1.45.0",
+   "latest": "1.45.0",
+   "behind": false,
    "error": null
   },
   {
