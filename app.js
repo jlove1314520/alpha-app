@@ -27,6 +27,9 @@
     [/yfinance/gi,'Yahoo 財經'],[/\bNAV\b/g,'淨值'],[/BAA10Y/g,'信用利差'],[/Cloudflare\s*Access/g,'存取閘道'],
     [/\bXBRL\b/g,'結構化財報'],[/\bMI_INDEX\b/g,'大盤統計'],[/\bSTOCK_DAY\b/g,'日成交'],[/\bopenapi\b/gi,'開放資料'],[/SBL\//g,''],
     [/GitHub Actions\s*排程/g,'每日排程'],
+    // 先.八十一-44：本日新增的資料來源說明含工程術語 repo／price_history，改白話（先具體、後通用）
+    [/repo\s*price_history/g,'本站每日收盤檔'],[/\brepo\s+[\w.-]+\.json\b/g,'本站資料檔'],[/\brepo\s*排程/g,'本站每日排程'],
+    [/\brepo\s*檔/g,'本站資料檔'],[/\brepo\s*名單/g,'本站名單'],[/\brepo\b/g,'本站'],
     [/[（(]\s*#\d{3}(?:\s*[／/、,，]\s*#\d{3})*\s*[）)]/g,''],[/[，,、]?\s*#\d{3}\b/g,''],
     [/data\/[\w./-]+\.json/g,'資料檔'],[/research\/[\w./-]+\.py/g,'程式'],
     [/（\s*[／/、，]*\s*）/g,''],[/\(\s*\)/g,'']
@@ -4164,7 +4167,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-13.1200';
+  const APP_VERSION='2026-10-13.1207';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

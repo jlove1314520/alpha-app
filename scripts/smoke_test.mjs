@@ -3848,11 +3848,11 @@ async function runSmokeTest(baseUrl, headless = true) {
       await p.waitForFunction(() => /個交易日|走勢圖：|repo 無此檔/.test((document.getElementById("trend-note") || {}).textContent || ""), null, { timeout: 20000 }).catch(() => null);  // 預設文字就是「來源：日收盤價」，要等真正寫入
       const tn = await p.evaluate(() => (document.getElementById("trend-note") || {}).textContent || "");
       // 盤中有 Shioaji 即時價時，註記另加「走勢圖：…repo price_history」
-      if (!/repo price_history/.test(tn)) r10Errs.push(`個股走勢來源不是 repo：${tn.slice(0, 80)}`);
+      if (!/repo price_history|本站每日收盤檔/.test(tn)) r10Errs.push(`個股走勢來源不是 repo：${tn.slice(0, 80)}`);
       await p.evaluate(() => { const b = document.querySelector('nav#nav button[data-scr="picks"]'); if (b) b.click(); });
       await p.waitForFunction(() => /來源：/.test((document.getElementById("mainstream-src") || {}).textContent || ""), null, { timeout: 20000 }).catch(() => null);
       const ms = await p.evaluate(() => (document.getElementById("mainstream-src") || {}).textContent || "");
-      if (!/repo/.test(ms)) r10Errs.push(`主流題材來源不是 repo：${ms}`);
+      if (!/repo|本站/.test(ms)) r10Errs.push(`主流題材來源不是 repo：${ms}`);
       await p.evaluate(() => { const b = document.querySelector('nav#nav button[data-scr="market"]'); if (b) b.click(); });
       await p.waitForFunction(() => /最新/.test((document.getElementById("fut-note") || {}).textContent || ""), null, { timeout: 20000 }).catch(() => null);
       const fn = await p.evaluate(() => (document.getElementById("fut-note") || {}).textContent || "");
@@ -3875,7 +3875,7 @@ async function runSmokeTest(baseUrl, headless = true) {
       await p2.evaluate(() => { const b = document.querySelector('nav#nav button[data-scr="market"]'); if (b) b.click(); });
       await p2.waitForFunction(() => /無法取得/.test((document.getElementById("fut-note") || {}).textContent || ""), null, { timeout: 20000 }).catch(() => null);
       const fn2 = await p2.evaluate(() => (document.getElementById("fut-note") || {}).textContent || "");
-      if (!/repo 檔讀取失敗（HTTP 404）/.test(fn2) || !/FinMind|公開資料/.test(fn2) || !/連不上|失敗/.test(fn2)) r10Errs.push(`兩邊都失敗時沒寫明原因：${fn2}`);
+      if (!/(repo |本站資料)檔讀取失敗（HTTP 404）/.test(fn2) || !/FinMind|公開資料/.test(fn2) || !/連不上|失敗/.test(fn2)) r10Errs.push(`兩邊都失敗時沒寫明原因：${fn2}`);
       const em = await p2.evaluate(async () => { await fm('TaiwanStockPrice', '2330', '2026-01-01'); return fmEmptyMsg('x'); });
       if (!/FinMind 連不上/.test(em)) r10Errs.push(`fmEmptyMsg 沒帶失敗原因：${em}`);
     } finally { await ctx2.close(); }
@@ -4188,7 +4188,7 @@ async function runSmokeTest(baseUrl, headless = true) {
         await p.evaluate(() => { Promise.resolve(openStock("2330")).catch(() => {}); });
         await p.waitForFunction(() => document.querySelector("#rev-note .rev-px-src"), null, { timeout: 20000 }).catch(() => null);
         const t = await p.evaluate(() => (document.querySelector("#rev-note .rev-px-src") || {}).textContent || "");
-        const m = t.match(/repo (\d+)\/(\d+) 個月/);
+        const m = t.match(/(?:repo|本站) ?(\d+)\/(\d+) 個月/);
         if (!m || +m[1] < 1) mcErrs.push(`${blockFm ? "[擋FinMind] " : ""}營收圖沒標 repo 月底股價（${t}）`);
         const need = m ? +m[2] - +m[1] : 0;
         const starts = fmReq.map(u => (u.match(/start_date=(\d{4}-\d\d-\d\d)/) || [])[1]).filter(Boolean);
@@ -4299,6 +4299,37 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { esErrs.push(`測試本身出錯：${e.message || e}`); }
   record("132. 整份事件改讀精簡版 events_search.json（筆數相同、搜尋結果不少），讀不到退回整份（先.八十一-30）", esErrs.length === 0, esErrs.join("; "));
 
+  // 133.【2026-10-13 先.八十一-44】本日新增的資料來源說明不得在畫面上露出工程術語（repo／price_history／by_code／industry_flow.json）：
+  // 個股頁走勢註記與營收圖月底股價、選股頁主流題材來源、市場頁期貨法人註記，經顯示層改寫後檢查。
+  const jargonErrs = [];
+  try {
+    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+    try {
+      const p = await ctx.newPage();
+      await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+      await p.waitForTimeout(1200);
+      const grab = async (sel) => p.evaluate((s) => [...document.querySelectorAll(s)].map(e => e.textContent).join(" | "), sel);
+      await p.evaluate(() => { Promise.resolve(openStock("2330")).catch(() => {}); });
+      await p.waitForFunction(() => /個交易日|走勢圖：/.test((document.getElementById("trend-note") || {}).textContent || "") && document.querySelector("#rev-note .rev-px-src"), null, { timeout: 25000 }).catch(() => null);
+      await p.waitForTimeout(600);
+      const t1 = await grab("#trend-note, #rev-note");
+      await p.evaluate(() => { const b = document.querySelector('nav#nav button[data-scr="picks"]'); if (b) b.click(); });
+      await p.waitForFunction(() => /來源：/.test((document.getElementById("mainstream-src") || {}).textContent || ""), null, { timeout: 20000 }).catch(() => null);
+      await p.waitForTimeout(600);
+      const t2 = await grab("#mainstream-src");
+      await p.evaluate(() => { const b = document.querySelector('nav#nav button[data-scr="market"]'); if (b) b.click(); });
+      await p.waitForFunction(() => /最新/.test((document.getElementById("fut-note") || {}).textContent || ""), null, { timeout: 20000 }).catch(() => null);
+      await p.waitForTimeout(600);
+      const t3 = await grab("#fut-note");
+      for (const [nm, t] of [["個股頁", t1], ["主流題材", t2], ["期貨法人", t3]]) {
+        const hit = (t.match(/\brepo\b|price_history|by_code|industry_flow\.json|futures_institutional/g) || []);
+        if (hit.length) jargonErrs.push(`${nm}露出術語 ${[...new Set(hit)].join("、")}：${t.slice(0, 80)}`);
+        if (!t.trim()) jargonErrs.push(`${nm}沒有讀到文字`);
+      }
+    } finally { await ctx.close(); }
+  } catch (e) { jargonErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("133. 本日新增的資料來源說明不露工程術語（repo／price_history 等）（先.八十一-44）", jargonErrs.length === 0, jargonErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4327,7 +4358,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
