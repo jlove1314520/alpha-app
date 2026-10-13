@@ -4343,6 +4343,19 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { itErrs.push(`測試本身出錯：${e.message || e}`); }
   record("134. 互動視窗專屬項目不被自走軌道接走（DevQueue 判定＋兩份 prompt 規則）（先.八十一-46）", itErrs.length === 0, itErrs.join("; "));
 
+  // 135.【2026-10-13 先.八十一-51】price_history 每日合併取代同日列時保留還原比例（落後的 OpenAPI 資料不得把已調整的列蓋回未調整）。
+  const mrErrs = [];
+  try {
+    const { execFileSync } = await import("node:child_process");
+    const fsm2 = await import("node:fs");
+    const py = fsm2.existsSync("C:/Program Files/Python313/python.exe") ? "C:/Program Files/Python313/python.exe" : "python";
+    let out = "";
+    try { out = execFileSync(py, ["scripts/selftest_merge_rows_adj.py"], { encoding: "utf8", env: { ...process.env, PYTHONIOENCODING: "utf-8" }, timeout: 60000 }); }
+    catch (e) { out = String(e.stdout || "") + String(e.stderr || ""); }
+    if (!/失敗 0/.test(out)) mrErrs.push(out.split("\n").filter(l => /FAIL|Error/.test(l)).slice(0, 3).join(" | ") || out.slice(-200));
+  } catch (e) { mrErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("135. 價格歷史合併同日列保留還原比例（除息後落後資料不得蓋回未調整）（先.八十一-51）", mrErrs.length === 0, mrErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4371,7 +4384,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

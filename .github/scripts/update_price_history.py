@@ -466,6 +466,18 @@ def fill_whitelist_gaps(prices: dict, target_dates: dict, recent_dates: list[str
 
 
 def merge_rows(existing: list[dict] | None, latest: dict) -> list[dict]:
+    """把 latest 併進該檔歷史（同日期取代），保留最後 PRICE_HISTORY_DAYS 筆。
+
+    先.八十一-51（2026-10-13）根因修正：取代「已存在的同一天」時，**保留那一列既有的還原比例（adj_close/close）**。
+    原本直接用新抓的列（adj_close＝close）蓋掉——OpenAPI STOCK_DAY_ALL 有 T+1 落後，隔天的排程可能又回傳前一天的
+    資料，若前一輪已經對「除息日前一天」那列乘過除權息係數（事件已標 applied、不會再乘），這一蓋就把那列打回未調整。
+    實測帳本 08-26 起 161 個已套用事件中有 19 個這樣（例 2614 10/06 除息、10/05 那列 adj＝close），資料已在先.八十一-49 重算修正。
+    """
+    old = next((r for r in (existing or []) if r.get("date") == latest["date"]), None)
+    if old and old.get("close") and old.get("adj_close") and latest.get("close"):
+        ratio = old["adj_close"] / old["close"]
+        if abs(ratio - 1.0) > 1e-9:
+            latest = dict(latest, adj_close=round(latest["close"] * ratio, 6))
     rows = [r for r in (existing or []) if r.get("date") != latest["date"]]
     rows.append(latest)
     rows.sort(key=lambda r: r["date"])
