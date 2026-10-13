@@ -19545,3 +19545,22 @@ C. 驗收
 - [ ] **先.八十八-3 用 先.八十七-1 固定的 60 檔已下市美股清單逐檔查 Tiingo metadata（startDate／endDate）與日線：拿不拿得到、起訖日、是否涵蓋 SEC 真正交易期間（核對 delisted_at；下市後還有大量資料判污染）；先.八十七-1 完成後才做**（DevQueue 可執行）
 - [ ] **先.八十八-4 另抽 10 檔在市大型股（AAPL、MSFT 等）當對照組，確認不是 key 或程式問題**（DevQueue 可執行）
 - [ ] **先.八十八-5 結果寫進 research/DATA_SOURCE_COVERAGE_TEST.md 列覆蓋率與正確率；≥80% 且正確 → 寫 B1 美股動能用法提案、交總司令審閱（不自行登記試驗）；偏低 → 美股動能標「暫停：免費管道補不到，等 App 有收入再評估」**（DevQueue 可執行）
+
+# 2026-10-13【先.八十九：Telegram 只讀擷取：改用邀請連結重新設定目標群組】（總司令裁示原文，動工前先寫入）
+
+先.八十九　Telegram 只讀擷取：改用邀請連結重新設定目標群組
+1. 總司令已在設定工具完成登入（Signed in successfully），但第 3 題填了 @Shioaji，resolve_target 報 ValueError。正確目標是私人群組邀請連結：https://t.me/+MLbqzvPpfWM5M2Y1（此為完整連結，勿修改任何字元）。
+2. 用 write_env_key 把本機 .env 的 TELEGRAM_TARGET_CHAT 改成上面那條連結。只改這一鍵，不得讀出、印出或 commit .env 其他值；Telegram session 檔與 api_id／api_hash 照規則不得讀出、印出或 commit。
+3. 在總司令看得到的視窗重新執行登入流程（research/telegram_reader.py --login，或上次開給總司令的同一個設定工具），讓它解析邀請連結並把數字 ID 寫入 TELEGRAM_TARGET_CHAT_ID。session 已存在，正常情況不會再問手機號碼與驗證碼；如果又問，停下回報，不要代填。
+4. 成功時視窗應顯示「登入成功，目標群組可讀取：（群組名稱）」。接著手動跑一次只讀擷取，確認：
+   - 心跳寫入成功
+   - 有新訊息落地在本機 telegram_export（不進 repo）
+   - ReadOnlyClient 沒有觸發任何寫入
+5. 設定工具加一個「只改目標群組」的選項：已登入時不必再輸入 api_id／api_hash，只問群組。
+6. 每項完成標 - [x]，在 research/PROGRESS_HEARTBEAT.jsonl append item=先.八十九-N。
+
+- [ ] **先.八十九-1 認定正確目標＝私人群組邀請連結（第 3 題誤填 @Shioaji 造成 resolve_target ValueError）**（互動視窗執行；動憑證設定）
+- [ ] **先.八十九-2 用 write_env_key 只改本機 .env 的 TELEGRAM_TARGET_CHAT 為邀請連結；不讀出、不印出、不提交 .env 其他值與 session**（互動視窗執行；動憑證設定）
+- [ ] **先.八十九-3 在總司令看得到的視窗重跑登入流程解析邀請連結、寫入 TELEGRAM_TARGET_CHAT_ID；若又問手機或驗證碼就停下回報、不代填**（互動視窗執行；動憑證設定）
+- [ ] **先.八十九-4 成功後手動跑一次只讀擷取：心跳寫入、新訊息落地本機 telegram_export（不進 repo）、ReadOnlyClient 沒有任何寫入**（互動視窗執行；動憑證設定）
+- [ ] **先.八十九-5 設定工具加「只改目標群組」選項：已連線時不再問 api_id／api_hash，只問群組**（互動視窗執行；動憑證設定）
