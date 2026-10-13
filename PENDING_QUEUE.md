@@ -19305,7 +19305,7 @@ C. 驗收
 心跳：每完成一項把對應行標 - [x]（部分完成 [~]），並在 research/PROGRESS_HEARTBEAT.jsonl append 一行（source=interactive, item=先.八十一-N）。佇列深度 ≥12：做完一項就從 Cowork 全檢報告與 BACKLOG 補件，不得用新的 alpha 試驗湊數。
 
 - [x] **先.八十一-1 market_tw 停在 10/8 查根因＋data_date＋落後時重試／rwd 備援＋App 標「大盤資料停在 MM/DD」＋冒煙檢查**（互動視窗執行）〔根因：04:03 時 TWSE／TAIFEX openapi 仍是 10/08、yfinance ^TWII 缺 10/12；加 data_date／expected_trading_day／stale_note，落後改 rwd MI_INDEX 帶日期，走勢改 FMTQIK 官方；App 顯示「大盤資料停在 MM/DD」；smoke #111；110 PASS／0 FAIL〕
-- [ ] **先.八十一-2 Shioaji 1.7.4→1.7.7（非交易時段；唯讀 --preflight＋SIMULATION 演練 A／B 全 PASS，失敗退回 1.7.4；禁止 1.7.6）**（互動視窗執行）
+- [!] **先.八十一-2 Shioaji 1.7.4→1.7.7（非交易時段；唯讀 --preflight＋SIMULATION 演練 A／B 全 PASS，失敗退回 1.7.4；禁止 1.7.6）**（互動視窗執行）〔阻塞：演練 B 要求 config＝SIMULATION、演練 A 需盤中且 STOP.flag 拒單，皆需切模式／撤旗標（紅線）；未開始升級仍 1.7.4，送審甲乙丙〕
 - [x] **先.八十一-3 STOP＋strategy_frozen 時 --run 只記 FROZEN 心跳後結束、不產生 REJECT／推播；看門狗不判故障；附自測**（互動視窗執行）〔is_frozen()（STOP＋strategy_frozen）→ --run 只記 FROZEN 心跳後結束（不連券商、不寫 REJECT、不推播）；看門狗見 FROZEN 回 FROZEN 不報漏跑；單純 STOP 與 SIMULATION 演練不受影響；selftest_frozen_run 5/5；110 PASS／0 FAIL；今日 09:05／09:40 實地驗證待補〕
 - [x] **先.八十一-4 【提案，不改程式】docs/PROPOSAL_US_LINKED_LIMIT.md：00646 限價基準（10/12 未成交原因、三種做法與風險）**（互動視窗執行）〔提案已寫 docs/PROPOSAL_US_LINKED_LIMIT.md（未改程式）：原因①連假期間 S&P +0.59%、②盤中零股簿高於整股（盤後零股 78.95／賣 79.00 vs 限價 78.70）；做法 A／B／C 與風險；建議先 B 再評估 C；等裁示〕
 - [x] **先.八十一-5 裁示①：模擬 B／C 繼續紙上追蹤、App 標「閘門殺測失敗（#435/#436），不再是真錢候選」；槓桿階段 1 提案作廢入墓園；AWAITING_REVIEW 結案**（互動視窗執行）〔交易頁紙.三／紙.四＋跟 0050 比 B／C 標「閘門殺測失敗（#435/#436），不再是真錢候選」（data-ui-cite 保留編號）、移除「槓桿真錢提案最早 2027-04」；LEVERAGE_SAFETY_PLAN 階段 1 作廢＋墓園；AWAITING_REVIEW #436 結案（另新增 -4 提案待裁示）；smoke #112；111 PASS／0 FAIL〕
