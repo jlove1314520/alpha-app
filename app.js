@@ -1380,11 +1380,12 @@
       ${lg?'':`<line x1="${pad}" y1="${Y(100).toFixed(1)}" x2="${W-pad}" y2="${Y(100).toFixed(1)}" stroke="var(--hairline)" stroke-width="1" stroke-dasharray="3,2"/>`}${ticks.join('')}${box}${lines}</svg>`;
   }
   // 先.七十六-3：指標列分段——回測年化與最大跌幅／樣本外累計差距／紙上累計差距（<60 交易日：尚不足以判斷）
+  // 先.八十一-6：回測最大跌幅 ≤ −45% 加註「接近天條一」（天條一：MDD 不得超過 −50%）
   function scHistMetricsHtml(l){
     const H=SC_HIST&&SC_HIST.lines&&SC_HIST.lines[l.id];if(!H)return '';
     const B=(SC_HIST.bench_0050||{}).oos;
     const cells=[];
-    if(H.backtest&&H.backtest.cagr!=null)cells.push(`<div class="s" data-seg="backtest"><span>回測</span><b>年化 ${(H.backtest.cagr*100).toFixed(1)}%</b><span style="font-size:10px">最大跌幅 ${(H.backtest.mdd*100).toFixed(1)}%</span></div>`);
+    if(H.backtest&&H.backtest.cagr!=null)cells.push(`<div class="s" data-seg="backtest"><span>回測</span><b>年化 ${(H.backtest.cagr*100).toFixed(1)}%</b><span style="font-size:10px">最大跌幅 ${(H.backtest.mdd*100).toFixed(1)}%${H.backtest.mdd<=-0.45?'<b class="sc-survival-near" style="color:var(--warn)">（接近天條一）</b>':''}</span></div>`);
     // 先.八十-8：樣本外格同時寫「策略 +X%／0050 +Y%」，再附差幾點
     if(H.oos&&H.oos.cum_return!=null&&B&&B.cum_return!=null){const g=(H.oos.cum_return-B.cum_return)*100,sp=v=>(v>=0?'+':'')+(v*100).toFixed(1)+'%';cells.push(`<div class="s" data-seg="oos"><span>樣本外</span><b class="sc-oos-pair">策略 ${sp(H.oos.cum_return)}／0050 ${sp(B.cum_return)}</b><span style="font-size:10px" class="${g>=0?'pos':'neg'}">差 ${_scPp(g)}</span></div>`)}
     const m=l.metrics||{};
@@ -3866,7 +3867,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-13.0814';
+  const APP_VERSION='2026-10-13.0819';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

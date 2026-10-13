@@ -3677,6 +3677,32 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { killErrs.push(`測試本身出錯：${e.message || e}`); }
   record("112. 模擬 B／C 標「閘門殺測失敗（#435/#436），不再是真錢候選」（交易頁＋跟 0050 比，編號不被改寫）、舊真錢提案字樣移除（先.八十一-5）", killErrs.length === 0, killErrs.join("; "));
 
+  // 113.【2026-10-13 先.八十一-6 裁示②】#418 聯集日曆整串重跑：跟 0050 比的回測段改讀 *_unioncal 結果（Bb-90 年化 10.33%／MDD −47.29%），
+  // 月報酬檔同步更正（年化一致）、原登記結果檔不被覆蓋；Bb-90 回測格加註「接近天條一」；破億年化讀到更正值。
+  const ucErrs = [];
+  try {
+    const fsx = await import("node:fs");
+    const h = JSON.parse(fsx.readFileSync("data/strategy_history.json", "utf8"));
+    const bt = h.lines.live_bb90.backtest;
+    if (!/_unioncal\.json$/.test(bt.source)) ucErrs.push(`Bb-90 回測段來源不是聯集日曆版：${bt.source}`);
+    if (Math.abs(bt.cagr * 100 - 10.33) > 0.01 || Math.abs(bt.mdd * 100 + 47.29) > 0.01) ucErrs.push(`Bb-90 回測值 ${(bt.cagr * 100).toFixed(2)}%／${(bt.mdd * 100).toFixed(2)}% 不是更正值`);
+    for (const id of ["paper_3", "paper_4", "paper_1b"]) if (!/_unioncal\.json$/.test(h.lines[id].backtest.source)) ucErrs.push(`${id} 回測段未改讀聯集日曆版`);
+    for (const id of ["live_bb90", "paper_3", "paper_4"]) if (h.lines[id].backtest.repro.status === "IRREPRODUCIBLE") ucErrs.push(`${id} 月報酬與更正結果年化對不上`);
+    const orig = JSON.parse(fsx.readFileSync("research/data/core_allocation_result.json", "utf8"));
+    if (Math.abs(orig.grid["Bb-90"].cagr * 100 - 10.19) > 0.01) ucErrs.push("#418 原登記結果檔被改動");
+    const r = await page.evaluate(async () => {
+      await window.go("home");
+      SC_TAB = "live"; renderStrategyCurves();
+      const note = (document.querySelector('#sc-body .sc-hist-metrics [data-seg="backtest"]') || {}).textContent || "";
+      SC_TAB = "all"; renderStrategyCurves();
+      if (typeof btEnsureRate === "function") { BT_RATE = null; await btEnsureRate(); }
+      return { note, rate: typeof BT_RATE === "number" ? BT_RATE : null };
+    });
+    if (!/接近天條一/.test(r.note)) ucErrs.push(`Bb-90 回測格缺「接近天條一」：${r.note}`);
+    if (r.rate == null || Math.abs(r.rate * 100 - 10.33) > 0.01) ucErrs.push(`破億年化應為更正值 10.33%：${r.rate}`);
+  } catch (e) { ucErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("113. #418 聯集日曆整串重跑：回測段讀更正值、月報酬同步、原結果檔不覆蓋、Bb-90 標「接近天條一」、破億年化更正（先.八十一-6）", ucErrs.length === 0, ucErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -3705,7 +3731,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

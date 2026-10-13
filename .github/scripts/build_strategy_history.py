@@ -34,30 +34,30 @@ PAPER_START = "2026-10-08"
 # 線 id → 各段來源（檔名、JSON 路徑、事前登記／結果試驗編號、附註）
 SPEC = {
     "live_bb90": {
-        "backtest": ("core_allocation_result.json", ["grid", "Bb-90"], "#417／#418", "核心配置 24 格點的 Bb-90（45% 0050＋45% VTI＋10% IEF）"),
+        "backtest": ("core_allocation_result_unioncal.json", ["grid", "Bb-90"], "#417／#418", "核心配置 24 格點的 Bb-90（45% 0050＋45% VTI＋10% IEF）；美股腿聯集日曆更正值（先.八十一-6）"),
         "oos": ("bb90_oos_2025_result.json", ["results", "Bb-90"], "#423／#425", "美股腿用 VTI／IEF；真錢版改用 00646／00697B"),
     },
     "paper_1": {
-        "backtest": ("core_allocation_result.json", ["grid", "Aa-70"], "#417／#418", "70% 0050＋30% 定存（核心配置基準 Aa-70）"),
+        "backtest": ("core_allocation_result_unioncal.json", ["grid", "Aa-70"], "#417／#418", "70% 0050＋30% 定存（核心配置基準 Aa-70）；聯集日曆重跑（先.八十一-6）"),
         "oos": ("bb90_oos_2025_result.json", ["results", "paper1_70_30"], "#423／#425", ""),
     },
     "paper_3": {
         # 先.八十-7（2026-10-12）：改用「訊號延後一個交易日」版（與紙.三實際執行一致；12.13%／−25.85%），
         # 舊的同日訊號版（12.30%／−24.66%）在紙上追蹤裡做不到，不再當作模擬 B 的回測數字。
-        "backtest": ("crisis_gate_timing_sensitivity.json", ["trials", "S3-C6"], "#424／#426", "訊號延後一個交易日（與紙上追蹤實際執行一致）",
-                     "crisis_gate_leveraged_bb90_result.json"),
+        "backtest": ("crisis_gate_timing_sensitivity_unioncal.json", ["trials", "S3-C6"], "#424／#426", "訊號延後一個交易日（與紙上追蹤實際執行一致）；美股腿聯集日曆更正值（先.八十一-6）",
+                     "crisis_gate_leveraged_bb90_result_unioncal.json"),
         "oos": ("s3c6_oos_2025_result.json", ["results", "S3-C6_real"], "#427／#428", "槓桿腿用 00631L／00647L 真實價"),
     },
     "paper_4": {
-        "backtest": ("r1_0050_credit_gate_result.json", ["trials", "R1-C", "stats"], "#429／#430", "看過 2025–26 結果後才設計；R1 沒有做樣本外單發，只有回測段"),
+        "backtest": ("r1_0050_credit_gate_result_unioncal.json", ["trials", "R1-C", "stats"], "#429／#430", "看過 2025–26 結果後才設計；R1 沒有做樣本外單發，只有回測段；聯集日曆重跑（先.八十一-6）"),
     },
     "paper_1b": {
-        "backtest": ("core_allocation_result.json", ["grid", "Bb-90"], "#417／#418", "同族 Bb-90（回測美股腿用 VTI／IEF）"),
+        "backtest": ("core_allocation_result_unioncal.json", ["grid", "Bb-90"], "#417／#418", "同族 Bb-90（回測美股腿用 VTI／IEF）；聯集日曆更正值（先.八十一-6）"),
         "oos": ("bb90_oos_2025_result.json", ["results", "Bb-90"], "#423／#425", "同族 Bb-90（美股腿用 VTI／IEF）"),
     },
 }
 BENCH = {
-    "backtest": ("r1_0050_credit_gate_result.json", ["benchmark_0050_buy_hold"], "#429／#430", "0050 買進持有（還原息）"),
+    "backtest": ("r1_0050_credit_gate_result_unioncal.json", ["benchmark_0050_buy_hold"], "#429／#430", "0050 買進持有（還原息）"),
     "oos": ("bb90_oos_2025_result.json", ["results", "0050_hold"], "#423／#425", ""),
 }
 

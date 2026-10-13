@@ -1,0 +1,837 @@
+{
+ "prereg": "docs/PREREG_crisis_gate_leveraged_bb90.md",
+ "prereg_sha256": "76c3eea0f3ccf504a21d3d4b2be9d47eb18938ea218105f96d89914bd0494222",
+ "prereg_trial": 424,
+ "generated_at": "2026-10-13T00:10:22.287732+00:00",
+ "period": [
+  "2003-07-01",
+  "2024-12-31"
+ ],
+ "impl_check_max_abs_diff": {
+  "Bb-90": 4.440892098500626e-16,
+  "C5": 6.661338147750939e-16,
+  "C6": 6.661338147750939e-16
+ },
+ "n_family": 42,
+ "bb90": {
+  "cagr": 0.10326002827239855,
+  "mdd": -0.4729275990952889,
+  "sortino": 1.0625123070869613,
+  "worst_12m": -0.43081317743368386,
+  "longest_underwater_days": 1353,
+  "cagr_first_half": 0.0764036542189801,
+  "cagr_second_half": 0.13072261626572468,
+  "mdd_first_half": -0.4729275990952889,
+  "mdd_second_half": -0.2576692280758296,
+  "sharpe_daily": 0.052684480022455356,
+  "total_ret": 7.273817774729999
+ },
+ "ungated": {
+  "C5": {
+   "cagr": 0.12794316562371866,
+   "mdd": -0.6082363044345688,
+   "sortino": 0.9804800891837008,
+   "worst_12m": -0.5652371727617295,
+   "longest_underwater_days": 1401,
+   "cagr_first_half": 0.08953233696476359,
+   "cagr_second_half": 0.16761016743533963,
+   "mdd_first_half": -0.6082363044345688,
+   "mdd_second_half": -0.3357342834340906,
+   "sharpe_daily": 0.04824801766247603,
+   "total_ret": 12.314848131159716
+  },
+  "C6": {
+   "cagr": 0.1293086049769554,
+   "mdd": -0.6182090705251624,
+   "sortino": 0.9675470191007666,
+   "worst_12m": -0.5738141493125075,
+   "longest_underwater_days": 1438,
+   "cagr_first_half": 0.08933867553598485,
+   "cagr_second_half": 0.1706418658144495,
+   "mdd_first_half": -0.6182090705251624,
+   "mdd_second_half": -0.34769969682057433,
+   "sharpe_daily": 0.04791273574931666,
+   "total_ret": 12.665778274982411
+  }
+ },
+ "trials": {
+  "S1-C5": {
+   "signal": "S1",
+   "config": "C5",
+   "stats": {
+    "cagr": 0.11488166556009483,
+    "mdd": -0.21718498295689392,
+    "sortino": 1.1644870989902967,
+    "worst_12m": -0.16735835038640612,
+    "longest_underwater_days": 565,
+    "cagr_first_half": 0.10754948044767065,
+    "cagr_second_half": 0.12226894535386257,
+    "mdd_first_half": -0.20235047852171528,
+    "mdd_second_half": -0.21718498295689415,
+    "sharpe_daily": 0.05780653033386279,
+    "total_ret": 9.36487569402431
+   },
+   "calmar": 0.5289576838878226,
+   "off_month_share_tw": 0.2811244979919679,
+   "off_month_share_us": 0.20481927710843373,
+   "control": {
+    "n": 1000,
+    "seed": 20261007,
+    "p50": 0.18930941373721832,
+    "p95": 0.2867576218001421,
+    "percentile_of_signal": 100.0,
+    "pass": true
+   },
+   "stress": {
+    "2008": {
+     "n_days": 261,
+     "ret": 0.052179440231082896,
+     "mdd": -0.050855711212844046
+    },
+    "2020": {
+     "n_days": 64,
+     "ret": -0.13152078565872705,
+     "mdd": -0.21718498295689426
+    },
+    "2022": {
+     "n_days": 260,
+     "ret": -0.15934913738456113,
+     "mdd": -0.17606810980671994
+    }
+   },
+   "cluster_bootstrap_vs_bb90": {
+    "clusters": 22,
+    "B": 2000,
+    "seed": 20261006,
+    "share_excess_gt_0": 0.6215,
+    "share_excess_gt_1pp": 0.465,
+    "p5_p50_p95_annual_log_excess": [
+     -0.025371263975175,
+     0.007924598831803634,
+     0.05541688851519136
+    ],
+    "pass": false
+   },
+   "dsr_report_only": {
+    "dsr": 0.9990393002406328,
+    "sr_observed": 0.05780653033386279,
+    "sr0_threshold": 0.015617445693355677,
+    "n_trials": 42,
+    "var_sr_trials": 4.999759347813866e-05,
+    "n_obs": 5608,
+    "z": 3.1021201573139066,
+    "freq_label": "每期"
+   },
+   "conditions": {
+    "mdd_full_gt_-45": true,
+    "mdd_first_half_gt_-45": true,
+    "mdd_second_half_gt_-45": true,
+    "cagr_ge_12": false,
+    "cagr_gt_bb90": true,
+    "control_beats_p95": true,
+    "replication_ge_6_of_8": true
+   },
+   "verdict": "FAIL"
+  },
+  "S1-C6": {
+   "signal": "S1",
+   "config": "C6",
+   "stats": {
+    "cagr": 0.12106680647145152,
+    "mdd": -0.25061509865432996,
+    "sortino": 1.1933442636475122,
+    "worst_12m": -0.2150280339099372,
+    "longest_underwater_days": 545,
+    "cagr_first_half": 0.10558665871953177,
+    "cagr_second_half": 0.1367444888347722,
+    "mdd_first_half": -0.24416244598037296,
+    "mdd_second_half": -0.25061509865432996,
+    "sharpe_daily": 0.05893907581811438,
+    "total_ret": 10.674276778321511
+   },
+   "calmar": 0.4830786617467024,
+   "off_month_share_tw": 0.2811244979919679,
+   "off_month_share_us": 0.20481927710843373,
+   "control": {
+    "n": 1000,
+    "seed": 20261007,
+    "p50": 0.19593949327629898,
+    "p95": 0.2622298168663443,
+    "percentile_of_signal": 100.0,
+    "pass": true
+   },
+   "stress": {
+    "2008": {
+     "n_days": 261,
+     "ret": -0.10909367782014201,
+     "mdd": -0.15664120767980783
+    },
+    "2020": {
+     "n_days": 64,
+     "ret": -0.12868194503549335,
+     "mdd": -0.25061509865433007
+    },
+    "2022": {
+     "n_days": 260,
+     "ret": -0.16285413372484436,
+     "mdd": -0.18174237899040946
+    }
+   },
+   "cluster_bootstrap_vs_bb90": {
+    "clusters": 22,
+    "B": 2000,
+    "seed": 20261006,
+    "share_excess_gt_0": 0.82,
+    "share_excess_gt_1pp": 0.6085,
+    "p5_p50_p95_annual_log_excess": [
+     -0.00975973722705285,
+     0.014488219242183572,
+     0.046017063406639656
+    ],
+    "pass": false
+   },
+   "dsr_report_only": {
+    "dsr": 0.9992668455627272,
+    "sr_observed": 0.05893907581811438,
+    "sr0_threshold": 0.015617445693355677,
+    "n_trials": 42,
+    "var_sr_trials": 4.999759347813866e-05,
+    "n_obs": 5608,
+    "z": 3.1812700287061664,
+    "freq_label": "每期"
+   },
+   "conditions": {
+    "mdd_full_gt_-45": true,
+    "mdd_first_half_gt_-45": true,
+    "mdd_second_half_gt_-45": true,
+    "cagr_ge_12": true,
+    "cagr_gt_bb90": true,
+    "control_beats_p95": true,
+    "replication_ge_6_of_8": true
+   },
+   "verdict": "PASS"
+  },
+  "S2-C5": {
+   "signal": "S2",
+   "config": "C5",
+   "stats": {
+    "cagr": 0.09843096618993696,
+    "mdd": -0.3459117657030131,
+    "sortino": 0.8965765986408726,
+    "worst_12m": -0.24736222567597344,
+    "longest_underwater_days": 850,
+    "cagr_first_half": 0.0900441056659107,
+    "cagr_second_half": 0.10688073543372889,
+    "mdd_first_half": -0.270820897548006,
+    "mdd_second_half": -0.34591176570301296,
+    "sharpe_daily": 0.047005446261370806,
+    "total_ret": 6.529048409844177
+   },
+   "calmar": 0.2845551263337082,
+   "off_month_share_tw": 0.27235772357723576,
+   "off_month_share_us": 0.20731707317073167,
+   "control": {
+    "n": 1000,
+    "seed": 20261007,
+    "p50": 0.184912487672248,
+    "p95": 0.29450551625360427,
+    "percentile_of_signal": 93.7,
+    "pass": false
+   },
+   "stress": {
+    "2008": {
+     "n_days": 261,
+     "ret": -0.11324064529269862,
+     "mdd": -0.16627577036411434
+    },
+    "2020": {
+     "n_days": 64,
+     "ret": -0.2276992641731982,
+     "mdd": -0.3357342834340902
+    },
+    "2022": {
+     "n_days": 260,
+     "ret": -0.1599653804189919,
+     "mdd": -0.17865805581764926
+    }
+   },
+   "cluster_bootstrap_vs_bb90": {
+    "clusters": 22,
+    "B": 2000,
+    "seed": 20261006,
+    "share_excess_gt_0": 0.4295,
+    "share_excess_gt_1pp": 0.2645,
+    "p5_p50_p95_annual_log_excess": [
+     -0.040919572477296905,
+     -0.003714639725367746,
+     0.03314236644280126
+    ],
+    "pass": false
+   },
+   "dsr_report_only": {
+    "dsr": 0.9891531389203891,
+    "sr_observed": 0.047005446261370806,
+    "sr0_threshold": 0.015617445693355677,
+    "n_trials": 42,
+    "var_sr_trials": 4.999759347813866e-05,
+    "n_obs": 5608,
+    "z": 2.295688085752679,
+    "freq_label": "每期"
+   },
+   "conditions": {
+    "mdd_full_gt_-45": true,
+    "mdd_first_half_gt_-45": true,
+    "mdd_second_half_gt_-45": true,
+    "cagr_ge_12": false,
+    "cagr_gt_bb90": false,
+    "control_beats_p95": false,
+    "replication_ge_6_of_8": false
+   },
+   "verdict": "FAIL"
+  },
+  "S2-C6": {
+   "signal": "S2",
+   "config": "C6",
+   "stats": {
+    "cagr": 0.10804007551709072,
+    "mdd": -0.34769969682057433,
+    "sortino": 0.9535814671408217,
+    "worst_12m": -0.31344626316902346,
+    "longest_underwater_days": 1399,
+    "cagr_first_half": 0.09172419977305535,
+    "cagr_second_half": 0.12457398559464572,
+    "mdd_first_half": -0.33892786039976597,
+    "mdd_second_half": -0.34769969682057433,
+    "sharpe_daily": 0.04985222323521282,
+    "total_ret": 8.079873562561492
+   },
+   "calmar": 0.3107281269009657,
+   "off_month_share_tw": 0.27235772357723576,
+   "off_month_share_us": 0.20731707317073167,
+   "control": {
+    "n": 1000,
+    "seed": 20261007,
+    "p50": 0.19197908816756082,
+    "p95": 0.2624901190144873,
+    "percentile_of_signal": 99.3,
+    "pass": true
+   },
+   "stress": {
+    "2008": {
+     "n_days": 261,
+     "ret": -0.22156142981757387,
+     "mdd": -0.2399488931143049
+    },
+    "2020": {
+     "n_days": 64,
+     "ret": -0.20509729896544537,
+     "mdd": -0.34769969682057467
+    },
+    "2022": {
+     "n_days": 260,
+     "ret": -0.1632448929542316,
+     "mdd": -0.19000434677066136
+    }
+   },
+   "cluster_bootstrap_vs_bb90": {
+    "clusters": 22,
+    "B": 2000,
+    "seed": 20261006,
+    "share_excess_gt_0": 0.6145,
+    "share_excess_gt_1pp": 0.3615,
+    "p5_p50_p95_annual_log_excess": [
+     -0.02057608926883556,
+     0.0044733641147246955,
+     0.02936982875480822
+    ],
+    "pass": false
+   },
+   "dsr_report_only": {
+    "dsr": 0.9937740418178733,
+    "sr_observed": 0.04985222323521282,
+    "sr0_threshold": 0.015617445693355677,
+    "n_trials": 42,
+    "var_sr_trials": 4.999759347813866e-05,
+    "n_obs": 5608,
+    "z": 2.4990715610245804,
+    "freq_label": "每期"
+   },
+   "conditions": {
+    "mdd_full_gt_-45": true,
+    "mdd_first_half_gt_-45": true,
+    "mdd_second_half_gt_-45": true,
+    "cagr_ge_12": false,
+    "cagr_gt_bb90": true,
+    "control_beats_p95": true,
+    "replication_ge_6_of_8": false
+   },
+   "verdict": "FAIL"
+  },
+  "S3-C5": {
+   "signal": "S3",
+   "config": "C5",
+   "stats": {
+    "cagr": 0.12056286735329058,
+    "mdd": -0.2511813970612621,
+    "sortino": 1.3167585319183663,
+    "worst_12m": -0.18125300517083964,
+    "longest_underwater_days": 794,
+    "cagr_first_half": 0.09320752197218596,
+    "cagr_second_half": 0.14854213899028945,
+    "mdd_first_half": -0.2511813970612621,
+    "mdd_second_half": -0.1552425478610996,
+    "sharpe_daily": 0.06710567386361291,
+    "total_ret": 10.561951594597812
+   },
+   "calmar": 0.47998326613290476,
+   "off_month_share_tw": 0.41295546558704455,
+   "off_month_share_us": 0.41295546558704455,
+   "control": {
+    "n": 1000,
+    "seed": 20261007,
+    "p50": 0.16684434998066183,
+    "p95": 0.3294332030300663,
+    "percentile_of_signal": 99.4,
+    "pass": true
+   },
+   "stress": {
+    "2008": {
+     "n_days": 261,
+     "ret": 0.07341764405206863,
+     "mdd": -0.031697268184952776
+    },
+    "2020": {
+     "n_days": 64,
+     "ret": -0.045904962443084174,
+     "mdd": -0.10041053526414856
+    },
+    "2022": {
+     "n_days": 260,
+     "ret": -0.13619829923648186,
+     "mdd": -0.15524254786109948
+    }
+   },
+   "cluster_bootstrap_vs_bb90": {
+    "clusters": 22,
+    "B": 2000,
+    "seed": 20261006,
+    "share_excess_gt_0": 0.694,
+    "share_excess_gt_1pp": 0.5455,
+    "p5_p50_p95_annual_log_excess": [
+     -0.024811060559532264,
+     0.012770454199152723,
+     0.06279383396129119
+    ],
+    "pass": false
+   },
+   "dsr_report_only": {
+    "dsr": 0.9999248788109684,
+    "sr_observed": 0.06710567386361291,
+    "sr0_threshold": 0.015617445693355677,
+    "n_trials": 42,
+    "var_sr_trials": 4.999759347813866e-05,
+    "n_obs": 5608,
+    "z": 3.7906684818924625,
+    "freq_label": "每期"
+   },
+   "conditions": {
+    "mdd_full_gt_-45": true,
+    "mdd_first_half_gt_-45": true,
+    "mdd_second_half_gt_-45": true,
+    "cagr_ge_12": true,
+    "cagr_gt_bb90": true,
+    "control_beats_p95": true,
+    "replication_ge_6_of_8": true
+   },
+   "verdict": "PASS"
+  },
+  "S3-C6": {
+   "signal": "S3",
+   "config": "C6",
+   "stats": {
+    "cagr": 0.12624298830017922,
+    "mdd": -0.22714376807900616,
+    "sortino": 1.3563401116742735,
+    "worst_12m": -0.14877078603128335,
+    "longest_underwater_days": 751,
+    "cagr_first_half": 0.09519489332734121,
+    "cagr_second_half": 0.15809927246454647,
+    "mdd_first_half": -0.22714376807900616,
+    "mdd_second_half": -0.1655301136084404,
+    "sharpe_daily": 0.06827457343834081,
+    "total_ret": 11.88988922850452
+   },
+   "calmar": 0.5557845120200208,
+   "off_month_share_tw": 0.41295546558704455,
+   "off_month_share_us": 0.41295546558704455,
+   "control": {
+    "n": 1000,
+    "seed": 20261007,
+    "p50": 0.18310599747235817,
+    "p95": 0.3032605299949561,
+    "percentile_of_signal": 100.0,
+    "pass": true
+   },
+   "stress": {
+    "2008": {
+     "n_days": 261,
+     "ret": -0.09534003865803908,
+     "mdd": -0.13529849739471667
+    },
+    "2020": {
+     "n_days": 64,
+     "ret": -0.0606834938475751,
+     "mdd": -0.15880165409296176
+    },
+    "2022": {
+     "n_days": 260,
+     "ret": -0.14480256827190052,
+     "mdd": -0.16553011360843883
+    }
+   },
+   "cluster_bootstrap_vs_bb90": {
+    "clusters": 22,
+    "B": 2000,
+    "seed": 20261006,
+    "share_excess_gt_0": 0.874,
+    "share_excess_gt_1pp": 0.7015,
+    "p5_p50_p95_annual_log_excess": [
+     -0.007183739332226875,
+     0.018799350926983996,
+     0.05119048713422713
+    ],
+    "pass": false
+   },
+   "dsr_report_only": {
+    "dsr": 0.9999460982512711,
+    "sr_observed": 0.06827457343834081,
+    "sr0_threshold": 0.015617445693355677,
+    "n_trials": 42,
+    "var_sr_trials": 4.999759347813866e-05,
+    "n_obs": 5608,
+    "z": 3.87232178246192,
+    "freq_label": "每期"
+   },
+   "conditions": {
+    "mdd_full_gt_-45": true,
+    "mdd_first_half_gt_-45": true,
+    "mdd_second_half_gt_-45": true,
+    "cagr_ge_12": true,
+    "cagr_gt_bb90": true,
+    "control_beats_p95": true,
+    "replication_ge_6_of_8": true
+   },
+   "verdict": "PASS"
+  }
+ },
+ "replication": {
+  "^GSPC": {
+   "market": "^GSPC",
+   "n_days": 5412,
+   "start": "2003-07-01",
+   "end": "2024-12-30",
+   "ungated_2x": {
+    "cagr": 0.11152061941685165,
+    "mdd": -0.8544393796995833,
+    "calmar": 0.13051905385735119
+   },
+   "S1": {
+    "cagr": 0.12489909580775316,
+    "mdd": -0.4585254030382394,
+    "calmar": 0.27239296880861585,
+    "off_month_share": 0.20155038759689925,
+    "holds": true
+   },
+   "S2": {
+    "cagr": 0.09784967442247638,
+    "mdd": -0.6586631190862096,
+    "calmar": 0.1485579981436144,
+    "off_month_share": 0.21705426356589153,
+    "holds": true
+   },
+   "S3": {
+    "cagr": 0.1410529798936515,
+    "mdd": -0.3882278396729121,
+    "calmar": 0.3633252576953029,
+    "off_month_share": 0.39534883720930236,
+    "holds": true
+   }
+  },
+  "^TWII": {
+   "market": "^TWII",
+   "n_days": 5277,
+   "start": "2003-07-01",
+   "end": "2024-12-30",
+   "ungated_2x": {
+    "cagr": 0.08803981532015892,
+    "mdd": -0.8523370864278951,
+    "calmar": 0.10329224988804567
+   },
+   "S1": {
+    "cagr": 0.08500253725202511,
+    "mdd": -0.5523260004054169,
+    "calmar": 0.15389921385129754,
+    "off_month_share": 0.2906976744186046,
+    "holds": true
+   },
+   "S2": {
+    "cagr": 0.03503740256504462,
+    "mdd": -0.7665388602585436,
+    "calmar": 0.045708579670999276,
+    "off_month_share": 0.3062015503875969,
+    "holds": false
+   },
+   "S3": {
+    "cagr": 0.14262596648375014,
+    "mdd": -0.506475767545762,
+    "calmar": 0.2816047195601779,
+    "off_month_share": 0.39534883720930236,
+    "holds": true
+   }
+  },
+  "^N225": {
+   "market": "^N225",
+   "n_days": 5265,
+   "start": "2003-07-01",
+   "end": "2024-12-30",
+   "ungated_2x": {
+    "cagr": 0.061404052958417,
+    "mdd": -0.8935819686396322,
+    "calmar": 0.06871675471685833
+   },
+   "S1": {
+    "cagr": 0.0712505744382479,
+    "mdd": -0.5642408947127656,
+    "calmar": 0.12627687058117074,
+    "off_month_share": 0.36046511627906974,
+    "holds": true
+   },
+   "S2": {
+    "cagr": 0.0851155419992009,
+    "mdd": -0.6214827899930968,
+    "calmar": 0.13695558971173818,
+    "off_month_share": 0.3682170542635659,
+    "holds": true
+   },
+   "S3": {
+    "cagr": 0.122963677809238,
+    "mdd": -0.5017968844671687,
+    "calmar": 0.24504671434898714,
+    "off_month_share": 0.39534883720930236,
+    "holds": true
+   }
+  },
+  "^FTSE": {
+   "market": "^FTSE",
+   "n_days": 5432,
+   "start": "2003-07-01",
+   "end": "2024-12-30",
+   "ungated_2x": {
+    "cagr": 0.011124282956918696,
+    "mdd": -0.7850594390367999,
+    "calmar": 0.014169988161109471
+   },
+   "S1": {
+    "cagr": 0.04290390620089979,
+    "mdd": -0.3882043054422787,
+    "calmar": 0.11051888296813103,
+    "off_month_share": 0.3062015503875969,
+    "holds": true
+   },
+   "S2": {
+    "cagr": 0.011124548639347198,
+    "mdd": -0.5492866191209719,
+    "calmar": 0.020252720987723877,
+    "off_month_share": 0.34883720930232553,
+    "holds": true
+   },
+   "S3": {
+    "cagr": 0.07008424584595785,
+    "mdd": -0.4477629046337587,
+    "calmar": 0.1565208844249442,
+    "off_month_share": 0.39534883720930236,
+    "holds": true
+   }
+  },
+  "^GDAXI": {
+   "market": "^GDAXI",
+   "n_days": 5463,
+   "start": "2003-07-01",
+   "end": "2024-12-30",
+   "ungated_2x": {
+    "cagr": 0.10850216499851184,
+    "mdd": -0.8380242406035803,
+    "calmar": 0.1294737786109433
+   },
+   "S1": {
+    "cagr": 0.11152735803248337,
+    "mdd": -0.5336347311938363,
+    "calmar": 0.20899568846086297,
+    "off_month_share": 0.2713178294573644,
+    "holds": true
+   },
+   "S2": {
+    "cagr": 0.06903688268716124,
+    "mdd": -0.7851380058048868,
+    "calmar": 0.0879296151463052,
+    "off_month_share": 0.2945736434108527,
+    "holds": false
+   },
+   "S3": {
+    "cagr": 0.12878988754736476,
+    "mdd": -0.4850272951535567,
+    "calmar": 0.26553121614854824,
+    "off_month_share": 0.39534883720930236,
+    "holds": true
+   }
+  },
+  "^HSI": {
+   "market": "^HSI",
+   "n_days": 5301,
+   "start": "2003-07-02",
+   "end": "2024-12-30",
+   "ungated_2x": {
+    "cagr": -0.00935892090222279,
+    "mdd": -0.9369170421070608,
+    "calmar": -0.009989060377400364
+   },
+   "S1": {
+    "cagr": 0.027730519335972925,
+    "mdd": -0.8163227473397753,
+    "calmar": 0.03397004362103209,
+    "off_month_share": 0.39922480620155043,
+    "holds": true
+   },
+   "S2": {
+    "cagr": 0.045019415673203333,
+    "mdd": -0.7068334192007953,
+    "calmar": 0.06369169092783704,
+    "off_month_share": 0.40697674418604646,
+    "holds": true
+   },
+   "S3": {
+    "cagr": 0.07769213011287901,
+    "mdd": -0.6945356110151186,
+    "calmar": 0.11186198213699342,
+    "off_month_share": 0.39534883720930236,
+    "holds": true
+   }
+  },
+  "^KS11": {
+   "market": "^KS11",
+   "n_days": 5307,
+   "start": "2003-07-01",
+   "end": "2024-12-30",
+   "ungated_2x": {
+    "cagr": 0.05612805503630547,
+    "mdd": -0.8226458767744387,
+    "calmar": 0.06822869550672436
+   },
+   "S1": {
+    "cagr": 0.06236945683739381,
+    "mdd": -0.7134428680819861,
+    "calmar": 0.08742039429879976,
+    "off_month_share": 0.375968992248062,
+    "holds": true
+   },
+   "S2": {
+    "cagr": 0.06022495720329046,
+    "mdd": -0.6399879757842127,
+    "calmar": 0.09410326362693532,
+    "off_month_share": 0.3798449612403101,
+    "holds": true
+   },
+   "S3": {
+    "cagr": 0.10453504161334704,
+    "mdd": -0.4307163887874711,
+    "calmar": 0.24270040410495708,
+    "off_month_share": 0.39534883720930236,
+    "holds": true
+   }
+  },
+  "^AXJO": {
+   "market": "^AXJO",
+   "n_days": 5436,
+   "start": "2003-07-01",
+   "end": "2024-12-30",
+   "ungated_2x": {
+    "cagr": 0.04110809396857795,
+    "mdd": -0.8209751019668154,
+    "calmar": 0.0500722785259809
+   },
+   "S1": {
+    "cagr": 0.051717055522879196,
+    "mdd": -0.4487085686644141,
+    "calmar": 0.11525756166595073,
+    "off_month_share": 0.2790697674418605,
+    "holds": true
+   },
+   "S2": {
+    "cagr": 0.014004016515029027,
+    "mdd": -0.7131643386871903,
+    "calmar": 0.019636450892662343,
+    "off_month_share": 0.32170542635658916,
+    "holds": false
+   },
+   "S3": {
+    "cagr": 0.09868228172224236,
+    "mdd": -0.4616099597635548,
+    "calmar": 0.21377849336870733,
+    "off_month_share": 0.39534883720930236,
+    "holds": true
+   }
+  }
+ },
+ "replication_summary": {
+  "S1": {
+   "holds": 8,
+   "computable": 8,
+   "markets_holding": [
+    "^GSPC",
+    "^TWII",
+    "^N225",
+    "^FTSE",
+    "^GDAXI",
+    "^HSI",
+    "^KS11",
+    "^AXJO"
+   ],
+   "pass": true
+  },
+  "S2": {
+   "holds": 5,
+   "computable": 8,
+   "markets_holding": [
+    "^GSPC",
+    "^N225",
+    "^FTSE",
+    "^HSI",
+    "^KS11"
+   ],
+   "pass": false
+  },
+  "S3": {
+   "holds": 8,
+   "computable": 8,
+   "markets_holding": [
+    "^GSPC",
+    "^TWII",
+    "^N225",
+    "^FTSE",
+    "^GDAXI",
+    "^HSI",
+    "^KS11",
+    "^AXJO"
+   ],
+   "pass": true
+  }
+ },
+ "dsr_V": {
+  "value_daily": 4.999759347813866e-05,
+  "n_sharpes": 36,
+  "N_used": 42,
+  "source": "#418 24 組重算＋#421 6 組網格＋本次 6 組，日頻 Sharpe 樣本變異數",
+  "bias_note": "V 為僅有 Sharpe 記錄者的離散度，非全體；同家族高度相關，V 偏小→DSR 偏寬鬆"
+ },
+ "verdict": "PASS"
+}
