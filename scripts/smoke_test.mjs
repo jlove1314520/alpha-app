@@ -77,12 +77,19 @@ const PANEL_IDS = [
 // 先.八十二-1：price_history 改拆檔（data/price_history/_meta.json＋b0～b9／bx.json，依代號最後一碼分桶）。
 // 冒煙一律用這兩個讀法（單檔還在時照舊讀單檔，過渡期相容）。codes 省略＝全部。
 function phBucket(code) { const c = String(code).slice(-1); return /[0-9]/.test(c) ? c : "x"; }
+// 先.八十一-58：讀排程會改寫的資料檔時，檔案可能正被本機 git pull 換掉（短暫不存在或寫到一半）→ 重試 4 次、間隔 1.5 秒
+function readJsonRetry(fsx, p, tries = 4) {
+  for (let i = 0; ; i++) {
+    try { return JSON.parse(fsx.readFileSync(p, "utf8")); }
+    catch (e) { if (i >= tries - 1) throw e; Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 1500); }
+  }
+}
 function readPH(fsx, codes) {
-  if (fsx.existsSync("data/price_history.json")) return JSON.parse(fsx.readFileSync("data/price_history.json", "utf8"));
-  const head = JSON.parse(fsx.readFileSync("data/price_history/_meta.json", "utf8"));
+  if (fsx.existsSync("data/price_history.json")) return readJsonRetry(fsx, "data/price_history.json");
+  const head = readJsonRetry(fsx, "data/price_history/_meta.json");
   const bs = codes ? [...new Set(codes.map(phBucket))] : ["0","1","2","3","4","5","6","7","8","9","x"];
   const prices = {};
-  for (const b of bs) Object.assign(prices, JSON.parse(fsx.readFileSync(`data/price_history/b${b}.json`, "utf8")).prices || {});
+  for (const b of bs) Object.assign(prices, readJsonRetry(fsx, `data/price_history/b${b}.json`).prices || {});
   return { meta: head.meta, prices, code_order: head.code_order };
 }
 // 頁面內（fetch）版：回傳 {meta, prices, total}
@@ -148,8 +155,12 @@ async function writeJsonOut(jsonOut, url, results, crashError = null) {
 
 async function runSmokeTest(baseUrl, headless = true) {
   const results = { checks: [], all_passed: true };
+  // 先.八十一-58：每項耗時＝距上一項 record 的時間（含該項的等待與操作），結束時列最慢 5 項與總時長。
+  const _t0 = Date.now();
+  let _lastAt = Date.now();
   const record = (name, passed, detail = "") => {
-    results.checks.push({ name, passed, detail });
+    const ms = Date.now() - _lastAt; _lastAt = Date.now();
+    results.checks.push({ name, passed, detail, ms });
     if (!passed) results.all_passed = false;
     console.log(`${passed ? "PASS" : "FAIL"} - ${name}${detail ? "：" + detail : ""}`);
   };
@@ -3411,7 +3422,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const trErrs = [];
   try {
     const fsx = await import("node:fs");
-    const ti = JSON.parse(fsx.readFileSync("data/trials_index.json", "utf8"));
+    const ti = readJsonRetry(fsx, "data/trials_index.json");
     const led = fsx.readFileSync("research/TRIALS_LEDGER.md", "utf8").split(/\r?\n/);
     let n = 0;
     for (const l of led) {
@@ -3578,13 +3589,13 @@ async function runSmokeTest(baseUrl, headless = true) {
     let out = "";
     try { out = execFileSync(py, ["scripts/selftest_price_history_gaps.py"], { encoding: "utf8", env: { ...process.env, PYTHONIOENCODING: "utf-8" }, timeout: 240000 }); }
     catch (e) { out = String(e.stdout || "") + String(e.stderr || ""); gapErrs.push("全市場缺日自測未通過：" + out.split(/\r?\n/).filter(l => /^FAIL/.test(l)).join(" | ").slice(0, 300)); }
-    const led = JSON.parse(fsx.readFileSync("data/picks_ledger.json", "utf8"));
+    const led = readJsonRetry(fsx, "data/picks_ledger.json");
     const withStatus = led.snapshots.filter(s => s.data_status);
     if (withStatus.length < 50) gapErrs.push(`有 data_status 的批次過少（${withStatus.length}）`);
     const inc = withStatus.filter(s => s.data_status.complete === false);
     if (led.meta.incomplete_batches !== inc.length) gapErrs.push(`meta.incomplete_batches ${led.meta.incomplete_batches} ≠ 實際 ${inc.length}`);
     for (const s of inc) if (!(s.data_status.missing_entry || s.data_status.missing_exit || (s.data_status.market_gap_days || []).length)) gapErrs.push(`${s.snapshot_date} ${s.board} 標不完整卻沒有原因`);
-    const curves = JSON.parse(fsx.readFileSync("data/strategy_curves.json", "utf8"));
+    const curves = readJsonRetry(fsx, "data/strategy_curves.json");
     for (const l of curves.lines.filter(x => x.group === "board" && x.started)) {
       const b = l.id.replace("board_", "");
       const n = inc.filter(s => s.board === b).length;
@@ -3599,8 +3610,8 @@ async function runSmokeTest(baseUrl, headless = true) {
   const i10Errs = [];
   try {
     const fsx = await import("node:fs");
-    const curves = JSON.parse(fsx.readFileSync("data/strategy_curves.json", "utf8"));
-    const brief = JSON.parse(fsx.readFileSync("data/daily_brief.json", "utf8"));
+    const curves = readJsonRetry(fsx, "data/strategy_curves.json");
+    const brief = readJsonRetry(fsx, "data/daily_brief.json");
     const fakeAudit = { generated_at: new Date().toISOString(), universe: 1900, gate_pass: true, violation_rate: 0, completeness_gap_rate: 0,
       by_check: { a_price: { checked: 1900, violations: 0 }, b_empty: { checked: 0, violations: 0 } }, top_20: [] };
     const zeroAudit = { generated_at: new Date().toISOString(), universe: 0, gate_pass: true, by_check: { a_price: { checked: 0, violations: 0 } } };
@@ -3652,7 +3663,7 @@ async function runSmokeTest(baseUrl, headless = true) {
     if (!l.length) rsErrs.push("價格歷史沒有 00631L");
     if (post.some(r => r.adj_close != null && Math.abs(r.adj_close - r.close) > 0.01 * r.close)) rsErrs.push("00631L 分割後不該再除");
     if (!(ph.meta.splits_applied || []).includes("00631L@2026-03-31x22.0")) rsErrs.push("meta.splits_applied 缺 00631L 紀錄");
-    const cv = JSON.parse(fsx.readFileSync("data/strategy_curves.json", "utf8"));
+    const cv = readJsonRetry(fsx, "data/strategy_curves.json");
     for (const x of cv.lines.filter(x => x.group === "paper" && x.started)) {
       if (!/還原權息/.test(x.note) || !/現金與定存按一個月定存利率計息/.test(x.note) || !/建倉已扣手續費/.test(x.note)) rsErrs.push(`${x.id} note 缺口徑說明：${x.note}`);
     }
@@ -3671,7 +3682,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const mdErrs = [];
   try {
     const fsx = await import("node:fs");
-    const mt = JSON.parse(fsx.readFileSync("data/market_tw.json", "utf8"));
+    const mt = readJsonRetry(fsx, "data/market_tw.json");
     const ph = readPH(fsx, ["0050"]);  // 先.八十二-1
     const last = ((ph.prices["0050"] || []).slice(-1)[0] || {}).date;
     const dd = mt.data_date || (mt.taiex || {}).data_date;
@@ -3717,7 +3728,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const ucErrs = [];
   try {
     const fsx = await import("node:fs");
-    const h = JSON.parse(fsx.readFileSync("data/strategy_history.json", "utf8"));
+    const h = readJsonRetry(fsx, "data/strategy_history.json");
     const bt = h.lines.live_bb90.backtest;
     if (!/_unioncal\.json$/.test(bt.source)) ucErrs.push(`Bb-90 回測段來源不是聯集日曆版：${bt.source}`);
     if (Math.abs(bt.cagr * 100 - 10.33) > 0.01 || Math.abs(bt.mdd * 100 + 47.29) > 0.01) ucErrs.push(`Bb-90 回測值 ${(bt.cagr * 100).toFixed(2)}%／${(bt.mdd * 100).toFixed(2)}% 不是更正值`);
@@ -4416,7 +4427,7 @@ async function runSmokeTest(baseUrl, headless = true) {
     const fsx = await import("node:fs");
     const { execFileSync } = await import("node:child_process");
     if (fsx.existsSync("data/price_history.json")) phsErrs.push("舊單檔 data/price_history.json 仍存在");
-    const head = JSON.parse(fsx.readFileSync("data/price_history/_meta.json", "utf8"));
+    const head = readJsonRetry(fsx, "data/price_history/_meta.json");
     const seen = new Set();
     let maxMB = 0, totMB = 0;
     for (const b of ["0","1","2","3","4","5","6","7","8","9","x"]) {
@@ -4433,7 +4444,7 @@ async function runSmokeTest(baseUrl, headless = true) {
     if (order.length !== seen.size || order.some(c => !seen.has(c))) phsErrs.push(`_meta 代號順序 ${order.length} 檔與分桶 ${seen.size} 檔不一致`);
     const py = process.platform === "win32" ? "python" : "python3";
     let out = "";
-    try { out = execFileSync(py, ["scripts/selftest_price_history_split.py"], { encoding: "utf8", env: { ...process.env, PYTHONIOENCODING: "utf-8" }, timeout: 240000 }); }
+    try { out = execFileSync(py, ["scripts/selftest_price_history_split.py", "--quick"], { encoding: "utf8", env: { ...process.env, PYTHONIOENCODING: "utf-8" }, timeout: 240000 }); }
     catch (e) { out = String(e.stdout || "") + String(e.stderr || ""); phsErrs.push("拆檔前後一致性自測未通過：" + out.split("\n").filter(l => /FAIL/.test(l)).join("；").slice(0, 300)); }
     phsInfo = `${seen.size} 檔、最大分桶 ${maxMB.toFixed(1)}MB、合計 ${totMB.toFixed(1)}MB；${(out.match(/合計 \d+ 項，失敗 \d+/) || [""])[0]}`;
   } catch (e) { phsErrs.push(`測試本身出錯：${e.message || e}`); }
@@ -4459,7 +4470,7 @@ async function runSmokeTest(baseUrl, headless = true) {
       if (bad.length) ntrErrs.push(`${f} 標近期無成交卻有排名：${bad.slice(0, 5).join("、")}`);
       parts.push(`${f} 生效=${rtf.applied} 剔除 ${rtf.excluded}（會剔除 ${rtf.would_exclude}）`);
     }
-    const lg = JSON.parse(fsx.readFileSync("data/picks_ledger.json", "utf8"));
+    const lg = readJsonRetry(fsx, "data/picks_ledger.json");
     const rc = ((lg.meta || {}).rule_changes || []).find(x => x.effective_date === "2026-10-14");
     if (lg.meta && lg.meta.rule_changes && !rc) ntrErrs.push("picks_ledger 規則紀錄缺生效日 2026-10-14");
     parts.push(rc ? "picks_ledger 已標生效日 2026-10-14" : "picks_ledger 規則紀錄待雲端班次寫入");
@@ -4513,7 +4524,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   let rsInfo = "";
   try {
     const fsx = await import("node:fs");
-    const d = JSON.parse(fsx.readFileSync("data/research_scorecard.json", "utf8"));
+    const d = readJsonRetry(fsx, "data/research_scorecard.json");
     for (const k of ["trials", "autopsy", "oos"]) if (!d[k] || d[k].error) rsErrs2.push(`資料檔缺 ${k}：${JSON.stringify(d[k] || null).slice(0, 80)}`);
     const c = (d.autopsy || {}).counts || {};
     if ((c.A || 0) + (c.B || 0) + (c.C || 0) !== (d.autopsy || {}).total) rsErrs2.push(`A／B／C 合計 ${(c.A || 0) + (c.B || 0) + (c.C || 0)} ≠ 總條數 ${(d.autopsy || {}).total}`);
@@ -4556,9 +4567,9 @@ async function runSmokeTest(baseUrl, headless = true) {
   let evsInfo = "";
   try {
     const fsx = await import("node:fs");
-    const full = JSON.parse(fsx.readFileSync("data/events.json", "utf8")).fetched_at;
-    const srch = ((JSON.parse(fsx.readFileSync("data/events_search.json", "utf8")).top) || {}).fetched_at;
-    const idx = JSON.parse(fsx.readFileSync("data/events_by_code/_index.json", "utf8")).fetched_at;
+    const full = readJsonRetry(fsx, "data/events.json").fetched_at;
+    const srch = ((readJsonRetry(fsx, "data/events_search.json").top) || {}).fetched_at;
+    const idx = readJsonRetry(fsx, "data/events_by_code/_index.json").fetched_at;
     if (!(full && full === srch && full === idx)) evsErrs.push(`三檔 fetched_at 不一致：整份 ${full}／精簡 ${srch}／索引 ${idx}`);
     const r = await page.evaluate(async () => {
       const realFetch = window.fetch, o = {};
@@ -4615,6 +4626,10 @@ async function runSmokeTest(baseUrl, headless = true) {
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
+  results.total_ms = Date.now() - _t0;
+  const slow = [...results.checks].sort((a, b) => (b.ms || 0) - (a.ms || 0)).slice(0, 5);
+  console.log(`[耗時] 總計 ${(results.total_ms / 1000).toFixed(1)} 秒；最慢 5 項：` +
+    slow.map(c => `${String(c.name).split(".")[0]}（${((c.ms || 0) / 1000).toFixed(1)} 秒）`).join("、"));
 
   return results;
   } finally {

@@ -18,8 +18,16 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 import price_history_store as S  # noqa: E402
 
-src = Path(sys.argv[1]) if len(sys.argv) > 1 else S.CANONICAL
-orig = S.load(src)  # 單檔存在讀單檔，否則讀拆檔
+QUICK = "--quick" in sys.argv  # 先.八十一-58：冒煙用快速版（300 檔子集來回＋實際分桶大小）；完整 2,960 檔比對在拆檔時已做過
+args = [a for a in sys.argv[1:] if a != "--quick"]
+src = Path(args[0]) if args else S.CANONICAL
+if QUICK:
+    head = json.loads((S.split_dir(src) / "_meta.json").read_text(encoding="utf-8")) if not src.exists() else None
+    order = (head or {}).get("code_order") or list((S.load(src).get("prices") or {}).keys())
+    pick = order[::max(1, len(order) // 300)][:300] + ["2330", "0050", "00646", "00697B"]
+    orig = S.load(src, codes=pick)
+else:
+    orig = S.load(src)  # 單檔存在讀單檔，否則讀拆檔
 ser = lambda d: json.dumps(d, ensure_ascii=False, sort_keys=False)
 tmp = Path(tempfile.mkdtemp())
 res = []
@@ -32,6 +40,8 @@ try:
     sizes = S.save(json.loads(one.read_text(encoding="utf-8")), logical, split=True)
     back = S.load(logical)
     res.append((f"①拆檔讀回＝原單檔（{len(orig.get('prices', {}))} 檔）", ser(back) == ser(orig)))
+    if QUICK and not src.exists():  # 快速版：大小看 repo 裡實際的分桶檔
+        sizes = {f.name: f.stat().st_size for f in S.split_dir(src).glob("*.json")}
     big = {k: v for k, v in sizes.items() if v >= 20 * 1024 * 1024}
     mx = max(sizes.items(), key=lambda kv: kv[1])
     res.append((f"②每檔 <20MB（最大 {mx[0]} {mx[1] / 1048576:.1f}MB，合計 {sum(sizes.values()) / 1048576:.1f}MB；原單檔 {one.stat().st_size / 1048576:.1f}MB）", not big))
