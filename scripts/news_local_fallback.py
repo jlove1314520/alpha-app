@@ -26,13 +26,19 @@ import local_git_commit as G  # noqa: E402
 TW = timezone(timedelta(hours=8))
 STALE_MIN = 60
 LOG = ROOT / "research" / "news_local_fallback.log"
-STEPS = [  # 與 .github/workflows/news_events.yml 相同順序；第一步失敗就停，其餘照 workflow 的 continue-on-error
+# 與 .github/workflows/news_events.yml 相同的腳本；第一步失敗就停，其餘照 workflow 的 continue-on-error。
+# 先.八十一-64（2026-10-13）：拆檔（split_events_by_code）改成緊接在 fetch_news_events 之後跑。
+# 原本照 workflow 放最後，中間 news_body_extract 約 7 分鐘，這段時間工作區的 events.json 已是新版、
+# events_search.json／events_by_code／ir_events 還是舊版（冒煙 #132 偶發失敗的根因）。拆檔只讀 events.json，
+# 後面三步都不寫 events.json，所以提前跑輸出完全相同，不一致的時間從約 7 分鐘縮到拆檔本身的幾秒。
+STEPS = [
     ([".github/scripts/fetch_news_events.py"], True),
+    (["scripts/split_events_by_code.py"], False),
     ([".github/scripts/fetch_news_sitemap.py"], False),
     ([".github/scripts/news_body_extract.py"], False),
     (["scripts/build_themes.py"], False),
-    (["scripts/split_events_by_code.py"], False),
 ]
+EVENTS_WRITERS = {".github/scripts/fetch_news_events.py"}  # 會寫 events.json 的步驟；自測確認拆檔緊接在最後一個之後
 OUTPUTS = ["data/news.json", "data/events.json", "data/events_by_code", "data/ir_events.json", "data/events_search.json", "data/news_urls.json", "data/news_evidence.json",
            "data/themes.json", "data/schema_guard/news_events.json"]
 

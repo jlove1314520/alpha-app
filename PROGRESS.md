@@ -1,3 +1,17 @@
+## 2026-10-13 17:24（互動視窗）先.八十一-64 新聞本機補班：拆檔提前、工作區不一致窗口縮到幾秒
+
+- **問題**（來源：先.八十一-49 冒煙 #132 偶發的根因）：本機新聞補班照 workflow 順序跑：抓新聞與事件 → sitemap → 內文萃取（約 7 分鐘）→ 題材 → 拆檔。這 7 分鐘內，工作區的 `events.json` 已是新版，`events_search.json`／`events_by_code/`／`ir_events.json` 還是舊版，讀本機工作區的冒煙或伺服器會看到不一致。
+- **修正**（`scripts/news_local_fallback.py`）：拆檔改成緊接在抓新聞與事件之後跑。
+  - 拆檔只讀 `events.json`，後面的 sitemap、內文萃取、題材三步都不寫 `events.json`，所以提前跑，輸出完全相同。
+  - 不一致的時間從約 7 分鐘縮到拆檔本身的幾秒。最後仍是一次提交全部產出（取鎖、衝突作廢）。
+  - 雲端 workflow 是全部跑完才一次提交，沒有這個問題，不改。
+- **自測**：`scripts/selftest_news_fallback_order.py` 3/3 PASS。
+  - ① 拆檔緊接在最後一個寫 events.json 的步驟之後；
+  - ② 拆檔之後的步驟原始碼都不寫 events.json；
+  - ③ 步驟集合和 news_events.yml 相同，只換順序、不多不少。
+- **附記（先.八十一-63 重啟驗證）**：常駐伺服器重啟後跑 `scripts/live_server_verify.py`，四步全 PASS。build sha 663dc3f＝HEAD；OPTIONS 精確來源＋allow-credentials；本檔與 4 個延後 import 模組的啟動時雜湊都和現在檔案一致。
+- 冒煙全套 140 PASS／0 FAIL。
+
 ## 2026-10-13 17:18（互動視窗）先.八十一-63 常駐伺服器四步驗證不必讀 token（啟動雜湊＋模組雜湊＋驗證工具）
 
 - **原計畫**：公開 /health 加 build git sha 與 stale_process，讓七之二四步驗證不必讀 token（先.八十二-14 要求照原計畫做完）。
