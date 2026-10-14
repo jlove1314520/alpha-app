@@ -19804,6 +19804,7 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
 - [ ] **先.九十七-R4 [自走補入，來源：docs/UX_REDESIGN_PROPOSAL.md ⑥「全頁走查補充」沒讀到「需連上本機電腦才出現的內容（自動投資、帳本、委託）」] 本機連線才顯示的文字走查：grep app-trade.js／app-settings.js／app.js 裡自動投資卡、日誌帳本、委託與否決窗的固定字串，依先.九十七-3 原則改成描述事實的中性說法（純文字，不改任何下單邏輯、按鈕行為、模式或 STOP）；全套冒煙＋393×852 截圖**（DevQueue 可執行）
 - [ ] **先.九十七-R5 [自走補入，來源：docs/UX_REDESIGN_PROPOSAL.md ⑥「全頁走查補充」的「觀察」段] IBKR Paper 抽屜 ⚠ 注意「真實送單一律由你在本頁親自按下『送出』，App 不會自動送單」與 2026-10-06 台股自動交易規則並存易誤讀：補一句「這段只講 IBKR Paper 模擬帳戶；台股真錢自動投資另見設定頁」（純文字，不改任何下單邏輯）；冒煙**（DevQueue 可執行）
 - [ ] **先.九十七-R6 [自走補入，來源：先.九十七-1 補跑後 10/14 大盤融資維持率標「資料不完整」] market.yml 步驟順序：「更新大盤融資維持率」（update_margin_maintenance.py）排在「更新個股 OHLCV 歷史」（update_price_history.py）之前，晚上 STOCK_DAY_ALL 仍是前一天時要用 price_history 同日收盤補，但那時 price_history 還沒寫入當天 → 只跑一班（本機補跑、或雲端只跑到 17:13 班）時當天維持率必定不完整（10/14 實例：21:43 補跑後 ratio=null，22:17 單獨重跑該步才得 191.61%）。修法擇一寫進 PROGRESS：①把維持率步驟移到 price_history 之後，或 ②market_local_catchup.py 收尾時若當天 data_incomplete 就自動重跑該步一次；不改維持率計算與門檻；自測＋冒煙**（DevQueue 可執行）
+- [ ] **先.九十七-R7 [自走補入，來源：research/DATA_GAP_PLAN.md 第 36 行甲類 #39「0050 成分股調整：已在 #82 查證可得」——只查證、尚未整理成結構化檔] 0050 歷史成分股變動表結構化：把 #82（2026-09-23～24）已用維基完整變動表＋四家媒體交叉核對的結果整理成 `research/data/0050_constituent_changes.json`（每筆：生效日、納入／剔除代號、出處），先查 #82 留下的原始檔／筆記，缺的才補抓（維基 API 一次請求、記入 rate_limit_state；不碰 MOPS）；只補資料、不登記試驗、不回測；做完在 DATA_GAP_PLAN 第 36 行補「已結構化」**（DevQueue 可執行）
 
 # 2026-10-14【先.九十八：Telegram 只讀擷取每次執行都被當新登入】（總司令裁示原文，動工前先寫入）
 
