@@ -17600,3 +17600,10 @@ lock: LOCK_ACQUIRED (cycle 20261015-013102)
 prompt: GUARD_PRECHECK_WARN：**先.八十四-7 （補件，來源：先.八十四-4 停擺告警觀察）DevQueue 改每 30 分鐘後，「三軌任一 ≤60… 會被擋（需總司令：裁示；不可逆：—）。只警告、不改標記，由互動視窗處理 DEVQUEUE_ELIGIBLE_LOW：DevQueue 可執行的 - [ ] 共 3 項（下限 6，先.八十五-1c） PROMPT_READY: 先.九十七-R6 [自走補入，來源：先.九十七-1 補跑後 10/14 大盤融資維持率標「資料不完整」] market.yml 步驟順序：「更新大盤融資維持率」（update_margin_maintenance.py）排在「更新個股 OHLCV 歷史」（update_price_history.py）之前，晚上 STOCK_DAY_ALL 仍是前一天時要用 price_history 同日收盤補，但那時 price_history 還沒寫入當天 → 只跑一班（本機補跑、或雲端只跑到 17:13 班）時當天維持率必定不完整（10/14 實例：21:43 補跑後 ratio=null，22:17 單獨重跑該步才得 191.61%）。修法擇一寫進 PROGRESS：①把維持率步驟移到 price_history 之後，或 ②market_local_catchup.py 收尾時若當天 data_incomplete 就自動重跑該步一次；不改維持率計算與門檻；自測＋冒煙（債務類） (exit=0)
 finally: released .devqueue.lock (cycle_id=20261015-013102)
 ===== DevQueue cycle end: 2026-10-15 01:57:52 cycle_id=20261015-013102 reason=OK exit=0 duration_min=26.8 =====
+
+===== DevQueue cycle start: 2026-10-15 02:01:02 cycle_id=20261015-020102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20261015-020102)
+prompt: GUARD_PRECHECK_WARN：**先.八十四-7 （補件，來源：先.八十四-4 停擺告警觀察）DevQueue 改每 30 分鐘後，「三軌任一 ≤60… 會被擋（需總司令：裁示；不可逆：—）。只警告、不改標記，由互動視窗處理 DEVQUEUE_ELIGIBLE_LOW：DevQueue 可執行的 - [ ] 共 0 項（下限 6，先.八十五-1c） NO_PENDING_ITEM_FOR_DEVQUEUE：剩餘待辦皆為[研究]類或「（互動視窗執行」類，留給marathon／hypothesis_queue軌或互動視窗session (exit=3)
+finally: released .devqueue.lock (cycle_id=20261015-020102)
+===== DevQueue cycle end: 2026-10-15 02:01:04 cycle_id=20261015-020102 reason=QUEUE_EMPTY exit= duration_min=0 =====
