@@ -1,27 +1,27 @@
 {
   "meta": {
     "backfill_note": "2026-08-27一次性回補：讀research端FinMind歷史parquet快取（TaiwanStockPrice）補上約90個交易日OHLCV歷史，供generate_scores_live.py的technical因子(站上60日均線×20/60日均量比)使用。close為原始收盤價（未還原權息，MA60在除權息當天附近會有跳空失真，是刻意的簡化，見generate_scores_live.py檔頭說明）。2026-08-27新增adj_close（還原權息收盤價，讀本機FinMind TaiwanStockDividend快取算出，跟research/adjust.py同一條TWSE官方公式），供generate_scores_momentum.py的relative_strength因子改用，修正除息跳空被誤判成下跌的P0 bug——之後由update_price_history.py每日排程用TWSE官方TWT48U接續回溯調整新事件。merge-safe，既有較新資料不會被覆蓋。",
-    "generated_at": "2026-10-14T01:52:57.864154+08:00",
-    "twse_updated_count": 1371,
-    "tpex_updated_count": 990,
+    "generated_at": "2026-10-14T21:47:53.974782+08:00",
+    "twse_updated_count": 1369,
+    "tpex_updated_count": 989,
     "errors": [],
-    "ex_dividend_events_added": 0,
+    "ex_dividend_events_added": 6,
     "ex_dividend_events_applied": 0,
     "gap_backfill_note": "2026-08-28一次性回補（B23第一步）：對動能榜候選宇宙中深度不足（<60列）的股票，改用FinMind即時線上API（不經過本機parquet快取/holdout）從2026-04-01補齊——這批股票的research端FinMind本機快取已經過期很久，daily排程單靠一天一筆要等數月才會自然補滿。TWSE官方STOCK_DAY單股端點本輪先試過，實測被反爬蟲整批擋下（53檔測試全部428），才改走這條路（見模組docstring「方法演進紀錄」）。本輪：目標1826檔、成功補進228檔、1597檔查詢失敗（配額/無資料）、1檔查到資料但沒有新增天數。",
     "gap_backfill_note_round2": "2026-08-28 03點場保守測試批次：目標80檔，成功0、失敗56",
     "source": "TWSE STOCK_DAY_ALL（上市）+ TPEx tpex_mainboard_quotes（上櫃）每日累積式寫回；adj_close由TWSE TWT48U除權息事件回溯調整；起始種子=research/build_price_history.py（FinMind快取）",
     "mixed_date_warning": null,
-    "twse_openapi_date": "2026-10-12",
-    "twse_gap_filled_dates": [],
-    "twse_no_data_dates": [
+    "twse_openapi_date": "2026-10-13",
+    "twse_gap_filled_dates": [
       "2026-10-14"
     ],
+    "twse_no_data_dates": [],
     "twse_latest_check": {
-      "expected_latest_trading_day": "2026-10-13",
-      "actual_0050_last_date": "2026-10-13",
+      "expected_latest_trading_day": "2026-10-14",
+      "actual_0050_last_date": "2026-10-14",
       "ok": true
     },
-    "capital_reduction_events_added": 0,
+    "capital_reduction_events_added": 2,
     "capital_reduction_events_applied": 0,
     "etf_gap_backfill_note": "2026-10-10 先.五十七-A2：0050／00646（TWSE STOCK_DAY）、00697B（TPEx tradingStock）官方單股月資料補缺日，只補不覆蓋，逐筆標 source；adj_close 暫等於 close。",
     "gap_backfill_2026_10_12": {
@@ -38,10 +38,10 @@
     ],
     "splits_note": "股票分割還原（先.八十-12）：分割前 adj_close ÷ 分割比例；close 為原始成交價",
     "whitelist_fill": {
-      "generated_at": "2026-10-14T01:52:57.834345+08:00",
+      "generated_at": "2026-10-14T21:47:53.912268+08:00",
       "target_dates": {
-        "twse": "2026-10-13",
-        "tpex": "2026-10-13"
+        "twse": "2026-10-14",
+        "tpex": "2026-10-14"
       },
       "codes": {
         "0050": {
@@ -49,7 +49,7 @@
           "filled": [],
           "missing": [],
           "errors": [],
-          "last_date": "2026-10-13",
+          "last_date": "2026-10-14",
           "last_source": "all_market_endpoint",
           "ok": true
         },
@@ -58,7 +58,7 @@
           "filled": [],
           "missing": [],
           "errors": [],
-          "last_date": "2026-10-13",
+          "last_date": "2026-10-14",
           "last_source": "all_market_endpoint",
           "ok": true
         },
@@ -67,7 +67,7 @@
           "filled": [],
           "missing": [],
           "errors": [],
-          "last_date": "2026-10-13",
+          "last_date": "2026-10-14",
           "last_source": "all_market_endpoint",
           "ok": true
         }
