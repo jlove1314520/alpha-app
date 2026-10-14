@@ -163,6 +163,7 @@
     _safeAsync('loadDataFreshness',loadDataFreshness);  // 2026-09-03 P0三-三.2，獨立包起來，失敗不影響設定頁其他區塊
     _safeAsync('loadDataAudit',()=>loadDataAudit(false));  // 2026-09-06 稽核.一，同樣獨立
     _safeAsync('loadSmokeCloud',loadSmokeCloud);  // 常備.開發-27 雲端夜間冒煙，同樣獨立
+    _safeAsync('loadWarrantBackup',loadWarrantBackup);  // 先.九十五-2 權證快照備份，同樣獨立
     _safeAsync('loadSchemaGuard',loadSchemaGuard);  // 常備.開發-28 資料檔 schema 守門，同樣獨立
     _safeAsync('loadAdjAnomalies',loadAdjAnomalies);  // 先.六十一
     _safeAsync('loadCoverage',()=>loadCoverage(false));    // 2026-09-15 稽核二.二，同樣獨立
@@ -728,6 +729,29 @@
   }
   // 常備.開發-27：雲端夜間冒煙（data/smoke_cloud.json，.github/workflows/smoke_cloud.yml 每晚產出）。
   // 超過 36 小時沒更新也標警示——排程沒跑跟冒煙失敗一樣需要處理，不能顯示成「沒問題」。
+  // 先.九十五-2：權證快照最後備份時間（data/warrant_backup_status.json，本機排程 AlphaWarrantSnapshot 寫）。
+  // 備份超過 8 天、或最後快照超過 4 天就標警告（排程可能沒跑／電腦沒開）。404＝排程還沒產生第一份。
+  async function loadWarrantBackup(){
+    const sum=document.getElementById('warrant-backup-summary'),tm=document.getElementById('warrant-backup-tm');
+    if(!sum)return;
+    try{
+      const r=await fetch('data/warrant_backup_status.json?t='+Date.now());
+      if(r.status===404){sum.textContent='尚未產生第一份備份狀態';return}
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const d=await r.json();
+      const days=t=>t?(Date.now()-new Date(t).getTime())/86400000:null;
+      const bAge=days(d.last_backup_at),sAge=days(d.last_snapshot_date?d.last_snapshot_date+'T17:30:00+08:00':null);
+      const warn=[];
+      if(bAge==null)warn.push('還沒有備份過');else if(bAge>8)warn.push('已 '+Math.floor(bAge)+' 天沒備份');
+      if(sAge==null)warn.push('還沒有快照');else if(sAge>4)warn.push('最後快照是 '+Math.floor(sAge)+' 天前，排程可能沒跑或電腦沒開');
+      sum.innerHTML=`快照 <b>${nf(d.snapshot_days||0)}</b> 天（最後 ${d.last_snapshot_date||'—'}，共 ${d.snapshot_mb!=null?d.snapshot_mb:'—'} MB）｜已備份 <b>${nf(d.backed_up_days||0)}</b> 天`
+        +(warn.length?` ｜ <b style="color:var(--warn)">${warn.join('；')}</b>`:' ｜ <b>✓ 正常</b>');  // 不用漲跌色（台股慣例 --up 是紅色，會誤讀）
+      if(tm)tm.textContent=d.last_backup_at?fmtTzMMDDHHMM(new Date(d.last_backup_at),'Asia/Taipei'):'尚未備份';
+    }catch(e){
+      console.warn('[loadWarrantBackup]',e);recordGlobalError('loadWarrantBackup',e);
+      sum.innerHTML='<b style="color:var(--warn)">✗ 讀不到備份狀態</b>（'+(e&&e.message||e)+'）';
+    }
+  }
   async function loadSmokeCloud(){
     const sum=document.getElementById('smoke-cloud-summary'),list=document.getElementById('smoke-cloud-list');
     if(!sum||!list)return;

@@ -24,7 +24,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
      載不到時index.html::renderStockChart()自動退回既有SVG折線，不會讓個股頁空白。 -->
 <!-- 常備.開發-20（2026-10-11）：函式庫改為第一次畫K線時才載入（見 app.js ensureLwc()），不再佔首頁首次載入傳輸量。 -->
 <title>Alpha 台美股 AI 交易</title>
-<link rel="stylesheet" href="app.css?v=2026-10-14.1851">
+<link rel="stylesheet" href="app.css?v=2026-10-14.1915">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -1240,6 +1240,14 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" style="margin-top:6px">稽核時間：<b id="audit-tm">--:--</b>。每晚自動跑全市場恆等式檢查（現價來源一致、進場價在現價±30%內、20日高低點、市值、本益比、空值、千分位解析）。一致性違規率超過 1% 會讓冒煙測試 FAIL、禁止上線。</div>
     </div>
 
+    <!-- 先.九十五-2（2026-10-14）：權證每日快照（本機排程 AlphaWarrantSnapshot，交易日 17:30）每週壓縮備份到 research/data 以外的
+         本機資料夾；狀態由 research/warrant_snapshot_daily.py 寫 data/warrant_backup_status.json。快照與備份都不進 repo。 -->
+    <div class="card">
+      <h3>權證快照備份 <span class="press refresh-btn" style="float:right" onclick="refreshTap(this,'warrant-backup-tm',async()=>{await loadWarrantBackup()})">重新整理</span></h3>
+      <div class="note" id="warrant-backup-summary">檢查中…</div>
+      <div class="note" style="margin-top:6px">最後備份：<b id="warrant-backup-tm">--:--</b>。交易日 17:30 存一份權證快照（只存這台電腦），每 7 天壓縮備份一次到另一個資料夾；備份位置等總司令指定。</div>
+    </div>
+
     <!-- 常備.開發-27（2026-10-11）：雲端夜間冒煙＝.github/workflows/smoke_cloud.yml 每晚台北 02:30 對 Pages 正式網址跑
          scripts/smoke_test.mjs，結果寫 data/smoke_cloud.json。本機冒煙驗「程式碼」，這張卡驗「手機實際打開的那個網址」。 -->
     <div class="card" data-ui-advanced>
@@ -1475,6 +1483,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-14.1851"></script>
+<script src="app.js?v=2026-10-14.1915"></script>
 </body>
 </html>

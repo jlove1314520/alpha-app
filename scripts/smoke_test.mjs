@@ -4809,6 +4809,35 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { mtErrs.push(`測試本身出錯：${e.message || e}`); }
   record("148. 方法論說明頁：選股卡「怎麼算的？」開啟、算法／權重／資料日期／存活者偏誤但書／研究成績單連結齊全、切榜正常、無推介字眼（先.九十四-5g）", mtErrs.length === 0, mtErrs.join("; ") || mtInfo);
 
+  // 149.【2026-10-14 先.九十五-2】設定頁「權證快照備份」卡：route 餵 data/warrant_backup_status.json——
+  // (a) 今天剛備份 → 顯示天數與「正常」、最後備份時間有值；(b) 備份 10 天前、快照 6 天前 → 兩個警告都要出現，不能顯示正常。
+  const wbErrs = [];
+  try {
+    let fixture = null;
+    await page.route("**/data/warrant_backup_status.json**", (route) =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fixture) }));
+    const today = new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10);
+    fixture = { last_snapshot_date: today, snapshot_days: 3, snapshot_mb: 10.5, last_backup_at: new Date().toISOString(), backed_up_days: 3 };
+    const a = await page.evaluate(async () => {
+      if (typeof loadWarrantBackup !== "function") return { err: "loadWarrantBackup 未載入" };
+      await loadWarrantBackup();
+      return { sum: document.getElementById("warrant-backup-summary").innerText, tm: document.getElementById("warrant-backup-tm").innerText };
+    });
+    if (a.err) wbErrs.push(a.err);
+    else {
+      if (!/快照 3 天/.test(a.sum) || !/正常/.test(a.sum)) wbErrs.push(`(a) 應顯示 3 天且正常：${a.sum}`);
+      if (/--:--|尚未備份/.test(a.tm)) wbErrs.push(`(a) 最後備份時間應有值：${a.tm}`);
+    }
+    fixture = { last_snapshot_date: new Date(Date.now() - 6 * 86400000).toISOString().slice(0, 10), snapshot_days: 3, snapshot_mb: 10.5,
+      last_backup_at: new Date(Date.now() - 10 * 86400000).toISOString(), backed_up_days: 1 };
+    const b = await page.evaluate(async () => { await loadWarrantBackup(); return document.getElementById("warrant-backup-summary").innerText; });
+    if (!/天沒備份/.test(b)) wbErrs.push(`(b) 10 天前備份應警告：${b}`);
+    if (!/排程可能沒跑/.test(b)) wbErrs.push(`(b) 6 天前快照應警告：${b}`);
+    if (/正常/.test(b)) wbErrs.push("(b) 有警告時不得顯示正常");
+    await page.unroute("**/data/warrant_backup_status.json**");
+  } catch (e) { wbErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("149. 設定頁「權證快照備份」卡：天數／最後備份時間、備份逾 8 天與快照逾 4 天要警告（先.九十五-2）", wbErrs.length === 0, wbErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];

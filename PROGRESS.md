@@ -1,3 +1,12 @@
+## 2026-10-14 19:15（互動視窗）先.九十五-2 權證每日快照排程上線＋每週備份＋設定頁顯示（十節：只改寫 data/warrant_backup_status.json，MACHINE_WRITTEN ^data/ 涵蓋）
+
+- **排程**：`scripts/register_warrant_snapshot_task.ps1` 註冊本機排程 `AlphaWarrantSnapshot`（週一～五 17:30，下次 10/15 17:30）→ `scripts/run_warrant_snapshot.ps1` → `research/warrant_snapshot_daily.py`。休市日依 `data/trading_calendar.json` 跳過、不發請求（10/9 休市、10/10 週末判斷正確；行事曆讀不到或未公布只降級成平日處理，快照程式本身會核對官方日期）。已用 Start-ScheduledTask 實跑一次，LastTaskResult=0。
+- **每週備份**：距上次滿 7 天就把還沒備份的日資料夾壓成 zip，存到 `C:\alpha\backups\warrant_snapshots`（research/data 以外、repo 外），寫完 `testzip()` 驗證，失敗就刪掉不完整的 zip 下次再試。首份已備份（10/14，3.5MB、8 個檔，驗證通過）。⚠️ 這個位置跟程式在同一顆硬碟：防誤刪、不防硬碟壞，正式路徑等總司令指定。
+- **設定頁**：新增「權證快照備份」卡（一般模式就看得到），讀 `data/warrant_backup_status.json` 顯示快照天數、最後快照日、最後備份時間；備份逾 8 天或快照逾 4 天標警告；正常不用漲跌色。冒煙新增 149（正常與兩種逾期情境）。
+- **冒煙**：`node scripts/smoke_test.mjs` 148 項全部通過（含新 149）。
+- 十節註記：新排程只改寫追蹤檔 `data/warrant_backup_status.json`（git_op_lock 下 path-scoped commit），dev_queue_runner MACHINE_WRITTEN 以 `^data/` 涵蓋；快照與備份都不進 repo。
+- 提案文件加核准註記；AWAITING 等待中 2→1；C:\alpha\CLAUDE.md 權證段更新。
+
 ## 2026-10-14 19:07（互動視窗）先.九十五-8 DevQueue 收工自動補件規則
 
 - `scripts/dev_queue_runner.py` 產生的 DevQueue 提示詞：補件段改成「收工自動補件」——每輪收工前重算，`- [ ]` <12 **或** DevQueue 可執行 <6 就補到兩個門檻都達到；來源依序 BACKLOG.md → docs/UX_REDESIGN_PROPOSAL.md → Cowork 全檢報告（原檔不在本機，條目已抄在 PENDING_QUEUE「先.八十　全檢修正」節）→ DATA_GAP_PLAN 甲類；每條寫來源；新補預設「（DevQueue 可執行）」；不得用小事湊數、不得補新的 alpha 試驗；來源用盡就照實寫。取代先.八十二 8⑦「只限兩種來源」。

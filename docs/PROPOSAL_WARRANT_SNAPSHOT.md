@@ -1,5 +1,7 @@
 # 提案：權證每日快照排程（先.九十四-5a）
 
+> ⚠️ 狀態已更新：**2026-10-14 先.九十五-2 總司令核准**——本機排程 `AlphaWarrantSnapshot` 交易日 17:30（`scripts/register_warrant_snapshot_task.ps1`、`scripts/run_warrant_snapshot.ps1` → `research/warrant_snapshot_daily.py`）；每 7 天壓縮備份到 `C:lphaackups\warrant_snapshots`（總司令指定路徑前的暫定位置，與程式同一顆硬碟），設定頁「權證快照備份」卡顯示最後備份時間；不進 repo。下面是核准前的提案原文，保留供稽核。
+>
 > 狀態：**等待總司令審閱**（本條只寫程式＋手動跑一次，**沒有建排程**）。
 > 寫於 2026-10-14，DevQueue 20261014-170102。非投資建議。
 
