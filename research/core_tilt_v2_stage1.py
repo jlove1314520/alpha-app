@@ -142,18 +142,32 @@ def segments(inp):
         end = eff[j + 1] if j + 1 < len(eff) else None
         seg = [d for d in days[pos[e]:] if end is None or d < end]
         kind, base, w = starts[e]
-        out.append((base, seg, kind, w))
+        k = max(i for i, s in enumerate(sched) if s["effective"] <= e)
+        k_end = sched[k + 1]["effective"] if k + 1 < len(sched) else None
+        anchor = (sched[k]["weight_day"], tuple(d for d in days if d >= sched[k]["effective"] and (k_end is None or d < k_end)))
+        out.append((base, seg, kind, w, anchor))
     return out
 
 
-def price_ratio(inp, base: str, seg: list[str], members) -> pd.DataFrame:
-    """同 build_portfolio：tri reindex([base]+seg).ffill(limit=5)；base 沒價的成分剔除。"""
+_PCACHE: dict = {}
+
+
+def price_ratio(inp, base: str, seg: list[str], members, anchor) -> pd.DataFrame:
+    """取價與 build_portfolio 完全同一套：以所屬成分異動的 weight_day 起整段 reindex→ffill(limit=5)→
+    weight_day 沒價者剔除→再 ffill()。傾斜再平衡段從這份整段價格切出 [base]+seg 再除以 base 價，
+    中途停牌的成分沿用舊價（不因再平衡日剛好沒價而被剔除）。"""
+    wd, rng = anchor
     cols = {}
     for m in members:
-        p = inp["tri"][m].reindex([base] + seg).ffill(limit=5)
-        if pd.isna(p.iloc[0]):
+        key = (m, wd, rng[0] if rng else None)
+        if key not in _PCACHE:
+            p = inp["tri"][m].reindex(list(dict.fromkeys([wd] + list(rng)))).ffill(limit=5)
+            _PCACHE[key] = None if pd.isna(p.iloc[0]) else p.ffill()
+        p = _PCACHE[key]
+        if p is None:
             continue
-        cols[m] = p.ffill() / p.iloc[0]
+        q = p.reindex([base] + seg)
+        cols[m] = q / q.iloc[0]
     return pd.DataFrame(cols)
 
 
@@ -165,12 +179,12 @@ def simulate(inp, segs, score_fn, cost_rt: float):
     ucost, tcost = pd.Series(0.0, index=idx), pd.Series(0.0, index=idx)
     w_u = w_t = None            # 上一段結束時漂移後的權重
     log = []
-    for base, seg, kind, capw in segs:
+    for base, seg, kind, capw, anchor in segs:
         if kind == "change":
             new_u = capw
         else:
             new_u = w_u
-        pr = price_ratio(inp, base, seg, new_u.index)
+        pr = price_ratio(inp, base, seg, new_u.index, anchor)
         new_u = new_u.reindex(pr.columns).fillna(0.0)
         comp = score_fn(base, list(new_u.index)) if score_fn else pd.Series(dtype=float)
         new_t = tilt(new_u / new_u.sum(), comp, inp["industry"]) if score_fn else new_u / new_u.sum()
