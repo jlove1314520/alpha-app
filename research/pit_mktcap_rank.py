@@ -22,8 +22,9 @@
 查不到快取的代號**不猜**：列進 `coverage_report()`，由 `--backfill` 照 FinMind 每小時上限補抓。
 
 已知限制（照實寫，驗證腳本會量化）：
-1. 0050 依「流通股數」加權（且 2023 起有單檔權重上限規則），這裡用總股數 → 重建
-   不可能完全一致，TE 有下限。
+1. 0050 依「流通股數」加權，這裡用總股數 → 重建不可能完全一致，TE 有下限。
+   （2026-10-14 先.九十三-1 更正：0050 追蹤的臺灣50指數**沒有**單檔權重上限；30% 上限只用在另一檔
+   「FTSE TWSE Taiwan 50 30% Capped Index」。官方規則出處見 research/PIT_MKTCAP_RULES_FIX.md R7。）
 2. 季間增減資（現增、可轉債轉換、庫藏股註銷）要到下一期法定公告日才反映，股數會落後。
 3. 資產負債表快取有空檔的代號（FinMind 回空）沒有股數，排不進名次（coverage_report 列出）。
 
@@ -287,6 +288,126 @@ def total_return_index(sid: str) -> pd.Series:
     out = pd.Series(px["close"].astype(float).to_numpy() * fac.to_numpy(), index=px["date"].to_numpy())
     out.attrs["no_event_cache"] = bool(no_cache)
     return out
+
+
+# ── 先.九十三-1（2026-10-14）：照臺灣50指數官方編制規則排成分股（research/PIT_MKTCAP_RULES_FIX.md R1～R6）──
+RULE_SWITCH_CUTOFF = "2022-06-01"   # R2：v4.6（2022-06）起改「生效日前 4 週的星期一」；2014～2021 版查不到，事前固定以此為界
+BUFFER_IN, BUFFER_OUT, N_CONST = 40, 61, 50   # R4
+FAST_ENTRY_RANK, FAST_ENTRY_DAY = 20, 5       # R6：新上市第 5 個交易日收盤全市值排名 ≤20 → 納入
+
+
+def _third_friday(y: int, m: int):
+    import calendar as _cal
+    from datetime import date as _date
+    fr = [d for wk in _cal.Calendar().monthdatescalendar(y, m) for d in wk if d.weekday() == 4 and d.month == m]
+    return fr[2]
+
+
+def review_calendar(days: list[str]) -> list[dict]:
+    """R1／R2：每季（3、6、9、12 月）審核——第三個星期五收盤後生效（下一個交易日起），排名資料基準日依版本。
+    回傳 [{"cutoff", "close_day", "effective"}]，三者都對齊到 days（交易日）。"""
+    from datetime import timedelta as _td
+    import bisect
+    out = []
+    y0, y1 = int(days[0][:4]), int(days[-1][:4])
+    for y in range(y0, y1 + 1):
+        for m in (3, 6, 9, 12):
+            tf = _third_friday(y, m).isoformat()
+            i = bisect.bisect_right(days, tf) - 1          # 第三個星期五（或之前最後一個交易日）收盤
+            if i < 0 or i + 1 >= len(days):
+                continue
+            close_day, eff = days[i], days[i + 1]
+            if eff < RULE_SWITCH_CUTOFF:
+                pm = m - 1                                  # 2、5、8、11 月最後一個交易日
+                last = f"{y}-{pm:02d}-31"
+                j = bisect.bisect_right(days, last) - 1
+                cutoff = days[j] if j >= 0 and days[j][:7] == f"{y}-{pm:02d}" else None
+            else:
+                from datetime import date as _date
+                mon = (_third_friday(y, m) + _td(days=3)) - _td(weeks=4)   # 生效日（星期一）前 4 週的星期一
+                j = bisect.bisect_right(days, mon.isoformat()) - 1
+                cutoff = days[j] if j >= 0 else None
+            if cutoff and days[0] <= cutoff:
+                out.append({"cutoff": cutoff, "close_day": close_day, "effective": eff})
+    return out
+
+
+def taiwan50_schedule(days: list[str]) -> list[dict]:
+    """照規則排出成分股異動時間表（R1～R6）。回傳依生效日排序的
+    [{"effective", "weight_day", "members": [...], "reason", "added": [...], "removed": [...]}]。
+    weight_day＝用哪一天收盤的總市值定權重（審核：第三個星期五收盤；期中異動：前一個交易日收盤）。"""
+    import bisect
+    revs = review_calendar(days)
+    # 新上市股第 5 個交易日（R6 快速納入）
+    uni = twse_common_universe()
+    ipo_days = {}
+    for r in uni.itertuples():
+        if not r.listing_date or not (days[0] < r.listing_date <= days[-1]):
+            continue
+        cs = close_series(r.stock_id)
+        own = [d for d in cs.index if d >= r.listing_date and d in set(days)][:FAST_ENTRY_DAY]
+        if len(own) == FAST_ENTRY_DAY:
+            ipo_days[r.stock_id] = own[-1]
+    need = sorted({days[0]} | {x["cutoff"] for x in revs} | {x["close_day"] for x in revs} | set(ipo_days.values()))
+    panel = mktcap_panel(need)
+    rank_at = {d: g.set_index("stock_id")["rank"].to_dict() for d, g in panel.groupby("date")}
+
+    def ranks(d):
+        if d not in rank_at:
+            g = mktcap_panel([d])
+            rank_at[d] = g.set_index("stock_id")["rank"].to_dict()
+        return rank_at[d]
+
+    r0 = ranks(days[0])
+    members = [s for s, k in sorted(r0.items(), key=lambda x: x[1])][:N_CONST]
+    sched = [{"effective": days[0], "weight_day": days[0], "members": list(members), "reason": "起始：前 50 名",
+              "added": list(members), "removed": []}]
+    events = [(x["effective"], "review", x) for x in revs if x["effective"] > days[0]]
+    events += [(days[days.index(d) + 1], "ipo", {"sid": s, "day": d}) for s, d in ipo_days.items()
+               if days.index(d) + 1 < len(days)]
+    events.sort(key=lambda e: (e[0], 0 if e[1] == "review" else 1))
+    ev_i = 0
+    for di in range(1, len(days)):
+        d = days[di]
+        # 期中刪除（R6）：成分股前一個交易日已無價格（close_on 規則：>9 日曆天沒成交）→ 用排名最高的非成分股遞補
+        prev = days[di - 1]
+        gone = [s for s in members if close_on(s, prev) is None]
+        if gone:
+            rk = ranks(prev)
+            cands = [s for s, k in sorted(rk.items(), key=lambda x: x[1]) if s not in members]
+            add = cands[:len(gone)]
+            members = [s for s in members if s not in gone] + add
+            sched.append({"effective": d, "weight_day": prev, "members": list(members), "reason": "期中刪除（無價格）→ 保留名單遞補",
+                          "added": add, "removed": gone})
+        while ev_i < len(events) and events[ev_i][0] == d:
+            _, kind, x = events[ev_i]
+            ev_i += 1
+            if kind == "review":
+                rk = ranks(x["cutoff"])
+                inn = [s for s, k in rk.items() if k <= BUFFER_IN and s not in members]
+                out = [s for s in members if rk.get(s, 10**9) >= BUFFER_OUT]
+                new = [s for s in members if s not in out] + inn
+                big = 10**9
+                if len(new) > N_CONST:          # 多了：刪排名最低的現有成分股
+                    keep_new = sorted(new, key=lambda s: rk.get(s, big))[:N_CONST]
+                    new = keep_new
+                elif len(new) < N_CONST:        # 少了：補排名最高的非成分股
+                    fill = [s for s, k in sorted(rk.items(), key=lambda t: t[1]) if s not in new]
+                    new = new + fill[:N_CONST - len(new)]
+                added = [s for s in new if s not in members]
+                removed = [s for s in members if s not in new]
+                members = new
+                sched.append({"effective": d, "weight_day": x["close_day"], "members": list(members),
+                              "reason": f"季審（基準日 {x['cutoff']}）", "added": added, "removed": removed})
+            else:
+                rk = ranks(x["day"])
+                if rk.get(x["sid"], 10**9) <= FAST_ENTRY_RANK and x["sid"] not in members:
+                    low = max(members, key=lambda s: rk.get(s, 10**9))
+                    members = [s for s in members if s != low] + [x["sid"]]
+                    sched.append({"effective": d, "weight_day": x["day"], "members": list(members),
+                                  "reason": f"新上市快速納入（第 5 個交易日排名 {rk[x['sid']]}）",
+                                  "added": [x["sid"]], "removed": [low]})
+    return sched
 
 
 def top_n(d: str, n: int = 50) -> pd.DataFrame:
