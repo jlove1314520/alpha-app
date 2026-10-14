@@ -19835,7 +19835,7 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
 8. 研.七 觸價推播（一檔一天最多 1 則）。
 研究室輸出一律不進 scores.json、不當評分權重；全部標「研究紀錄，非投資建議」。
 
-- [ ] **先.九十九-0 找 alpha-research-lab.zip（或 alpha-research-lab/ 資料夾）與規格檔位置；找不到標 [!] 請總司令放到 C:\alpha\ 下**（互動視窗執行）
+- [!] **先.九十九-0 找 alpha-research-lab.zip（或 alpha-research-lab/ 資料夾）與規格檔位置；找不到標 [!] 請總司令放到 C:\alpha\ 下**（互動視窗執行）〔BLOCKED：全機找不到 alpha-research-lab.zip／資料夾與規格檔；pending_patches 的 research_lab 補丁不是同一個（無 fetch 模組與測試、且寫公開 repo）。請總司令放到 C:\alpha\ 下〕
 - [ ] **先.九十九-研.一 匯入模組到 alpha-data（私有）research_lab/，pytest 8 passed**（互動視窗執行）
 - [ ] **先.九十九-研.二 回退鏈 fetch.alpha_local()＋fetch.official()；FINMIND_TOKEN 只放環境變數；拔掉 token 也能跑；3443 的 8、9 月營收改官方值 source=official**（互動視窗執行）
 - [ ] **先.九十九-先決 上櫃財報與法人端點補接、MOPS 月營收備援；4 檔近 6 個月無缺日再驗**（互動視窗執行）

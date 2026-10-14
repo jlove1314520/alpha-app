@@ -1,3 +1,9 @@
+## 2026-10-15 00:08（互動視窗）先.九十九-0 研究室模組與規格檔找不到，等總司令放到 C:\alpha\
+
+- 找過 C:\alpha、C:\Users\user（含下載、桌面、文件、OneDrive，深度 6 層）、D:\、G:\：**沒有 `alpha-research-lab.zip`、沒有 `alpha-research-lab/` 資料夾，也沒有規格檔 `claude/Alpha_台股研究室整合_規格與派工_2026-10-14.md`**（C:\alpha 底下沒有 claude 資料夾）。
+- 只找到 `C:\alpha\pending_patches\research_lab_2026-10-14\`（10/15 00:04 建立，Cowork 代擬的「研究室.一」v1～v4 補丁）：只有 4 檔 A 級的設定與說法紀錄＋一支 `build_research.py`，**沒有 fetch 模組、沒有 pytest 測試**；而且它把研究結果寫到公開 repo 的 `data/research.json`，與本次裁示 (a)「研究檔不進公開 repo」衝突。判定不是要匯入的模組，未使用、未複製進任何 repo。
+- 標 [!]：請總司令把 `alpha-research-lab.zip` 與規格檔放到 `C:\alpha\`。研.一～研.七依裁示依序做，前一項沒完成不往下。
+
 ## 2026-10-15 00:04（DevQueue 20261014-233102）先.九十六-R4／先.九十六-R5／先.九十七-R1＋冒煙 #103／#114 修正
 
 等待總司令審閱：1 件（先.九十八-3 Telegram「新裝置登入」手機端確認，等總司令看手機是否不再跳通知，自 10/14 23:24 起約 40 分鐘；本輪未新增）。
