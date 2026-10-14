@@ -19710,5 +19710,5 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
 - [ ] **先.九十五-4 淺色模式（先.九十四-5j）：預設跟隨手機系統，設定頁可切淺色／深色／跟隨系統；全套冒煙＋393×852 兩種模式截圖**（互動視窗執行）
 - [ ] **先.九十五-5 0050 成分股歷史（先.九十四-5k）：維基百科（CC BY-SA），只存本機 research/data（不進 repo），檔案附出處與授權說明**（互動視窗執行）
 - [x] **先.九十五-6 先.九十四-5l 與先.八十二-6 重複，結案**（互動視窗執行）〔5l 與先.八十二-6 重複結案（pe_snapshot 已含 EPS_ttm）〕
-- [ ] **先.九十五-7 14 份舊 autostash 逐份 git stash show -p 匯出 patch 存 research/archive/stash_patches/（不進 repo），確認檔案存在後再 drop，前後列清單**（互動視窗執行）
+- [x] **先.九十五-7 14 份舊 autostash 逐份 git stash show -p 匯出 patch 存 research/archive/stash_patches/（不進 repo），確認檔案存在後再 drop，前後列清單**（互動視窗執行）〔14 份匯出 research/archive/stash_patches/（本機、gitignore）、14/14 可套回基底，drop 後 0 份；清單見 AUTOSTASH_INVENTORY〕
 - [ ] **先.九十五-8 佇列自動補件規則：DevQueue 每輪收工若 - [ ] <12 或 DevQueue 可執行 <6，自動從 BACKLOG、docs/UX_REDESIGN_PROPOSAL.md、Cowork 全檢報告、DATA_GAP_PLAN 甲類補件並寫明來源；不得用小事湊數、不得補新 alpha 試驗**（互動視窗執行）

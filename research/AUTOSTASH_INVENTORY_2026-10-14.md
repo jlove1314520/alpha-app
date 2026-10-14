@@ -187,3 +187,29 @@
 | stash@{13} | 870a1fb40ddb907a407947d9134f7522a70acc7f | 2026-09-04 07:30:28 |
 
 **交 Cowork**：這 14 份的改動在 HEAD 找不到（多半是當時排程與互動視窗同時改同一檔，後來被改寫），建議逐份看差異決定要不要撿回；未經裁示不再清除。本檔仍只列檔名與差異統計，不貼內容。
+
+## 先.九十五-7（2026-10-14）：剩下 14 份匯出 patch 後清除
+
+- 做法：逐份 `git stash show -p --binary --include-untracked <SHA>` 匯出到 `research/archive/stash_patches/stash_NN_<SHA12>.patch`（本機、已加 .gitignore，不進 repo）；每份檢查 diff 檔數＝暫存改動＋未追蹤檔數，並在暫時索引上 `git apply --cached --check` 確認可套回自己的基底 commit（14/14 通過）；再逐份核對 SHA 後 `git stash drop`（由大編號往小，避免編號位移）。
+- 對照表（含基底 commit）：本機 `research/archive/stash_patches/INDEX.md`。
+
+清除前（14 份）：
+
+```
+stash@{0} 8bd20ef6fd8c11288138c99a3a9f364977194886
+stash@{1} d3bd05087e1efbaf4a1e217b093265aaf4dfb525
+stash@{2} c78c3d63e6e56dc36d441d652e7796bc825e79de
+stash@{3} 09b9f4b874fc7ac386776b9a305c88fb8e082656
+stash@{4} b5247dd0d88aad1462dcae0d5a7c75a98796077b
+stash@{5} dcf3c2c2ce25fe76a70ab1493bd3d9e20447e2fe
+stash@{6} 67abbb90009ee06740a1ad60e650bd9598c680fc
+stash@{7} b1027ac57478310f4a1b7e17731070884c39fac8
+stash@{8} dd0286fd6fe51c3a248461beb5eec449cd57b1d7
+stash@{9} 69c988c35e38f8941affaf457b74199ae12978ac
+stash@{10} 3c7f0dfbcdd03fe7535d1afdbbb88b80512a5d92
+stash@{11} a95fe86a3f244287b377665b2eaf3ff20d6ef074
+stash@{12} ddea4d804f4bb9903c926736a7b04a25e895d60b
+stash@{13} 870a1fb40ddb907a407947d9134f7522a70acc7f
+```
+
+清除後：0 份（`git stash list` 為空）。

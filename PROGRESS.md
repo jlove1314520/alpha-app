@@ -1,3 +1,10 @@
+## 2026-10-14 18:45（互動視窗）先.九十五-7 舊 autostash 匯出 patch 後清除
+
+- 14 份舊 autostash 逐份匯出 patch（含未追蹤檔、二進位）到本機 `research/archive/stash_patches/`（.gitignore 新增此路徑，不進 repo），附 INDEX.md 對照（SHA、基底 commit、檔數、大小）。
+- 驗證：每份 patch 檔數＝暫存改動＋未追蹤檔數；14/14 可在暫時索引上套回自己的基底 commit。
+- 確認檔案存在、SHA 相符後由大編號往小逐份 drop：14 → 0。前後清單寫在 research/AUTOSTASH_INVENTORY_2026-10-14.md 末節。
+- 已 drop 的暫存在 git 清理垃圾前（約 2 週）仍可用 SHA 救回；之後只能靠 patch。
+
 ## 2026-10-14 18:43（互動視窗）先.九十五-6 先.九十四-5l 重複結案
 
 - 先.九十四-5l（每日存 EPS_ttm 快照）與先.八十二-6 重複：`scripts/build_pe_snapshot.py` 已在 market.yml 每日寫 `data/pe_snapshot/<資料日>.json`（收盤／本益比／EPS_ttm），結案不另建機器寫檔。
