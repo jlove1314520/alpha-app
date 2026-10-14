@@ -203,6 +203,19 @@ eb = envf.read_bytes()
 check(".env 寫入：取代舊值、保留其他行與 CRLF", eb == b"A=1\r\nB=2\r\nTELEGRAM_TARGET_CHAT_ID=-100777\r\n")
 
 # 6 登入檔與輸出路徑都在 repo 外
+# 先.九十八：裝置名稱好認；排程遇到沒有登入檔時不連線、不建檔、不登入
+check("裝置名稱為「Alpha 只讀擷取」", T.DEVICE_MODEL == "Alpha 只讀擷取" and "device_model=DEVICE_MODEL" in Path(T.__file__).read_text(encoding="utf-8"))
+import asyncio as _aio, tempfile as _tf
+_orig = T.SESSION_FILE
+with _tf.TemporaryDirectory() as _d:
+    T.SESSION_FILE = Path(_d) / "none.session"
+    _called = []
+    _mk = T.make_client
+    T.make_client = lambda env: _called.append(1)
+    _r = _aio.run(T.run_once({"TELEGRAM_API_ID": "1", "TELEGRAM_API_HASH": "x", "TELEGRAM_TARGET_CHAT_ID": "-1"}, out_dir=Path(_d)))
+    T.make_client = _mk
+    T.SESSION_FILE = _orig
+check("沒有登入檔→NO_SESSION、不建立連線", _r.get("state") == "NO_SESSION" and not _called)
 check("登入檔路徑不在 repo 內", ROOT.resolve() not in Path(str(T.SESSION_BASE) + ".session").resolve().parents)
 check("擷取輸出與摘要路徑不在 repo 內", ROOT.resolve() not in T.EXPORT_DIR.resolve().parents)
 gi = (ROOT / ".gitignore").read_text(encoding="utf-8")

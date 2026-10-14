@@ -1,3 +1,8 @@
+## 2026-10-14 23:24（互動視窗）先.九十八-2 Telegram 只讀擷取：裝置名稱好認、絕不自建登入檔
+
+- `research/telegram_reader.py`：TelegramClient 帶 `device_model="Alpha 只讀擷取"`（改名不新增授權，實測同一個授權直接改名）；新增 `SESSION_FILE`，排程遇到登入檔不存在時只記心跳 `NO_SESSION`、**不連線、不建新檔、不登入**（原本 Telethon 會在連線時建一個空的新登入檔）。設定工具與排程繼續共用 secrets 底下同一個檔。
+- `scripts/selftest_telegram_reader.py` 加 2 項（裝置名稱、沒登入檔不連線），全部通過。
+
 ## 2026-10-14 23:24（互動視窗）先.九十八-1 Telegram「新裝置登入」根因查證
 
 - 只看路徑、存在、修改時間，沒讀 session 內容。設定工具（`--login`）與排程（`run-telegram-reader.ps1`→`research/telegram_reader.py`）用**同一個** `C:\alpha\secrets\telegram_reader.session`、同一支 Python（Microsoft Store 版）；排程帳號＝總司令本人、互動登入型；工作目錄 C:\alpha\alpha-app。全機只有這一個 .session 檔。

@@ -30,6 +30,9 @@ REPO = Path(__file__).resolve().parent.parent
 ENV_PATH = REPO / ".env"
 SECRETS_DIR = Path(r"C:\alpha\secrets")
 SESSION_BASE = SECRETS_DIR / "telegram_reader"          # Telethon 會自動加 .session
+SESSION_FILE = Path(str(SESSION_BASE) + ".session")     # 設定工具與排程共用這一個檔（先.九十八）
+# 先.九十八：Telegram 裝置清單顯示的名稱。改名不會新增授權（每次連線的 initConnection 會更新同一個授權的顯示資訊）。
+DEVICE_MODEL = "Alpha 只讀擷取"
 EXPORT_DIR = Path(r"C:\alpha\telegram_export\sinopac_api")
 STATE_NAME = "_state.json"
 HB_NAME = "_heartbeat.jsonl"
@@ -281,7 +284,8 @@ def _push_failure(n: int) -> None:
 
 def make_client(env: dict):
     from telethon import TelegramClient
-    return TelegramClient(str(SESSION_BASE), int(env["TELEGRAM_API_ID"]), env["TELEGRAM_API_HASH"])
+    return TelegramClient(str(SESSION_BASE), int(env["TELEGRAM_API_ID"]), env["TELEGRAM_API_HASH"],
+                          device_model=DEVICE_MODEL)
 
 
 async def run_once(env: dict, out_dir: Path = EXPORT_DIR, client=None, now: datetime | None = None) -> dict:
@@ -293,6 +297,11 @@ async def run_once(env: dict, out_dir: Path = EXPORT_DIR, client=None, now: date
     if not (env.get("TELEGRAM_API_ID") and env.get("TELEGRAM_API_HASH") and target is not None):
         _heartbeat(out_dir, "NOT_CONFIGURED")
         return {"state": "NOT_CONFIGURED"}
+    if client is None and not SESSION_FILE.exists():
+        # 先.九十八：排程絕不建立新的登入檔，也不登入；沒有登入檔就只記心跳，等總司令跑設定工具。
+        _heartbeat(out_dir, "NO_SESSION")
+        print("[warn] 找不到登入檔，略過（請執行設定工具）", flush=True)
+        return {"state": "NO_SESSION"}
     try:
         c = client or make_client(env)
         ro = ReadOnlyClient(c, target)
