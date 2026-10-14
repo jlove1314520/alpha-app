@@ -19877,7 +19877,7 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
 
 **以下研究室.一～研究室.七照 `C:\alpha\pending_patches\research_lab_2026-10-14\final\README_給ClaudeCode.md`「佇列條目」原文登記（先.一百-2）：**
 
-- [ ] **研究室.一 全市場研究層上線**〔互動視窗執行中〕（DevQueue 可執行）
+- [x] **研究室.一 全市場研究層上線**（DevQueue 可執行）〔全市場研究層上線：selftest 11/11 PASS、2330 小檔有 research 節、smoke 157 全過；dispatch 403 改本機照 market.yml 跑（1b4559b54）〕
   做法：
   1. 把 `final/scripts/build_research.py`、`final/scripts/selftest_research.py`、`final/research/lab/` 複製進 repo 同路徑。
   2. `market.yml` 在「個股頁每檔小檔（build_by_code）」這一步之前新增兩步：

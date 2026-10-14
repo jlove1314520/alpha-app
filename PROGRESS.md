@@ -1,3 +1,13 @@
+## 2026-10-15 07:50（互動視窗）研究室.一 全市場研究層上線
+
+- 照 final\README 做法 1～6：複製 `scripts/build_research.py`、`scripts/selftest_research.py`、`research/lab/`；`market.yml` 在 build_by_code 前新增「研究層」「研究層自測」兩步（continue-on-error），git add 清單加 `data/research.json data/research_radar.json`；`build_by_code.py` SOURCES 加 research；`data_schema_guard.py` 與 `data/seed/pipeline_registry.json` 登記兩檔；`research/lab/` 未被 gitignore、可提交，並加進 DevQueue 碰撞判斷的機器寫入名單（Cowork 每週寫入，由研究室.六驗證後提交）。
+- [自行裁量] 停擺告警：README 寫「超過 26 小時」，改用與 fundamentals 同一套 market_yml 班次判斷（連續錯過 2 班即告警，平日 26 小時內必觸發），避免固定 26 小時在週末休市誤報。
+- [自行裁量] 驗收要的 workflow_dispatch：GitHub 權杖回 403（沒有 Actions 寫入權限），改用 `market_local_catchup.py --force --only 研究／個股頁每檔小檔／個股小檔一致性` 在乾淨的 origin/main 副本照 market.yml 原樣跑 5 步，全成功（1b4559b54）。若要雲端真跑一次，需要總司令替權杖加上 Actions 權限，或等下一班排程。
+- **selftest 實際輸出**：PASS 1 schema 與免責聲明／2 標明不是因子／3 全市場涵蓋 ≥95%／4 無例外錯誤／5 無 NaN／6 營收算不出來都有 reason／7 季報過期都有 reason／8 change_tag 都有規則文字／9 雷達過流動性門檻／10 深度情境公式與說法 PIT／11 雷達檔 <120KB → **全部 PASS（11/11）**。涵蓋：1,979 檔全建、0 錯誤；rev3_qoq 41、fresh_quarter 1,020、foreign 1,083（研究室.二～四要補）。
+- `data/by_code/2330.json` 出現 research 節（origin 已確認）；selftest_by_code 抽 64 檔 0 不一致；最大小檔 24KB（未觸發「改只收 rev／q／px」分支）；schema guard 2 檔通過。
+- **smoke 實際輸出**：`=== 冒煙測試結果：全部通過 ===`，157 項 PASS。
+- 研究紀錄非投資建議；research*.json 不進 scores、不當選股權重。
+
 ## 2026-10-15 07:39（互動視窗）先.一百-3 研究室 README 凍結.二描述更正
 
 - 更正 `C:lpha\pending_patches
