@@ -67,6 +67,9 @@ SCHEMAS: dict[str, dict] = {
     "data/ui_glossary.json": _S(ts=None, req={"terms": "list"}),
     "data/coverage.json": _S(ts=_MG, req={**_META, "factors": "dict"}),
     "data/trials_index.json": _S(req={"rows": "list"}),
+    # 研究室.一：研究層（研究紀錄，不是因子）
+    "data/research.json": _S(ts=_MG, req={**_META, "stocks": "dict"}),
+    "data/research_radar.json": _S(ts=_MG, req={**_META, "lists": "dict", "industry_heat": "list", "deep": "list"}),
     # 市場
     "data/market_tw.json": _S(ts=_FETCHED, req={"errors": "list", "taiex": "dict|null", "sectors": "list"}),
     "data/market_us.json": _S(ts=_FETCHED, req={"indices": "dict"}),

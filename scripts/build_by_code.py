@@ -46,6 +46,7 @@ SOURCES = {  # 小檔裡的節名 → 來源檔
     "short_lending_available": DATA / "short_lending_available.json",
     "cash_flow": DATA / "cash_flow.json",
     "sector_flow": DATA / "sector_flow.json",
+    "research": DATA / "research.json",  # 研究室.一：研究紀錄＋變化偵測（不是因子，不進 scores）
 }  # events 不收：事件每 30 分鐘更新（news_events.yml），個股頁改讀同步切出的 data/events_by_code/<代號>.json
 SCORES_FILE = ROOT / "scores.json"
 OTHER_BOARDS = {"scores_momentum": ROOT / "scores_momentum.json", "scores_future": ROOT / "scores_future.json"}  # 選股頁展開／報告用的完整列

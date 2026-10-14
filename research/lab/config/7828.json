@@ -1,0 +1,173 @@
+{
+ "name": "創新服務",
+ "tier": "A",
+ "headline": "Q3 營收 4.43 億（QoQ +23%）兌現，但 TGV 量產時程由 2027H2 改口為 2028 後；現價接近樂觀情境。",
+ "thesis": {
+  "statement": "AI 晶片測試針數暴增 → 探針卡組裝自動化 → 植針機與維修代工放量；TGV 是 2028 後第二段成長。",
+  "confirmed_by_user": false
+ },
+ "indicators": [
+  {
+   "id": "rev3_yoy",
+   "group": "公司營運",
+   "label": "近3月營收年增",
+   "kind": "rev3_yoy",
+   "support_if": [
+    ">=",
+    0.3
+   ],
+   "review_if": [
+    "<",
+    0.0
+   ],
+   "update_from": "每月10日月營收"
+  },
+  {
+   "id": "rev3_qoq",
+   "group": "公司營運",
+   "label": "近3月營收 vs 前3月",
+   "kind": "rev3_qoq",
+   "support_if": [
+    ">=",
+    0.0
+   ],
+   "review_if": [
+    "<",
+    -0.15
+   ],
+   "update_from": "每月10日月營收"
+  },
+  {
+   "id": "gm",
+   "group": "公司營運",
+   "label": "最近一季毛利率",
+   "kind": "gm",
+   "support_if": [
+    ">=",
+    0.75
+   ],
+   "review_if": [
+    "<",
+    0.7
+   ],
+   "update_from": "季報"
+  },
+  {
+   "id": "tgv",
+   "group": "產業需求",
+   "label": "TGV 驗證進度",
+   "kind": "manual",
+   "status": "review",
+   "detail": "量產說法由 2027H2（3/25）→ 2028 後（9/10）",
+   "asof": "2026-09-10",
+   "source": "fugle 法說備忘錄",
+   "support_text": "封裝廠驗證通過",
+   "review_text": "再延後或未公布結果",
+   "update_from": "法說、MOPS 重大訊息"
+  },
+  {
+   "id": "customer",
+   "group": "公司營運",
+   "label": "客戶集中度（TP 集團）",
+   "kind": "manual",
+   "status": "neutral",
+   "detail": "TP 佔 2025 前三季營收 48.31%",
+   "asof": "2026-03-25",
+   "source": "上櫃前業績發表會",
+   "support_text": "非 TP 佔比上升",
+   "review_text": "TP 佔比 >60% 或砍單",
+   "update_from": "年報、法說"
+  },
+  {
+   "id": "headcount",
+   "group": "公司營運",
+   "label": "人力進度",
+   "kind": "manual",
+   "status": "neutral",
+   "detail": "9 月 213 人，目標年底近翻倍",
+   "asof": "2026-09-10",
+   "source": "fugle 法說備忘錄",
+   "support_text": "人力增且費用率降",
+   "review_text": "人力增但營收持平",
+   "update_from": "法說"
+  }
+ ],
+ "scenario": {
+  "target_year": 2027,
+  "base": {
+   "year": 2026,
+   "assumed_monthly": 160000000,
+   "ytd_override": {
+    "value": 954324000,
+    "through_month": 9,
+    "source": "2026Q1+Q2 季報營收 + 7–9 月官方月營收（興櫃期間無月營收）"
+   }
+  },
+  "tax": 0.2,
+  "assumption_owner": "Cowork 初版假設（2026-10-14），待使用者確認",
+  "scenarios": {
+   "保守": {
+    "growth": 0.25,
+    "gm": 0.72,
+    "opex": 0.35,
+    "pe": [
+     35,
+     50
+    ],
+    "basis": "植針機維持 70–80 台、材料包拉低毛利"
+   },
+   "基準": {
+    "growth": 0.6,
+    "gm": 0.77,
+    "opex": 0.32,
+    "pe": [
+     45,
+     65
+    ],
+    "basis": "植針機增加未翻倍、維修代工放量"
+   },
+   "樂觀": {
+    "growth": 1.0,
+    "gm": 0.79,
+    "opex": 0.29,
+    "pe": [
+     55,
+     80
+    ],
+    "basis": "植針機翻倍＋維修機新一波＋TGV 開始貢獻"
+   }
+  },
+  "must_deliver": [
+   "2027 植針機出貨 ≥140 台",
+   "單季毛利率 ≥77%",
+   "費用率 <30%",
+   "TGV 封裝廠驗證通過",
+   "2027H1 月營收穩定 ≥2.2 億"
+  ]
+ },
+ "shares_fallback": 40493911,
+ "next_checkpoints": [
+  {
+   "date": "2026-11-10",
+   "item": "10 月營收"
+  },
+  {
+   "date": "2026-11-14",
+   "item": "Q3 財報（Cowork 推估 EPS ≈4.24）"
+  },
+  {
+   "date": "2026-11-30",
+   "item": "TGV 封裝廠驗證結果（公司說最快 11 月）"
+  }
+ ],
+ "known_gaps": [
+  "法說逐字稿為媒體整理，非官方原文"
+ ],
+ "sources": [
+  "https://blog.fugle.tw/post/earnings-call-7828-2026-09-10",
+  "https://finance.biggo.com.tw/news/TW_7828.TW_2026-06-05",
+  "https://vocus.cc/article/69df7736fd89780001aab0c1",
+  "https://m.cnyes.com/news/id/6599259"
+ ],
+ "doc_url": "https://claude.ai/code/artifact/a18aba2d-1457-479d-9d8d-efc494796ae5"
+}

@@ -1,0 +1,134 @@
+{
+ "name": "創意",
+ "tier": "A",
+ "headline": "9 月營收 71.45 億（年增 98%）、前 9 月 441 億；但毛利率 Q1 27.2% → Q2 21.5%，近四季 EPS 39 元對 8,245 元股價。",
+ "thesis": {
+  "statement": "CSP 雲端 ASIC（含 Tesla AI5/AI6 設計服務）進入量產，營收倍增；毛利率因量產比重提高而下滑。",
+  "confirmed_by_user": false
+ },
+ "indicators": [
+  {
+   "id": "rev3_yoy",
+   "group": "公司營運",
+   "label": "近3月營收年增",
+   "kind": "rev3_yoy",
+   "support_if": [
+    ">=",
+    0.5
+   ],
+   "review_if": [
+    "<",
+    0.15
+   ],
+   "update_from": "每月10日月營收"
+  },
+  {
+   "id": "rev3_qoq",
+   "group": "公司營運",
+   "label": "近3月營收 vs 前3月",
+   "kind": "rev3_qoq",
+   "support_if": [
+    ">=",
+    0.0
+   ],
+   "review_if": [
+    "<",
+    -0.15
+   ],
+   "update_from": "每月10日月營收"
+  },
+  {
+   "id": "gm",
+   "group": "公司營運",
+   "label": "最近一季毛利率",
+   "kind": "gm",
+   "support_if": [
+    ">=",
+    0.22
+   ],
+   "review_if": [
+    "<",
+    0.18
+   ],
+   "update_from": "季報"
+  },
+  {
+   "id": "old_target",
+   "group": "股價反應",
+   "label": "前次研究目標價（2026/03）",
+   "kind": "manual",
+   "status": "review",
+   "detail": "保守 2,470／中性 3,000／樂觀 3,570；現價 8,245 已為樂觀目標 2.3 倍 → 原模型需重估",
+   "asof": "2026-03",
+   "source": "使用者 2026/03 研究",
+   "support_text": "新模型支持現價",
+   "review_text": "新模型仍遠低於現價",
+   "update_from": "本次情境表"
+  }
+ ],
+ "scenario": {
+  "target_year": 2027,
+  "base": {
+   "year": 2026,
+   "assumed_monthly": 7000000000
+  },
+  "tax": 0.12,
+  "assumption_owner": "Cowork 初版假設（2026-10-14），待使用者確認",
+  "scenarios": {
+   "保守": {
+    "growth": 0.1,
+    "gm": 0.2,
+    "opex": 0.085,
+    "pe": [
+     40,
+     60
+    ],
+    "basis": "量產專案成長放緩、毛利續降"
+   },
+   "基準": {
+    "growth": 0.3,
+    "gm": 0.22,
+    "opex": 0.08,
+    "pe": [
+     60,
+     80
+    ],
+    "basis": "CSP ASIC 持續放量"
+   },
+   "樂觀": {
+    "growth": 0.5,
+    "gm": 0.24,
+    "opex": 0.075,
+    "pe": [
+     80,
+     100
+    ],
+    "basis": "新 CSP 專案＋Tesla 專案同時量產"
+   }
+  },
+  "must_deliver": [
+   "2027 營收年增 ≥50%",
+   "毛利率回到 24%",
+   "NRE 新案數持續增加"
+  ]
+ },
+ "shares_fallback": 134011911,
+ "next_checkpoints": [
+  {
+   "date": "2026-10-29",
+   "item": "Q3 法說（日期待確認）"
+  },
+  {
+   "date": "2026-11-10",
+   "item": "10 月營收"
+  }
+ ],
+ "known_gaps": [
+  "尚無管理層說法紀錄",
+  "Q3 法說日期未查證"
+ ],
+ "sources": [
+  "https://finance.technews.tw/2026/10/05/guc-3443-202609-financial-report/"
+ ],
+ "doc_url": null
+}

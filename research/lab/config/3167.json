@@ -1,0 +1,149 @@
+{
+ "name": "大量",
+ "tier": "A",
+ "headline": "9 月營收 13.04 億、年增 172%，3 月起連 7 個月月增；Q2 毛利率 44.2%。但 7/15–7/30 股價從 892 跌到 442、腰斬，波動極大。",
+ "thesis": {
+  "statement": "AI 伺服器板與高速光模組帶動高階 CCD 背鑽＋TM 量測機需求，半導體 CoWoS 檢測成為第二引擎。",
+  "confirmed_by_user": false
+ },
+ "indicators": [
+  {
+   "id": "rev3_yoy",
+   "group": "公司營運",
+   "label": "近3月營收年增",
+   "kind": "rev3_yoy",
+   "support_if": [
+    ">=",
+    0.5
+   ],
+   "review_if": [
+    "<",
+    0.2
+   ],
+   "update_from": "每月10日月營收"
+  },
+  {
+   "id": "rev3_qoq",
+   "group": "公司營運",
+   "label": "近3月營收 vs 前3月",
+   "kind": "rev3_qoq",
+   "support_if": [
+    ">=",
+    0.0
+   ],
+   "review_if": [
+    "<",
+    -0.15
+   ],
+   "update_from": "每月10日月營收"
+  },
+  {
+   "id": "gm",
+   "group": "公司營運",
+   "label": "最近一季毛利率",
+   "kind": "gm",
+   "support_if": [
+    ">=",
+    0.42
+   ],
+   "review_if": [
+    "<",
+    0.38
+   ],
+   "update_from": "季報"
+  },
+  {
+   "id": "ccd",
+   "group": "產業需求",
+   "label": "高階 CCD 機訂單",
+   "kind": "manual",
+   "status": "support",
+   "detail": "2026 已確認 456 台、洽談 205 台、潛在 800 台；交期排到 9–10 月",
+   "asof": "2026-03-11",
+   "source": "fugle 法說備忘錄",
+   "support_text": "2027 新廠訂單落地",
+   "review_text": "取消／遞延訂單",
+   "update_from": "法說"
+  },
+  {
+   "id": "semi",
+   "group": "產業需求",
+   "label": "半導體 CoWoS 檢測",
+   "kind": "manual",
+   "status": "neutral",
+   "detail": "7 個站點逐一切入，已有 repeat order；未揭露營收占比",
+   "asof": "2026-04-04",
+   "source": "鉅亨董座專訪",
+   "support_text": "揭露營收占比且成長",
+   "review_text": "無新站點導入",
+   "update_from": "法說、分割子公司 IPO 文件"
+  }
+ ],
+ "scenario": {
+  "target_year": 2027,
+  "base": {
+   "year": 2026,
+   "assumed_monthly": 1350000000
+  },
+  "tax": 0.2,
+  "assumption_owner": "Cowork 初版假設（2026-10-14），待使用者確認",
+  "scenarios": {
+   "保守": {
+    "growth": 0.0,
+    "gm": 0.4,
+    "opex": 0.18,
+    "pe": [
+     20,
+     30
+    ],
+    "basis": "PCB 擴產循環見頂、營收持平"
+   },
+   "基準": {
+    "growth": 0.2,
+    "gm": 0.43,
+    "opex": 0.17,
+    "pe": [
+     30,
+     40
+    ],
+    "basis": "2027 新廠訂單＋TM4 放量"
+   },
+   "樂觀": {
+    "growth": 0.4,
+    "gm": 0.45,
+    "opex": 0.16,
+    "pe": [
+     40,
+     50
+    ],
+    "basis": "半導體檢測成為明顯第二引擎"
+   }
+  },
+  "must_deliver": [
+   "2027 營收年增 ≥40%",
+   "毛利率 ≥45%",
+   "半導體檢測營收占比揭露且成長"
+  ]
+ },
+ "shares_fallback": 89513491,
+ "next_checkpoints": [
+  {
+   "date": "2026-11-10",
+   "item": "10 月營收"
+  },
+  {
+   "date": "2026-11-14",
+   "item": "Q3 財報"
+  }
+ ],
+ "known_gaps": [
+  "下半年法說內容未取得",
+  "子公司分割上市對母公司持股比例影響未量化"
+ ],
+ "sources": [
+  "https://blog.fugle.tw/post/earnings-call-3167-2026-03-11",
+  "https://news.cnyes.com/news/id/6407234",
+  "https://winvest.tw/News/Detail/95300"
+ ],
+ "doc_url": null
+}

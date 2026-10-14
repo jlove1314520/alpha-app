@@ -122,6 +122,7 @@ MACHINE_WRITTEN = [
     re.compile(r"^research/data/[^/]+\.jsonl$"),  # 先.八十五-1：research/data/ 底下的 append-only 紀錄（例 adjustment_anomaly_warnings.jsonl 由 adjust.py 每次還原價計算寫入；10/13 23:01 因它讓路）
     re.compile(r"^research/\.[^/]+$"),        # .pid / .lock / .*_state.json 等隱藏狀態檔
     re.compile(r"^research/DEV_QUEUE_PROMPT\.txt$"),  # 本專案每輪重寫的提示檔
+    re.compile(r"^research/lab/"),            # 研究室.一（先.一百）：Cowork 每週日寫入深度研究設定／說法紀錄，由研究室.六驗證後提交
 ]
 
 

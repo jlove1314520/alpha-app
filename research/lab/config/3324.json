@@ -1,0 +1,148 @@
+{
+ "name": "雙鴻",
+ "tier": "A",
+ "headline": "1–9 月營收 270.4 億、年增 72%；公司全年 +60–70% 目標需 Q4 達 102–125 億（Q3 為 97.9 億）。Q2 EPS 10.41 低於 Q1 12.61。",
+ "thesis": {
+  "statement": "AI 伺服器液冷滲透率提升（GB300／Rubin、CSP ASIC、CPU 液冷）→ 雙鴻液冷產品放量，營收與獲利同步成長。",
+  "confirmed_by_user": false
+ },
+ "indicators": [
+  {
+   "id": "rev3_yoy",
+   "group": "公司營運",
+   "label": "近3月營收年增",
+   "kind": "rev3_yoy",
+   "support_if": [
+    ">=",
+    0.3
+   ],
+   "review_if": [
+    "<",
+    0.1
+   ],
+   "update_from": "每月10日月營收"
+  },
+  {
+   "id": "rev3_qoq",
+   "group": "公司營運",
+   "label": "近3月營收 vs 前3月",
+   "kind": "rev3_qoq",
+   "support_if": [
+    ">=",
+    0.0
+   ],
+   "review_if": [
+    "<",
+    -0.15
+   ],
+   "update_from": "每月10日月營收"
+  },
+  {
+   "id": "gm",
+   "group": "公司營運",
+   "label": "最近一季毛利率",
+   "kind": "gm",
+   "support_if": [
+    ">=",
+    0.28
+   ],
+   "review_if": [
+    "<",
+    0.25
+   ],
+   "update_from": "季報"
+  },
+  {
+   "id": "target",
+   "group": "公司營運",
+   "label": "全年營收年增 60–70% 目標進度",
+   "kind": "manual",
+   "status": "neutral",
+   "detail": "1–9 月 270.4 億 vs 2025 全年 232.8 億；達標需 Q4 102.1–125.4 億（Q3 97.9 億）",
+   "asof": "2026-10-14",
+   "source": "公司目標見旺得富 2026-07-15；數字為 Cowork 計算",
+   "support_text": "10–11 月月營收 ≥34 億",
+   "review_text": "Q4 月營收 <32 億",
+   "update_from": "月營收"
+  },
+  {
+   "id": "nvda",
+   "group": "產業需求",
+   "label": "NVIDIA Vera Rubin 供應商資格",
+   "kind": "manual",
+   "status": "neutral",
+   "detail": "媒體引外資：部分產品重回合格供應商",
+   "asof": "2026-07-15",
+   "source": "旺得富（引日系外資）",
+   "support_text": "公司或客戶端證實出貨",
+   "review_text": "出貨未見或份額下降",
+   "update_from": "法說、新聞"
+  }
+ ],
+ "scenario": {
+  "target_year": 2027,
+  "base": {
+   "year": 2026,
+   "assumed_monthly": 3260000000
+  },
+  "tax": 0.22,
+  "assumption_owner": "Cowork 初版假設（2026-10-14），待使用者確認",
+  "scenarios": {
+   "保守": {
+    "growth": 0.1,
+    "gm": 0.27,
+    "opex": 0.12,
+    "pe": [
+     18,
+     25
+    ],
+    "basis": "液冷滲透放緩、毛利維持 Q2 水準"
+   },
+   "基準": {
+    "growth": 0.25,
+    "gm": 0.285,
+    "opex": 0.11,
+    "pe": [
+     22,
+     30
+    ],
+    "basis": "ASIC＋CPU 液冷導入、費用率回落"
+   },
+   "樂觀": {
+    "growth": 0.4,
+    "gm": 0.3,
+    "opex": 0.105,
+    "pe": [
+     28,
+     35
+    ],
+    "basis": "Rubin 份額確立、液冷佔比 >70%"
+   }
+  },
+  "must_deliver": [
+   "2027 營收年增 ≥40%",
+   "毛利率回到 30%（2026Q1 為 29.7%）",
+   "業外不再出現 Q2 類型損失"
+  ]
+ },
+ "shares_fallback": 93076837,
+ "next_checkpoints": [
+  {
+   "date": "2026-11-10",
+   "item": "10 月營收（達標檢核）"
+  },
+  {
+   "date": "2026-11-14",
+   "item": "Q3 財報"
+  }
+ ],
+ "known_gaps": [
+  "尚未取得 2026 年法說會原文／整理（guidance 只有 1 筆媒體轉述）",
+  "液冷營收占比無公開數字"
+ ],
+ "sources": [
+  "https://wantrich.chinatimes.com/news/20260715900267-420101",
+  "https://uanalyze.com.tw/articles/6324538910"
+ ],
+ "doc_url": null
+}
