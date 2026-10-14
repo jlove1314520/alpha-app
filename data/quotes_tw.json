@@ -1,11 +1,11 @@
 {
-  "fetched_at": "2026-10-14T13:32:42+00:00",
+  "fetched_at": "2026-10-14T18:08:53+00:00",
   "source": "TWSE MIS（mis.twse.com.tw，證交所公開即時行情端點）",
   "meta": {
     "trading_window": false,
-    "queried": 227,
-    "matched": 227,
-    "live": 227,
+    "queried": 239,
+    "matched": 239,
+    "live": 239,
     "data_type": "intraday",
     "sparkline": {
       "mode": "moved_to_build_sparklines_py",
@@ -13,22 +13,22 @@
     }
   },
   "quotes": {
-    "1101": {
-      "name": "台泥",
-      "price": 27.05,
-      "prev_close": 26.35,
-      "change": 0.7,
-      "change_pct": 2.657,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
     "1216": {
       "name": "統一",
       "price": 78.2,
       "prev_close": 77.1,
       "change": 1.1,
       "change_pct": 1.427,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "1227": {
+      "name": "佳格",
+      "price": 28.25,
+      "prev_close": 28.15,
+      "change": 0.1,
+      "change_pct": 0.355,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -69,6 +69,16 @@
       "prev_close": 13.25,
       "change": 0.45,
       "change_pct": 3.396,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "1308": {
+      "name": "亞聚",
+      "price": 15.2,
+      "prev_close": 14.9,
+      "change": 0.3,
+      "change_pct": 2.013,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -123,16 +133,6 @@
       "date": "20261014",
       "stale": false
     },
-    "1319": {
-      "name": "東陽",
-      "price": 82.6,
-      "prev_close": 82.6,
-      "change": 0.0,
-      "change_pct": 0.0,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
     "1326": {
       "name": "台化",
       "price": 85.5,
@@ -169,16 +169,6 @@
       "prev_close": 14.1,
       "change": 0.4,
       "change_pct": 2.837,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "1455": {
-      "name": "集盛",
-      "price": 10.3,
-      "prev_close": 10.05,
-      "change": 0.25,
-      "change_pct": 2.488,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -233,12 +223,22 @@
       "date": "20261014",
       "stale": false
     },
-    "1569": {
-      "name": "濱川",
-      "price": 83.9,
-      "prev_close": 81.0,
-      "change": 2.9,
-      "change_pct": 3.58,
+    "1597": {
+      "name": "直得",
+      "price": 160.5,
+      "prev_close": 146.0,
+      "change": 14.5,
+      "change_pct": 9.932,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "1605": {
+      "name": "華新",
+      "price": 40.7,
+      "prev_close": 38.55,
+      "change": 2.15,
+      "change_pct": 5.577,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -249,16 +249,6 @@
       "prev_close": 36.5,
       "change": 0.85,
       "change_pct": 2.329,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "1707": {
-      "name": "葡萄王",
-      "price": 86.3,
-      "prev_close": 86.1,
-      "change": 0.2,
-      "change_pct": 0.232,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -303,6 +293,16 @@
       "date": "20261014",
       "stale": false
     },
+    "1802": {
+      "name": "台玻",
+      "price": 67.0,
+      "prev_close": 61.8,
+      "change": 5.2,
+      "change_pct": 8.414,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
     "1808": {
       "name": "潤隆",
       "price": 34.95,
@@ -313,22 +313,22 @@
       "date": "20261014",
       "stale": false
     },
-    "1809": {
-      "name": "中釉",
-      "price": 43.95,
-      "prev_close": 42.4,
-      "change": 1.55,
-      "change_pct": 3.656,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
     "1815": {
       "name": "富喬",
       "price": 134.0,
       "prev_close": 130.0,
       "change": 4.0,
       "change_pct": 3.077,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "2002": {
+      "name": "中鋼",
+      "price": 19.5,
+      "prev_close": 19.15,
+      "change": 0.35,
+      "change_pct": 1.828,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -373,6 +373,36 @@
       "date": "20261014",
       "stale": false
     },
+    "2103": {
+      "name": "台橡",
+      "price": 29.95,
+      "prev_close": 28.65,
+      "change": 1.3,
+      "change_pct": 4.538,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "2104": {
+      "name": "國際中橡",
+      "price": 12.25,
+      "prev_close": 11.65,
+      "change": 0.6,
+      "change_pct": 5.15,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "2105": {
+      "name": "正新",
+      "price": 31.4,
+      "prev_close": 30.85,
+      "change": 0.55,
+      "change_pct": 1.783,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
     "2201": {
       "name": "裕隆",
       "price": 29.3,
@@ -403,12 +433,12 @@
       "date": "20261014",
       "stale": false
     },
-    "2302": {
-      "name": "麗正",
-      "price": 46.7,
-      "prev_close": 46.4,
-      "change": 0.3,
-      "change_pct": 0.647,
+    "2312": {
+      "name": "金寶",
+      "price": 33.25,
+      "prev_close": 30.8,
+      "change": 2.45,
+      "change_pct": 7.955,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -433,12 +463,42 @@
       "date": "20261014",
       "stale": false
     },
+    "2323": {
+      "name": "中環",
+      "price": 11.9,
+      "prev_close": 10.85,
+      "change": 1.05,
+      "change_pct": 9.677,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "2328": {
+      "name": "廣宇",
+      "price": 49.55,
+      "prev_close": 48.6,
+      "change": 0.95,
+      "change_pct": 1.955,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
     "2330": {
       "name": "台積電",
       "price": 2490.0,
       "prev_close": 2490.0,
       "change": 0.0,
       "change_pct": 0.0,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "2332": {
+      "name": "友訊",
+      "price": 20.9,
+      "prev_close": 20.35,
+      "change": 0.55,
+      "change_pct": 2.703,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -450,16 +510,6 @@
       "change": 2.0,
       "change_pct": 1.99,
       "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "2351": {
-      "name": "順德",
-      "price": 207.0,
-      "prev_close": 209.0,
-      "change": -2.0,
-      "change_pct": -0.957,
-      "time": "13:33:00",
       "date": "20261014",
       "stale": false
     },
@@ -483,12 +533,32 @@
       "date": "20261014",
       "stale": false
     },
+    "2362": {
+      "name": "藍天",
+      "price": 49.0,
+      "prev_close": 47.3,
+      "change": 1.7,
+      "change_pct": 3.594,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
     "2368": {
       "name": "金像電",
       "price": 1260.0,
       "prev_close": 1170.0,
       "change": 90.0,
       "change_pct": 7.692,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "2375": {
+      "name": "凱美",
+      "price": 136.5,
+      "prev_close": 124.5,
+      "change": 12.0,
+      "change_pct": 9.639,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -513,12 +583,12 @@
       "date": "20261014",
       "stale": false
     },
-    "2383": {
-      "name": "台光電",
-      "price": 5520.0,
-      "prev_close": 5545.0,
-      "change": -25.0,
-      "change_pct": -0.451,
+    "2385": {
+      "name": "群光",
+      "price": 105.5,
+      "prev_close": 103.5,
+      "change": 2.0,
+      "change_pct": 1.932,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -543,6 +613,16 @@
       "date": "20261014",
       "stale": false
     },
+    "2406": {
+      "name": "國碩",
+      "price": 29.9,
+      "prev_close": 29.0,
+      "change": 0.9,
+      "change_pct": 3.103,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
     "2412": {
       "name": "中華電",
       "price": 148.5,
@@ -559,16 +639,6 @@
       "prev_close": 168.0,
       "change": 3.0,
       "change_pct": 1.786,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "2436": {
-      "name": "偉詮電",
-      "price": 72.0,
-      "prev_close": 70.8,
-      "change": 1.2,
-      "change_pct": 1.695,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -623,16 +693,6 @@
       "date": "20261014",
       "stale": false
     },
-    "2468": {
-      "name": "華經",
-      "price": 46.15,
-      "prev_close": 46.35,
-      "change": -0.2,
-      "change_pct": -0.431,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
     "2476": {
       "name": "鉅祥",
       "price": 126.5,
@@ -669,26 +729,6 @@
       "prev_close": 392.0,
       "change": 34.0,
       "change_pct": 8.673,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "2504": {
-      "name": "國產",
-      "price": 31.7,
-      "prev_close": 32.0,
-      "change": -0.3,
-      "change_pct": -0.938,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "2520": {
-      "name": "冠德",
-      "price": 37.4,
-      "prev_close": 37.2,
-      "change": 0.2,
-      "change_pct": 0.538,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -769,36 +809,6 @@
       "prev_close": 121.5,
       "change": 3.5,
       "change_pct": 2.881,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "2617": {
-      "name": "台航",
-      "price": 32.8,
-      "prev_close": 32.55,
-      "change": 0.25,
-      "change_pct": 0.768,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "2618": {
-      "name": "長榮航",
-      "price": 43.4,
-      "prev_close": 43.0,
-      "change": 0.4,
-      "change_pct": 0.93,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "2633": {
-      "name": "台灣高鐵",
-      "price": 26.0,
-      "prev_close": 26.0,
-      "change": 0.0,
-      "change_pct": 0.0,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -923,26 +933,6 @@
       "date": "20261014",
       "stale": false
     },
-    "2882": {
-      "name": "國泰金",
-      "price": 114.0,
-      "prev_close": 114.5,
-      "change": -0.5,
-      "change_pct": -0.437,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "2883": {
-      "name": "凱基金",
-      "price": 38.65,
-      "prev_close": 38.75,
-      "change": -0.1,
-      "change_pct": -0.258,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
     "2884": {
       "name": "玉山金",
       "price": 47.3,
@@ -973,36 +963,6 @@
       "date": "20261014",
       "stale": false
     },
-    "2887": {
-      "name": "台新新光金",
-      "price": 42.65,
-      "prev_close": 43.0,
-      "change": -0.35,
-      "change_pct": -0.814,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "2889": {
-      "name": "國票金",
-      "price": 16.8,
-      "prev_close": 16.8,
-      "change": 0.0,
-      "change_pct": 0.0,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "2891": {
-      "name": "中信金",
-      "price": 71.4,
-      "prev_close": 71.6,
-      "change": -0.2,
-      "change_pct": -0.279,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
     "2892": {
       "name": "第一金",
       "price": 40.65,
@@ -1019,6 +979,16 @@
       "prev_close": 10.85,
       "change": 0.0,
       "change_pct": 0.0,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "2903": {
+      "name": "遠百",
+      "price": 22.3,
+      "prev_close": 22.2,
+      "change": 0.1,
+      "change_pct": 0.45,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1053,16 +1023,6 @@
       "date": "20261014",
       "stale": false
     },
-    "3016": {
-      "name": "嘉晶",
-      "price": 169.5,
-      "prev_close": 168.0,
-      "change": 1.5,
-      "change_pct": 0.893,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
     "3026": {
       "name": "禾伸堂",
       "price": 854.0,
@@ -1073,12 +1033,42 @@
       "date": "20261014",
       "stale": false
     },
+    "3028": {
+      "name": "增你強",
+      "price": 62.5,
+      "prev_close": 62.0,
+      "change": 0.5,
+      "change_pct": 0.806,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
     "3030": {
       "name": "德律",
       "price": 307.0,
       "prev_close": 306.0,
       "change": 1.0,
       "change_pct": 0.327,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "3034": {
+      "name": "聯詠",
+      "price": 560.0,
+      "prev_close": 546.0,
+      "change": 14.0,
+      "change_pct": 2.564,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "3035": {
+      "name": "智原",
+      "price": 211.0,
+      "prev_close": 192.0,
+      "change": 19.0,
+      "change_pct": 9.896,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1113,12 +1103,12 @@
       "date": "20261014",
       "stale": false
     },
-    "3045": {
-      "name": "台灣大",
-      "price": 126.5,
-      "prev_close": 125.0,
-      "change": 1.5,
-      "change_pct": 1.2,
+    "3090": {
+      "name": "日電貿",
+      "price": 183.5,
+      "prev_close": 167.0,
+      "change": 16.5,
+      "change_pct": 9.88,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1129,16 +1119,6 @@
       "prev_close": 67.1,
       "change": -1.8,
       "change_pct": -2.683,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "3167": {
-      "name": "大量",
-      "price": 960.0,
-      "prev_close": 977.0,
-      "change": -17.0,
-      "change_pct": -1.74,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1183,22 +1163,22 @@
       "date": "20261014",
       "stale": false
     },
+    "3264": {
+      "name": "欣銓",
+      "price": 278.0,
+      "prev_close": 268.5,
+      "change": 9.5,
+      "change_pct": 3.538,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
     "3287": {
       "name": "廣寰科",
       "price": 57.7,
       "prev_close": 52.5,
       "change": 5.2,
       "change_pct": 9.905,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "3290": {
-      "name": "東浦",
-      "price": 51.8,
-      "prev_close": 52.2,
-      "change": -0.4,
-      "change_pct": -0.766,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1223,6 +1203,26 @@
       "date": "20261014",
       "stale": false
     },
+    "3338": {
+      "name": "泰碩",
+      "price": 68.8,
+      "prev_close": 65.8,
+      "change": 3.0,
+      "change_pct": 4.559,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "3354": {
+      "name": "律勝",
+      "price": 34.55,
+      "prev_close": 31.45,
+      "change": 3.1,
+      "change_pct": 9.857,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
     "3356": {
       "name": "奇偶",
       "price": 75.6,
@@ -1233,22 +1233,32 @@
       "date": "20261014",
       "stale": false
     },
-    "3402": {
-      "name": "漢科",
-      "price": 135.0,
-      "prev_close": 135.5,
-      "change": -0.5,
-      "change_pct": -0.369,
+    "3357": {
+      "name": "臺慶科",
+      "price": 226.5,
+      "prev_close": 215.0,
+      "change": 11.5,
+      "change_pct": 5.349,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
     },
-    "3406": {
-      "name": "玉晶光",
-      "price": 1065.0,
-      "prev_close": 1175.0,
-      "change": -110.0,
-      "change_pct": -9.362,
+    "3374": {
+      "name": "精材",
+      "price": 499.0,
+      "prev_close": 465.5,
+      "change": 33.5,
+      "change_pct": 7.197,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "3380": {
+      "name": "明泰",
+      "price": 31.65,
+      "prev_close": 31.3,
+      "change": 0.35,
+      "change_pct": 1.118,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1269,26 +1279,6 @@
       "prev_close": 8095.0,
       "change": 150.0,
       "change_pct": 1.853,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "3483": {
-      "name": "力致",
-      "price": 88.6,
-      "prev_close": 89.6,
-      "change": -1.0,
-      "change_pct": -1.116,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "3504": {
-      "name": "揚明光",
-      "price": 82.0,
-      "prev_close": 83.7,
-      "change": -1.7,
-      "change_pct": -2.031,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1323,12 +1313,12 @@
       "date": "20261014",
       "stale": false
     },
-    "3543": {
-      "name": "州巧",
-      "price": 51.9,
-      "prev_close": 54.1,
-      "change": -2.2,
-      "change_pct": -4.067,
+    "3580": {
+      "name": "友威科",
+      "price": 121.0,
+      "prev_close": 115.0,
+      "change": 6.0,
+      "change_pct": 5.217,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1353,6 +1343,16 @@
       "date": "20261014",
       "stale": false
     },
+    "3597": {
+      "name": "映興",
+      "price": 53.4,
+      "prev_close": 48.6,
+      "change": 4.8,
+      "change_pct": 9.877,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
     "3605": {
       "name": "宏致",
       "price": 187.0,
@@ -1373,12 +1373,12 @@
       "date": "20261014",
       "stale": false
     },
-    "3653": {
-      "name": "健策",
-      "price": 7070.0,
-      "prev_close": 6990.0,
-      "change": 80.0,
-      "change_pct": 1.144,
+    "3693": {
+      "name": "營邦",
+      "price": 754.0,
+      "prev_close": 700.0,
+      "change": 54.0,
+      "change_pct": 7.714,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1413,12 +1413,62 @@
       "date": "20261014",
       "stale": false
     },
+    "3711": {
+      "name": "日月光投控",
+      "price": 747.0,
+      "prev_close": 740.0,
+      "change": 7.0,
+      "change_pct": 0.946,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "3715": {
+      "name": "定穎投控",
+      "price": 140.5,
+      "prev_close": 133.0,
+      "change": 7.5,
+      "change_pct": 5.639,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
     "4167": {
       "name": "松瑞藥",
       "price": 22.15,
       "prev_close": 22.4,
       "change": -0.25,
       "change_pct": -1.116,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "4583": {
+      "name": "台灣精銳",
+      "price": 420.5,
+      "prev_close": 394.5,
+      "change": 26.0,
+      "change_pct": 6.591,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "4714": {
+      "name": "永捷",
+      "price": 12.55,
+      "prev_close": 12.5,
+      "change": 0.05,
+      "change_pct": 0.4,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "4739": {
+      "name": "康普",
+      "price": 88.2,
+      "prev_close": 87.3,
+      "change": 0.9,
+      "change_pct": 1.031,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1463,22 +1513,22 @@
       "date": "20261014",
       "stale": false
     },
-    "4906": {
-      "name": "正文",
-      "price": 42.95,
-      "prev_close": 40.8,
-      "change": 2.15,
-      "change_pct": 5.27,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
     "4912": {
       "name": "聯德控股-KY",
       "price": 106.0,
       "prev_close": 104.0,
       "change": 2.0,
       "change_pct": 1.923,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "4915": {
+      "name": "致伸",
+      "price": 64.2,
+      "prev_close": 63.5,
+      "change": 0.7,
+      "change_pct": 1.102,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1513,22 +1563,22 @@
       "date": "20261014",
       "stale": false
     },
+    "4949": {
+      "name": "有成精密",
+      "price": 81.7,
+      "prev_close": 81.7,
+      "change": 0.0,
+      "change_pct": 0.0,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
     "4958": {
       "name": "臻鼎-KY",
       "price": 567.0,
       "prev_close": 552.0,
       "change": 15.0,
       "change_pct": 2.717,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "4961": {
-      "name": "天鈺",
-      "price": 183.0,
-      "prev_close": 183.0,
-      "change": 0.0,
-      "change_pct": 0.0,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1563,22 +1613,22 @@
       "date": "20261014",
       "stale": false
     },
-    "4976": {
-      "name": "佳凌",
-      "price": 40.5,
-      "prev_close": 41.7,
-      "change": -1.2,
-      "change_pct": -2.878,
+    "4977": {
+      "name": "眾達-KY",
+      "price": 191.0,
+      "prev_close": 174.0,
+      "change": 17.0,
+      "change_pct": 9.77,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
     },
-    "5230": {
-      "name": "雷笛克光學",
-      "price": 30.3,
-      "prev_close": 27.55,
-      "change": 2.75,
-      "change_pct": 9.982,
+    "5228": {
+      "name": "鈺鎧",
+      "price": 61.9,
+      "prev_close": 63.8,
+      "change": -1.9,
+      "change_pct": -2.978,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1589,6 +1639,16 @@
       "prev_close": 1540.0,
       "change": 5.0,
       "change_pct": 0.325,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "5274": {
+      "name": "信驊",
+      "price": 17500.0,
+      "prev_close": 17350.0,
+      "change": 150.0,
+      "change_pct": 0.865,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1613,12 +1673,22 @@
       "date": "20261014",
       "stale": false
     },
-    "5443": {
-      "name": "均豪",
-      "price": 111.5,
-      "prev_close": 112.0,
-      "change": -0.5,
-      "change_pct": -0.446,
+    "5388": {
+      "name": "中磊",
+      "price": 75.2,
+      "prev_close": 73.5,
+      "change": 1.7,
+      "change_pct": 2.313,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "5465": {
+      "name": "富驊",
+      "price": 36.95,
+      "prev_close": 35.8,
+      "change": 1.15,
+      "change_pct": 3.212,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1643,12 +1713,22 @@
       "date": "20261014",
       "stale": false
     },
-    "5475": {
-      "name": "德宏",
-      "price": 210.0,
-      "prev_close": 206.0,
-      "change": 4.0,
-      "change_pct": 1.942,
+    "5498": {
+      "name": "凱崴",
+      "price": 55.1,
+      "prev_close": 52.0,
+      "change": 3.1,
+      "change_pct": 5.962,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "5521": {
+      "name": "工信",
+      "price": 11.35,
+      "prev_close": 11.2,
+      "change": 0.15,
+      "change_pct": 1.339,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1659,16 +1739,6 @@
       "prev_close": 62.1,
       "change": -0.5,
       "change_pct": -0.805,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "5536": {
-      "name": "聖暉*",
-      "price": 908.0,
-      "prev_close": 895.0,
-      "change": 13.0,
-      "change_pct": 1.453,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1689,16 +1759,6 @@
       "prev_close": 16.95,
       "change": 0.05,
       "change_pct": 0.295,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "5864": {
-      "name": "致和證",
-      "price": 40.55,
-      "prev_close": 39.0,
-      "change": 1.55,
-      "change_pct": 3.974,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1743,6 +1803,16 @@
       "date": "20261014",
       "stale": false
     },
+    "6005": {
+      "name": "群益證",
+      "price": 32.95,
+      "prev_close": 32.25,
+      "change": 0.7,
+      "change_pct": 2.171,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
     "6015": {
       "name": "宏遠證",
       "price": 18.5,
@@ -1759,16 +1829,6 @@
       "prev_close": 23.4,
       "change": 0.5,
       "change_pct": 2.137,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "6021": {
-      "name": "美好證",
-      "price": 57.5,
-      "prev_close": 52.3,
-      "change": 5.2,
-      "change_pct": 9.943,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1793,22 +1853,42 @@
       "date": "20261014",
       "stale": false
     },
-    "6152": {
-      "name": "百一",
-      "price": 18.6,
-      "prev_close": 18.95,
-      "change": -0.35,
-      "change_pct": -1.847,
+    "6127": {
+      "name": "九豪",
+      "price": 64.5,
+      "prev_close": 62.9,
+      "change": 1.6,
+      "change_pct": 2.544,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
     },
-    "6156": {
-      "name": "松上",
-      "price": 26.35,
-      "prev_close": 26.15,
-      "change": 0.2,
-      "change_pct": 0.765,
+    "6141": {
+      "name": "柏承",
+      "price": 54.3,
+      "prev_close": 51.7,
+      "change": 2.6,
+      "change_pct": 5.029,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "6146": {
+      "name": "耕興",
+      "price": 204.0,
+      "prev_close": 196.0,
+      "change": 8.0,
+      "change_pct": 4.082,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "6147": {
+      "name": "頎邦",
+      "price": 232.0,
+      "prev_close": 221.0,
+      "change": 11.0,
+      "change_pct": 4.977,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1829,16 +1909,6 @@
       "prev_close": 46.0,
       "change": -0.3,
       "change_pct": -0.652,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "6196": {
-      "name": "帆宣",
-      "price": 656.0,
-      "prev_close": 641.0,
-      "change": 15.0,
-      "change_pct": 2.34,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1873,16 +1943,6 @@
       "date": "20261014",
       "stale": false
     },
-    "6213": {
-      "name": "聯茂",
-      "price": 856.0,
-      "prev_close": 795.0,
-      "change": 61.0,
-      "change_pct": 7.673,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
     "6214": {
       "name": "精誠",
       "price": 196.0,
@@ -1893,12 +1953,12 @@
       "date": "20261014",
       "stale": false
     },
-    "6225": {
-      "name": "天瀚",
-      "price": 88.2,
-      "prev_close": 80.2,
-      "change": 8.0,
-      "change_pct": 9.975,
+    "6217": {
+      "name": "中探針",
+      "price": 216.5,
+      "prev_close": 197.0,
+      "change": 19.5,
+      "change_pct": 9.898,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1909,16 +1969,6 @@
       "prev_close": 45.0,
       "change": 0.95,
       "change_pct": 2.111,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "6257": {
-      "name": "矽格",
-      "price": 277.0,
-      "prev_close": 279.0,
-      "change": -2.0,
-      "change_pct": -0.717,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1943,12 +1993,32 @@
       "date": "20261014",
       "stale": false
     },
+    "6274": {
+      "name": "台燿",
+      "price": 1735.0,
+      "prev_close": 1655.0,
+      "change": 80.0,
+      "change_pct": 4.834,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
     "6278": {
       "name": "台表科",
       "price": 290.0,
       "prev_close": 264.0,
       "change": 26.0,
       "change_pct": 9.848,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "6409": {
+      "name": "旭隼",
+      "price": 924.0,
+      "prev_close": 854.0,
+      "change": 70.0,
+      "change_pct": 8.197,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1963,12 +2033,12 @@
       "date": "20261014",
       "stale": false
     },
-    "6416": {
-      "name": "瑞祺電通",
-      "price": 118.5,
-      "prev_close": 122.5,
-      "change": -4.0,
-      "change_pct": -3.265,
+    "6438": {
+      "name": "迅得",
+      "price": 182.0,
+      "prev_close": 176.5,
+      "change": 5.5,
+      "change_pct": 3.116,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1983,12 +2053,12 @@
       "date": "20261014",
       "stale": false
     },
-    "6456": {
-      "name": "GIS-KY",
-      "price": 91.2,
-      "prev_close": 97.4,
-      "change": -6.2,
-      "change_pct": -6.366,
+    "6446": {
+      "name": "藥華藥",
+      "price": 1190.0,
+      "prev_close": 1165.0,
+      "change": 25.0,
+      "change_pct": 2.146,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -1999,6 +2069,16 @@
       "prev_close": 119.0,
       "change": 0.5,
       "change_pct": 0.42,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "6526": {
+      "name": "達發",
+      "price": 802.0,
+      "prev_close": 783.0,
+      "change": 19.0,
+      "change_pct": 2.427,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -2053,22 +2133,32 @@
       "date": "20261014",
       "stale": false
     },
+    "6715": {
+      "name": "嘉基",
+      "price": 557.0,
+      "prev_close": 507.0,
+      "change": 50.0,
+      "change_pct": 9.862,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "6781": {
+      "name": "AES-KY",
+      "price": 993.0,
+      "prev_close": 981.0,
+      "change": 12.0,
+      "change_pct": 1.223,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
     "6788": {
       "name": "華景電",
       "price": 375.5,
       "prev_close": 363.0,
       "change": 12.5,
       "change_pct": 3.444,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "6799": {
-      "name": "來頡",
-      "price": 87.3,
-      "prev_close": 86.6,
-      "change": 0.7,
-      "change_pct": 0.808,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -2093,32 +2183,92 @@
       "date": "20261014",
       "stale": false
     },
-    "6877": {
-      "name": "鏵友益",
-      "price": 152.5,
-      "prev_close": 139.0,
+    "6885": {
+      "name": "全福生技",
+      "price": 31.9,
+      "prev_close": 29.0,
+      "change": 2.9,
+      "change_pct": 10.0,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "6901": {
+      "name": "鑽石投資",
+      "price": 17.55,
+      "prev_close": 17.5,
+      "change": 0.05,
+      "change_pct": 0.286,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "6933": {
+      "name": "AMAX-KY",
+      "price": 414.5,
+      "prev_close": 377.0,
+      "change": 37.5,
+      "change_pct": 9.947,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "7556": {
+      "name": "意德士",
+      "price": 286.0,
+      "prev_close": 285.0,
+      "change": 1.0,
+      "change_pct": 0.351,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "7730": {
+      "name": "暉盛-創",
+      "price": 208.0,
+      "prev_close": 211.5,
+      "change": -3.5,
+      "change_pct": -1.655,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "7751": {
+      "name": "竑騰",
+      "price": 1690.0,
+      "prev_close": 1635.0,
+      "change": 55.0,
+      "change_pct": 3.364,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "8016": {
+      "name": "矽創",
+      "price": 300.0,
+      "prev_close": 295.0,
+      "change": 5.0,
+      "change_pct": 1.695,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "8042": {
+      "name": "金山電",
+      "price": 158.0,
+      "prev_close": 144.0,
+      "change": 14.0,
+      "change_pct": 9.722,
+      "time": "13:30:00",
+      "date": "20261014",
+      "stale": false
+    },
+    "8043": {
+      "name": "蜜望實",
+      "price": 150.5,
+      "prev_close": 137.0,
       "change": 13.5,
-      "change_pct": 9.712,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "6944": {
-      "name": "兆聯實業",
-      "price": 815.0,
-      "prev_close": 805.0,
-      "change": 10.0,
-      "change_pct": 1.242,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "7765": {
-      "name": "中華資安",
-      "price": 235.0,
-      "prev_close": 236.0,
-      "change": -1.0,
-      "change_pct": -0.424,
+      "change_pct": 9.854,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -2173,12 +2323,12 @@
       "date": "20261014",
       "stale": false
     },
-    "8131": {
-      "name": "福懋科",
-      "price": 66.9,
-      "prev_close": 65.1,
-      "change": 1.8,
-      "change_pct": 2.765,
+    "8112": {
+      "name": "至上",
+      "price": 85.2,
+      "prev_close": 84.2,
+      "change": 1.0,
+      "change_pct": 1.188,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -2203,16 +2353,6 @@
       "date": "20261014",
       "stale": false
     },
-    "8454": {
-      "name": "富邦媒",
-      "price": 248.5,
-      "prev_close": 242.0,
-      "change": 6.5,
-      "change_pct": 2.686,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
     "8464": {
       "name": "億豐",
       "price": 367.0,
@@ -2223,12 +2363,12 @@
       "date": "20261014",
       "stale": false
     },
-    "8996": {
-      "name": "高力",
-      "price": 1685.0,
-      "prev_close": 1715.0,
-      "change": -30.0,
-      "change_pct": -1.749,
+    "8926": {
+      "name": "台汽電",
+      "price": 59.2,
+      "prev_close": 58.2,
+      "change": 1.0,
+      "change_pct": 1.718,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
@@ -2253,32 +2393,12 @@
       "date": "20261014",
       "stale": false
     },
-    "9938": {
-      "name": "百和",
-      "price": 39.45,
-      "prev_close": 39.5,
-      "change": -0.05,
-      "change_pct": -0.127,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
     "9941": {
       "name": "裕融",
       "price": 77.9,
       "prev_close": 77.6,
       "change": 0.3,
       "change_pct": 0.387,
-      "time": "13:30:00",
-      "date": "20261014",
-      "stale": false
-    },
-    "9945": {
-      "name": "潤泰新",
-      "price": 29.35,
-      "prev_close": 29.15,
-      "change": 0.2,
-      "change_pct": 0.686,
       "time": "13:30:00",
       "date": "20261014",
       "stale": false
