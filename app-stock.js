@@ -884,7 +884,9 @@
     const chart=LWC.createChart(el,{width:el.clientWidth||320,height:220,
       layout:{background:{type:'solid',color:'transparent'},textColor:_cssVar('--ink-3','#9aa0a6')},
       grid:{vertLines:{color:'rgba(128,128,128,.12)'},horzLines:{color:'rgba(128,128,128,.12)'}},
-      rightPriceScale:{borderVisible:false},
+      // 先.九十五-R8：左下 TradingView 標誌（Apache-2.0 授權要求保留署名，不移除）約 19px 高，
+      // 底部留白從預設 10% 加到 20%，K 棒不會畫進標誌那一塊。
+      rightPriceScale:{borderVisible:false,scaleMargins:{top:0.1,bottom:0.2}},
       timeScale:{borderVisible:false,timeVisible:STOCK_CHART.mode==='intraday',secondsVisible:false},
       handleScroll:{vertTouchDrag:false}});
     const up=_cssVar('--up','#ff5257'),down=_cssVar('--down','#24c98a');
@@ -986,7 +988,7 @@
     });
     if(TECH_TOGGLES.vol&&!TECH_CHART.volSeries){
       TECH_CHART.volSeries=TECH_CHART.chart.addSeries(LWC.HistogramSeries,{priceFormat:{type:'volume'},priceScaleId:'tech-vol'});
-      TECH_CHART.chart.priceScale('tech-vol').applyOptions({scaleMargins:{top:0.82,bottom:0}});
+      TECH_CHART.chart.priceScale('tech-vol').applyOptions({scaleMargins:{top:0.74,bottom:0.1}});  // 先.九十五-R8：量能柱底部讓出左下 TradingView 標誌
       TECH_CHART.volSeries.setData(TECH_CHART.volumes);
     }else if(!TECH_TOGGLES.vol&&TECH_CHART.volSeries){
       try{TECH_CHART.chart.removeSeries(TECH_CHART.volSeries)}catch(e){console.warn('[applyTechIndicators:removeVol]',e)}
@@ -1019,7 +1021,7 @@
     const chart=LWC.createChart(el,{width:el.clientWidth||320,height:300,
       layout:{background:{type:'solid',color:'transparent'},textColor:_cssVar('--ink-3','#9aa0a6')},
       grid:{vertLines:{color:'rgba(128,128,128,.12)'},horzLines:{color:'rgba(128,128,128,.12)'}},
-      rightPriceScale:{borderVisible:false},timeScale:{borderVisible:false},handleScroll:{vertTouchDrag:false}});
+      rightPriceScale:{borderVisible:false,scaleMargins:{top:0.1,bottom:0.2}},timeScale:{borderVisible:false},handleScroll:{vertTouchDrag:false}});  // 先.九十五-R8 同上
     const up=_cssVar('--up','#ff5257'),down=_cssVar('--down','#24c98a');
     const candle=chart.addSeries(LWC.CandlestickSeries,{upColor:up,downColor:down,borderVisible:false,wickUpColor:up,wickDownColor:down});
     candle.setData(daily.map(x=>({time:x.time,open:x.open,high:x.high,low:x.low,close:x.close})));
