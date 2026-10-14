@@ -56,7 +56,7 @@ def main() -> int:
         val = pd.Series(0.0, index=[base_day] + seg)
         for m, wm in w.items():
             if m not in tri:
-                tri[m] = pmr.total_return_index(m)
+                tri[m] = pmr.total_return_index_patched(m)   # 先.九十四-1 F1：補官方 TWT49U 缺列的除權息
             p = tri[m].reindex([base_day] + seg).ffill(limit=5)
             if pd.isna(p.iloc[0]):
                 no_px += 1
@@ -77,17 +77,19 @@ def main() -> int:
         by_year[int(y)] = {"te": round(float(dd.std() * np.sqrt(252)), 4), "corr": round(float(g["port"].corr(g["etf"])), 4),
                            "port_ret": round(float((1 + g["port"]).prod() - 1), 4), "etf_ret": round(float((1 + g["etf"]).prod() - 1), 4)}
     verdict = "PASS_合格" if te <= 0.01 else ("REVIEW_送審" if te <= 0.03 else "FAIL_量尺無法重建0050")
-    res = {"generated_at": datetime.now().isoformat(timespec="seconds"), "task": "先.九十三-1b",
+    res = {"generated_at": datetime.now().isoformat(timespec="seconds"), "task": "先.九十四-1c（先.九十三-1b＋F1 重跑）",
            "rules_doc": "research/PIT_MKTCAP_RULES_FIX.md", "period": [df.index[0], df.index[-1]], "n_days": len(df),
            "primary": {"metric": "日頻 TE（年化）", "te_daily": round(te, 4), "verdict": verdict,
                        "thresholds": "≤1% 合格／1～3% 送審／>3% 結案（事前寫死）"},
            "reference_only": {"te_monthly": round(te_m, 4), "corr_daily": round(corr, 4),
-                              "previous_monthly_reconstitution_te_daily": 0.0446},
+                              "previous_monthly_reconstitution_te_daily": 0.0446,
+                              "previous_rules_run_te_daily_93_1b": 0.0446},
            "by_year": by_year,
            "n_changes": len(sched), "changes": [{k2: v for k2, v in s.items() if k2 != "members"} for s in sched],
            "tsmc_weight_at_reviews": {d: round(v, 4) for d, v in tsmc_w},
            "weight_starts_without_price": no_px,
            "not_implemented": ["N1 自由流通市值加權（無免費官方流通係數歷史）", "N2 最低流通量", "N3 流動性篩選", "N4 全額交割股排除"],
+           "fix_list": "research/PIT_MKTCAP_RULES_FIX.md 先.九十四-1 F1",
            "requests_made": 0}
     OUT.write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
     print(json.dumps({k: res[k] for k in ("period", "primary", "reference_only", "n_changes", "weight_starts_without_price")}, ensure_ascii=False, indent=1))

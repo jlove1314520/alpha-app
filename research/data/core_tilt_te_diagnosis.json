@@ -1,0 +1,408 @@
+{
+ "generated_at": "2026-10-14T16:46:53",
+ "task": "先.九十四-1a／1b",
+ "period": [
+  "2013-07-01",
+  "2024-12-31"
+ ],
+ "n_days": 2816,
+ "a_rules_took_effect": {
+  "days_compared": 2816,
+  "days_with_different_names": 2816,
+  "avg_names_different": 2.65,
+  "max_names_different": 8.0,
+  "avg_one_way_weight_diff": 0.0179,
+  "max_one_way_weight_diff": 0.061,
+  "te_daily_rules_vs_monthly": 0.0065,
+  "te_daily_rules_vs_etf": 0.04428,
+  "te_daily_monthly_vs_etf": 0.04456,
+  "cum_rules": 3.7259,
+  "cum_monthly": 3.7826,
+  "n_rule_changes": 51,
+  "sample_day": "2019-03-26",
+  "sample_only_in_rules": [
+   "2492",
+   "2888",
+   "3481"
+  ],
+  "sample_only_in_monthly": [
+   "2301",
+   "3034",
+   "9910"
+  ]
+ },
+ "b1_dividends": {
+  "by_year": {
+   "2013": {
+    "port_tri": 0.0646,
+    "port_px": 0.0171,
+    "port_div": 0.0475,
+    "etf_tri": 0.0904,
+    "etf_px": 0.0653,
+    "etf_div": 0.0251,
+    "gap_tri": -0.0258,
+    "gap_px": -0.0482
+   },
+   "2014": {
+    "port_tri": 0.146,
+    "port_px": 0.0961,
+    "port_div": 0.0499,
+    "etf_tri": 0.1666,
+    "etf_px": 0.1388,
+    "etf_div": 0.0278,
+    "gap_tri": -0.0206,
+    "gap_px": -0.0427
+   },
+   "2015": {
+    "port_tri": -0.0482,
+    "port_px": -0.0913,
+    "port_div": 0.0431,
+    "etf_tri": -0.0628,
+    "etf_px": -0.0912,
+    "etf_div": 0.0284,
+    "gap_tri": 0.0146,
+    "gap_px": -0.0001
+   },
+   "2016": {
+    "port_tri": 0.1962,
+    "port_px": 0.1341,
+    "port_div": 0.0621,
+    "etf_tri": 0.1965,
+    "etf_px": 0.1819,
+    "etf_div": 0.0146,
+    "gap_tri": -0.0003,
+    "gap_px": -0.0477
+   },
+   "2017": {
+    "port_tri": 0.174,
+    "port_px": 0.1271,
+    "port_div": 0.0469,
+    "etf_tri": 0.1814,
+    "etf_px": 0.1442,
+    "etf_div": 0.0372,
+    "gap_tri": -0.0074,
+    "gap_px": -0.0171
+   },
+   "2018": {
+    "port_tri": -0.0258,
+    "port_px": -0.0687,
+    "port_div": 0.0429,
+    "etf_tri": -0.0494,
+    "etf_px": -0.0809,
+    "etf_div": 0.0316,
+    "gap_tri": 0.0236,
+    "gap_px": 0.0123
+   },
+   "2019": {
+    "port_tri": 0.2868,
+    "port_px": 0.2252,
+    "port_div": 0.0617,
+    "etf_tri": 0.3352,
+    "etf_px": 0.2841,
+    "etf_div": 0.0511,
+    "gap_tri": -0.0484,
+    "gap_px": -0.0589
+   },
+   "2020": {
+    "port_tri": 0.2778,
+    "port_px": 0.2309,
+    "port_div": 0.0468,
+    "etf_tri": 0.3114,
+    "etf_px": 0.261,
+    "etf_div": 0.0504,
+    "gap_tri": -0.0336,
+    "gap_px": -0.03
+   },
+   "2021": {
+    "port_tri": 0.2301,
+    "port_px": 0.1976,
+    "port_div": 0.0325,
+    "etf_tri": 0.2192,
+    "etf_px": 0.1902,
+    "etf_div": 0.029,
+    "gap_tri": 0.0109,
+    "gap_px": 0.0074
+   },
+   "2022": {
+    "port_tri": -0.1949,
+    "port_px": -0.2495,
+    "port_div": 0.0546,
+    "etf_tri": -0.2137,
+    "etf_px": -0.2426,
+    "etf_div": 0.0289,
+    "gap_tri": 0.0188,
+    "gap_px": -0.0069
+   },
+   "2023": {
+    "port_tri": 0.2734,
+    "port_px": 0.2228,
+    "port_div": 0.0506,
+    "etf_tri": 0.2752,
+    "etf_px": 0.2291,
+    "etf_div": 0.046,
+    "gap_tri": -0.0018,
+    "gap_px": -0.0063
+   },
+   "2024": {
+    "port_tri": 0.4345,
+    "port_px": 0.3963,
+    "port_div": 0.0382,
+    "etf_tri": 0.4864,
+    "etf_px": 0.4452,
+    "etf_div": 0.0413,
+    "gap_tri": -0.0519,
+    "gap_px": -0.0489
+   }
+  },
+  "avg_annual_div_port": 0.0481,
+  "avg_annual_div_etf": 0.0343,
+  "te_daily_price_only": 0.0528,
+  "holdings_without_event_cache_max_weight": {
+   "2311": 0.0209,
+   "2325": 0.0109,
+   "2823": 0.0064,
+   "5876": 0.0112
+  },
+  "official_twt49u_check": {
+   "holdings_with_missing_events": {
+    "1476": 1,
+    "1590": 2,
+    "2301": 1,
+    "2303": 2,
+    "2308": 1,
+    "2311": 6,
+    "2324": 1,
+    "2325": 5,
+    "2327": 1,
+    "2379": 1,
+    "2408": 1,
+    "2409": 3,
+    "2454": 2,
+    "2492": 1,
+    "2603": 3,
+    "2609": 1,
+    "2615": 1,
+    "2823": 13,
+    "2881": 4,
+    "2882": 3,
+    "2884": 3,
+    "2886": 3,
+    "2887": 1,
+    "2888": 5,
+    "2890": 2,
+    "2891": 1,
+    "3017": 1,
+    "3481": 2,
+    "3711": 1,
+    "5871": 1,
+    "5876": 8,
+    "5880": 3,
+    "6415": 2,
+    "8046": 4
+   },
+   "missed_dividend_return_by_year": {
+    "2013": 0.002,
+    "2014": 0.0026,
+    "2015": 0.0022,
+    "2016": 0.0015,
+    "2017": 0.0016,
+    "2018": 0.0014,
+    "2019": 0.001,
+    "2020": 0.0014,
+    "2021": 0.0028,
+    "2022": 0.0031,
+    "2023": 0.0029,
+    "2024": 0.0015
+   },
+   "etf_0050_missing_events": 0,
+   "te_daily_after_patch": 0.04427,
+   "cum_after_patch": 3.8342
+  }
+ },
+ "b2_stale_prices": {
+  "days_with_any_stale_member": 63,
+  "n_days": 2816,
+  "avg_stale_weight": 0.00039,
+  "max_stale_weight": 0.0847,
+  "te_daily_clean_days_only": 0.0443,
+  "diff_autocorr_lag1": -0.418,
+  "corr_port_t_etf_t_minus_1": -0.008,
+  "corr_port_t_etf_t_plus_1": -0.003,
+  "te_by_aggregation_annualized": {
+   "1d": 0.0443,
+   "2d": 0.0344,
+   "5d": 0.0259,
+   "21d": 0.02
+  },
+  "etf_days_missing_in_cache": 0
+ },
+ "b3_weights_N1": {
+  "top10_by_our_weight_at_end": [
+   "2330",
+   "2317",
+   "2454",
+   "2881",
+   "2308",
+   "2382",
+   "2882",
+   "2412",
+   "2891",
+   "3711"
+  ],
+  "regression": {
+   "all": {
+    "implied_weight_gap_etf_minus_ours": {
+     "2330": 0.0213,
+     "2317": 0.008,
+     "2454": 0.0164,
+     "2881": 0.0075,
+     "2308": -0.0009,
+     "2382": 0.0059,
+     "2882": -0.0108,
+     "2412": -0.0066,
+     "2891": 0.0125,
+     "3711": 0.022
+    },
+    "r2": 0.027,
+    "te_unexplained": 0.0437,
+    "te_total": 0.0443
+   },
+   "2019_2024": {
+    "implied_weight_gap_etf_minus_ours": {
+     "2330": 0.0705,
+     "2317": 0.019,
+     "2454": 0.0221,
+     "2881": 0.0041,
+     "2308": 0.0029,
+     "2382": 0.0045,
+     "2882": -0.0034,
+     "2412": 0.0068,
+     "2891": 0.0161,
+     "3711": 0.0244
+    },
+    "r2": 0.053,
+    "te_unexplained": 0.043,
+    "te_total": 0.0441
+   }
+  },
+  "tsmc_weight_ours_samples": {
+   "2013-07-01": 0.1962,
+   "2019-03-26": 0.2942,
+   "2024-12-31": 0.5329
+  }
+ },
+ "official_index_decomposition": {
+  "n_days": 2816,
+  "te_daily_etf_vs_index_tr": 0.0439,
+  "te_daily_ours_vs_index_tr": 0.0172,
+  "te_daily_ours_vs_etf": 0.0443,
+  "autocorr_lag1_etf_minus_index": -0.455,
+  "autocorr_lag1_ours_minus_index": 0.016,
+  "corr_ours_index": 0.9963,
+  "te_by_aggregation": {
+   "1d": {
+    "etf_vs_index": 0.0439,
+    "ours_vs_index": 0.0172,
+    "ours_vs_etf": 0.0443
+   },
+   "5d": {
+    "etf_vs_index": 0.0222,
+    "ours_vs_index": 0.0175,
+    "ours_vs_etf": 0.0258
+   },
+   "21d": {
+    "etf_vs_index": 0.0122,
+    "ours_vs_index": 0.0181,
+    "ours_vs_etf": 0.0197
+   }
+  },
+  "by_year": {
+   "2013": {
+    "ours": 0.0668,
+    "index_tr": 0.0747,
+    "etf": 0.0904,
+    "ours_minus_index": -0.0078,
+    "etf_minus_index": 0.0158
+   },
+   "2014": {
+    "ours": 0.1488,
+    "index_tr": 0.1761,
+    "etf": 0.1666,
+    "ours_minus_index": -0.0273,
+    "etf_minus_index": -0.0095
+   },
+   "2015": {
+    "ours": -0.0461,
+    "index_tr": -0.0569,
+    "etf": -0.0628,
+    "ours_minus_index": 0.0108,
+    "etf_minus_index": -0.0059
+   },
+   "2016": {
+    "ours": 0.1978,
+    "index_tr": 0.1912,
+    "etf": 0.1965,
+    "ours_minus_index": 0.0066,
+    "etf_minus_index": 0.0053
+   },
+   "2017": {
+    "ours": 0.1758,
+    "index_tr": 0.1883,
+    "etf": 0.1814,
+    "ours_minus_index": -0.0125,
+    "etf_minus_index": -0.0069
+   },
+   "2018": {
+    "ours": -0.0246,
+    "index_tr": -0.0442,
+    "etf": -0.0494,
+    "ours_minus_index": 0.0196,
+    "etf_minus_index": -0.0052
+   },
+   "2019": {
+    "ours": 0.2881,
+    "index_tr": 0.3371,
+    "etf": 0.3352,
+    "ours_minus_index": -0.0491,
+    "etf_minus_index": -0.0019
+   },
+   "2020": {
+    "ours": 0.2794,
+    "index_tr": 0.3226,
+    "etf": 0.3114,
+    "ours_minus_index": -0.0432,
+    "etf_minus_index": -0.0112
+   },
+   "2021": {
+    "ours": 0.2334,
+    "index_tr": 0.2242,
+    "etf": 0.2192,
+    "ours_minus_index": 0.0092,
+    "etf_minus_index": -0.0049
+   },
+   "2022": {
+    "ours": -0.1926,
+    "index_tr": -0.2149,
+    "etf": -0.2137,
+    "ours_minus_index": 0.0223,
+    "etf_minus_index": 0.0012
+   },
+   "2023": {
+    "ours": 0.2769,
+    "index_tr": 0.2934,
+    "etf": 0.2752,
+    "ours_minus_index": -0.0166,
+    "etf_minus_index": -0.0183
+   },
+   "2024": {
+    "ours": 0.4365,
+    "index_tr": 0.4896,
+    "etf": 0.4864,
+    "ours_minus_index": -0.0531,
+    "etf_minus_index": -0.0032
+   }
+  },
+  "note": "主判定不變（對 0050 含息）；這裡只拆解誤差來源"
+ },
+ "requests_made": 0
+}

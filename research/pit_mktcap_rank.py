@@ -498,3 +498,55 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+# ── 先.九十四-1（2026-10-14）：FinMind 缺列的除權息事件用證交所官方 TWT49U 補上 ──
+OFFICIAL_EXRIGHT = HERE / "data" / "twse_exright_2013_2024.csv"   # research/fetch_twse_exright_history.py 產生
+
+
+@lru_cache(maxsize=1)
+def _official_exright() -> dict:
+    if not OFFICIAL_EXRIGHT.exists():
+        return {}
+    df = pd.read_csv(OFFICIAL_EXRIGHT, dtype={"stock_id": str, "date": str})
+    return {sid: list(zip(g["date"], g["factor"])) for sid, g in df.groupby("stock_id")}
+
+
+def missing_official_events(sid: str) -> list[tuple[str, float]]:
+    """官方 TWT49U 有、但 total_return_index() 在除權息日沒有反映的事件（含息報酬≈不含息報酬）。
+    判定：當天 (1+含息報酬)/(1+原始報酬) 與 1/係數 的差距 > 一半的事件幅度 → 視為缺列。"""
+    ev = _official_exright().get(sid, [])
+    if not ev:
+        return []
+    tri = total_return_index(sid)
+    cs = close_series(sid)
+    if tri.empty:
+        return []
+    out = []
+    idx = list(tri.index)
+    pos = {d: i for i, d in enumerate(idx)}
+    for d, f in ev:
+        if d not in pos or pos[d] == 0 or not (0 < f < 1):
+            continue
+        i = pos[d]
+        r_tri = tri.iloc[i] / tri.iloc[i - 1]
+        r_px = cs.loc[d] / cs.loc[idx[i - 1]]
+        want = 1 / f
+        if abs(r_tri / r_px - want) > 0.5 * abs(want - 1):
+            out.append((d, float(f)))
+    return out
+
+
+@lru_cache(maxsize=4096)
+def total_return_index_patched(sid: str) -> pd.Series:
+    """total_return_index()＋官方 TWT49U 補上 FinMind 缺列的除權息事件（除權息日報酬乘 1/係數）。"""
+    tri = total_return_index(sid)
+    miss = missing_official_events(sid)
+    if tri.empty or not miss:
+        return tri
+    ret = tri / tri.shift(1)
+    for d, f in miss:
+        ret.loc[d] = ret.loc[d] / f
+    out = ret.fillna(1.0).cumprod() * float(tri.iloc[0])
+    out.attrs["patched_events"] = miss
+    return out
