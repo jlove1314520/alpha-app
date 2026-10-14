@@ -19912,7 +19912,7 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
 
 - [ ] **研究室.二-驗收 （補件，來源：研究室.二 驗收門檻需累積 20 個交易日）2026-11-12 起讀 data/research.json 的 meta.coverage.with_foreign 是否 ≥1,900（修正 2026-10-15 生效、只往後累積不回補；with_foreign 要求近 20 個交易日外資無缺值）；未達就列出仍缺值的上櫃代號數與缺值日期**（互動視窗執行；時間閘：2026-11-12 後）
 
-- [ ] **研究室.三 月營收歷史補齊（App 顯示用回補檔）**（DevQueue 可執行）
+- [ ] **研究室.三 月營收歷史補齊（App 顯示用回補檔）**〔互動視窗執行中〕（DevQueue 可執行）
   做法：
   1. 新寫 `scripts/backfill_revenue_display.py`：用 FinMind `TaiwanStockMonthRevenue`，以「月份」為單位抓全市場（不帶 data_id），補 2024-12～2026-06 共 19 次請求。節流共用 rate_limit_state，token 讀環境變數。
   2. 寫入 `data/revenue_backfill.json`，格式為 `{"meta":{source,generated_at,months}, "stocks":{代號:[{year,month,revenue,yoy}]}}`。不改 fundamentals.json。
