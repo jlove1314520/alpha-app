@@ -4740,6 +4740,37 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { rmErrs.push(`測試本身出錯：${e.message || e}`); }
   record("146. 減少動態效果：手機設定開啟時淡入／閃色／分頁過場／骨架／長條／開關動畫時間為 0，閃色仍會自動移除（先.九十四-5e）", rmErrs.length === 0, rmErrs.join("; ") || rmInfo);
 
+  // 147.【先.九十四-5f】「跟 0050 差多少」改中性色＋領先／落後文字：該欄不得帶 pos／neg（漲跌色只留給真實漲跌）。
+  const vsGapErrs = [];
+  let vsGapInfo = "";
+  try {
+    const r = await page.evaluate(() => {
+      if (typeof scMetricsHtml !== "function" || typeof _scVs !== "function") return { err: "scMetricsHtml／_scVs 未載入" };
+      const box = document.createElement("div");
+      const rows = [-45.81, 12.3, 0, null].map(g => {
+        box.innerHTML = scMetricsHtml({ goal: "x", status: "模擬中", metrics: { cum_pct: -3, cum_gap_pp: g, mdd_pct: 5, days: 10, bench_cum_pct: 1 } });
+        const s = [...box.querySelectorAll(".sc-metrics .s")].find(d => /跟 0050 差多少/.test(d.textContent));
+        const b = s && s.querySelector("b");
+        return { g, txt: b ? b.textContent : null, cls: b ? b.className : null };
+      });
+      const live = [...document.querySelectorAll(".sc-gap")].map(e => ({ txt: e.textContent, cls: e.className }));
+      return { rows, live, vs: [_scVs(-0.04), _scVs(2)] };
+    });
+    if (r.err) vsGapErrs.push(r.err);
+    else {
+      const want = { "-45.81": /^落後 45\.8 點$/, "12.3": /^領先 12\.3 點$/, "0": /^持平 0\.0 點$/, "null": /^—$/ };
+      for (const x of r.rows) {
+        if (!x.txt) { vsGapErrs.push(`差距 ${x.g} 找不到「跟 0050 差多少」欄`); continue; }
+        if (/\b(pos|neg)\b/.test(x.cls || "")) vsGapErrs.push(`差距 ${x.g} 仍帶漲跌色 class：${x.cls}`);
+        if (!want[String(x.g)].test(x.txt)) vsGapErrs.push(`差距 ${x.g} 文字不對：${x.txt}`);
+      }
+      if (r.vs[0] !== "持平 0.0 點" || r.vs[1] !== "領先 2.0 點") vsGapErrs.push(`_scVs 邊界不對：${r.vs.join("／")}`);
+      for (const e of r.live) if (/\b(pos|neg)\b/.test(e.cls)) vsGapErrs.push(`畫面上差距欄仍帶漲跌色：${e.txt}`);
+      vsGapInfo = `樣本：${r.rows.map(x => x.txt).join("／")}；畫面上差距欄 ${r.live.length} 個`;
+    }
+  } catch (e) { vsGapErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("147. 「跟 0050 差多少」用中性色＋領先／落後文字，不帶漲跌色 pos／neg（先.九十四-5f）", vsGapErrs.length === 0, vsGapErrs.join("; ") || vsGapInfo);
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4768,7 +4799,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144/146新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144/146/147新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

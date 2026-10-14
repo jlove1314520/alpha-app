@@ -1362,6 +1362,8 @@
     ['pointerup','pointercancel','pointerleave'].forEach(t=>svg.addEventListener(t,()=>{down=false;hide()}));
   }
   const _scPp=v=>v==null?'—':`${v>=0?'+':''}${Number(v).toFixed(1)} 點`;
+  // 先.九十四-5f：「跟 0050 差多少」是相對比較、不是漲跌，用中性色＋「領先／落後」文字，漲跌色只留給真實漲跌
+  const _scVs=v=>{if(v==null||!isFinite(Number(v)))return '—';const n=Number(v),a=Math.abs(n).toFixed(1);return a==='0.0'?'持平 0.0 點':`${n>0?'領先':'落後'} ${a} 點`};
   const _scGap=v=>v==null?'—':(v>0?'+':v<0?'−':'')+Math.abs(Number(v)).toFixed(1);
   const _scPct=v=>v==null?'—':`${Number(v).toFixed(2)}%`;
   const SC_STATUS_COLOR={'真錢':'var(--accent)','模擬中':'var(--ink-2)','紙上追蹤中':'var(--ink-2)','回測通過':'var(--good)','回測未通過':'var(--critical)','未回測':'var(--warn)'};
@@ -1372,7 +1374,7 @@
     return `<div class="note sc-goal" style="margin:0 0 4px">設計目標：<b style="color:var(--ink-2)">${l.goal||'未標示'}</b>　${scStatusTag(l.status)}</div>
     <div class="bot-stats sc-metrics" style="margin:6px 0">
       <div class="s"><span>賺賠％</span><b class="${(m.cum_pct||0)>=0?'pos':'neg'}">${m.cum_pct==null?'—':(m.cum_pct>=0?'+':'')+Number(m.cum_pct).toFixed(1)+'%'}</b></div>
-      <div class="s"><span>跟 0050 差多少</span><b class="${(m.cum_gap_pp||0)>=0?'pos':'neg'}">${_scPp(m.cum_gap_pp)}</b></div>
+      <div class="s"><span>跟 0050 差多少</span><b class="sc-gap" style="color:var(--ink)">${_scVs(m.cum_gap_pp)}</b></div>
       <div class="s"><span>最大跌幅</span><b>${_scPct(m.mdd_pct)}</b></div>
     </div>
     <div class="note" style="margin-bottom:4px">${m.days||0} 個交易日；同期 0050 ${_scPct(m.bench_cum_pct)}${m.days>=60&&m.ann_gap_pp!=null?'；每年約差 '+_scPp(m.ann_gap_pp):''}</div>
@@ -1488,7 +1490,7 @@
     const cells=[];
     if(H.backtest&&H.backtest.cagr!=null)cells.push(`<div class="s" data-seg="backtest"><span>回測</span><b>年化 ${(H.backtest.cagr*100).toFixed(1)}%</b><span style="font-size:10px">最大跌幅 ${(H.backtest.mdd*100).toFixed(1)}%${H.backtest.mdd<=-0.45?'<b class="sc-survival-near" style="color:var(--warn)">（接近天條一）</b>':''}</span></div>`);
     // 先.八十-8：樣本外格同時寫「策略 +X%／0050 +Y%」，再附差幾點
-    if(H.oos&&H.oos.cum_return!=null&&B&&B.cum_return!=null){const g=(H.oos.cum_return-B.cum_return)*100,sp=v=>(v>=0?'+':'')+(v*100).toFixed(1)+'%';cells.push(`<div class="s" data-seg="oos"><span>樣本外</span><b class="sc-oos-pair">策略 ${sp(H.oos.cum_return)}／0050 ${sp(B.cum_return)}</b><span style="font-size:10px" class="${g>=0?'pos':'neg'}">差 ${_scPp(g)}</span></div>`)}
+    if(H.oos&&H.oos.cum_return!=null&&B&&B.cum_return!=null){const g=(H.oos.cum_return-B.cum_return)*100,sp=v=>(v>=0?'+':'')+(v*100).toFixed(1)+'%';cells.push(`<div class="s" data-seg="oos"><span>樣本外</span><b class="sc-oos-pair">策略 ${sp(H.oos.cum_return)}／0050 ${sp(B.cum_return)}</b><span style="font-size:10px;color:var(--ink-2)" class="sc-gap">${_scVs(g)}</span></div>`)}
     const m=l.metrics||{};
     cells.push(`<div class="s" data-seg="paper"><span>紙上</span><b>${scHasData(l)&&m.days>=60?_scPp(m.cum_gap_pp):'尚不足以判斷'}</b><span style="font-size:10px">${scHasData(l)?(m.days||0)+' 個交易日':'還沒開始'}</span></div>`);
     return `<div class="bot-stats sc-hist-metrics" style="margin:6px 0">${cells.join('')}</div>`;
@@ -4201,7 +4203,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-14.1818';
+  const APP_VERSION='2026-10-14.1824';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
