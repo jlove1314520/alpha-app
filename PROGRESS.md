@@ -1,3 +1,9 @@
+## 2026-10-14 21:59（互動視窗）先.八十四-5 AlphaMarketCatchup 10/14 首跑照實結案（失敗＋已修）
+
+- 照實結案：10/14 17:30 AlphaMarketCatchup **首跑失敗**。排程器顯示「上次結果 0」，但心跳檔 `research/data/market_local_catchup.jsonl` 沒有 10/14 的紀錄，`market_local_catchup_stdout.log` 也沒有產生——程式一行都沒跑。
+- 根因：`C:\alpha\run-market-catchup.ps1` 存成不帶 BOM 的 UTF-8，Windows PowerShell 5.1 用 cp950 讀，中文註解吃掉換行，`$repoDir = ...` 那行被併進註解；`Set-Location $null` 失敗後停在 System32，`python scripts\...` 找不到檔被 `try{}catch{}` 吞掉，所以排程照樣回報 0。
+- 修正與驗證見先.九十七-1（同一輪）：5 支啟動檔改存 UTF-8 含 BOM；21:43 本機補跑成功；21:58 排程自動觸發實測寫出心跳 `landed`。
+
 ## 2026-10-14 21:43（互動視窗）先.九十七-4 接受先.九十五-R9 NameError 修正，AWAITING 結案
 
 - 總司令裁示先.九十七-4：接受先.九十五-R9（`research/generate_scores_future.py` 過期價格過濾 NameError 修正；有排名者名次變動 0 檔），`research/AWAITING_REVIEW.md` 該列移到已結案。
