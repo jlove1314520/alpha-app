@@ -1,3 +1,23 @@
+## 2026-10-14 21:05（DevQueue 20261014-203102）先.九十五-R3、R4、R9、R8、R5、R11、先.九十六-R1＋SW 空值順手修
+
+等待總司令審閱：4 件（先.九十六-1 core_tilt v2 第 1 階段 PREREG 草稿，約 1 小時；先.九十五-R2 market.yml 雲端排程沒準時跑，20:03 起約 1 小時；先.九十五-R9 未來性濾網過期價格過濾修好後少 1 檔，20:45 起；先.九十六-R1 推介用語全頁走查 10 列待決定改哪幾列，20:54 起）
+
+- **先.九十五-R3 淺色 WCAG 對比**（`17f440c36`）：逐組算淺色文字 token 對 --page／卡片白／卡片漸層終點；未達 4.5 的 8 個（--ink-4 4.04、--gold／--accent 4.14、--up 4.37、--down 3.65、--warn 3.84、--good 4.00、--serious 4.02）只調 HSL 亮度到 ≥4.6，只動 `:root[data-theme="light"]`。
+  證據：docs/UX_AUDIT.md 前後表；docs/ux_shots/contrast_r3/ 淺色前後 6 張；深色 6 頁像素比對 5 張完全相同、設定頁 7×8px 狀態點差異；冒煙 152 全過。
+  [自行裁量] 一律用小字 4.5 門檻＋0.1 餘裕；--down-deep 跟著調深保層次。未涵蓋：半透明膠囊底、寫死在 JS 的顏色（已補件 R2、R3）。
+- **先.九十五-R4 美股方法論直接開美股段**（`fbe8be15b`）：`openMethodSheet('us')` 只顯示 `#method-us-body`，存活者偏誤但書（`US_SURVIVORSHIP_CAVEAT` 原文）置頂紅框，台股三榜切換隱藏；台股入口不變。
+  證據：冒煙新增 #154（393×852 但書在 346～400px）；全套 153 全過。未在總司令手機看過。
+- **先.九十五-R9 未來性濾網 NameError**（`c95636b2a`）：`generate_scores_future.py` main 內自己讀 price_history（momentum 已於 09-27 修過，本機重跑確認正常）。修前 log「過期價格過濾失敗（NameError）」→ 修後「剔除價格落後超過30天的代號：1 檔」。榜單差異只少 1589 永冠-KY（本來無排名）、名次變動 0；依分支列 AWAITING。本機重跑的 scores_*.json 已還原不提交。
+- **先.九十五-R8 K 線 TradingView 標誌**（`edd850d71`）：保留 Apache-2.0 署名，價格軸底部留白 10%→20%、量能柱讓出底部。前後截圖 docs/ux_shots/r8_before_2330.png／r8_after_2330.png（最低 K 棒底 535px、標誌頂 544px）。冒煙 153 全過。技術型態分頁未另外截圖。
+- **先.九十五-R5 央行理監事會 2015～2017**（`6eed02d2c`）：`research/fetch_cbc_meeting_dates.py` → 本機 `research/data/cbc_meeting_dates.json` 12 場（3 次調降＋1 次推導調降、8 次維持），14 次請求、`cbc_www` 節流 ≥3 秒。
+  [自行裁量] 第三方媒體交叉核對沒做，改用新聞稿之間「由年息 X%」鏈條自我核對（全對得上）；105/03/24 版型不同，由前後兩篇推導並標註。
+- **先.九十五-R11 加權指數 1999～2010 開高低收**（`f12ab22a4`）：`research/fetch_taiex_open_hist.py` 144 次請求全 200、3,021 個交易日存本機；robots 允許；C:\alpha\CLAUDE.md 頻率清單補兩段（該檔不在 git）。[自行裁量] User-Agent 用誠實的 alpha-research 字串。未查官方「早年開盤指數」定義。
+- **先.九十六-R1 推介用語全頁走查**（`5051d6b84`）：393×852 匯出六分頁、個股頁四子分頁、AAPL、方法論視窗、全部 ⓘ／⚠ 展開內容逐段讀過，10 列＋1 則觀察寫進 UX_REDESIGN_PROPOSAL ⑥「全頁走查補充」，只列未改，列 AWAITING。沒讀到的範圍（搜尋結果、評分報告展開、toast／推播）已補件 R5。
+- **順手修（純 bug）SW register 回空值**（本 commit）：走查時每頁都出現紅色「偵測到程式錯誤：serviceWorker — Cannot read properties of undefined (reading 'waiting')」，原因是 SW 被封鎖時 `register()` 回 undefined 又直接傳進 `watchSwUpdate()`；加空值判斷改成 console.warn。真機一般不會遇到（推定），只在 SW 被封鎖時。
+  冒煙：第一次 152 過、#18 IBKR 卡「promise was garbage collected」（上一輪也出現過的 Playwright 不穩定項，該卡未動）；重跑結果：重跑 153 項全部通過。
+- **佇列補件**：本輪做完後 DevQueue 可執行 0 項，補 4 項（先.九十六-R2 半透明底對比、R3 寫死顏色清點、R4 減少動態逐條核對、R5 補讀推介用語），來源皆 UX_AUDIT／UX_REDESIGN_PROPOSAL。補完 `- [ ]` 10 項、DevQueue 可執行 4 項，**仍低於 12／6 門檻**：BACKLOG 剩下的 🔄 項（B23／B24 PIT 回測）屬研究試驗、不得補；DATA_GAP_PLAN 甲類已全數抓完（#47 處置股早已有 disposal_history_*.json、#13 本輪抓完）；全檢（先.八十）節沒有未完成項——**四個來源就本輪檢查範圍已用盡**，不湊數。
+- 下一步：先.九十六-R2～R5；R6（10/28 後）、R7（10/15～10/21 權證快照首週）時間閘未到；先.八十四-5～7、先.九十二-B2 屬互動視窗。
+
 ## 2026-10-14 20:25（互動視窗）先.九十六-2 「跟 0050 比」未滿 60 天收合＋進場類用語改中性
 
 - ① 首頁不改、④ 交易／日誌分頁不降權：照裁示不動，記入 docs/UX_REDESIGN_PROPOSAL.md 待裁示段落（⚠️ 已裁示註記，原文保留）；先.九十五-R8 標 [x]。

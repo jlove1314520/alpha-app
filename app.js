@@ -4408,7 +4408,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-14.2050';
+  const APP_VERSION='2026-10-14.2105';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
@@ -4585,6 +4585,8 @@
     .then(()=>pullSettingsOnce()));  // 2026-09-15（CF.6／稽核.四）連上即時伺服器後拉一次跨裝置設定
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('sw.js').then(reg=>{
+      // 先.九十六-R1 走查順手修：SW 被瀏覽器／測試環境封鎖時 register() 會回 undefined，不是程式錯誤，跳過即可
+      if(!reg){console.warn('[serviceWorker] register 回傳空值（SW 被封鎖或不支援），略過更新監看');return}
       watchSwUpdate(reg);
       // 先.八十一-7（第二招：合併重複抓取）：register() 本身就會檢查 sw.js 有沒有新版，啟動時不再多叫一次 reg.update()（量測顯示 sw.js 被抓兩次）
     }).catch(e=>{console.warn('[serviceWorker]',e);recordGlobalError('serviceWorker',e)});
