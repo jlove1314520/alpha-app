@@ -43,7 +43,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(mq.addEventListener)mq.addEventListener('change',h);else if(mq.addListener)mq.addListener(h)}
 })();
 </script>
-<link rel="stylesheet" href="app.css?v=2026-10-15.0002">
+<link rel="stylesheet" href="app.css?v=2026-10-15.0057">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -1429,7 +1429,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="sheet" id="ibkr-sheet">
     <div class="grab"></div>
     <h2>IBKR Paper 下單 <span style="font-size:11px;color:var(--warn);font-weight:400">模擬帳戶</span></h2>
-    <div class="note" style="margin:-6px 0 10px">⚠ 僅限IBKR Paper（模擬）帳戶，非投資建議，不構成買賣訊號。需先在本機另開終端機執行 <code>python research/ibkr_order_server.py</code>，App無法自動幫你啟動它。真實送單一律由你在本頁親自按下「送出」，App不會自動送單。</div>
+    <div class="note" style="margin:-6px 0 10px">⚠ 僅限IBKR Paper（模擬）帳戶，非投資建議，不構成買賣訊號。需先在本機另開終端機執行 <code>python research/ibkr_order_server.py</code>，App無法自動幫你啟動它。真實送單一律由你在本頁親自按下「送出」，App不會自動送單。這段只講 IBKR Paper 模擬帳戶；台股真錢自動投資另見設定頁。</div>
     <div class="frow"><span>連線狀態</span><b id="ibkr-health">檢查中…</b></div>
     <div class="frow"><span>標的</span><b id="ibkr-symbol">—</b></div>
     <div class="frow"><span>方向</span>
@@ -1510,6 +1510,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-15.0002"></script>
+<script src="app.js?v=2026-10-15.0057"></script>
 </body>
 </html>

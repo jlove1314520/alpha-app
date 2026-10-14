@@ -5020,7 +5020,7 @@ async function runSmokeTest(baseUrl, headless = true) {
       .map(f => fsq.readFileSync(f, "utf8").split("\n").filter(l => !/^\s*(\/\/|<!--)/.test(l)).join("\n")).join("\n");
     for (const w of ["AI 選股</div>", "資金流入中", "<h3>選股理由</h3>", "越低越便宜", "量能突破倍數", "動能訊號，非流動性", "正在出貨", "產生下單計畫", "📋 下單計畫", "AI 綜合評分排行", "動能訊號，財報只當", "土洋同買訊號", "勝算估計", "達標機率", "送出 Paper 委託", "'送出買進'"])
       if (src.includes(w)) wordErrs.push(`仍出現舊用語「${w}」`);
-    for (const w of ["setIbkrSide('BUY')\">模擬買進", "setIbkrSide('SELL')\">模擬賣出", "送出模擬委託（IBKR Paper）", "第三方資料", "假設情境"])
+    for (const w of ["setIbkrSide('BUY')\">模擬買進", "setIbkrSide('SELL')\">模擬賣出", "送出模擬委託（IBKR Paper）", "第三方資料", "假設情境", "這段只講 IBKR Paper 模擬帳戶；台股真錢自動投資另見設定頁"])  // 末項：先.九十七-R5
       if (!src.includes(w)) wordErrs.push(`缺新用語「${w}」`);
   } catch (e) { wordErrs.push(`測試本身出錯：${e.message || e}`); }
   record("156. 推介疑慮用語已改中性說法、IBKR 模擬按鈕帶「模擬」、評等標第三方資料、破億標假設情境（先.九十七-3）", wordErrs.length === 0, wordErrs.join("; ") || "ok");
