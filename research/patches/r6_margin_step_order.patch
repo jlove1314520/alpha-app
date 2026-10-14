@@ -1,0 +1,34 @@
+diff --git a/.github/workflows/market.yml b/.github/workflows/market.yml
+index 609852441..ac73dd860 100644
+--- a/.github/workflows/market.yml
++++ b/.github/workflows/market.yml
+@@ -123,12 +123,6 @@ jobs:
+       - name: 抓USD/TWD匯率（yfinance，免金鑰）
+         run: python .github/scripts/fetch_fx.py
+         continue-on-error: true
+-      - name: 更新大盤融資維持率+個股融資融券（TWSE官方MI_MARGN/STOCK_DAY_ALL，2026-09-15起分母也改TWSE官方，零FinMind依賴）
+-        run: python .github/scripts/update_margin_maintenance.py
+-        continue-on-error: true
+-      - name: 累積個股融資融券逐檔逐日歷史（零額外請求，稽核.三B組第2類）
+-        run: python .github/scripts/accumulate_margin_by_stock.py
+-        continue-on-error: true
+       - name: 更新外資及陸資持股比率（TWSE官方MI_QFIIS，免金鑰，源頭二.3第1名）
+         run: python .github/scripts/fetch_foreign_holding.py
+         continue-on-error: true
+@@ -148,6 +142,16 @@ jobs:
+           python scripts/backfill_price_history_gaps.py || echo "::warning::price_history 缺日補齊未完成"
+           python scripts/selftest_price_history_gaps.py || echo "::warning::price_history 仍有全市場缺日"
+         continue-on-error: true
++      # 先.九十七-R6（2026-10-15）：融資維持率兩步從「更新外資持股」之前移到這裡（price_history 寫入當天＋缺日補齊之後）。
++      # 晚上 STOCK_DAY_ALL 仍是前一天時，維持率分母要用 price_history 同日收盤補；原順序下 price_history 還沒寫入當天，
++      # 只跑一班（本機補跑 market_local_catchup.py 讀本檔順序、或雲端只跑 17:13 班）當天維持率必定不完整（10/14 實例 ratio=null）。
++      # 只換順序，請求次數與計算不變。
++      - name: 更新大盤融資維持率+個股融資融券（TWSE官方MI_MARGN/STOCK_DAY_ALL，2026-09-15起分母也改TWSE官方，零FinMind依賴）
++        run: python .github/scripts/update_margin_maintenance.py
++        continue-on-error: true
++      - name: 累積個股融資融券逐檔逐日歷史（零額外請求，稽核.三B組第2類）
++        run: python .github/scripts/accumulate_margin_by_stock.py
++        continue-on-error: true
+       - name: 產生全市場走勢線sparklines.json（從price_history切出，零額外請求）
+         run: python .github/scripts/build_sparklines.py
+         continue-on-error: true
