@@ -1,3 +1,12 @@
+## 2026-10-14 21:59（互動視窗）先.九十七-1 10/14 收盤資料補上、AlphaMarketCatchup 未執行根因修正、19:30 第二層保險
+
+**a. 補跑**：21:43 用修好的啟動檔本機補跑 market.yml 63 步，0 步失敗，commit `afbbaf951`（push 第 3 次成功）。origin 與線上 `data/market_tw.json` data_date＝2026-10-14；線上 App 393×852 首頁顯示「已收盤(10/14)」「加權指數前收（2026-10-14）48,625.83，+0.59%」「資料日 2026-10-14」。
+**b. 根因**：`schtasks /query /tn AlphaMarketCatchup /v`：觸發「每週一～五 17:30」、上次執行 10/14 17:30、上次結果 0、開始位置「不適用」。但心跳與 stdout log 都沒有產生。`run-market-catchup.ps1` 是無 BOM 的 UTF-8，PowerShell 5.1 用 cp950 解析時 `$repoDir` 那行被吃掉（用 Parser 實測：cp950 讀 4 個敘述、UTF-8 讀 5 個）。同病的還有 `run-margin-ck-check.ps1`、`run-news-fallback.ps1`、`run-phone-regression.ps1`、`run-quotes-fallback.ps1`（另 `reschedule-twse-probe-task.ps1` 無 BOM 但解析不受影響）。新聞補班能跑只因為它的排程「開始位置」剛好設成 C:\alpha\alpha-app；**AlphaQuotesFallback、AlphaMarginCkCheck、AlphaPhoneRegression 三個排程同樣從建好起就沒真正執行過**（排程都回 0）。
+**修正**：6 支改存 UTF-8 含 BOM（原檔備份 `C:\alpha\*.bak_nobom_20261014`），Parser 重驗敘述數一致。實測：排程觸發暫改 21:58:51 → 21:58:53 心跳新增一筆 `landed`（market_tw＝2026-10-14）→ 觸發改回平日 17:30（下次 10/15 17:30）。
+**c. 第二層保險**：`scripts/market_local_catchup.py --late`＋`C:\alpha\run-market-catchup-late.ps1`（含 BOM）／`-hidden.vbs`，新排程 AlphaMarketCatchupLate 平日 19:30（開始位置 C:\alpha\alpha-app）。仍沒落地就補跑，補上後推播「今天收盤資料由本機補上」；只讓位給「正在執行」的雲端班，排隊中的不算。[自行裁量] 推播失敗只記警告。
+**d.** 先.八十四-5 照實結案（首跑失敗＋修正）；AWAITING 先.九十五-R2 註「已由本機補跑接手」後結案。
+- 未改 App 檔，不需冒煙；雲端 workflow 排程時間未改。
+
 ## 2026-10-14 21:59（互動視窗）先.八十四-5 AlphaMarketCatchup 10/14 首跑照實結案（失敗＋已修）
 
 - 照實結案：10/14 17:30 AlphaMarketCatchup **首跑失敗**。排程器顯示「上次結果 0」，但心跳檔 `research/data/market_local_catchup.jsonl` 沒有 10/14 的紀錄，`market_local_catchup_stdout.log` 也沒有產生——程式一行都沒跑。
