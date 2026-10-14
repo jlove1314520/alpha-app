@@ -1,3 +1,24 @@
+## 2026-10-14 16:42（互動視窗）先.九十四-4 美股宇宙權證下市誤判修正、重建、但書改 55／57
+
+- **做了什麼**：修 `research/us_universe_rebuild.py` 的證券類別判定（先.八十七-1a），重建 `us_universe_pit.json`（本機檔，不進 repo），重算 CLAUDE.md 七之三但書。
+  - 舊版只要標題裡出現「普通股」字樣就算普通股，所以「Redeemable Warrants … exercisable for … Class A Common Stock」這種權證下市被當成公司下市。
+  - 新版逐標題判定：先拿掉「普通股只是標的」的說法（exercisable for／to purchase／consisting of／convertible into…＋普通股、Common Stock Purchase Warrants／Rights），剩下的文字還有普通股字樣才算。
+  - 刻意保留三種情況仍算普通股：
+    - 股東權益計畫附隨權利（Common Stock and associated … Rights）；
+    - 同一份 Form 25 同時下市普通股與權證（SPAC 清算常見）；
+    - ADS 維持舊口徑，不在本裁示範圍。
+  - 用已快取的標題重新判定，0 次網路請求。
+- **結果**：15,238 份 Form 25 中 535 份由「普通股」改「非普通股」：權證約 398、信託憑證 72、單位 22、權利 31 等。另有 94 份改判成普通股，主要是單數寫法的「Common Share」與 ADS。
+  - 宇宙狀態異動：
+    - 已下市 → 停止申報 68、已下市 → 在市 32；
+    - 在市 → 已下市 77、停止申報 → 已下市 9；
+    - 已下市數 5,728 → 5,714。
+  - 實例 BKSY（CIK 1753539，2026-08-26 權證下市）由 delisted 恢復 active；Chesapeake 2026-02-06 Class A/B/C 權證下市也恢復 active。
+- **但書**：2026-10-05 抽的 60 檔裡有 3 檔其實是信託憑證，剩 57 檔中 55 檔沒有價格來源（96.5%）。仍是約 97%，但分子分母變了，照三之二節改成「抽樣 55／57」，舊文字加 ⚠️ 保留。
+  - 同步改了 DATA.md、docs/US_PRICE_SOURCES.md、docs/UX_REDESIGN_PROPOSAL.md、prototype/ux_v2.html、research/GRAVEYARD_AUTOPSY.md、`.github/scripts/build_us_screener.py`（美股篩選揭露字串）與暫停中的 B2 草稿。
+- **已知限制（未改）**：「Form 25 後 180 天內不再申報定期報告才算下市」這條判別，對資料尾端（最近約 9 個月）的事件分不出轉板和下市。例如 TEVA 2026-09-14 ADS 這次被判成已下市，是既有限制，不是本次修正造成的。先.八十七-1 的抽樣已用 EVENT_CUTOFF 避開。
+- **冒煙**：App 程式未動；只改了篩選資料的揭露文字。
+
 ## 2026-10-14 16:38（互動視窗）先.九十四-2 本機 autostash 重新比對：清除 57 份、保留 14 份交 Cowork
 
 - **做了什麼**：本機 autostash 依裁示重新比對並清除。

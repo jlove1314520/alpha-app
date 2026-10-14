@@ -77,6 +77,36 @@ NONCOMMON_PAT = re.compile(
     r"depositary\s+share|subordinat|trust\s+preferred|contingent\s+value", re.I)
 
 
+# ── 先.九十四-4（2026-10-14，修 先.八十七-1a）：逐「標題」判斷是不是普通股 ──
+# 舊版 _only_noncommon() 只要標題裡出現普通股字樣就算普通股，於是「Redeemable Warrants, each
+# whole warrant exercisable for one share of Class A Common Stock」這種**權證／單位**下市被當成
+# 公司下市（實例 BKSY 2026-08-26）。新版先拿掉「普通股只是標的」的說法（exercisable for／to purchase／
+# consisting of／convertible into／exchangeable…＋普通股、Common Stock Purchase Warrants／Rights），
+# 剩下的文字還有普通股字樣才算。刻意保留：
+#   - 股東權益計畫附隨權利（Common Stock and associated Preferred Stock Purchase Rights）→ 仍是普通股；
+#   - 同一份 Form 25 同時下市普通股與權證（SPAC 清算常見，「Common Stock; Warrants; Units」）→ 普通股；
+#   - ADS（American Depositary Shares, each representing … ordinary shares）維持舊判定＝普通股（外國公司在美唯一股權掛牌；
+#     不在本次裁示範圍，不改口徑）。
+CORE = r"(?:common\s*stock|common\s*shares?|ordinary\s*shares?|ordinary\s*stock|common\s*equity)"
+COMMON2 = re.compile(CORE + r"|class\s+[ab]\b(?:\s+\S+){0,2}?\s+(?:common|ordinary|shares?|stock)\b|share[s]?\s+of\s+common", re.I)
+# 「普通股只是別種證券的標的」的說法：權證可轉換成…、用來買…、每單位含…、代表…
+UNDERLYING = re.compile(
+    r"\b(?:exercisable|to\s+purchase|to\s+acquire|consisting\s+of|convertible\s+(?:into|to)|"
+    r"exchangeable\s+(?:into|for)|entitl(?:es|ing)\s+the\s+holder)\b[^;|]{0,160}?"
+    r"(?:" + CORE + r"|class\s+[ab]\b(?:\s+\S+){0,2}?\s+(?:common|ordinary|shares?|stock)\b)", re.I)
+# 「普通股」當形容詞：Common Stock Purchase Warrants／Rights
+ADJ = re.compile(CORE + r"\s+(?:purchase\s+)?(?:warrants?|rights?)\b", re.I)
+# 股東權益計畫的附隨權利：Common Stock (and associated Preferred Stock Purchase Rights) 仍是普通股下市
+ASSOC = re.compile(r"(?:and|including|together\s+with|with)?\s*(?:the\s+)?(?:associated|attached|related)\s+[^;|)]{0,80}?rights?\b", re.I)
+
+
+def common_title(t: str) -> bool:
+    s = ASSOC.sub(" ", t)
+    s = UNDERLYING.sub(" ", s)
+    s = ADJ.sub(" ", s)
+    return bool(COMMON2.search(s))
+
+
 # 定期報告原件（不含 /A 修正版）。先.八十三-3a-2：1994～2009 年小型公司用 10KSB／10QSB
 # （2008～2009 年廢止）、2003 年以前很多公司用 10-K405，form.idx 裡的寫法**沒有連字號**
 # （實測 1996Q1：10QSB 289、10KSB 237、10-K405 995；2003Q1：10KSB 1,422、10QSB 1,274）。
@@ -222,8 +252,7 @@ def _one_form25(it: dict) -> tuple[str, dict]:
         titles = _titles_from_html(_plain_text(txt))
         src = "html_description_of_class"
     issuers = sorted({int(c) for c in ISSUER_CIK_RE.findall(txt)})
-    blob = " | ".join(titles)[:1000]
-    is_common = bool(COMMON_PAT.search(blob)) and not _only_noncommon(titles)
+    is_common = any(common_title(t) for t in titles)
     return acc, {"cik": it["cik"], "issuer_ciks": issuers, "date": it["date"], "form": it["form"],
                  "titles": titles[:8], "is_common": is_common,
                  "parsed": bool(titles), "src": src}
@@ -246,14 +275,6 @@ def form25_classes(items: list[dict], limit: int | None = None, workers: int = 6
                 print(f"  Form25 {n}/{len(todo)}（{n / max(el, 1e-9) * 60:.0f} 筆/分，"
                       f"已耗時 {el / 60:.1f} 分）", flush=True)
     return out
-
-
-def _only_noncommon(titles: list[str]) -> bool:
-    """每一個標題都明確是非普通股時回 True（避免「Common Stock」只出現在樣板文字裡）。"""
-    hits = [t for t in titles if COMMON_PAT.search(t)]
-    if not hits:
-        return True
-    return all(NONCOMMON_PAT.search(t) and not COMMON_PAT.search(t) for t in hits)
 
 
 def main() -> int:
@@ -304,6 +325,9 @@ def build(state: dict) -> None:
     # 候選：每個 CIK 的所有「普通股 Form 25」日期
     cand: dict[int, list[str]] = {}
     for v in cls.values():
+        # 先.九十四-4：用已存的標題重新判定（不重抓），舊快取裡的 is_common 是舊規則算的
+        if v.get("titles"):
+            v["is_common"] = any(common_title(t) for t in v["titles"])
         if not v.get("is_common"):
             continue
         # 25-NSE 由交易所代申報，真正下市的是 <issuer><cik>；有 issuer 就以它為準
@@ -343,7 +367,7 @@ def build(state: dict) -> None:
            "source": f"SEC EDGAR full-index form.idx {QUARTERS[0][0]}Q{QUARTERS[0][1]}～2026Q3 全量；Form 25／25-NSE 逐筆解析 securityClassTitle（2010 以前的 Form 25 本文未抓）",
            "note": ("v2（先.十八-一）：母體改為「2010 以來曾向 SEC 申報過 10-K／10-Q 或 Form 25 的所有 CIK」，"
                     "不再從現有 ticker 名冊出發，故含早已下市、現在沒有 ticker 的公司。"
-                    "delisted 只在 Form 25 的證券類別為普通股時才標；非普通股（優先股／權證／票券等）不再誤判。"
+                    "delisted 只在 Form 25 的證券類別為普通股時才標；非普通股（優先股／權證／票券等）不再誤判。先.九十四-4：逐標題判定，權證／單位標題裡「可轉換成普通股」的字樣不再算普通股（修 先.八十七-1a）。"
                     "另加 last_periodic_report 與 stopped_filing（>15 個月無定期報告）。"
                     "先.八十三-3a-2：form.idx 可往前延伸（--from-year），但 2010 以前的 Form 25 本文未解析，"
                     "那段期間下市的公司只會以 stopped_filing（最後一次定期報告日）呈現。"),
