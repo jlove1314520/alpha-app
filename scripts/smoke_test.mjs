@@ -3753,7 +3753,10 @@ async function runSmokeTest(baseUrl, headless = true) {
   // 捲到「跟 0050 比」附近才抓；首次載入時 sw.js 不得被抓兩次（合併重複抓取）。
   const lzErrs = [];
   try {
-    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+    // 2026-10-14 DevQueue 20261014-233102：原用 393×852，首頁內容變短後哨兵落在首屏內（頂端 843.8 < 852），
+    // 依設計②「版面穩定後哨兵在畫面內就直接載入」本來就該抓，測試前提不成立。改用 393×667（小螢幕手機）確保哨兵在畫面下方，
+    // 並先斷言哨兵確實在畫面外——不成立就 FAIL 說明，不靜默略過。
+    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 667 }, serviceWorkers: "block" });
     const p2 = await ctx.newPage();
     const urls = [];
     p2.on("request", (rq) => urls.push(rq.url()));
@@ -3761,6 +3764,9 @@ async function runSmokeTest(baseUrl, headless = true) {
       await p2.goto(`${baseUrl}/index.html`, { waitUntil: "networkidle", timeout: 30000 });
       await p2.waitForTimeout(1500);
       const before = urls.slice();
+      const sen = await p2.evaluate(() => { const s = document.getElementById("home-lazy-sentinel"); return s ? { top: s.getBoundingClientRect().top, h: innerHeight } : null; });
+      if (!sen) lzErrs.push("找不到 #home-lazy-sentinel");
+      else if (sen.top < sen.h) lzErrs.push(`測試前提不成立：哨兵頂端 ${sen.top.toFixed(1)} 已在畫面內（視窗高 ${sen.h}），需改用更矮的視窗`);
       const n = (re, arr) => arr.filter(u => re.test(u.split("?")[0])).length;
       if (n(/\/data\/news\.json$/, before)) lzErrs.push("沒捲動就抓了 news.json");
       if (n(/\/data\/strategy_history\.json$/, before)) lzErrs.push("沒捲動就抓了 strategy_history.json");
