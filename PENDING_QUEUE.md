@@ -19510,7 +19510,7 @@ C. 驗收
 - [x] **先.八十六-2a SEC EDGAR full-index 1993 起美股時點宇宙（併 先.八十三-3a-2，做完兩條一起標）**（DevQueue 可執行）〔2026-10-14 隨 先.八十三-3a-2 一起完成（form.idx 1993Q1 起），SIC 補抓接 先.八十三-3a-3〕
 - [x] **先.八十六-2b Kenneth French Data Library 動能因子 UMD 月報酬 1927 起存成本機參考序列（B1 現象對照；不是新試驗、不計 N）**（DevQueue 可執行）〔DevQueue 20261013-233102：research/fetch_french_umd.py（Tuck 官方 F-F_Momentum_Factor_CSV.zip，1 請求、robots 未禁止）→ research/data/french_umd_monthly.json（本機、gitignore）：Mom 1927-01～2026-08 共 1,196 個月，月均 0.613%、標準差 4.694%（CRSP 202608 版）；未登記試驗、不計 N；冒煙 143 項全過〕
 - [x] **先.八十六-2c 期交所 TXO 2002–2014 年度檔下載供 B4（併 先.八十三-3d-1，做完兩條一起標）**（DevQueue 可執行）〔2026-10-14 互動視窗接手完成：research/data/raw/taifex_opt_yearly/2002～2014.zip（不進 repo）；併 先.八十三-3d-1〕
-- [ ] **先.八十六-3 美股已下市股價格來源比較表：Stooq、Alpha Vantage、Tiingo 與收費的含下市股資料商；每家寫是否含已下市股、歷史起點、費用、使用條款是否允許自用研究；key 只放本機 .env、不進 repo 或對話**（DevQueue 可執行）
+- [ ] **先.八十六-3 美股已下市股價格來源比較表：Stooq、Alpha Vantage、Tiingo 與收費的含下市股資料商；每家寫是否含已下市股、歷史起點、費用、使用條款是否允許自用研究；key 只放本機 .env、不進 repo 或對話**（DevQueue 可執行）〔第 1 批 2026-10-14 DevQueue 20261014-083101：research/US_DELISTED_PRICE_SOURCES.md 已建，Tiingo／Alpha Vantage／Stooq／yfinance 用 repo 既有實測、Norgate（Platinum 1990／Diamond 1950 含下市股，價格為動態試算器擷取不到）、EODHD（delisted=1 參數、方案 $19.99～$99.99／月）讀官方頁；尚餘：AV／Stooq／EODHD 條款、Norgate 價格、Sharadar、CRSP；下一輪從表中「待查」格續做；未申請任何試用〕
 
 # 2026-10-13【先.八十七（修正版：只用免費管道）：合法資料管道實測】（總司令裁示原文，動工前先寫入）
 
