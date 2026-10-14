@@ -43,7 +43,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(mq.addEventListener)mq.addEventListener('change',h);else if(mq.addListener)mq.addListener(h)}
 })();
 </script>
-<link rel="stylesheet" href="app.css?v=2026-10-14.2038">
+<link rel="stylesheet" href="app.css?v=2026-10-14.2044">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -490,7 +490,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       限制，不登記試驗、不回測；只是資料排序。 -->
       <div class="note" style="color:var(--caution);font-weight:600;margin-bottom:6px">⚠ 只是資料排序，還沒回測過</div>
       <div class="note" id="picks-us-meta" style="margin-bottom:6px">載入中…</div>
-      <div class="note" style="margin-bottom:6px"><span class="press" style="color:var(--gold);cursor:pointer" onclick="openMethodSheet('value')">方法論與存活者偏誤但書 ›</span></div>
+      <div class="note" style="margin-bottom:6px"><span class="press" style="color:var(--gold);cursor:pointer" onclick="openMethodSheet('us')">方法論與存活者偏誤但書 ›</span></div>
       <div id="picks-us-list"></div>
     </div>
     <!-- 2026-10-13 先.八十一-33：美股描述性篩選（成交額／漲跌幅／市值門檻）。資料 data/us_screener.json
@@ -1492,6 +1492,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <span class="mtg-opt" data-board="momentum" onclick="openMethodSheet('momentum')">題材動能榜</span>
       <span class="mtg-opt" data-board="future" onclick="openMethodSheet('future')">未來性濾網</span>
     </div>
+    <!-- 先.九十五-R4：從美股選股開啟時（openMethodSheet('us')）只顯示這一段，美股存活者偏誤但書放最上面、不用捲動。 -->
+    <div id="method-us-body" class="note" style="line-height:1.7;display:none"></div>
     <div id="method-board-body" class="note" style="line-height:1.7">載入中…</div>
     <div id="method-common-body" class="note" style="line-height:1.7;margin-top:12px"></div>
   </div>
@@ -1507,6 +1509,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-14.2038"></script>
+<script src="app.js?v=2026-10-14.2044"></script>
 </body>
 </html>

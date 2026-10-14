@@ -4935,6 +4935,46 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { acErrs.push(`測試本身出錯：${e.message || e}`); }
   record("153. 「跟 0050 比」未滿 60 個交易日收合標「累積中」；進場類用語已換成中性說法（先.九十六-2）", acErrs.length === 0, acErrs.join("; ") || acInfo);
 
+  // 154.【2026-10-14 先.九十五-R4】選股頁切到美股 → 點「方法論與存活者偏誤但書」：直接開美股段、台股三榜切換隱藏、
+  // 美股存活者偏誤但書（與 app.js US_SURVIVORSHIP_CAVEAT 同文）不用捲動就在 393×852 可視範圍內；之後從台股入口開仍是台股榜。
+  const r4Errs = [];
+  let r4Info = "";
+  try {
+    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+    try {
+      const p = await ctx.newPage();
+      const perr = [];
+      p.on("pageerror", e => perr.push(String(e.message || e)));
+      await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+      await p.waitForTimeout(1500);
+      await p.evaluate(() => { const b = document.querySelector('nav#nav button[data-scr="picks"]'); if (b) b.click(); });
+      await p.waitForFunction(() => typeof setMarketToggle === "function" && document.querySelector("#picks-board-toggle .mtg-opt"), null, { timeout: 20000 }).catch(() => null);
+      await p.evaluate(() => setMarketToggle("picks", "US"));
+      await p.waitForTimeout(800);
+      const link = p.locator("#picks-us-panel span.press", { hasText: "方法論與存活者偏誤但書" });
+      if (await link.count() !== 1) r4Errs.push(`美股面板的方法論連結數量 ${await link.count()}`);
+      else await link.click();
+      await p.waitForTimeout(800);
+      const st = await p.evaluate(() => {
+        const c = document.getElementById("method-us-caveat"), tg = document.getElementById("method-board-toggle"), bb = document.getElementById("method-board-body");
+        const r = c ? c.getBoundingClientRect() : null;
+        return { txt: c ? c.textContent : "", inView: !!r && r.height > 0 && r.top >= 0 && r.bottom <= window.innerHeight,
+          rect: r ? [Math.round(r.top), Math.round(r.bottom)] : null, tgHidden: !tg || getComputedStyle(tg).display === "none",
+          bbHidden: !bb || getComputedStyle(bb).display === "none", caveat: typeof US_SURVIVORSHIP_CAVEAT === "string" ? US_SURVIVORSHIP_CAVEAT : null };
+      });
+      if (!st.caveat || !st.txt.includes(st.caveat)) r4Errs.push(`但書文字不符：${st.txt}`);
+      if (!st.inView) r4Errs.push(`但書不在可視範圍：${JSON.stringify(st.rect)}`);
+      if (!st.tgHidden || !st.bbHidden) r4Errs.push("美股段仍顯示台股三榜切換或台股內容");
+      await p.evaluate(() => { closeMethodSheet(); openMethodSheet("value"); });
+      await p.waitForTimeout(500);
+      const tw = await p.evaluate(() => ({ us: getComputedStyle(document.getElementById("method-us-body")).display, tg: getComputedStyle(document.getElementById("method-board-toggle")).display }));
+      if (tw.us !== "none" || tw.tg === "none") r4Errs.push(`從台股入口開仍顯示美股段或缺台股切換：${JSON.stringify(tw)}`);
+      if (perr.length) r4Errs.push(`頁面錯誤：${perr.join(" | ")}`);
+      r4Info = `但書位置 ${JSON.stringify(st.rect)}（視窗高 852）`;
+    } finally { await ctx.close(); }
+  } catch (e) { r4Errs.push(`測試本身出錯：${e.message || e}`); }
+  record("154. 美股選股的方法論連結直接開美股段、存活者偏誤但書置頂且不用捲動（先.九十五-R4）", r4Errs.length === 0, r4Errs.join("; ") || r4Info);
+
   // 151.【2026-10-14 先.九十五-R1】離線三缺陷：另開環境連線開一次，再「斷網＋小檔抓不到（模擬 SW／HTTP 快取都沒有，
   // UX_AUDIT UX-2～4 的情境）」重新整理：①自選股名稱不得退成代號、走勢小圖不得消失 ②頂端台股不得寫「無資料」
   // ③錯誤 log 不得出現 ensureQuoteLite（離線是常態，比照先.八十-2）。393×852 離線截圖存 research/ux_shots/（不進 repo）。

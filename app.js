@@ -2272,6 +2272,19 @@
   }
   function openMethodSheet(board){
     try{
+      // 先.九十五-R4：'us'＝從美股選股開啟，只顯示美股段（但書置頂），台股三榜切換與內容隱藏。
+      const us=board==='us';
+      const usEl=document.getElementById('method-us-body'),tg=document.getElementById('method-board-toggle'),bb=document.getElementById('method-board-body');
+      if(usEl)usEl.style.display=us?'':'none';
+      if(tg)tg.style.display=us?'none':'inline-flex';
+      if(bb)bb.style.display=us?'none':'';
+      if(us){
+        document.getElementById('method-mask').classList.add('open');
+        document.getElementById('method-sheet').classList.add('open');
+        const sh=document.getElementById('method-sheet');if(sh)sh.scrollTop=0;
+        renderMethodUs();renderMethodCommon();
+        return;
+      }
       if(!METHOD_BOARDS[board])board=METHOD_BOARD;
       METHOD_BOARD=board;
       document.getElementById('method-mask').classList.add('open');
@@ -2340,6 +2353,18 @@
       ${inHtml}
       <div style="margin-top:4px">原始資料來自證交所、櫃買中心、期交所的官方公開資料；公司產業別是一次性整理、不常變動。</div>
       ${errs.length?`<div style="color:var(--note-gold);margin-top:6px">部分資料讀取失敗：${_mEsc(errs.join('；'))}</div>`:''}`;
+  }
+  function renderMethodUs(){
+    const el=document.getElementById('method-us-body');if(!el||el.dataset.done)return;
+    try{
+      el.innerHTML=`
+        <div id="method-us-caveat" style="color:var(--caution);font-weight:700;border:1px solid rgba(201,82,74,.5);border-radius:8px;padding:8px 10px;margin-bottom:10px">⚠ ${_mEsc(US_SURVIVORSHIP_CAVEAT)}</div>
+        <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px">美股評分 v0</div>
+        <div>用 SEC 申報的年度財報（XBRL）加上 yfinance 每日收盤價，把美股排序。只是資料排序，<b>還沒回測過</b>。</div>
+        <div>名冊是 SEC 當下的申報人清單，不是當年的名冊，已下市公司多數拿不到價格，所以這份排序不能拿來回測、也不能當成歷史上會贏的證據。</div>
+        <div style="margin-top:4px">美股篩選（成交額／漲跌幅／市值門檻）只篩資料、不排名，也不是選股訊號。</div>`;
+      el.dataset.done='1';
+    }catch(e){console.warn('[renderMethodUs]',e);recordGlobalError('renderMethodUs',e)}
   }
   function renderMethodCommon(){
     const el=document.getElementById('method-common-body');if(!el||el.dataset.done)return;
@@ -4383,7 +4408,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-14.2038';
+  const APP_VERSION='2026-10-14.2044';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
