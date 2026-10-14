@@ -419,7 +419,7 @@
     const weightNoteEl=document.getElementById('picks-weight-note');
     if(weightNoteEl){
       const noteByEngine={
-        'scoring-momentum-v1':'題材動能榜：因子聚焦股價領先財報的動能訊號，財報只當地雷排除用，估值不扣分 ｜ 相對強度已改用還原權息收盤價，除息事件涵蓋率隨每日累積逐步提高，剛上線這幾週可能還沒回溯到少數個股的最新事件 ｜ ⚠ 創新高/量價配合度因子的門檻參數（1.3倍/2.5倍/0.6/0.7等）為經驗值，尚未經統計驗證 ｜ 非投資建議',
+        'scoring-momentum-v1':'題材動能榜：因子聚焦股價領先財報的動能指標，財報只當地雷排除用，估值不扣分 ｜ 相對強度已改用還原權息收盤價，除息事件涵蓋率隨每日累積逐步提高，剛上線這幾週可能還沒回溯到少數個股的最新事件 ｜ ⚠ 創新高/量價配合度因子的門檻參數（1.3倍/2.5倍/0.6/0.7等）為經驗值，尚未經統計驗證 ｜ 非投資建議',
         'scoring-future-v1':'未來性濾網：因子聚焦法人籌碼行為+毛利率品質+產能利用率代理（(a)類，現在就能算的部分）｜ 非投資建議',
       };
       weightNoteEl.textContent=noteByEngine[meta.engine_version]
@@ -603,7 +603,7 @@
     document.getElementById('report-industry-tech').innerHTML=itHtml;
     });
 
-    document.getElementById('report-strategy').textContent='目前為「AI 綜合評分排行」清單性質，不是自動交易策略；下方按鈕只依分批資金配置範例產生試算，不代表任何策略訊號。台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單（只交易白名單 ETF，與本頁個股無關）。';
+    document.getElementById('report-strategy').textContent='目前為「規則綜合評分排行」清單性質（規則加權，非 AI 判斷），不是自動交易策略；下方按鈕只依分批資金配置範例產生試算，不代表任何策略或買賣建議。台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單（只交易白名單 ETF，與本頁個股無關）。';
 
     // 分批進場計畫：機械式資金分配規則（現價/-4%/-8%），不是估值預測，不是投資建議
     const planEl=document.getElementById('report-entry-plan');
@@ -727,11 +727,11 @@
     if(!ENTRY_PLAN_CACHE){toast('分批資金配置範例尚未載入完成');return}
     const {tranches}=ENTRY_PLAN_CACHE;
     document.getElementById('report-order-plan').innerHTML=`<div class="gate" style="margin-top:10px">
-      <div style="font-weight:700;margin-bottom:8px">📋 下單計畫（僅顯示，不會送出）</div>
+      <div style="font-weight:700;margin-bottom:8px">📋 分批試算（僅顯示，不會送出）</div>
       ${tranches.map((t,i)=>`<div class="g">批次 ${i+1}：${nf(t.price.toFixed(2))} 元 · 資金配置 ${t.pct}% · 張數請自行決定</div>`).join('')}
-      <div class="g" style="color:var(--warn);margin-top:8px">⚠️ 本計畫非投資建議、不構成買賣訊號；只顯示、不會實際下單。台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單，只交易白名單 ETF，與本計畫無關。</div>
+      <div class="g" style="color:var(--warn);margin-top:8px">⚠️ 本試算非投資建議、不構成買賣訊號；只顯示、不會實際下單。台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單，只交易白名單 ETF，與本計畫無關。</div>
     </div>`;
-    toast('已產生下單計畫（僅顯示，未送出）');
+    toast('已產生分批試算（僅顯示，未送出）');
   }
   // 近 30 日事件流。無事件時要**講清楚查了什麼**，不能只寫「無資料」——
   // 「沒查」跟「查了沒有」對使用者是完全不同的資訊。

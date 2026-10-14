@@ -164,7 +164,7 @@
     if(e.abnormal&&e.z_today!=null)
       badges.push(pill(`異常大${e.z_today>0?'買':'賣'}（z=${e.z_today}）`,'var(--gold)'));
     if(!badges.length){
-      host.innerHTML='<div class="note">近期無連續買賣（≥2 日）或土洋同買訊號。</div>';
+      host.innerHTML='<div class="note">近期無連續買賣（≥2 日）或土洋同買情形。</div>';
       return;
     }
     const miss=m.windows_missing_days||{};

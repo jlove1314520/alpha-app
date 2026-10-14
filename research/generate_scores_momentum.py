@@ -88,7 +88,7 @@ BACKTEST_NOTE = "2015-2024 回測（#437）：驗證期報酬 +53.5% 輸 0050 �
 
 FACTOR_LABELS = {
     "relative_strength": "相對強度/價格動能",
-    "volume_breakout": "量能突破",
+    "volume_breakout": "量能倍數",  # 先.九十六-R5：原「量能突破」，「突破」是技術面買點用語
     "new_high_breakout": "創新高",
     "volume_price_coordination": "量價配合度",
     "chip_concentration": "籌碼集中",
@@ -625,7 +625,7 @@ def _reason(key: str, row: pd.Series) -> str:
         return f"今日成交值為近20日均量的 {v:.2f} 倍，居全市場前 {front}%。"
     if key == "new_high_breakout":
         if v > 0:
-            return f"今日收盤價創近{NEW_HIGH_WINDOW}日新高，突破前波高點 {v*100:+.1f}%，居全市場前 {front}%。（參數未驗證）"
+            return f"今日收盤價創近{NEW_HIGH_WINDOW}日新高，高於前波高點 {v*100:+.1f}%，居全市場前 {front}%。（參數未驗證）"
         return f"今日收盤價距近{NEW_HIGH_WINDOW}日高點 {v*100:.1f}%，尚未創新高，居全市場前 {front}%。（參數未驗證）"
     if key == "volume_price_coordination":
         return f"量價配合度綜合指標 {v:+.1f}（吸收比/量能梯度/回檔量縮/背離扣分等規則加總），居全市場前 {front}%。（參數未驗證，見weights_frozen_momentum.json）"
@@ -784,7 +784,7 @@ def main():
                            "（不讀parquet、不呼叫FinMind），供GitHub Actions每日排程使用。",
                 "disclaimer": (
                     "⚠ 本榜為資料排序，組合策略回測未通過，不代表能贏大盤。"
-                    "因子設計聚焦股價領先財報的題材動能（相對強度/量能突破/籌碼集中/"
+                    "因子設計聚焦股價領先財報的題材動能（相對強度/量能倍數/籌碼集中/"
                     "族群齊漲度/產業資金流入），財報只當地雷排除用（financial_risk_flag），"
                     "不計入加權總分；完全不計算PE/PEG估值，題材股本來就貴，用估值扣分"
                     "等於自相矛盾。權重是初始設計值，不是回測最佳化結果，見"
