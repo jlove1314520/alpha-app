@@ -8094,6 +8094,13 @@ registry卡住單工作槽，均已reap清除，未留殘餘。**修法**：改�
 `_format_mismatch`旗標，不再依賴「垃圾湊巧對不上」這種運氣。
 
 <!-- ORDER-BEGIN -->
+研究室.一 全市場研究層上線
+研究室.二 上櫃外資欄位修正
+研究室.三 月營收歷史補齊（App 顯示用回補檔）
+研究室.四 季報補齊（上櫃＋2025 起缺季）
+研究室.五 App 顯示
+研究室.六 深度研究每週自動更新的接收端
+研究室.七 說法資料集預登記（只登記不檢定）
 先.八十七-1 從 SEC EDGAR Form 25 抽 60 檔已下市美股（分散年份與交易所），固定清單並 commit
 先.八十三-2a-1 （補件，來源：先.八十三-2a 診斷）新寫 research/pit_mktcap_rank.py（OrdinaryShare 法定公告日÷10×未還原收盤、含下市股普通股、只留上市股）＋驗證腳本（淨值曲線有在動；對 2024 年以前還原 0050：台積電權重 30～50%、相關 ≥0.98、TE ≤1%）；FinMind 補抓資產負債表照每小時上限分批；不改 research/pit.py 等單一寫入者檔，不登記試驗
 定案.一 [研究]
@@ -19844,15 +19851,15 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
 8. 研.七 觸價推播（一檔一天最多 1 則）。
 研究室輸出一律不進 scores.json、不當評分權重；全部標「研究紀錄，非投資建議」。
 
-- [!] **先.九十九-0 找 alpha-research-lab.zip（或 alpha-research-lab/ 資料夾）與規格檔位置；找不到標 [!] 請總司令放到 C:\alpha\ 下**（互動視窗執行）〔BLOCKED：全機找不到 alpha-research-lab.zip／資料夾與規格檔；pending_patches 的 research_lab 補丁不是同一個（無 fetch 模組與測試、且寫公開 repo）。請總司令放到 C:\alpha\ 下〕
-- [ ] **先.九十九-研.一 匯入模組到 alpha-data（私有）research_lab/，pytest 8 passed**（互動視窗執行）
-- [ ] **先.九十九-研.二 回退鏈 fetch.alpha_local()＋fetch.official()；FINMIND_TOKEN 只放環境變數；拔掉 token 也能跑；3443 的 8、9 月營收改官方值 source=official**（互動視窗執行）
-- [ ] **先.九十九-先決 上櫃財報與法人端點補接、MOPS 月營收備援；4 檔近 6 個月無缺日再驗**（互動視窗執行）
-- [ ] **先.九十九-研.三 盤後排程 15:30＋STATUS.json 登記＋超過 26 小時沒更新告警**（互動視窗執行）
-- [ ] **先.九十九-研.四 App 個股頁「研究」分頁＋自選股研究狀態點＋今日頁研究提醒，冒煙新增 4 項；本機離線顯示上次結果與日期**（互動視窗執行）
-- [ ] **先.九十九-研.五 B 級自動名單（自選股 ∪ supply_chain tier 1，標「B 級：自動指標，無人工論點」）**（互動視窗執行）
-- [ ] **先.九十九-研.六 說法資料集預登記（只登記不檢定；轉向事件 ≥120 筆前不得跑）**（互動視窗執行）
-- [ ] **先.九十九-研.七 觸價推播（一檔一天最多 1 則）**（互動視窗執行）
+- [x] **先.九十九-0 找 alpha-research-lab.zip（或 alpha-research-lab/ 資料夾）與規格檔位置；找不到標 [!] 請總司令放到 C:\alpha\ 下**（互動視窗執行）〔BLOCKED：全機找不到 alpha-research-lab.zip／資料夾與規格檔；pending_patches 的 research_lab 補丁不是同一個（無 fetch 模組與測試、且寫公開 repo）。請總司令放到 C:\alpha\ 下〕〔⚠️ 已被先.一百 取代（2026-10-15，舊版：4 檔、alpha-research-lab.zip、本機 live server，整批作廢）〕
+- [x] **先.九十九-研.一 匯入模組到 alpha-data（私有）research_lab/，pytest 8 passed**（互動視窗執行）〔⚠️ 已被先.一百 取代（2026-10-15，舊版：4 檔、alpha-research-lab.zip、本機 live server，整批作廢）〕
+- [x] **先.九十九-研.二 回退鏈 fetch.alpha_local()＋fetch.official()；FINMIND_TOKEN 只放環境變數；拔掉 token 也能跑；3443 的 8、9 月營收改官方值 source=official**（互動視窗執行）〔⚠️ 已被先.一百 取代（2026-10-15，舊版：4 檔、alpha-research-lab.zip、本機 live server，整批作廢）〕
+- [x] **先.九十九-先決 上櫃財報與法人端點補接、MOPS 月營收備援；4 檔近 6 個月無缺日再驗**（互動視窗執行）〔⚠️ 已被先.一百 取代（2026-10-15，舊版：4 檔、alpha-research-lab.zip、本機 live server，整批作廢）〕
+- [x] **先.九十九-研.三 盤後排程 15:30＋STATUS.json 登記＋超過 26 小時沒更新告警**（互動視窗執行）〔⚠️ 已被先.一百 取代（2026-10-15，舊版：4 檔、alpha-research-lab.zip、本機 live server，整批作廢）〕
+- [x] **先.九十九-研.四 App 個股頁「研究」分頁＋自選股研究狀態點＋今日頁研究提醒，冒煙新增 4 項；本機離線顯示上次結果與日期**（互動視窗執行）〔⚠️ 已被先.一百 取代（2026-10-15，舊版：4 檔、alpha-research-lab.zip、本機 live server，整批作廢）〕
+- [x] **先.九十九-研.五 B 級自動名單（自選股 ∪ supply_chain tier 1，標「B 級：自動指標，無人工論點」）**（互動視窗執行）〔⚠️ 已被先.一百 取代（2026-10-15，舊版：4 檔、alpha-research-lab.zip、本機 live server，整批作廢）〕
+- [x] **先.九十九-研.六 說法資料集預登記（只登記不檢定；轉向事件 ≥120 筆前不得跑）**（互動視窗執行）〔⚠️ 已被先.一百 取代（2026-10-15，舊版：4 檔、alpha-research-lab.zip、本機 live server，整批作廢）〕
+- [x] **先.九十九-研.七 觸價推播（一檔一天最多 1 則）**（互動視窗執行）〔⚠️ 已被先.一百 取代（2026-10-15，舊版：4 檔、alpha-research-lab.zip、本機 live server，整批作廢）〕
 
 # 2026-10-15【先.一百：台股研究室改用新版規格】（總司令裁示原文，動工前先寫入）
 
@@ -19863,7 +19870,113 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
 4. 研究室.三、.四 的回補檔（revenue_backfill.json、financials_backfill.json）照 README 加進 holdout 讀取守門的「不允許」名單；若該清單屬第十三節核心檔，該小步由互動視窗處理，其餘照做。
 5. 每項完成標 - [x]，在 research/PROGRESS_HEARTBEAT.jsonl append item=研究室.N；附 selftest 與 smoke 實際輸出。
 
-- [ ] **先.一百-1 先.九十九整批作廢（每條加「⚠️ 已被先.一百 取代」、改 [x]），AWAITING 先.九十九-0 結案**（互動視窗執行）
+- [x] **先.一百-1 先.九十九整批作廢（每條加「⚠️ 已被先.一百 取代」、改 [x]），AWAITING 先.九十九-0 結案**（互動視窗執行）〔先.九十九 9 條作廢改 [x]、AWAITING 先.九十九-0 結案〕
 - [ ] **先.一百-2 照 final\README_給ClaudeCode.md「佇列條目」把研究室.一～七貼進權威清單最前面（一～六 DevQueue 可執行、七互動視窗；順序一→六）**（互動視窗執行）
 - [ ] **先.一百-3 更正 README：凍結.二已於 2026-10-11 解除，但 research*.json 不得進 scores*.json、不得當選股權重照舊**（互動視窗執行）
 - [ ] **先.一百-4 研究室.三／.四 回補檔加進 holdout 讀取守門「不允許」名單（屬十三節核心檔的那一步由互動視窗處理）**（互動視窗執行）
+
+**以下研究室.一～研究室.七照 `C:\alpha\pending_patches\research_lab_2026-10-14\final\README_給ClaudeCode.md`「佇列條目」原文登記（先.一百-2）：**
+
+- [ ] **研究室.一 全市場研究層上線**（DevQueue 可執行）
+  做法：
+  1. 把 `final/scripts/build_research.py`、`final/scripts/selftest_research.py`、`final/research/lab/` 複製進 repo 同路徑。
+  2. `market.yml` 在「個股頁每檔小檔（build_by_code）」這一步之前新增兩步：
+     - `python scripts/build_research.py`
+     - `python scripts/selftest_research.py || echo "::warning::研究層自測未過"`
+
+     兩步都設 continue-on-error。
+  3. commit 的 git add 清單加入 `data/research.json data/research_radar.json`。
+  4. `scripts/build_by_code.py` 的 SOURCES 加 `"research": DATA / "research.json"`，通用切法會自動切成每檔一節。跑 `selftest_by_code.py` 要通過。
+  5. 照既有方式把兩個新檔登記到 `data_schema_guard.py` 和 `data/seed/pipeline_registry.json`，超過 26 小時沒更新要告警。
+  6. 本機 commit 範圍加入 `research/lab/`。研究室.六的 Cowork 每週會寫入這裡。
+
+  驗收：
+  - workflow_dispatch 手動跑一次 market.yml，selftest 11 PASS。
+  - `data/by_code/2330.json` 出現 research 節。
+  - smoke 全過。
+
+  分支：
+  - selftest 第 3 項（涵蓋率）FAIL → 查 listed_universe／company_info 的代號對應，修好重跑。
+  - by_code 小檔超過既有大小上限 → research 節改成只收 rev／q／px（不含 flags）和 change_tags，再跑一次。
+
+  停下條件：只有 market.yml 連兩班失敗、而且根因是這一步，才停。
+
+- [ ] **研究室.二 上櫃外資欄位修正**（DevQueue 可執行；與既有「籌碼原子.補上櫃三大法人歷史」合併處理）
+  現況：上櫃股外資值是 None。
+
+  做法：
+  1. 查 `fetch_market_tw.py` 的 TPEx 三大法人解析（欄位名稱或順序對不上），修好後只往前累積，不回補 holdout 期間。
+  2. 驗收：隔一個交易日，`research.json` 的 `coverage.with_foreign` 要從 1,083 升到 ≥1,900。
+
+  分支：TPEx 端點本身沒有外資欄位 → 改用 TPEx 外資買賣超專用端點，以實測為準（openapi 無效路徑會回 200＋HTML，要看 body 是不是 JSON）。
+
+- [ ] **研究室.三 月營收歷史補齊（App 顯示用回補檔）**（DevQueue 可執行）
+  做法：
+  1. 新寫 `scripts/backfill_revenue_display.py`：用 FinMind `TaiwanStockMonthRevenue`，以「月份」為單位抓全市場（不帶 data_id），補 2024-12～2026-06 共 19 次請求。節流共用 rate_limit_state，token 讀環境變數。
+  2. 寫入 `data/revenue_backfill.json`，格式為 `{"meta":{source,generated_at,months}, "stocks":{代號:[{year,month,revenue,yoy}]}}`。不改 fundamentals.json。
+  3. build_research 已經會自動合併這個檔。
+
+  Holdout：這個檔是 App 顯示與研究紀錄用，研究端回測程式不得讀。請在 `research/validation` 既有的 holdout 讀取守門清單「不允許」名單裡加上這個檔名（如果該清單是互動視窗專屬，這一小步改成交互動視窗處理，其餘照做）。
+
+  驗收：`coverage.with_rev3_qoq` 從 41 升到 ≥1,800。
+
+  分支：
+  - FinMind 不帶 data_id 被拒 → 改用研究端本機 parquet 快取。
+  - 快取也缺 → 逐檔抓，每輪上限 300 檔，記斷點，維持 `- [ ]` 續跑。
+
+- [ ] **研究室.四 季報補齊（上櫃＋2025 起缺季）**（DevQueue 可執行）
+  做法：
+  1. `update_stock_financials.py` 加 TPEx 上櫃綜合損益表（mopsfin_t187ap06_O_ci 系列，名稱以實測為準），以後每季自動更新。
+  2. 2025Q1～2026Q2 回補：用 FinMind `TaiwanStockFinancialStatements` 以日期抓全市場（6 次），寫 `data/financials_backfill.json`，格式為 `{"meta":…, "stocks":{代號:[{year,quarter,revenue,gross_margin_pct,op_margin_pct,eps}]}}`。holdout 處理方式同研究室.三。
+
+  驗收：`coverage.with_fresh_quarter` 從 1,020 升到 ≥1,850。
+
+- [ ] **研究室.五 App 顯示**（DevQueue 可執行）
+  做法（用詞依 `docs` 人因改版用詞表）：
+  1. **個股頁「研究」分頁**（讀 by_code 的 research 節）。由上而下：
+     - 變化標籤晶片，點一下顯示 `meta.rules` 的規則文字
+     - 近 3 月營收年增／季增
+     - 最新一季毛利率與季變化（過期就顯示 reason）
+     - 本益比
+     - 價格對 MA20／MA60、近 20 日漲跌
+     - 外資／投信 10 日
+     - 大戶週變化
+     - 下一場法說
+     - 近 7 日重大訊息（連結原文）
+     - 近 10 日量價標記
+     - 有 deep 時再加：headline、論點狀態晶片、情境價格帶橫條（標出現價）、說法變化時間軸、下一個檢查日、研究檔連結
+     - 底部固定免責聲明
+  2. **選股頁「變化雷達」分頁**（讀 research_radar.json）：
+     - 名單切換晶片：綜合變化／營收加速／營收創新高／毛利率跳升／營收轉弱／法說將至／帶量突破／創高量縮／法人背離／重大訊息
+     - 每列：代號、名稱、產業、標籤、近 3 月營收年增、20 日漲跌，點列進個股頁
+     - 頂部固定一行「變化排序不是買進訊號，規則未經回測」
+  3. **市場頁「產業營收熱度」表**（industry_heat）：
+     - 欄位：產業、檔數、營收年增中位數、營收成長家數比、20 日漲跌中位數
+     - 依營收年增中位數排序
+  4. **自選股列研究狀態點**：
+     - 有 deep 且有 review → 紅點
+     - 有 2 個以上 change_tags → 藍點
+     - 其他不顯示
+
+  smoke 新增 5 項：
+  - 研究分頁有免責聲明
+  - 雷達頁有「不是買進訊號」那一行
+  - research 節缺少時只顯示一行空狀態（尚未建檔｜原因｜下一步）
+  - 沒有「建置中」佔位字
+  - 雷達檔載入 < 1 秒（測量方式沿用既有 measure 腳本）
+
+- [ ] **研究室.六 深度研究每週自動更新的接收端**（DevQueue 可執行）
+  做法：
+  1. Cowork 每週日晚上會把新的 `research/lab/config/<代號>.json` 和 `research/lab/guidance/<代號>.jsonl` 直接寫進 repo 工作目錄。
+  2. 本機 commit 前先跑 `python scripts/build_research.py && python scripts/selftest_research.py`：
+     - 第 10 項（說法 PIT／格式）FAIL → 不 commit 那一檔，在 PENDING_QUEUE 記一行原因。
+     - 通過 → commit，訊息寫「研究室.六 週更新 <代號>」。
+
+- [ ] **研究室.七 說法資料集預登記（只登記不檢定）**（互動視窗執行：要碰 TRIALS 登記）
+  做法：
+  1. 在 TRIALS_LEDGER 登記假說：「guidance direction 下降事件，其後 20／60 日相對 0050 超額報酬 < 0」。
+  2. 判準事前寫死；只用 recorded_at ≤ 事件日的紀錄；轉向事件累積到 ≥120 筆之前不得跑檢定。
+  3. 列 AWAITING_REVIEW。
+
+**執行順序**：一 → 二 → 三 → 四 → 五 → 六；七由互動視窗擇時處理。
+每項各自 commit；完成時附 selftest 與 smoke 的實際輸出。
