@@ -1,3 +1,18 @@
+## 2026-10-15 01:57（DevQueue 20261015-013102）冒煙 #103 修正＋先.九十七-R6／R7／R8
+
+等待總司令審閱：2 件（沿用 AWAITING_REVIEW「等待中」表，本輪沒有新增）：
+1. 先.九十九-0 研究室模組與規格檔找不到——等總司令把 `alpha-research-lab.zip` 放到 `C:lpha\`，已等約 2 小時。
+2. 先.九十八-3 Telegram 只讀擷取「新裝置登入」驗證——等總司令確認，已等約 2.5 小時。
+
+- **冒煙 #103 修正 ✅**（2c3d1d4b4）：c65042745 寫入 #446 後沒有重跑產生程式，帳本開頭總數停在 446、索引 447 列 ≠ 帳本 448 列。重跑 `research/selection_bias_ledger.py`＋`.github/scripts/build_trials_index.py`（不手改數字）：總 N 446→447、TW 分軌 222→223、索引 448 列。
+- **先.九十七-R6 ✅**（773405cce）：上一輪說的 patch 檔沒有落地，照上一輪記錄重做修法①——market.yml「更新大盤融資維持率」「累積個股融資融券」兩步移到「全市場缺日補齊」之後、sparklines 之前，加註原因；計算、門檻、請求次數都沒變。證據：yaml 順序 OHLCV 26→缺日 27→維持率 28→累積 29；`market_local_catchup.load_steps()` 讀到 23→24→25→26；`closes_from_price_history('2026-10-14')` 取得 2,358 檔收盤，補值路徑可用；中間的外資持股兩步不讀寫維持率檔（grep 確認）。**還沒驗證**：要等 10/15 收盤班次實跑後，看當天 ratio 有沒有值。
+- **先.九十七-R7 ✅（重複項）**（commit 見 git log「先.九十七-R7」）：先.九十五-5（10/14）已經產出本機 `research/data/tai50_constituent_changes_wiki.json`（71 列，附維基 revision 與 CC BY-SA 授權）。[自行裁量] 不另建 `0050_constituent_changes.json`、不再打維基；只在 DATA_GAP_PLAN #39 補「已結構化」。
+- **先.九十七-R8 ✅**（2dc576a5b）：`app-settings.js` 資料新鮮度表的 10 個 market.yml 每日項目改用 `mkt:'tw'/'us'`，新增 `_freshnessMarketRuns()` 讀 STATUS.json crons，規則跟後端 `_market_run_hms()` 一樣；讀不到才退回 06:10／21:30 UTC；寬限 3 小時不變；每一列都標出排程時刻的來源。新增冒煙 #158，也做了反向驗證：同一條規則對舊版會判「寫死」。影響：台股項目判逾期的基準從台北 14:10 改成 17:13＋3 小時，跟實際排程一致。
+- **DATA_SOURCE_MAP 補註**（88d0cf804）：#49「未查證」已過時，補註指向 DATA_GAP_PLAN 2.13 與 先.九十五-R11 已抓的資料（只加註，沒刪舊文字）。
+- 冒煙：#103 修正後 156 PASS／0 FAIL；R8 加 #158 後 157 PASS／0 FAIL。R6／R7／補註只改 yml 或文件，沿用同一次結果。
+- 佇列：`- [ ]` 13 項（≥12）。`dev_queue_runner.py next` 回 NO_PENDING_ITEM：剩下的 DevQueue 項目都要等時間或資料（先.八十四-6／-7、先.九十五-R6／R7 要等排程累積），先.九十九-研系列要在互動視窗做。**補件：四個來源都已用盡**——BACKLOG 的 B27（常備.開發-7）、B28（期貨籌碼已改讀 TAIFEX repo 檔）已完成，其餘是研究或卡資料；UX 提案⑥ 10 列＋IBKR 警語已在 先.九十七-3／R5 完成；全檢 先.八十-1～14 全部完成；DATA_GAP_PLAN 甲類只剩 DATA_SOURCE_MAP 補註，本輪直接做掉。沒有補新的 alpha 試驗，也沒有拿小事湊數。
+- 已知不一致（照實記錄）：R7 條目裡寫的時間「01:48」是 shell `date` 的輸出；本輪 `date` 讀數前後跳動不大，跟實際經過的時間對不太起來，以 commit 時間為準。
+
 ## 2026-10-15 01:10（DevQueue 20261015-003102）先.九十七-R2～R6
 
 等待總司令審閱：0 件（本輪沒有新增 AWAITING 項目）。
