@@ -21,7 +21,8 @@
 2. **阻塞≠停止**：某一項標`- [!]`BLOCKED後，同一輪要立刻換下一項
    繼續做，不是結束整輪；每輪開工時要檢查已BLOCKED項目的解除條件，
    解除就轉回`- [ ]`。
-3. **佇列深度下限12項（2026-09-19總司令裁示【裁示】五，原本5項太淺，一補
+3. ⚠️ **補件來源與時機已更新（2026-10-14【先.九十五】8）**：DevQueue 每輪收工時，`- [ ]` <12 或 DevQueue 可執行 <6 就自動補件，來源依序 BACKLOG.md → docs/UX_REDESIGN_PROPOSAL.md → Cowork 全檢報告（本檔「先.八十　全檢修正」節）→ DATA_GAP_PLAN 甲類，每條寫來源；不得用小事湊數、不得補新的 alpha 試驗。下面原文的補件來源清單已過時，保留供稽核。
+   **佇列深度下限12項（2026-09-19總司令裁示【裁示】五，原本5項太淺，一補
    完馬上又見底，實測消化速度約5條/40分鐘）**：**真正能動手做的`- [ ]`項目**
    低於12項時，執行者有責任自己補、**一次補到20項**（來源：本檔「常備
    backlog」區塊→`REPORT.md`/`LEADS.md`/`STRATEGY_GRAVEYARD.md`裡的未進
@@ -19717,4 +19718,4 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
 - [x] **先.九十五-5 0050 成分股歷史（先.九十四-5k）：維基百科（CC BY-SA），只存本機 research/data（不進 repo），檔案附出處與授權說明**（互動視窗執行）〔維基 1 次請求、71 列本機 json 附出處與 CC BY-SA 4.0 說明、不進 repo〕
 - [x] **先.九十五-6 先.九十四-5l 與先.八十二-6 重複，結案**（互動視窗執行）〔5l 與先.八十二-6 重複結案（pe_snapshot 已含 EPS_ttm）〕
 - [x] **先.九十五-7 14 份舊 autostash 逐份 git stash show -p 匯出 patch 存 research/archive/stash_patches/（不進 repo），確認檔案存在後再 drop，前後列清單**（互動視窗執行）〔14 份匯出 research/archive/stash_patches/（本機、gitignore）、14/14 可套回基底，drop 後 0 份；清單見 AUTOSTASH_INVENTORY〕
-- [ ] **先.九十五-8 佇列自動補件規則：DevQueue 每輪收工若 - [ ] <12 或 DevQueue 可執行 <6，自動從 BACKLOG、docs/UX_REDESIGN_PROPOSAL.md、Cowork 全檢報告、DATA_GAP_PLAN 甲類補件並寫明來源；不得用小事湊數、不得補新 alpha 試驗**（互動視窗執行）
+- [x] **先.九十五-8 佇列自動補件規則：DevQueue 每輪收工若 - [ ] <12 或 DevQueue 可執行 <6，自動從 BACKLOG、docs/UX_REDESIGN_PROPOSAL.md、Cowork 全檢報告、DATA_GAP_PLAN 甲類補件並寫明來源；不得用小事湊數、不得補新 alpha 試驗**（互動視窗執行）〔DevQueue 提示詞改為收工自動補件（<12 或可執行 <6，四個來源依序、寫來源、不湊數、不補 alpha 試驗）；自測 23/23、25/25〕

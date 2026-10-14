@@ -1,3 +1,9 @@
+## 2026-10-14 19:07（互動視窗）先.九十五-8 DevQueue 收工自動補件規則
+
+- `scripts/dev_queue_runner.py` 產生的 DevQueue 提示詞：補件段改成「收工自動補件」——每輪收工前重算，`- [ ]` <12 **或** DevQueue 可執行 <6 就補到兩個門檻都達到；來源依序 BACKLOG.md → docs/UX_REDESIGN_PROPOSAL.md → Cowork 全檢報告（原檔不在本機，條目已抄在 PENDING_QUEUE「先.八十　全檢修正」節）→ DATA_GAP_PLAN 甲類；每條寫來源；新補預設「（DevQueue 可執行）」；不得用小事湊數、不得補新的 alpha 試驗；來源用盡就照實寫。取代先.八十二 8⑦「只限兩種來源」。
+- `PENDING_QUEUE.md` 開頭規則第 3 點加 ⚠️ 指向新規則，舊文字保留供稽核（三之二節）。
+- 驗證：`dev_queue_runner.py prompt` 實際產生的 research/DEV_QUEUE_PROMPT.txt 第 33 行起含新規則；selftest_dev_queue_crunch 23/23、selftest_dev_queue_guard 25/25 通過。
+
 ## 2026-10-14 19:05（互動視窗）先.九十五-5 0050 成分股歷史（維基百科，只存本機）
 
 - 中文維基百科「臺灣50指數」條目頁抓 1 次（`/zh-tw/` 條目頁，robots 允許；/w/ 與 /api/ 被禁所以不用 API），revision 94501061，原始 HTML 存本機 `research/data/raw/wikipedia/`。
