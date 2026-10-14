@@ -872,8 +872,28 @@ def _file_ts(rel: str) -> datetime | None:
     return _parse_ts(d.get("fetched_at") or d.get("generated_at") or meta.get("generated_at") or meta.get("last_snapshot_at"))
 
 
+def _market_run_hms(crons: list[dict]) -> tuple[tuple[int, int], tuple[int, int], str]:
+    """先.九十七-R2：排程健康判斷用的 market.yml 時刻（UTC），跟橫幅共用 parse_workflow_crons() 單一來源。
+    台股取主班次（台北 14:00 之後、當日最早那班），美股取台北隔日／09:00 前那班；
+    讀不到就退回舊的寫死值並在 rule 註明（十二節：只降級不中斷）。"""
+    def _hm(c):
+        h, m = c["utc"].split(":")
+        return int(h), int(m)
+    tw = sorted((c for c in crons if not c["next_day_taipei"] and "14:00" <= c["taipei"] <= "23:59"), key=lambda c: c["taipei"])
+    us = [c for c in crons if c["next_day_taipei"] or c["taipei"] < "09:00"]
+    if tw and us:
+        return _hm(tw[0]), _hm(us[0]), "market.yml cron"
+    print("  ! schedule_health：讀不到 market.yml 台股／美股 cron，退回舊寫死時刻 06:10／21:30 UTC")
+    return (tw and _hm(tw[0])) or (6, 10), (us and _hm(us[0])) or (21, 30), "market.yml cron 讀取失敗，退回舊寫死時刻"
+
+
 def build_schedule_health() -> dict:
     now = datetime.now(timezone.utc)
+    tw_hm, us_hm, hm_src = _market_run_hms(parse_workflow_crons(REPO_ROOT / ".github" / "workflows" / "market.yml"))
+    tw_utc, us_utc = f"{tw_hm[0]:02d}:{tw_hm[1]:02d} UTC", f"{us_hm[0]:02d}:{us_hm[1]:02d} UTC"
+    tw_tpe = f"{(tw_hm[0] + 8) % 24:02d}:{tw_hm[1]:02d}"
+    us_tpe = f"{(us_hm[0] + 8) % 24:02d}:{us_hm[1]:02d}"
+    tw_late = f"{(tw_hm[0] + 8 + 3) % 24:02d}:{tw_hm[1]:02d}"
     checks = [
         # (name, file, kind, args, owner, note)
         ("台股盤中報價（GitHub Actions quotes.yml）", "data/quotes_tw.json", "intraday", (TAIPEI_TZ, (9, 0), (13, 30)),
@@ -884,15 +904,15 @@ def build_schedule_health() -> dict:
          "GitHub Actions", "每10分鐘（美東正常盤）；盤前盤後另有extended_hours欄位"),
         ("美股即時報價（本機IBKR）", "data/quotes_ibkr.json", "intraday", (NY_TZ, (9, 30), (16, 0)),
          "本機排程", "只有使用者這台機器開著IB Gateway才會更新"),
-        ("台股大盤/類股/法人（market.yml 06:10 UTC）", "data/market_tw.json", "daily", (timezone.utc, (6, 10), 3.0),
-         "GitHub Actions", "台北14:10排程，寬限3小時→17:10後仍沒有當天資料=異常"),
-        ("美股四大指數（market.yml 21:30 UTC）", "data/market_us.json", "daily", (timezone.utc, (21, 30), 3.0),
-         "GitHub Actions", "台北隔天05:30排程，寬限3小時"),
-        ("個股基本面PER/月營收（market.yml）", "data/fundamentals.json", "daily", (timezone.utc, (6, 10), 3.0), "GitHub Actions", ""),
-        ("個股價量歷史（market.yml）", "data/price_history.json", "daily", (timezone.utc, (6, 10), 3.0), "GitHub Actions", ""),
-        ("個股財報/法人/融資（market.yml）", "data/stock_detail.json", "daily", (timezone.utc, (6, 10), 3.0), "GitHub Actions", ""),
-        ("大盤融資維持率（market.yml）", "data/margin_maintenance.json", "daily", (timezone.utc, (6, 10), 3.0), "GitHub Actions", ""),
-        ("前瞻選股台帳（market.yml）", "data/picks_ledger.json", "daily", (timezone.utc, (6, 10), 3.0), "GitHub Actions", ""),
+        (f"台股大盤/類股/法人（market.yml {tw_utc}）", "data/market_tw.json", "daily", (timezone.utc, tw_hm, 3.0),
+         "GitHub Actions", f"台北{tw_tpe}排程，寬限3小時→{tw_late}後仍沒有當天資料=異常（時刻來源：{hm_src}）"),
+        (f"美股四大指數（market.yml {us_utc}）", "data/market_us.json", "daily", (timezone.utc, us_hm, 3.0),
+         "GitHub Actions", f"台北隔天{us_tpe}排程，寬限3小時（時刻來源：{hm_src}）"),
+        ("個股基本面PER/月營收（market.yml）", "data/fundamentals.json", "daily", (timezone.utc, tw_hm, 3.0), "GitHub Actions", ""),
+        ("個股價量歷史（market.yml）", "data/price_history.json", "daily", (timezone.utc, tw_hm, 3.0), "GitHub Actions", ""),
+        ("個股財報/法人/融資（market.yml）", "data/stock_detail.json", "daily", (timezone.utc, tw_hm, 3.0), "GitHub Actions", ""),
+        ("大盤融資維持率（market.yml）", "data/margin_maintenance.json", "daily", (timezone.utc, tw_hm, 3.0), "GitHub Actions", ""),
+        ("前瞻選股台帳（market.yml）", "data/picks_ledger.json", "daily", (timezone.utc, tw_hm, 3.0), "GitHub Actions", ""),
     ]
     out = []
     for name, rel, kind, args, owner, note in checks:
