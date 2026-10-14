@@ -4771,6 +4771,44 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { vsGapErrs.push(`測試本身出錯：${e.message || e}`); }
   record("147. 「跟 0050 差多少」用中性色＋領先／落後文字，不帶漲跌色 pos／neg（先.九十四-5f）", vsGapErrs.length === 0, vsGapErrs.join("; ") || vsGapInfo);
 
+  // 148.【先.九十四-5g】方法論說明頁：選股卡有「怎麼算的？」→點開方法論視窗，分數算法／權重／資料基準日／輸入資料時間／
+  // 美股存活者偏誤但書（CLAUDE.md 七現行文字）／研究成績單連結都要出現；切到題材動能榜內容要跟著換；不得有推介字眼。
+  const mtErrs = [];
+  let mtInfo = "";
+  try {
+    await page.evaluate(() => go("picks"));
+    await page.waitForSelector("#picks-list .method-link", { timeout: 15000 });
+    await page.evaluate(() => document.querySelector("#picks-list .method-link").click());
+    await page.waitForFunction(() => /分數怎麼算/.test(document.getElementById("method-board-body").textContent) && /因子權重/.test(document.getElementById("method-board-body").textContent), null, { timeout: 15000 });
+    const r = await page.evaluate(() => {
+      const sh = document.getElementById("method-sheet"), b = document.getElementById("method-board-body"), c = document.getElementById("method-common-body");
+      const bt = b.textContent, ct = c.textContent;
+      return { open: sh.classList.contains("open"), bt, ct, wRows: b.querySelectorAll(".num").length,
+        hasBtn: !![...c.querySelectorAll("button")].find(x => /研究成績單/.test(x.textContent)),
+        onBtn: (document.querySelector("#method-board-toggle .mtg-opt.on") || {}).dataset?.board };
+    });
+    if (!r.open) mtErrs.push("點「怎麼算的？」後方法論視窗沒有打開");
+    if (r.onBtn !== "value") mtErrs.push(`預設應是價值成長榜，實際 ${r.onBtn}`);
+    if (!/資料基準日：\s*\d{4}-\d{2}-\d{2}/.test(r.bt)) mtErrs.push("沒有顯示資料基準日");
+    if (!/%/.test(r.bt)) mtErrs.push("沒有列出因子權重");
+    if (!/回測狀態/.test(r.bt)) mtErrs.push("沒有回測狀態");
+    if (!/本益比、殖利率、月營收\s*\d{4}\/\d{2}\/\d{2}/.test(r.bt)) mtErrs.push("沒有輸入資料與更新時間");
+    if (!r.ct.includes("存活者偏誤未完全修正：已下市股約 97%（抽樣 55／57）無價格來源。")) mtErrs.push("美股存活者偏誤但書不是 CLAUDE.md 現行文字");
+    if (!r.hasBtn) mtErrs.push("沒有研究成績單連結");
+    if (!/非投資建議/.test(r.ct)) mtErrs.push("沒有非投資建議");
+    const bad = (r.bt + r.ct).match(/推薦|必漲|必賺|穩賺|買點|賣點|目標價|強烈買/g);
+    if (bad) mtErrs.push(`出現推介字眼：${[...new Set(bad)].join("、")}`);
+    await page.evaluate(() => document.querySelector('#method-board-toggle .mtg-opt[data-board="momentum"]').click());
+    await page.waitForFunction(() => /題材動能榜/.test(document.getElementById("method-board-body").textContent) && /因子權重/.test(document.getElementById("method-board-body").textContent), null, { timeout: 15000 });
+    const mo = await page.evaluate(() => document.getElementById("method-board-body").textContent);
+    if (!/初始設計值/.test(mo)) mtErrs.push("題材動能榜應說明權重是初始設計值");
+    await page.evaluate(() => closeMethodSheet());
+    const closed = await page.evaluate(() => !document.getElementById("method-sheet").classList.contains("open"));
+    if (!closed) mtErrs.push("關閉後視窗仍開著");
+    mtInfo = `價值榜內容 ${r.bt.length} 字、權重核對：${/已核對/.test(r.bt) ? "一致" : "未核對"}；動能榜切換正常`;
+  } catch (e) { mtErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("148. 方法論說明頁：選股卡「怎麼算的？」開啟、算法／權重／資料日期／存活者偏誤但書／研究成績單連結齊全、切榜正常、無推介字眼（先.九十四-5g）", mtErrs.length === 0, mtErrs.join("; ") || mtInfo);
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4799,7 +4837,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144/146/147新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144/146/147/148新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

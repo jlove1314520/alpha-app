@@ -24,7 +24,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
      載不到時index.html::renderStockChart()自動退回既有SVG折線，不會讓個股頁空白。 -->
 <!-- 常備.開發-20（2026-10-11）：函式庫改為第一次畫K線時才載入（見 app.js ensureLwc()），不再佔首頁首次載入傳輸量。 -->
 <title>Alpha 台美股 AI 交易</title>
-<link rel="stylesheet" href="app.css?v=2026-10-14.1824">
+<link rel="stylesheet" href="app.css?v=2026-10-14.1851">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -399,6 +399,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="note num picks-lb-only tw-only" id="picks-asof-line" style="margin:3px 0 0">載入中…</div>
         <div class="note picks-lb-only tw-only" id="picks-weight-note" data-ui-explain style="margin-top:2px"></div>
         <div class="note picks-lb-only tw-only" id="picks-backtest-note" style="margin-top:4px;display:none"></div>
+        <div class="note picks-lb-only tw-only" style="margin-top:4px"><span class="press" id="picks-method-link" style="color:var(--gold);cursor:pointer" onclick="openMethodSheet(typeof PICKS_BOARD!=='undefined'?PICKS_BOARD:'value')">分數怎麼算的？資料來源與已知偏誤 ›</span></div>
       </div>
       <div class="mkt-toggle" id="picks-toggle"></div>
     </div>
@@ -470,6 +471,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       限制，不登記試驗、不回測；只是資料排序。 -->
       <div class="note" style="color:#c9524a;font-weight:600;margin-bottom:6px">⚠ 只是資料排序，還沒回測過</div>
       <div class="note" id="picks-us-meta" style="margin-bottom:6px">載入中…</div>
+      <div class="note" style="margin-bottom:6px"><span class="press" style="color:var(--gold);cursor:pointer" onclick="openMethodSheet('value')">方法論與存活者偏誤但書 ›</span></div>
       <div id="picks-us-list"></div>
     </div>
     <!-- 2026-10-13 先.八十一-33：美股描述性篩選（成交額／漲跌幅／市值門檻）。資料 data/us_screener.json
@@ -1334,6 +1336,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
 
 
+    <!-- 先.九十四-5g：方法論說明頁入口（常用層，不藏在進階） -->
+    <div class="card" id="settings-method-card">
+      <h3>方法論</h3>
+      <div class="note">排行榜分數怎麼算、資料從哪來、何時更新、回測與存活者偏誤等已知限制。</div>
+      <button class="btn ghost" style="width:100%;margin-top:10px" onclick="openMethodSheet('value')">看方法論</button>
+    </div>
+
     <div class="card" data-ui-advanced>
       <h3>免責聲明</h3>
       <div class="note" style="line-height:1.7">
@@ -1440,6 +1449,21 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div id="sector-sheet-list"></div>
   </div>
 
+  <!-- 先.九十四-5g（2026-10-14）：方法論說明頁。內容依 docs/UX_REDESIGN_PROPOSAL.md ⑤；分數算法、資料日期、回測狀態一律讀當下資料檔的 meta，
+       不寫死數字。從選股卡「怎麼算的？」、選股頁標題列、設定頁開啟。 -->
+  <div class="sheet-mask" id="method-mask" onclick="closeMethodSheet()"></div>
+  <div class="sheet" id="method-sheet" style="max-height:88%">
+    <div class="grab"></div>
+    <h2>方法論</h2>
+    <div class="mkt-toggle" id="method-board-toggle" style="margin:0 0 10px;display:inline-flex">
+      <span class="mtg-opt" data-board="value" onclick="openMethodSheet('value')">價值成長榜</span>
+      <span class="mtg-opt" data-board="momentum" onclick="openMethodSheet('momentum')">題材動能榜</span>
+      <span class="mtg-opt" data-board="future" onclick="openMethodSheet('future')">未來性濾網</span>
+    </div>
+    <div id="method-board-body" class="note" style="line-height:1.7">載入中…</div>
+    <div id="method-common-body" class="note" style="line-height:1.7;margin-top:12px"></div>
+  </div>
+
   <!-- 刪除確認 -->
   <div class="sheet-mask" id="cmask" onclick="cfNo()"></div>
   <div class="cmodal" id="confirm">
@@ -1451,6 +1475,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-14.1824"></script>
+<script src="app.js?v=2026-10-14.1851"></script>
 </body>
 </html>
