@@ -1,3 +1,8 @@
+## 2026-10-14 18:43（互動視窗）先.九十五-6 先.九十四-5l 重複結案
+
+- 先.九十四-5l（每日存 EPS_ttm 快照）與先.八十二-6 重複：`scripts/build_pe_snapshot.py` 已在 market.yml 每日寫 `data/pe_snapshot/<資料日>.json`（收盤／本益比／EPS_ttm），結案不另建機器寫檔。
+- 佇列：5l 標 [x] 並註明結案理由。
+
 ## 2026-10-14 18:28（DevQueue 20261014-180102）先.九十四-5d／5e／5f 內部人轉讓累積提案、減少動態效果、跟 0050 差距改中性色
 
 **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md`）：①先.九十四-1 證交所 FTSE 路徑衝突 ②先.九十四-5a 權證每日快照排程提案 ③**本輪新增** 先.九十四-5d 內部人持股轉讓累積排程提案（`docs/PROPOSAL_INSIDER_TRANSFER_ACCUMULATE.md`，今天 18:1x 起等；要決定放哪一班、commit 清單加檔、姓名是否改雜湊）。
