@@ -1,3 +1,8 @@
+## 2026-10-15 07:39（互動視窗）先.一百-3 研究室 README 凍結.二描述更正
+
+- 更正 `C:lpha\pending_patches
+esearch_lab_2026-10-14inal\README_給ClaudeCode.md`「定位」：凍結.二已於 2026-10-11 解除（舊句劃線保留），但 research*.json 不得進 scores*.json、不得當選股權重照舊有效。README 在 repo 外，不 commit。
+
 ## 2026-10-15 07:39（互動視窗）先.一百-2 研究室.一～七登記進權威清單最前面
 
 - 研究室.一～七照 final\README_給ClaudeCode.md「佇列條目」原文登記在先.一百 段下方，`<!-- ORDER-BEGIN -->` 權威清單最前面加 7 個編號；一～六 DevQueue 可執行、七互動視窗（原文自帶）。`dev_queue_runner.find_next()` 實測下一項＝研究室.一。
