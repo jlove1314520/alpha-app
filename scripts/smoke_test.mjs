@@ -5078,6 +5078,48 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { r2Errs.push(`測試本身出錯：${e.message || e}`); }
   record("152. 診斷橫幅下次排程時間讀 market.yml 實際 cron（經 STATUS.json），不寫死（先.九十五-R2）", r2Errs.length === 0, r2Errs.join("; ") || r2Info);
 
+  // 157.【先.九十六-R4】減少動態：系統設 reducedMotion=reduce 時，JS 捲動不平滑、價格不加閃爍 class、CSS 動畫時長為 0；
+  // 一般模式（主頁面）仍平滑捲動與閃爍。另做原始碼檢查：app*.js 不得再直接寫 behavior:'smooth'（一律走 uiScrollIntoView）。
+  const rdmErrs = []; let rdmInfo = "";
+  try {
+    const probe = async (pg) => pg.evaluate(() => {
+      if (typeof uiReducedMotion !== "function" || typeof uiScrollIntoView !== "function" || typeof flashPriceEls !== "function") return { err: "uiReducedMotion／uiScrollIntoView 未載入" };
+      const calls = []; const orig = Element.prototype.scrollIntoView;
+      Element.prototype.scrollIntoView = function (o) { calls.push(o && o.behavior); };
+      try { uiScrollIntoView(document.getElementById("main") || document.body); } finally { Element.prototype.scrollIntoView = orig; }
+      const box = document.createElement("div"); box.id = "__rm_probe";
+      box.innerHTML = '<b data-flash-code="__RM" data-flash-value="2">2</b>'; document.body.appendChild(box);
+      PREV_QUOTE_PRICES["__RM"] = 1; flashPriceEls("#__rm_probe");
+      const b = box.querySelector("b"); const flashed = b.classList.contains("flash-up") || b.classList.contains("flash-down");
+      const t = document.createElement("i"); t.className = "flash-up"; document.body.appendChild(t);
+      const dur = getComputedStyle(t).animationDuration; t.remove(); box.remove(); delete PREV_QUOTE_PRICES["__RM"];
+      return { rm: uiReducedMotion(), behavior: calls[0], flashed, dur };
+    });
+    const normal = await probe(page);
+    const rctx = await browser.newContext({ viewport: { width: 393, height: 852 }, reducedMotion: "reduce", serviceWorkers: "block" });
+    const rp = await rctx.newPage();
+    await rp.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 20000 });
+    await rp.waitForTimeout(1500);
+    const reduced = await probe(rp);
+    const ge = await rp.evaluate(() => (typeof GLOBAL_ERRORS !== "undefined" ? GLOBAL_ERRORS : []).map(e => e.label + "：" + e.msg));
+    await rctx.close();
+    if (normal.err || reduced.err) rdmErrs.push(normal.err || reduced.err);
+    else {
+      if (normal.rm || normal.behavior !== "smooth" || !normal.flashed) rdmErrs.push(`一般模式應平滑捲動且閃爍：${JSON.stringify(normal)}`);
+      if (!reduced.rm) rdmErrs.push("reduce 模式下 uiReducedMotion() 應為 true");
+      if (reduced.behavior !== "auto") rdmErrs.push(`reduce 模式捲動應為 auto：${reduced.behavior}`);
+      if (reduced.flashed) rdmErrs.push("reduce 模式不應加閃爍 class");
+      if (!/^0s/.test(reduced.dur || "")) rdmErrs.push(`reduce 模式 CSS 動畫時長應為 0s：${reduced.dur}`);
+    }
+    if (ge.length) rdmErrs.push("reduce 模式載入有錯誤：" + ge.join("｜"));
+    const fsm = await import("node:fs");
+    for (const f of fsm.readdirSync(".").filter(f => /^app.*\.js$/.test(f))) {
+      if (/behavior\s*:\s*['"]smooth['"]/.test(fsm.readFileSync(f, "utf8"))) rdmErrs.push(`${f} 仍直接寫 behavior:'smooth'`);
+    }
+    rdmInfo = `一般：${JSON.stringify(normal)}；減少動態：${JSON.stringify(reduced)}`;
+  } catch (e) { rdmErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("157. 減少動態：reduce 時 JS 捲動不平滑、價格不閃、CSS 動畫 0 秒；一般模式照常（先.九十六-R4）", rdmErrs.length === 0, rdmErrs.join("; ") || rdmInfo);
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -5106,7 +5148,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144/146/147/148/151/152新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144/146/147/148/151/152/157新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

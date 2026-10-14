@@ -354,9 +354,9 @@
       const btn=document.querySelector('#trade-tabs button[data-sub="monitor"]');if(btn)btn.click();
       await loadStrategyMonitor();
       const card=document.querySelector('#strategy-monitor-list [data-sid="'+id+'"]');
-      if(!card){const el=document.getElementById('strategy-monitor-list');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});return}  // 先.八十-6：監控台改用曲線檔的線編號，對不到就停在清單頂端
+      if(!card){const el=document.getElementById('strategy-monitor-list');if(el)uiScrollIntoView(el);return}  // 先.八十-6：監控台改用曲線檔的線編號，對不到就停在清單頂端
       const det=card.querySelector('[id^="sm-detail-"]');if(det)det.style.display='';
-      card.scrollIntoView({behavior:'smooth',block:'start'});
+      uiScrollIntoView(card);
     }catch(e){console.warn('[openStrategyReport]',e);recordGlobalError('openStrategyReport',e)}
   }
   function toggleStrategyDetail(id){

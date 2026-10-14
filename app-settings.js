@@ -68,7 +68,7 @@
   let ALERT_RULES={};
   function alertGoLive(){
     const el=document.getElementById('live-discovery');const card=el&&el.closest('.card');
-    if(card)card.scrollIntoView({behavior:'smooth',block:'start'});
+    if(card)uiScrollIntoView(card);
   }
   function renderAlerts(d){
     const body=document.getElementById('alert-body'),cta=document.getElementById('alert-cta'),note=document.getElementById('alert-note');

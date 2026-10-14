@@ -6,6 +6,18 @@
   // console裡沒人看到。只留最近20筆，避免無限累積吃記憶體。
   let GLOBAL_ERRORS=[];
 
+  // 先.九十六-R4（2026-10-14）：減少動態。app.css 的全域 prefers-reduced-motion 規則只管 CSS 動畫／轉場，
+  // 管不到 JS 明確指定的 scrollIntoView 的平滑捲動選項，也不該在使用者要求減少動態時還加閃爍 class。
+  // JS 端要捲動一律走 uiScrollIntoView()，要加動畫 class 前先問 uiReducedMotion()。
+  function uiReducedMotion(){
+    try{return !!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)}
+    catch(e){console.warn('[uiReducedMotion] 讀不到系統設定，視為未要求減少動態',e);return false}
+  }
+  function uiScrollIntoView(el,opt){
+    if(!el)return;
+    el.scrollIntoView(Object.assign({block:'start'},opt||{},{behavior:uiReducedMotion()?'auto':'smooth'}));
+  }
+
   // ══════ 先.七十二-A1／A3（2026-10-11）：白話轉換表（前台唯一一份；對照 data/ui_glossary.json）══════
   // 資料檔裡帶來的文字（評分理由、錯誤訊息、伺服器回傳的原因）在顯示前一律經過 uiPlain()，把內部代號換成白話、
   // 拿掉端點名與檔案路徑。新增內部代號時同步改這裡與 data/ui_glossary.json。
@@ -981,7 +993,7 @@
       const cur=parseFloat(el.dataset.flashValue);
       if(isNaN(cur))return;
       const prev=PREV_QUOTE_PRICES[code];
-      if(prev!=null&&prev!==cur){
+      if(prev!=null&&prev!==cur&&!uiReducedMotion()){ // 先.九十六-R4：減少動態時不閃
         el.classList.remove('flash-up','flash-down');
         void el.offsetWidth; // 強制reflow，讓同方向的連續變動也能重新觸發動畫
         el.classList.add(cur>prev?'flash-up':'flash-down');
@@ -4408,7 +4420,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-14.230055';
+  const APP_VERSION='2026-10-14.2344';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
