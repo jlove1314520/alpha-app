@@ -1,3 +1,11 @@
+## 2026-10-14 19:04（互動視窗）先.九十五-3 內部人持股轉讓前向累積上線（05:43 班、姓名雜湊）
+
+- `.github/scripts/fetch_insider_transfer_tw.py`：姓名、受讓人改存 `name_hash`／`transferee_hash`（SHA-256 前 16 碼、固定前綴），原文不寫檔；只留職稱與身分類別（`role`）。限制照實寫在程式開頭：前綴公開，拿候選姓名逐一算仍可比對，防的是「公開 repo 直接搜尋得到姓名」。
+- `scripts/selftest_insider_transfer_tw.py` 加 5 項（原文不落地、無原文鍵、同名同雜湊、不同人不同雜湊、空值回 None）：23 項全過。
+- `.github/workflows/market.yml`：「累積借券賣出」之後新增一步，只在 `43 21 * * 1-5`（台北 05:43）班或手動觸發時跑、`continue-on-error`。**本 commit 新增會改寫 `data/insider_transfer_tw_history.json` 的排程步驟，已確認該檔在 market.yml commit 步驟的 `git add` 明確清單裡；`data/rate_limit_state.json` 原本就在清單裡**（CLAUDE.md 第十節）。本機 DevQueue `MACHINE_WRITTEN` 以 `^data/` 涵蓋。
+- 本機實跑一次（2 次請求）：上市 3 筆、上櫃 20 筆，寫入 23 筆，輸出沒有 name／transferee 原文鍵；首份資料檔一併提交，之後由 05:43 班累加。
+- 提案文件開頭加核准註記；AWAITING_REVIEW 該列移到已結案（等待中 3→2）。
+
 ## 2026-10-14 19:02（互動視窗）先.九十五-1 TAI50I 撤回＋core_tilt 改 0050 官方 NAV 基準重跑（1.70% 送審）
 
 - **TAI50I 採乙**：刪 `research/data/tai50_index_daily.csv`（git rm）與本機原始月檔；兩個數字在墓園、PIT_MKTCAP_RULES_FIX、GRAVEYARD_AUTOPSY、PROGRESS、診斷 JSON 改寫「已撤回」；`fetch_tai50_index.py` 永久停用；DATA_GAP_PLAN 新增第 6 節「禁抓清單」（證交所 /FTSE/ 路徑、mopsov、MOPS 法說會、權證資訊揭露平台）。git 歷史不改寫，舊 commit 裡仍看得到該檔。

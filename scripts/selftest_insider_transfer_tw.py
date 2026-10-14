@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
 from pathlib import Path
 
@@ -53,6 +54,13 @@ check(tw[0]["code"] == "9999" and tw[0]["role"] == "董事本人" and tw[0]["rep
 check(tp[0]["code"] == "8888" and tp[0]["role"] == "經理人本人" and tp[0]["company"] == "測試上櫃", "TPEx 欄位改名正確（申請人身分→role）")
 check(set(tw[0]) == set(tp[0]), "兩邊輸出鍵完全相同")
 check(tw[0]["planned_own"] == "100", "數值照原字串保留，不轉型")
+# 先.九十五-3：姓名、受讓人改雜湊，原文不得出現在輸出
+dump = json.dumps(tw + tp, ensure_ascii=False)
+check("測試甲" not in dump and "測試乙" not in dump, "姓名／受讓人原文不落地")
+check("name" not in tw[0] and "transferee" not in tw[0], "輸出沒有 name／transferee 原文鍵")
+check(tw[0]["name_hash"] == tp[0]["name_hash"] and len(tw[0]["name_hash"]) == 16, "同一姓名雜湊相同（可辨識同一人）")
+check(tw[0]["name_hash"] != tw[0]["transferee_hash"], "不同人雜湊不同")
+check(fit.person_hash("") is None and fit.person_hash(None) is None, "空值雜湊回 None 不補")
 
 bad = dict(TWSE_ROW)
 bad.pop("受讓人")

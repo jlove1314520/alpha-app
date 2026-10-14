@@ -33,8 +33,10 @@ mopsov（robots.txt 全站 Disallow，不抓），官方 openapi 只給「每日
   本腳本不處理。
 - 快照只有最新一天；哪天排程沒跑，那天的申報就永久缺一天（只能事後從 mopsov
   補，而那裡不抓），`meta.report_dates` 可看出缺哪幾天。
-- 「姓名」「受讓人」是官方公開申報內容，照官方原文保留（去重需要，且與 MOPS
-  公開頁面相同）；是否改為雜湊由總司令在提案裡決定。
+- 「姓名」「受讓人」依 2026-10-14 先.九十五-3 總司令裁示**改存雜湊**（`name_hash`／
+  `transferee_hash`，SHA-256 前 16 碼、固定前綴），原文不寫進檔案；只留職稱與身分類別（`role`）。
+  雜湊仍可去重、辨識「同一人多次申報」。⚠️ 限制：固定前綴寫在公開程式碼裡，有心人拿候選
+  姓名逐一算雜湊仍可比對出來——它防的是「公開 repo 裡可直接搜尋到姓名」，不是加密。
 
 用法：
     python .github/scripts/fetch_insider_transfer_tw.py           # 正式抓取
@@ -165,6 +167,9 @@ def normalize_rows(rows, market: str) -> tuple[list[dict], list[str]]:
         for src_key, dst_key in mapping.items():
             v = row.get(src_key)
             rec[dst_key] = v.strip() if isinstance(v, str) else v
+        # 先.九十五-3：姓名、受讓人改雜湊，原文不落地
+        for plain, hk in (("name", "name_hash"), ("transferee", "transferee_hash")):
+            rec[hk] = person_hash(rec.pop(plain, None))
         rec["report_date"] = roc_to_compact(rec.get("report_date_roc") or "")
         if not rec.get("code"):
             warns.append(f"{market} 第{i}列沒有公司代號，略過")
@@ -172,6 +177,16 @@ def normalize_rows(rows, market: str) -> tuple[list[dict], list[str]]:
         rec["id"] = record_id(rec)
         out.append(rec)
     return out, warns
+
+
+HASH_PREFIX = "alpha-insider-transfer-v1|"
+
+
+def person_hash(v) -> str | None:
+    """姓名／受讓人 → SHA-256 前 16 碼；空值回 None（照實，不補）。"""
+    if v is None or (isinstance(v, str) and not v.strip()):
+        return None
+    return hashlib.sha256((HASH_PREFIX + str(v).strip()).encode("utf-8")).hexdigest()[:16]
 
 
 def record_id(rec: dict) -> str:
