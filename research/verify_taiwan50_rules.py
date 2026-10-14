@@ -30,9 +30,8 @@ START = "2013-06-01"
 TSMC = "2330"
 
 
-def main() -> int:
-    etf = pmr.total_return_index("0050")
-    days = [d for d in etf.index if START <= d <= VAL_END]
+def build_portfolio(days: list[str]):
+    """重建組合日報酬（R1～R6＋F1）。先.九十五-1 的 NAV 基準重跑共用同一份，不另寫一套。"""
     sched = pmr.taiwan50_schedule(days)
     print(f"異動 {len(sched)} 次（季審 {sum('季審' in s['reason'] for s in sched)}、期中遞補 {sum('遞補' in s['reason'] for s in sched)}、"
           f"快速納入 {sum('快速' in s['reason'] for s in sched)}）", flush=True)
@@ -64,6 +63,13 @@ def main() -> int:
             val = val + wm * (p.ffill() / p.iloc[0])
         r = (val / val.shift(1)).iloc[1:] - 1
         port.loc[seg] = r.to_numpy()
+    return port, sched, tsmc_w, no_px
+
+
+def main() -> int:
+    etf = pmr.total_return_index("0050")
+    days = [d for d in etf.index if START <= d <= VAL_END]
+    port, sched, tsmc_w, no_px = build_portfolio(days)
     etf_ret = etf.reindex(days).pct_change()
     df = pd.DataFrame({"port": port, "etf": etf_ret}).dropna()
     diff = df["port"] - df["etf"]

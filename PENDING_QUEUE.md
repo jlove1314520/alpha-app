@@ -19710,7 +19710,7 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
 7. 14 份舊 autostash：逐份 git stash show -p 匯出成 patch，存 research/archive/stash_patches/（不進 repo），確認檔案存在後再 drop，前後列清單。
 8. 佇列自動補件：DevQueue 每輪收工時，若 - [ ] 少於 12 項或 DevQueue 可執行少於 6 項，自動從 BACKLOG、docs/UX_REDESIGN_PROPOSAL.md、Cowork 全檢報告、DATA_GAP_PLAN 甲類補件，每條寫明來源；不得用小事湊數，也不得補新的 alpha 試驗。
 
-- [ ] **先.九十五-1 TAI50I 採乙：刪 research/data/tai50_index_daily.csv 與兩個數字（4.39%、1.72%），文件改「已撤回」，抓取程式停用寫進 DATA_GAP_PLAN 禁抓清單；core_tilt 第 0 階段改用 0050 官方每日 NAV 為基準（先三來源查證合法免費來源與 robots／使用條款，修正清單先 commit，門檻不變，只跑一次）**（互動視窗執行）
+- [x] **先.九十五-1 TAI50I 採乙：刪 research/data/tai50_index_daily.csv 與兩個數字（4.39%、1.72%），文件改「已撤回」，抓取程式停用寫進 DATA_GAP_PLAN 禁抓清單；core_tilt 第 0 階段改用 0050 官方每日 NAV 為基準（先三來源查證合法免費來源與 robots／使用條款，修正清單先 commit，門檻不變，只跑一次）**（互動視窗執行）〔TAI50I 撤回＋禁抓清單；NAV 三來源查證、修正清單 c9eb1d82b 先 commit、12 次請求；重跑一次日頻 TE 1.70% → 送審（AWAITING）〕
 - [ ] **先.九十五-2 權證每日快照核准上線：本機排程交易日 17:30；每週壓縮備份到 research/data 以外的本機資料夾（總司令指定路徑前），設定頁顯示最後備份時間；不進 repo**（互動視窗執行）
 - [ ] **先.九十五-3 內部人持股轉讓前向累積核准上線：market.yml 05:43 班、每日 2 請求；commit 清單加 data/insider_transfer_tw_history.json；姓名與受讓人改雜湊只留職稱與身分類別；照 CLAUDE.md 第十節註明 allowlist**（互動視窗執行）
 - [ ] **先.九十五-4 淺色模式（先.九十四-5j）：預設跟隨手機系統，設定頁可切淺色／深色／跟隨系統；全套冒煙＋393×852 兩種模式截圖**（互動視窗執行）
