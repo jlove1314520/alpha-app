@@ -19690,3 +19690,25 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
 - [ ] **先.九十四-5j [自走補入，來源：docs/UX_REDESIGN_PROPOSAL.md 第 45～58 行 決策 3] 淺色模式／跟隨手機系統：要總司令決定做不做與預設值（目前 app.css 寫死 color-scheme: dark；設定頁的「配色」只切紅綠漲跌慣例）**（互動視窗執行；要總司令拍板）
 - [ ] **先.九十四-5k [自走補入，來源：DATA_GAP_PLAN.md #39 第 119～126、249 行] 0050 成分股歷史異動表：資料只有維基百科（CC BY-SA）可用、證交所 FTSE 路徑不抓；要總司令決定授權條件能不能接受，同意後才結構化 2003～2026 異動存 research/data**（互動視窗執行；要總司令拍板）
 - [ ] **先.九十四-5l [自走補入，來源：先.八十一-41 停在「建議…等裁示」] 每日存 EPS_ttm 快照（約 30KB／日）讓本益比反推 EPS 的備援日後可用：要總司令決定是否新增這個機器寫檔**（互動視窗執行；要總司令拍板）
+
+# 2026-10-14【先.九十五：七項裁示＋佇列自動補件】（總司令裁示原文，動工前先寫入）
+
+先.九十五　七項裁示＋佇列自動補件（每項標 - [x]，在 research/PROGRESS_HEARTBEAT.jsonl append item=先.九十五-N）
+1. 證交所 /rwd/zh/FTSE/TAI50I 資料採乙：刪除 research/data/tai50_index_daily.csv 與用它算出的兩個數字（0050 對指數 TE 4.39%、重建對指數 1.72%），文件改寫「已撤回」；確認抓取程式已停用並寫進 DATA_GAP_PLAN 禁抓清單。
+   core_tilt 第 0 階段改用 0050 官方每日淨值（NAV）當基準：先三來源查證 NAV 的合法免費來源（投信投顧公會／元大官網，查 robots 與使用條款），修正清單先 commit，門檻不變（日頻 TE ≤1% 合格、1～3% 送審、>3% 結案），只跑一次。說明：原門檻以 0050 市價為基準是 Cowork 設計錯誤，市價含折溢價與股息日雜訊。
+2. 權證每日快照（docs/PROPOSAL_WARRANT_SNAPSHOT.md）核准：本機排程交易日 17:30；每週把快照壓縮備份一份到 research/data 以外的第二位置（路徑由總司令指定前，先備份到本機另一個資料夾並在設定頁顯示最後備份時間）。不進 repo。
+3. 內部人持股轉讓前向累積（docs/PROPOSAL_INSIDER_TRANSFER_ACCUMULATE.md）核准：放 market.yml 05:43 班、每日 2 請求；commit 清單加 data/insider_transfer_tw_history.json；姓名與受讓人改雜湊，只留職稱與身分類別。照 CLAUDE.md 第十節註明 allowlist。
+4. 淺色模式（先.九十四-5j）：做，預設跟隨手機系統，設定頁可手動切淺色／深色／跟隨系統；全套冒煙＋393×852 兩種模式截圖。
+5. 0050 成分股歷史（先.九十四-5k）：可用維基百科（CC BY-SA），只存本機 research/data（不進 repo），檔案附出處與授權說明。
+6. 先.九十四-5l 與先.八十二-6（已核准並完成的每日本益比快照）重複，結案。
+7. 14 份舊 autostash：逐份 git stash show -p 匯出成 patch，存 research/archive/stash_patches/（不進 repo），確認檔案存在後再 drop，前後列清單。
+8. 佇列自動補件：DevQueue 每輪收工時，若 - [ ] 少於 12 項或 DevQueue 可執行少於 6 項，自動從 BACKLOG、docs/UX_REDESIGN_PROPOSAL.md、Cowork 全檢報告、DATA_GAP_PLAN 甲類補件，每條寫明來源；不得用小事湊數，也不得補新的 alpha 試驗。
+
+- [ ] **先.九十五-1 TAI50I 採乙：刪 research/data/tai50_index_daily.csv 與兩個數字（4.39%、1.72%），文件改「已撤回」，抓取程式停用寫進 DATA_GAP_PLAN 禁抓清單；core_tilt 第 0 階段改用 0050 官方每日 NAV 為基準（先三來源查證合法免費來源與 robots／使用條款，修正清單先 commit，門檻不變，只跑一次）**（互動視窗執行）
+- [ ] **先.九十五-2 權證每日快照核准上線：本機排程交易日 17:30；每週壓縮備份到 research/data 以外的本機資料夾（總司令指定路徑前），設定頁顯示最後備份時間；不進 repo**（互動視窗執行）
+- [ ] **先.九十五-3 內部人持股轉讓前向累積核准上線：market.yml 05:43 班、每日 2 請求；commit 清單加 data/insider_transfer_tw_history.json；姓名與受讓人改雜湊只留職稱與身分類別；照 CLAUDE.md 第十節註明 allowlist**（互動視窗執行）
+- [ ] **先.九十五-4 淺色模式（先.九十四-5j）：預設跟隨手機系統，設定頁可切淺色／深色／跟隨系統；全套冒煙＋393×852 兩種模式截圖**（互動視窗執行）
+- [ ] **先.九十五-5 0050 成分股歷史（先.九十四-5k）：維基百科（CC BY-SA），只存本機 research/data（不進 repo），檔案附出處與授權說明**（互動視窗執行）
+- [ ] **先.九十五-6 先.九十四-5l 與先.八十二-6 重複，結案**（互動視窗執行）
+- [ ] **先.九十五-7 14 份舊 autostash 逐份 git stash show -p 匯出 patch 存 research/archive/stash_patches/（不進 repo），確認檔案存在後再 drop，前後列清單**（互動視窗執行）
+- [ ] **先.九十五-8 佇列自動補件規則：DevQueue 每輪收工若 - [ ] <12 或 DevQueue 可執行 <6，自動從 BACKLOG、docs/UX_REDESIGN_PROPOSAL.md、Cowork 全檢報告、DATA_GAP_PLAN 甲類補件並寫明來源；不得用小事湊數、不得補新 alpha 試驗**（互動視窗執行）
