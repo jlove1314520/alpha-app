@@ -6,7 +6,7 @@
 - **做了什麼**：`research/warrant_snapshot.py`（每天 7 次請求，只留反推 IV 要的欄位，gzip 存本機 `research/data/warrant_snapshots/YYYY-MM-DD/`，寫檔前驗日期與空表）＋`scripts/selftest_warrant_snapshot.py`；提案文件交審閱；**沒有建排程**。
 - **證據**：10/14 17:03 手動實抓，7 次全 HTTP 200、無 402/403/428/429；上市基本 42,444、上櫃基本 15,745、上櫃發行 11,463、上市認購 33,727／認售 2,328、上櫃權證 11,454、上櫃標的 346 檔；壓縮後約 3.5MB／天。自測 21 項全過。
 - **欄位跟 B1 調查不同 → 已照實更正** `research/WARRANT_DATA_SURVEY.md` 末節：基本資料「標的」是名稱不是代號；備註在 t187ap37 不在 tpex_warrant_issue；openapi 基本資料晚一天（10/14 抓到出表日 10/13）。
-- **[自行裁量]**：節流新來源名 `tpex_www`；上市美式／歐式只從備註判斷（約 9% 有寫），其餘記 None 不猜。`C:lpha\CLAUDE.md` 頻率上限清單補「權證每日快照」一節（該檔不在 git）。
+- **[自行裁量]**：節流新來源名 `tpex_www`；上市美式／歐式只從備註判斷（約 9% 有寫），其餘記 None 不猜。`C:\alpha\CLAUDE.md` 頻率上限清單補「權證每日快照」一節（該檔不在 git）。
 
 ### 先.九十四-5b 權證隱含波動反推（e6e4fd6fb）
 - **做了什麼**：`research/warrant_iv.py`（歐式 Black-Scholes、不含股利、行使比例、利率固定 1.5%、日曆天、二分法）＋`scripts/selftest_warrant_iv.py`；用 10/14 快照算全市場 IV 分佈存本機 `research/data/warrant_iv_sample.json`。
