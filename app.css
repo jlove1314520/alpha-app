@@ -462,3 +462,9 @@
 details.ui-more>summary{list-style:none;cursor:pointer;color:var(--ink-3);font-size:13px;text-align:center;padding:8px 0;border:1px dashed var(--hairline);border-radius:12px;margin:4px 0 10px}
 details.ui-more>summary::-webkit-details-marker{display:none}
 details.ui-more[open]>summary{color:var(--ink-2)}
+/* 先.九十四-5e：手機設定「減少動態效果」時，淡入／閃色／分頁過場／骨架閃爍／長條成長一律改成瞬間（動畫時間 0），
+   直接顯示最終樣子；開關、抽屜、提示條的過場也歸零。animationend 在 0 秒動畫仍會觸發，閃色 class 照常移除。 */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:0s!important;animation-delay:0s!important;animation-iteration-count:1!important;
+    transition-duration:0s!important;transition-delay:0s!important;scroll-behavior:auto!important}
+}

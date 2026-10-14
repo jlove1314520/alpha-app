@@ -4698,6 +4698,48 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { pfErrs.push(`測試本身出錯：${e.message || e}`); }
   record("145. 模擬 F 賣波動：自測全過、分頁與「只是研究／不提請真錢」標示、研究成績單含權證不做說明（先.九十一-1／-5-1）", pfErrs.length === 0, pfErrs.join("; ") || pfInfo);
 
+  // 146.【先.九十四-5e】減少動態效果：reducedMotion=reduce 時 .rise／.flash-up／.screen.active／骨架／長條的動畫時間與過場時間為 0，
+  // 閃色 class 照常被 animationend 移除；對照組（一般模式）.rise 動畫時間必須 >0，避免測試恆真。
+  const rmErrs = [];
+  let rmInfo = "";
+  try {
+    const probe = () => {
+      const host = document.createElement("div");
+      host.innerHTML = '<div class="rise"></div><div class="flash-up"></div><div class="skel-line"></div><div class="bar-fill"></div><div class="switch"></div>';
+      document.body.appendChild(host);
+      const out = {};
+      for (const el of host.children) { const cs = getComputedStyle(el); out[el.className] = { a: cs.animationDuration, t: cs.transitionDuration }; }
+      const scr = document.querySelector(".screen.active");
+      out.screen = scr ? { a: getComputedStyle(scr).animationDuration } : null;
+      host.remove();
+      return out;
+    };
+    const normal = await page.evaluate(probe);
+    if (!normal.rise || normal.rise.a === "0s") rmErrs.push(`對照組（一般模式）.rise 動畫時間應 >0：${JSON.stringify(normal.rise)}`);
+    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, reducedMotion: "reduce", serviceWorkers: "block" });
+    try {
+      const p2 = await ctx.newPage();
+      await p2.goto(`${baseUrl}/index.html`, { waitUntil: "domcontentloaded", timeout: 30000 });
+      await p2.waitForSelector(".screen.active", { timeout: 15000 });
+      const mq = await p2.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches);
+      if (!mq) rmErrs.push("模擬 reducedMotion=reduce 沒生效");
+      const r = await p2.evaluate(probe);
+      for (const k of ["rise", "flash-up", "skel-line", "bar-fill"]) if (!r[k] || r[k].a !== "0s") rmErrs.push(`.${k} 動畫時間應為 0s：${JSON.stringify(r[k])}`);
+      if (!r.switch || r.switch.t !== "0s") rmErrs.push(`.switch 過場時間應為 0s：${JSON.stringify(r.switch)}`);
+      if (!r.screen || r.screen.a !== "0s") rmErrs.push(`.screen.active 淡入應為 0s：${JSON.stringify(r.screen)}`);
+      const flashGone = await p2.evaluate(async () => {
+        const el = document.createElement("span"); document.body.appendChild(el);
+        el.classList.add("flash-up");
+        el.addEventListener("animationend", () => el.classList.remove("flash-up", "flash-down"), { once: true });
+        await new Promise(res => setTimeout(res, 300));
+        const gone = !el.classList.contains("flash-up"); el.remove(); return gone;
+      });
+      if (!flashGone) rmErrs.push("0 秒動畫下 animationend 沒觸發，閃色 class 沒被移除");
+      rmInfo = `對照組 .rise=${normal.rise && normal.rise.a}；減少動態 .rise=${r.rise && r.rise.a}`;
+    } finally { await ctx.close(); }
+  } catch (e) { rmErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("146. 減少動態效果：手機設定開啟時淡入／閃色／分頁過場／骨架／長條／開關動畫時間為 0，閃色仍會自動移除（先.九十四-5e）", rmErrs.length === 0, rmErrs.join("; ") || rmInfo);
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4726,7 +4768,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144/146新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
