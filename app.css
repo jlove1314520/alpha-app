@@ -15,6 +15,7 @@
     --accent:#d8b070; --accent-deep:#c9974a;
     --up:#ff5257; --up-deep:#e6383f;      /* 台股慣例：紅=漲 */
     --down:#24c98a; --down-deep:#1aa876;  /* 綠=跌 */
+    --up-on-tint:var(--up); --down-on-tint:var(--down); --gold-on-tint:var(--gold); /* 先.九十六-R2：淡色底上的漲跌字（深色＝本色，淺色改 deep） */
     --warn:#fab219; --good:#0ca30c; --serious:#ec835a; --critical:#d03b3b;
     --violet:#9085e9; --yellow:#c98500;
     --nav-h:64px;
@@ -40,18 +41,34 @@
     --surface-2:#ffffff; --surface-3:#ece6db;
     --ink:#1c1a16; --ink-2:#45413a; --ink-3:#6a645a; --ink-4:#736c61;
     --hairline:rgba(0,0,0,.09); --grid:#e2ddd2;
-    --gold:#906420; --gold-deep:#7d5416; --gold-line:#a87a2e;
+    --gold:#8c611f; --gold-deep:#7d5416; --gold-line:#a87a2e;
     --gold-grad:linear-gradient(135deg,#e9c98f,#c9974a);
-    --accent:#906420; --accent-deep:#7d5416;
+    --accent:#8c611f; --accent-deep:#7d5416;
     --up:#d2252b; --up-deep:#b81d22;
     --down:#0c7c50; --down-deep:#0a6b44;
-    --warn:#966100; --good:#097e09; --serious:#b34e27; --critical:#b52a2a;
+    --warn:#905d00; --good:#097e09; --serious:#b34e27; --critical:#b52a2a;
     --violet:#5b4fc4; --yellow:#8f5f00;
     --fg-rgb:0,0,0;
     --caution:#b0362d; --note-gold:#80591a;
-    --glass:rgba(250,248,243,.82); --glass-strong:rgba(250,248,243,.95); --ai-tail:rgba(var(--fg-rgb),.6);
-    --line-mid:#cfc9bd; --line-zero:#bdb6a8; --opt-ink:#6a645a; --dot-off:#a8a296; --killer-ink:#b52a2a;
+    --glass:rgba(250,248,243,.82); --glass-strong:rgba(250,248,243,.95); --ai-tail:rgba(250,248,243,.6);
+    --line-mid:#cfc9bd; --line-zero:#bdb6a8; --opt-ink:#686259; --dot-off:#a8a296; --killer-ink:#b52a2a;
   }
+  /* 先.九十六-R2（2026-10-14）：混色底（半透明淡底）逐組量 WCAG 後的淺色專屬修正，逐組數字見 docs/UX_AUDIT.md。
+     ①漲跌慣例改用 data-updown 屬性（原本 JS 寫進 inline style 會蓋掉淺色 token）；
+     ②--ai-tail 淺色原本是 rgba(0,0,0,.6)，AI 卡右下角變深灰、字對比 1.1，改成卡片米白；
+     ③--ink-4／--gold／--accent／--opt-ink 再暗一點，讓 #app 頂端金色淡光、分頁切換膠囊淡底上也 ≥4.6。深色不動。 */
+  :root[data-updown="intl"]{--up:#24c98a; --up-deep:#1aa876; --down:#ff5257; --down-deep:#e6383f}
+  :root[data-theme="light"][data-updown="intl"]{--up:#0c7c50; --up-deep:#0a6b44; --down:#d2252b; --down-deep:#b81d22}
+  :root[data-theme="light"]{--up-on-tint:var(--up-deep); --down-on-tint:var(--down-deep); --gold-on-tint:var(--gold-deep)}
+  /* 頂端警示橫幅與錯誤 log 的字色是 index.html inline 寫死的深色用亮紅（淺色淡紅底上 2.1～3.6）；淺色改用 --critical 同色相再暗一點
+     （#af2929：錯誤 log 裡「複製」鈕是兩層淡紅疊起來，--critical 只有 4.38） */
+  :root[data-theme="light"] :is(#auto-banner,#claude-auth-banner,#paper-tracking-banner,#error-log,#error-log-copy){color:#af2929 !important}
+  :root[data-theme="light"] #app{background:radial-gradient(120% 55% at 50% -8%, rgba(216,176,112,.035), transparent 60%), var(--page)}
+  :root[data-theme="light"] .pill .tm{color:var(--ink-3)}
+  :root[data-theme="light"] .ai-tag{color:var(--gold-deep)}
+  :root[data-theme="light"] .ai-card{--ink-4:var(--ink-3)}
+  :root[data-theme="light"] #settings-layer-toggle button.on{color:var(--gold-deep)}
+  :root[data-theme="light"] #home-footer-version{opacity:1 !important;color:var(--ink-4)}
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   /* 2026-08-28修正（黑格問題第二輪，跟status-bar-style改black併用）：
      100% 靠父層（html的height:100%又靠viewport meta）層層傳遞容易在iOS
@@ -227,8 +244,8 @@
   .idx-row .px{justify-self:end}
 
   .chg-tag{font-size:11px;padding:2px 7px;border-radius:6px;font-variant-numeric:tabular-nums;font-weight:600}
-  .chg-tag.u{background:rgba(230,103,103,.15);color:var(--up)}
-  .chg-tag.d{background:rgba(25,158,112,.15);color:var(--down)}
+  .chg-tag.u{background:rgba(230,103,103,.15);color:var(--up-on-tint)}
+  .chg-tag.d{background:rgba(25,158,112,.15);color:var(--down-on-tint)}
 
   /* ===== 熱力圖 ===== */
   .heat{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}

@@ -4975,6 +4975,36 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { r4Errs.push(`測試本身出錯：${e.message || e}`); }
   record("154. 美股選股的方法論連結直接開美股段、存活者偏誤但書置頂且不用捲動（先.九十五-R4）", r4Errs.length === 0, r4Errs.join("; ") || r4Info);
 
+  // 155.【2026-10-14 先.九十六-R2】漲跌慣例（台股／國際）不得用 inline style 寫死 --up／--down——
+  // 舊版 applyColorScheme 寫進 <html> style，蓋掉淺色 token，淺色模式綠字只有 1.7:1。
+  // 檢查：淺色／深色 × 台股／國際四種組合的 --up／--down 都是該主題的值，且 <html> 沒有 inline --up；最後還原偏好。
+  const udErrs = [];
+  let udInfo = "";
+  try {
+    const prevTheme = await page.evaluate(() => { try { return localStorage.getItem("alpha_theme") } catch (e) { return null } });
+    const prevCs = await page.evaluate(() => { try { return localStorage.getItem("alpha_color_scheme") } catch (e) { return null } });
+    await page.evaluate(() => { go("settings"); });   // setColorScheme／setThemePref 在設定頁腳本裡
+    await page.waitForFunction(() => typeof setColorScheme === "function" && typeof setThemePref === "function", null, { timeout: 15000 });
+    const want = { "light|TW": ["#d2252b", "#0c7c50"], "light|INTL": ["#0c7c50", "#d2252b"], "dark|TW": ["#ff5257", "#24c98a"], "dark|INTL": ["#24c98a", "#ff5257"] };
+    const got = [];
+    for (const th of ["light", "dark"]) for (const cs of ["TW", "INTL"]) {
+      const v = await page.evaluate(([th, cs]) => { setThemePref(th); setColorScheme(cs);
+        const s = getComputedStyle(document.documentElement);
+        return { up: s.getPropertyValue("--up").trim(), down: s.getPropertyValue("--down").trim(), inl: document.documentElement.style.getPropertyValue("--up") }; }, [th, cs]);
+      const w = want[`${th}|${cs}`];
+      if (v.up !== w[0] || v.down !== w[1]) udErrs.push(`${th}/${cs} 應為 ${w.join("/")}，實際 ${v.up}/${v.down}`);
+      if (v.inl) udErrs.push(`${th}/${cs} <html> 仍有 inline --up=${v.inl}`);
+      got.push(`${th}/${cs}=${v.up}/${v.down}`);
+    }
+    udInfo = got.join("；");
+    await page.evaluate(([t, c]) => {
+      setColorScheme(c || "TW"); if (c == null) localStorage.removeItem("alpha_color_scheme");
+      if (t == null) localStorage.removeItem("alpha_theme"); else localStorage.setItem("alpha_theme", t);
+      alphaApplyTheme(); if (typeof renderThemeToggle === "function") renderThemeToggle();
+    }, [prevTheme, prevCs]);
+  } catch (e) { udErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("155. 漲跌慣例不用 inline 寫死顏色：淺色／深色 × 台股／國際四組 --up／--down 都是該主題的值（先.九十六-R2）", udErrs.length === 0, udErrs.join("; ") || udInfo);
+
   // 151.【2026-10-14 先.九十五-R1】離線三缺陷：另開環境連線開一次，再「斷網＋小檔抓不到（模擬 SW／HTTP 快取都沒有，
   // UX_AUDIT UX-2～4 的情境）」重新整理：①自選股名稱不得退成代號、走勢小圖不得消失 ②頂端台股不得寫「無資料」
   // ③錯誤 log 不得出現 ensureQuoteLite（離線是常態，比照先.八十-2）。393×852 離線截圖存 research/ux_shots/（不進 repo）。

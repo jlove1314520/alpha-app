@@ -4408,7 +4408,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-14.2105';
+  const APP_VERSION='2026-10-14.2152';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
@@ -4486,12 +4486,15 @@
     TW:{up:'#ff5257',upDeep:'#e6383f',down:'#24c98a',downDeep:'#1aa876',label:'台股慣例（紅漲綠跌）'},
     INTL:{up:'#24c98a',upDeep:'#1aa876',down:'#ff5257',downDeep:'#e6383f',label:'國際慣例（綠漲紅跌）'},
   };
+  // 先.九十六-R2（2026-10-14）修 bug：原本把上面的深色值直接寫進 <html> inline style，
+  // inline 優先於 :root[data-theme="light"]，淺色模式的 --up／--down 永遠被蓋成深色亮色（綠字對比 1.7:1）。
+  // 改成只設 data-updown 屬性，實際顏色由 app.css 依深淺色各給一組；COLOR_SCHEMES 的色碼只剩說明用途。
   function applyColorScheme(key){
-    const s=COLOR_SCHEMES[key]||COLOR_SCHEMES.TW;
-    const root=document.documentElement.style;
-    root.setProperty('--up',s.up);root.setProperty('--up-deep',s.upDeep);
-    root.setProperty('--down',s.down);root.setProperty('--down-deep',s.downDeep);
-    localStorage.setItem('alpha_color_scheme',key);
+    const k=COLOR_SCHEMES[key]?key:'TW';
+    const html=document.documentElement;
+    ['--up','--up-deep','--down','--down-deep'].forEach(p=>html.style.removeProperty(p));
+    if(k==='INTL')html.setAttribute('data-updown','intl');else html.removeAttribute('data-updown');
+    localStorage.setItem('alpha_color_scheme',k);
   }
 
   // ── 幣別切換（2026-08-25 新增）：今日頁總資產/已實現損益、交易頁持倉損益支援 NT$/US$。

@@ -117,7 +117,7 @@
     el.innerHTML=MAINSTREAM_CACHE.map(r=>{
       const scoreInd=r.scoreInd||HEAT_TO_SCORE_INDUSTRY[r.id];
       const active=PICKS_INDUSTRY===scoreInd;
-      return `<span class="press" style="flex-shrink:0;font-size:12px;font-weight:${active?600:400};color:${active?'#1a1005':'var(--ink-2)'};background:${active?'var(--gold-grad)':'rgba(var(--fg-rgb),.05)'};border:1px solid ${active?'transparent':'rgba(var(--fg-rgb),.08)'};padding:6px 13px;border-radius:999px;cursor:pointer;white-space:nowrap" onclick="filterPicksByIndustry('${scoreInd}')">${r.label} <span style="color:${active?'#1a1005':'var(--up)'}">+${r.inflow.toFixed(1)}%</span>${r.crowded?' ⚠ 已擁擠':''}</span>`;
+      return `<span class="press" style="flex-shrink:0;font-size:12px;font-weight:${active?600:400};color:${active?'#1a1005':'var(--ink-2)'};background:${active?'var(--gold-grad)':'rgba(var(--fg-rgb),.05)'};border:1px solid ${active?'transparent':'rgba(var(--fg-rgb),.08)'};padding:6px 13px;border-radius:999px;cursor:pointer;white-space:nowrap" onclick="filterPicksByIndustry('${scoreInd}')">${r.label} <span style="color:${active?'#1a1005':'var(--up-on-tint)'}">+${r.inflow.toFixed(1)}%</span>${r.crowded?' ⚠ 已擁擠':''}</span>`;
     }).join('');
   }
   // 先.八十一-10：主流題材主來源改為 repo 的 data/industry_flow.json（scripts/build_industry_flow.py：price_history
@@ -698,7 +698,7 @@
         `<div class="note" style="margin-bottom:12px">⚠️ 技術層級分批規則（價位取自這一檔自己的均線／前波低點／ATR，非估值預測、非投資建議，僅為資金配置範例）。近期支撐參考：20 日低點 ${nf(low20.toFixed(2))}、60 日低點 ${nf(low60.toFixed(2))}、近 20 日最高 ${nf(swingHigh.toFixed(2))}。</div>`+
         `<div style="display:flex;flex-direction:column;gap:10px">`+
         tranches.map((t,i)=>`<div style="display:flex;align-items:center;gap:12px">
-          <span class="num" style="width:22px;height:22px;border-radius:50%;background:rgba(216,176,112,.15);color:var(--gold);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</span>
+          <span class="num" style="width:22px;height:22px;border-radius:50%;background:rgba(216,176,112,.15);color:var(--gold-on-tint);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</span>
           <span style="flex:1;font-size:12.5px;color:var(--ink-2)">${t.label}<br><span style="font-size:9.5px;color:var(--ink-4)">${t.basis}${t.off<-0.05?`　距現價 ${t.off.toFixed(1)}%`:''}</span></span>
           <span class="num" style="font-size:13px;font-weight:600">${nf(t.price.toFixed(2))}</span>
           <span class="num" style="font-size:10px;color:var(--ink-4);width:34px;text-align:right">${t.pct}%</span>

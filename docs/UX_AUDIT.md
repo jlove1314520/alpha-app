@@ -7,7 +7,62 @@
 
 ---
 
+## 2026-10-14 21:50（DevQueue 20261014-213102，先.九十六-R2）淺色模式「半透明混色底」上的文字對比
+
+補 先.九十五-R3「沒涵蓋①」。方法：新工具 `scripts/light_mix_contrast.mjs`（393×852、淺色、凍結時鐘、擋外部請求、不註冊 SW），
+六個分頁各捲 0／760／1520／2280px，逐一找有直接文字的可見元素，從自己往上把每層背景（含 rgba 半透明、漸層每個色標）合成到第一個不透明底，
+文字色若半透明也先混色、元素 opacity 連乘；**只列路徑上有半透明底的組合**。漸層取「最差色標」，所以是保守值（例：#app 頂端金色淡光、AI 卡漸層）。
+平常隱藏的警示橫幅／錯誤 log 由工具強制顯示並塞示範字後一起量。另用靜態掃描（app.css、index.html、app*.js 裡同一段同時有 `background:rgba(...)` 與 `color:`）補畫面沒出現的元件。
+判定：小字 ≥4.5（大字 ≥3），WCAG 2.x 公式。
+
+### 抓到的兩個真 bug（不只是對比不足）
+1. **淺色模式的漲跌色根本沒生效**：`app.js::applyColorScheme()` 啟動時把**深色**的 `--up／--down`（#ff5257／#24c98a）寫進 `<html>` inline style，
+   inline 優先於 `:root[data-theme="light"]`，先.九十五-R3 調好的淺色漲跌色被整個蓋掉——淺色首頁綠字 `-1.10%` 在淡綠膠囊上只有 **1.72:1**、大盤一眼 1.87。
+   修法：改設 `data-updown="intl"` 屬性，顏色由 `app.css` 依深淺色各給一組；冒煙新增 #155 守四種組合。
+2. **AI 卡右下角在淺色變深灰**：`--ai-tail` 淺色值是 `rgba(var(--fg-rgb),.6)`＝黑 60%，卡片漸層尾端發黑，「規則摘要」字對比 1.20。改成卡片米白 `rgba(250,248,243,.6)`。
+
+### 逐組（改之前 → 改之後，數字＝最差合成底）
+
+| 元件 | 半透明底 | 改之前 字／底／對比 | 改法（只動淺色） | 改之後 字／底／對比 |
+|---|---|---|---|---|
+| 漲跌幅膠囊 `.chg-tag.d` | rgba(25,158,112,.15) | #24c98a／#d8eadf／**1.72** | bug 1＋新 token `--down-on-tint`（淺色＝`--down-deep`） | #0a6b44／#d8eadf／5.26 |
+| 漲跌幅膠囊 `.chg-tag.u` | rgba(230,103,103,.15) | #ff5257／#f7e2de／**2.56** | bug 1＋`--up-on-tint`（淺色＝`--up-deep`） | #b81d22／#f7e2de／5.23 |
+| 大盤一眼 `.idx-cap .cv/.cp` | rgba(fg,.035) | #24c98a／#f1efea／**1.87**；#ff5257／**2.78** | bug 1 | 全過（≥4.6） |
+| 主流題材 chip 流入％（app-picks.js） | rgba(fg,.05) | #ff5257／#e6e1d6／**2.44** | inline 改用 `--up-on-tint` | #b81d22／#e7e3da／5.06 |
+| 選股排名圓章（app-picks.js:701，淡金底） | rgba(216,176,112,.15) | `--gold`／#f0e7d8／4.45（靜態） | inline 改用 `--gold-on-tint`（淺色＝`--gold-deep`） | #7d5416／5.43（靜態） |
+| AI 卡 `.ai-tag` | rgba(216,176,112,.16) 疊 AI 卡漸層 | #906420／#746c5e／**1.00**（bug 2）→ 修 bug 2 後 3.85 | 淺色 `.ai-tag` 用 `--gold-deep` | #7d5416／#ecddc5／4.99 |
+| AI 卡內 `--ink-4` 小字 | AI 卡漸層 | #736c61／**1.20**（bug 2）→ 4.12 | 淺色 `.ai-card{--ink-4:var(--ink-3)}` | #6a645a／#efe6d5／4.73 |
+| 頂端警示橫幅（auto／claude-auth／paper-tracking） | rgba(220,38,38,.12～.14) | inline 寫死 #ef4444／#dc2626：**2.72／3.59**（靜態） | 淺色 ID 規則 `color:#af2929 !important`（`--critical` 同色相再暗） | 4.68／4.82 |
+| ⚠ 錯誤 log 淡紅底＋「複製錯誤詳情」 | rgba(220,80,80,.08)＋.12 兩層 | inline 寫死 #e08080：**2.24／2.14**（靜態） | 同上 | 5.25／4.59 |
+| ⚠ 診斷橫幅、極端警示（淡黃底） | rgba(250,178,25,.1／.12) | `--warn` #966100：4.42／4.36（靜態） | `--warn` → #905d00 | 4.63（動態）／4.65（靜態） |
+| 分頁切換膠囊 `.mtg-opt`（美股／題材動能榜／進階） | rgba(fg,.05) | `--opt-ink` #6a645a／#e6e1d6／4.48 | `--opt-ink` → #686259 | 4.70 |
+| 設定「常用」選中 | rgba(fg,.05) | `--accent` #906420／**3.99** | 淺色 `#settings-layer-toggle button.on` 用 `--gold-deep` | 5.19 |
+| 頂端狀態膠囊時間 `.pill .tm` | rgba(fg,.04) | `--ink-4`／#e8e3d8／**4.06** | 淺色 `.pill .tm` 用 `--ink-3` | 4.67 |
+| 頁頂金色淡光上的 `--ink-4`／`--gold` 小字（重新整理、ⓘ 說明、分數怎麼算的） | `#app` radial rgba(216,176,112,.07) | 4.43／4.45 | 淺色 `#app` 淡光 .07→.035；`--gold`／`--accent` → #8c611f | `--ink-4` 4.52、`--gold` 4.75 |
+| 首頁版本字 `#home-footer-version` | （inline opacity .5） | **2.01** | 淺色 `opacity:1 !important; color:--ink-4` | 過 |
+
+合計：動態掃描 51 組混色底文字，改之前 **20 組未達標**，改之後 48 組 **0 組未達標**（組數變少是因為 bug 修好後幾組顏色合併）。
+**[自行裁量]** ①`--ink-4` 沒再整體調暗：要讓它在 #app 淡光上 ≥4.6 得調到 #6b645a，跟 `--ink-3`（#6a645a）幾乎同色、四階文字層次就沒了，
+所以改把淺色淡光減半（.035，肉眼幾乎看不出）＋個別元件改用 `--ink-3`；②錯誤橫幅用寫死 #af2929 而不是新 token，因為原本 inline 就是寫死色，只有淺色覆寫；
+③「複製錯誤詳情」4.59、`--ink-4` 在淡光上 4.52 低於自訂的 4.6 餘裕，但都 ≥4.5。
+
+### 深色有沒有動到
+用一個只把 `app.css／app.js／app-picks.js` 換回 HEAD 版的臨時伺服器（8793）跟現行版各跑一次 `scripts/css_token_shots.mjs`，逐像素比對：
+深色六分頁 home／journal／picks **0 像素差**；market 14 像素、trade 18 像素（頂端狀態膠囊抗鋸齒）；settings 286 像素＝連線測試「耗時 2989 ms／983 ms」即時數字。
+深色 token 唯一新增的 `--up-on-tint／--down-on-tint／--gold-on-tint` 在深色＝`var(--up)／var(--down)／var(--gold)`，值不變。
+
+### 截圖
+`docs/ux_shots/contrast_r2/`：`before_light_{home,picks,settings,aicard}.png`／`after_light_{home,picks,settings,aicard}.png`（393×852 淺色）。
+before 首頁可見綠字 `-1.10%`、大盤一眼 `51,603.2` 是深色用的亮綠；after 改為深綠。AI 卡 before 右下角發黑，after 正常。
+
+**沒涵蓋**：①JS 裡用 `_cssVar('--up','#ff5257')` 畫的 canvas／SVG 圖（線條非文字，不適用 4.5 規則）；②只量了凍結時鐘下會出現的畫面，
+個股頁、各種抽屜／彈窗內的混色底只有靜態掃描；③未在總司令手機上看過。
+
+---
+
 ## 2026-10-14 20:40（DevQueue 20261014-203102，先.九十五-R3）淺色模式 WCAG 對比度量化
+
+> ⚠️ 下表 `--gold`／`--accent`（#906420）、`--warn`（#966100）、`--opt-ink` 已在 先.九十六-R2 再調暗為 #8c611f／#905d00／#686259，現值見上一段。
 
 方法：WCAG 2.x 相對亮度公式，逐一計算 `app.css` 內 `:root[data-theme="light"]` 的文字色 token 對四種底色的對比。
 底色取 `--page`（#f4f1ea）、卡片白（`--card-grad` 起點／`--surface-2` #ffffff）、卡片漸層終點（#faf8f3）、`--surface-3`（#ece6db）。
