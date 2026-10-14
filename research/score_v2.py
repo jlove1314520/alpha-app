@@ -409,12 +409,12 @@ def _reason(key: str, row: pd.Series) -> str:
     if key == "technical":
         v = row["raw_ma_breakout"]
         return (f"價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 {v:+.3f}"
-                f"（正值代表站上均線且量能放大），居全市場前 {front}%。")
+                f"（正值代表價格高於均線且近期量能較大），居全市場前 {front}%。")
     if key == "valuation_adj":
         pe, eps_yoy, peg = row["raw_pe"], row["raw_eps_yoy"], row["raw_peg"]
         return (f"本益比 {pe:.1f} 倍，近一季 EPS 年增 {eps_yoy*100:.0f}%，"
-                f"PEG（本益比÷盈餘成長率）= {peg:.2f}（PEG<1通常視為便宜、>2偏貴，"
-                f"用成長調整後的估值，避免高成長股被純本益比殺錯），估值居全市場前 {front}%。")
+                f"PEG（本益比÷盈餘成長率）= {peg:.2f}（PEG<1代表本益比低於盈餘成長率、>2代表本益比高於盈餘成長率兩倍，"
+                f"是用成長調整後的估值倍數，避免只看本益比時高成長股排名偏低），估值居全市場前 {front}%。")
     return ""
 
 

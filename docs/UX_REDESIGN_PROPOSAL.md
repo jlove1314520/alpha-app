@@ -130,6 +130,15 @@
 > | 10 | 「大戶也可能正在賣出」 |
 > **先.九十六-R5 補讀（2026-10-14 DevQueue 20261014-233102）**：搜尋結果、推播／toast 無推介詞；評分報告「產生下單計畫／📋 下單計畫」→「分批試算」、「AI 綜合評分排行」→「規則綜合評分排行」、「動能訊號」→「動能指標」、「土洋同買訊號」→「土洋同買情形」；動能榜理由「突破前波高點」→「高於前波高點」、因子名「量能突破」→「量能倍數」（產生器已改，下一班 market.yml 生效）。
 > 冒煙第 156 項守這批字樣不被改回；393×852 淺色／深色截圖 `docs/screenshots/neutral_wording_20261014/`。
+> **先.九十七-R3 後端產生文字走查（2026-10-15 DevQueue 20261015-003102）**：grep `research/generate_scores_*.py`、`research/score_v2.py`、`.github/scripts/build_us_scores_v0.py`、`scripts/build_*.py`（21 支）裡「便宜／偏貴／買點／訊號／突破／多頭／空頭／追／強勢／弱勢」，排除註解與 docstring 後逐條看：
+> | 位置 | 原文 | 處理 |
+> |---|---|---|
+> | `research/score_v2.py` `_reason('valuation_adj')`（評分報告估值理由） | 「PEG<1通常視為便宜、>2偏貴，用成長調整後的估值，避免高成長股被純本益比殺錯」 | 改「PEG<1代表本益比低於盈餘成長率、>2代表本益比高於盈餘成長率兩倍，是用成長調整後的估值倍數，避免只看本益比時高成長股排名偏低」 |
+> | `research/score_v2.py` `_reason('technical')` | 「正值代表站上均線且量能放大」 | 改「正值代表價格高於均線且近期量能較大」 |
+> | `scripts/build_sector_flow.py` meta.known_gaps（App 未顯示，資料檔說明） | 「貴的被買、便宜的被賣」 | 改「高價股被買、低價股被賣」（原意是股價高低，不是估值判斷） |
+> | `generate_scores_live.py`／`score_v2.py` 免責聲明「不代表買賣訊號」、`build_sector_flow.py`「非預測訊號」 | — | **維持**：[自行裁量] 這是否定式警語，拿掉反而少一層提醒 |
+> | `generate_scores_momentum.py` 因子名 | 「量能倍數」 | 先.九十六-R5 已改，不動 |
+> 其餘命中都在註解／docstring（不會出現在 App）。產生器改動要等下一班 market.yml 重產 by_code 檔才會在 App 換掉舊句子。
 
 ## ⑦ 產出與下一步
 

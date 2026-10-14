@@ -284,7 +284,7 @@ def main() -> int:
             "non_industry_excluded": excluded_non_industry,
             "known_gaps": [
                 "張數與金額可能反向：淨張數為負而淨金額為正是合理的"
-                "（貴的被買、便宜的被賣），前端應以金額為主、張數為輔",
+                "（高價股被買、低價股被賣），前端應以金額為主、張數為輔",
                 "自營商為合併值，未排除避險（上游 fetch_market_tw.py 的 T86 解析已加總）",
                 "est_amount = 張數×1000×當日收盤，為估算非真實成交金額",
                 "上櫃產業別沿用 company_info，未接 t187ap03_O（金流一.2）",
