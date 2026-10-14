@@ -164,6 +164,12 @@
   3. 供應商：FinMind `TaiwanStockDispositionSecuritiesPeriod` 回 400、付費層（repo `STRATEGY_GRAVEYARD.md` #47、`docs/FIRST_HAND_SOURCES.md` 第 180～188 行）。
   4. 社群：同一個 `rwd/zh/announcement/punish` 路徑與本專案 `C:\alpha\CLAUDE.md` 已登記的 TWT49U／exDailyQ 區間查詢是同一套網站結構。
 - **抓取計畫（DevQueue 可執行）**：TWSE 2000～2024 每年 1 次、TPEx 每年 1 次（若單次筆數有上限則改每季），約 50～100 次請求、同源間隔 ≥3 秒、402/403/428/429 即停；先抓「注意股」對應的 `rwd/zh/announcement/notice` 是否也可查區間一起確認。輸出 `research/data/disposal_history_{twse,tpex}.json`。**只補資料、不登記試驗**；要重測 #47 需另寫規格事前登記，並注意 #47 已被判死過一次（新資料單發）。→ 排入佇列 **先.八十六-1a**。
+- **抓取結果（先.八十六-1a，2026-10-14 DevQueue 20261014-083101）**：`research/fetch_disposal_history.py` 逐年 2000～2024 各 1 次、間隔 3.5 秒、0 錯誤（共 50 次＋核對 16 次）。輸出 `research/data/disposal_history_{twse,tpex}.json`（`research/data/` 在 .gitignore，只在本機；重抓指令 `python research/fetch_disposal_history.py 2000 2024`）。
+  - 上市：**2001 起**有資料（2000 全年 0 筆），25 年 3,149 列；以（公布日期、代號、處置起迄）去重後 3,076 個事件。
+  - 上櫃：**2003 起**有資料（2000～2002 全年 0 筆），6,417 列；去重後 6,344 個事件。
+  - **查詢語意**：區間是比對「處置期間」是否重疊，不是公布日期——跨年的處置會在兩年各出現一次（兩邊各 73 筆跨年重複、約 80 筆公布日期落在前一年）。使用時一律先去重。
+  - **沒有單次筆數上限**：2020 年改逐季查 4 次，唯一事件與全年查詢完全一致（上市 383＝383、上櫃 491＝491，兩邊差集皆 0）。
+  - 只補資料、未登記試驗；#47 要重測需另寫規格事前登記並計入 N。
 
 ### 2.13 #49 隔夜／盤中分解（B5）
 - **分類**：**甲（已查證可得，資料量小、未整批抓）**。
@@ -236,7 +242,7 @@
 
 | 子項 | 內容 | 請求預算 | 狀態 |
 |---|---|---|---|
-| 先.八十六-1a | #47 處置股歷史：TWSE `rwd/zh/announcement/punish` 2000～2024、TPEx `bulletin/disposal` 可查起點～2024，存 `research/data/disposal_history_{twse,tpex}.json`；先確認起始年與單次筆數上限；只補資料、不登記試驗 | 約 50～100 次、同源 ≥3 秒 | 新排入，DevQueue 可執行 |
+| 先.八十六-1a | #47 處置股歷史：TWSE `rwd/zh/announcement/punish` 2000～2024、TPEx `bulletin/disposal` 可查起點～2024，存 `research/data/disposal_history_{twse,tpex}.json`；先確認起始年與單次筆數上限；只補資料、不登記試驗 | 實際 66 次、同源 3.5 秒 | **已完成**（上市 2001 起 3,076 事件、上櫃 2003 起 6,344 事件） |
 | （已完成） | B1 宇宙 1993 起、B4 TXO 2002–2014、French UMD | — | 先.八十三-3a-2／3a-3、先.八十六-2a／2b／2c |
 | （PREREG 後再抓） | #49 加權指數 1999 起開盤價 | 約 310 次月請求 | 等 B5 PREREG |
 | （先法遵） | #39 臺灣50 歷史審核結果整理 | 人工 | 先確認使用條款，不排抓取 |
