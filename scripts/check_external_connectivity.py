@@ -518,6 +518,22 @@ def check_devqueue_format_mismatch_alerts() -> list[str]:
         return []
 
 
+def check_launcher_encoding_alerts() -> list[str]:
+    """2026-10-14（先.九十七-R1）：排程啟動檔（C:/alpha/*.ps1、scripts/*.ps1）含中文卻沒有
+    UTF-8 BOM 時，Windows PowerShell 5.1 會用 cp950 讀、中文註解吃掉下一行（先.九十七-1 根因：
+    排程回報 0 卻一行沒跑）。這裡每 5 分鐘只做快速的位元組檢查（不呼叫 powershell）；
+    兩種讀法的完整比對在 `python scripts/selftest_launcher_encoding.py --parse`。
+    自身失敗只印一行警告、回空清單，不影響本輪其他自檢（CLAUDE.md 十二節）。
+    """
+    try:
+        from selftest_launcher_encoding import scan_bom
+        return [f"排程啟動檔含中文但沒有 UTF-8 BOM（PowerShell 5.1 會讀錯、整支可能沒跑）：{Path(r['file']).name}"
+                for r in scan_bom() if not r["ok"]]
+    except Exception as e:  # noqa: BLE001
+        print(f"  ! 排程啟動檔編碼自檢失敗（{type(e).__name__}: {e}），本輪跳過這項自檢")
+        return []
+
+
 def check_domain_blocklist_alerts() -> list[str]:
     """2026-09-20（合規.三，總司令裁示【緊急·合規】）：讀`audit_preflight.py`
     寫進`data/audit_report.json`的`domain_blocklist_scan`欄位，把
@@ -637,7 +653,8 @@ def main() -> int:
     # 同一批stalled清單——跟產出檔停擺/連通性告警用同一套亮燈機制，不用另外
     # 教總司令看第三個地方。
     task_stalls = (task_stalls + check_stale_user_visible_blocks() + check_pat_expiry_alerts()
-                   + check_devqueue_format_mismatch_alerts() + check_domain_blocklist_alerts())
+                   + check_devqueue_format_mismatch_alerts() + check_domain_blocklist_alerts()
+                   + check_launcher_encoding_alerts())
     publish_task_health(now, task_rows, task_stalls, conn_alerts)
     record["local_tasks"] = {"stalled": task_stalls, "checked": len(task_rows)}
     for msg in task_stalls:
