@@ -1,51 +1,51 @@
 {
-  "fetched_at": "2026-10-14T20:01:36.932125+08:00",
+  "fetched_at": "2026-10-14T20:31:39.102508+08:00",
   "connected": true,
   "account_type": "paper",
   "error": null,
   "quotes": {
     "AAPL": {
-      "last": 343.55,
-      "bid": 343.5,
-      "ask": 343.55,
+      "last": 343.88,
+      "bid": 343.7,
+      "ask": 343.9,
       "close": 341.27,
-      "change_pct": 0.6681,
+      "change_pct": 0.7648,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "MSFT": {
-      "last": 546.84,
-      "bid": 546.64,
-      "ask": 546.85,
+      "last": 546.86,
+      "bid": 546.33,
+      "ask": 547.4,
       "close": 543.45,
-      "change_pct": 0.6238,
+      "change_pct": 0.6275,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "NVDA": {
-      "last": 227.1,
-      "bid": 227.06,
-      "ask": 227.18,
+      "last": 227.82,
+      "bid": 227.79,
+      "ask": 227.83,
       "close": 228.52,
-      "change_pct": -0.6214,
+      "change_pct": -0.3063,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "TSLA": {
-      "last": 374.58,
-      "bid": 374.53,
-      "ask": 374.69,
+      "last": 375.32,
+      "bid": 375.17,
+      "ask": 375.39,
       "close": 375.23,
-      "change_pct": -0.1732,
+      "change_pct": 0.024,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "GOOGL": {
-      "last": 358.51,
-      "bid": 358.29,
-      "ask": 358.49,
+      "last": 358.37,
+      "bid": 358.36,
+      "ask": 358.59,
       "close": 353.78,
-      "change_pct": 1.337,
+      "change_pct": 1.2974,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
@@ -81,14 +81,15 @@
       "label": "那斯達克綜合指數"
     },
     "^SOX": {
-      "last": 12208.79,
+      "last": 12208.795,
       "bid": null,
       "ask": null,
-      "close": 12208.79,
-      "change_pct": 0.0,
-      "data_type": "DELAYED",
+      "close": 12236.788,
+      "change_pct": -0.2288,
+      "data_type": "YAHOO_DELAYED",
       "exchange": "PHLX",
-      "label": "費城半導體指數"
+      "label": "費城半導體指數",
+      "source": "yahoo_fallback"
     }
   }
 }
