@@ -125,6 +125,7 @@
   3. 社群／其他：中文維基「臺灣50指數」有 2003-01～2026-09 完整變動表；#82 用工商時報、鉅亨、聯合、自由時報核對 2016-06、2018-06、2020-09 三筆，組成全吻合。GitHub `yfiua/index-constituents`、`Jaycome/tw50-quant-data` 沒有變動資料。
 - **另一個缺口（丙性質）**：每季審核通常只換 0～3 檔，2003～2024 約數十個事件，樣本小；要重測先估檢定力。
 - **建議**：資料面已不是瓶頸，不排新抓取；`GRAVEYARD_AUTOPSY.md` 該列改指向 #82。重測需另寫規格事前登記並計入 N（#82 現況見 `HYPOTHESIS_QUEUE.md`）。`www.twse.com.tw/robots.txt` `Disallow: /FTSE/`，所以**不抓**證交所 FTSE 路徑。
+- **2026-10-14 先.九十五-5**：總司令核准用維基百科（CC BY-SA）。`research/build_tai50_changes_wiki.py` 解析條目頁（1 次請求，revision 94501061，robots 允許 /zh-tw/ 條目頁、不用被禁的 /w/ 與 /api/）→ 本機 `research/data/tai50_constituent_changes_wiki.json`（71 列 2003-01～2026-09，1 格「?」照原文保留），檔內附出處、作者、CC BY-SA 4.0 授權與但書；不進 repo。
 
 ### 2.9 #40 庫藏股買回
 - **分類**：**丙（合規上不存在）**。

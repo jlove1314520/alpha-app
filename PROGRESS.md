@@ -1,3 +1,10 @@
+## 2026-10-14 19:05（互動視窗）先.九十五-5 0050 成分股歷史（維基百科，只存本機）
+
+- 中文維基百科「臺灣50指數」條目頁抓 1 次（`/zh-tw/` 條目頁，robots 允許；/w/ 與 /api/ 被禁所以不用 API），revision 94501061，原始 HTML 存本機 `research/data/raw/wikipedia/`。
+- `research/build_tai50_changes_wiki.py`（0 次請求）解析「成份股變動」表 → 本機 `research/data/tai50_constituent_changes_wiki.json`：71 列（2003-01～2026-09），每列納入／剔除代號與名稱；1 格「?」（2003-04 納入）照原文保留、不猜。
+- 檔內附出處（條目網址、revision 連結、取得時間）、作者（維基百科貢獻者）、CC BY-SA 4.0 授權與「相同授權分享」說明、四條但書（非官方、2011 前後審核月份不同、無法解析不猜、月份非精確生效日）。
+- research/data/ 已 gitignore：資料與 HTML 不進 repo，只提交解析程式。DATA_GAP_PLAN 2.8 節補記；佇列 先.九十四-5k 標 [x]。
+
 ## 2026-10-14 19:04（互動視窗）先.九十五-3 內部人持股轉讓前向累積上線（05:43 班、姓名雜湊）
 
 - `.github/scripts/fetch_insider_transfer_tw.py`：姓名、受讓人改存 `name_hash`／`transferee_hash`（SHA-256 前 16 碼、固定前綴），原文不寫檔；只留職稱與身分類別（`role`）。限制照實寫在程式開頭：前綴公開，拿候選姓名逐一算仍可比對，防的是「公開 repo 直接搜尋得到姓名」。
