@@ -31,19 +31,21 @@
   }
   /* 先.九十五-4：淺色模式。data-theme 由 index.html <head> 的小腳本在第一次繪製前設定
      （設定頁「外觀」：跟隨系統（預設）／淺色／深色）。只覆寫 token，元件規則不動。 */
+  /* 先.九十五-R3（2026-10-14）：WCAG 對比量化後，--ink-4／--gold／--accent／--up／--down(-deep)／--warn／--good／--serious
+     只把亮度調暗到對 --page、卡片白、卡片漸層底都 ≥4.6:1（色相不變）；逐組數字見 docs/UX_AUDIT.md。 */
   :root[data-theme="light"]{
     color-scheme: light;
     --page:#f4f1ea;
     --card-grad:linear-gradient(160deg,#ffffff,#faf8f3);
     --surface-2:#ffffff; --surface-3:#ece6db;
-    --ink:#1c1a16; --ink-2:#45413a; --ink-3:#6a645a; --ink-4:#7c7569;
+    --ink:#1c1a16; --ink-2:#45413a; --ink-3:#6a645a; --ink-4:#736c61;
     --hairline:rgba(0,0,0,.09); --grid:#e2ddd2;
-    --gold:#9a6b22; --gold-deep:#7d5416; --gold-line:#a87a2e;
+    --gold:#906420; --gold-deep:#7d5416; --gold-line:#a87a2e;
     --gold-grad:linear-gradient(135deg,#e9c98f,#c9974a);
-    --accent:#9a6b22; --accent-deep:#7d5416;
-    --up:#d9262c; --up-deep:#b81d22;
-    --down:#0e8f5c; --down-deep:#0b7a4e;
-    --warn:#a86d00; --good:#0a8a0a; --serious:#c2552a; --critical:#b52a2a;
+    --accent:#906420; --accent-deep:#7d5416;
+    --up:#d2252b; --up-deep:#b81d22;
+    --down:#0c7c50; --down-deep:#0a6b44;
+    --warn:#966100; --good:#097e09; --serious:#b34e27; --critical:#b52a2a;
     --violet:#5b4fc4; --yellow:#8f5f00;
     --fg-rgb:0,0,0;
     --caution:#b0362d; --note-gold:#80591a;
