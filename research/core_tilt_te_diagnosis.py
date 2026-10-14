@@ -231,40 +231,12 @@ def main() -> int:
     }
     print("①補", json.dumps(part_1["official_twt49u_check"], ensure_ascii=False), flush=True)
 
-    # ── 官方臺灣50報酬指數（research/fetch_tai50_index.py）：分開「0050 市價自身雜訊」與「重建誤差」 ──
-    idx = pd.read_csv(HERE / "data" / "tai50_index_daily.csv", dtype={"date": str}).set_index("date")
-    df["idx_tr"] = idx["tai50_tr"].reindex(days).pct_change().reindex(df.index)
-    dfi = df.dropna(subset=["idx_tr"])
-    tei = lambda a, b: float((dfi[a] - dfi[b]).std() * ann)
-    e_i = dfi["etf"] - dfi["idx_tr"]
-    p_i = dfi["rules_fix"] - dfi["idx_tr"]
-    agg_i = {}
-    for k in (1, 5, 21):
-        g = (1 + dfi[["rules_fix", "etf", "idx_tr"]]).groupby(np.arange(len(dfi)) // k).prod() - 1
-        agg_i[f"{k}d"] = {"etf_vs_index": round(float((g["etf"] - g["idx_tr"]).std() * np.sqrt(252 / k)), 4),
-                          "ours_vs_index": round(float((g["rules_fix"] - g["idx_tr"]).std() * np.sqrt(252 / k)), 4),
-                          "ours_vs_etf": round(float((g["rules_fix"] - g["etf"]).std() * np.sqrt(252 / k)), 4)}
-    yr_i = {}
-    for y, g in dfi.groupby(pd.to_datetime(dfi.index).year):
-        c = lambda col: float((1 + g[col]).prod() - 1)
-        yr_i[int(y)] = {"ours": round(c("rules_fix"), 4), "index_tr": round(c("idx_tr"), 4), "etf": round(c("etf"), 4),
-                        "ours_minus_index": round(c("rules_fix") - c("idx_tr"), 4), "etf_minus_index": round(c("etf") - c("idx_tr"), 4)}
-    part_idx = {
-        "n_days": len(dfi),
-        "te_daily_etf_vs_index_tr": round(tei("etf", "idx_tr"), 4),
-        "te_daily_ours_vs_index_tr": round(tei("rules_fix", "idx_tr"), 4),
-        "te_daily_ours_vs_etf": round(tei("rules_fix", "etf"), 4),
-        "autocorr_lag1_etf_minus_index": round(float(e_i.autocorr(1)), 3),
-        "autocorr_lag1_ours_minus_index": round(float(p_i.autocorr(1)), 3),
-        "corr_ours_index": round(float(dfi["rules_fix"].corr(dfi["idx_tr"])), 4),
-        "te_by_aggregation": agg_i, "by_year": yr_i,
-        "note": "主判定不變（對 0050 含息）；這裡只拆解誤差來源",
-    }
-    print("指數", json.dumps({k: v for k, v in part_idx.items() if k != "by_year"}, ensure_ascii=False), flush=True)
+    # 先.九十五-1：原本這裡用證交所 /rwd/zh/FTSE/TAI50I（官方臺灣50報酬指數）拆解誤差來源；
+    # 該路徑與專案禁抓決定衝突，總司令裁示採乙——資料與兩個衍生數字已撤回，本段刪除。
 
     out = {"generated_at": datetime.now().isoformat(timespec="seconds"), "task": "先.九十四-1a／1b",
            "period": [df.index[0], df.index[-1]], "n_days": len(df),
-           "a_rules_took_effect": part_a, "b1_dividends": part_1, "b2_stale_prices": part_2, "b3_weights_N1": part_3, "official_index_decomposition": part_idx,
+           "a_rules_took_effect": part_a, "b1_dividends": part_1, "b2_stale_prices": part_2, "b3_weights_N1": part_3, "official_index_decomposition": "已撤回（先.九十五-1：資料來源為禁抓的證交所 FTSE 路徑）",
            "requests_made": 0}
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     print("寫入", OUT)

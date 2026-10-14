@@ -278,3 +278,12 @@
 2. **#61**：2015–17 會議日期查得到（2.16），但樣本上限仍成立，維持死亡。
 
 `GRAVEYARD_AUTOPSY.md` 第 5 節表格對應兩列已加註指向本檔。
+
+## 6. 禁抓清單（2026-10-14 先.九十五-1 建立；新增抓取前先對這裡）
+
+| 路徑 | 原因 | 狀態／依據 |
+|---|---|---|
+| `www.twse.com.tw` 任何含 `/FTSE/` 的路徑（含 `/FTSE/…`、`/rwd/zh/FTSE/…`，例如 `/rwd/zh/FTSE/TAI50I` 臺灣50指數歷史） | robots.txt `Disallow: /FTSE/`；專案決定連 `/rwd/zh/FTSE/` 也不抓（本檔 2.8 節） | `research/fetch_tai50_index.py` 已停用（main() 開頭直接 SystemExit）；2026-10-14 誤抓的 144 次結果依先.九十五-1 裁示乙**已刪除**（`research/data/tai50_index_daily.csv`、`research/data/raw/twse_tai50i/`），兩個衍生數字已撤回 |
+| `mopsov.twse.com.tw` 全站 | robots.txt `User-Agent: * Disallow: /` | 本檔 2.9、2.10、2.17 節；`mops_buyback_client.py` 依 2026-09-15 裁示停用 |
+| `mops.twse.com.tw` 法說會頁面與簡報 PDF | robots.txt 回安全性錯誤頁、無法確認允許 | CLAUDE.md「MOPS 法說會」節；App 只給連結 |
+| 證交所權證資訊揭露平台（官方 IV） | 有同意頁，不做程式擷取 | 先.九十四-5b；需要時由總司令手動看 |

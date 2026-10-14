@@ -40,9 +40,9 @@ def _roc(s: str) -> str:
 def main() -> int:
     # ⛔ 2026-10-14 停用：www.twse.com.tw/robots.txt 有「Disallow: /FTSE/」，本端點路徑是 /rwd/zh/FTSE/TAI50I。
     # 字面上前綴規則只禁根目錄的 /FTSE/，但專案先前已決定「不抓證交所 FTSE 路徑」（research/DATA_GAP_PLAN.md #39）。
-    # 本程式已於 2026-10-14 跑過一次（144 次請求）才發現此衝突；已抓資料是否保留交總司令裁示（AWAITING_REVIEW）。
-    # 裁示前不得再執行。
-    raise SystemExit("已停用：證交所 FTSE 路徑與 robots.txt／DATA_GAP_PLAN 決定衝突，待總司令裁示")
+    # 本程式已於 2026-10-14 跑過一次（144 次請求）才發現此衝突；先.九十五-1 總司令裁示乙：資料已刪除、衍生數字已撤回，
+    # 本路徑列入 DATA_GAP_PLAN 第 6 節禁抓清單。永久停用，不得再執行。
+    raise SystemExit("已停用（先.九十五-1）：證交所 FTSE 路徑列入禁抓清單")
     ap = argparse.ArgumentParser()
     ap.add_argument("--start", default="2013-01")
     a = ap.parse_args()
