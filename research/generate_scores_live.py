@@ -595,12 +595,12 @@ def _reason(key: str, row: pd.Series) -> str:
             bits.append(f"PEG {row['raw_peg']:.2f}")
         ind = row.get("industry") or "全市場"
         return ("、".join(bits) + f"；在「{ind}」同業內的估值百分位平均為 "
-                f"{row['raw_valuation_pct_in_industry']*100:.0f}%（數字越低越便宜），綜合估值居全市場前 {front}%。")
+                f"{row['raw_valuation_pct_in_industry']*100:.0f}%（數值越低代表估值倍數越低），綜合估值居全市場前 {front}%。")
     if key == "technical":
         c = row.get("tech_components") or {}
         bits = []
         if c.get("ma_alignment") is not None:
-            bits.append("均線多頭排列" if c["ma_alignment"] > 0 else ("均線空頭排列" if c["ma_alignment"] < 0 else "均線糾結"))
+            bits.append("短期均線在長期均線之上" if c["ma_alignment"] > 0 else ("短期均線在長期均線之下" if c["ma_alignment"] < 0 else "短中長期均線交錯"))  # 先.九十七-3 中性用語
         if c.get("range_position_60d") is not None:
             bits.append(f"位於近60日區間 {((c['range_position_60d'] + 1) / 2 * 100):.0f}% 位置")
         if c.get("rsi14_value") is not None:
