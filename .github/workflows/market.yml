@@ -123,12 +123,6 @@ jobs:
       - name: 抓USD/TWD匯率（yfinance，免金鑰）
         run: python .github/scripts/fetch_fx.py
         continue-on-error: true
-      - name: 更新大盤融資維持率+個股融資融券（TWSE官方MI_MARGN/STOCK_DAY_ALL，2026-09-15起分母也改TWSE官方，零FinMind依賴）
-        run: python .github/scripts/update_margin_maintenance.py
-        continue-on-error: true
-      - name: 累積個股融資融券逐檔逐日歷史（零額外請求，稽核.三B組第2類）
-        run: python .github/scripts/accumulate_margin_by_stock.py
-        continue-on-error: true
       - name: 更新外資及陸資持股比率（TWSE官方MI_QFIIS，免金鑰，源頭二.3第1名）
         run: python .github/scripts/fetch_foreign_holding.py
         continue-on-error: true
@@ -147,6 +141,15 @@ jobs:
         run: |
           python scripts/backfill_price_history_gaps.py || echo "::warning::price_history 缺日補齊未完成"
           python scripts/selftest_price_history_gaps.py || echo "::warning::price_history 仍有全市場缺日"
+        continue-on-error: true
+      # 先.九十七-R6（2026-10-15）：維持率步驟移到 price_history 寫入＋缺日補齊之後。晚上 STOCK_DAY_ALL 常仍是前一天，
+      # 維持率要用 price_history 同日收盤補；排在前面時當天 price_history 還沒寫入 → 只跑一班（本機補跑／17:13 班）必定 data_incomplete
+      # （10/14 實例：21:43 補跑 ratio=null，22:17 單獨重跑才得 191.61%）。中間的外資持股兩步不讀寫維持率檔，順序互不影響；計算與門檻不變。
+      - name: 更新大盤融資維持率+個股融資融券（TWSE官方MI_MARGN/STOCK_DAY_ALL，2026-09-15起分母也改TWSE官方，零FinMind依賴）
+        run: python .github/scripts/update_margin_maintenance.py
+        continue-on-error: true
+      - name: 累積個股融資融券逐檔逐日歷史（零額外請求，稽核.三B組第2類）
+        run: python .github/scripts/accumulate_margin_by_stock.py
         continue-on-error: true
       - name: 產生全市場走勢線sparklines.json（從price_history切出，零額外請求）
         run: python .github/scripts/build_sparklines.py
