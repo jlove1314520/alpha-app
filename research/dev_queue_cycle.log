@@ -17532,3 +17532,10 @@ lock: LOCK_ACQUIRED (cycle 20261014-163102)
 prompt: GUARD_PRECHECK_WARN：**先.八十四-7 （補件，來源：先.八十四-4 停擺告警觀察）DevQueue 改每 30 分鐘後，「三軌任一 ≤60… 會被擋（需總司令：裁示；不可逆：—）。只警告、不改標記，由互動視窗處理 GUARD_PRECHECK_WARN：**先.九十四-2 本機 autostash 重新比對：53 份只含機器寫檔者清除（裁示核准，前後各列清單）；18 份改… 會被擋（需總司令：裁示、核准、裁示、核准；不可逆：—）。只警告、不改標記，由互動視窗處理 DEVQUEUE_ELIGIBLE_LOW：DevQueue 可執行的 - [ ] 共 0 項（下限 6，先.八十五-1c） NO_PENDING_ITEM_FOR_DEVQUEUE：剩餘待辦皆為[研究]類或「（互動視窗執行」類，留給marathon／hypothesis_queue軌或互動視窗session (exit=3)
 finally: released .devqueue.lock (cycle_id=20261014-163102)
 ===== DevQueue cycle end: 2026-10-14 16:31:04 cycle_id=20261014-163102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-10-14 17:01:02 cycle_id=20261014-170102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20261014-170102)
+prompt: GUARD_PRECHECK_WARN：**先.八十四-7 （補件，來源：先.八十四-4 停擺告警觀察）DevQueue 改每 30 分鐘後，「三軌任一 ≤60… 會被擋（需總司令：裁示；不可逆：—）。只警告、不改標記，由互動視窗處理 GUARD_PRECHECK_WARN：**先.九十四-5k [自走補入，來源：DATA_GAP_PLAN.md #39 第 119～126、249 行] 00… 會被擋（需總司令：授權；不可逆：—）。只警告、不改標記，由互動視窗處理 GUARD_PRECHECK_WARN：**先.九十四-5l [自走補入，來源：先.八十一-41 停在「建議…等裁示」] 每日存 EPS_ttm 快照（約 30… 會被擋（需總司令：裁示；不可逆：—）。只警告、不改標記，由互動視窗處理 DEVQUEUE_ELIGIBLE：DevQueue 可執行的 - [ ] 共 9 項（下限 6，先.八十五-1c） PROMPT_READY: 先.九十四-5a [自走補入，來源：先.九十二-B1 WARRANT_DATA_SURVEY.md 第 5 節] 權證每日基本資料＋收盤快照程式 research/warrant_snapshot.py（TWSE t187ap37_L、TPEx mopsfin_t187ap37_O／tpex_warrant_issue、MI_INDEX 0999／0999P、TPEx afterTrading WW／EW；只留 IV 反推需要的欄位、gzip 存 research/data/warrant_snapshots/YYYY-MM-DD/）＋scripts/selftest_warrant_snapshot.py；做法：先手動跑一次當日快照驗欄位，再寫 docs/PROPOSAL_WARRANT_SNAPSHOT.md（每日 7 次請求、存放大小、放哪個排程）交總司令審閱，本條不建排程（債務類） (exit=0)
+finally: released .devqueue.lock (cycle_id=20261014-170102)
+===== DevQueue cycle end: 2026-10-14 17:39:24 cycle_id=20261014-170102 reason=OK exit=0 duration_min=38.4 =====
