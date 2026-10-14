@@ -61,6 +61,16 @@ ALLOWED_HOLDOUT_READERS = frozenset({
 })
 
 
+# 2026-10-15 先.一百-4（研究室.三／.四）：只給 App 顯示與研究紀錄用的回補檔，內容涵蓋 2025 年以後（holdout 期間），
+# **研究端任何回測／檢定程式都不得讀**（ALLOWED_HOLDOUT_READERS 裡的單發腳本也一樣不得讀——那些只核准讀
+# 自己預登記的資料）。這是「不允許」名單：scripts/selftest_display_only_files.py 掃 research/ 底下所有 .py，
+# 出現這些檔名就 FAIL。由互動視窗加入（CLAUDE.md 十三）。
+DISPLAY_ONLY_DATA_FILES = frozenset({
+    "revenue_backfill.json",     # 研究室.三：月營收 2024-12～2026-06 回補
+    "financials_backfill.json",  # 研究室.四：季報 2025Q1～2026Q2 回補
+})
+
+
 def _caller_is_allowlisted() -> bool:
     """走呼叫堆疊，檢查ALLOWED_HOLDOUT_READERS裡的檔名是否出現在呼叫鏈上的任何一層。
 

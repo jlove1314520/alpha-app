@@ -318,6 +318,10 @@ jobs:
       - name: 研究層自測（研究室.一）
         run: python scripts/selftest_research.py || echo "::warning::研究層自測未過"
         continue-on-error: true
+      # 先.一百-4：App 顯示用回補檔（revenue_backfill／financials_backfill，涵蓋 holdout 期間）不得被 research/ 回測程式讀取
+      - name: 顯示用回補檔守門（先.一百-4）
+        run: python scripts/selftest_display_only_files.py || echo "::warning::research/ 有程式引用 App 顯示用回補檔"
+        continue-on-error: true
       - name: 個股頁每檔小檔（零額外請求，先.八十一-9）
         run: python scripts/build_by_code.py
         continue-on-error: true

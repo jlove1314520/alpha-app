@@ -19873,7 +19873,7 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
 - [x] **先.一百-1 先.九十九整批作廢（每條加「⚠️ 已被先.一百 取代」、改 [x]），AWAITING 先.九十九-0 結案**（互動視窗執行）〔先.九十九 9 條作廢改 [x]、AWAITING 先.九十九-0 結案〕
 - [x] **先.一百-2 照 final\README_給ClaudeCode.md「佇列條目」把研究室.一～七貼進權威清單最前面（一～六 DevQueue 可執行、七互動視窗；順序一→六）**（互動視窗執行）〔研究室.一～七原文登記、權威清單最前面；find_next＝研究室.一〕
 - [x] **先.一百-3 更正 README：凍結.二已於 2026-10-11 解除，但 research*.json 不得進 scores*.json、不得當選股權重照舊**（互動視窗執行）〔README 定位句更正（凍結.二已解除，research 不進 scores 照舊）〕
-- [ ] **先.一百-4 研究室.三／.四 回補檔加進 holdout 讀取守門「不允許」名單（屬十三節核心檔的那一步由互動視窗處理）**（互動視窗執行）
+- [x] **先.一百-4 研究室.三／.四 回補檔加進 holdout 讀取守門「不允許」名單（屬十三節核心檔的那一步由互動視窗處理）**（互動視窗執行）〔holdout.py 加 DISPLAY_ONLY_DATA_FILES（互動視窗改核心檔）＋selftest_display_only_files 2/2 PASS＋掛進 market.yml〕
 
 **以下研究室.一～研究室.七照 `C:\alpha\pending_patches\research_lab_2026-10-14\final\README_給ClaudeCode.md`「佇列條目」原文登記（先.一百-2）：**
 

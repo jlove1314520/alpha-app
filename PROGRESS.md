@@ -1,3 +1,9 @@
+## 2026-10-15 07:56（互動視窗）先.一百-4 App 顯示用回補檔加進研究端不得讀清單
+
+- 既有的 holdout 守門只有「允許讀 holdout 的單發腳本」白名單（`ALLOWED_HOLDOUT_READERS`），沒有 README 說的「不允許」檔名清單。[自行裁量] 在 `research/validation/holdout.py`（第十三節核心檔，互動視窗改）新增 `DISPLAY_ONLY_DATA_FILES = {revenue_backfill.json, financials_backfill.json}`，註明研究端任何回測／檢定（含白名單單發）都不得讀。
+- 新增 `scripts/selftest_display_only_files.py`：掃 research/ 底下所有 .py，引用到清單檔名就 FAIL；並自測守門本身抓得到。實際輸出：PASS 守門能抓到假程式裡的檔名／PASS research/ 底下沒有程式引用（2 個檔名）→ 合計 2 項，失敗 0。
+- `market.yml` 在研究層自測後加「顯示用回補檔守門」一步（continue-on-error，失敗只警告）。回補檔由本機程式產生、market.yml 不寫，所以**沒加進** market.yml 的 git add 清單（檔案不存在時 pathspec 會讓 commit 步驟失敗）。
+
 ## 2026-10-15 07:53（互動視窗）研究室.二 上櫃外資欄位修正（欄位名夾空白）
 
 - **根因**：櫃買官方 `tpex_3insti_daily_trading` 的外資欄位名中間夾空白（實測 `ForeignInvestorsInclude MainlandAreaInvestors-Difference`），`fetch_market_tw.py::fetch_institutional_tpex()` 照無空白名稱 `row.get()` → 上櫃外資永遠 None（例：3324 10/14 為 [None, 0.0, -43.3]）。端點本身有外資欄位，不需改用其他端點（README 分支未觸發）。
