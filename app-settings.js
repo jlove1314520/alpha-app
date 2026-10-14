@@ -590,20 +590,38 @@
     {label:'台股盤中報價（GitHub Actions）',file:'data/quotes_tw.json',kind:'intraday',tz:'Asia/Taipei',open:[9,0],close:[13,30]},
     {label:'美股即時報價（本機IBKR）',file:'data/quotes_ibkr.json',kind:'intraday',tz:'America/New_York',open:[9,30],close:[16,0],local:true},
     {label:'美股盤中報價（GitHub Actions）',file:'data/quotes_us.json',kind:'intraday',tz:'America/New_York',open:[9,30],close:[16,0]},
-    {label:'台股大盤/類股/三大法人',file:'data/market_tw.json',kind:'daily',tz:'UTC',run:[6,10],grace:3},
-    {label:'美股四大指數',file:'data/market_us.json',kind:'daily',tz:'UTC',run:[21,30],grace:3},
-    {label:'美股類股SIC對映',file:'data/us_sic.json',kind:'daily',tz:'UTC',run:[21,30],grace:3},
+    {label:'台股大盤/類股/三大法人',file:'data/market_tw.json',kind:'daily',tz:'UTC',mkt:'tw',grace:3},
+    {label:'美股四大指數',file:'data/market_us.json',kind:'daily',tz:'UTC',mkt:'us',grace:3},
+    {label:'美股類股SIC對映',file:'data/us_sic.json',kind:'daily',tz:'UTC',mkt:'us',grace:3},
     {label:'台股ADR溢價',file:'data/adr_premium.json',kind:'intraday',tz:'America/New_York',open:[9,30],close:[16,0]},
-    {label:'匯率 USD/TWD',file:'data/fx.json',kind:'daily',tz:'UTC',run:[6,10],grace:3},
-    {label:'大盤融資維持率',file:'data/margin_maintenance.json',kind:'daily',tz:'UTC',run:[6,10],grace:3},
-    {label:'前瞻選股台帳',file:'data/picks_ledger.json',kind:'daily',tz:'UTC',run:[6,10],grace:3},
-    {label:'策略前向紙上績效',file:'data/strategy_performance.json',kind:'daily',tz:'UTC',run:[6,10],grace:3},
+    {label:'匯率 USD/TWD',file:'data/fx.json',kind:'daily',tz:'UTC',mkt:'tw',grace:3},
+    {label:'大盤融資維持率',file:'data/margin_maintenance.json',kind:'daily',tz:'UTC',mkt:'tw',grace:3},
+    {label:'前瞻選股台帳',file:'data/picks_ledger.json',kind:'daily',tz:'UTC',mkt:'tw',grace:3},
+    {label:'策略前向紙上績效',file:'data/strategy_performance.json',kind:'daily',tz:'UTC',mkt:'tw',grace:3},
     // 先.六十-C9（2026-10-10）：這三個大檔原本經 STATUS.json 間接判斷（viaStatus），但 STATUS.json 頂層從 09-15 起沒人更新，
     // 判斷跟著失真。改成只串流讀檔案開頭幾 KB 抓它自己的 generated_at（三檔的 meta.generated_at 都在前 1KB 內），讀到就中止下載。
-    {label:'個股基本面 PER/月營收',file:'data/fundamentals.json',kind:'daily',tz:'UTC',run:[6,10],grace:3,head:true},
-    {label:'個股財報/法人/融資',file:'data/stock_detail.json',kind:'daily',tz:'UTC',run:[6,10],grace:3,head:true},
-    {label:'個股價量歷史',file:'data/price_history/_meta.json',kind:'daily',tz:'UTC',run:[6,10],grace:3,head:true},
+    {label:'個股基本面 PER/月營收',file:'data/fundamentals.json',kind:'daily',tz:'UTC',mkt:'tw',grace:3,head:true},
+    {label:'個股財報/法人/融資',file:'data/stock_detail.json',kind:'daily',tz:'UTC',mkt:'tw',grace:3,head:true},
+    {label:'個股價量歷史',file:'data/price_history/_meta.json',kind:'daily',tz:'UTC',mkt:'tw',grace:3,head:true},
   ];
+  // 先.九十七-R8：每日項目的排程時刻（UTC）改讀 STATUS.json workflows[market.yml].crons（generate_status_json.py 從 market.yml
+  // 實際 cron 換算，與後端 _market_run_hms()／橫幅 marketScheduleLabel() 同一規則：台股取台北 14:00 後當日最早一班，美股取台北隔日／09:00 前那班）。
+  // 讀不到才退回舊值 06:10／21:30 UTC（只降級不中斷，十二節）；寬限小時數不變。
+  const FRESH_FALLBACK_RUN={tw:[6,10],us:[21,30]};
+  function _freshnessMarketRuns(stDoc){
+    const out={tw:FRESH_FALLBACK_RUN.tw,us:FRESH_FALLBACK_RUN.us,src:'讀不到 market.yml cron，退回舊寫死時刻'};
+    try{
+      const w=stDoc&&Array.isArray(stDoc.workflows)?stDoc.workflows.find(x=>x&&/market\.yml$/.test(x.file||'')):null;
+      const cr=w&&Array.isArray(w.crons)?w.crons.filter(c=>c&&/^\d{2}:\d{2}$/.test(c.utc||'')&&/^\d{2}:\d{2}$/.test(c.taipei||'')):[];
+      const hm=c=>c.utc.split(':').map(Number);
+      const tw=cr.filter(c=>!c.next_day_taipei&&c.taipei>='14:00').sort((a,b)=>a.taipei<b.taipei?-1:1);
+      const us=cr.filter(c=>c.next_day_taipei||c.taipei<'09:00');
+      if(tw.length)out.tw=hm(tw[0]);
+      if(us.length)out.us=hm(us[0]);
+      if(tw.length&&us.length)out.src='market.yml cron';
+    }catch(e){console.warn('[_freshnessMarketRuns]',e);recordGlobalError('_freshnessMarketRuns',e);}
+    return out;
+  }
   // 只讀檔案開頭 maxBytes（Range＋串流，伺服器不支援 Range 也會在讀夠後中止），回傳第一個 "generated_at" 的時間
   async function _headGeneratedAt(url,maxBytes){
     maxBytes=maxBytes||16384;
@@ -648,7 +666,7 @@
       }else{due=new Date(_lastWeekdayInstant(now,item.tz,item.close[0],item.close[1],0).getTime()-gap);rule='盤後/假日需有最近一個交易日收盤資料';}
     }else{
       due=_lastWeekdayInstant(now,item.tz,item.run[0],item.run[1],item.grace*3600000);
-      rule='每個平日排程後'+item.grace+'小時內須落地';
+      rule='每個平日排程後'+item.grace+'小時內須落地'+(item.runSrc?'（排程時刻：'+item.runSrc+'）':'');
     }
     const status=!ts?'missing':(ts>=due?'ok':'overdue');
     return {status,due,rule};
@@ -978,7 +996,9 @@
     try{const r=await fetch('data/STATUS.json?t='+Date.now());if(r.ok)statusDoc=await r.json();}
     catch(e){console.warn('[loadDataFreshness:STATUS]',e);recordGlobalError('loadDataFreshness:STATUS',e);}
     // 各檔獨立抓、獨立判定，用allSettled：一個檔壞了只有那一列顯示「讀取失敗」，其他列照常。
-    const settled=await Promise.allSettled(FRESHNESS_ITEMS.map(async item=>{
+    const mktRuns=_freshnessMarketRuns(statusDoc);
+    const settled=await Promise.allSettled(FRESHNESS_ITEMS.map(async item0=>{
+      const item=item0.mkt?Object.assign({},item0,{run:mktRuns[item0.mkt],runSrc:mktRuns.src}):item0;
       let ts=null,via='';
       if(item.head){
         ts=await _headGeneratedAt(item.file);

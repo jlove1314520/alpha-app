@@ -5126,6 +5126,35 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { rdmErrs.push(`測試本身出錯：${e.message || e}`); }
   record("157. 減少動態：reduce 時 JS 捲動不平滑、價格不閃、CSS 動畫 0 秒；一般模式照常（先.九十六-R4）", rdmErrs.length === 0, rdmErrs.join("; ") || rdmInfo);
 
+  // 158.【先.九十七-R8】設定頁資料新鮮度表的 market.yml 每日項目：排程時刻讀 STATUS.json workflows[market.yml].crons，
+  // 讀不到才退回 06:10／21:30 UTC；app-settings.js 的 FRESHNESS_ITEMS 不得再寫死 run:[6,10]／run:[21,30]。
+  const frErrs = []; let frInfo = "";
+  try {
+    const fsm = await import("node:fs");
+    const src = fsm.readFileSync("app-settings.js", "utf8");
+    const m = src.match(/const FRESHNESS_ITEMS=\[([\s\S]*?)\n  \];/);
+    if (!m) frErrs.push("找不到 FRESHNESS_ITEMS 定義");
+    else if (/run:\s*\[\s*(6\s*,\s*10|21\s*,\s*30)\s*\]/.test(m[1])) frErrs.push("FRESHNESS_ITEMS 仍寫死 run:[6,10] 或 run:[21,30]");
+    const r = await page.evaluate(() => {
+      if (typeof _freshnessMarketRuns !== "function") return { err: "_freshnessMarketRuns 未載入" };
+      const doc = { workflows: [{ file: ".github/workflows/market.yml", crons: [
+        { utc: "10:41", taipei: "18:41", next_day_taipei: false }, { utc: "09:13", taipei: "17:13", next_day_taipei: false },
+        { utc: "21:43", taipei: "05:43", next_day_taipei: true }] }] };
+      const row = document.querySelector('#data-freshness-list .fresh-row[data-file="data/market_tw.json"]');
+      return { ok: _freshnessMarketRuns(doc), none: _freshnessMarketRuns(null), bad: _freshnessMarketRuns({ workflows: [{ file: "market.yml", crons: [{ utc: "x" }] }] }),
+        rowTxt: row ? row.textContent : null };
+    });
+    if (r.err) frErrs.push(r.err);
+    else {
+      if (JSON.stringify(r.ok.tw) !== "[9,13]" || JSON.stringify(r.ok.us) !== "[21,43]" || r.ok.src !== "market.yml cron") frErrs.push("crons 換算錯：" + JSON.stringify(r.ok));
+      if (JSON.stringify(r.none.tw) !== "[6,10]" || JSON.stringify(r.none.us) !== "[21,30]") frErrs.push("讀不到 STATUS 時沒退回舊值：" + JSON.stringify(r.none));
+      if (JSON.stringify(r.bad.tw) !== "[6,10]") frErrs.push("crons 格式壞時沒退回舊值：" + JSON.stringify(r.bad));
+      if (r.rowTxt != null && !/排程時刻：/.test(r.rowTxt)) frErrs.push("market_tw 列沒標排程時刻來源：" + r.rowTxt.slice(0, 80));
+      frInfo = `換算 台股 ${r.ok.tw.join(":")}／美股 ${r.ok.us.join(":")} UTC；退回 ${r.none.tw.join(":")}／${r.none.us.join(":")}；畫面列：${r.rowTxt == null ? "（未在設定頁，略過）" : (r.rowTxt.match(/排程時刻：[^；）]*/) || [""])[0]}`;
+    }
+  } catch (e) { frErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("158. 資料新鮮度表 market.yml 每日項目讀 STATUS.json crons、讀不到才退回舊時刻，不再寫死 run:[6,10]（先.九十七-R8）", frErrs.length === 0, frErrs.join("; ") || frInfo);
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -5154,7 +5183,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144/146/147/148/151/152/157新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144/146/147/148/151/152/157/158新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
