@@ -382,6 +382,8 @@
   // 2026-08-25 新增：盤中近即時報價（GitHub Actions 排程抓，見 .github/workflows/quotes.yml）。
   // FinMind 免費版只有盤後日線，畫面顯示「盤中」卻只能給前一日收盤價會誤導使用者。
   let INTRADAY_TW=null,INTRADAY_US=null,INTRADAY_IBKR=null,INTRADAY_SINOPAC=null;
+  // 先.九十五-R1②：即時檔抓取是不是因為「連不上網路」失敗（頂端市場時鐘據此寫「離線」而不是「無資料」）
+  const INTRADAY_NET_OFF={tw:false,us:false};
   function intradayAgeMin(data){
     if(!data||!data.fetched_at)return null;
     return (Date.now()-new Date(data.fetched_at).getTime())/60000;
@@ -550,10 +552,10 @@
     // 台股那份859KB）60秒內不重抓——串流每幾秒觸發一次重繪，每次都重抓會把手機流量吃光。
     const liveSkip=LIVE.connected;
     if(!(liveSkip&&Date.now()-INTRADAY_TW_AT<60000)){
-      try{const r=await fetch('data/quotes_tw.json?t='+Date.now());if(r.ok){INTRADAY_TW=await r.json();INTRADAY_TW_AT=Date.now()}}catch(e){console.warn('[loadIntradayQuotes:tw]',e);recordGlobalError('loadIntradayQuotes:tw',e)}
+      try{const r=await fetch('data/quotes_tw.json?t='+Date.now());INTRADAY_NET_OFF.tw=false;if(r.ok){INTRADAY_TW=await r.json();INTRADAY_TW_AT=Date.now()}}catch(e){INTRADAY_NET_OFF.tw=_isOfflineErr(e);console.warn('[loadIntradayQuotes:tw]',e);recordGlobalError('loadIntradayQuotes:tw',e)}
     }
     if(!(liveSkip&&Date.now()-INTRADAY_US_AT<60000)){
-      try{const r=await fetch('data/quotes_us.json?t='+Date.now());if(r.ok){INTRADAY_US=await r.json();INTRADAY_US_AT=Date.now()}}catch(e){console.warn('[loadIntradayQuotes:us]',e);recordGlobalError('loadIntradayQuotes:us',e)}
+      try{const r=await fetch('data/quotes_us.json?t='+Date.now());INTRADAY_NET_OFF.us=false;if(r.ok){INTRADAY_US=await r.json();INTRADAY_US_AT=Date.now()}}catch(e){INTRADAY_NET_OFF.us=_isOfflineErr(e);console.warn('[loadIntradayQuotes:us]',e);recordGlobalError('loadIntradayQuotes:us',e)}
     }
     await ensureIbkrQuotes();
     await ensureSinopacQuotes();
@@ -761,7 +763,8 @@
     const data=intradayGetter?intradayGetter():null;
     const age=intradayAgeMin(data);
     let label,dot;
-    if(age==null){label='無資料';dot='var(--ink-3)';}
+    // 先.九十五-R1②：斷網時沒抓到即時檔寫「離線」，不寫「無資料」（下面卡片可能正顯示上次存的資料，兩處說法要一致）
+    if(age==null){label=(navigator.onLine===false||INTRADAY_NET_OFF[elId==='mkt-us'?'us':'tw'])?'離線':'無資料';dot='var(--ink-3)';}
     else{const d=new Date(data.fetched_at);
       if(open&&age<=INTRADAY_STALE_MIN){label='延遲'+Math.max(1,Math.round(age))+'分';dot='var(--good)'}
       else if(open){label='資料延遲';dot='var(--warn)'}
@@ -797,10 +800,10 @@
     let label,dot;
     if(session==='pre'||session==='post'){label=session==='pre'?'盤前':'盤後';dot='var(--warn)';}
     else if(session==='closed'){
-      if(age==null){label='無資料';dot='var(--ink-3)'}
+      if(age==null){label=(navigator.onLine===false||INTRADAY_NET_OFF.us)?'離線':'無資料';dot='var(--ink-3)'}
       else{label='已收盤('+fmtTzMD(new Date(data.fetched_at),'America/New_York')+')';dot='var(--ink-3)'}}
     else{
-      if(age==null){label='無資料';dot='var(--ink-3)'}
+      if(age==null){label=(navigator.onLine===false||INTRADAY_NET_OFF.us)?'離線':'無資料';dot='var(--ink-3)'}
       else if(age<=INTRADAY_STALE_MIN){label='延遲'+Math.max(1,Math.round(age))+'分';dot='var(--good)'}
       else{label='資料延遲';dot='var(--warn)'}}
     dotEl.style.background=dot;
@@ -1199,7 +1202,19 @@
   // 常備.開發-20（先.六十七）：FinMind 名稱清單失敗時，首頁先用 data/quote_lite/{代號}.json 的名稱（見 ensureQuoteLite），
   // 整份 company_info.json 延後到搜尋／其他頁真的要用時才抓。
   const LITE_NAME={};
-  const nameOf=code=>STOCKNAME[code]||STOCKNAME_US[code]||LITE_NAME[code]||code;
+  // 先.九十五-R1①：自選股等熱門代號的名稱同步存本機（alpha_name_saved，最多 300 筆），斷網重開時名稱不會退成代號。
+  // 只是名稱對照（公開資訊），不是報價；有網路時一律以 FinMind／小檔的新名稱為準並覆寫。
+  const NAME_SAVED_KEY='alpha_name_saved';
+  const NAME_SAVED=(()=>{try{return JSON.parse(localStorage.getItem(NAME_SAVED_KEY))||{}}catch(e){console.warn('[NAME_SAVED]',e);return {}}})();
+  let _nameSaveT=null;
+  function _nameRemember(code,n){
+    if(!code||!n||n===code||NAME_SAVED[code]===n)return;
+    NAME_SAVED[code]=n;
+    const ks=Object.keys(NAME_SAVED);if(ks.length>300)ks.slice(0,ks.length-300).forEach(k=>delete NAME_SAVED[k]);
+    if(_nameSaveT)return;
+    _nameSaveT=setTimeout(()=>{_nameSaveT=null;try{localStorage.setItem(NAME_SAVED_KEY,JSON.stringify(NAME_SAVED))}catch(e){console.warn('[nameRemember]',e)}},500);
+  }
+  const nameOf=code=>{const n=STOCKNAME[code]||STOCKNAME_US[code]||LITE_NAME[code];if(n){_nameRemember(code,n);return n}return NAME_SAVED[code]||code};
   // 2026-08-24 新增：手動「重新整理」按鈕用——清掉全部 FinMind 快取（記憶體＋localStorage），
   // 讓接下來的 hydrateXxx() 重新真的打一次 API，不要停在 3 分鐘內的舊快取。
   function fmClearCache(){
@@ -1600,31 +1615,54 @@
       return shardP[k]||(shardP[k]=fetch('data/quote_lite/p/'+encodeURIComponent(k)+'.json?t='+tb).then(r=>{if(r.status===404)return {};if(!r.ok)throw new Error('分片 '+k+' HTTP '+r.status);return r.json()}))};
     const res=await Promise.allSettled(want.map(c=>fetch('data/quote_lite/'+encodeURIComponent(c)+'.json?t='+tb)
       .then(r=>{if(r.status===404)return shardOf(c).then(sh=>sh&&sh[c]?{code:c,d:sh[c]}:{code:c,miss:true});if(!r.ok)throw new Error(c+' HTTP '+r.status);return r.json().then(d=>({code:c,d}))})));
-    let hardFail=0,miss=0;
-    for(const x of res){
-      if(x.status==='rejected'){hardFail++;console.warn('[ensureQuoteLite]',x.reason);continue}
+    let hardFail=0,miss=0,offFail=0;
+    const saved=_qlSavedRead();
+    for(let i=0;i<res.length;i++){
+      const x=res[i];
+      if(x.status==='rejected'){
+        // 先.九十五-R1①③：斷網抓不到 → 用上次存在本機的小檔頂上（只有自選股與指數有存），不算程式錯誤
+        const off=_isOfflineErr(x.reason)||navigator.onLine===false;
+        if(off)offFail++;else console.warn('[ensureQuoteLite]',x.reason);
+        hardFail++;
+        const c=want[i];
+        if(off&&saved[c]){try{_qlApply(c,saved[c])}catch(e){console.warn('[ensureQuoteLite:saved]',c,e)}}
+        continue}
       const {code,d}=x.value;QUOTE_LITE_AT[code]=Date.now();
       if(x.value.miss){miss++;continue}
       try{
-        if(!SPARKLINES_FULL){
-          SPARKLINES=SPARKLINES||{};
-          if(Array.isArray(d.s))SPARKLINES[code]=d.s;
-          if(d.sd)SPARKLINES_STALE_DATES[code]=d.sd;else delete SPARKLINES_STALE_DATES[code];
-          if(d.asof)SPARKLINES_ASOF=d.asof;
-        }
-        if(!QUOTES_ALL_TW_FULL){
-          QUOTES_ALL_TW_CACHE=QUOTES_ALL_TW_CACHE||{quotes:{}};
-          if(d.a)QUOTES_ALL_TW_CACHE.quotes[code]=d.a;
-        }
-        if(d.n)LITE_NAME[code]=d.n;
+        if(WL.includes(code)||QUOTE_LITE_INDEX.has(code))saved[code]=d;
+        _qlApply(code,d);
       }catch(e){hardFail++;console.warn('[ensureQuoteLite:merge]',code,e)}
     }
+    _qlSavedWrite(saved);
     if(hardFail||(miss&&miss===want.length)){
       const why=hardFail?`${hardFail} 檔抓取失敗`:`要的 ${want.length} 檔全部 404（小檔目錄可能不存在）`;
+      if(hardFail&&offFail===hardFail){console.info('[ensureQuoteLite] 離線：'+why+'，已用本機存檔頂上（不計程式錯誤）');return}
       console.warn('[ensureQuoteLite] 小檔不可用，改抓整份 sparklines／quotes_all_tw：'+why);
       recordGlobalError('ensureQuoteLite',new Error(why+'，已改抓整份檔'));
       await Promise.allSettled([ensureSparklines(),loadQuotesAllTw()]);
     }
+  }
+  // 先.九十五-R1①：自選股／指數的小檔（走勢線、收盤、名稱、資料日）另存本機 alpha_quote_lite_saved，斷網時頂上；
+  // 小檔本身帶 asof／sd 資料日，卡片照常標日期，不會冒充即時。
+  const QL_SAVED_KEY='alpha_quote_lite_saved';
+  function _qlSavedRead(){try{return JSON.parse(localStorage.getItem(QL_SAVED_KEY))||{}}catch(e){console.warn('[qlSavedRead]',e);return {}}}
+  function _qlSavedWrite(o){
+    try{const keep={};for(const k of Object.keys(o))if(WL.includes(k)||QUOTE_LITE_INDEX.has(k))keep[k]=o[k];localStorage.setItem(QL_SAVED_KEY,JSON.stringify(keep))}
+    catch(e){console.warn('[qlSavedWrite]',e)}
+  }
+  function _qlApply(code,d){
+    if(!SPARKLINES_FULL){
+      SPARKLINES=SPARKLINES||{};
+      if(Array.isArray(d.s))SPARKLINES[code]=d.s;
+      if(d.sd)SPARKLINES_STALE_DATES[code]=d.sd;else delete SPARKLINES_STALE_DATES[code];
+      if(d.asof)SPARKLINES_ASOF=d.asof;
+    }
+    if(!QUOTES_ALL_TW_FULL){
+      QUOTES_ALL_TW_CACHE=QUOTES_ALL_TW_CACHE||{quotes:{}};
+      if(d.a)QUOTES_ALL_TW_CACHE.quotes[code]=d.a;
+    }
+    if(d.n)LITE_NAME[code]=d.n;
   }
   // ── 2026-09-06（實測.二）當日 1 分K ────────────────────────────────────────
   // 兩點改動：
@@ -4319,7 +4357,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-14.1939';
+  const APP_VERSION='2026-10-14.1950';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

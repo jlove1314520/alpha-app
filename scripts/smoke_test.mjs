@@ -4881,6 +4881,41 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { thErrs.push(`測試本身出錯：${e.message || e}`); }
   record("150. 淺色模式：預設跟隨系統、設定頁三選一切換、固定時不受系統影響、底色與 theme-color 跟著變（先.九十五-4）", thErrs.length === 0, thErrs.join("; ") || thInfo);
 
+  // 151.【2026-10-14 先.九十五-R1】離線三缺陷：另開環境連線開一次，再「斷網＋小檔抓不到（模擬 SW／HTTP 快取都沒有，
+  // UX_AUDIT UX-2～4 的情境）」重新整理：①自選股名稱不得退成代號、走勢小圖不得消失 ②頂端台股不得寫「無資料」
+  // ③錯誤 log 不得出現 ensureQuoteLite（離線是常態，比照先.八十-2）。393×852 離線截圖存 research/ux_shots/（不進 repo）。
+  const r1Errs = [];
+  let r1Info = "";
+  try {
+    const rctx = await browser.newContext({ viewport: { width: 393, height: 852 } });
+    const rp = await rctx.newPage();
+    await rp.goto(`${baseUrl}/index.html`, { waitUntil: "networkidle", timeout: 30000 });
+    await rp.waitForTimeout(3000);
+    const rowInfo = () => rp.evaluate(() => WL.filter(c => !/^[A-Za-z]/.test(c)).map(c => {
+      const r = [...document.querySelectorAll("#wl-list > div")].find(e => e.innerText.includes(c));
+      return { c, name: nameOf(c), svg: r ? r.querySelectorAll("svg").length : -1 }; }));
+    const onRows = await rowInfo();
+    await rp.evaluate(async () => { Object.keys(localStorage).filter(k => k.startsWith("fmc_")).forEach(k => localStorage.removeItem(k));
+      if (self.caches) { const c = await caches.open("alpha-data-v1"); for (const q of await c.keys()) if (/quote_lite|sparklines|quotes_all_tw|company_info/.test(q.url)) await c.delete(q); } });
+    await rctx.route(/\/data\/(quote_lite|sparklines|quotes_all_tw|company_info)/, r => r.abort("internetdisconnected"));
+    await rctx.setOffline(true);
+    await rp.reload({ waitUntil: "load" });
+    await rp.waitForTimeout(6000);
+    const offRows = await rowInfo();
+    const pill = await rp.evaluate(() => document.querySelector("#mkt-tw b")?.textContent);
+    const ge = await rp.evaluate(() => GLOBAL_ERRORS.map(e => e.label + "：" + e.msg));
+    for (const o of offRows) { const p0 = onRows.find(x => x.c === o.c) || {};
+      if (o.name === o.c) r1Errs.push(`①${o.c} 名稱退成代號`);
+      if ((p0.svg || 0) > 0 && o.svg < p0.svg) r1Errs.push(`①${o.c} 走勢小圖消失（連線 ${p0.svg}→離線 ${o.svg}）`); }
+    if (pill === "無資料") r1Errs.push("②頂端台股寫「無資料」（下方卡片同時顯示上次存的資料，說法矛盾）");
+    if (ge.some(x => /ensureQuoteLite/.test(x))) r1Errs.push("③離線被記成程式錯誤：" + ge.filter(x => /ensureQuoteLite/.test(x)).join("｜"));
+    (await import("node:fs")).mkdirSync("research/ux_shots", { recursive: true });
+    await rp.screenshot({ path: "research/ux_shots/offline_r1.png" });
+    r1Info = `離線 ${offRows.length} 檔自選股名稱與走勢線都在；頂端台股「${pill}」；錯誤 log ${ge.length} 筆`;
+    await rctx.close();
+  } catch (e) { r1Errs.push(`測試本身出錯：${e.message || e}`); }
+  record("151. 離線：自選股名稱／走勢線不消失、頂端不寫「無資料」、抓取失敗不記成程式錯誤（先.九十五-R1）", r1Errs.length === 0, r1Errs.join("; ") || r1Info);
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4909,7 +4944,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144/146/147/148新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144/146/147/148/151新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
