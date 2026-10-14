@@ -4881,6 +4881,60 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { thErrs.push(`測試本身出錯：${e.message || e}`); }
   record("150. 淺色模式：預設跟隨系統、設定頁三選一切換、固定時不受系統影響、底色與 theme-color 跟著變（先.九十五-4）", thErrs.length === 0, thErrs.join("; ") || thInfo);
 
+  // 153.【2026-10-14 先.九十六-2】②「跟 0050 比」樣本 <60 個交易日收合並標「累積中（已 N 天／需 60 天）」；≥60 天照常展開。
+  // ③ 用語替代（UX_REDESIGN_PROPOSAL ⑥表前兩列）：畫面上不得再出現「現價進場」「進場階梯」「分批進場計畫」「估值與進場」。
+  const acErrs = [];
+  let acInfo = "";
+  try {
+    const r = await page.evaluate(() => {
+      if (typeof scCollapseIfShort !== "function") return { err: "scCollapseIfShort 未載入" };
+      const short = scCollapseIfShort({ metrics: { days: 12 } }, "<b>X</b>");
+      const long = scCollapseIfShort({ metrics: { days: 80 } }, "<b>X</b>");
+      const none = scCollapseIfShort({}, "<b>X</b>");
+      return { short, long, none };
+    });
+    if (r.err) acErrs.push(r.err);
+    else {
+      if (!/<details class="sc-accum">/.test(r.short) || !/累積中（已 12 天／需 60 天）/.test(r.short) || /<details[^>]* open/.test(r.short)) acErrs.push(`12 天應收合且不展開：${r.short.slice(0, 120)}`);
+      if (r.long !== "<b>X</b>") acErrs.push("80 天不應收合");
+      if (!/已 0 天／需 60 天/.test(r.none)) acErrs.push("沒有天數應視為 0 天收合");
+    }
+    await page.evaluate(() => go("home"));
+    await page.evaluate(() => document.getElementById("strategy-curves-card")?.scrollIntoView());
+    await page.waitForTimeout(2500);
+    const dom = await page.evaluate(() => {
+      const c = document.getElementById("strategy-curves-card");
+      return { acc: c ? c.querySelectorAll("details.sc-accum").length : -1, txt: c ? c.innerText : "" };
+    });
+    acInfo = `首頁收合區塊 ${dom.acc} 個`;
+    // 目前所有線都未滿 60 天（最長 29 天），預設「全部疊加」分頁必須是收合的；哪天資料滿 60 天，這條自然改成檢查不收合
+    const ov = await page.evaluate(() => {
+      if (typeof SC_DATA === "undefined" || !SC_DATA || !SC_DATA.lines) return null;
+      const st = scLines().filter(scHasData);
+      const mx = st.reduce((m, l) => Math.max(m, Number((l.metrics && l.metrics.days) || 0)), 0);
+      SC_TAB = "all"; renderStrategyCurves();
+      const d = document.querySelector("#sc-body details.sc-accum");
+      return { mx, n: st.length, has: !!d, open: d ? d.open : null, sum: d ? d.querySelector("summary").textContent : "" };
+    });
+    if (ov && ov.n) {
+      if (ov.mx < 60 && (!ov.has || ov.open)) acErrs.push(`全部疊加最長 ${ov.mx} 天應收合：${JSON.stringify(ov)}`);
+      if (ov.mx >= 60 && ov.has) acErrs.push(`全部疊加最長 ${ov.mx} 天不應收合`);
+      if (ov.has && !new RegExp(`已 ${ov.mx} 天／需 60 天`).test(ov.sum)) acErrs.push(`摘要天數不對：${ov.sum}`);
+      acInfo += `；全部疊加最長 ${ov.mx} 天、${ov.has ? "已收合" : "未收合"}`;
+    }
+    const words = ["現價進場", "進場階梯", "分批進場計畫", "分批進場價位", "估值與進場"];
+    const src = await page.evaluate(w => {
+      const hits = w.filter(x => document.body.innerHTML.includes(x));
+      const fn = typeof renderEntryPlan === "function" ? String(renderEntryPlan) : "";
+      return { hits, fnHits: w.filter(x => fn.includes(x)) };
+    }, words);
+    const visible = src.hits.filter(x => !["分批進場計畫"].includes(x) || true);
+    // innerHTML 也含註解，所以只檢查非註解文字：移除 <!-- --> 後再比對
+    const vis = await page.evaluate(w => { const h = document.body.innerHTML.replace(/<!--[\s\S]*?-->/g, ""); return w.filter(x => h.includes(x)); }, words);
+    if (vis.length) acErrs.push(`畫面仍有舊用語：${vis.join("、")}`);
+  } catch (e) { acErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("153. 「跟 0050 比」未滿 60 個交易日收合標「累積中」；進場類用語已換成中性說法（先.九十六-2）", acErrs.length === 0, acErrs.join("; ") || acInfo);
+
   // 151.【2026-10-14 先.九十五-R1】離線三缺陷：另開環境連線開一次，再「斷網＋小檔抓不到（模擬 SW／HTTP 快取都沒有，
   // UX_AUDIT UX-2～4 的情境）」重新整理：①自選股名稱不得退成代號、走勢小圖不得消失 ②頂端台股不得寫「無資料」
   // ③錯誤 log 不得出現 ensureQuoteLite（離線是常態，比照先.八十-2）。393×852 離線截圖存 research/ux_shots/（不進 repo）。

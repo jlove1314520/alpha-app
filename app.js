@@ -1406,6 +1406,13 @@
   const scInceptionHtml=l=>l&&l.inception_note?`<div class="note sc-inception" data-ui-keep style="margin:2px 0 6px;color:var(--warn)">⚠ ${_uiEsc(l.inception_note)}</div>`:'';
   // 先.九十一-1：還沒開始的線也標設計註記（模擬 F：學界已知現象、只是研究）；已開始的線註記已併入 note
   const scDesignHtml=l=>l&&l.design_note&&!scHasData(l)?`<div class="note sc-design" data-ui-keep style="margin:2px 0 6px;color:var(--ink-3)">ⓘ ${_uiEsc(l.design_note)}</div>`:'';
+  // 先.九十六-2 ②（2026-10-14 總司令裁示）：樣本不足 60 個交易日時收合，標「累積中（已 N 天／需 60 天）」，點開才看數字與圖
+  const SC_MIN_DAYS=60;
+  function scCollapseIfShort(l,html,prefix){
+    const d=Number((l&&l.metrics&&l.metrics.days)||0);
+    if(d>=SC_MIN_DAYS)return html;
+    return `<details class="sc-accum"><summary class="note" style="cursor:pointer;margin:6px 0;color:var(--ink-2)">${prefix||''}累積中（已 ${d} 天／需 ${SC_MIN_DAYS} 天）<span style="color:var(--ink-3)">　點開看目前數字</span></summary>${html}</details>`;
+  }
   function scLineBlock(l){
     return scCandHtml(l)+scInceptionHtml(l)+scDesignHtml(l)+_scLineBlockInner(l);
   }
@@ -1413,10 +1420,11 @@
     if(!l)return '<div class="note sc-notyet" style="color:var(--ink-3)">現在還沒有資料</div>';
     if(!scHasData(l))return `<div class="note sc-goal" style="margin:6px 0 2px">設計目標：<b style="color:var(--ink-2)">${l.goal||'未標示'}</b></div>`+scNotYetHtml(l)+scHistBlockHtml(l);
     // 先.七十五：剛建倉只有一天時不畫只有一個點的大空圖，改一行說明（歷史段圖裡會畫出起點）
-    if(l.dates.length<2)return scMetricsHtml(l)+`<div class="note sc-oneday" style="margin-top:8px;color:var(--ink-3)">${+l.start_date.slice(5,7)}/${+l.start_date.slice(8,10)} 建倉，起點 100；下一個交易日收盤後開始畫線</div>`+scHistBlockHtml(l);
-    return scMetricsHtml(l)+`<div style="margin-top:8px">${scSvg([l])}</div>`+scHistBlockHtml(l)+`
+    if(l.dates.length<2)return scCollapseIfShort(l,scMetricsHtml(l)+`<div class="note sc-oneday" style="margin-top:8px;color:var(--ink-3)">${+l.start_date.slice(5,7)}/${+l.start_date.slice(8,10)} 建倉，起點 100；下一個交易日收盤後開始畫線</div>`+scHistBlockHtml(l));
+    const full=scMetricsHtml(l)+`<div style="margin-top:8px">${scSvg([l])}</div>`+scHistBlockHtml(l)+`
       <div class="note" style="margin-top:4px;font-size:10px">${l.start_date} 起算為 100；<span style="color:${SC_BENCH_COLOR}">━</span> 灰線＝同期 0050；按住圖看每天數字</div>
       <div class="note" style="margin-top:4px;font-size:10px;color:var(--ink-3)">${l.note||''}</div>`;
+    return scCollapseIfShort(l,full);
   }
   // 先.七十三-3：疊圖圖例——0050 灰色排第一，其後每條有資料的線：顏色＋名稱＋目前跟 0050 差幾點
   function scLegendHtml(started){
@@ -1543,7 +1551,9 @@
       html+=`<div class="note" style="margin-top:6px;font-size:10px;color:var(--warn)">${(SC_DATA.meta&&SC_DATA.meta.correction)||''}</div>`;
     }else if(SC_TAB==='all'){
       const all=scLines(),started=all.filter(scHasData),soon=all.filter(l=>!scHasData(l));
-      html+=started.length?`<div style="margin-top:4px">${scSvg(started)}</div>`+scLegendHtml(started):scNotYetHtml(null);
+      // 先.九十六-2 ②：疊加圖以「最長的一條」天數判斷，不足 60 個交易日整張收合
+      const maxDays=started.reduce((m,l)=>Math.max(m,Number((l.metrics&&l.metrics.days)||0)),0);
+      html+=started.length?scCollapseIfShort({metrics:{days:maxDays}},`<div style="margin-top:4px">${scSvg(started)}</div>`+scLegendHtml(started),'最長一條 '):scNotYetHtml(null);
       // 「即將加入」是資料清單不是說明文字，不用 .note（不會被收成「ⓘ 說明」）
       if(soon.length)html+=`<div class="sc-soon" style="margin-top:4px;font-size:11.5px;line-height:1.6;color:var(--ink-3)">即將加入：${soon.map(l=>`${_uiEsc(l.label.replace(/\s*(三檔分散|供給緊縮|景氣閘門|加速|穩健|賣波動)$/,''))}（${scShortDate(l)}）`).join('、')}</div>`;
       html+=`<div class="note" style="font-size:10px;color:var(--ink-3)">各線從自己的起始日接在當天 0050 的位置；按住圖看各線自己的報酬</div>`;
@@ -4373,7 +4383,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-14.2002';
+  const APP_VERSION='2026-10-14.2025';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

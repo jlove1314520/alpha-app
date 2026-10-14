@@ -43,7 +43,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(mq.addEventListener)mq.addEventListener('change',h);else if(mq.addListener)mq.addListener(h)}
 })();
 </script>
-<link rel="stylesheet" href="app.css?v=2026-10-14.2002">
+<link rel="stylesheet" href="app.css?v=2026-10-14.2025">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -571,12 +571,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     樣本數。台股沒有免費的分析師目標價資料源，所以這裡不是目標價，也不是預測，
     只是「本益比移動到同業某個百分位時的換算價」。分批進場階梯不動。 -->
     <div class="card">
-      <h3>估值與進場</h3>
+      <h3>估值區間（非目標價）與價位換算</h3>
       <div id="report-valuation-band"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div><div class="skel-line w30"></div></div>
       <div id="report-entry-plan"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
     </div>
 
-    <div class="card" style="background:linear-gradient(155deg, rgba(216,176,112,.12), rgba(20,19,15,.6));border-color:rgba(216,176,112,.25)">
+    <div class="card" style="background:linear-gradient(155deg, rgba(216,176,112,.12), var(--ai-tail));border-color:rgba(216,176,112,.25)">
       <h3>分批試算</h3>
       <div id="report-strategy" class="note"></div>
       <button class="press" style="width:100%;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--gold-grad);color:#1a1005;font-size:14px;font-weight:700;padding:14px;border-radius:14px;border:0" onclick="generateOrderPlan()">
@@ -1378,7 +1378,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div class="card" data-ui-advanced>
       <h3>免責聲明</h3>
       <div class="note" style="line-height:1.7">
-        Alpha 是個人研究與自動交易用 App，<b style="color:var(--ink-2)">所有評分、排行、盤前日報、分批進場計畫皆非投資建議</b>，不構成任何買賣訊號。歷史資料與回測結果不代表未來績效。資料來源可能延遲或有誤，使用前請自行查證。<b style="color:var(--ink-2)">台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單</b>：台股真錢下單只由本機 Bb-90 引擎依硬限制（白名單 ETF、僅買進現股、單次金額上限、限價偏離前收 ≤1%、資料新鮮度、下單前對帳、緊急停止）執行，每批送單前有 30 分鐘否決窗；App 本身沒有台股下單按鈕。個股頁「產生下單計畫」只顯示試算、不會下單。美股個股頁的「IBKR 模擬買進／賣出」只對 IBKR <b>模擬（Paper）帳戶</b>送單，不涉及真實資金，一律由你手動按下。投資有風險，盈虧請自負。
+        Alpha 是個人研究與自動交易用 App，<b style="color:var(--ink-2)">所有評分、排行、盤前日報、分批資金配置範例皆非投資建議</b>，不構成任何買賣訊號。歷史資料與回測結果不代表未來績效。資料來源可能延遲或有誤，使用前請自行查證。<b style="color:var(--ink-2)">台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單</b>：台股真錢下單只由本機 Bb-90 引擎依硬限制（白名單 ETF、僅買進現股、單次金額上限、限價偏離前收 ≤1%、資料新鮮度、下單前對帳、緊急停止）執行，每批送單前有 30 分鐘否決窗；App 本身沒有台股下單按鈕。個股頁「產生下單計畫」只顯示試算、不會下單。美股個股頁的「IBKR 模擬買進／賣出」只對 IBKR <b>模擬（Paper）帳戶</b>送單，不涉及真實資金，一律由你手動按下。投資有風險，盈虧請自負。
       </div>
     </div>
 
@@ -1507,6 +1507,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-14.2002"></script>
+<script src="app.js?v=2026-10-14.2025"></script>
 </body>
 </html>

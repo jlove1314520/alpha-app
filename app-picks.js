@@ -528,7 +528,7 @@
     host.style.display='';
     // 2026-09-06（實測.四）總司令裁示取消「極端走勢就不顯示分批進場」：
     // 階梯照顯示，把判斷權留給使用者，這裡只負責把風險講得夠醒目。
-    host.innerHTML=`⚠ 追高風險提醒：${flags.join('；')}。下方進場階梯照常顯示，但請自行判斷是否值得追。`;
+    host.innerHTML=`⚠ 追高風險提醒：${flags.join('；')}。下方回檔價位參考照常顯示，但請自行判斷是否值得追。`;
   }
   async function renderReport(){
     const row=REPORT_CACHE;
@@ -603,7 +603,7 @@
     document.getElementById('report-industry-tech').innerHTML=itHtml;
     });
 
-    document.getElementById('report-strategy').textContent='目前為「AI 綜合評分排行」清單性質，不是自動交易策略；下方按鈕只依分批進場計畫產生試算，不代表任何策略訊號。台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單（只交易白名單 ETF，與本頁個股無關）。';
+    document.getElementById('report-strategy').textContent='目前為「AI 綜合評分排行」清單性質，不是自動交易策略；下方按鈕只依分批資金配置範例產生試算，不代表任何策略訊號。台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單（只交易白名單 ETF，與本頁個股無關）。';
 
     // 分批進場計畫：機械式資金分配規則（現價/-4%/-8%），不是估值預測，不是投資建議
     const planEl=document.getElementById('report-entry-plan');
@@ -621,7 +621,7 @@
       // 防線一：await 期間使用者已經切到別檔，這批結果作廢（不作廢就會把這一檔的
       // 價格寫進另一檔的頁面——光聖 6442 顯示 6808 的 32 就是這樣來的）。
       if(runId!==REPORT_SEQ)return;
-      if(!px.length){planEl.innerHTML='<div class="note">'+fmEmptyMsg('查無報價資料')+'，無法計算分批進場價位。</div>';return}
+      if(!px.length){planEl.innerHTML='<div class="note">'+fmEmptyMsg('查無報價資料')+'，無法計算分批資金配置範例。</div>';return}
       const closes=px.map(x=>usCode?x.Close:x.close).filter(x=>x!=null);
       const highs=px.map(x=>usCode?x.High:x.max).filter(x=>x!=null);
       const lows=px.map(x=>usCode?x.Low:x.min).filter(x=>x!=null);
@@ -629,7 +629,7 @@
       const low20=Math.min(...closes.slice(-20));
       const low60=Math.min(...closes.slice(-60));
       // 防線二：跟全 App 唯一真值比對，差超過 ±30% 就不顯示任何數字。
-      const sane=priceSanityFailure(row.code,last,'分批進場計畫');
+      const sane=priceSanityFailure(row.code,last,'分批資金配置範例');
       if(sane){
         planEl.innerHTML='<div class="note" style="color:var(--warn)">⚠ '+sane+'</div>';
         const ctaBad=document.querySelector('#scr-report .buy-cta');if(ctaBad)ctaBad.style.display='none';
@@ -663,7 +663,7 @@
       // 候選層級。只留「不高於現價」的（進場階梯是等回檔，不是追價），
       // 現價那一階永遠保留當第一階。
       const cand=[
-        {label:'現價進場',price:last,basis:'目前成交價'},
+        {label:'以現價為基準',price:last,basis:'目前成交價'},
         {label:'5 日均線',price:ma(5),basis:'近 5 日收盤平均'},
         {label:'10 日均線',price:ma(10),basis:'近 10 日收盤平均'},
         {label:'20 日均線（月線）',price:ma(20),basis:'近 20 日收盤平均'},
@@ -695,7 +695,7 @@
       ENTRY_PLAN_CACHE={code:row.code,name:row.name,tranches};
       planEl.innerHTML=
         (EXTREME_MOVE_ACTIVE?`<div class="note" style="margin-bottom:10px;color:var(--warn);border:1px solid rgba(250,178,25,.35);border-radius:9px;padding:8px 10px"><b>⚠ 追高風險高</b>：${extremeMoveFlags(row).join('；')}。階梯照常顯示，判斷權在你。</div>`:'')+
-        `<div class="note" style="margin-bottom:12px">⚠️ 技術層級分批規則（價位取自這一檔自己的均線／前波低點／ATR，非估值預測、非投資建議，僅為進場資金分配參考）。近期支撐參考：20 日低點 ${nf(low20.toFixed(2))}、60 日低點 ${nf(low60.toFixed(2))}、近 20 日最高 ${nf(swingHigh.toFixed(2))}。</div>`+
+        `<div class="note" style="margin-bottom:12px">⚠️ 技術層級分批規則（價位取自這一檔自己的均線／前波低點／ATR，非估值預測、非投資建議，僅為資金配置範例）。近期支撐參考：20 日低點 ${nf(low20.toFixed(2))}、60 日低點 ${nf(low60.toFixed(2))}、近 20 日最高 ${nf(swingHigh.toFixed(2))}。</div>`+
         `<div style="display:flex;flex-direction:column;gap:10px">`+
         tranches.map((t,i)=>`<div style="display:flex;align-items:center;gap:12px">
           <span class="num" style="width:22px;height:22px;border-radius:50%;background:rgba(216,176,112,.15);color:var(--gold);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</span>
@@ -705,7 +705,7 @@
         </div>`).join('')+`</div>`;
     }catch(e){
       console.warn('[renderReport:tranches]',e);recordGlobalError('renderReport:tranches',e);
-      planEl.innerHTML='<div class="note">分批進場價位計算失敗（'+e.message+'）。</div>';
+      planEl.innerHTML='<div class="note">分批資金配置範例計算失敗（'+e.message+'）。</div>';
     }
   }
   function updateReportWatchBtn(code){
@@ -724,7 +724,7 @@
     updateReportWatchBtn(row.code);
   }
   function generateOrderPlan(){
-    if(!ENTRY_PLAN_CACHE){toast('分批進場計畫尚未載入完成');return}
+    if(!ENTRY_PLAN_CACHE){toast('分批資金配置範例尚未載入完成');return}
     const {tranches}=ENTRY_PLAN_CACHE;
     document.getElementById('report-order-plan').innerHTML=`<div class="gate" style="margin-top:10px">
       <div style="font-weight:700;margin-bottom:8px">📋 下單計畫（僅顯示，不會送出）</div>
