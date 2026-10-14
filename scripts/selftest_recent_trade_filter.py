@@ -49,9 +49,15 @@ out, info = F.evaluate(real)
 # 先.八十四-4（2026-10-13）：原本寫死「3085、8183 一定被剔除」，3085 在 10/13 恢復成交（2 張、16.2 元）後此項必然失敗。
 # 改成依各檔真實最後成交日推出預期：最後一筆有量的日期早於判定視窗第一天 → 應剔除，否則不應剔除。
 win0 = (info.get("window") or [None])[0]
+# 先.九十七-3（2026-10-14）：只依規則①推預期，漏了規則②「不在官方最新快照」——3085 10/13 有成交、10/14 沒成交，
+# 依②（快照完整時）應剔除，舊預期卻判「不應剔除」。改成兩條規則都算。
 def _expect(code):
-    traded = [r["date"] for r in real.get(code) or [] if (r.get("volume") or 0) > 0]
-    return bool(win0) and (not traded or traded[-1] < win0)
+    rs = real.get(code) or []
+    traded = [r["date"] for r in rs if (r.get("volume") or 0) > 0]
+    rule1 = bool(win0) and (not traded or traded[-1] < win0)
+    last = max((r["date"] for r in rs if r.get("date")), default=None)
+    rule2 = bool(info.get("snapshot_check")) and (last is None or last < info.get("latest", ""))
+    return rule1 or rule2
 exp = {c: _expect(c) for c in ("3085", "8183")}
 res.append((f"⑥真資料判定與最後成交日一致（視窗起 {win0}；3085 應剔除={exp['3085']} 實際={'3085' in out}；8183 應剔除={exp['8183']} 實際={'8183' in out}）",
             all(("%s" % c in out) == e for c, e in exp.items()) and exp["8183"]))

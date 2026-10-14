@@ -189,10 +189,10 @@
   // 題材動能榜的因子集合，跟上面價值成長榜完全獨立（見
   // research/generate_scores_momentum.py檔頭說明：因子/權重各自版本控管）。
   const MOMENTUM_FACTOR_LABELS={
-    relative_strength:'相對強度/價格動能', volume_breakout:'量能突破',
+    relative_strength:'相對強度/價格動能', volume_breakout:'量能倍數',
     new_high_breakout:'創新高', volume_price_coordination:'量價配合度',
     chip_concentration:'籌碼集中', group_breadth:'族群齊漲度',
-    sector_capital_flow:'產業資金流入',
+    sector_capital_flow:'產業成交額增加',
   };
   const MOMENTUM_FACTOR_ORDER=['relative_strength','volume_breakout','new_high_breakout','volume_price_coordination','chip_concentration','group_breadth','sector_capital_flow'];
   // 未來性濾網(a)類因子集合（見research/generate_scores_future.py檔頭說明）。
@@ -260,7 +260,7 @@
       const labels={};US_PILLAR_KEYS.forEach(k=>labels[k]=(m.pillars&&m.pillars[k]&&m.pillars[k].label)||k);
       const ranked=rows.filter(s=>s.rank!=null).slice(0,30);
       const pc=m.pillar_coverage||{};
-      metaEl.innerHTML=`評分時間 ${_usEsc((m.generated_at||'').slice(0,16).replace('T',' '))} ｜ 財報 ${_usEsc((m.financials_generated_at||'').slice(0,10))} ｜ 股價 ${_usEsc((m.price_source&&m.price_source.as_of)||'—')}<br>樣本 ${rows.length} 檔、排名 ${m.ranked_count||0} 檔（完整度≥50%）；分項涵蓋：${US_PILLAR_KEYS.map(k=>_usEsc(labels[k])+' '+(pc[k]||0)).join('、')}。三分項等權；價值＝本益比/PEG（越低越便宜，PBR 缺）、成長＝EPS/營收年增＋毛利率/營益率年變化（年度）、品質＝v0 自訂（毛利率/營益率/FCF利潤率/低負債）。宇宙為 SEC 當下名冊前段＋自選股，非全市場。`;
+      metaEl.innerHTML=`評分時間 ${_usEsc((m.generated_at||'').slice(0,16).replace('T',' '))} ｜ 財報 ${_usEsc((m.financials_generated_at||'').slice(0,10))} ｜ 股價 ${_usEsc((m.price_source&&m.price_source.as_of)||'—')}<br>樣本 ${rows.length} 檔、排名 ${m.ranked_count||0} 檔（完整度≥50%）；分項涵蓋：${US_PILLAR_KEYS.map(k=>_usEsc(labels[k])+' '+(pc[k]||0)).join('、')}。三分項等權；價值＝本益比/PEG（數值越低代表本益比越低，PBR 缺）、成長＝EPS/營收年增＋毛利率/營益率年變化（年度）、品質＝v0 自訂（毛利率/營益率/FCF利潤率/低負債）。宇宙為 SEC 當下名冊前段＋自選股，非全市場。`;
       listEl.innerHTML=ranked.length?ranked.map(s=>usScoreRowHtml(s,labels)).join(''):'<div class="note">目前沒有完整度≥50%的美股可排名。</div>';
     }catch(e){
       console.warn('[loadUsScoresV0]',e);recordGlobalError('loadUsScoresV0',e);
@@ -389,7 +389,7 @@
     const _c=boardCfg.cacheGet();
     if(_c&&_c.weights&&_c.weights.low_vol===1&&row.summary)return row.summary;  // 方案B：只有低波動計分，直接用伺服器端摘要
     const avail=order.map(k=>({key:k,f:row.factors&&row.factors[k]})).filter(x=>x.f&&typeof x.f.percentile==='number');
-    if(!avail.length)return row.summary||'這檔目前所有因子皆無資料，無法拆解選股理由。';
+    if(!avail.length)return row.summary||'這檔目前所有因子皆無資料，無法拆解分數。';
     const sorted=[...avail].sort((a,b)=>b.f.percentile-a.f.percentile);
     const pct=p=>Math.round(p*100);
     const top=sorted.slice(0,Math.min(2,sorted.length));

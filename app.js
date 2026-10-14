@@ -3225,7 +3225,7 @@
     _segStyle(document.getElementById('ibkr-side-buy'),side==='BUY','var(--up-deep)','#fff');
     _segStyle(document.getElementById('ibkr-side-sell'),side==='SELL','var(--down-deep)','#fff');
     document.getElementById('ibkr-submit-btn').className='btn '+(side==='BUY'?'buy':'sell');
-    document.getElementById('ibkr-submit-btn').textContent=(side==='BUY'?'送出買進':'送出賣出')+' Paper 委託（IBKR）';
+    document.getElementById('ibkr-submit-btn').textContent=(side==='BUY'?'送出模擬買進':'送出模擬賣出')+'委託（IBKR Paper）';
   }
   function setIbkrOrderType(t){
     IBKR_STATE.orderType=t;
@@ -3713,22 +3713,22 @@
   const BT_PROB_OFF='樣本內重抽，偏樂觀，不能當依據';
   function renderBtProb(params){
     const el=document.getElementById('bt-prob');if(!el)return;
-    if(params){el.innerHTML='<b>達標機率</b>：已下架——'+BT_PROB_OFF+'。';return}
-    el.innerHTML='達標機率：請先填入淨資產與出生日期。已下架數字：'+BT_PROB_OFF+'。';return;
+    if(params){el.innerHTML='<b>假設情境達標比例</b>：已下架——'+BT_PROB_OFF+'。';return}
+    el.innerHTML='假設情境達標比例：請先填入淨資產與出生日期。已下架數字：'+BT_PROB_OFF+'。';return;
     const bias='<a href="https://github.com/jlove1314520/alpha-app/blob/main/research/WIN_PROBABILITY_2026-10.md" target="_blank" rel="noopener">偏誤說明（WIN_PROBABILITY_2026-10）</a>';
-    if(!params){el.innerHTML='達標機率：請先填入淨資產與出生日期（每月投入、目標年齡可留預設），填好後在你的瀏覽器內計算，不會送出。';return}
+    if(!params){el.innerHTML='假設情境達標比例：請先填入淨資產與出生日期（每月投入、目標年齡可留預設），填好後在你的瀏覽器內計算，不會送出。';return}
     clearTimeout(BT_PROB.timer);
-    el.textContent='達標機率計算中…';
+    el.textContent='假設情境達標比例計算中…';
     BT_PROB.timer=setTimeout(()=>{
       btProbData().then(d=>{
         const res=btProbCalc(d.returns,{nw:params.nw,pmt:params.pmt,nmon:params.nmon,goal:BT_GOAL,B:BT_PROB.B,block:BT_PROB.block,seed:BT_PROB.seed});
-        if(!res){el.textContent='達標機率：期間太短或資料不足，無法計算';return}
+        if(!res){el.textContent='假設情境達標比例：期間太短或資料不足，無法計算';return}
         const lab={'0050':'0050 全持有','Bb-90':'Bb-90','S3-C6':'S3-C6（紙.三）','R1-A':'R1-A（紙.四 並列）','R1-C':'R1-C（紙.四 主）'};
         const rows=(d.strategies||Object.keys(res)).filter(k=>res[k]).map(k=>'<tr><td>'+_autoEsc(lab[k]||k)+'</td><td style="text-align:right"><b>'+(res[k].p*100).toFixed(1)+'%</b></td><td style="text-align:right">'+btFmt(res[k].p5)+'</td><td style="text-align:right">'+btFmt(res[k].p50)+'</td><td style="text-align:right">'+btFmt(res[k].p95)+'</td></tr>').join('');
-        el.innerHTML='<b>達標機率（'+params.nmon+' 個月後 ≥ 1 億）</b>'
-          +'<table style="width:100%;font-size:11px;margin:4px 0"><tr><th style="text-align:left">策略</th><th style="text-align:right">機率</th><th style="text-align:right">期末 5%</th><th style="text-align:right">中位</th><th style="text-align:right">95%</th></tr>'+rows+'</table>'
+        el.innerHTML='<b>假設情境：歷史重抽樣中 '+params.nmon+' 個月後 ≥ 1 億的比例</b>'
+          +'<table style="width:100%;font-size:11px;margin:4px 0"><tr><th style="text-align:left">策略</th><th style="text-align:right">比例</th><th style="text-align:right">期末 5%</th><th style="text-align:right">中位</th><th style="text-align:right">95%</th></tr>'+rows+'</table>'
           +'<div style="color:var(--warn)">⚠ '+_autoEsc(d.label||'回測，非保證')+'：用 '+_autoEsc((d.months||[])[0]||'')+'～'+_autoEsc((d.months||[]).slice(-1)[0]||'')+' 回測月報酬，12 個月區塊自助法抽樣 '+BT_PROB.B.toLocaleString()+' 次（固定種子）；R1 無樣本外驗證。參數只在你的瀏覽器內計算。'+bias+'</div>';
-      }).catch(e=>{console.warn('[renderBtProb]',e);recordGlobalError('renderBtProb',e);el.textContent='達標機率：讀取回測月報酬失敗（'+e.message+'）'});
+      }).catch(e=>{console.warn('[renderBtProb]',e);recordGlobalError('renderBtProb',e);el.textContent='假設情境達標比例：讀取回測月報酬失敗（'+e.message+'）'});
     },50);
   }
   // 先.三十一-二：橫幅由三個來源合成——本機狀態/緊急停止、本機離線、Pages 上的去識別化排程心跳
@@ -4408,7 +4408,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-14.2152';
+  const APP_VERSION='2026-10-14.2218';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

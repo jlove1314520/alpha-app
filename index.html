@@ -43,7 +43,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(mq.addEventListener)mq.addEventListener('change',h);else if(mq.addListener)mq.addListener(h)}
 })();
 </script>
-<link rel="stylesheet" href="app.css?v=2026-10-14.2152">
+<link rel="stylesheet" href="app.css?v=2026-10-14.2218">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -414,7 +414,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <section class="screen" id="scr-picks">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;gap:10px">
       <div>
-        <div style="font-size:22px;font-weight:700;letter-spacing:-.01em">AI 選股</div>
+        <div style="font-size:22px;font-weight:700;letter-spacing:-.01em">規則排序</div>
         <div class="note num picks-lb-only tw-only" id="picks-asof-line" style="margin:3px 0 0">載入中…</div>
         <div class="note picks-lb-only tw-only" id="picks-weight-note" data-ui-explain style="margin-top:2px"></div>
         <div class="note picks-lb-only tw-only" id="picks-backtest-note" style="margin-top:4px;display:none"></div>
@@ -447,7 +447,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <!-- 主流題材（資金流向）chips -->
     <div id="mainstream-wrap" class="picks-lb-only tw-only" style="margin-top:12px">
       <div style="display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:12px;color:var(--ink-3)">🔥 主流題材（資金流入中）</div>
+        <div style="font-size:12px;color:var(--ink-3)">主流題材（成交額增加）</div>
         <span class="press refresh-btn" id="mainstream-refresh" onclick="refreshTap(this,null,loadMainstreamIndustries)">重新整理</span>
       </div>
       <div id="mainstream-chips" style="display:flex;gap:8px;margin-top:8px;overflow-x:auto;padding-bottom:4px"><div class="skel-block" style="height:26px;width:70px;border-radius:14px;flex:0 0 auto"></div><div class="skel-block" style="height:26px;width:70px;border-radius:14px;flex:0 0 auto"></div><div class="skel-block" style="height:26px;width:70px;border-radius:14px;flex:0 0 auto"></div></div>
@@ -624,16 +624,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <h3>量能</h3>
         <div class="facts">
           <div class="f"><span>今日成交值</span><b id="kn-turnover">—</b></div>
-          <div class="f"><span>量能突破倍數</span><b id="kn-vol-mult">—</b></div>
+          <div class="f"><span>量能倍數</span><b id="kn-vol-mult">—</b></div>
         </div>
         <div class="note" id="kn-liquidity-flag"></div>
-        <div class="note">量能突破倍數＝今日成交值 ÷ 近20日均量（動能訊號，非流動性門檻）；流動性門檻另計：今日成交值絕對值 &lt; NT$3000萬才標示量能不足</div>
+        <div class="note">量能倍數＝今日成交值 ÷ 近20日均量（動能指標，非流動性門檻）；流動性門檻另計：今日成交值絕對值 &lt; NT$3000萬才標示量能不足</div>
       </div>
       <!-- 2026-09-15（P0產品.二）選股理由：scores.json既有因子拆解成貢獻方向＋全市場百分位＋
            同產業比較，零外部資料（同產業比較純在瀏覽器端用已載入的scores.json算，不加新資料源）。
            美股與樣本外個股（低流動性/資料不足未進榜）誠實顯示原因，不硬湊。 -->
       <div class="card">
-        <h3>選股理由</h3>
+        <h3>分數拆解</h3>
         <div id="stock-reason-card"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div><div class="skel-line w30"></div></div>
         <div class="note" style="margin-top:8px;color:var(--caution);font-weight:600">⚠ 只是資料排序拆解，還沒回測過</div>
       </div>
@@ -708,7 +708,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div id="chip-trend-table"><div style="padding:8px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w60"></div></div><div style="padding:8px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w60"></div></div><div style="padding:8px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w60"></div></div><div style="padding:8px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w60"></div></div></div>
         <div class="note" id="chip-trend-note" style="margin-top:6px"></div>
         <div class="note" id="chip-cost-note" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--hairline)">外資估算成本：—</div>
-        <div class="note" id="chip-disclaimer" style="margin-top:8px;color:var(--ink-3)">跟著大戶不等於會賺，大戶也可能正在出貨。</div>
+        <div class="note" id="chip-disclaimer" style="margin-top:8px;color:var(--ink-3)">跟著大戶不等於會賺，大戶也可能正在賣出。</div>
       </div>
       <div class="card">
         <h3>融資融券</h3>
@@ -843,7 +843,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <button class="on" data-sub="bots">機器人</button>
       <button data-sub="strategy">策略</button>
       <button data-sub="monitor">策略監控台</button>
-      <button data-sub="picks">選股成績單</button>
+      <button data-sub="picks">排序成績單</button>
     </div>
 
     <!-- 先.六十-A2（2026-10-10）交易頁重寫：原本三張「規劃中」機器人卡（策略 A/B/C 開關）與停用的 Kill Switch 已移除。
@@ -1211,14 +1211,15 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
     <div class="card" id="bt-path-card">
       <h3>破億試算</h3>
+      <div class="note" style="margin:-4px 0 6px;color:var(--warn)">假設情境：以歷史回測月報酬重抽樣試算，不是預測。</div>
       <div class="setting-row"><span>目前淨資產（元）</span><div class="setting-input"><input id="bt-nw" type="number" inputmode="numeric" placeholder="例如 6000000" style="width:140px;text-align:right" onchange="btSave()"></div></div>
       <div class="setting-row" style="margin-top:8px"><span>每月投入（元）</span><div class="setting-input"><input id="bt-pmt" type="number" inputmode="numeric" placeholder="例如 300000" style="width:140px;text-align:right" onchange="btSave()"></div></div>
       <div class="setting-row" style="margin-top:8px"><span>出生日期</span><div class="setting-input"><input id="bt-birth" type="date" style="width:140px" onchange="btSave()"></div></div>
       <div class="setting-row" style="margin-top:8px"><span>目標年齡</span><div class="setting-input"><input id="bt-age" type="number" inputmode="numeric" placeholder="40" style="width:140px;text-align:right" onchange="btSave()"></div></div>
       <div id="bt-out" class="note" style="margin-top:10px;line-height:1.8">請填入上方四欄</div>
-      <div id="bt-prob" class="note" style="margin-top:10px;line-height:1.7">達標機率：先填淨資產與出生日期</div>
+      <div id="bt-prob" class="note" style="margin-top:10px;line-height:1.7">假設情境（歷史重抽樣）達標比例：先填淨資產與出生日期</div>
       <div class="note" style="margin-top:6px">數字只存在你的裝置與電腦；年化 10.19% 是過去回測，不是保證</div>
-      <div class="note" style="margin-top:6px">勝算估計（區塊自助法，描述性、樣本內、非保證）：<a href="https://github.com/jlove1314520/alpha-app/blob/main/research/WIN_PROBABILITY_2026-10.md" target="_blank" rel="noopener">WIN_PROBABILITY_2026-10</a></div>
+      <div class="note" style="margin-top:6px">假設情境估計（區塊自助法，描述性、樣本內、非保證）：<a href="https://github.com/jlove1314520/alpha-app/blob/main/research/WIN_PROBABILITY_2026-10.md" target="_blank" rel="noopener">WIN_PROBABILITY_2026-10</a></div>
     </div>
 
 
@@ -1433,8 +1434,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div class="frow"><span>標的</span><b id="ibkr-symbol">—</b></div>
     <div class="frow"><span>方向</span>
       <span style="display:flex;gap:6px">
-        <button class="btn ghost" id="ibkr-side-buy" style="padding:5px 14px;font-size:12.5px" onclick="setIbkrSide('BUY')">買進</button>
-        <button class="btn ghost" id="ibkr-side-sell" style="padding:5px 14px;font-size:12.5px" onclick="setIbkrSide('SELL')">賣出</button>
+        <button class="btn ghost" id="ibkr-side-buy" style="padding:5px 14px;font-size:12.5px" onclick="setIbkrSide('BUY')">模擬買進</button>
+        <button class="btn ghost" id="ibkr-side-sell" style="padding:5px 14px;font-size:12.5px" onclick="setIbkrSide('SELL')">模擬賣出</button>
       </span>
     </div>
     <div class="frow"><span>數量（股）</span><input id="ibkr-qty" type="number" min="1" step="1" value="1" style="width:90px;text-align:right;background:var(--surface-2);border:1px solid var(--hairline);border-radius:8px;padding:6px 8px;color:var(--ink);font-family:inherit;font-size:13.5px" oninput="updateIbkrPreview()"></div>
@@ -1452,7 +1453,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <input id="ibkr-token" type="text" placeholder="貼上 X-Alpha-Local-Token" oninput="saveIbkrToken()" style="width:100%;margin-top:6px;background:var(--surface);border:1px solid var(--hairline);border-radius:8px;padding:8px 10px;color:var(--ink);font-family:inherit;font-size:12.5px">
     </div>
     <div id="ibkr-result" class="note" style="min-height:14px"></div>
-    <button class="btn buy" id="ibkr-submit-btn" style="width:100%;margin-top:6px" onclick="submitIbkrOrderUI()">送出 Paper 委託（IBKR）</button>
+    <button class="btn buy" id="ibkr-submit-btn" style="width:100%;margin-top:6px" onclick="submitIbkrOrderUI()">送出模擬委託（IBKR Paper）</button>
     <div class="note" style="text-align:center">此為模擬(Paper)帳戶操作，不涉及真實資金；送出後仍可能被Gateway拒絕（例如Read-Only API未取消勾選），以「連線狀態」/送出結果訊息為準，不是按下去就保證成交</div>
   </div>
 
@@ -1509,6 +1510,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-14.2152"></script>
+<script src="app.js?v=2026-10-14.2218"></script>
 </body>
 </html>

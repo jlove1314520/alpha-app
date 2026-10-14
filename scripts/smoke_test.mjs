@@ -5005,6 +5005,20 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { udErrs.push(`測試本身出錯：${e.message || e}`); }
   record("155. 漲跌慣例不用 inline 寫死顏色：淺色／深色 × 台股／國際四組 --up／--down 都是該主題的值（先.九十六-R2）", udErrs.length === 0, udErrs.join("; ") || udInfo);
 
+  // 156.【2026-10-14 先.九十七-3】推介疑慮用語改中性說法：舊字樣不得再出現在畫面字串；IBKR 模擬下單按鈕都帶「模擬」；
+  // 券商評等標「第三方資料」、破億試算標「假設情境」。靜態掃 index.html＋app*.js 字串（註解行不算）。
+  const wordErrs = [];
+  try {
+    const fsq = await import("node:fs");
+    const src = ["index.html", ...fsq.readdirSync(".").filter(f => /^app.*\.js$/.test(f))]
+      .map(f => fsq.readFileSync(f, "utf8").split("\n").filter(l => !/^\s*(\/\/|<!--)/.test(l)).join("\n")).join("\n");
+    for (const w of ["AI 選股</div>", "資金流入中", "<h3>選股理由</h3>", "越低越便宜", "量能突破倍數", "動能訊號，非流動性", "正在出貨", "勝算估計", "達標機率", "送出 Paper 委託", "'送出買進'"])
+      if (src.includes(w)) wordErrs.push(`仍出現舊用語「${w}」`);
+    for (const w of ["setIbkrSide('BUY')\">模擬買進", "setIbkrSide('SELL')\">模擬賣出", "送出模擬委託（IBKR Paper）", "第三方資料", "假設情境"])
+      if (!src.includes(w)) wordErrs.push(`缺新用語「${w}」`);
+  } catch (e) { wordErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("156. 推介疑慮用語已改中性說法、IBKR 模擬按鈕帶「模擬」、評等標第三方資料、破億標假設情境（先.九十七-3）", wordErrs.length === 0, wordErrs.join("; ") || "ok");
+
   // 151.【2026-10-14 先.九十五-R1】離線三缺陷：另開環境連線開一次，再「斷網＋小檔抓不到（模擬 SW／HTTP 快取都沒有，
   // UX_AUDIT UX-2～4 的情境）」重新整理：①自選股名稱不得退成代號、走勢小圖不得消失 ②頂端台股不得寫「無資料」
   // ③錯誤 log 不得出現 ensureQuoteLite（離線是常態，比照先.八十-2）。393×852 離線截圖存 research/ux_shots/（不進 repo）。

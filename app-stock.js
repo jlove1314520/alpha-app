@@ -560,7 +560,7 @@
   }
   async function renderStockReasonCard(code){
     const host=document.getElementById('stock-reason-card');if(!host)return;
-    if(isUS(code)){host.innerHTML='<div class="note">美股暫無選股理由（因子評分目前僅涵蓋台股，見 scores.json meta.market:"TW"）</div>';return}
+    if(isUS(code)){host.innerHTML='<div class="note">美股暫無分數拆解（因子評分目前僅涵蓋台股，見 scores.json meta.market:"TW"）</div>';return}
     host.innerHTML=skeletonHtml(4);  // 2026-09-15 P0產品.四：骨架屏
     // 先.八十一-9：整份 scores.json（約 520KB）沒在記憶體時，改讀 by_code 小檔裡這一檔的列（同產業百分位已先算好）
     let cache=PICKS_CACHE&&!PICKS_CACHE._lite?PICKS_CACHE:null;
@@ -1177,7 +1177,7 @@
     const P=rows[1];
     if(P){const pos=r=>n(r.strongBuy)+n(r.buy),pt=K.reduce((a,[k])=>a+n(P[k]),0);
       if(pt){const d=pos(L)/tot*100-pos(P)/pt*100;trend=`買進類占比 ${(pos(L)/tot*100).toFixed(0)}%，較 ${esc(P.period)} 期${Math.abs(d)<0.5?'持平':(d>0?'上升 ':'下降 ')+Math.abs(d).toFixed(0)+' 個百分點'}。`}}
-    return `<div class="note" style="margin-bottom:4px">${esc(L.period)} 期，共 ${tot} 家券商評等（來源：Finnhub 免費層，抓取時間 ${esc((data.generated_at||'').slice(0,10))}）</div>${bars}`
+    return `<div class="note" style="margin-bottom:4px"><b style="color:var(--warn)">第三方資料</b>｜券商評等原文分類，非本 App 判斷｜${esc(L.period)} 期，共 ${tot} 家券商評等（來源：Finnhub 免費層，抓取時間 ${esc((data.generated_at||'').slice(0,10))}）</div>${bars}`
       +(trend?`<div class="note" style="margin-top:6px">${trend}</div>`:'')+tail;
   }
   async function renderAnalystRadar(code){
