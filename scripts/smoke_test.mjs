@@ -4916,6 +4916,30 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { r1Errs.push(`測試本身出錯：${e.message || e}`); }
   record("151. 離線：自選股名稱／走勢線不消失、頂端不寫「無資料」、抓取失敗不記成程式錯誤（先.九十五-R1）", r1Errs.length === 0, r1Errs.join("; ") || r1Info);
 
+  // 152.【2026-10-14 先.九十五-R2】診斷橫幅「下次排程」時間讀 STATUS.json workflows[market.yml].crons（單一來源＝workflow 實際 cron），
+  // 用 market.yml 現在的 cron 換算台北時間餵進去，標籤要含主班次與補救班次；STATUS 沒有 crons 時不得寫任何時刻；程式碼不得再寫死 14:10。
+  const r2Errs = [];
+  let r2Info = "";
+  try {
+    const fsm2 = await import("node:fs");
+    const yml = fsm2.readFileSync(".github/workflows/market.yml", "utf8");
+    const crons = [...yml.matchAll(/-\s*cron:\s*['"](\d+)\s+(\d+)\s[^'"]*['"]/g)].map(m => { const t = (+m[2] * 60 + +m[1] + 480); const tw = t % 1440;
+      return { taipei: String(Math.floor(tw / 60)).padStart(2, "0") + ":" + String(tw % 60).padStart(2, "0"), next_day_taipei: t >= 1440 }; });
+    const r = await page.evaluate((crons) => ({
+      tw: marketScheduleLabel({ workflows: [{ file: ".github/workflows/market.yml", crons }] }, "tw"),
+      us: marketScheduleLabel({ workflows: [{ file: ".github/workflows/market.yml", crons }] }, "us"),
+      fb: marketScheduleLabel({}, "tw") + "｜" + marketScheduleLabel(null, "us") }), crons);
+    const twT = crons.filter(c => !c.next_day_taipei && c.taipei >= "14:00").map(c => c.taipei);
+    const usT = crons.filter(c => c.next_day_taipei || c.taipei < "09:00").map(c => c.taipei);
+    for (const t of twT) if (!r.tw.includes(t)) r2Errs.push(`台股標籤缺 ${t}：${r.tw}`);
+    for (const t of usT) if (!r.us.includes(t)) r2Errs.push(`美股標籤缺 ${t}：${r.us}`);
+    if (/\d{1,2}:\d{2}/.test(r.fb)) r2Errs.push(`STATUS 沒有 crons 時不應寫時刻：${r.fb}`);
+    const src = fsm2.readFileSync("app.js", "utf8");
+    if (/台股收盤後 14:10|21:30 UTC'/.test(src)) r2Errs.push("app.js 仍寫死 台股收盤後 14:10／21:30 UTC");
+    r2Info = `${r.tw}；${r.us}；無 crons：${r.fb}`;
+  } catch (e) { r2Errs.push(`測試本身出錯：${e.message || e}`); }
+  record("152. 診斷橫幅下次排程時間讀 market.yml 實際 cron（經 STATUS.json），不寫死（先.九十五-R2）", r2Errs.length === 0, r2Errs.join("; ") || r2Info);
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4944,7 +4968,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144/146/147/148/151新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144/146/147/148/151/152新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

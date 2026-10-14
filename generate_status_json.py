@@ -17,6 +17,7 @@ JSON，不是手寫、不會漏。
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
@@ -714,10 +715,47 @@ def fetch_workflow_runs() -> dict[str, dict]:
     return out
 
 
+def parse_workflow_crons(path: Path) -> list[dict]:
+    """先.九十五-R2：從 workflow 檔讀實際 cron（單一來源），換算台北時間給 App 橫幅用。
+    只解析「分 時 * * 星期」這種固定時刻的寫法；解析失敗回空清單（App 會改顯示不帶時間的說明）。"""
+    out = []
+    try:
+        for line in path.read_text(encoding="utf-8").splitlines():
+            m = re.match(r"\s*-\s*cron:\s*['\"]([^'\"]+)['\"]\s*(?:#\s*(.*))?$", line)
+            if not m:
+                continue
+            parts = m.group(1).split()
+            if len(parts) != 5 or not parts[0].isdigit() or not parts[1].isdigit():
+                continue
+            mi, h = int(parts[0]), int(parts[1])
+            tw_min = (h * 60 + mi + 8 * 60) % (24 * 60)
+            out.append({"cron": m.group(1), "utc": f"{h:02d}:{mi:02d}",
+                        "taipei": f"{tw_min // 60:02d}:{tw_min % 60:02d}",
+                        "next_day_taipei": h * 60 + mi + 8 * 60 >= 24 * 60,
+                        "comment": (m.group(2) or "").strip()})
+    except Exception as e:  # 十二節：解析失敗只降級
+        print(f"  ! 讀 {path.name} cron 失敗：{e}")
+    return out
+
+
+def _market_schedule_text(crons: list[dict]) -> str:
+    if not crons:
+        return "台股收盤後／美股收盤後（cron 讀取失敗），週一至週五"
+    tw = [c["taipei"] for c in crons if not c["next_day_taipei"] and "14:00" <= c["taipei"] <= "23:59"]
+    us = [c["taipei"] for c in crons if c["next_day_taipei"] or c["taipei"] < "09:00"]
+    seg = []
+    if tw:
+        seg.append("台股收盤後 " + tw[0] + (f"（補救 {'、'.join(tw[1:])}）" if len(tw) > 1 else "") + " 台北")
+    if us:
+        seg.append("美股收盤後 " + "、".join(us) + " 台北（隔日）")
+    return "／".join(seg) + "，週一至週五（GitHub 排程常延遲數小時）"
+
+
 def build_workflows() -> list[dict]:
     live = fetch_workflow_runs()
+    market_crons = parse_workflow_crons(REPO_ROOT / ".github" / "workflows" / "market.yml")
     known = {
-        "market.yml": "台股收盤後(06:10 UTC)/美股收盤後(21:30 UTC)，週一至週五",
+        "market.yml": _market_schedule_text(market_crons),
         "quotes.yml": "盤中每10分鐘：台股09:00-13:30、美股13:30-21:00(左右)，週一至週五",
     }
     out = []
@@ -730,6 +768,7 @@ def build_workflows() -> list[dict]:
             "file": f".github/workflows/{fname}",
             "name": info.get("name"),
             "schedule": schedule,
+            "crons": market_crons if fname == "market.yml" else None,
             "last_run": info.get("last_run"),
             "last_status": info.get("last_status"),
             "today_runs": info.get("today_runs"),

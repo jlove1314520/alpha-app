@@ -2380,6 +2380,18 @@
     if(usOpen&&!usLive&&(usQAge==null||usQAge>INTRADAY_STALE_MIN))problems.push({name:'自選股美股報價',reason:usQAge==null?'無資料':'資料過舊',schedule:'盤中每10分鐘'});
     return problems;
   }
+  // 先.九十五-R2：橫幅「下次排程」時間改讀 STATUS.json 的 workflows[market.yml].crons（generate_status_json.py 從
+  // .github/workflows/market.yml 實際 cron 換算台北時間，單一來源）；STATUS 還沒有這欄（舊版）時不寫時間，不寫死舊時刻。
+  function marketScheduleLabel(stDoc,kind){
+    try{
+      const w=stDoc&&Array.isArray(stDoc.workflows)?stDoc.workflows.find(x=>x&&/market\.yml$/.test(x.file||'')):null;
+      const cr=w&&Array.isArray(w.crons)?w.crons:[];
+      if(kind==='us'){const t=cr.filter(c=>c.next_day_taipei||c.taipei<'09:00').map(c=>c.taipei);
+        return t.length?'美股收盤後 '+t.join('、')+'（台北隔日）':'美股收盤後（market.yml 排程）'}
+      const t=cr.filter(c=>!c.next_day_taipei&&c.taipei>='14:00').map(c=>c.taipei);
+      return t.length?'台股收盤後 '+t[0]+(t.length>1?'（補救 '+t.slice(1).join('、')+'）':''):'台股收盤後（market.yml 排程）';
+    }catch(e){console.warn('[marketScheduleLabel]',e);return kind==='us'?'美股收盤後（market.yml 排程）':'台股收盤後（market.yml 排程）'}
+  }
   async function updateDiagBanner(){
     const el=document.getElementById('diag-banner');if(!el)return;
     // 2026-08-28修正（P0併入，Cowork定位）：MARKET_TW_CACHE/MARKET_US_CACHE
@@ -2393,6 +2405,11 @@
     const twOpen=nowTW.wd>=1&&nowTW.wd<=5&&(nowTW.h*60+nowTW.mi)>=540&&(nowTW.h*60+nowTW.mi)<810;
     const usOpen=nowUS.wd>=1&&nowUS.wd<=5&&(nowUS.h*60+nowUS.mi)>=570&&(nowUS.h*60+nowUS.mi)<960;
     const problems=diagQuoteProblems(twOpen,usOpen);
+    const stDoc=await ensureStatusDoc();
+    const twSched=marketScheduleLabel(stDoc,'tw'),usSched=marketScheduleLabel(stDoc,'us');
+    // 先.九十五-R1 順帶：斷網時沒抓到檔，說「離線」而不是「尚未排程抓取或抓取失敗」
+    const netOff=navigator.onLine===false||INTRADAY_NET_OFF.tw;
+    const noDataTxt=netOff?'離線，連不上資料檔':'無資料（尚未排程抓取或抓取失敗）';
     // 大盤/類股/三大法人、美股指數：這兩個一天只排程1-2次，用24小時當過期門檻。
     const twMAge=marketDataAgeMin(MARKET_TW_CACHE);
     // 2026-09-06（健檢.一）改用交易日曆判斷，不再用 rolling 24 小時。
@@ -2411,26 +2428,25 @@
       name:'大盤指數/類股/三大法人',
       reason:twSrcNotYet
         ?'證交所今日資料尚未發布（實測收盤後 95 分鐘仍未提供，發布時間量測中）'
-        :(twMAge==null?'無資料（尚未排程抓取或抓取失敗）':'資料過舊（比最近一個交易日的收盤還舊）'),
-      schedule:twSrcNotYet?'待證交所發布後自動抓取':'台股收盤後 14:10'});
+        :(twMAge==null?noDataTxt:'資料過舊（比最近一個交易日的收盤還舊）'),
+      schedule:twSrcNotYet?'待證交所發布後自動抓取':twSched});
     const usMAge=marketDataAgeMin(MARKET_US_CACHE);
     // 美股 16:00 ET 收盤，同樣給 4 小時寬限
     const usFresh=isFreshForCalendar(
       MARKET_US_CACHE&&MARKET_US_CACHE.fetched_at?new Date(MARKET_US_CACHE.fetched_at).getTime():null,
       'America/New_York',US_HOLIDAYS,16,0,4*60);
-    if(usMAge==null||!usFresh)problems.push({name:'美股四大指數',reason:usMAge==null?'無資料（尚未排程抓取或抓取失敗）':'資料過舊（比最近一個交易日的收盤還舊）',schedule:'美股收盤後 21:30 UTC'});
+    if(usMAge==null||!usFresh)problems.push({name:'美股四大指數',reason:usMAge==null?noDataTxt:'資料過舊（比最近一個交易日的收盤還舊）',schedule:usSched});
     // 2026-08-27 新增：個股基本面快照（月營收/PER/PBR）改排程累積更新後，超過3天沒更新
     // 就代表 update_fundamentals_daily.py 那步連續失敗，提醒使用者可能看到過期的基本面數字。
     // 常備.開發-20（2026-10-11）：原本為了讀一個時間戳下載整份 fundamentals.json（gzip 約 536KB）。
     // 改讀 STATUS.json 的 data_files（generate_status_json.py 從同一份檔的 meta.generated_at 抄出，
     // 同一個 market.yml 排程產生）；STATUS 查不到這一列才退回舊做法讀整份檔。
     let fundGenAt=null;
-    const stDoc=await ensureStatusDoc();
     const stRow=stDoc&&Array.isArray(stDoc.data_files)?stDoc.data_files.find(x=>x&&x.path==='data/fundamentals.json'):null;
     if(stRow&&stRow.generated_at)fundGenAt=stRow.generated_at;
     else{await loadFundamentals('');fundGenAt=FUNDAMENTALS_CACHE&&FUNDAMENTALS_CACHE.meta&&FUNDAMENTALS_CACHE.meta.generated_at}
     const fundAgeMin=fundGenAt?(Date.now()-new Date(fundGenAt).getTime())/60000:null;
-    if(fundAgeMin==null||fundAgeMin>3*24*60)problems.push({name:'個股基本面（月營收/PER/PBR）',reason:fundAgeMin==null?'無資料或缺少更新時間戳':'資料可能過期（超過3天未更新）',schedule:'台股收盤後 14:10'});
+    if(fundAgeMin==null||fundAgeMin>3*24*60)problems.push({name:'個股基本面（月營收/PER/PBR）',reason:fundAgeMin==null?'無資料或缺少更新時間戳':'資料可能過期（超過3天未更新）',schedule:twSched});
     // 2026-08-27 新增：大盤融資維持率改排程累積更新後，超過3天沒新的一天就代表
     // update_margin_maintenance.py 連續失敗（常見原因：TWSE信用交易統計www.twse.
     // com.tw/rwd端點當天尚未發布、2026-09-15起分母已改TWSE官方端點，不再是FinMind
@@ -2439,8 +2455,8 @@
     try{const r=await fetch('data/margin_maintenance.json?t='+Date.now());if(r.ok)marginHistory=await r.json()}catch(e){console.warn('[updateDiagBanner:margin]',e);recordGlobalError('updateDiagBanner:margin',e)}
     const marginLast=Array.isArray(marginHistory)&&marginHistory.length?marginHistory[marginHistory.length-1]:null;
     const marginAgeMin=marginLast&&marginLast.date?(Date.now()-new Date(marginLast.date+'T00:00:00+08:00').getTime())/60000:null;
-    if(marginAgeMin==null||marginAgeMin>3*24*60)problems.push({name:'大盤融資維持率',reason:marginAgeMin==null?'無資料':'資料過期（超過3天未更新）',schedule:'台股收盤後 14:10'});
-    else if(marginLast&&marginLast.data_incomplete)problems.push({name:'大盤融資維持率',reason:'今日資料不完整（分母/全市場融資金額取得失敗）',schedule:'台股收盤後 14:10'});
+    if(marginAgeMin==null||marginAgeMin>3*24*60)problems.push({name:'大盤融資維持率',reason:marginAgeMin==null?'無資料':'資料過期（超過3天未更新）',schedule:twSched});
+    else if(marginLast&&marginLast.data_incomplete)problems.push({name:'大盤融資維持率',reason:'今日資料不完整（分母/全市場融資金額取得失敗）',schedule:twSched});
     if(!problems.length){el.style.display='none';return}
     el.style.display='';
     el.innerHTML='⚠ 部分資料異常：'+problems.map(p=>`<b>${p.name}</b>（${p.reason}，下次排程 ${p.schedule}）`).join('；');
@@ -4357,7 +4373,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-14.1950';
+  const APP_VERSION='2026-10-14.2002';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
