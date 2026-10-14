@@ -3540,7 +3540,7 @@
         +'<span style="color:var(--ink-4)">候選：'+tried+'</span><br>'
         +'<span style="color:var(--ink-4)">你不需要手動填網址。日後端點變更由 data/live_endpoints.json 統一更新，裝置端不用動。</span>';
     }else{
-      box.innerHTML='<b style="color:#e6383f">所有候選端點都連不上</b>（耗時 '+DISCOVERY.tookMs+' ms）<br>'
+      box.innerHTML='<b style="color:var(--status-bad)">所有候選端點都連不上</b>（耗時 '+DISCOVERY.tookMs+' ms）<br>'
         +'<span style="color:var(--ink-4)">候選：'+(tried||'清單為空')+'</span><br>'
         +'<span style="color:var(--ink-4)">請確認家中 PC 的即時伺服器有在跑。</span>';
     }
@@ -4143,7 +4143,7 @@
       const gs=LIVE.feedGap.gap_start?String(LIVE.feedGap.gap_start).slice(11,16):'';
       txt='⚠ 行情中斷，補資料中'+(gs?'（自 '+gs+'）':'');color='var(--warn)';
     }
-    else if(LIVE.connected){txt='● 即時連線中（本機伺服器・'+(LIVE.sourceMode==='tick-push-memory'?'逐筆推送':(LIVE.sourceMode==='hot-file'?'熱檔秒級':'冷檔'))+(LIVE.streamMode?'・'+LIVE.streamMode:'')+'）';color='#1aa876'}
+    else if(LIVE.connected){txt='● 即時連線中（本機伺服器・'+(LIVE.sourceMode==='tick-push-memory'?'逐筆推送':(LIVE.sourceMode==='hot-file'?'熱檔秒級':'冷檔'))+(LIVE.streamMode?'・'+LIVE.streamMode:'')+'）';color='var(--status-ok)'}
     // 2026-09-08（自動連線二.1）重連過程不得靜默：正在重試就明講第幾次。
     else if(LIVE.retryCount>0){
       txt='重新連線中（第 '+LIVE.retryCount+' 次）'
@@ -4151,7 +4151,7 @@
         +'，暫時顯示最後收盤 '+lastCloseLabel();
       color='var(--warn)';
     }
-    else{txt=(!LIVE.lastError||_isOfflineErr({message:LIVE.lastError})?liveOfflineText():'離線（連不上即時伺服器：'+LIVE.lastError+'）')+'，顯示最後收盤 '+lastCloseLabel();color='#e6383f'}
+    else{txt=(!LIVE.lastError||_isOfflineErr({message:LIVE.lastError})?liveOfflineText():'離線（連不上即時伺服器：'+LIVE.lastError+'）')+'，顯示最後收盤 '+lastCloseLabel();color='var(--status-bad)'}
     const el=document.getElementById('home-live-status');if(el){el.textContent=txt;el.style.color=color}
     const note=document.getElementById('live-status-note');if(note){note.textContent=txt;note.style.color=color}
     try{updatePollNote()}catch(e){console.warn('[renderLiveStatus:updatePollNote]',e)}  // 2026-09-04四修.四：輪詢文案跟著連線狀態走
@@ -4408,7 +4408,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-14.2218';
+  const APP_VERSION='2026-10-14.230055';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

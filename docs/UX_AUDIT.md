@@ -7,6 +7,44 @@
 
 ---
 
+## 2026-10-14 23:00（DevQueue 20261014-223102，先.九十六-R3）淺色模式寫死顏色清點（app*.js／index.html inline）
+
+補 先.九十五-R3「沒涵蓋②」。方法：grep `index.html`、`app*.js` 裡 `color／background／border／fill／stroke` 後面直接接 `#hex` 或 `rgba(數字)` 的地方，
+共 34 處（index.html 23、app.js 6、app-trade.js 2、app-picks／app-settings／app-shared 各 1；app-stock.js 另有 3 處圖表 API 參數）。
+對比用 WCAG 2.x 公式，底色取淺色 `--page` #f4f1ea／卡片 #ffffff。
+
+### 直接改成 token（深色值不變）
+| 位置 | 原本 | 淺色對比（page／card） | 改法 | 改之後 |
+|---|---|---|---|---|
+| app.js `renderLiveStatus` 連不上／離線字（首頁 `#home-live-status`、設定 `#live-status-note`） | `#e6383f` | **3.72／4.20** | 新 token `--status-bad`（深色＝#e6383f，淺色＝`--critical`） | #b52a2a：5.59／6.31 |
+| app.js `renderLiveStatus`「● 即時連線中」 | `#1aa876` | **2.70／3.04** | 新 token `--status-ok`（深色＝#1aa876，淺色＝`--good`） | #097e09：4.65／5.25 |
+| app.js 端點探測「所有候選端點都連不上」 | `#e6383f` | **3.72／4.20** | `--status-bad` | 同上 |
+| index.html 報表頁「＋自選」按鈕圖示 `#report-watch-btn` | `stroke="#d8b070"` | 1.80（圖形，WCAG 1.4.11 要 ≥3） | `style="stroke:var(--gold-line)"`（深色 --gold-line 就是 #d8b070） | #a87a2e：3.39 |
+
+**[自行裁量]** 不直接用 `--up-deep／--down-deep`（深色值剛好相同）：那兩個會跟著「國際慣例」對調，連線狀態不是漲跌，不該變色；所以另開語意 token。
+
+### 不用改（淺色下沒問題）
+- `color:#fff` on `var(--accent)`（app.js 篩選 chip、流程圓點、新版本橫幅）：淺色 --accent #8c611f 上白字 ≈5.2。
+- `#1a1005` on `--gold-grad`（AI 卡按鈕、品牌圖示、訊號三色膠囊）：漸層兩主題相同，深字在淺金底上本來就高對比。
+- 淡金／淡黃／淡紅 `rgba(...,.08～.15)` 底：字色都已吃 token（`--warn`／`--note-gold`／`--gold-on-tint`），先.九十六-R2 已量過。
+- 錯誤橫幅 `#ef4444／#dc2626／#e08080`：先.九十六-R2 已用淺色 ID 規則覆寫為 #af2929。
+- `rgba(127,127,127,.08)`、`rgba(128,128,128,.12)` 中性灰：兩主題都可。
+
+### 不確定、先列表不改
+1. **類股熱力圖**（app-market.js:134 `hexMix('#383835','#8f2f2f'／'#265244')`＋index.html:226/228 圖例色塊）：底色 #383835 是深灰，淺色頁面上整塊仍是深色磚，
+   而且**紅漲綠跌寫死，選「國際慣例」也不會對調**（另一個獨立問題）。要改得重新設計淺色熱力圖配色（磚上文字色也要一起調），不是換 token 就好。
+2. **個股頁成本線** app-stock.js:195 `color:'#d4a84b'`（lightweight-charts 參數，不吃 CSS 變數）：淺色底上 1.96，偏淡；可改 `_cssVar('--gold-line', ...)`，
+   但深色 --gold-line 是 #d8b070 ≠ #d4a84b，會動到深色外觀，所以留待決定。
+3. `index.html:537` 金色漸層 `#c9974a→#e9c98f`（裝飾圖示）：淺色底上偏淡但屬裝飾，未改。
+
+### 截圖與驗證
+- `scripts/css_token_shots.mjs r3h_before／r3h_after` 逐像素比：**深色**首頁 0 像素差，其他分頁 4 像素（頂端時鐘抗鋸齒），設定頁 43 像素，
+  抽樣該列主色仍是 (230,56,63)＝#e6383f 未變；**淺色**設定頁連線狀態那一行 852 像素，主色 (230,56,63)→(181,42,42)。
+- 前後截圖：`docs/ux_shots/contrast_r3h/{before,after}_light_settings.png`。
+- **沒涵蓋**：「● 即時連線中」綠字要真的連上本機伺服器才出現，截圖環境擋外部請求，只有靜態計算；未在總司令手機上看過。
+
+---
+
 ## 2026-10-14 21:50（DevQueue 20261014-213102，先.九十六-R2）淺色模式「半透明混色底」上的文字對比
 
 補 先.九十五-R3「沒涵蓋①」。方法：新工具 `scripts/light_mix_contrast.mjs`（393×852、淺色、凍結時鐘、擋外部請求、不註冊 SW），

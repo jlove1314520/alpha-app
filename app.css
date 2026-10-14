@@ -17,6 +17,7 @@
     --down:#24c98a; --down-deep:#1aa876;  /* 綠=跌 */
     --up-on-tint:var(--up); --down-on-tint:var(--down); --gold-on-tint:var(--gold); /* 先.九十六-R2：淡色底上的漲跌字（深色＝本色，淺色改 deep） */
     --warn:#fab219; --good:#0ca30c; --serious:#ec835a; --critical:#d03b3b;
+    --status-ok:#1aa876; --status-bad:#e6383f; /* 先.九十六-R3：即時連線狀態字（原本 app.js 寫死，深色值不變；淺色改 --good／--critical） */
     --violet:#9085e9; --yellow:#c98500;
     --nav-h:64px;
     /* 先.九十五-4 淺色模式：下面這些在深色模式的值＝原本寫死的顏色（深色外觀不變），淺色組另外覆寫 */
@@ -59,6 +60,7 @@
      ③--ink-4／--gold／--accent／--opt-ink 再暗一點，讓 #app 頂端金色淡光、分頁切換膠囊淡底上也 ≥4.6。深色不動。 */
   :root[data-updown="intl"]{--up:#24c98a; --up-deep:#1aa876; --down:#ff5257; --down-deep:#e6383f}
   :root[data-theme="light"][data-updown="intl"]{--up:#0c7c50; --up-deep:#0a6b44; --down:#d2252b; --down-deep:#b81d22}
+  :root[data-theme="light"]{--status-ok:var(--good); --status-bad:var(--critical)}
   :root[data-theme="light"]{--up-on-tint:var(--up-deep); --down-on-tint:var(--down-deep); --gold-on-tint:var(--gold-deep)}
   /* 頂端警示橫幅與錯誤 log 的字色是 index.html inline 寫死的深色用亮紅（淺色淡紅底上 2.1～3.6）；淺色改用 --critical 同色相再暗一點
      （#af2929：錯誤 log 裡「複製」鈕是兩層淡紅疊起來，--critical 只有 4.38） */
