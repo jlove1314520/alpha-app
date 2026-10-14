@@ -73,3 +73,16 @@ swagger 裡含「權證」的端點 20 個，主要的：`mopsfin_t187ap37_O`（
 4. （補充）官方權證資訊揭露平台有隱含波動，但有同意頁，不做程式擷取。
 
 替代路徑：**前向每日快照**（第 5 節）。
+
+## 2026-10-14 實測更正（先.九十四-5a，DevQueue 20261014-170102）
+
+寫 `research/warrant_snapshot.py` 時實抓一次（7 次請求全 200），下列幾點與上文記載不同，以這裡為準（上文保留供稽核）：
+
+1. **基本資料表的「標的證券/指數」是名稱（例：友達），不是代號**。上市權證的標的代號要從 MI_INDEX 同列的「標的代號」拿；上櫃權證要用 `tpex_warrant_issue` 的 `UnderlyingStockCode`。
+2. **1.2 節「備註欄有除權息後的履約價／行使比例調整紀錄」在 `mopsfin_t187ap37_O`（以及上市 `t187ap37_L`）的「備註」欄，不在 `tpex_warrant_issue`**——後者實測欄位：Date、Code、Name、ListedDate、ExpiryDate、UnderlyingStockCode、UnderlyingStock、Type、American/European、CapPrice/Index、FloorPrice/Index、Reset、LatestExercisePrice、`Latest ExerciseRatio`（中間有空格）、InitialIssuance、Accum.Accum.Issuance、Accum.CanceledWarrant，**沒有備註欄、也沒有「累計註銷量」以外的文字欄位**。
+3. **openapi 基本資料晚一天**：10/14 17:03 抓到的 `t187ap37_L`／`mopsfin_t187ap37_O` 出表日期都是 1151013。
+4. 上市「從備註判斷美式／歐式」實測：42,444 筆中只有約 3,744 筆備註寫明（約 9%），其餘無法判斷。
+5. 欄位名用半形括號（例：`最新標的履約配發數量(每仟單位權證)`、`結算方式(詳附註編號說明)`）；TPEx afterTrading 欄位名帶尾端空白與 `<br>`（例：`收盤 `、`最後買量<br>(張數)`），程式用去空白＋前綴比對。
+6. 當天筆數：MI_INDEX 0999 33,727、0999P 2,328；TPEx WW 11,454；未成交的收盤是 `--`／`----`，記 `None`。
+
+排程提案見 `docs/PROPOSAL_WARRANT_SNAPSHOT.md`。
