@@ -19792,7 +19792,7 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
 - [ ] **先.九十七-2 core_tilt v2 第 1 階段 PREREG 三題同意；規格寫明 2021–2024 曾被舊版 #283 使用（當時淨值平線，視為未有效看過結果）；改名 FINAL → 登記 → 只跑一次 → 結果寫墓園或候選；AWAITING 結案**（互動視窗執行）
 - [x] **先.九十七-3 先.九十六-R1 推介用語 10 列全改中性描述；美股模擬買賣按鈕加「模擬」、券商評等標「第三方資料」、破億試算標「假設情境」；R5 補讀結果出來後同原則改；全套冒煙＋393×852 截圖；AWAITING 結案**（互動視窗執行）〔10 列全改中性說法、模擬／第三方資料／假設情境標示；冒煙 155 全過（新增 156）；截圖 neutral_wording_20261014；AWAITING 結案〕
 - [x] **先.九十七-4 先.九十五-R9 未來性濾網 NameError 修正接受（有排名者名次變動 0 檔），AWAITING 結案**（互動視窗執行）〔R9 接受，AWAITING 結案〕
-- [ ] **先.九十七-5 佇列補到 ≥12 項、DevQueue 可執行 ≥6 項**（互動視窗執行）
+- [x] **先.九十七-5 佇列補到 ≥12 項、DevQueue 可執行 ≥6 項**（互動視窗執行）〔補件 R1～R6（皆 DevQueue 可執行）；- [ ] 15 項、DevQueue 可執行 9 項〕
 - [ ] **先.九十七-R1 [自走補入，來源：先.九十七-1 根因——C:lpha 下 5 支 run-*.ps1 存成無 BOM UTF-8，Windows PowerShell 5.1 以 cp950 讀，中文註解吃掉 `$repoDir` 那行，排程回報 0 卻一行沒跑] 排程啟動檔編碼自測：新增 scripts/selftest_launcher_encoding.py（只用標準函式庫）掃 C:lpha\*.ps1 與 scripts\*.ps1，「含非 ASCII 且沒有 UTF-8 BOM」判 FAIL 並列檔名；再用 `powershell -NoProfile -Command [Management.Automation.Language.Parser]::ParseFile` 比對 cp950／UTF-8 兩種讀法的敘述數，不同也判 FAIL；掛進 scripts/local_schedule_watchdog.py（或既有本機每日自檢）只印警告不中斷（CLAUDE.md 十二節）；本機跑一次貼結果**（DevQueue 可執行）
 - [ ] **先.九十七-R2 [自走補入，來源：先.九十五-R2 AWAITING 附記「generate_status_json.py build_schedule_health() 仍以 06:10 UTC 判逾期（未改，屬監控門檻）」] 排程健康判斷改讀 market.yml 實際 cron（與 先.九十五-R2 橫幅同一個單一來源函式），不再寫死 06:10 UTC；判逾期的寬限分鐘數維持現值不改；自測＋冒煙**（DevQueue 可執行）
 - [ ] **先.九十七-R3 [自走補入，來源：先.九十六-R1 走查只讀前端畫面，後端產生的字串沒逐支查] 後端產生、會顯示在 App 的文字走查：grep research/generate_scores_*.py、research/score_v2.py、.github/scripts/build_us_scores_v0.py、scripts/build_*.py 輸出字串裡的「便宜／偏貴／買點／訊號／突破／多頭／空頭／追／強勢」等，依先.九十七-3 原則（描述事實的中性說法）直接改成純文字替代，改完各跑一次該腳本自測或 dry-run；清單與改法寫進 docs/UX_REDESIGN_PROPOSAL.md ⑥「全頁走查補充」下方**（DevQueue 可執行）
