@@ -1,3 +1,20 @@
+## 2026-10-14 20:04（DevQueue 20261014-193102）先.九十四-5i、先.九十五-R1、先.九十五-R2
+
+等待總司令審閱：2 件（先.九十六-1 core_tilt v2 第 1 階段 PREREG 草稿，等約 0 小時；先.九十五-R2 market.yml 雲端排程沒準時跑，20:03 起等）
+
+- **先.九十四-5i app.css 字級／間距／圓角 token**（`09d8a2dbc`）：`:root` 新增 `--fs-*`／`--sp-*`／`--r-*`，只把數值剛好相等的宣告換成 var()（字級 17、間距 60、圓角 5 處），其他數值不動。
+  證據：var() 代回後與原檔逐字相同；新工具 `scripts/css_token_shots.mjs`＋`scripts/css_token_diff.py`（凍結時鐘、擋外網）393×852 深淺色 12 張逐像素最大差 0.086%（無變更基準自己對自己也有 0.025%，設定頁計時文字），全部 <0.5%；冒煙全過。
+  [自行裁量] 「五分頁」照現行六個分頁全截並加淺色模式；inline style 不在範圍。
+- **先.九十五-R1 離線三缺陷**（`bf4eaf0e3`）：名稱與自選股／指數小檔存本機（`alpha_name_saved`、`alpha_quote_lite_saved`），斷網時頂上；頂端時鐘斷網沒資料寫「離線」；`ensureQuoteLite` 離線失敗不記錯誤 log。
+  證據：冒煙新增 #151（斷網＋攔截小檔＋清快取）；舊 app.js 三點全 FAIL、新版 PASS；全套冒煙全過；離線截圖 `research/ux_shots/offline_r1.png`（不進 repo）。
+  [自行裁量] 只改顯示層，sw.js 沒動（顯示層已修好三點）。
+- **先.九十五-R2 橫幅排程時間**（`0fb1e13a6`）：generate_status_json.py 從 market.yml 讀實際 cron 寫進 STATUS.json `workflows[].crons`；App `marketScheduleLabel()` 讀它，移除寫死的 14:10／21:30 UTC；斷網時橫幅說離線。
+  「10/14 收盤後仍判過舊」根因＝雲端排程沒跑（17:13／18:41 兩班到 20:03 都沒有 run；近期 schedule run 普遍晚數小時；00:37Z 那班 rebase 衝突失敗），依分支只記證據列 AWAITING，未改 workflow。
+  證據：冒煙新增 #152；第一次全套冒煙 #18（IBKR 下單卡，未動到）出現 Playwright「promise was garbage collected」，重跑全部通過。
+  未驗證：STATUS.json 要等雲端下一班 market.yml 才有 crons 欄，在那之前 App 顯示不帶時刻的說明。
+- **佇列補件**：`- [ ]` 11→14、DevQueue 可執行 3→6，新增 R8（UX-6 TradingView 標誌壓 K 棒）、R9（generate_scores_future／momentum 過期價格過濾 NameError，本輪查 log 發現）、R10（UX_REDESIGN ⑥ 用語「持有假設」一句）。
+- 下一步：R3 淺色對比度、R4 美股但書位置、R5 央行會議日期、R8～R10。
+
 ## 2026-10-14 19:58（互動視窗）先.九十六-1 core_tilt v2 第 1 階段 PREREG 草稿（傾斜臂對不傾斜臂）
 
 - 第 0 階段量尺核准（0050 官方 NAV 含息、日頻 TE 1.70%）；AWAITING 先.九十五-1 該列移到已結案；墓園該條加註「離開墓園狀態、進第 1 階段」。
