@@ -159,6 +159,7 @@
     const cacheCount=Object.keys(localStorage).filter(k=>k.startsWith('fmc_')).length;
     setTxt('set-cache-count',cacheCount+' 筆快取');
     renderColorSchemeToggle();
+    _safeSync('renderThemeToggle',renderThemeToggle);  // 先.九十五-4
     loadAboutVersions();
     _safeAsync('loadDataFreshness',loadDataFreshness);  // 2026-09-03 P0三-三.2，獨立包起來，失敗不影響設定頁其他區塊
     _safeAsync('loadDataAudit',()=>loadDataAudit(false));  // 2026-09-06 稽核.一，同樣獨立
@@ -227,7 +228,7 @@
     const q=((document.getElementById('trials-filter')||{}).value||'').trim().toLowerCase();
     const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
     const rows=_trialsData.rows.filter(r=>!q||(r.name+r.verdict+r.track+r.date).toLowerCase().includes(q)).slice(0,150);
-    box.innerHTML=rows.length?rows.map(r=>'<div style="border-bottom:1px solid rgba(255,255,255,.06);padding:4px 0"><b>#'+r.id+'</b>'+(r.dup_id?'<span style="color:var(--ink-3)">（帳本共用編號）</span>':'')+' '+esc(r.date)+' · '+esc(r.track)+'<br>'+esc(r.name)+' <span style="color:var(--ink-3)">→ '+esc(r.verdict)+'</span></div>').join(''):'<div class="note">沒有符合的紀錄</div>';
+    box.innerHTML=rows.length?rows.map(r=>'<div style="border-bottom:1px solid rgba(var(--fg-rgb),.06);padding:4px 0"><b>#'+r.id+'</b>'+(r.dup_id?'<span style="color:var(--ink-3)">（帳本共用編號）</span>':'')+' '+esc(r.date)+' · '+esc(r.track)+'<br>'+esc(r.name)+' <span style="color:var(--ink-3)">→ '+esc(r.verdict)+'</span></div>').join(''):'<div class="note">沒有符合的紀錄</div>';
   }
   window.renderTrials=renderTrials;
 
@@ -1062,5 +1063,18 @@
     el.innerHTML=['TW','INTL'].map(k=>
       `<span class="press mtg-opt${cur===k?' on':''}" onclick="setColorScheme('${k}')">${k==='TW'?'台股':'國際'}</span>`
     ).join('');
+  }
+  // 先.九十五-4：外觀三選一。實際套用在 index.html <head> 的 alphaApplyTheme（第一次繪製前就要跑，所以不放這裡）。
+  const THEME_OPTS=[['system','跟隨系統'],['light','淺色'],['dark','深色']];
+  function renderThemeToggle(){
+    const el=document.getElementById('theme-toggle');if(!el)return;
+    const cur=typeof alphaThemePref==='function'?alphaThemePref():'system';
+    el.innerHTML=THEME_OPTS.map(([k,l])=>`<span class="press mtg-opt${cur===k?' on':''}" onclick="setThemePref('${k}')">${l}</span>`).join('');
+  }
+  function setThemePref(k){
+    try{localStorage.setItem('alpha_theme',k)}catch(e){console.warn('[setThemePref] 存偏好失敗',e);recordGlobalError('setThemePref',e)}
+    const now=typeof alphaApplyTheme==='function'?alphaApplyTheme():'dark';
+    renderThemeToggle();
+    toast('外觀：'+(THEME_OPTS.find(o=>o[0]===k)||['',''])[1]+(k==='system'?'（目前'+(now==='light'?'淺色':'深色')+'）':''));
   }
   function setColorScheme(key){applyColorScheme(key);renderColorSchemeToggle();toast('已切換：'+COLOR_SCHEMES[key].label)}

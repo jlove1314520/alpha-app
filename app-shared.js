@@ -248,7 +248,7 @@
   function usScoreRowHtml(s,labels){
     const pills=US_PILLAR_KEYS.map(k=>{const p=s.pillars&&s.pillars[k];return `<span style="margin-right:8px">${_usEsc(labels[k]||k)} <b class="num">${p?p.score.toFixed(1):'—'}</b></span>`}).join('');
     const detail=US_PILLAR_KEYS.map(k=>{const p=s.pillars&&s.pillars[k];return `<div class="sub">${_usEsc(labels[k]||k)}：${p?_usEsc(usPillarDetail(k,p)):'缺資料'}</div>`}).join('');
-    const warn=(s.warnings&&s.warnings.length)?`<div class="sub" style="color:#c9a35a">${_usEsc(s.warnings.join('；'))}</div>`:'';
+    const warn=(s.warnings&&s.warnings.length)?`<div class="sub" style="color:var(--note-gold)">${_usEsc(s.warnings.join('；'))}</div>`:'';
     return `<details class="us-score-row" style="padding:7px 0;border-bottom:1px solid var(--hairline)"><summary style="display:flex;justify-content:space-between;gap:8px;cursor:pointer;list-style:none"><span><b>${s.rank==null?'':'#'+s.rank+' '}${_usEsc(s.code)}</b> <span class="sub">${_usEsc(s.name||s.exchange||'')}</span><div class="sub">${pills}</div></span><span style="text-align:right"><b class="num" style="font-size:16px">${s.total_score==null?'—':s.total_score.toFixed(1)}</b><div class="sub">完整度 ${Math.round((s.coverage||0)*100)}%</div></span></summary><div style="padding:4px 0 2px">${detail}<div class="sub">財報期末 ${_usEsc(s.period_end||'—')}（申報 ${_usEsc(s.filed||'—')}）</div>${warn}<div class="sub"><span class="press" style="color:var(--accent,#d8b070)" onclick="openStock('${_usEsc(s.code)}')">開個股頁 ›</span></div></div></details>`;
   }
   async function loadUsScoresV0(){
@@ -291,7 +291,7 @@
     metaEl.innerHTML=`資料日 ${_usEsc(m.as_of||'—')}（美東收盤）｜ 符合 <b class="num" id="us-scr-count">${hit.length}</b> / ${m.priced_count||0} 檔，依日均成交額排序、列前 50 檔<br>只把資料依門檻篩出，沒有排名、沒有回測、不是選股訊號。樣本：${_usEsc(m.universe_note||'')} 市值有值 ${m.market_cap_count||0} 檔。<details style="margin-top:3px"><summary class="sub" style="cursor:pointer">資料品質說明</summary>${(m.data_quality||[]).map(t=>'<div class="sub">・'+_usEsc(t)+'</div>').join('')}</details>`;
     listEl.innerHTML=hit.length?hit.slice(0,50).map(r=>{
       const ch=r.change_pct,col=ch==null?'':(ch>0?'color:var(--up,#e0524a)':ch<0?'color:var(--down,#3aa676)':'');
-      const fl=(r.flags&&r.flags.length)?`<div class="sub" style="color:#c9a35a">${_usEsc(r.flags.join('；'))}</div>`:'';
+      const fl=(r.flags&&r.flags.length)?`<div class="sub" style="color:var(--note-gold)">${_usEsc(r.flags.join('；'))}</div>`:'';
       return `<div class="us-scr-row press" style="display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--hairline)" onclick="openStock('${_usEsc(r.code)}')"><span><b>${_usEsc(r.code)}</b> <span class="sub">${_usEsc(r.name||'')}</span><div class="sub">日均成交額 ${_usBig(r.avg_dollar_volume_20d)} ・ 市值 ${_usBig(r.market_cap_est,'B')}</div>${fl}</span><span style="text-align:right"><b class="num">${r.close==null?'—':r.close}</b><div class="sub num" style="${col}">${ch==null?'—':(ch>0?'+':'')+ch.toFixed(2)+'%'}</div></span></div>`;
     }).join(''):'<div class="note">沒有符合門檻的股票，放寬條件再試。</div>';
   }
@@ -354,7 +354,7 @@
         ||'這檔股票目前這項因子資料不足（例如上市時間太短、價量/法人歷史不夠），不是永久缺資料源。';
       return `<div class="factor-row">
         <div class="fr-top"><span class="fr-name" style="color:var(--ink-3)">${labels[key]} <span style="font-size:9.5px;color:var(--ink-4)">${wTxt}</span></span>
-          <span style="font-size:9px;color:#c9a35a;background:rgba(216,176,112,.08);padding:2px 6px;border-radius:5px">尚無資料 · 不計入</span></div>
+          <span style="font-size:9px;color:var(--note-gold);background:rgba(216,176,112,.08);padding:2px 6px;border-radius:5px">尚無資料 · 不計入</span></div>
         <div class="fr-reason" style="color:var(--ink-4)">${reasonTxt}</div>
       </div>`;
     }
@@ -366,14 +366,14 @@
       :f.score<4.8?'<span style="color:var(--ink-3)">▼ 拉低總分</span>'
       :'<span style="color:var(--ink-4)">· 中性</span>';
     const pctBadge=typeof f.percentile==='number'
-      ?`<span style="font-size:9px;color:var(--ink-2);background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px">全市場${pctLabel(f.percentile)}</span>`:'';
+      ?`<span style="font-size:9px;color:var(--ink-2);background:rgba(var(--fg-rgb),.06);padding:2px 6px;border-radius:5px">全市場${pctLabel(f.percentile)}</span>`:'';
     // 先.八十一-9：個股頁讀 by_code 小檔時沒有同產業整批列，用 build_by_code.py 先算好的 row._industry_pct（同一套算法）
     const ip=row._industry_pct?(row._industry_pct[key]||null):industryPercentileFor(allRows,row.industry,key,f.score);
-    const indBadge=ip?`<span style="font-size:9px;color:var(--ink-2);background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px">同產業(${ip.n}檔)${pctLabel(ip.pct)}</span>`:'';
+    const indBadge=ip?`<span style="font-size:9px;color:var(--ink-2);background:rgba(var(--fg-rgb),.06);padding:2px 6px;border-radius:5px">同產業(${ip.n}檔)${pctLabel(ip.pct)}</span>`:'';
     return `<div class="factor-row">
       <div class="fr-top"><span class="fr-name">${labels[key]} <span style="font-size:9.5px;color:var(--ink-4)">${wTxt}</span></span><span class="fr-score" style="color:${scoreColor(f.score)}">${f.score.toFixed(1)}</span></div>
       <div style="position:relative;height:8px;border-radius:999px;background:var(--surface-3);margin-top:6px;overflow:hidden">
-        <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(255,255,255,.15)"></div>
+        <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(var(--fg-rgb),.15)"></div>
         <div class="bar-fill" style="position:absolute;top:0;bottom:0;${dirUp?`left:50%;width:${mag}%`:`right:50%;width:${mag}%`};background:${dirUp?'var(--gold-grad)':'rgba(138,133,123,.55)'};border-radius:999px"></div>
       </div>
       <div style="margin-top:5px;display:flex;flex-wrap:wrap;align-items:center;gap:4px">${dirTag}${pctBadge}${indBadge}</div>

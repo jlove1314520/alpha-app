@@ -4838,6 +4838,49 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { wbErrs.push(`測試本身出錯：${e.message || e}`); }
   record("149. 設定頁「權證快照備份」卡：天數／最後備份時間、備份逾 8 天與快照逾 4 天要警告（先.九十五-2）", wbErrs.length === 0, wbErrs.join("; "));
 
+  // 150.【2026-10-14 先.九十五-4】淺色模式：預設跟隨系統；設定頁三選一（跟隨系統／淺色／深色）切換後 data-theme、
+  // 頁面底色、theme-color 都要跟著變；跟隨系統時手機切淺／深色要即時反映；最後還原成原本偏好與深色系統。
+  const thErrs = [];
+  let thInfo = "";
+  try {
+    const bg = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+    const st = () => page.evaluate(() => ({ t: document.documentElement.getAttribute("data-theme"),
+      m: document.querySelector('meta[name="theme-color"]').getAttribute("content"), pref: alphaThemePref() }));
+    const prev = await page.evaluate(() => { try { return localStorage.getItem("alpha_theme") } catch (e) { return null } });
+    await page.evaluate(() => { localStorage.removeItem("alpha_theme"); alphaApplyTheme(); });
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.waitForTimeout(100);
+    let s1 = await st();
+    if (s1.pref !== "system" || s1.t !== "dark") thErrs.push(`預設應跟隨系統（系統深色→dark）：${JSON.stringify(s1)}`);
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.waitForTimeout(100);
+    let s2 = await st();
+    if (s2.t !== "light" || s2.m !== "#f4f1ea") thErrs.push(`跟隨系統時切到淺色應即時變 light：${JSON.stringify(s2)}`);
+    const bgLight = await bg();
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.evaluate(() => { go("settings"); });
+    await page.waitForTimeout(400);
+    const opts = await page.evaluate(() => [...document.querySelectorAll("#theme-toggle .mtg-opt")].map(e => e.textContent));
+    if (opts.join("/") !== "跟隨系統/淺色/深色") thErrs.push(`設定頁外觀選項不對：${opts.join("/")}`);
+    await page.evaluate(() => setThemePref("light"));
+    let s3 = await st();
+    if (s3.t !== "light" || s3.pref !== "light") thErrs.push(`選淺色後系統深色仍應是 light：${JSON.stringify(s3)}`);
+    const on = await page.evaluate(() => document.querySelector("#theme-toggle .mtg-opt.on")?.textContent);
+    if (on !== "淺色") thErrs.push(`選中項應是淺色：${on}`);
+    await page.evaluate(() => setThemePref("dark"));
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.waitForTimeout(100);
+    let s4 = await st();
+    if (s4.t !== "dark") thErrs.push(`固定深色時系統切淺色不應改變：${JSON.stringify(s4)}`);
+    const bgDark = await bg();
+    if (bgLight === bgDark) thErrs.push(`淺色與深色底色相同（${bgLight}），淺色 token 沒生效`);
+    thInfo = `淺色底 ${bgLight}／深色底 ${bgDark}`;
+    await page.evaluate(p => { if (p == null) localStorage.removeItem("alpha_theme"); else localStorage.setItem("alpha_theme", p); }, prev);
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.evaluate(() => alphaApplyTheme());
+  } catch (e) { thErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("150. 淺色模式：預設跟隨系統、設定頁三選一切換、固定時不受系統影響、底色與 theme-color 跟著變（先.九十五-4）", thErrs.length === 0, thErrs.join("; ") || thInfo);
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];

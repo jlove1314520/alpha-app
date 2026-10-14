@@ -2253,14 +2253,14 @@
     if(gen!==METHOD_GEN)return;  // 使用者已切到別的榜
     if(errs.length){console.warn('[renderMethodBoard] 部分資料載入失敗',errs);recordGlobalError('renderMethodBoard',new Error(errs.join('；')))}
     const m=meta||{};
-    const btag=m.backtest_status?`<span style="display:inline-block;font-size:10.5px;font-weight:600;color:#c9524a;border:1px solid rgba(201,82,74,.5);border-radius:6px;padding:1px 7px">${_mEsc(m.backtest_status)}</span>`+(m.backtest_note?` ${_mEsc(m.backtest_note)}`:''):'（讀不到回測狀態）';
+    const btag=m.backtest_status?`<span style="display:inline-block;font-size:10.5px;font-weight:600;color:var(--caution);border:1px solid rgba(201,82,74,.5);border-radius:6px;padding:1px 7px">${_mEsc(m.backtest_status)}</span>`+(m.backtest_note?` ${_mEsc(m.backtest_note)}`:''):'（讀不到回測狀態）';
     let wHtml='<div>讀不到權重檔，無法列出權重。</div>';
     if(wf&&wf.weights){
       const ws=Object.entries(wf.weights).filter(([,w])=>w>0).sort((a,b)=>b[1]-a[1]);
       wHtml=ws.map(([k,w])=>`<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--hairline);padding:3px 0"><span>${_mEsc(labels[k]||k)}</span><b class="num">${Math.round(w*100)}%</b></div>`).join('');
       const hashOk=m.weights_hash&&wf.weights_sha256?m.weights_hash===wf.weights_sha256:null;
       wHtml+=`<div style="margin-top:4px">${wf.dev_period?`權重凍結於 ${_mEsc(wf.frozen_at)}，只用 ${_mEsc(wf.dev_period.val_end)} 以前的研究期決定，之後不再依結果調整。`:`這組權重是初始設計值（${_mEsc(wf.frozen_at)} 定下），<b>不是</b>回測找出來的最佳值。`}`
-        +(hashOk===true?' 已核對：今天榜單用的就是這組權重。':hashOk===false?' <span style="color:#c9524a">⚠ 今天榜單記錄的權重版本與此檔不一致，以榜單為準。</span>':'')+'</div>';
+        +(hashOk===true?' 已核對：今天榜單用的就是這組權重。':hashOk===false?' <span style="color:var(--caution)">⚠ 今天榜單記錄的權重版本與此檔不一致，以榜單為準。</span>':'')+'</div>';
       // 價值成長榜 meta.disclaimer 載明 analyst／catalyst 全市場沒有資料源，權重實際全數重新分配（讀當下 meta，文字改了就不顯示）。
       if(board==='value'&&/analyst\/catalyst兩項全市場沒有資料源/.test(m.disclaimer||''))wHtml+=`<div>其中「${_mEsc(labels.analyst||'analyst')}」「${_mEsc(labels.catalyst||'catalyst')}」目前全市場都沒有資料，實際上這兩項的權重都分給了其他項目。</div>`;
     }
@@ -2269,7 +2269,7 @@
     const inHtml=cfg.inputs.map(pth=>{
       const f=files.find(x=>x.path===pth);
       return `<div style="display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--hairline);padding:4px 0"><span>${_mEsc(METHOD_INPUT_NAMES[pth]||pth)}</span>`
-        +(f?`<span class="num" style="text-align:right">${_mTime(f.generated_at)}${f.status&&f.status!=='ok'?` <span style="color:#c9524a">異常</span>`:''}</span>`
+        +(f?`<span class="num" style="text-align:right">${_mTime(f.generated_at)}${f.status&&f.status!=='ok'?` <span style="color:var(--caution)">異常</span>`:''}</span>`
           :'<span style="text-align:right">未列入清單，看資料基準日</span>')+'</div>';
     }).join('');
     const floor=m.liquidity_floor_20d_value;
@@ -2291,7 +2291,7 @@
       <div style="font-weight:700;color:var(--ink-2);margin-top:12px">用到哪些資料、何時更新</div>
       ${inHtml}
       <div style="margin-top:4px">原始資料來自證交所、櫃買中心、期交所的官方公開資料；公司產業別是一次性整理、不常變動。</div>
-      ${errs.length?`<div style="color:#c9a35a;margin-top:6px">部分資料讀取失敗：${_mEsc(errs.join('；'))}</div>`:''}`;
+      ${errs.length?`<div style="color:var(--note-gold);margin-top:6px">部分資料讀取失敗：${_mEsc(errs.join('；'))}</div>`:''}`;
   }
   function renderMethodCommon(){
     const el=document.getElementById('method-common-body');if(!el||el.dataset.done)return;
@@ -3268,7 +3268,7 @@
     clearTimeout(tmr); tmr=setTimeout(()=>t.classList.remove('show'),2400);
   }
   function chip(label,active,onclick){
-    return `<span class="press" style="flex-shrink:0;white-space:nowrap;font-size:12px;font-weight:${active?600:400};color:${active?'#1a1005':'var(--ink-2)'};background:${active?'var(--gold-grad)':'rgba(255,255,255,.05)'};border:1px solid ${active?'transparent':'rgba(255,255,255,.08)'};padding:6px 13px;border-radius:999px;cursor:pointer" onclick="${onclick}">${label}</span>`;
+    return `<span class="press" style="flex-shrink:0;white-space:nowrap;font-size:12px;font-weight:${active?600:400};color:${active?'#1a1005':'var(--ink-2)'};background:${active?'var(--gold-grad)':'rgba(var(--fg-rgb),.05)'};border:1px solid ${active?'transparent':'rgba(var(--fg-rgb),.08)'};padding:6px 13px;border-radius:999px;cursor:pointer" onclick="${onclick}">${label}</span>`;
   }
   function closeIndustrySheet(){
     document.getElementById('industry-mask').classList.remove('open');
@@ -4319,7 +4319,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-14.1915';
+  const APP_VERSION='2026-10-14.1930';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

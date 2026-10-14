@@ -1,3 +1,13 @@
+## 2026-10-14 19:30（互動視窗）先.九十五-4 淺色模式（預設跟隨手機系統，設定頁可切）
+
+- **做法**：只換 token、不改元件規則。`app.css` 新增 `:root[data-theme="light"]` 一組淺色 token（底色、卡片、文字四階、細線、金色、漲跌色加深以顧對比）；原本寫死、只適合深色的顏色改成變數（白色半透明細線 `rgba(var(--fg-rgb),…)`、「未經回測」警語色 `--caution`、資料完整度提醒 `--note-gold`、毛玻璃底、熱力圖基準線等），**深色模式的值＝原本寫死的值，外觀不變**。index.html／app*.js 內嵌樣式同步換（共 49 處）；SVG 屬性不能用變數的 4 處改成 style。
+- **跟隨系統**：`index.html` `<head>` 在載入 CSS 前先跑一段小程式決定 `data-theme`（避免手機淺色時先閃一下深色），偏好存 `localStorage alpha_theme`（system／light／dark，預設 system），跟隨系統時監聽手機切換即時變；`theme-color` 一起換。
+- **設定頁**：「顯示偏好」卡新增「外觀」三選一（跟隨系統／淺色／深色）。
+- **熱力圖**：類股漲跌格子原本用寫死的深底，淺色時改淺底＋淡紅／淡綠，切換外觀時自動重畫。
+- **冒煙**：新增 150（預設跟隨系統、系統切換即時反映、設定頁三選一、固定時不受系統影響、底色與 theme-color 改變）；`node scripts/smoke_test.mjs` 149 項全部通過。注意：Playwright 預設模擬淺色系統，所以其餘冒煙項目現在是在淺色下跑。
+- **截圖**：393×852 兩種模式各六頁（今日／市場／選股／交易／日誌／設定）存 `docs/screenshots/theme_20261014/`（JPEG，共 1.5MB），頁面錯誤 0。
+- 限制：iOS 加到主畫面後狀態列樣式（`apple-mobile-web-app-status-bar-style`）不能執行時切換，淺色模式下狀態列仍是黑底；手機實機未看。
+
 ## 2026-10-14 19:15（互動視窗）先.九十五-2 權證每日快照排程上線＋每週備份＋設定頁顯示（十節：只改寫 data/warrant_backup_status.json，MACHINE_WRITTEN ^data/ 涵蓋）
 
 - **排程**：`scripts/register_warrant_snapshot_task.ps1` 註冊本機排程 `AlphaWarrantSnapshot`（週一～五 17:30，下次 10/15 17:30）→ `scripts/run_warrant_snapshot.ps1` → `research/warrant_snapshot_daily.py`。休市日依 `data/trading_calendar.json` 跳過、不發請求（10/9 休市、10/10 週末判斷正確；行事曆讀不到或未公布只降級成平日處理，快照程式本身會核對官方日期）。已用 Start-ScheduledTask 實跑一次，LastTaskResult=0。

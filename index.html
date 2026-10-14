@@ -24,7 +24,26 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
      載不到時index.html::renderStockChart()自動退回既有SVG折線，不會讓個股頁空白。 -->
 <!-- 常備.開發-20（2026-10-11）：函式庫改為第一次畫K線時才載入（見 app.js ensureLwc()），不再佔首頁首次載入傳輸量。 -->
 <title>Alpha 台美股 AI 交易</title>
-<link rel="stylesheet" href="app.css?v=2026-10-14.1915">
+<script>
+// 先.九十五-4：外觀（跟隨系統＝預設／淺色／深色）。要在第一次繪製前決定，避免手機淺色模式先閃一下深色。
+// 偏好存 localStorage alpha_theme（system｜light｜dark）；跟隨系統時監聽手機切換。設定頁呼叫 alphaApplyTheme() 重套。
+(function(){
+  var mq=null;
+  try{mq=window.matchMedia?window.matchMedia('(prefers-color-scheme: light)'):null}catch(e){console.warn('[theme] matchMedia 不可用',e)}
+  window.alphaThemePref=function(){try{var v=localStorage.getItem('alpha_theme');return v==='light'||v==='dark'?v:'system'}catch(e){console.warn('[theme] 讀偏好失敗',e);return 'system'}};
+  window.alphaApplyTheme=function(){
+    var p=window.alphaThemePref(),light=p==='light'||(p==='system'&&!!(mq&&mq.matches));
+    document.documentElement.setAttribute('data-theme',light?'light':'dark');
+    var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',light?'#f4f1ea':'#0b0a09');
+    try{window.dispatchEvent(new CustomEvent('alpha-theme-change',{detail:light?'light':'dark'}))}catch(e){console.warn('[theme] 事件失敗',e)}
+    return light?'light':'dark';
+  };
+  try{window.alphaApplyTheme()}catch(e){console.warn('[theme] 套用失敗，維持深色',e)}
+  if(mq){var h=function(){if(window.alphaThemePref()==='system')window.alphaApplyTheme()};
+    if(mq.addEventListener)mq.addEventListener('change',h);else if(mq.addListener)mq.addListener(h)}
+})();
+</script>
+<link rel="stylesheet" href="app.css?v=2026-10-14.1930">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -205,7 +224,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="heat" id="heat-grid"><div class="skel-block" style="height:140px"></div></div>
         <div class="legend">
           <div class="li"><span class="sw" style="background:#8f2f2f"></span>漲</div>
-          <div class="li"><span class="sw" style="background:#383835"></span>平</div>
+          <div class="li"><span class="sw" style="background:var(--line-mid)"></span>平</div>
           <div class="li"><span class="sw" style="background:#265244"></span>跌</div>
         </div>
         <div class="note" id="heat-datatime"></div>
@@ -411,17 +430,17 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
          顯示，回測完成前不得移除）：本榜是資料排序，不是驗證過的策略。
          2026-10-12 常備.開發-6：三榜皆已回測且未通過（價值成長 #390/#395、題材動能 #437、
          未來性 #438），字樣改為「回測未通過」，仍固定顯示。 -->
-    <div class="note picks-lb-only tw-only" style="margin-top:6px;color:#c9524a;font-weight:600">⚠ 本榜為資料排序，組合策略回測未通過，不代表能贏大盤。</div>
+    <div class="note picks-lb-only tw-only" style="margin-top:6px;color:var(--caution);font-weight:600">⚠ 本榜為資料排序，組合策略回測未通過，不代表能贏大盤。</div>
     <!-- 2026-08-27新增（P1-新，使用者裁示）：總分跟資料完整度是兩件事，
          固定顯示在排行榜正上方，不是藏在角落的小字。 -->
-    <div class="note picks-lb-only tw-only" id="picks-coverage-note" data-ui-explain style="margin-top:6px;color:#c9a35a">⚠ 總分與「資料完整度」（coverage）是兩件事：全市場股票都會進榜，
+    <div class="note picks-lb-only tw-only" id="picks-coverage-note" data-ui-explain style="margin-top:6px;color:var(--note-gold)">⚠ 總分與「資料完整度」（coverage）是兩件事：全市場股票都會進榜，
       高分但資料完整度低的股票分數僅供參考、不代表可信——卡片變淡、加註「資料稀疏」的就是這種情況。</div>
 
     <!-- 搜尋框：任查任一檔（樣本內即使不在排行榜前段也查得到分數，樣本外誠實顯示查無資料）-->
-    <div class="press picks-lb-only tw-only" style="display:flex;align-items:center;gap:10px;margin-top:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:12px 14px" onclick="document.getElementById('picks-search-input').focus()">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8a857b" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+    <div class="press picks-lb-only tw-only" style="display:flex;align-items:center;gap:10px;margin-top:12px;background:rgba(var(--fg-rgb),.05);border:1px solid rgba(var(--fg-rgb),.09);border-radius:14px;padding:12px 14px" onclick="document.getElementById('picks-search-input').focus()">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="stroke:var(--ink-3)" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
       <input id="picks-search-input" type="text" placeholder="搜尋股票代號或公司名稱…" oninput="onPicksSearchInput(this.value)" style="flex:1;background:none;border:0;outline:0;color:var(--ink);font-size:13.5px;font-family:inherit">
-      <span style="font-size:10px;color:#c9a35a;background:rgba(216,176,112,.1);padding:3px 8px;border-radius:6px;flex-shrink:0">查評分</span>
+      <span style="font-size:10px;color:var(--note-gold);background:rgba(216,176,112,.1);padding:3px 8px;border-radius:6px;flex-shrink:0">查評分</span>
     </div>
     <div id="picks-search-result" class="picks-lb-only tw-only"></div>
 
@@ -452,10 +471,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
          不得出現綜合分數、排名、買進字樣、任何績效數字。資料 data/supply_watchlist.json 由既有排程每日更新。 -->
     <div class="card tw-only" id="picks-supply-card" style="display:none;margin-top:10px">
       <h3>供給吃緊觀察清單</h3>
-      <div class="note" style="color:#c9524a;font-weight:600">描述性資料，未經回測驗證；紙上追蹤中，滿8季前不得作為真錢依據</div>
+      <div class="note" style="color:var(--caution);font-weight:600">描述性資料，未經回測驗證；紙上追蹤中，滿8季前不得作為真錢依據</div>
       <div class="note" id="supply-meta-line" style="margin-top:6px">載入中…</div>
       <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
-        <select id="supply-industry" onchange="onSupplyFilter(this.value)" style="flex:1;min-width:0;background:rgba(255,255,255,.05);color:var(--ink);border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:8px 10px;font-size:13px"><option value="">全部產業</option></select>
+        <select id="supply-industry" onchange="onSupplyFilter(this.value)" style="flex:1;min-width:0;background:rgba(var(--fg-rgb),.05);color:var(--ink);border:1px solid rgba(var(--fg-rgb),.09);border-radius:10px;padding:8px 10px;font-size:13px"><option value="">全部產業</option></select>
       </div>
       <div id="supply-sort-chips" style="display:flex;gap:8px;margin-top:10px;overflow-x:auto;padding-bottom:4px"></div>
       <div id="supply-list" style="margin-top:6px"></div>
@@ -465,11 +484,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
     <!-- 美股/期貨：見 PROGRESS.md -->
     <div class="card picks-lb-only" id="picks-us-panel" style="display:none">
-      <h3>美股評分 <span data-ui-aux style="font-size:11px;color:#c9524a;font-weight:600">未經回測</span></h3>
+      <h3>美股評分 <span data-ui-aux style="font-size:11px;color:var(--caution);font-weight:600">未經回測</span></h3>
       <!-- 2026-10-11 常備.開發-17：取代「建置中，尚無評分」。資料：data/us_scores_v0.json
       （.github/scripts/build_us_scores_v0.py，SEC XBRL 年度財報＋yfinance 收盤）。受凍結.二
       限制，不登記試驗、不回測；只是資料排序。 -->
-      <div class="note" style="color:#c9524a;font-weight:600;margin-bottom:6px">⚠ 只是資料排序，還沒回測過</div>
+      <div class="note" style="color:var(--caution);font-weight:600;margin-bottom:6px">⚠ 只是資料排序，還沒回測過</div>
       <div class="note" id="picks-us-meta" style="margin-bottom:6px">載入中…</div>
       <div class="note" style="margin-bottom:6px"><span class="press" style="color:var(--gold);cursor:pointer" onclick="openMethodSheet('value')">方法論與存活者偏誤但書 ›</span></div>
       <div id="picks-us-list"></div>
@@ -477,7 +496,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <!-- 2026-10-13 先.八十一-33：美股描述性篩選（成交額／漲跌幅／市值門檻）。資料 data/us_screener.json
     （.github/scripts/build_us_screener.py：yfinance 日線一次批次＋SEC 流通股數估市值）。不排名、不是選股訊號。 -->
     <div class="card picks-lb-only" id="us-screen-panel" style="display:none">
-      <h3>美股篩選 <span data-ui-aux style="font-size:11px;color:#c9a35a;font-weight:600">只篩資料，不是選股訊號</span></h3>
+      <h3>美股篩選 <span data-ui-aux style="font-size:11px;color:var(--note-gold);font-weight:600">只篩資料，不是選股訊號</span></h3>
       <div style="display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:13px;margin-bottom:6px">
         <label>日均成交額 ≥ <input id="us-scr-dv" type="number" min="0" step="10" value="100" style="width:64px"> 百萬美元</label>
         <label>漲跌幅 <input id="us-scr-chmin" type="number" step="0.5" placeholder="不限" style="width:56px"> ～ <input id="us-scr-chmax" type="number" step="0.5" placeholder="不限" style="width:56px"> %</label>
@@ -495,10 +514,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <!-- ════════ 2c. 個股研究報告頁（scoring-v2，2026-08-24 新增）════════ -->
   <section class="screen" id="scr-report">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 0 10px">
-      <button class="press" style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center" onclick="go('picks')">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#f5f3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      <button class="press" style="width:34px;height:34px;border-radius:10px;background:rgba(var(--fg-rgb),.05);border:1px solid rgba(var(--fg-rgb),.08);display:flex;align-items:center;justify-content:center" onclick="go('picks')">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="stroke:var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
-      <button class="press" id="report-watch-btn" style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center" onclick="toggleReportWatch()">
+      <button class="press" id="report-watch-btn" style="width:34px;height:34px;border-radius:10px;background:rgba(var(--fg-rgb),.05);border:1px solid rgba(var(--fg-rgb),.08);display:flex;align-items:center;justify-content:center" onclick="toggleReportWatch()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d8b070" stroke-width="1.8" stroke-linejoin="round"><path d="M12 4v16M4 12h16"/></svg>
       </button>
     </div>
@@ -513,7 +532,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       </div>
       <div style="position:relative;width:92px;height:92px;flex-shrink:0">
         <svg width="92" height="92" viewBox="0 0 92 92">
-          <circle cx="46" cy="46" r="40" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="7"/>
+          <circle cx="46" cy="46" r="40" fill="none" style="stroke:rgba(var(--fg-rgb),.07)" stroke-width="7"/>
           <circle id="report-ring" cx="46" cy="46" r="40" fill="none" stroke="url(#ggrad)" stroke-width="7" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2" transform="rotate(-90 46 46)" style="transition:stroke-dashoffset 1s cubic-bezier(.22,.9,.3,1)"/>
           <defs><linearGradient id="ggrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c9974a"/><stop offset="1" stop-color="#e9c98f"/></linearGradient></defs>
         </svg>
@@ -616,7 +635,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="card">
         <h3>選股理由</h3>
         <div id="stock-reason-card"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div><div class="skel-line w30"></div></div>
-        <div class="note" style="margin-top:8px;color:#c9524a;font-weight:600">⚠ 只是資料排序拆解，還沒回測過</div>
+        <div class="note" style="margin-top:8px;color:var(--caution);font-weight:600">⚠ 只是資料排序拆解，還沒回測過</div>
       </div>
     </div>
 
@@ -1018,7 +1037,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       </div>
       <!-- 2026-09-08（連線四.2）現行架構說明。使用者不需要懂 Tailscale，
            但需要知道「為什麼區網位址不能用了」與「哪個網址在哪裡能用」。 -->
-      <div class="note" style="margin-top:10px;padding:8px 10px;background:rgba(255,255,255,.03);border-radius:8px;line-height:1.6">
+      <div class="note" style="margin-top:10px;padding:8px 10px;background:rgba(var(--fg-rgb),.03);border-radius:8px;line-height:1.6">
         <b style="color:var(--ink-2)">目前架構</b><br>
         伺服器只聽 <span class="num">127.0.0.1</span>（本機），對外由 <b>Tailscale Funnel</b> 轉進來。<br>
         <b style="color:var(--ink-2)">區網直連已停用</b>——<span class="num">192.168.x.x:8001</span> 這類位址在任何網路下都連不到，那是舊版用法。<br>
@@ -1176,6 +1195,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="mkt-toggle" id="color-scheme-toggle" style="padding:2px"></div>
       </div>
       <div class="note">台股慣例紅漲綠跌，可切換成國際慣例</div>
+      <div class="setting-row" style="margin-top:10px">
+        <span>外觀</span>
+        <div class="mkt-toggle" id="theme-toggle" style="padding:2px"></div>
+      </div>
+      <div class="note">預設跟隨手機的淺色／深色設定，也可以固定成淺色或深色</div>
       <div class="setting-row" style="margin-top:10px">
         <span>預設幣別</span>
         <div class="mkt-toggle" id="settings-ccy-toggle" style="padding:2px"></div>
@@ -1483,6 +1507,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-14.1915"></script>
+<script src="app.js?v=2026-10-14.1930"></script>
 </body>
 </html>

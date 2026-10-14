@@ -7,7 +7,7 @@
   function renderJournalChips(){
     const el=document.getElementById('journal-chips');
     el.innerHTML=['ALL','TW','US','FUT'].map(k=>
-      `<span class="press" style="flex-shrink:0;white-space:nowrap;font-size:12px;font-weight:${JOURNAL_FILTER===k?600:400};color:${JOURNAL_FILTER===k?'#1a1005':'var(--ink-2)'};background:${JOURNAL_FILTER===k?'var(--gold-grad)':'rgba(255,255,255,.05)'};border:1px solid ${JOURNAL_FILTER===k?'transparent':'rgba(255,255,255,.08)'};padding:6px 13px;border-radius:999px;cursor:pointer" onclick="setJournalFilter('${k}')">${JOURNAL_CHIP_LABEL[k]}</span>`
+      `<span class="press" style="flex-shrink:0;white-space:nowrap;font-size:12px;font-weight:${JOURNAL_FILTER===k?600:400};color:${JOURNAL_FILTER===k?'#1a1005':'var(--ink-2)'};background:${JOURNAL_FILTER===k?'var(--gold-grad)':'rgba(var(--fg-rgb),.05)'};border:1px solid ${JOURNAL_FILTER===k?'transparent':'rgba(var(--fg-rgb),.08)'};padding:6px 13px;border-radius:999px;cursor:pointer" onclick="setJournalFilter('${k}')">${JOURNAL_CHIP_LABEL[k]}</span>`
     ).join('');
     document.querySelectorAll('#journal-trades [data-mkt]').forEach(el=>{
       el.style.display=(JOURNAL_FILTER==='ALL'||el.dataset.mkt===JOURNAL_FILTER)?'':'none';
@@ -65,7 +65,7 @@
     if(!h.length)return '目前沒有自動交易買進的持股';
     return h.map(x=>{
       const up=(x.pnl||0)>=0,st=x.settlement||{};
-      const stTxt=st.status==='pending'?'<span style="color:#c9a35a">待交割（'+md(st.date)+' 扣款）</span>':'已交割（'+md(st.date)+'）';
+      const stTxt=st.status==='pending'?'<span style="color:var(--note-gold)">待交割（'+md(st.date)+' 扣款）</span>':'已交割（'+md(st.date)+'）';
       return '<div style="padding:6px 0;border-bottom:1px solid var(--hairline)">'+
         '<div style="display:flex;justify-content:space-between;gap:8px"><b>'+esc(x.symbol)+' '+esc(nameOf(x.symbol)!==x.symbol?nameOf(x.symbol):'')+'</b><span>'+n(x.qty)+' 股</span></div>'+
         '<div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;margin-top:2px"><span>成本 '+n(x.cost)+' 元（均價 '+n(x.avg_cost)+'）</span><span>市值 '+n(x.value)+' 元</span></div>'+
@@ -75,7 +75,7 @@
   }
   function renderHoldings(h,syncedNote){
     const el=document.getElementById('journal-holdings');if(!el)return;
-    el.innerHTML=holdingsHtml(h)+(syncedNote?'<div class="note" data-ui-keep style="margin-top:4px;color:#c9a35a">'+_autoEsc(syncedNote)+'</div>':'');
+    el.innerHTML=holdingsHtml(h)+(syncedNote?'<div class="note" data-ui-keep style="margin-top:4px;color:var(--note-gold)">'+_autoEsc(syncedNote)+'</div>':'');
   }
   function renderHoldingsFromCache(why){
     const c=holdingsCacheLoad(),el=document.getElementById('journal-holdings');

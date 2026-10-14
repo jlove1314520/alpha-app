@@ -51,8 +51,8 @@
     const pts=cl.map((c,i)=>`${x(i)},${y(c)}`).join(' ');
     const lastX=x(cl.length-1),lastY=y(cl[cl.length-1]);
     return `<svg viewBox="0 0 320 110" style="width:100%">
-      <line x1="0" y1="96" x2="320" y2="96" stroke="#383835" stroke-width="1"/>
-      <line x1="0" y1="56" x2="320" y2="56" stroke="#2c2c2a" stroke-width="1"/>
+      <line x1="0" y1="96" x2="320" y2="96" style="stroke:var(--line-mid)" stroke-width="1"/>
+      <line x1="0" y1="56" x2="320" y2="56" style="stroke:var(--grid)" stroke-width="1"/>
       <polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2"/>
       <circle cx="${lastX}" cy="${lastY}" r="3.5" fill="${col}"/>
       <text x="${Math.min(318,Math.max(2,+lastX))}" y="${Math.max(12,+lastY-8)}" text-anchor="${+lastX>280?'end':'middle'}" font-size="10" fill="var(--ink-2)">${fmtLabel(cl[cl.length-1])}</text>

@@ -117,7 +117,7 @@
     el.innerHTML=MAINSTREAM_CACHE.map(r=>{
       const scoreInd=r.scoreInd||HEAT_TO_SCORE_INDUSTRY[r.id];
       const active=PICKS_INDUSTRY===scoreInd;
-      return `<span class="press" style="flex-shrink:0;font-size:12px;font-weight:${active?600:400};color:${active?'#1a1005':'var(--ink-2)'};background:${active?'var(--gold-grad)':'rgba(255,255,255,.05)'};border:1px solid ${active?'transparent':'rgba(255,255,255,.08)'};padding:6px 13px;border-radius:999px;cursor:pointer;white-space:nowrap" onclick="filterPicksByIndustry('${scoreInd}')">${r.label} <span style="color:${active?'#1a1005':'var(--up)'}">+${r.inflow.toFixed(1)}%</span>${r.crowded?' ⚠ 已擁擠':''}</span>`;
+      return `<span class="press" style="flex-shrink:0;font-size:12px;font-weight:${active?600:400};color:${active?'#1a1005':'var(--ink-2)'};background:${active?'var(--gold-grad)':'rgba(var(--fg-rgb),.05)'};border:1px solid ${active?'transparent':'rgba(var(--fg-rgb),.08)'};padding:6px 13px;border-radius:999px;cursor:pointer;white-space:nowrap" onclick="filterPicksByIndustry('${scoreInd}')">${r.label} <span style="color:${active?'#1a1005':'var(--up)'}">+${r.inflow.toFixed(1)}%</span>${r.crowded?' ⚠ 已擁擠':''}</span>`;
     }).join('');
   }
   // 先.八十一-10：主流題材主來源改為 repo 的 data/industry_flow.json（scripts/build_industry_flow.py：price_history
@@ -285,7 +285,7 @@
     const _unchangedTxt=`<br><span style="color:var(--ink-3)">內容自 ${esc(m.as_of)} 起沒有變動：每晚 23:00 本機排程重算，基準季仍是 ${esc(m.period)}${_nextDl?'，下一季財報法定期限 '+_nextDl+' 過後才會換季':''}。</span>`;
     document.getElementById('supply-meta-line').innerHTML=
       `基準季 <b>${esc(m.period)}</b>（法定公告期限 ${esc(m.period_deadline)} 已過）· 資料日 ${esc(m.as_of)}<br>名冊 ${m.n_universe} 檔，已入庫該季財報 ${m.n_with_period} 檔（${covPct}），可計百分位 ${m.n_scored} 檔`
-      +(lowCov?`<br><span style="color:#c9a35a">資料準備中（已涵蓋 ${m.n_with_period}／${m.n_universe.toLocaleString('en-US')} 檔）：財報入庫覆蓋率未達 80%，暫不顯示桶內百分位，下列僅列已入庫股票的原始變化值</span>`:'')+_unchangedTxt;
+      +(lowCov?`<br><span style="color:var(--note-gold)">資料準備中（已涵蓋 ${m.n_with_period}／${m.n_universe.toLocaleString('en-US')} 檔）：財報入庫覆蓋率未達 80%，暫不顯示桶內百分位，下列僅列已入庫股票的原始變化值</span>`:'')+_unchangedTxt;
     const rows=d.rows||[];
     const inds=[...new Set(rows.map(r=>r.i))].sort();
     const sel=document.getElementById('supply-industry');
@@ -399,8 +399,8 @@
       <div style="display:flex;align-items:center;gap:12px">
         <div class="num" style="width:24px;text-align:center;font-size:15px;font-weight:700;color:${topPick?'var(--gold)':'var(--ink-3)'}">${r.rank??'—'}</div>
         <div class="nm" style="flex:1;min-width:0">
-          <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b style="font-size:15.5px">${pickLabel(r)}</b>${r.industry?`<span style="font-size:9.5px;color:var(--ink-2);background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px">${r.industry}</span>`:''}</div>
-          <div style="font-size:11px;color:var(--ink-3);margin-top:4px">${r.summary||''}${lowCov?'<br><span style="color:#c9a35a">⚠ 資料稀疏，分數僅供參考'+(missingLabels.length?'（缺'+missingLabels.join('、')+'）':'')+'</span>':''}${lowLiq?'<br><span style="color:#c9524a">⚠ 流動性不足 · 不進數字排名</span>':''}${(r.flags||[]).includes('近期無成交')?'<br><span style="color:#c9524a">⚠ 近期無成交 · 不進數字排名'+(r.no_recent_trade_reason?'（'+r.no_recent_trade_reason+'）':'')+'</span>':''}</div>
+          <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b style="font-size:15.5px">${pickLabel(r)}</b>${r.industry?`<span style="font-size:9.5px;color:var(--ink-2);background:rgba(var(--fg-rgb),.06);padding:2px 6px;border-radius:5px">${r.industry}</span>`:''}</div>
+          <div style="font-size:11px;color:var(--ink-3);margin-top:4px">${r.summary||''}${lowCov?'<br><span style="color:var(--note-gold)">⚠ 資料稀疏，分數僅供參考'+(missingLabels.length?'（缺'+missingLabels.join('、')+'）':'')+'</span>':''}${lowLiq?'<br><span style="color:var(--caution)">⚠ 流動性不足 · 不進數字排名</span>':''}${(r.flags||[]).includes('近期無成交')?'<br><span style="color:var(--caution)">⚠ 近期無成交 · 不進數字排名'+(r.no_recent_trade_reason?'（'+r.no_recent_trade_reason+'）':'')+'</span>':''}</div>
           <div style="font-size:10px;color:var(--ink-4);margin-top:2px">近20日均成交值 ${fmtLiquidity(r.liquidity_20d)}元 · 資料完整度 ${Math.round(r.coverage*100)}% · <span class="press method-link" style="color:var(--gold);cursor:pointer" onclick="event.stopPropagation();openMethodSheet('${PICKS_BOARD}')">怎麼算的？</span></div>
         </div>
         <div style="text-align:right;flex-shrink:0"><div class="num" style="font-size:20px;font-weight:700;color:${scoreColor(r.total_score)}">${r.total_score.toFixed(1)}</div><div style="font-size:9px;color:var(--ink-4)">/ 10</div></div>
@@ -435,7 +435,7 @@
       if(el){
         if(meta.backtest_status){
           const esc=t=>String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-          el.innerHTML=`<span style="display:inline-block;font-size:10.5px;font-weight:600;color:#c9524a;border:1px solid rgba(201,82,74,.5);border-radius:6px;padding:1px 7px">${esc(meta.backtest_status)}</span>`
+          el.innerHTML=`<span style="display:inline-block;font-size:10.5px;font-weight:600;color:var(--caution);border:1px solid rgba(201,82,74,.5);border-radius:6px;padding:1px 7px">${esc(meta.backtest_status)}</span>`
             +(meta.backtest_note?` <span style="color:var(--ink-3)">${esc(meta.backtest_note)}</span>`:'')
             +(planB&&meta.score_scheme_disclosure?` <span style="color:var(--ink-3)">${esc(meta.score_scheme_disclosure)}</span>`:'');
           el.style.display='';
@@ -457,7 +457,7 @@
     const filtered=(excluded.length?base.filter(r=>!isDisposalNow(r.code)):base).slice(0,PICKS_TOP_N);
     const topEx=base.slice(0,PICKS_TOP_N).filter(r=>isDisposalNow(r.code));
     const dispNote=excluded.length
-      ?`<div class="note" id="picks-disposal-note" style="color:#c9524a;margin-bottom:6px">已排除處置股 ${excluded.length} 檔${topEx.length?`（原本在前 ${PICKS_TOP_N} 名：${topEx.map(r=>r.code+(r.name?' '+r.name:'')).join('、')}）`:''}（資料：${(DISPOSAL_FLAGS&&DISPOSAL_FLAGS.meta&&DISPOSAL_FLAGS.meta.generated_at||'').slice(0,16).replace('T',' ')||'—'}）</div>`
+      ?`<div class="note" id="picks-disposal-note" style="color:var(--caution);margin-bottom:6px">已排除處置股 ${excluded.length} 檔${topEx.length?`（原本在前 ${PICKS_TOP_N} 名：${topEx.map(r=>r.code+(r.name?' '+r.name:'')).join('、')}）`:''}（資料：${(DISPOSAL_FLAGS&&DISPOSAL_FLAGS.meta&&DISPOSAL_FLAGS.meta.generated_at||'').slice(0,16).replace('T',' ')||'—'}）</div>`
       :(DISPOSAL_FLAGS&&DISPOSAL_FLAGS.meta?'':'<div class="note" id="picks-disposal-note" style="margin-bottom:6px">處置股旗標未載入，本清單未排除處置股</div>');
     listEl.innerHTML=dispNote+filtered.map(r=>pickRowHtml(r,allRows)).join('');
   }
@@ -714,7 +714,7 @@
     btn.querySelector('svg').innerHTML=inWL
       ?'<path d="M20 6L9 17l-5-5"/>'
       :'<path d="M12 4v16M4 12h16"/>';
-    btn.style.borderColor=inWL?'rgba(216,176,112,.4)':'rgba(255,255,255,.08)';
+    btn.style.borderColor=inWL?'rgba(216,176,112,.4)':'rgba(var(--fg-rgb),.08)';
   }
   function toggleReportWatch(){
     const row=REPORT_CACHE;if(!row)return;

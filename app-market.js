@@ -128,8 +128,16 @@
   }
   function heatColor(pct){
     const t=Math.max(-3,Math.min(3,pct))/3;
+    // 先.九十五-4：淺色模式改用淺底＋淡紅／淡綠（字是深色 --ink），深色模式維持原本的值
+    if(document.documentElement.getAttribute('data-theme')==='light')
+      return t>=0?hexMix('#ebe6dc','#ef9a96',t):hexMix('#ebe6dc','#8fd0b0',-t);
     return t>=0?hexMix('#383835','#8f2f2f',t):hexMix('#383835','#265244',-t);
   }
+  // 外觀切換（設定頁或手機系統切換）時重畫熱力圖，顏色才會跟著換；自身失敗只警告
+  window.addEventListener('alpha-theme-change',()=>{
+    try{if(document.getElementById('heat-grid')&&typeof loadHeatmap==='function')loadHeatmap().catch(e=>{console.warn('[heat theme]',e);recordGlobalError('heatThemeRedraw',e)})}
+    catch(e){console.warn('[heat theme]',e);recordGlobalError('heatThemeRedraw',e)}
+  });
   // 2026-08-26 架構修正：類股表現改讀 market_tw.json 的 sectors（TWSE MI_INDEX
   // 官方28類產業分類，見 fetch_market_tw.py），不再逐類呼叫 FinMind。
   async function loadHeatmap(){
@@ -155,7 +163,7 @@
     el.innerHTML=sectors.map(r=>{
       const nameAttr=JSON.stringify(r.name).replace(/"/g,'&quot;');
       return r.change_pct==null
-      ?`<div class="tile press" style="background:#383835;cursor:pointer" onclick='openSectorList(${nameAttr})'><b>${r.name.replace('類指數','')}</b><span>—</span></div>`
+      ?`<div class="tile press" style="background:var(--line-mid);cursor:pointer" onclick='openSectorList(${nameAttr})'><b>${r.name.replace('類指數','')}</b><span>—</span></div>`
       :`<div class="tile press" style="background:${heatColor(r.change_pct)};cursor:pointer" onclick='openSectorList(${nameAttr})'><b>${r.name.replace('類指數','')}</b><span>${r.change_pct>=0?'+':''}${r.change_pct.toFixed(2)}%</span></div>`;
     }).join('');
     document.getElementById('heat-datatime').textContent=heatSrcNote||`${twCloseDateLabel(MARKET_TW_CACHE)}｜${fmtMarketDataTime(MARKET_TW_CACHE)}`;
@@ -696,14 +704,14 @@
       const pct=Math.max(2,Math.abs(r.amt)/maxAbs*100);
       const pos=r.amt>0,col=pos?'var(--up)':'var(--down)';
       const open=FLOW_OPEN===r.ind;
-      let html=`<div class="press" onclick="toggleFlowSector('${r.ind.replace(/'/g,"\'")}')" style="cursor:pointer;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+      let html=`<div class="press" onclick="toggleFlowSector('${r.ind.replace(/'/g,"\'")}')" style="cursor:pointer;padding:6px 0;border-bottom:1px solid rgba(var(--fg-rgb),.05)">
         <div style="display:flex;align-items:baseline;gap:8px">
           <span style="flex:1;font-size:12px;color:var(--ink-2)">${r.ind}<span style="font-size:9.5px;color:var(--ink-4)"> ${r.n}檔</span></span>
           <b class="num" style="font-size:12.5px;color:${col}">${pos?'+':''}${fmtFlowAmt(r.amt)}</b>
           <span class="num" style="font-size:9.5px;color:var(--ink-4);min-width:62px;text-align:right">${nf(Math.round(r.lots))} 張</span>
           <span style="font-size:10px;color:var(--ink-4)">${open?'▾':'▸'}</span>
         </div>
-        <div style="height:3px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:3px;overflow:hidden">
+        <div style="height:3px;background:rgba(var(--fg-rgb),.05);border-radius:2px;margin-top:3px;overflow:hidden">
           <div style="height:100%;width:${pct}%;background:${col};opacity:.65"></div>
         </div>
       </div>`;
