@@ -544,9 +544,14 @@ def fetch_institutional_tpex(date_str: str) -> dict[str, dict]:
         code = row.get("SecuritiesCompanyCode")
         if not code:
             continue
-        foreign = _num(row.get("ForeignInvestorsIncludeMainlandAreaInvestors-Difference"))
-        trust = _num(row.get("SecuritiesInvestmentTrustCompanies-Difference"))
-        dealer = _num(row.get("Dealers-Difference"))
+        # 研究室.二（2026-10-15）：官方欄位名中間夾空白（實測 "ForeignInvestorsInclude MainlandAreaInvestors-Difference"），
+        # 原本照無空白名稱 row.get() 永遠拿到 None，上櫃外資全部是 None。改成「去掉所有空白後整串完全比對」，
+        # 仍是 exact match（不是 substring），不會撞到「(Foreign Dealers excluded)」那組欄位。
+        # 外資＝外陸資（含外資自營）總額，與上市 T86「外陸資＋外資自營商」同口徑（實測 3324：-63013＝-63013＋0）。
+        nrow = {str(k).replace(" ", ""): v for k, v in row.items()}
+        foreign = _num(nrow.get("ForeignInvestorsIncludeMainlandAreaInvestors-Difference"))
+        trust = _num(nrow.get("SecuritiesInvestmentTrustCompanies-Difference"))
+        dealer = _num(nrow.get("Dealers-Difference"))
         actual_date = row.get("Date")
         date_iso = date_str
         if actual_date and len(actual_date) == 7 and actual_date.isdigit():

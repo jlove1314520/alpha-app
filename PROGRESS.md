@@ -1,3 +1,12 @@
+## 2026-10-15 07:53（互動視窗）研究室.二 上櫃外資欄位修正（欄位名夾空白）
+
+- **根因**：櫃買官方 `tpex_3insti_daily_trading` 的外資欄位名中間夾空白（實測 `ForeignInvestorsInclude MainlandAreaInvestors-Difference`），`fetch_market_tw.py::fetch_institutional_tpex()` 照無空白名稱 `row.get()` → 上櫃外資永遠 None（例：3324 10/14 為 [None, 0.0, -43.3]）。端點本身有外資欄位，不需改用其他端點（README 分支未觸發）。
+- **修正**：欄位名去掉空白後整串完全比對（仍是 exact match，不會撞到「(Foreign Dealers excluded)」那組）；外資取外陸資含外資自營總額，與上市 T86 同口徑（實測 3324：−63,013＝−63,013＋0）。只往後累積，不回補。
+- **驗證**：新增 `scripts/selftest_tpex_institutional.py`（離線假資料）5/5 PASS；實打官方端點 1 次：上櫃 901 檔外資 **901 檔有值**，3324 10/14＝−63.0 張。
+- **驗收時間差（照實寫）**：`coverage.with_foreign` 的定義是「近 20 個交易日外資無缺值」，只往後累積的話要約 20 個交易日（約 11/11）才會從 1,083 升到 ≥1,900，README 寫的「隔一個交易日」達不到。已補時間閘檢查項「研究室.二-驗收」（11/12 後）。
+- 合併處理「籌碼原子.補上櫃三大法人歷史」：本次只修解析、往後累積；該項的歷史回補部分依 README「不回補 holdout 期間」不做。
+- 未改 App 檔，不需冒煙；selftest 實際輸出見上。
+
 ## 2026-10-15 07:50（互動視窗）研究室.一 全市場研究層上線
 
 - 照 final\README 做法 1～6：複製 `scripts/build_research.py`、`scripts/selftest_research.py`、`research/lab/`；`market.yml` 在 build_by_code 前新增「研究層」「研究層自測」兩步（continue-on-error），git add 清單加 `data/research.json data/research_radar.json`；`build_by_code.py` SOURCES 加 research；`data_schema_guard.py` 與 `data/seed/pipeline_registry.json` 登記兩檔；`research/lab/` 未被 gitignore、可提交，並加進 DevQueue 碰撞判斷的機器寫入名單（Cowork 每週寫入，由研究室.六驗證後提交）。
