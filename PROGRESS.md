@@ -12,7 +12,7 @@
   「10/14 收盤後仍判過舊」根因＝雲端排程沒跑（17:13／18:41 兩班到 20:03 都沒有 run；近期 schedule run 普遍晚數小時；00:37Z 那班 rebase 衝突失敗），依分支只記證據列 AWAITING，未改 workflow。
   證據：冒煙新增 #152；第一次全套冒煙 #18（IBKR 下單卡，未動到）出現 Playwright「promise was garbage collected」，重跑全部通過。
   未驗證：STATUS.json 要等雲端下一班 market.yml 才有 crons 欄，在那之前 App 顯示不帶時刻的說明。
-- **佇列補件**：`- [ ]` 11→14、DevQueue 可執行 3→6，新增 R8（UX-6 TradingView 標誌壓 K 棒）、R9（generate_scores_future／momentum 過期價格過濾 NameError，本輪查 log 發現）、R10（UX_REDESIGN ⑥ 用語「持有假設」一句）。
+- **佇列補件**：`- [ ]` 11→14、DevQueue 可執行 3→6，新增 R8（UX-6 TradingView 標誌壓 K 棒）、R9（generate_scores_future／momentum 過期價格過濾 NameError，本輪查 log 發現）、R10（UX_REDESIGN ⑥ 用語「持有假設」一句）。R10 隨即查證該句已不在現行 App，依分支標 [x]（無程式變更）；再補 R11（DATA_GAP_PLAN #13 MI_5MINS_HIST 1999–2010 開盤指數，只抓資料）。收工時 `- [ ]` 14、DevQueue 可執行 6。
 - 下一步：R3 淺色對比度、R4 美股但書位置、R5 央行會議日期、R8～R10。
 
 ## 2026-10-14 19:58（互動視窗）先.九十六-1 core_tilt v2 第 1 階段 PREREG 草稿（傾斜臂對不傾斜臂）
