@@ -115,6 +115,7 @@
   3. 供應商：FinMind `TaiwanStockHoldingSharesPer` 免費層回 HTTP 400「Your level is free」（repo `holding_shares_per_probe.py`）。
 - **乙類資料**：FinMind 付費會員（方案與價格以 FinMind 官網為準，**未親自驗證**）→ **待採購**，依總司令「App 賺錢前不花錢買資料」暫不採購。
 - **前向累積選項**（不是本項交辦、僅列出）：每週一次抓 TDCC 開放資料 1 次請求存檔，屬合規、零成本；要開始累積需另立交辦。
+  - ⚠️ 上一行「要開始累積需另立交辦」已過時（2026-10-14 先.九十四-5c 更正）：`scripts/fetch_tdcc_holders.py`（源頭一.2a，2026-09-10 加入）已由本機排程 `AlphaTdccHolders` 每週累積，`research/data/tdcc/` 現有 20260904／0911／0924／1008 四週（0918、1001 兩週缺，原因未查），並產出 `data/holders.json`。
 
 ### 2.8 #39 0050 成分股調整
 - **分類**：**甲（已查證可得）**。`GRAVEYARD_AUTOPSY.md` 第 5 節寫「不能」，與 `HYPOTHESIS_QUEUE.md` #82（第 12520～12700 行，2026-09-23～24）判「資料可行」互相矛盾——以 #82 較新且查得較深為準。
@@ -171,6 +172,17 @@
   - **查詢語意**：區間是比對「處置期間」是否重疊，不是公布日期——跨年的處置會在兩年各出現一次（兩邊各 73 筆跨年重複、約 80 筆公布日期落在前一年）。使用時一律先去重。
   - **沒有單次筆數上限**：2020 年改逐季查 4 次，唯一事件與全年查詢完全一致（上市 383＝383、上櫃 491＝491，兩邊差集皆 0）。
   - 只補資料、未登記試驗；#47 要重測需另寫規格事前登記並計入 N。
+- **注意股歷史（先.九十四-5c，2026-10-14 DevQueue 20261014-170102）**：
+  - **三來源查證**：
+    1. 官方網站（實測）：上市 `www.twse.com.tw/rwd/zh/announcement/notice?startDate=YYYYMMDD&endDate=YYYYMMDD&response=json`、上櫃 `www.tpex.org.tw/www/zh-tw/bulletin/attention?startDate=YYYY/MM/DD&endDate=YYYY/MM/DD&response=json`，**都可查區間**：title／`date` 欄位跟著查詢區間變（例：上市「109年01月01日 至 109年12月31日」4,262 筆、只查 1 月 126 筆；上櫃 2020-01 回 79 筆、`date`＝20200101~20200131）。
+    2. 官方 API：openapi `/announcement/notice`、TPEx `tpex_trading_warning_information` 類端點＝當期快照（與處置股同一情況，見上方 2.12 第 2 點），不能拿來補歷史。
+    3. 同站結構：與上方處置股 `punish`／`disposal` 是同一套 rwd／www bulletin 結構，參數格式相同；`www.twse.com.tw/robots.txt` 只禁 `/epaper/`、`/FTSE/`，`www.tpex.org.tw` 沒有 robots.txt。
+  - **抓取結果**：`research/fetch_notice_history.py` 逐年 2000～2024 各 1 次、間隔 3.5 秒；上櫃 2018 遇 1 次 `ChunkedEncodingError`（網路中斷，非 402/403/428/429），斷點續抓一次補齊。輸出 `research/data/notice_history_{twse,tpex}.json`（本機，`research/data/` 在 .gitignore；重抓 `python research/fetch_notice_history.py 2000 2024`，已抓年份不重抓）。
+    - 上市：**2001 起**（2000 全年 0 筆），47,151 列。
+    - 上櫃：**2002 起**（2000、2001 全年 0 筆），42,154 列。
+  - **沒有單次筆數上限**：2021 年改逐季查 4 次，唯一列（去掉編號與累計次數）與全年一次查完全一致（上市 5,041＝5,041、上櫃 3,828＝3,828，差集皆 0）。
+  - **地雷**：「累計次數」欄是**按查詢區間重算**的（同一列全年查與分季查數字不同），不能當成官方「最近 N 日累計」；要用時自己從日期重算。
+  - 只補資料、未登記試驗、不計 N；#47 要重測需另寫規格事前登記。
 
 ### 2.13 #49 隔夜／盤中分解（B5）
 - **分類**：**甲（已查證可得，資料量小、未整批抓）**。
