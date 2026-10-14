@@ -310,6 +310,10 @@ def main():
 
         # 還在名冊、但價格早就停住的也要擋（正峰 1538、永冠-KY 1589 停在 2024-12-31）
         try:
+            # 先.九十五-R9（2026-10-14）：`price_history` 是 `build_rows()` 的區域變數，`main()` 沒有，
+            # 這裡一直 NameError 被 except 吞掉、過期價格過濾從未執行；比照 generate_scores_momentum.py
+            # 2026-09-27 的同一修法，在這裡自己讀一次。
+            price_history = PHS.load(PRICE_HISTORY_PATH).get("prices", {}) if PHS.exists(PRICE_HISTORY_PATH) else {}
             _last = {c: (rows[-1].get("date") or "") for c, rows in price_history.items() if rows}
             _latest = max((d for d in _last.values() if d), default=None)
             if _latest:
