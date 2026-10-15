@@ -19939,6 +19939,11 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
 
   驗收：`coverage.with_fresh_quarter` 從 1,020 升到 ≥1,850。
 
+- [ ] **修.FinMind計數 （補件，來源：研究室.四 進度③ 2026-10-15 實測）research/finmind_client.py 的 calls_by_minute／last_request_at 在兩支行程同時抓 FinMind 時互相覆寫（_rate_limit_wait_or_raise 讀→sleep→寫，沒有檔案鎖），10/15 08:08 實際撞到 FinMind 402 上限時狀態檔只記 1～11 次；最小間隔也可能被兩支同時判定通過**（DevQueue 可執行）[自行補入]
+  ⚠️ 範圍比條目標題大（同輪 08:31 查到）：repo 內至少 20 支 .py（.github/scripts/fetch_*／update_*、generate_status_json.py、research/fetch_*／backfill_*）都整檔讀改寫 data/rate_limit_state.json，任何一支寫入都可能蓋掉 finmind 的計數；只在 finmind_client 加鎖不夠，要做共用的鎖＋只更新自己那個 source 鍵（先列出全部寫入者再改）。本輪時間不夠，未動工。
+  做法：讀改寫 data/rate_limit_state.json 的那段加跨行程檔案鎖（可沿用 scripts/git_op_lock.py 的作法或 msvcrt.locking），sleep 後重新讀一次狀態再寫；鎖本身失敗只降級成警告、照舊送請求（十二節）。
+  驗收：兩支行程各送 10 次假請求（mock requests，不打 FinMind），狀態檔 calls_by_minute 合計＝20、相鄰 last_request_at 間隔都 ≥ 最小間隔。→ 若 mock 很難做，改成單元測試直接呼叫 _bump_call_counter 兩個 thread 並行 → 只有鎖壞掉時才停。
+
 - [ ] **研究室.五 App 顯示**（DevQueue 可執行）
   〔進度 2026-10-15 DevQueue 20261015-080102：第 3 小項「市場頁產業營收熱度表」已做（app-market.js loadIndustryHeat＋index.html「更多」區第一張卡，讀 research_radar.json industry_heat，依營收年增中位數排序，附資料日與「未經回測、非投資建議」）；Playwright 實測 33 列、pageerror 0；冒煙 157 項全過。[自行裁量] 卡片放進市場頁「更多」收合區（市場頁主畫面已滿，先.七十二-B7 慣例）。尚餘第 1、2、4 小項，維持 - [ ]〕
   做法（用詞依 `docs` 人因改版用詞表）：

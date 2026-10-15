@@ -1,3 +1,15 @@
+## 2026-10-15 08:31（DevQueue 20261015-080102）研究室.三讓行／研究室.四第 1 批／研究室.五-3／自選股盤前 0.00% 修復
+
+等待總司令審閱：0 件（research/AWAITING_REVIEW.md 本輪未變動）。
+
+- **研究室.三 讓行**：條目標〔互動視窗執行中〕，互動視窗 07:56 已 commit `scripts/backfill_revenue_display.py` 並在跑（行程 07:56:46 起），本輪不碰。
+- **研究室.四（第 1 批，未完成，維持 - [ ]）**：①第 1 步「上櫃損益表」查證後已存在（`update_stock_financials.py` EXTRA_SOURCES），上櫃卡 2024Q4 的根因是 2025Q1～2026Q1 斷層。②FinMind 不帶 data_id 全市場查詢實測 HTTP 400（免費層不開放）→ 照研究室.三分支改逐檔，新寫 `scripts/backfill_financials_display.py`，輸出 `data/financials_backfill.json`。③抓 34 檔後 FinMind **HTTP 402 已達上限，封鎖到約 10:08**——互動視窗的研究室.三同時在跑，兩支合計撞到每小時 600，**本輪並行抓取也拖累了研究室.三**。④不落檔驗證：合併後 34 檔中 33 檔季報由過期轉新鮮。下一輪 10:08 後續跑（剩 1,945 檔，約 7 輪）。備註：既有 `research/backfill_stock_financials_gap_2025.py`（09-15 稽核二.一，寫 stock_detail.json、每檔 2 次請求）是舊路線，本次照研究室.四新規格另寫回補檔，沒用它。
+- **研究室.五-3（其餘小項未做，維持 - [ ]）**：市場頁「更多」區新增「產業營收熱度」卡（`app-market.js` loadIndustryHeat、`index.html`），讀 research_radar.json industry_heat，依營收年增中位數排序，附資料日與免責。Playwright 實測 33 列、pageerror 0。[自行裁量] 放進「更多」收合區。
+- **純 bug 修復：自選股盤前整排 +0.00%**：冒煙 #121 08:15 FAIL，改回原版程式重跑同樣 FAIL（不是本輪改動造成）。根因：`intradayQuote` 先讀 quotes_tw.json 但沒跳過 `stale:true`，檔案本身新鮮（07:50 盤前班）時繞過先.八十一-24 的防線、tier 標 live。修好後 #121 PASS。
+- **補件**：收工時 `- [ ]` 11 項、DevQueue 可執行 4 項，兩個門檻都不到。四個來源（BACKLOG／UX 提案／先.八十全檢節／DATA_GAP 甲類）查過已無可補項目（**來源已用盡**），只補一條本輪實測 bug「修.FinMind計數」（rate_limit_state.json 被 20 支以上程式整檔讀改寫，多行程時計數失準）。補完 12 項、可執行 5 項，仍低於 6。
+- **冒煙測試**：`node scripts/smoke_test.mjs` 157 項全過（=== 冒煙測試結果：全部通過 ===）。
+- commits：182525514（stale 報價修復）、64182c919（研究室.五-3）、771e1ec40（研究室.四第 1 批）、本筆（佇列補件＋PROGRESS）。
+
 ## 2026-10-15 07:56（互動視窗）先.一百-4 App 顯示用回補檔加進研究端不得讀清單
 
 - 既有的 holdout 守門只有「允許讀 holdout 的單發腳本」白名單（`ALLOWED_HOLDOUT_READERS`），沒有 README 說的「不允許」檔名清單。[自行裁量] 在 `research/validation/holdout.py`（第十三節核心檔，互動視窗改）新增 `DISPLAY_ONLY_DATA_FILES = {revenue_backfill.json, financials_backfill.json}`，註明研究端任何回測／檢定（含白名單單發）都不得讀。
