@@ -3814,10 +3814,96 @@
       `<div style="display:none" data-ui-raw>${list.map(_uiEsc).join('<br>')}</div></details>`;
   }
   function renderAutoBanner(){
-    uiRedBanner(document.getElementById('auto-banner'),[AUTO_BAN.offline,AUTO_BAN.hb,AUTO_BAN.px,AUTO_BAN.local]);
+    const el=document.getElementById('auto-banner');
+    // 先.一〇四-2：凍結中的「已暫停」不是故障，不進紅色清單
+    const local=(AUTO_FROZEN&&/已暫停/.test(AUTO_BAN.local||''))?'':AUTO_BAN.local;
+    const reds=[AUTO_BAN.offline,AUTO_BAN.hb,AUTO_BAN.px,local].filter(Boolean);
+    if(el)el.dataset.sev=reds.length?'red':(AUTO_FROZEN?'frozen':'');
+    if(!reds.length&&AUTO_FROZEN&&el){
+      el.style.display='block';
+      el.innerHTML='<div class="ui-ban-sit" data-ui-keep>自動投資：凍結中（等策略打贏 0050）</div>';
+      return;
+    }
+    uiRedBanner(el,reds);
   }
+  // ══════ 先.一〇四-2 橫幅總管（2026-10-16）══════
+  // 原本 auto／診斷／Claude 授權／紙上追蹤／錯誤紀錄 最多五條各佔一塊，手機第一屏被吃掉一半。
+  // 各橫幅的判斷邏輯不動，這裡只「讀」它們目前顯示什麼：
+  //   今日頁＝一行（最嚴重一則＋還有 N 則），點開才展開原本的橫幅；
+  //   其他頁＝橫幅全收起，只在頂部膠囊旁亮一個色點（點了回今日頁並展開）。
+  // 同一原因（電腦／心跳／離線）只算一次。總管自己出錯只 console.warn，不影響原橫幅（十二節：寧可漏抓不可癱瘓）。
+  const HUB_SRC=[
+    {id:'auto-banner',sev:3},{id:'claude-auth-banner',sev:3},{id:'paper-tracking-banner',sev:3},
+    {id:'diag-banner',sev:2},{id:'error-log',sev:1}];
+  const HUB_SEV_COLOR={3:'var(--critical)',2:'var(--warn)',1:'var(--serious)',0:'var(--ink-3)'};
+  let HUB_OPEN=false;
+  function _hubVisible(el){return !!el&&el.style.display!=='none'&&(el.textContent||'').trim()!==''}
+  function _hubText(el){
+    const sit=el.querySelector('.ui-ban-sit');
+    if(sit)return sit.textContent.trim();
+    const sm=el.querySelector('summary');
+    if(sm)return sm.textContent.trim();
+    const t=(el.textContent||'').trim().replace(/\s+/g,' ');
+    return [...t].length>28?[...t].slice(0,28).join('')+'…':t;
+  }
+  function _hubKey(txt,id){return /電腦|心跳|關機|離線|停擺|沒有實際執行/.test(txt)?'pc':id}
+  function hubCollect(){
+    const byKey=new Map();
+    for(const s of HUB_SRC){
+      const el=document.getElementById(s.id);
+      if(!_hubVisible(el))continue;
+      const sev=(el.dataset&&el.dataset.sev==='frozen')?0:s.sev;
+      const txt=_hubText(el);
+      const k=_hubKey(txt,s.id);
+      const cur=byKey.get(k);
+      if(!cur||sev>cur.sev)byKey.set(k,{id:s.id,sev,txt});
+    }
+    return [...byKey.values()].sort((a,b)=>b.sev-a.sev);
+  }
+  function hubRefresh(){
+    try{
+      const app=document.getElementById('app'),hub=document.getElementById('alert-hub'),dot=document.getElementById('alert-hub-dot');
+      if(!app||!hub)return;
+      const act=document.querySelector('.screen.active');
+      const onHome=!!act&&act.id==='scr-home';
+      const items=hubCollect();
+      const top=items[0];
+      app.classList.toggle('hub-collapsed',!(onHome&&HUB_OPEN));
+      if(dot){
+        dot.hidden=!top||onHome;
+        if(top)dot.style.background=HUB_SEV_COLOR[top.sev];
+        dot.title=top?top.txt:'';
+      }
+      if(!top||!onHome){hub.hidden=true;return}
+      hub.hidden=false;
+      hub.style.setProperty('--hub-c',HUB_SEV_COLOR[top.sev]);
+      hub.dataset.sev=String(top.sev);
+      const more=items.length>1?`<span class="hub-more">還有 ${items.length-1} 則</span>`:'';
+      hub.innerHTML=`<span class="hub-dot"></span><span class="hub-txt">${_uiEsc(top.txt)}</span>${more}<span class="hub-caret">${HUB_OPEN?'收起':'看細節'}</span>`;
+    }catch(e){console.warn('[hubRefresh]',e)}
+  }
+  function hubToggle(force){HUB_OPEN=force==null?!HUB_OPEN:!!force;hubRefresh()}
+  function hubDotTap(){HUB_OPEN=true;go('home');hubRefresh()}
+  try{
+    let _hubT=null;
+    const _hubSoon=()=>{clearTimeout(_hubT);_hubT=setTimeout(hubRefresh,60)};
+    const mo=new MutationObserver(_hubSoon);
+    HUB_SRC.forEach(s=>{const el=document.getElementById(s.id);if(el)mo.observe(el,{attributes:true,attributeFilter:['style','data-sev'],childList:true,subtree:true,characterData:true})});
+    document.querySelectorAll('.screen').forEach(el=>mo.observe(el,{attributes:true,attributeFilter:['class']}));
+    window.hubToggle=hubToggle;window.hubDotTap=hubDotTap;window.hubRefresh=hubRefresh;
+    hubRefresh();
+  }catch(e){console.warn('[alert-hub init]',e)}
   // 規則：台股交易日，台北 09:50 後當日沒有 run 心跳，或 13:50 後沒有 settle 心跳→紅色橫幅。
   // 讀不到心跳檔（網路錯誤、404）時不亂報，只 console.warn（無法判斷≠未執行）。
+  // 先.一〇四-2：策略凍結（STOP＋strategy_frozen）時排程照跑、只記 FROZEN 心跳。
+  // 公開心跳最近一次 run 是 FROZEN → 視為凍結中，自動投資改灰色「凍結中」，不用紅色。
+  let AUTO_FROZEN=false;
+  function autoFrozenFromHeartbeat(doc){
+    const ev=(doc&&Array.isArray(doc.events))?doc.events.filter(e=>e&&e.task==='run'&&typeof e.ts==='string'):[];
+    if(!ev.length)return false;
+    const last=ev.reduce((a,b)=>a.ts>b.ts?a:b);
+    return last.code==='FROZEN'&&(Date.now()-Date.parse(last.ts))<14*86400000;
+  }
   function evalAutoHeartbeat(doc,now){
     const z=_zonedParts(now||new Date(),'Asia/Taipei');
     if(!isTradingDay(now||new Date(),'Asia/Taipei',TW_HOLIDAYS))return '';
@@ -3852,7 +3938,9 @@
     try{
       const r=await fetch('data/auto_heartbeat.json?t='+Date.now(),{cache:'no-store'});
       if(!r.ok){console.warn('[loadAutoHeartbeat] HTTP',r.status);AUTO_BAN.hb='';return}
-      AUTO_BAN.hb=evalAutoHeartbeat(await r.json());
+      const hbDoc=await r.json();
+      AUTO_FROZEN=autoFrozenFromHeartbeat(hbDoc)||AUTO_FROZEN;
+      AUTO_BAN.hb=evalAutoHeartbeat(hbDoc);
     }catch(e){console.warn('[loadAutoHeartbeat]',e);recordGlobalError('loadAutoHeartbeat',e);AUTO_BAN.hb=''}
     renderAutoBanner();
   }
@@ -3958,6 +4046,7 @@
       // 先.五十五-B6：交割戶餘額查詢為 0 的現金不足，改寫成可行動的說明
       // 先.五十四-6 更正 2：現金不足直接顯示引擎寫好的說明文字（可用餘額、本批所需、入金後次一交易日 09:05 自動重跑）
       const cashMsg=String(st.last_error||'').startsWith('INSUFFICIENT_CASH:')?String(st.last_error).slice('INSUFFICIENT_CASH:'.length):'';
+      if(autoFreezeText(d))AUTO_FROZEN=true;
       AUTO_BAN.local=red?(cashMsg||('自動交易異常：'+(st.last_error||'請檢查'))):(autoFreezeText(d)?('自動投資'+autoFreezeText(d)):(d.stopped?'自動交易已緊急停止（一律拒單）':''));
       renderAutoBanner();
     }catch(e){console.warn('[loadAutoTrading]',e);recordGlobalError('loadAutoTrading',e);note.textContent=_isOfflineErr(e)?liveOfflineText():'讀取自動交易狀態失敗（伺服器未更新）';AUTO_BAN.offline=_isOfflineErr(e)?liveOfflineText():'讀不到本機自動交易狀態（伺服器未更新）';renderAutoBanner()}
@@ -4442,7 +4531,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-16.0040';
+  const APP_VERSION='2026-10-16.0053';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

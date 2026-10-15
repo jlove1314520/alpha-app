@@ -2994,6 +2994,9 @@ async function runSmokeTest(baseUrl, headless = true) {
       const el = document.getElementById("auto-banner");
       const save = Object.assign({}, AUTO_BAN);
       const out = [];
+      // 先.一〇四-2：原橫幅收進一行總管，今日頁展開後才顯示；這裡先展開再檢查兩段式內容
+      if (typeof go === "function") go("home");
+      if (typeof hubToggle === "function") hubToggle(true);
       for (const raw of ["現金不足：INSUFFICIENT_CASH 需 12,345 元", "自動交易排程未執行（電腦可能關機或離線）：今日盤前任務沒有心跳", "未知錯誤 Bb-90 LIVE preflight XYZ_42"]) {
         AUTO_BAN.offline = ""; AUTO_BAN.hb = ""; AUTO_BAN.px = ""; AUTO_BAN.local = raw;
         renderAutoBanner();
@@ -3002,6 +3005,7 @@ async function runSmokeTest(baseUrl, headless = true) {
           detOpen: det && det.open, detRaw: det && (det.querySelector("[data-ui-raw]") || {}).textContent, visible: el.innerText });
       }
       Object.assign(AUTO_BAN, save); renderAutoBanner();
+      if (typeof hubToggle === "function") hubToggle(false);
       return out;
     });
     const want = ["還沒入金，這一期不會下單", "電腦沒在跑，自動投資暫停"];
