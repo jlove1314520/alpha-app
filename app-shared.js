@@ -107,11 +107,14 @@
   // 從同一條基線往下長，取代舊版「單一bar在盒子裡置中」（那樣正負值都各自往兩邊
   // 對稱長，視覺上沒有共用基線，容易誤讀漲跌幅度）。.up-zone/.dn-zone各佔一半高度，
   // 兩者交界（.dn-zone的border-top）就是基線，同一列的每一欄交界y座標理論上相同。
-  function divBarHTML(label,v,mx){
+  // 先.一〇四-7：第 4 參數 valTxt（選填）＝在這根柱子旁標數值（法人買賣超只標最新一根）
+  function divBarHTML(label,v,mx,valTxt){
     const h=Math.max(15,Math.abs(v)/mx*100).toFixed(0);
+    // 數值絕對定位、放在沒有柱子的那一半（正值放基線下方、負值放基線上方），不佔版面、不推動零基線（smoke #49）
+    const tag=valTxt?`<b class="db-val ${v>=0?'pos-v':'neg-v'}" style="color:${v>=0?'var(--up)':'var(--down)'}">${valTxt}</b>`:'';
     const up=v>=0?`<i class="u" style="height:${h}%"></i>`:'';
     const dn=v<0?`<i class="dn" style="height:${h}%"></i>`:'';
-    return `<div class="db"><div class="bar-zone"><div class="up-zone">${up}</div><div class="dn-zone">${dn}</div></div><em style="font-size:9px;color:var(--ink-3)">${label}</em></div>`;
+    return `<div class="db${valTxt?' has-val':''}">${tag}<div class="bar-zone"><div class="up-zone">${up}</div><div class="dn-zone">${dn}</div></div><em style="font-size:9px;color:var(--ink-3)">${label}</em></div>`;
   }
 
   // 2026-08-25 新增：大盤（全市場）融資維持率。這個數字沒辦法在瀏覽器端直接算——

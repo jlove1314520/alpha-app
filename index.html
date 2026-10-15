@@ -43,7 +43,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(mq.addEventListener)mq.addEventListener('change',h);else if(mq.addListener)mq.addListener(h)}
 })();
 </script>
-<link rel="stylesheet" href="app.css?v=2026-10-16.0125">
+<link rel="stylesheet" href="app.css?v=2026-10-16.0137">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -402,6 +402,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
     <div class="card">
       <h3>法人買賣超</h3>
+      <!-- 先.一〇四-7：張／億元切換 -->
+      <div id="inst-unit" style="display:flex;gap:6px;align-items:center;margin:-2px 0 8px"></div>
       <div class="div-bars" id="inst-bars"><div class="skel-block" style="height:100px"></div></div>
       <div class="legend">
         <div class="li"><span class="sw" style="background:var(--up)"></span>買超</div>
@@ -409,7 +411,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="li" style="margin-left:auto;color:var(--ink)">今日 <b id="inst-today">—</b></div>
       </div>
       <div class="note" id="inst-datatime"></div>
-      <div class="note">單位：張；來源：證交所</div>
+      <div class="note" id="inst-unit-note">單位：張；來源：證交所</div>
     </div>
 
     <div class="card">
@@ -1548,6 +1550,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-16.0125"></script>
+<script src="app.js?v=2026-10-16.0137"></script>
 </body>
 </html>

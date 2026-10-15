@@ -178,17 +178,37 @@
   // T86 只給股數沒有逐股價格，換算成金額需要每股價格加權，這裡沒有那個資料，
   // 誠實只回報張數，不假裝算出金額（App 原本標「億元」是錯的，這裡一併改正）。
   // 歷史是跨多次排程執行累積出來的，一開始可能只有 1-2 天，會隨時間增加到 5-10 天。
+  // 先.一〇四-7：單位可切張／億元（億元讀 *_net_amt，來自先.一〇三-1b 的 BFI82U；還沒有就停用並說明）；
+  // 最新一根標數值、數字一律千分位。
+  let INST_UNIT='lots';
+  function setInstUnit(u){INST_UNIT=u;_safeAsync('loadInstTotal',loadInstTotal)}
+  window.setInstUnit=setInstUnit;
+  function _instFmt(v,unit){
+    if(v==null||!isFinite(v))return '—';
+    const sign=v>=0?'+':'−';
+    return unit==='amt'?sign+Math.abs(v).toLocaleString('zh-TW',{maximumFractionDigits:1,minimumFractionDigits:1})+' 億'
+      :sign+Math.round(Math.abs(v)).toLocaleString('zh-TW')+' 張';
+  }
   async function loadInstTotal(){
     const el=document.getElementById('inst-bars');if(!el)return;
     await loadMarketDataFiles();
     const history=(MARKET_TW_CACHE&&MARKET_TW_CACHE.institutional_history)||[];
     if(!history.length){el.innerHTML='<div class="note">查無資料</div>';return}
-    const nets=history.map(h=>({date:h.date,net:h.total_net_lots}));
+    const hasAmt=history.some(h=>h.total_net_amt!=null);
+    const unit=(INST_UNIT==='amt'&&hasAmt)?'amt':'lots';
+    const sw=document.getElementById('inst-unit');
+    if(sw){
+      const chip=(k,lb,dis)=>`<span class="press" ${dis?'aria-disabled="true"':`onclick="setInstUnit('${k}')"`} style="padding:2px 9px;border-radius:12px;font-size:11px;border:1px solid ${unit===k?'var(--accent)':'var(--hairline)'};color:${dis?'var(--ink-4)':(unit===k?'var(--accent)':'var(--ink-3)')};${dis?'cursor:not-allowed':'cursor:pointer'}">${lb}</span>`;
+      sw.innerHTML=chip('lots','張',false)+chip('amt','億元',!hasAmt)+(hasAmt?'':'<span class="note" style="margin:0 0 0 6px;font-size:10px">億元：待接官方金額資料</span>');
+    }
+    const nets=history.map(h=>({date:h.date,net:unit==='amt'?h.total_net_amt:h.total_net_lots})).filter(n=>n.net!=null);
     const mx=Math.max(...nets.map(n=>Math.abs(n.net)))||1;
-    el.innerHTML=nets.map(n=>divBarHTML(n.date.slice(4,6)+'/'+n.date.slice(6,8),n.net,mx)).join('');
+    el.innerHTML=nets.map((n,i)=>divBarHTML(n.date.slice(4,6)+'/'+n.date.slice(6,8),n.net,mx,i===nets.length-1?_instFmt(n.net,unit).replace(/ (張|億)$/,''):'')).join('');
     const todayNet=nets[nets.length-1].net;
     const te=document.getElementById('inst-today');
-    te.textContent=(todayNet>=0?'+':'')+Math.round(todayNet)+' 張';te.style.color=todayNet>=0?'var(--up)':'var(--down)';
+    te.textContent=_instFmt(todayNet,unit);te.style.color=todayNet>=0?'var(--up)':'var(--down)';
+    const un=document.getElementById('inst-unit-note');
+    if(un)un.textContent=unit==='amt'?'單位：億元；來源：證交所三大法人買賣金額統計（BFI82U）':'單位：張（上市，不含權證）；來源：證交所 T86';
     document.getElementById('inst-datatime').textContent=fmtMarketDataTime(MARKET_TW_CACHE)+(history.length<5?`（累積中，目前${history.length}天）`:'');
     // 2026-09-02新增：市場頁「籌碼」精簡入口卡（#chips-entry-inst）跟這裡是
     // 同一份資料的兩種呈現，不重新fetch，直接複寫同樣的文字/顏色。
