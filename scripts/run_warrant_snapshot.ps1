@@ -8,7 +8,9 @@
 
 $repoDir = "C:\alpha\alpha-app"
 $logPath = "$repoDir\research\data\warrant_snapshot_cycle.log"
-$pythonExe = "C:\Users\user\AppData\Local\Microsoft\WindowsApps\python.exe"
+# xian.102-2a: the Store-app alias (WindowsApps\python.exe) printed nothing when this task ran as
+# "run whether user is logged on or not" (2 runs, 10/15 22:40 and 22:44). Use the regular install, same as run-market-catchup.ps1.
+$pythonExe = "C:\Program Files\Python313\python.exe"
 
 Set-Location $repoDir
 $env:PYTHONIOENCODING = "utf-8"
@@ -18,4 +20,5 @@ $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 Add-Content -Path $logPath -Value "`n===== warrant_snapshot launcher: $ts =====" -Encoding utf8
 $out = & $pythonExe research\warrant_snapshot_daily.py 2>&1
 Add-Content -Path $logPath -Value ($out -join "`n") -Encoding utf8
+if (-not $out) { Add-Content -Path $logPath -Value "WARN: python produced no output (exit=$LASTEXITCODE)" -Encoding utf8 }
 exit 0

@@ -1,3 +1,14 @@
+## 2026-10-15 23:0x（互動視窗）先.一〇二 重開機停擺防護四題裁示落地
+
+等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證；先.一〇一-3 已依【先.一〇二】結案）。
+
+- **先.一〇二-1 使用時段**：`C:\alpha\set-wu-active-hours.ps1`（UAC 經總司令同意）→ 讀回 ActiveHoursStart=7、ActiveHoursEnd=1、SmartActiveHoursState=0（手動）。改前值 6／0；21:55 只讀時是 0／8，中間被改過、來源不明，如實記錄。
+- **先.一〇二-2a 第一批改 Password 登入類型**：`C:\alpha\convert-tasks-to-password.ps1 -Batch 1`（repo 內副本 `scripts/scheduler/`），密碼由總司令本人在 Windows 認證視窗輸入，CC 未經手、未記錄。6/6 轉換成功；非互動身分 `git push --dry-run` exit=0；AlphaMarketCatchup／AlphaQuotesFallback／AlphaData 排程啟動 rc=0；**發現並修復**：`run_warrant_snapshot.ps1` 寫死 Store 版 python，非互動身分下輸出全空但 rc=0（兩次重現），改用 C:\Program Files\Python313\python.exe 後 10/15 權證快照補上並「push 成功」。另 9 支 launcher 有同樣寫法，第二批前要先改。AlphaDevQueue 見 23:01 排程結果。
+- **先.一〇二-3**：雲端停擺告警改看 DevQueue／市場補跑／連線監測（任一 ≤60 分鐘即存活），紅燈文字「本機停擺 N 分鐘，可能是重開機未登入」；連線心跳提交改每 30 分鐘。**總司令待辦：GitHub 手機 App 開 Actions 失敗推播。**
+- **先.一〇二-4／5／6**：網路線記為建議；`docs/UNFREEZE_CHECKLIST.md` 加第 5 項；AWAITING_REVIEW 清理。
+- 冒煙測試（先.一〇二-3 動到 app-settings.js）：`node scripts/smoke_test.mjs` exit=0「=== 冒煙測試結果：全部通過 ===」。
+- 下一步：先.一〇二-2b 第二批要等第一批觀察 3 個交易日（10/16、10/19、10/20）沒問題後才做；做之前先把 9 支 Store 版 python 的 launcher 換路徑。
+
 ## 2026-10-15 22:16（DevQueue 20261015-214141）研究室.五 完成／研究室.六 接收端／研究室.三、.四 各續一批
 
 等待總司令審閱：0 件（本輪未新增等待審閱項目；research/AWAITING_REVIEW.md 本輪未變動）。
