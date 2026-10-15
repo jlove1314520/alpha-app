@@ -64,6 +64,22 @@ def already_snapshotted(ledger: dict, board: str, snapshot_date: str) -> bool:
                for s in ledger.get("snapshots", []))
 
 
+def is_non_trading_day(d: str) -> bool:
+    """週末或 data/trading_calendar.json 列為休市。日曆讀不到只看週末（寧可多記一筆，不可漏記交易日）。"""
+    try:
+        day = datetime.strptime(d, "%Y-%m-%d").date()
+    except ValueError:
+        return False
+    if day.weekday() >= 5:
+        return True
+    try:
+        cal = (_load_json(REPO_ROOT / "data" / "trading_calendar.json") or {}).get("tw", {}).get(str(day.year)) or {}
+        return d in set(cal.get("closed") or []) | set(cal.get("unscheduled_closed") or [])
+    except Exception as e:  # noqa: BLE001 -- 守門員自己的失敗只降級成警告（十二節）
+        print(f"  [warn] trading_calendar 讀取失敗：{e}")
+        return False
+
+
 def build_snapshot(board: str, score_path: Path, quotes: dict, taiex_close: float | None) -> dict | None:
     data = _load_json(score_path)
     if not data or not data.get("stocks"):
@@ -72,6 +88,9 @@ def build_snapshot(board: str, score_path: Path, quotes: dict, taiex_close: floa
     snapshot_date = data["meta"].get("data_asof")
     if not snapshot_date:
         print(f"  {board} 板：{score_path.name} 缺 meta.data_asof，跳過（不確定要記哪一天，寧可不記也不亂猜）")
+        return None
+    if is_non_trading_day(snapshot_date):
+        print(f"  {board} 板：data_asof={snapshot_date} 是休市日，跳過（先.一〇三-11：休市日分數同前一交易日，記了就是重複快照）")
         return None
 
     ranked = sorted(

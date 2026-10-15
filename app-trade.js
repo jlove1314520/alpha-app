@@ -439,7 +439,7 @@
   function _picksAggregateWindow(snapshots, board, windowKey){
     const filled=[];
     for(const snap of snapshots){
-      if(snap.board!==board)continue;
+      if(snap.board!==board||snap.non_trading_day_duplicate)continue; // 先.一〇三-11：休市日重複快照不計
       for(const pick of (snap.picks||[])){
         const r=pick.returns&&pick.returns[windowKey];
         if(r&&r.return_pct!=null)filled.push(r);
@@ -490,7 +490,7 @@
       const boards=Object.keys(PICKS_BOARD_TITLES);
       picksWindowData={};
       const html=boards.map(board=>{
-        const snapshotCount=snapshots.filter(s=>s.board===board).length;
+        const snapshotCount=snapshots.filter(s=>s.board===board&&!s.non_trading_day_duplicate).length;
         picksWindowData[board]={};
         for(const key of Object.keys(windows))picksWindowData[board][key]=_picksAggregateWindow(snapshots, board, key);
         return picksReportCardHtml(board, snapshotCount, windows);

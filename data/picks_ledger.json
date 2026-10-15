@@ -19,7 +19,23 @@
         "ruling": "總司令【先.八十二】3 裁示②",
         "snapshot_field": "no_recent_trade_rule"
       }
-    ]
+    ],
+    "non_trading_day_duplicates": {
+      "marked_at": "2026-10-16",
+      "snapshots": 27,
+      "dates": [
+        "2026-08-29",
+        "2026-09-05",
+        "2026-09-12",
+        "2026-09-19",
+        "2026-09-25",
+        "2026-09-26",
+        "2026-10-03",
+        "2026-10-09",
+        "2026-10-10"
+      ],
+      "note": "先.一〇三-11：data_asof 落在休市日的快照（分數與前一交易日相同）只加標記、內容不改（鐵律：快照不可事後修改）；App 成績單與統計排除；build_picks_ledger.py 之後遇休市日不再快照"
+    }
   },
   "snapshots": [
     {
@@ -3980,7 +3996,8 @@
         "missing_exit": 1,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-08-29",
@@ -4656,7 +4673,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-08-29",
@@ -5296,7 +5314,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-08-31",
@@ -15868,7 +15887,8 @@
         "missing_exit": 1,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-09-05",
@@ -16544,7 +16564,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-09-05",
@@ -17184,7 +17205,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-09-07",
@@ -25918,7 +25940,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-09-12",
@@ -26594,7 +26617,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-09-12",
@@ -27270,7 +27294,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-09-14",
@@ -35526,7 +35551,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-09-19",
@@ -36042,7 +36068,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-09-19",
@@ -36558,7 +36585,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-09-21",
@@ -43266,7 +43294,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-09-25",
@@ -43782,7 +43811,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-09-25",
@@ -44298,7 +44328,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-09-26",
@@ -44814,7 +44845,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-09-26",
@@ -45330,7 +45362,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-09-26",
@@ -45846,7 +45879,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-09-29",
@@ -52564,7 +52598,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-10-03",
@@ -53081,7 +53116,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-10-03",
@@ -53598,7 +53634,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-10-06",
@@ -58128,7 +58165,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-10-09",
@@ -58485,7 +58523,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-10-09",
@@ -58842,7 +58881,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-10-10",
@@ -59199,7 +59239,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-10-10",
@@ -59556,7 +59597,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-10-10",
@@ -59913,7 +59955,8 @@
         "missing_exit": 0,
         "market_gap_days": [],
         "checked_at": "2026-10-15T23:24:37+08:00"
-      }
+      },
+      "non_trading_day_duplicate": true
     },
     {
       "snapshot_date": "2026-10-13",
