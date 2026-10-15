@@ -19989,7 +19989,7 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
      - 第 10 項（說法 PIT／格式）FAIL → 不 commit 那一檔，在 PENDING_QUEUE 記一行原因。
      - 通過 → commit，訊息寫「研究室.六 週更新 <代號>」。
 
-- [ ] **研究室.六-週跑 （補件，來源：研究室.六 接收端 2026-10-15）每週一（台北）第一輪 DevQueue 跑 `python scripts/lab_weekly_intake.py`；有 PASS 的 commit 就 push；research/lab/INTAKE_FAILURES.md 有新行就在本條補記代號與原因；第一次遇到真實週更新後回研究室.六把「⚠️ 尚未遇到真實週更新」改掉**（DevQueue 可執行；時間閘：2026-10-19 起每週一）
+- [!] **研究室.六-週跑 （補件，來源：研究室.六 接收端 2026-10-15）每週一（台北）第一輪 DevQueue 跑 `python scripts/lab_weekly_intake.py`；有 PASS 的 commit 就 push；research/lab/INTAKE_FAILURES.md 有新行就在本條補記代號與原因；第一次遇到真實週更新後回研究室.六把「⚠️ 尚未遇到真實週更新」改掉**（DevQueue 可執行；時間閘：2026-10-19 起每週一）　**⛔ 自走中止（2026-10-16 02:01）**：時間閘未到：本項 2026-10-19（週一）起每週一才跑；今天 2026-10-16（週五）。解除條件：台北時間週一第一輪 DevQueue
 
 - [ ] **研究室.七 說法資料集預登記（只登記不檢定）**（互動視窗執行：要碰 TRIALS 登記）
   做法：
