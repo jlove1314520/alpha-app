@@ -2,8 +2,8 @@
  "meta": {
   "created_at": "2026-10-11T14:17:33.521387+08:00",
   "schema_note": "B19 前瞻訊號台帳（非回測）：每筆在事件發生後 4 日內事前寫入，寫入後內容不可修改；entry_close 為寫入日之後第一個交易日收盤（避免前視）；returns.t5/t20/t60 由 update_signal_ledger_returns.py 只回填 null 欄位。status=待驗證線索 者不得影響任何評分。規格 research/B19_SIGNAL_LEDGER_SPEC.md。非投資建議。",
-  "last_build_at": "2026-10-15T23:24:38.133296+08:00",
-  "total_signals": 190,
+  "last_build_at": "2026-10-16T00:28:35.249271+08:00",
+  "total_signals": 247,
   "source": ".github/scripts/build_signal_ledger.py（讀 events.json L1＋news.json L3＋price_history.json）",
   "last_returns_backfill_at": "2026-10-15T21:56:35.671679+08:00"
  },
@@ -6268,6 +6268,2033 @@
    "anchor_trade_date": "2026-10-14",
    "weight": 1.0,
    "ref_close": 25.75,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "e467a012a45e0545",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E7%A9%8D%E9%9B%BB%E5%85%A8%E7%90%83%E6%93%B4%E5%BB%A0-%E5%B9%B4%E8%BC%95%E4%B8%96%E4%BB%A3%E7%9C%8B%E8%AD%B7%E5%9C%8B%E7%A5%9E%E5%B1%B1%E5%9C%A8%E7%BE%8E%E6%96%B0%E6%A9%9F%E6%9C%83-161216641.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-16",
+   "title": "台積電全球擴廠：年輕世代看護國神山在美新機會",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0561,
+   "pre_vol_spike": 1.846,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "7b075b2f1ce63a74",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9817534",
+   "type": "媒體報導",
+   "code": "3406",
+   "event_date": "2026-10-16",
+   "title": "玉晶光私募 引資3M 認購553.44張股票 金額逾48億元",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0276,
+   "pre_vol_spike": 2.216,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 0.5,
+   "ref_close": 1115.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "e5a5e8d31d6e6192",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9817535",
+   "type": "媒體報導",
+   "code": "2308",
+   "event_date": "2026-10-16",
+   "title": "台達電：缺電恐成 AI 大挑戰",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1809,
+   "pre_vol_spike": 1.222,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 1630.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "2180b97358bb90d7",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9817518",
+   "type": "媒體報導",
+   "code": "2356",
+   "event_date": "2026-10-16",
+   "title": "AI Agent 火熱 帶旺台鏈 英業達、緯創、鴻海有望受惠",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0086,
+   "pre_vol_spike": 1.165,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 57.6,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "989e8fac952efb18",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/11074/9817523",
+   "type": "媒體報導",
+   "code": "7806",
+   "event_date": "2026-10-16",
+   "title": "精華生醫上櫃 海外拓市",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": null,
+   "pre_vol_spike": null,
+   "reflected": "unknown",
+   "pre_volume_spike": null,
+   "reason": "價格序列不足（1<23 筆）",
+   "weight": 1.0,
+   "ref_close": 56.1,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "d5be777c512761e4",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9817707",
+   "type": "媒體報導",
+   "code": "3026",
+   "event_date": "2026-10-16",
+   "title": "禾伸堂獲輝達大追單 本季全面啟動漲價",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0334,
+   "pre_vol_spike": 1.212,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 811.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "722d2105256386ea",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9816882",
+   "type": "媒體報導",
+   "code": "2492",
+   "event_date": "2026-10-16",
+   "title": "AI需求把MLCC、電阻吃緊 華新科B/B升至1.8 轉單、漲價雙利多啟動",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0526,
+   "pre_vol_spike": 0.368,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 405.5,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "b86ae1384cfdd349",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9817709",
+   "type": "媒體報導",
+   "code": "3003",
+   "event_date": "2026-10-15",
+   "title": "晶技9月每股獲利 0.84 元 健和興 0.36 元",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0393,
+   "pre_vol_spike": 0.91,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 56.2,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "2b420e593a31d559",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9817714",
+   "type": "媒體報導",
+   "code": "3701",
+   "event_date": "2026-10-15",
+   "title": "大眾控馬國新山廠 開幕",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0164,
+   "pre_vol_spike": 0.803,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 60.1,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "54c81b5f9f191190",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9817595",
+   "type": "媒體報導",
+   "code": "6446",
+   "event_date": "2026-10-15",
+   "title": "藥華藥新藥賣向大陸",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0,
+   "pre_vol_spike": 0.4,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 1205.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "afa7cb56f41540b3",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9817597",
+   "type": "媒體報導",
+   "code": "7799",
+   "event_date": "2026-10-15",
+   "title": "禾榮科砸15億苗栗買地",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1337,
+   "pre_vol_spike": 1.046,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 447.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "1e5830e1759f8aba",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E7%A9%8D%E9%9B%BB-%E4%B8%8D%E6%8A%8A%E6%A9%9F%E6%9C%83%E7%95%99%E7%B5%A6%E5%88%A5%E4%BA%BA-q3%E7%87%9F%E6%94%B6-%E7%8D%B2%E5%88%A9%E5%89%B5%E9%AB%98-%E8%AD%89%E5%AF%A6%E6%AD%A3%E8%A9%95%E4%BC%B0%E5%BE%B7%E5%B7%9E%E6%93%B4%E5%BB%A0-153407934.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-15",
+   "title": "台積電\"不把機會留給別人\"Q3營收.獲利創高 證實正評估德州擴廠",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0561,
+   "pre_vol_spike": 1.846,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "63956578936031ca",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報焦點",
+   "source_id": "https://money.udn.com/money/story/5599/9817842",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-15",
+   "title": "先拜訪聯電但張忠謀理念令人折服！黃仁勳親揭當初為何選擇台積電",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0561,
+   "pre_vol_spike": 1.846,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "43b8bc9645de043d",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E8%87%BB%E9%BC%8E-ky%E4%BB%A3%E5%AD%90%E5%85%AC%E5%8F%B8%E6%85%B6%E9%BC%8E%E7%B2%BE%E5%AF%86%E9%9B%BB%E5%AD%90-%E6%B7%AE%E5%AE%89-%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8%E5%85%AC%E5%91%8A%E5%8F%96%E5%BE%97%E6%A9%9F%E5%99%A8%E8%A8%AD%E5%82%99-145652738.html",
+   "type": "媒體報導",
+   "code": "4958",
+   "event_date": "2026-10-15",
+   "title": "【公告】臻鼎-KY代子公司慶鼎精密電子(淮安)有限公司公告取得機器設備",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1277,
+   "pre_vol_spike": 1.136,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 519.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "5a166dab7928db5f",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%8D%87%E6%81%AF%E6%81%90%E6%8B%96%E7%B4%AFai%E7%94%A2%E6%A5%AD-%E9%82%A3%E6%96%AF%E9%81%94%E5%85%8B%E8%B7%8C%E8%BF%911%E5%80%8B%E6%9C%88%E4%BD%8E%E9%BB%9E-%E5%8F%B0%E7%A9%8D%E9%9B%BBadr%E9%87%8D%E6%8C%AB%E9%80%BE4-145628733.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-15",
+   "title": "升息恐拖累AI產業！那斯達克跌近1個月低點 台積電ADR重挫逾4％",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0561,
+   "pre_vol_spike": 1.846,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "a4543c8036860345",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/gogolook-%E5%85%AC%E5%91%8A%E6%9C%AC%E5%85%AC%E5%8F%B8%E5%8F%97%E9%82%80%E5%8F%83%E5%8A%A0%E5%AF%AC%E9%87%8F%E5%9C%8B%E9%9A%9B%E8%88%89%E8%BE%A6%E4%B9%8B%E5%8F%B0%E7%81%A3%E8%B7%AF%E6%BC%94-ndr-145400265.html",
+   "type": "媒體報導",
+   "code": "6902",
+   "event_date": "2026-10-15",
+   "title": "GOGOLOOK 公告本公司受邀參加寬量國際舉辦之台灣路演（NDR）",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0471,
+   "pre_vol_spike": 0.915,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 131.5,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "f60b01d48b489ef4",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/woolrich-%E6%AD%90%E6%B4%B2%E9%9F%BF%E6%87%89%E6%B0%B8%E7%BA%8C%E8%B6%A8%E5%8B%A2-%E5%AE%A3%E5%B8%83-2027-%E5%B9%B4%E8%B5%B7%E5%85%A8%E9%9D%A2%E5%81%9C%E7%94%A8%E5%8B%95%E7%89%A9%E6%AF%9B%E7%9A%AE-144144082.html",
+   "type": "媒體報導",
+   "code": "2027",
+   "event_date": "2026-10-15",
+   "title": "WOOLRICH 歐洲響應永續趨勢 宣布 2027 年起全面停用動物毛皮",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0325,
+   "pre_vol_spike": 1.455,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 49.3,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "0b9750370d4e556e",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E8%87%BB%E9%BC%8E-ky-%E4%BB%A3%E5%AD%90%E5%85%AC%E5%8F%B8%E6%85%B6%E9%BC%8E%E7%B2%BE%E5%AF%86%E9%9B%BB%E5%AD%90-%E6%B7%AE%E5%AE%89-%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8%E5%85%AC%E5%91%8A%E5%8F%96%E5%BE%97%E6%A9%9F%E5%99%A8%E8%A8%AD%E5%82%99-141800728.html",
+   "type": "媒體報導",
+   "code": "4958",
+   "event_date": "2026-10-15",
+   "title": "臻鼎-KY 代子公司慶鼎精密電子(淮安)有限公司公告取得機器設備",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1277,
+   "pre_vol_spike": 1.136,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 519.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "ea8f6c29144f160c",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.news.yahoo.com/ai%E7%8B%82%E6%BD%AE%E7%88%86%E5%8D%B1%E6%A9%9F-%E5%8F%B0%E6%8C%87%E6%9C%9F%E5%A4%9C%E7%9B%A4%E5%8A%87%E7%83%88%E9%9C%87%E7%9B%AA-%E9%82%A3%E6%8C%87-%E8%B2%BB%E5%8D%8A%E9%87%8D%E6%8C%AB-%E5%8F%B0%E7%A9%8D%E9%9B%BBadr%E5%B4%A9%E8%B7%8C%E9%80%BE5-135316941.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-15",
+   "title": "AI狂潮爆危機！台指期夜盤劇烈震盪 那指、費半重挫「台積電ADR崩跌逾5%」",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0561,
+   "pre_vol_spike": 1.846,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "e9e26fe318025c54",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報焦點",
+   "source_id": "https://money.udn.com/money/story/123398/9817705",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-15",
+   "title": "美股早盤／科技股續跌 道瓊漲234點 台積電 ADR 大跌4%",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0561,
+   "pre_vol_spike": 1.846,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "ab2aac1bf600d922",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E7%BE%8E%E8%82%A1%E6%97%A9%E7%9B%A4-%E9%80%9A%E8%86%A8%E9%9B%A3%E9%99%8D-%E7%A7%91%E6%8A%80%E8%82%A1%E7%BA%8C%E8%B7%8C-%E4%B8%BB%E8%A6%81%E6%8C%87%E6%95%B8%E9%96%8B%E4%BD%8E-%E5%8F%B0%E7%A9%8D%E9%9B%BBadr%E8%B7%8C%E9%80%BE4-134039810.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-15",
+   "title": "〈美股早盤〉通膨難降、科技股續跌！主要指數開低 台積電ADR跌逾4%",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0561,
+   "pre_vol_spike": 1.846,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "f6a0344a5bfd5681",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E6%AC%A3%E5%A4%A7%E5%81%A5%E5%BA%B7-%E8%A8%82%E6%96%BC10%E6%9C%8821%E6%97%A5%E8%B5%B7%E5%9C%A8%E8%AD%89%E5%88%B8%E5%95%86%E7%87%9F%E6%A5%AD%E8%99%95%E6%89%80%E8%B2%B7%E8%B3%A3-133713772.html",
+   "type": "媒體報導",
+   "code": "4198",
+   "event_date": "2026-10-15",
+   "title": "【公告】欣大健康一訂於10月21日起在證券商營業處所買賣",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0043,
+   "pre_vol_spike": 1.096,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 47.2,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "3ef53d60aacf20b6",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9817682",
+   "type": "媒體報導",
+   "code": "2867",
+   "event_date": "2026-10-15",
+   "title": "強化財務結構 三商壽擬發次順位公司債上限125億元",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0286,
+   "pre_vol_spike": 1.167,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-08-19",
+   "weight": 1.0,
+   "ref_close": null,
+   "ref_close_date": null,
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "0896a6fc547229c6",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "中央社財經",
+   "source_id": "https://www.cna.com.tw/news/afe/202610150343.aspx",
+   "type": "媒體報導",
+   "code": "2867",
+   "event_date": "2026-10-15",
+   "title": "強化財務結構 三商壽擬發次順位公司債上限125億元",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0286,
+   "pre_vol_spike": 1.167,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-08-19",
+   "weight": 1.0,
+   "ref_close": null,
+   "ref_close_date": null,
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "40116338e7f25790",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9817612",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-15",
+   "title": "台積電法說會／High-NA 規劃2030年導入 魏哲家：晚於對手不構成劣勢",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0561,
+   "pre_vol_spike": 1.846,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "6bcd2acf2c8228b0",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9817484",
+   "type": "媒體報導",
+   "code": "6446",
+   "event_date": "2026-10-15",
+   "title": "藥華藥血癌新藥取得中國ET藥證 初期聚焦醫院自費",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0,
+   "pre_vol_spike": 0.4,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 1205.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "2b7daa6695aa8fb8",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9817412",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-15",
+   "title": "台積電強勁展望難釋疑 AI 建設熱潮可持續性仍受關注",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0561,
+   "pre_vol_spike": 1.846,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "4aecd2ba4094362e",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "中央社財經",
+   "source_id": "https://www.cna.com.tw/news/afe/202610150318.aspx",
+   "type": "媒體報導",
+   "code": "6446",
+   "event_date": "2026-10-15",
+   "title": "藥華藥血癌新藥取得中國ET藥證 初期聚焦醫院自費",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0,
+   "pre_vol_spike": 0.4,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 1205.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "dbd8b217919aa76a",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9817439",
+   "type": "媒體報導",
+   "code": "2024",
+   "event_date": "2026-10-15",
+   "title": "13家金控前3季大賺6318億元 超越2024全年歷史紀錄",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0353,
+   "pre_vol_spike": 0.184,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 13.2,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "aade69b943b2ef67",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "中央社財經",
+   "source_id": "https://www.cna.com.tw/news/afe/202610150310.aspx",
+   "type": "媒體報導",
+   "code": "2024",
+   "event_date": "2026-10-15",
+   "title": "13家金控前3季大賺6318億元 超越2024全年歷史紀錄",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0353,
+   "pre_vol_spike": 0.184,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 13.2,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "d4abaa44a86b8cf0",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報焦點",
+   "source_id": "https://money.udn.com/money/story/123398/9810683",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-13",
+   "title": "台積電ADR跌2% 連五日下跌 台指期跌399點",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.033,
+   "pre_vol_spike": 1.066,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-13",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "9778525888d27139",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E6%B7%B1%E5%8C%96%E5%84%B2%E8%83%BD%E6%A5%AD%E5%8B%99%E8%BD%89%E5%9E%8B-%E6%A1%93%E9%BC%8E-ky%E5%89%8D%E4%B8%89%E5%AD%A3%E7%87%9F%E6%94%B623-55%E5%84%84%E5%85%83-%E5%B9%B4%E5%A2%9E1-231835857.html",
+   "type": "媒體報導",
+   "code": "5543",
+   "event_date": "2026-10-13",
+   "title": "深化儲能業務轉型，桓鼎-KY前三季營收23.55億元，年增1.27%",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0656,
+   "pre_vol_spike": 1.443,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-13",
+   "weight": 1.0,
+   "ref_close": 26.5,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "a2d2a6fa2f43249d",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報焦點",
+   "source_id": "https://money.udn.com/money/story/123398/9810673",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-13",
+   "title": "美股收盤／費半重挫2.7% 台積電ADR連五日下跌 油價續漲 銀行財報和 CPI 考驗美股",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.033,
+   "pre_vol_spike": 1.066,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-13",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "a61bf68faceec2cb",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E4%B8%AD%E8%8F%AF%E9%9B%BB%E4%BF%A1adr12%E6%97%A5%E4%B8%8A%E6%BC%B20-22%E7%BE%8E%E5%85%83%E6%BC%B2%E5%B9%850-48-%E6%8A%98%E5%8F%B0%E8%82%A1147-39%E5%85%83-215141095.html",
+   "type": "媒體報導",
+   "code": "2412",
+   "event_date": "2026-10-13",
+   "title": "中華電信ADR12日上漲0.22美元漲幅0.48%折台股147.39元",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0172,
+   "pre_vol_spike": 0.799,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-13",
+   "weight": 1.0,
+   "ref_close": 152.5,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "27a6be433c41a8a7",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E7%A9%8D%E9%9B%BBadr12%E6%97%A5%E4%B8%8B%E8%B7%8C8-96%E7%BE%8E%E5%85%83%E8%B7%8C%E5%B9%851-98-%E6%8A%98%E5%8F%B0%E8%82%A12834-51%E5%85%83-214137218.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-13",
+   "title": "台積電ADR12日下跌8.96美元跌幅1.98%折台股2834.51元",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.033,
+   "pre_vol_spike": 1.066,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-13",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "b55f9a2cb960ab59",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E7%A9%8D%E9%9B%BBadr12%E6%97%A5%E4%B8%8B%E8%B7%8C8-96%E7%BE%8E%E5%85%83%E8%B7%8C%E5%B9%851-98-%E6%8A%98%E5%8F%B0%E8%82%A12834-51%E5%85%83-214137218.html",
+   "type": "媒體報導",
+   "code": "2834",
+   "event_date": "2026-10-13",
+   "title": "台積電ADR12日下跌8.96美元跌幅1.98%折台股2834.51元",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.026,
+   "pre_vol_spike": 0.524,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-13",
+   "weight": 1.0,
+   "ref_close": 17.65,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "28a24f6a5273f5bc",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E8%82%A1%E7%9B%A4%E5%89%8D%E8%A6%81%E8%81%9E-%E5%8D%97%E4%BA%9E%E7%A7%91%E9%A0%90%E6%9C%9Fdram-q4%E7%BA%8C%E6%BC%B2-%E5%8F%B0%E9%81%94%E9%9B%BBq3%E7%87%9F%E6%94%B6%E8%A1%9D1970%E5%84%84%E5%85%83%E5%AF%AB%E6%96%B0%E7%8C%B7-211004877.html",
+   "type": "媒體報導",
+   "code": "2308",
+   "event_date": "2026-10-13",
+   "title": "〈台股盤前要聞〉南亞科預期DRAM Q4續漲、台達電Q3營收衝1970億元寫新猷",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1147,
+   "pre_vol_spike": 0.973,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-13",
+   "weight": 1.0,
+   "ref_close": 1630.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "9f9709ecafe3a653",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E8%82%A1%E7%9B%A4%E5%89%8D%E8%A6%81%E8%81%9E-%E5%8D%97%E4%BA%9E%E7%A7%91%E9%A0%90%E6%9C%9Fdram-q4%E7%BA%8C%E6%BC%B2-%E5%8F%B0%E9%81%94%E9%9B%BBq3%E7%87%9F%E6%94%B6%E8%A1%9D1970%E5%84%84%E5%85%83%E5%AF%AB%E6%96%B0%E7%8C%B7-211004877.html",
+   "type": "媒體報導",
+   "code": "2408",
+   "event_date": "2026-10-13",
+   "title": "〈台股盤前要聞〉南亞科預期DRAM Q4續漲、台達電Q3營收衝1970億元寫新猷",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0792,
+   "pre_vol_spike": 1.473,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-13",
+   "weight": 1.0,
+   "ref_close": 439.5,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "863e44725c338970",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E6%84%9B%E6%99%AE-%E7%8F%BE%E5%A2%9E%E5%8F%83%E8%88%87%E7%99%BC%E8%A1%8C%E6%B5%B7%E5%A4%96%E5%AD%98%E8%A8%97%E6%86%91%E8%AD%89%E6%A1%88%E5%AE%8C%E6%88%90%E8%A8%82%E5%83%B9-%E6%AF%8F%E8%82%A1%E6%8A%98%E5%90%88%E7%B4%84%E6%96%B0%E8%87%BA%E5%B9%A3897-61%E5%85%83-205700653.html",
+   "type": "媒體報導",
+   "code": "6531",
+   "event_date": "2026-10-13",
+   "title": "愛普*現增參與發行海外存託憑證案完成訂價，每股折合約新臺幣897.61元",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1223,
+   "pre_vol_spike": 1.437,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-13",
+   "weight": 1.0,
+   "ref_close": 831.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "5c5659631d210f68",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/11162/9810583",
+   "type": "媒體報導",
+   "code": "3008",
+   "event_date": "2026-10-13",
+   "title": "大立光法說會重塑市場對光通訊的看法？從上詮、友達等談起",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.081,
+   "pre_vol_spike": 2.813,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-13",
+   "weight": 0.5,
+   "ref_close": 6605.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "e2539f2f2b3fcb9e",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/11162/9810581",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-13",
+   "title": "日本國家隊 Rapidus 找來17家夥伴 真正的盤算是什麼？台積電該緊張嗎？",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.033,
+   "pre_vol_spike": 1.066,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-13",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "99ab466dd726e861",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9810451",
+   "type": "媒體報導",
+   "code": "4979",
+   "event_date": "2026-10-13",
+   "title": "輝達聯手思科光通訊大進擊 華星光、眾達等台鏈歡呼",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1054,
+   "pre_vol_spike": 0.601,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-13",
+   "weight": 1.0,
+   "ref_close": 542.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "22eeb9df22c39932",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9810361",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-13",
+   "title": "南亞科第3季毛利率85.7% 比台積電猛 改寫台灣晶圓製造業紀錄",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.033,
+   "pre_vol_spike": 1.066,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-13",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "892bbb0e58fa0c22",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9810361",
+   "type": "媒體報導",
+   "code": "2408",
+   "event_date": "2026-10-13",
+   "title": "南亞科第3季毛利率85.7% 比台積電猛 改寫台灣晶圓製造業紀錄",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0792,
+   "pre_vol_spike": 1.473,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-13",
+   "weight": 1.0,
+   "ref_close": 439.5,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "901a3fd42dc92ec1",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9810376",
+   "type": "媒體報導",
+   "code": "2408",
+   "event_date": "2026-10-13",
+   "title": "南亞科總座： DRAM 售價還會漲",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0792,
+   "pre_vol_spike": 1.473,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-13",
+   "weight": 1.0,
+   "ref_close": 439.5,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "5bb5dadfd4d162ae",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9810378",
+   "type": "媒體報導",
+   "code": "2408",
+   "event_date": "2026-10-13",
+   "title": "南亞科屏東廠聚焦 3D IC 技術",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0792,
+   "pre_vol_spike": 1.473,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-13",
+   "weight": 1.0,
+   "ref_close": 439.5,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "00e5d571d7ada422",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9810404",
+   "type": "媒體報導",
+   "code": "2308",
+   "event_date": "2026-10-13",
+   "title": "台達電9月營收月增1.3% 衝刺 AI 占比",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1147,
+   "pre_vol_spike": 0.973,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-13",
+   "weight": 1.0,
+   "ref_close": 1630.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "be014d1ae069911a",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/11162/9810313",
+   "type": "媒體報導",
+   "code": "2308",
+   "event_date": "2026-10-13",
+   "title": "漲價影響！遊戲機買氣冷 衝擊鴻海、和碩、鴻準、台達電等台鏈",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1147,
+   "pre_vol_spike": 0.973,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-13",
+   "weight": 1.0,
+   "ref_close": 1630.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "bccabcfaba0fcd69",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9810085",
+   "type": "媒體報導",
+   "code": "5371",
+   "event_date": "2026-10-13",
+   "title": "緯創搶 AI 財 斥資 10 億元買中光電南科廠",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": null,
+   "pre_vol_spike": null,
+   "reflected": "unknown",
+   "pre_volume_spike": null,
+   "reason": "價格序列不足（0<23 筆）",
+   "weight": 1.0,
+   "ref_close": null,
+   "ref_close_date": null,
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "c557f70bd3bbd6ec",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9810091",
+   "type": "媒體報導",
+   "code": "2887",
+   "event_date": "2026-10-13",
+   "title": "非電子族群短多點火 台新新光金、長榮等近五日獲法人買超 股價強勢表態",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0526,
+   "pre_vol_spike": 1.255,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-13",
+   "weight": 1.0,
+   "ref_close": 41.6,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "cf33e534c3f98586",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9810157",
+   "type": "媒體報導",
+   "code": "8454",
+   "event_date": "2026-10-13",
+   "title": "網家9月營收月增6.3% 富邦媒-6%",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.032,
+   "pre_vol_spike": 0.431,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-13",
+   "weight": 1.0,
+   "ref_close": 250.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "7d9b9524f41ba0c0",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E6%84%9B%E6%99%AE-%E5%85%AC%E5%91%8A%E6%9C%AC%E5%85%AC%E5%8F%B8%E7%8F%BE%E9%87%91%E5%A2%9E%E8%B3%87%E7%99%BC%E8%A1%8C%E6%99%AE%E9%80%9A%E8%82%A1%E5%8F%83%E8%88%87%E7%99%BC%E8%A1%8C%E6%B5%B7%E5%A4%96%E5%AD%98%E8%A8%97%E6%86%91%E8%AD%89%E4%B9%8B%E7%99%BC%E8%A1%8C%E6%A2%9D%E4%BB%B6-161900365.html",
+   "type": "媒體報導",
+   "code": "6531",
+   "event_date": "2026-10-13",
+   "title": "愛普* 公告本公司現金增資發行普通股參與發行海外存託憑證之發行條件",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1223,
+   "pre_vol_spike": 1.437,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-13",
+   "weight": 1.0,
+   "ref_close": 831.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "c032f523ac87f99e",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%AE%8F%E7%A2%81%E9%81%8A%E6%88%B2-%E5%89%B5-%E4%BB%A3%E5%AD%90%E5%85%AC%E5%8F%B8winking-studios-limited%E5%85%AC%E5%91%8A%E5%BA%AB%E8%97%8F%E8%82%A1%E5%9F%B7%E8%A1%8C%E6%83%85%E5%BD%A2-153900079.html",
+   "type": "媒體報導",
+   "code": "6908",
+   "event_date": "2026-10-12",
+   "title": "宏碁遊戲-創 代子公司Winking Studios Limited公告庫藏股執行情形",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0335,
+   "pre_vol_spike": 1.46,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-12",
+   "weight": 1.0,
+   "ref_close": 25.2,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "aeeedc0d13da2d21",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E8%98%8B%E6%9E%9C-m7-macbook-pro-%E5%A4%A7%E6%94%B9%E6%AC%BE-150803270.html",
+   "type": "媒體報導",
+   "code": "2027",
+   "event_date": "2026-10-12",
+   "title": "蘋果 M7 MacBook Pro 大改款 2027 春季現身 薄型機身、OLED 觸控螢幕成亮點",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0042,
+   "pre_vol_spike": 0.985,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-12",
+   "weight": 1.0,
+   "ref_close": 49.3,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "acd47aadffef1159",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%BE%AE%E8%BB%9F%E6%8E%A8%E6%96%B0-%E4%BB%A3ai%E6%99%B6%E7%89%87maia-300-%E9%83%A8%E5%88%86%E6%8E%A1%E5%8F%B0%E7%A9%8D%E9%9B%BB2%E5%A5%88%E7%B1%B3%E8%A3%BD%E7%A8%8B-150309675.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-12",
+   "title": "微軟推新一代AI晶片Maia 300 部分採台積電2奈米製程",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.016,
+   "pre_vol_spike": 1.024,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-12",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "fcb3a0c7a4668870",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.news.yahoo.com/%E5%82%B3%E8%AB%8B%E5%8F%B0%E7%A9%8D%E9%9B%BB%E8%87%AA%E5%BB%BA%E9%9B%BB%E5%BB%A0-%E5%8F%B0%E9%9B%BB%E6%9B%BE%E6%96%87%E7%94%9F%E6%9B%9D%E9%97%9C%E9%8D%B5-%E9%9B%BB%E7%B6%B2%E6%89%8D%E6%98%AF%E7%9C%9F%E6%AD%A3%E6%8C%91%E6%88%B0-143526486.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-12",
+   "title": "傳請台積電自建電廠？台電曾文生曝關鍵：電網才是真正挑戰",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.016,
+   "pre_vol_spike": 1.024,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-12",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "7c3e11ba59356883",
+   "recorded_at": "2026-10-16T00:28:35.249271+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.news.yahoo.com/%E7%BE%8E%E8%82%A1%E9%96%8B%E7%9B%A4-%E7%BE%8E%E5%85%89%E9%87%8D%E6%8C%AB4-%E6%8B%96%E7%B4%AF%E7%A7%91%E6%8A%80%E8%82%A1-%E5%8F%B0%E7%A9%8D%E9%9B%BBadr%E4%B8%8B%E8%B7%8C1-07-142819172.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-12",
+   "title": "美股開盤！美光重挫4%拖累科技股 台積電ADR下跌1.07％",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.016,
+   "pre_vol_spike": 1.024,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-12",
+   "weight": 1.0,
+   "ref_close": 2440.0,
    "ref_close_date": "2026-10-15",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
    "entry_close": null,

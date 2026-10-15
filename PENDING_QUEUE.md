@@ -20137,7 +20137,7 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
 **執行分工**：互動視窗先做 A1，再依序 B→C→D→E；改 App 前端（index.html／app-*.js）的項目為避免與 DevQueue（先.一〇三 夜間輪次也改前端）互撞，**本批一律由互動視窗執行**，DevQueue 不取。
 **心跳**：每項完成標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl item=先.一〇四-N；最後一項附驗收截圖路徑。
 
-- [ ] **先.一〇四-1 新聞排序改 published_iso（parsedate_to_datetime）、重跑確認最新 ≥ T-1、查 news_evidence/news_urls 補 10/01–10/15、查下游是否吃到 9/30 舊新聞並重產、news.json 最新 >2 天黃色警告**（互動視窗執行）
+- [x] **先.一〇四-1 新聞排序改 published_iso（parsedate_to_datetime）、重跑確認最新 ≥ T-1、查 news_evidence/news_urls 補 10/01–10/15、查下游是否吃到 9/30 舊新聞並重產、news.json 最新 >2 天黃色警告**（互動視窗執行）〔2026-10-16 00:40 互動視窗完成：根因＝merge_keep 用 RFC822 字串排序，開頭星期幾讓 'Wed' 永遠排前，加上只留 300 則，10/01 起新進新聞同一輪就被擠掉（修前 300 則全是 Wed）。修：加 published_iso（parsedate_to_datetime，台北時間）並以它排序，舊列補算。補回：news_urls／news_evidence 只有網址與日期、沒有標題，無法補；從 git 歷史 136 版找回 10/12、10/13 共 202 則合併；10/01～10/11、10/14 在當輪就被擠掉、從未進 commit，**補不回**。重跑後 news.json 最新 2026-10-16 00:12（≥T-1）。下游影響：build_daily_brief 個股新聞計數（標到 15→28 檔）與 build_signal_ledger L3 新聞交叉驗證（+57 筆 L3，190→247）自 10/01 起都吃到 9/30 舊新聞，已重產；題材（build_themes）讀 news_evidence，不受影響。監測：news.json 加 newest_published_iso／stale_warning（>2 天印 ::warning::、App 近期事件卡顯示黃色提示，不擋流程）。冒煙全部通過〕
 - [ ] **先.一〇四-2 橫幅合併成一行（最嚴重一則＋還有 N 則）、今日頁完整版／其他頁膠囊亮點、同因只講一次、strategy_frozen 灰色「凍結中」**（互動視窗執行）
 - [ ] **先.一〇四-3 首頁狀態列與頂部膠囊去重；沒連線時「我的資產」改頁尾小字**（互動視窗執行）
 - [ ] **先.一〇四-4 首頁順序：今日摘要卡→自選股→今日事件→策略 vs 0050→盤前日報（預設收合）；「跟 0050 比」失敗顯示原因**（互動視窗執行）

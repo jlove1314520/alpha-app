@@ -35,6 +35,7 @@ import ssl
 import sys
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
+from email.utils import parsedate_to_datetime
 from pathlib import Path
 
 import certifi
@@ -68,6 +69,7 @@ RSS_FEEDS = [
     ("經濟日報焦點", "https://money.udn.com/rssfeed/news/1001/5588?ch=money"),
 ]
 KEEP_DAYS = 90          # 事件保留 90 天：個股頁只顯示近 30 日，多留一些供研究端用
+NEWS_STALE_DAYS = 2     # 先.一〇四-1：最新一則超過 2 天就黃色警告
 NEWS_KEEP = 300         # 新聞只留最近 300 則，避免檔案無限長大
 
 
@@ -272,12 +274,40 @@ def fetch_news(s: requests.Session, known_codes: set[str]) -> tuple[list[dict], 
                 m = _match_article(title, "", _NAME2CODE, known_codes)
                 codes = m["codes"]
                 news.append({"title": title[:140], "url": link, "published": pub,
+                             "published_iso": published_iso(pub),
                              "source": name, "codes": codes})
                 n += 1
             meta[name] = {"ok": True, "items": len(items), "kept": n}
         except Exception as e:  # noqa: BLE001
             meta[name] = {"ok": False, "error": f"{type(e).__name__}: {e}"}
     return news, meta
+
+
+def published_iso(pub) -> str | None:
+    """RSS pubDate（RFC 822，例 'Wed, 30 Sep 2026 23:59:56 GMT'）→ 台北時間 ISO 字串；解析不了回 None。
+
+    先.一〇四-1（2026-10-16）：原本直接拿 pubDate 字串排序，開頭是星期幾，'Wed' 永遠排在 'Thu'／'Tue' 前面，
+    加上只留 300 則，10/01～10/15 的新聞一進來就被擠掉，news.json 停在 9/30。
+    """
+    if not pub:
+        return None
+    try:
+        dt = parsedate_to_datetime(str(pub))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(TZ).isoformat()
+    except (TypeError, ValueError, IndexError):
+        return None
+
+
+def _sort_key(r: dict) -> str:
+    """排序用時間：published_iso → 補算 published → date（事件用的 YYYY-MM-DD）。都是可直接比大小的 ISO 字串。"""
+    if r.get("published_iso"):
+        return str(r["published_iso"])
+    iso = published_iso(r.get("published"))
+    if iso:
+        return iso
+    return str(r.get("date") or "")
 
 
 def merge_keep(path: Path, key: str, new_rows: list[dict], id_fn, keep_days=None, cap=None):
@@ -301,7 +331,13 @@ def merge_keep(path: Path, key: str, new_rows: list[dict], id_fn, keep_days=None
     if keep_days:
         cutoff = (datetime.now(TZ) - timedelta(days=keep_days)).strftime("%Y-%m-%d")
         out = [r for r in out if str(r.get("date", "")) >= cutoff]
-    out.sort(key=lambda r: str(r.get("date") or r.get("published") or ""), reverse=True)
+    # 先.一〇四-1：舊列沒有 published_iso 的順手補上，排序一律用可比大小的 ISO 時間
+    for r in out:
+        if r.get("published") and not r.get("published_iso"):
+            iso = published_iso(r.get("published"))
+            if iso:
+                r["published_iso"] = iso
+    out.sort(key=_sort_key, reverse=True)
     if cap:
         out = out[:cap]
     return out
@@ -340,8 +376,26 @@ def main() -> int:
         "keep_days": KEEP_DAYS, "meta": ev_meta, "count": len(ev_out), "events": ev_out,
     }, ensure_ascii=False, indent=1), encoding="utf-8")
 
+    # 先.一〇四-1 監測：最新一則超過 NEWS_STALE_DAYS 天 → 黃色警告（只標記與印 ::warning::，不擋流程、不中止寫檔）
+    newest = _sort_key(nw_out[0]) if nw_out else ""
+    stale_warning = None
+    try:
+        if not newest:
+            stale_warning = "news.json 沒有任何可解析時間的新聞"
+        else:
+            nd = datetime.fromisoformat(newest) if "T" in newest else datetime.fromisoformat(newest + "T00:00:00+08:00")
+            age_d = (now - nd).total_seconds() / 86400
+            if age_d > NEWS_STALE_DAYS:
+                stale_warning = f"最新一則新聞是 {newest[:10]}，已 {age_d:.1f} 天沒有新的新聞"
+    except Exception as e:  # noqa: BLE001 -- 十二節：監測自身失敗只警告
+        print(f"::warning::新聞新鮮度檢查失敗：{type(e).__name__}: {e}")
+    if stale_warning:
+        print(f"::warning::{stale_warning}")
+
     (DATA / "news.json").write_text(json.dumps({
         "fetched_at": now.isoformat(),
+        "newest_published_iso": newest or None,
+        "stale_warning": stale_warning,
         "source": "中央社財經 RSS＋Yahoo股市 RSS（只存索引不存全文）",
         "not_used": {"鉅亨網": "公開 RSS 兩個路徑皆 404，唯一可通的是站台後端 API，"
                               "依 CLAUDE.md 取得方式鐵律不採用"},

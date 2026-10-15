@@ -2261,6 +2261,8 @@
           <span style="flex:1;font-size:12px;color:var(--ink-2);line-height:1.5"><b style="color:var(--ink)">${_holdName(it.code,evName)}</b>${realCodes.has(it.code)?' <span style="font-size:9.5px;color:var(--gold)">真錢持股</span>':''}・${t}${it.kind==='法說會'?mopsIrLinkHtml({type:it.kind,code:it.code},true):''}</span>
         </div>`;
       }).join('')
+        // 先.一〇四-1：news.json 最新一則超過 2 天 → 黃色提示（不擋其他內容）
+        +(newsDoc&&newsDoc.stale_warning?`<div class="note" style="margin-top:8px;color:var(--warn,#d4a72c)">⚠ 新聞來源可能停更：${String(newsDoc.stale_warning).replace(/</g,'&lt;')}</div>`:'')
         +`<div class="note" data-ui-explain style="margin-top:8px">自選股 ${WL.length} 檔＋真錢持股 ${realCodes.size} 檔（不含研究策略／模擬持股）${realNote?'（'+realNote+'）':''}，共 ${items.length} 則事件新聞${items.length>20?'，只顯示最近20筆':''}。來源：data/events.json（MOPS重大訊息／TWSE月營收／除權息）＋data/news.json（僅已命中股票代號者，覆蓋率有限）。點一列跳個股頁。</div>`;
     }catch(e){
       console.warn('[loadMyHoldingsEvents]',e);recordGlobalError('loadMyHoldingsEvents',e);
@@ -4440,7 +4442,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-16.0006';
+  const APP_VERSION='2026-10-16.0040';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
