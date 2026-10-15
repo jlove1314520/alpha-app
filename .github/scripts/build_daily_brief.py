@@ -10,7 +10,7 @@
   data/market_tw.json   台指期／加權指數（fetch_market_tw.py）
   data/events.json      重大訊息／法說會／除權息事件日曆（fetch_news_events.py）
   data/news.json        新聞索引（只用 codes 欄位計數）
-  data/paper_*.json     紙上追蹤狀態（週覆盤用）
+  data/strategy_curves.json  紙上追蹤（週覆盤用，與首頁「跟 0050 比」同一份；先.一〇三-5）
 
 自選股存在使用者手機 localStorage，排程端看不到，所以這裡只輸出
 「每檔代號 → 近一日重大訊息／新聞則數」對照表，由 App 端用自選股清單過濾。
@@ -40,8 +40,6 @@ DISCLAIMER = "規則摘要，非 AI 判斷、非投資建議"
 # 「重大訊息」類事件（不含每月例行的月營收與除權息，那兩類另外計數）
 MATERIAL_SOURCES = ("TWSE 重大訊息", "TPEx 重大訊息")
 UPCOMING_DAYS = 3
-PAPER_FILES = [("paper_7030.json", "紙.一 70/30"), ("paper_1b.json", "紙.一b Bb-90"),
-               ("paper_3.json", "紙.三"), ("paper_4.json", "紙.四 R1")]
 
 
 def _load(name):
@@ -113,15 +111,18 @@ def block_news():
 
 
 def block_paper():
+    """先.一〇三-5：週覆盤的紙上追蹤改讀 strategy_curves.json（與首頁「跟 0050 比」、交易頁同一份數字與名稱），
+    不再各自讀 paper_*.json——舊做法名稱用內部代號（紙.一b…）、報酬口徑也跟首頁不同。"""
+    sc = _load("strategy_curves.json")
     rows = []
-    for fn, label in PAPER_FILES:
-        try:
-            p = _load(fn)
-        except Exception as e:
-            rows.append({"label": label, "error": f"讀取失敗：{e}"})
+    for ln in sc.get("lines") or []:
+        if ln.get("group") != "paper":
             continue
-        rows.append({"label": label, "started": bool(p.get("started")), "note": p.get("note"),
-                     "as_of": p.get("as_of_date"), "total_return_pct": p.get("total_return_pct")})
+        m = ln.get("metrics") or {}
+        rows.append({"id": ln.get("id"), "label": ln.get("label"), "started": bool(ln.get("started")),
+                     "start_date": ln.get("start_date"), "note": None if ln.get("started") else (ln.get("inception_note") or ln.get("note")),
+                     "as_of": ln.get("as_of"), "total_return_pct": _pct(m.get("cum_pct")),
+                     "bench_return_pct": _pct(m.get("bench_cum_pct")), "source": "data/strategy_curves.json"})
     return rows
 
 

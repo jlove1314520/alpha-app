@@ -123,14 +123,20 @@
   function _paperRow(k,v,cls){
     return '<div style="display:flex;justify-content:space-between;gap:6px;margin-top:6px;font-size:12px"><span class="note" style="margin:0">'+_paperEsc(k)+'</span><b class="'+(cls||'')+'" style="text-align:right">'+v+'</b></div>';
   }
-  function _paperCommonRows(j,weightsHtml){
-    const ret=j.total_return_pct;
+  // 先.一〇三-5：累積報酬與資料日改讀 data/strategy_curves.json（與首頁「跟 0050 比」、週覆盤同一份）；
+  // 讀不到才退回各自 paper_*.json 的數字，並在卡上標來源。
+  let _PAPER_SC=null;
+  function _paperScLine(id){return _PAPER_SC&&id?(_PAPER_SC.lines||[]).find(x=>x.id===id&&x.started)||null:null}
+  function _paperCommonRows(j,weightsHtml,scId){
+    const ln=_paperScLine(scId);
+    const ret=ln?(ln.metrics||{}).cum_pct:j.total_return_pct;
+    const asOf=ln?ln.as_of:j.as_of_date;
     const nx=_paperNextRebalance(j.as_of_date);
-    return _paperRow('NAV',j.nav!=null?Math.round(j.nav).toLocaleString():'—')
+    return _paperRow(ln?'NAV（月底記帳）':'NAV',j.nav!=null?Math.round(j.nav).toLocaleString():'—')
       +_paperRow('累積報酬',ret!=null?(ret>=0?'+':'')+Number(ret).toFixed(2)+'%':'—',(ret||0)>=0?'pos':'neg')
       +_paperRow('目前權重',weightsHtml)
       +_paperRow('下次再平衡',nx?_paperEsc(nx)+'<span class="note" style="margin:0 0 0 3px">預計</span>':'—')
-      +'<div class="note" style="margin-top:6px;font-size:11px">截至 '+_paperEsc(j.as_of_date||'—')+' · 已記'+(j.history_months||0)+'筆</div>';
+      +'<div class="note" style="margin-top:6px;font-size:11px">截至 '+_paperEsc(asOf||'—')+' · 已記'+(j.history_months||0)+'筆'+(ln?'':(scId?' · 報酬取自帳本檔（跟 0050 比資料未就緒）':''))+'</div>';
   }
   async function _fetchPaperJson(url){
     const r=await fetch(url+'?t='+Date.now());
@@ -142,7 +148,7 @@
       const j=await _fetchPaperJson('data/paper_7030.json');
       if(!j.started)return _paperCardHtml('模擬 A 穩健','0050＋定存','<div class="note" style="margin-top:8px">'+_paperEsc(j.note||'尚未啟動：預定2026-10第一個交易日起')+'</div>');
       const w=(j.stock_weight!=null?'0050 '+(j.stock_weight*100).toFixed(0)+'%':'—')+' / 定存 '+(j.bond_weight!=null?(j.bond_weight*100).toFixed(0)+'%':'—');
-      return _paperCardHtml('模擬 A 穩健','0050 70% · 定存 30%',_paperCommonRows(j,w));
+      return _paperCardHtml('模擬 A 穩健','0050 70% · 定存 30%',_paperCommonRows(j,w,'paper_1'));
     }catch(e){
       console.warn('[_renderPaper7030]',e);recordGlobalError('_renderPaper7030',e);
       return _paperCardHtml('模擬 A 穩健','0050＋定存','<div class="note" style="margin-top:8px">載入失敗：'+_paperEsc(e.message)+'</div>');
@@ -151,13 +157,13 @@
   async function _renderPaper1b(){
     try{
       const j=await _fetchPaperJson('data/paper_1b.json');
-      if(!j.started)return _paperCardHtml('紙.一b Bb-90','0050 45% · 00646 45% · 00697B 10%','<div style="margin-top:10px;font-size:14px;font-weight:700;color:var(--warn)">2026-11-02 啟動</div><div class="note" style="margin-top:4px;font-size:11px">啟動前不顯示任何數字</div>');
+      if(!j.started)return _paperCardHtml('模擬 D 三檔分散','0050 45% · 00646 45% · 00697B 10%','<div style="margin-top:10px;font-size:14px;font-weight:700;color:var(--warn)">2026-11-02 啟動</div><div class="note" style="margin-top:4px;font-size:11px">啟動前不顯示任何數字</div>');
       const wp=j.weights_post||{};
       const w=Object.keys(wp).map(k=>_paperEsc(k)+' '+(wp[k]*100).toFixed(0)+'%').join('<br>');
-      return _paperCardHtml('紙.一b Bb-90','0050 / 00646 / 00697B',_paperCommonRows(j,w||'—'));
+      return _paperCardHtml('模擬 D 三檔分散','0050 / 00646 / 00697B',_paperCommonRows(j,w||'—','paper_1b'));
     }catch(e){
       console.warn('[_renderPaper1b]',e);recordGlobalError('_renderPaper1b',e);
-      return _paperCardHtml('紙.一b Bb-90','0050 / 00646 / 00697B','<div class="note" style="margin-top:8px">載入失敗：'+_paperEsc(e.message)+'</div>');
+      return _paperCardHtml('模擬 D 三檔分散','0050 / 00646 / 00697B','<div class="note" style="margin-top:8px">載入失敗：'+_paperEsc(e.message)+'</div>');
     }
   }
   // 2026-10-07（先.四十七-二）：紙.三 S3-C6（信用利差危機閘門×槓桿版 Bb-90 C6）前進式紙上追蹤。
@@ -170,21 +176,21 @@
     return t;
   }
   async function _renderPaper3(){
-    const title='紙.三 S3-C6 危機閘門',sub='00631L/00647L 各25%·0050/00646 各15%·00697B 20%（閘門關時2倍腿改現金）';
+    const title='模擬 B 景氣閘門',sub='00631L/00647L 各25%·0050/00646 各15%·00697B 20%（閘門關時2倍腿改現金）';
     try{
       const j=await _fetchPaperJson('data/paper_3.json');
       const err=j.last_error?'<div class="note" style="margin-top:6px;font-size:11px;color:var(--down,#e5534b)">最近一次未記帳：'+_paperEsc(j.last_error.reason||j.last_error.status)+'</div>':'';
       // 先.四十八 二：樣本外警示（#428，數字已以結果檔程式核對）
-      const oos='<div class="note" style="margin-top:6px;font-size:11px;color:var(--warn)">⚠ 樣本外（2025-01～2026-09，#428）：閘門 21 個持有月中 13 個月關閉，累積 +41.9%，落後 Bb-90 34.3pp、落後 0050 96.6pp。21 個月檢定力低，好壞都不構成證明。紙.三期間若閘門關閉占比 >50% 且落後 Bb-90 >10pp，進槓桿階段 1 須總司令另行裁示。</div>';
+      const oos='<div class="note" style="margin-top:6px;font-size:11px;color:var(--warn)">⚠ 樣本外（2025-01～2026-09，#428）：閘門 21 個持有月中 13 個月關閉，累積 +41.9%，落後 Bb-90 34.3pp、落後 0050 96.6pp。21 個月檢定力低，好壞都不構成證明。模擬 B 期間若閘門關閉占比 >50% 且落後 Bb-90 >10pp，進槓桿階段 1 須總司令另行裁示。</div>';
       if(!j.started)return _paperCardHtml(title,sub,_paperRow('閘門目前',_paperGateHtml(j.gate_now,null))+'<div style="margin-top:8px;font-size:14px;font-weight:700;color:var(--warn)">2026-10 月底建倉</div><div class="note" style="margin-top:4px;font-size:11px">建倉前不顯示淨值</div>'+err+oos);
       const sg=v=>v==null?'—':(v>=0?'+':'')+Number(v).toFixed(2)+'%';
       const wp=j.weights_post||{};
       const w=Object.keys(wp).map(k=>_paperEsc(k==='CASH'?'現金':k)+' '+(wp[k]*100).toFixed(0)+'%').join('<br>');
       return _paperCardHtml(title,sub,
         _paperRow('閘門目前',_paperGateHtml(j.gate_now,j.pending_switch))
-        +_paperCommonRows(j,w||'—')
+        +_paperCommonRows(j,w||'—','paper_3')
         +_paperRow('對照 Bb-90（同日起算）',sg(j.bench_bb90_return_pct))
-        +_paperRow('對照 0050 全持有',sg(j.bench_0050_return_pct))+err+oos+_paperKillHtml());
+        +_paperRow('對照 0050 全持有',sg(_paperScLine('paper_3')?(_paperScLine('paper_3').metrics||{}).bench_cum_pct:j.bench_0050_return_pct))+err+oos+_paperKillHtml());
     }catch(e){
       console.warn('[_renderPaper3]',e);recordGlobalError('_renderPaper3',e);
       return _paperCardHtml(title,sub,'<div class="note" style="margin-top:8px">載入失敗：'+_paperEsc(e.message)+'</div>');
@@ -198,12 +204,12 @@
   const _paperKillHtml=()=>'<div class="note paper-kill" data-ui-cite data-ui-keep style="margin-top:6px;font-size:11.5px;font-weight:600;color:var(--critical,#e5534b)">⛔ '+PAPER_KILL_LABEL+'</div>';
   const PAPER4_DISCLOSURE='看過 2025–26 結果後才設計；回測 2003–2024 年化 15.1%／MDD −36.2%；同一閘門在 2025–26 樣本外 21 個月中有 13 個月關閉並大幅落後 0050；無樣本外驗證，僅紙上追蹤';
   async function _renderPaper4(){
-    const title='紙.四 R1 信用利差閘門',sub='主：R1-C 0050 50%＋00631L 50%｜並列：R1-A 70%／30%（閘門關時 00631L 改現金）';
+    const title='模擬 C 加速',sub='主：R1-C 0050 50%＋00631L 50%｜並列：R1-A 70%／30%（閘門關時 00631L 改現金）';
     const disc='<div class="note" id="paper4-disclosure" style="margin-top:6px;font-size:11px;color:var(--warn)">⚠ '+_paperEsc(PAPER4_DISCLOSURE)+'。</div>'+_paperKillHtml();
     try{
       const [j,p3]=await Promise.all([_fetchPaperJson('data/paper_4.json'),_fetchPaperJson('data/paper_3.json').catch(e=>{console.warn('[_renderPaper4] paper_3',e);return {started:false}})]);
       const err=j.last_error?'<div class="note" style="margin-top:6px;font-size:11px;color:var(--down,#e5534b)">最近一次未記帳：'+_paperEsc(j.last_error.reason||j.last_error.status)+'</div>':'';
-      if(!j.started||!j.books)return _paperCardHtml(title,sub,_paperRow('閘門目前',_paperGateHtml(j.gate_now,null))+'<div style="margin-top:8px;font-size:14px;font-weight:700;color:var(--warn)">2026-10 月底建倉（與紙.三 同日）</div><div class="note" style="margin-top:4px;font-size:11px">建倉前不顯示淨值</div>'+err+disc);
+      if(!j.started||!j.books)return _paperCardHtml(title,sub,_paperRow('閘門目前',_paperGateHtml(j.gate_now,null))+'<div style="margin-top:8px;font-size:14px;font-weight:700;color:var(--warn)">2026-10 月底建倉（與模擬 B 同日）</div><div class="note" style="margin-top:4px;font-size:11px">建倉前不顯示淨值</div>'+err+disc);
       const sg=v=>v==null?'—':(v>=0?'+':'')+Number(v).toFixed(2)+'%';
       const pri=j.books[j.primary||'R1-C']||Object.values(j.books)[0];
       const a=j.books['R1-A'];
@@ -211,11 +217,11 @@
       const w=Object.keys(wp).map(k=>_paperEsc(k==='CASH'?'現金':k)+' '+(wp[k]*100).toFixed(0)+'%').join('<br>');
       return _paperCardHtml(title,sub,
         _paperRow('閘門目前',_paperGateHtml(j.gate_now,pri.pending_switch))
-        +_paperCommonRows(Object.assign({},pri,{history_months:pri.rows}),w||'—')
+        +_paperCommonRows(Object.assign({},pri,{history_months:pri.rows}),w||'—','paper_4')
         +(a?_paperRow('並列 R1-A（70/30）',sg(a.total_return_pct)):'')
-        +_paperRow('對照 0050 全持有',sg(pri.bench_0050_return_pct))
+        +_paperRow('對照 0050 全持有',sg(_paperScLine('paper_4')?(_paperScLine('paper_4').metrics||{}).bench_cum_pct:pri.bench_0050_return_pct))
         +_paperRow('對照 Bb-90（同日起算）',sg(pri.bench_bb90_return_pct))
-        +_paperRow('對照 紙.三 S3-C6',p3&&p3.started?sg(p3.total_return_pct):'—')+err+disc);
+        +_paperRow('對照 模擬 B',_paperScLine('paper_3')?sg((_paperScLine('paper_3').metrics||{}).cum_pct):(p3&&p3.started?sg(p3.total_return_pct):'—'))+err+disc);
     }catch(e){
       console.warn('[_renderPaper4]',e);recordGlobalError('_renderPaper4',e);
       return _paperCardHtml(title,sub,'<div class="note" style="margin-top:8px">載入失敗：'+_paperEsc(e.message)+'</div>'+disc);
@@ -224,6 +230,8 @@
   async function loadPaper7030(){
     const el=document.getElementById('paper-7030-card');if(!el)return;
     try{
+      try{const r=await fetch('data/strategy_curves.json?t='+Math.floor(Date.now()/60000));_PAPER_SC=r.ok?await r.json():null}
+      catch(e){console.warn('[loadPaper7030] strategy_curves',e);recordGlobalError('loadPaper7030.strategy_curves',e);_PAPER_SC=null}
       const [a,b,c,d]=await Promise.all([_renderPaper7030(),_renderPaper1b(),_renderPaper3(),_renderPaper4()]);
       el.innerHTML='<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px">'+a+b+'<div style="grid-column:1 / -1">'+c+'</div><div style="grid-column:1 / -1" id="paper4-card">'+d+'</div></div>'
         +'<div class="note" style="margin:-4px 0 10px;text-align:center;color:var(--warn)">⚠ 紙上追蹤：虛擬帳戶，未使用真實資金。</div>';

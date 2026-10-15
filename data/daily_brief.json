@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-16T01:09:04+08:00",
+ "generated_at": "2026-10-16T03:19:34+08:00",
  "date": "2026-10-16",
  "data_asof": "2026-10-15",
  "method": "固定規則摘要（不呼叫語言模型、不做市場判斷）；只讀 repo 內既有排程產物，不額外請求外部 API",
@@ -385,15 +385,16 @@
    }
   },
   "news": {
-   "fetched_at": "2026-10-16T00:28:02.749970+08:00",
+   "fetched_at": "2026-10-16T01:35:03.657393+08:00",
    "total": 300,
    "by_code": {
-    "2330": 17,
+    "2031": 1,
+    "3026": 2,
+    "2330": 15,
     "3406": 1,
     "2308": 4,
     "2356": 1,
     "7806": 1,
-    "3026": 1,
     "2492": 1,
     "3003": 1,
     "3701": 1,
@@ -401,7 +402,7 @@
     "7799": 1,
     "4958": 2,
     "6902": 1,
-    "2027": 2,
+    "2027": 1,
     "4198": 1,
     "2867": 2,
     "2024": 2,
@@ -430,37 +431,75 @@
   },
   "paper": [
    {
-    "label": "紙.一 70/30",
+    "id": "paper_1",
+    "label": "模擬 A 穩健",
     "started": true,
+    "start_date": "2026-10-01",
     "note": null,
-    "as_of": "2026-10-01",
-    "total_return_pct": 0.0
+    "as_of": "2026-10-15",
+    "total_return_pct": -2.56,
+    "bench_return_pct": -3.54,
+    "source": "data/strategy_curves.json"
    },
    {
-    "label": "紙.一b Bb-90",
+    "id": "paper_1b",
+    "label": "模擬 D 三檔分散",
     "started": true,
-    "note": "紙.一b＝#418 勝出組合 Bb-90 的台灣可執行版；與紙.一 70/30 並行，不取代",
-    "as_of": "2026-10-08",
-    "total_return_pct": 0.0
+    "start_date": "2026-10-08",
+    "note": null,
+    "as_of": "2026-10-15",
+    "total_return_pct": -2.37,
+    "bench_return_pct": -5.26,
+    "source": "data/strategy_curves.json"
    },
    {
-    "label": "紙.三",
-    "started": true,
-    "note": "紙.三＝S3-C6（#424／#426）台灣可執行版；槓桿腿用 00631L／00647L 真實價；閘門延後一個交易日切換；與紙.一／紙.一b 並行",
-    "as_of": "2026-10-08",
-    "total_return_pct": 0.0
-   },
-   {
-    "label": "紙.四 R1",
-    "started": true,
-    "note": "紙.四＝R1（#429／#430）台灣可執行版；槓桿腿用 00631L 真實價；閘門延後一個交易日切換；成本照 #430",
+    "id": "paper_2",
+    "label": "模擬 E 供給緊縮",
+    "started": false,
+    "start_date": "2026-11-16",
+    "note": "11/16 開始（選股資料還在預熱）",
     "as_of": null,
-    "total_return_pct": null
+    "total_return_pct": null,
+    "bench_return_pct": null,
+    "source": "data/strategy_curves.json"
+   },
+   {
+    "id": "paper_3",
+    "label": "模擬 B 景氣閘門",
+    "started": true,
+    "start_date": "2026-10-08",
+    "note": null,
+    "as_of": "2026-10-15",
+    "total_return_pct": -3.1,
+    "bench_return_pct": -5.26,
+    "source": "data/strategy_curves.json"
+   },
+   {
+    "id": "paper_4",
+    "label": "模擬 C 加速",
+    "started": true,
+    "start_date": "2026-10-08",
+    "note": null,
+    "as_of": "2026-10-15",
+    "total_return_pct": -7.36,
+    "bench_return_pct": -5.26,
+    "source": "data/strategy_curves.json"
+   },
+   {
+    "id": "paper_5",
+    "label": "模擬 F 賣波動",
+    "started": false,
+    "start_date": "2026-11-02",
+    "note": "11/02 開始（11 月起用當月真實資料開始記，不倒填）",
+    "as_of": null,
+    "total_return_pct": null,
+    "bench_return_pct": null,
+    "source": "data/strategy_curves.json"
    }
   ],
   "lines": [
    "加權指數 2026-10-12 當週 4 個交易日 -4.75%（49,313.44→46,969.87）",
-   "紙上追蹤：4／4 條已啟動（紙.一 70/30 累計 0.00%、紙.一b Bb-90 累計 0.00%、紙.三 累計 0.00%、紙.四 R1 累計 —）"
+   "紙上追蹤：4／6 條已啟動（模擬 A 穩健 累計 -2.56%、模擬 D 三檔分散 累計 -2.37%、模擬 B 景氣閘門 累計 -3.10%、模擬 C 加速 累計 -7.36%）"
   ]
  }
 }

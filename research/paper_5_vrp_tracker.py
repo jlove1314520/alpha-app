@@ -40,7 +40,7 @@ STATE = ROOT / "data" / "rate_limit_state.json"
 MARKET = ROOT / "data" / "market_tw.json"
 OPT_URL = "https://openapi.taifex.com.tw/v1/DailyMarketReportOpt"
 FSP_URL = "https://www.taifex.com.tw/cht/5/fSPDataDown"
-START = "2026-11-01"
+START = "2026-11-02"  # 先.一〇三-5：11/01 是週日，改成 11 月第一個交易日，與 strategy_curves.json 起始日一致
 MULT, SLIP_PTS, FEE, TAX = 50, 1.0, 50.0, 0.001
 TW = timezone(timedelta(hours=8))
 UA = {"User-Agent": "Mozilla/5.0 (compatible; AlphaAppPaperTracker/1.0)"}
