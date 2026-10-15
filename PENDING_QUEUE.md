@@ -19927,6 +19927,12 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
   - 快取也缺 → 逐檔抓，每輪上限 300 檔，記斷點，維持 `- [ ]` 續跑。
 
 - [ ] **研究室.四 季報補齊（上櫃＋2025 起缺季）**（DevQueue 可執行）
+  〔進度 2026-10-15 DevQueue 20261015-080102（第 1 批，未完成，維持 - [ ]）：
+  ①第 1 步「TPEx 上櫃綜合損益表」查證後**已存在**（.github/scripts/update_stock_financials.py EXTRA_SOURCES 已含 mopsfin_t187ap06/07_O_ci 等 6 類）；上櫃 715 檔卡在 2024Q4 的根因是 2025Q1～2026Q1 斷層（openapi 只給最新一季累計數，缺上一季累計就無法差分出單季），不是端點沒接——補齊 2 步即可解。
+  ②第 2 步原案「FinMind TaiwanStockFinancialStatements 以日期抓全市場」實測 HTTP 400（"Your level is register"，免費層不開放不帶 data_id）；本機 parquet 快取只到 2024-12-31；→ 照研究室.三同一分支改逐檔：新寫 scripts/backfill_financials_display.py（每輪上限 300 檔、季報過期者優先、每 25 檔中途存檔、--until 時間上限、滾動 1 小時用量封頂、402/403/428/429 即停），輸出 data/financials_backfill.json（2025Q1～2026Q2 單季：revenue／gross_margin_pct／op_margin_pct／net_income_parent／eps）。單位核對：6488 2024Q4 營收與官方管線單季值相同、2026Q1＋Q2＝官方累計數。
+  ③本批抓 34 檔（全有資料）後 FinMind 回 HTTP 402「Requests reach the upper limit」，封鎖到約 2026-10-15 10:08（台北）。當時互動視窗的研究室.三逐檔營收回補同時在跑，兩支合計撞到每小時 600 上限——**本輪並行抓取也拖累了研究室.三**，如實記錄。另：data/rate_limit_state.json 的 calls_by_minute 在兩支行程並行時顯示只有 1～11 次，計數不可靠（兩支行程互相覆寫狀態檔），已另列修.FinMind計數。
+  ④驗證（不落檔）：build_research.quarter_metrics 合併回補後，34 檔中 33 檔由 q_stale→新鮮。research.json 未重建（等 market.yml 下一班自動合併）。
+  下一輪：10:08 之後 `python scripts/backfill_financials_display.py --max 300`，斷點在檔內 meta.done；剩 1,945 檔，約 7 輪。[自行裁量] 研究室.三 與 .四 不要同時跑（共用 FinMind 每小時 600）。〕
   做法：
   1. `update_stock_financials.py` 加 TPEx 上櫃綜合損益表（mopsfin_t187ap06_O_ci 系列，名稱以實測為準），以後每季自動更新。
   2. 2025Q1～2026Q2 回補：用 FinMind `TaiwanStockFinancialStatements` 以日期抓全市場（6 次），寫 `data/financials_backfill.json`，格式為 `{"meta":…, "stocks":{代號:[{year,quarter,revenue,gross_margin_pct,op_margin_pct,eps}]}}`。holdout 處理方式同研究室.三。
