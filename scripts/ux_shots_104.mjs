@@ -32,16 +32,18 @@ for (const scheme of ["dark", "light"]) {
       await page.evaluate(() => { const m = document.getElementById("main"); if (m) m.scrollTop = 0; window.scrollTo(0, 0); });
       await page.screenshot({ path: path.join(out, `${pg.name}_${scheme}.png`) });
       metrics[`${pg.name}_${scheme}`] = await page.evaluate(() => {
-        const vis = (el) => { if (!el) return false; const r = el.getBoundingClientRect(); const cs = getComputedStyle(el); return r.height > 0 && cs.display !== "none" && cs.visibility !== "hidden"; };
-        const banners = [...document.querySelectorAll("[id*='banner'],[class*='banner']")].filter(vis)
-          .filter((el) => !el.parentElement.closest("[id*='banner'],[class*='banner']"));
+        const vis = (el) => { if (!el || el.hidden) return false; const r = el.getBoundingClientRect(); const cs = getComputedStyle(el); return r.height > 0 && cs.display !== "none" && cs.visibility !== "hidden"; };
+        // 先.一〇四 驗收量法：橫幅＝總管一行＋原本四條橫幅＋錯誤紀錄（只算看得到的）
+        const ids = ["alert-hub", "auto-banner", "diag-banner", "claude-auth-banner", "paper-tracking-banner", "error-log"];
+        const banners = ids.map((id) => document.getElementById(id)).filter(vis);
         const bannerH = banners.reduce((s, el) => s + el.getBoundingClientRect().height, 0);
-        const scr = document.querySelector(".scr.active") || document.getElementById("main");
-        const firstCard = scr ? [...scr.querySelectorAll(".card,section,.panel")].find(vis) : null;
-        return { banner_count: banners.length, banner_total_h: Math.round(bannerH),
-                 banner_ids: banners.map((b) => b.id || b.className).slice(0, 8),
+        const scr = document.querySelector(".screen.active");
+        const firstCard = scr ? [...scr.querySelectorAll(".card")].find(vis) : null;
+        const main = document.getElementById("main");
+        return { screen: scr && scr.id, banner_ids: banners.map((b) => b.id), banner_total_h: Math.round(bannerH),
                  first_card_y: firstCard ? Math.round(firstCard.getBoundingClientRect().top) : null,
-                 first_card: firstCard ? (firstCard.id || firstCard.className) : null };
+                 first_card: firstCard ? ((firstCard.querySelector("h3") || {}).textContent || firstCard.id || "").trim().slice(0, 12) : null,
+                 main_overflow_x: main ? main.scrollWidth > main.clientWidth + 1 : null };
       });
     } catch (e) {
       metrics[`${pg.name}_${scheme}`] = { error: String(e).slice(0, 200) };
