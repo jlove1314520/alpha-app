@@ -1,3 +1,21 @@
+## 2026-10-16 07:32（DevQueue 20261016-070101）先.一〇三-10c 分割／變更面額自動入帳＋6696；先.一〇三-12 美股盤中標示與現價退回鏈
+
+等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未新增）
+
+- **先.一〇三-10c ✅（18945d4871）**：
+  - 做了什麼：`update_price_history.py` 每班多打 TWSE TWTCAU、TWTB8U（今天前 120 天～後 60 天）＋TPEx pvChgAnn（當日）各 1 次，事件併進 `data/ex_dividend_events.json` 的 `reductions`，沿用減資的定錨與「來源已含調整」守門；`apply_splits` 讀帳本，同一事件已由官方表套用就不再除。TWTAUU 抓取失敗不再連帶擋掉分割入帳。SPLITS 補 6696 仁新（換股 10）。
+  - 證據：離線模擬（不寫檔）兩種先後順序都只除一次、第二次跑 0／0／0；三支請求全丟例外 → 回空＋3 筆 errors、不中止；調整後 00685L −4.1%、6949 −9.9%、5904 +10.0%、4747 −3.2%、6696 +1.8%。官方請求各 1 次查欄位。冒煙全部通過。
+  - [自行裁量]：6696 證據是櫃買公告轉載（uanalyze）＋本地 8/19 收 939 吻合，比照 5904／4747；手寫 SPLITS 保留（櫃買歷史官方查不到）。
+  - ⚠️ 未驗證：market.yml 尚未實跑；pvChgAnn 有資料時換股率欄格式沒見過（非數字會略過，不會亂套）。`C:lpha\CLAUDE.md` 頻率清單已更新。
+- **先.一〇三-12 ✅（6b5d1e997e）**：
+  - 做了什麼：`fetch_market_us.py` 加 `intraday`；App 指數退回 Yahoo 時，盤中抓的標「Yahoo 盤中快照（MM/DD HH:MM 美東，非收盤）」（舊檔用 fetched_at＋as_of 推）。個股頁美股現價改 IBKR → quotes_us → us_screener.json 日線 → FinMind（標「補充」），每層標來源與時間；FinMind 失敗不卡頁。
+  - 證據：Playwright 本機：AAPL「來源：IBKR 延遲~15分」、META 走 us_screener「資料日 2026-10-14」、強制 IBKR 無資料時四指數標盤中、pageerror 0；冒煙全部通過。
+  - [自行裁量]：repo 沒有逐檔美股日線序列，「repo 日線」用 us_screener.json 最新收盤。
+  - ⚠️ 未驗證：fetch_market_us.py 新欄位尚未在 market.yml 實跑。
+- 未開工：先.一〇三-13（範圍大，07:30 剩 15 分鐘，不做半套）；下一輪從它開始。
+- 佇列深度：`- [ ]` 16 項（≥12）、DevQueue 可執行約 6 項（≥6），不需補件。
+- 共用工作目錄：其他排程的未提交檔（audit_report、quotes_ibkr、rate_limit_state 等）沒有掃進本輪 commit。
+
 ## 2026-10-16 06:35（DevQueue 20261016-060101）先.一〇三-10a 除權息帳本補上櫃；先.一〇三-10b 還原價大漲跌歸類＋兩筆分割；先.一〇三-10c 櫃買面額變更端點（第 1 批）
 
 等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未新增）
