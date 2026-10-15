@@ -86,7 +86,28 @@
         }
       }
     },
-    "inserted_rows_adj_fixed": 0
+    "inserted_rows_adj_fixed": 0,
+    "adj_recompute_to_2026-10-15": {
+      "note": "先.八十一-49：6/1 以後 adj_close 以最後一列為錨、依官方除權息（TWT49U／exDailyQ，6/1～8/25）＋帳本除權息與減資係數整段重算",
+      "official_events": 1807,
+      "ledger_events": 15,
+      "codes_changed": 242,
+      "rows_changed": 16140,
+      "holdings_watch": {
+        "00697B": {
+          "rows": 74,
+          "max_rel_change": 0.008903
+        }
+      }
+    },
+    "no_trade_and_index_cleanup_2026_10_16": {
+      "note": "先.一〇三-10：收盤價 0 的列標 no_trade=True（save() 之後每次寫檔自動標）；TAIEX／TPEx 偽代號移到 data/price_history_index_legacy.json；3114／6874（9/3）、6590（9/8）等上櫃除權息改用官方 exDailyQ 係數重算 adj_close（scripts/fix_backfill_exdiv.py --end 2026-10-15）",
+      "no_trade_rows": 3779,
+      "moved_codes": [
+        "TAIEX",
+        "TPEx"
+      ]
+    }
   },
   "top_keys": [
     "meta",
@@ -2192,8 +2213,6 @@
     "Food",
     "Other",
     "Rubber",
-    "TAIEX",
-    "TPEx",
     "00400A",
     "00401A",
     "00402A",

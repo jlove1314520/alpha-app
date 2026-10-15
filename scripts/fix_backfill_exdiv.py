@@ -15,7 +15,11 @@ adj/close 比例推回；除權息帳本（data/ex_dividend_events.json）08-26 
   （openapi 的 tpex_exright_daily 只有最新一天）
 - 08-26 以後除權息：帳本 events 的 factor_applied
 - 減資恢復買賣：帳本 reductions（有 factor_applied 用它；沒有就用 ref_price ÷ pre_close，例 2380 6/29）
-每次請求間隔 ≥3 秒，402/403/428/429 立刻停止。用法：python scripts/fix_backfill_exdiv.py [--dry-run]
+每次請求間隔 ≥3 秒，402/403/428/429 立刻停止。用法：python scripts/fix_backfill_exdiv.py [--dry-run] [--end YYYY-MM-DD]
+
+2026-10-16 先.一〇三-10：上櫃 3114／6874（9/3）、6590（9/8）除權息沒進帳本（openapi tpex_exright_daily 只有當天，
+那幾天每日管線沒跑到就永遠漏了），price_history 單日跌 12～16%、adj_close＝close。加 --end：官方區間查到指定日，
+同一（代號,日期）官方與帳本都有時只用官方那筆（避免係數乘兩次）。
 """
 import json
 import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
@@ -125,6 +129,11 @@ def main(dry: bool) -> int:
     doc = PHS.load(PH)
     prices = doc.get("prices") or {}
     off, led = official_events(), ledger_events()
+    seen = {(e["code"], e["date"]) for e in off}
+    dup = sum(1 for e in led if (e["code"], e["date"]) in seen)
+    led = [e for e in led if (e["code"], e["date"]) not in seen]  # 先.一〇三-10：官方優先，不重複乘
+    if dup:
+        print(f"帳本與官方重複 {dup} 筆，只用官方")
     print(f"官方除權息 {len(off)} 筆（{START}～{END}）；帳本事件 {len(led)} 筆（08-26 起除權息＋減資）")
     by = {}
     for e in off + led:
@@ -144,7 +153,7 @@ def main(dry: bool) -> int:
     if dry:
         print("--dry-run：未寫檔")
         return 0
-    doc.setdefault("meta", {})["adj_recompute_2026_10_13"] = {
+    doc.setdefault("meta", {})["adj_recompute_2026_10_13" if END == "2026-08-25" else f"adj_recompute_to_{END}"] = {
         "note": "先.八十一-49：6/1 以後 adj_close 以最後一列為錨、依官方除權息（TWT49U／exDailyQ，6/1～8/25）＋帳本除權息與減資係數整段重算",
         "official_events": len(off), "ledger_events": len(led), "codes_changed": codes_changed, "rows_changed": rows_changed,
         "holdings_watch": watch}
@@ -154,4 +163,6 @@ def main(dry: bool) -> int:
 
 
 if __name__ == "__main__":
+    if "--end" in sys.argv:
+        END = sys.argv[sys.argv.index("--end") + 1]
     sys.exit(main("--dry-run" in sys.argv))

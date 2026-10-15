@@ -113,9 +113,22 @@ def _dump_bucket(prices: dict) -> str:
     return '{"prices": {\n' + ",\n".join(parts) + "\n}}\n"
 
 
+def mark_no_trade(prices: dict) -> int:
+    """先.一〇三-10：收盤價 0／空的列標 no_trade=True（官方行情「--」：當天沒有一般交易收盤價，
+    有些列仍有零星成交量），讓讀取端能排除，不把 0 當成價格。數值欄位不改。回傳本次新標的列數。"""
+    n = 0
+    for rows in prices.values():
+        for r in rows or []:
+            if isinstance(r, dict) and not r.get("close") and not r.get("no_trade"):
+                r["no_trade"] = True
+                n += 1
+    return n
+
+
 def save(doc: dict, path: Path | str = CANONICAL, split: bool | None = None) -> dict:
     """寫回。正式路徑寫拆檔並刪舊單檔；回傳 {bucket: bytes} 方便記錄大小。"""
     p = Path(path)
+    mark_no_trade(doc.get("prices") or {})
     if split is None:
         split = p.resolve() == CANONICAL.resolve()
     if not split:
