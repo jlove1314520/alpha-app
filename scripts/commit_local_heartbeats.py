@@ -18,9 +18,11 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 import local_git_commit as G  # noqa: E402
 
-THROTTLE_MIN = 60
+# 先.一〇二-3（2026-10-15）：60→30。雲端停擺告警門檻 60 分鐘，原本每 60 分鐘才提交一次，加上 5 分鐘排程間隔，
+# 實際間隔約 65 分鐘，會在 DevQueue 剛好沒提交的空檔誤報。
+THROTTLE_MIN = 30
 SETS = {
-    "connectivity": (["research/external_connectivity.jsonl", "research/connectivity_check.log"], "對外連通性監測心跳（AlphaConnectivity，每小時提交一次）"),
+    "connectivity": (["research/external_connectivity.jsonl", "research/connectivity_check.log"], "對外連通性監測心跳（AlphaConnectivity，每 30 分鐘提交一次）"),
     "probe": (["research/twse_publish_probe.jsonl", "research/twse_probe.log"], "TWSE 發布時間探測心跳（AlphaTwsePublishProbe）"),
 }
 

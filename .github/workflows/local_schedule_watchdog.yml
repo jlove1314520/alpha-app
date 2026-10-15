@@ -64,8 +64,10 @@ jobs:
             git push
           fi
 
-      - name: 停擺就讓這個 job 顯示紅燈（觸發GitHub預設email通知）
+      - name: 停擺就讓這個 job 顯示紅燈（觸發 GitHub email 與手機 App 的 Actions 失敗推播）
         if: steps.heartbeat.outcome == 'failure'
         run: |
-          echo "::error::本機排程疑似停擺超過60分鐘，詳見 data/STATUS.json 的 local_schedule_heartbeat 欄位"
+          # 先.一〇二-3：告警文字依總司令指定；N 取 STATUS.json 的 stall_minutes（最新一筆本機心跳距今分鐘數）
+          N=$(python -c "import json;v=json.load(open('data/STATUS.json',encoding='utf-8'))['local_schedule_heartbeat'].get('stall_minutes');print(int(v) if v is not None else '超過60')" 2>/dev/null || echo "超過60")
+          echo "::error::本機停擺 ${N} 分鐘，可能是重開機未登入（DevQueue／市場補跑／連線監測皆無 60 分鐘內心跳；詳見 data/STATUS.json 的 local_schedule_heartbeat）"
           exit 1

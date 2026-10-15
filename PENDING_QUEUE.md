@@ -20034,7 +20034,7 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
 - [ ] **先.一〇二-1 Windows Update 使用時段改 07:00～01:00（CC 備指令，總司令在 UAC 視窗同意當下執行；執行後列設定值）**（互動視窗執行；需總司令本人操作）
 - [ ] **先.一〇二-2a 第一批改「不論登入與否都執行」（存一次密碼）：AlphaMarketCatchup、AlphaMarketCatchupLate、AlphaData、AlphaQuotesFallback、AlphaWarrantSnapshot、AlphaDevQueue；改完逐一確認上次執行結果＋心跳＋非互動身分 push 測試**（互動視窗執行；需總司令本人在 Windows 視窗輸入密碼，CC 不得讀出／記錄／索取）
 - [ ] **先.一〇二-2b 第二批（其餘排程），第一批觀察 3 個交易日無問題後才做**（互動視窗執行；需總司令本人輸入密碼）〔前置：2a 完成後 3 個交易日〕
-- [ ] **先.一〇二-3 雲端停擺告警：本機心跳（DevQueue／市場補跑／連線監測）最新一筆超過 60 分鐘 → workflow 紅燈，訊息「本機停擺 N 分鐘，可能是重開機未登入」；總司令開 GitHub 手機 App Actions 失敗推播**（互動視窗執行）
-- [ ] **先.一〇二-4 網路線記錄為建議（不列阻塞）**（互動視窗執行）
-- [ ] **先.一〇二-5 自動交易解凍前置條件加一條：重開機停擺防護（先.一〇二-2）已上線並驗證**（互動視窗執行）
-- [ ] **先.一〇二-6 AWAITING_REVIEW 清掉先.九十九-0 殘留列；先.一〇一-3 結案**（互動視窗執行）
+- [x] **先.一〇二-3 雲端停擺告警：本機心跳（DevQueue／市場補跑／連線監測）最新一筆超過 60 分鐘 → workflow 紅燈，訊息「本機停擺 N 分鐘，可能是重開機未登入」；總司令開 GitHub 手機 App Actions 失敗推播**（互動視窗執行）〔2026-10-15 22:4x 完成（CC 端）：`scripts/check_local_schedule_heartbeat.py` 判定軌道加 connectivity／market_catchup（任一 ≤60 分鐘即存活），新增 `stall_minutes`；`local_schedule_watchdog.yml` 紅燈訊息改為「本機停擺 N 分鐘，可能是重開機未登入」；App 設定頁同文字。[自行裁量] `commit_local_heartbeats.py` 節流 60→30 分鐘（原本實際間隔約 65 分鐘，會在 DevQueue 空檔誤報，例：10/14 00:42→01:52 空 70 分鐘）。模擬停擺 rc=1 訊息正確；selftest_local_heartbeats 12/12、claude_auth 兩支全過；冒煙全部通過。**總司令待辦：GitHub 手機 App → 設定 → 通知 → Actions 開「失敗的工作流程」推播**（CC 無法代開）。已知限制：GitHub 排程常被跳過，告警可能晚到（10/15 第一次紅燈晚約 4.5 小時）〕
+- [x] **先.一〇二-4 網路線記錄為建議（不列阻塞）**（互動視窗執行）〔記在 docs/PROPOSAL_REBOOT_OUTAGE_GUARD.md 第四節〕
+- [x] **先.一〇二-5 自動交易解凍前置條件加一條：重開機停擺防護（先.一〇二-2）已上線並驗證**（互動視窗執行）〔docs/UNFREEZE_CHECKLIST.md 第 5 項〕
+- [x] **先.一〇二-6 AWAITING_REVIEW 清掉先.九十九-0 殘留列；先.一〇一-3 結案**（互動視窗執行）〔兩列移到「已結案審閱紀錄」，等待中剩 1 件（先.九十八-3）〕

@@ -1064,7 +1064,8 @@
           const stalledTracks=hb.track_stalled||[];
           const stalledNote=stalledTracks.length?`；個別軌道停擺：${stalledTracks.join('、')}`:'';
           if(hb.stalled){
-            hbNote.innerHTML=`本機排程心跳：<b style="color:${FRESH_BAD_COLOR}">疑似停擺</b>（三軌皆無新心跳，最新為${trackLabel} ${at}，距今約${mins==null?'—':mins.toFixed(0)}分鐘，門檻${hb.stall_threshold_minutes}分鐘）`;
+            // 先.一〇二-3：文字與雲端告警一致
+            hbNote.innerHTML=`本機排程心跳：<b style="color:${FRESH_BAD_COLOR}">本機停擺 ${mins==null?'—':mins.toFixed(0)} 分鐘，可能是重開機未登入</b>（最新心跳為${trackLabel} ${at}，門檻${hb.stall_threshold_minutes}分鐘）`;
           }else{
             hbNote.innerHTML=`本機排程心跳：<b style="color:${FRESH_OK_COLOR}">正常</b>（${trackLabel}最近一次commit ${at}，距今約${mins==null?'—':mins.toFixed(0)}分鐘${stalledNote}）`;
           }

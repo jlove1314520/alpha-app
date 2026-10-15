@@ -69,7 +69,9 @@ TRACK_STALL_THRESHOLD_MIN = 360  # 個別軌道層級警告門檻（6小時）�
 # 6 小時門檻會讓它們一週六天半都被標 track_stalled（假警報）；改成每週＋1 小時容忍。devqueue 維持 6 小時。
 WEEKLY_STALL_MIN = 7 * 24 * 60 + 60
 TRACK_STALL_THRESHOLD_MIN_BY_TRACK = {"devqueue": TRACK_STALL_THRESHOLD_MIN,
-                                      "marathon": WEEKLY_STALL_MIN, "hypothesis_queue": WEEKLY_STALL_MIN}
+                                      "marathon": WEEKLY_STALL_MIN, "hypothesis_queue": WEEKLY_STALL_MIN,
+                                      # 先.一〇二-3：連線監測每 30 分鐘提交，2 小時沒有就個別標記；市場補跑只在雲端沒落地時才有，給 4 天（含週末）。
+                                      "connectivity": 120, "market_catchup": 4 * 24 * 60}
 
 # 三條本機排程各自的commit message特徵樣式（實測抓自git log，見PENDING_QUEUE.md
 # 「警.一」／「乾.三」條目的查證紀錄）。用search不是match，因為都會夾帶
@@ -77,6 +79,12 @@ TRACK_STALL_THRESHOLD_MIN_BY_TRACK = {"devqueue": TRACK_STALL_THRESHOLD_MIN,
 DEVQUEUE_PATTERN = re.compile(r"DevQueue cycle log 自動更新")
 MARATHON_PATTERN = re.compile(r"Marathon cycle log 自動更新")
 HYPOTHESIS_QUEUE_PATTERN = re.compile(r"Hypothesis-queue cycle log 自動更新")
+# 先.一〇二-3（2026-10-15）：10/15 Windows Update 重開機後無人登入 12 小時，三軌全停但告警晚 4.5 小時。
+# 總司令裁示本機心跳改看 DevQueue／市場補跑／連線監測，最新一筆超過 60 分鐘就紅燈。
+# 連線監測（AlphaConnectivity）每 5 分鐘跑、scripts/commit_local_heartbeats.py 每 30 分鐘提交一次；
+# 市場補跑（AlphaMarketCatchup）只在雲端台股主班沒落地時才 commit，平常不會有，只當作「任一存活」的加分訊號。
+CONNECTIVITY_PATTERN = re.compile(r"對外連通性監測心跳（AlphaConnectivity")
+MARKET_CATCHUP_PATTERN = re.compile(r"本機補跑 market\.yml")
 IBKR_PATTERN = re.compile(r"IBKR quotes auto-update")
 
 # 三軌判定用（不含IBKR——IBKR維持警.一原本的設計，只記錄不參與停擺判定，
@@ -85,6 +93,8 @@ JUDGMENT_TRACKS = {
     "devqueue": DEVQUEUE_PATTERN,
     "marathon": MARATHON_PATTERN,
     "hypothesis_queue": HYPOTHESIS_QUEUE_PATTERN,
+    "connectivity": CONNECTIVITY_PATTERN,
+    "market_catchup": MARKET_CATCHUP_PATTERN,
 }
 
 
@@ -209,6 +219,12 @@ def _ibkr_file_freshness(now: datetime) -> tuple[str | None, float | None]:
         return None, None
 
 
+def _stall_minutes(tracks: dict) -> float | None:
+    """最新一筆本機心跳距今幾分鐘（所有軌道取最小）；全部查不到回 None。"""
+    vals = [t["minutes_since"] for t in tracks.values() if t.get("minutes_since") is not None]
+    return round(min(vals), 1) if vals else None
+
+
 def evaluate() -> dict:
     now = datetime.now(timezone.utc)
 
@@ -273,7 +289,8 @@ def evaluate() -> dict:
         },
         "stalled": stalled,
         "track_stalled": track_stalled_names,
-        "judged_by": "any_of_three_tracks",
+        "judged_by": "any_of_local_heartbeats",
+        "stall_minutes": _stall_minutes(tracks),
         "note": "本機排程最後活動時間；2026-09-27【乾.三主體第八點】裁示改為"
                 "「DevQueue／Marathon／Hypothesis-queue三軌任一有新鮮心跳"
                 "（≤60分鐘）即視為本機整體存活」（取代原本只看DevQueue單一"
@@ -372,10 +389,11 @@ def main() -> int:
               f"（門檻{TRACK_STALL_THRESHOLD_MIN}分鐘）")
     if result["stalled"]:
         minutes_summary = {name: t["minutes_since"] for name, t in result["tracks"].items()}
-        print(
-            f"::error::本機排程疑似停擺——三軌(DevQueue/Marathon/Hypothesis-queue)"
-            f"皆無{STALL_THRESHOLD_MIN}分鐘內的新commit，各軌距今分鐘數：{minutes_summary}"
-        )
+        n = result.get("stall_minutes")
+        n_txt = f"{n:.0f}" if isinstance(n, (int, float)) else "超過可查範圍的"
+        # 先.一〇二-3 總司令指定告警文字（GitHub 手機 App 的 Actions 失敗推播會帶出 job 名稱，詳細在這行 annotation）
+        print(f"::error::本機停擺 {n_txt} 分鐘，可能是重開機未登入"
+              f"（DevQueue／市場補跑／連線監測等本機心跳皆無 {STALL_THRESHOLD_MIN} 分鐘內的新 commit；各軌距今分鐘數：{minutes_summary}）")
         return 1
     return 0
 
