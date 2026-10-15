@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-10-15T23:00:03.189709+08:00",
- "duration_sec": 12.4,
+ "generated_at": "2026-10-16T03:15:17.790741+08:00",
+ "duration_sec": 4.7,
  "reference": {
   "twse": {
    "ok": true,
@@ -15,7 +15,7 @@
  },
  "universe": 2116,
  "reference_date": "2026-10-14",
- "listed_universe_size": 2143,
+ "listed_universe_size": 2144,
  "stocks_with_violation": 1,
  "code_free_violations": 0,
  "completeness_gap_stocks": 575,
@@ -40,9 +40,9 @@
  "total_violations": 604,
  "by_check": {
   "a_price_source": {
-   "checked": 3950,
+   "checked": 3939,
    "violations": 0,
-   "unverifiable": 4514,
+   "unverifiable": 4525,
    "note": ""
   },
   "a2_not_in_official": {
@@ -82,7 +82,7 @@
    "note": ""
   },
   "f_null_as_number": {
-   "checked": 124,
+   "checked": 123,
    "violations": 0,
    "unverifiable": 0,
    "note": ""
@@ -6649,7 +6649,7 @@
   "note": "由 scripts/check_external_connectivity.py 每 5 分鐘更新。產出檔停擺依據修改時間判定；connectivity_alerts 額外納入internet/tailscale/ibkr_gateway 這類「行程活著但連不上」的連續失敗告警（2026-09-15新增，此前只印在log沒亮燈，IBKR斷線6天才被發現就是這個缺口）。"
  },
  "self_check": {
-  "checked_at": "2026-10-15T03:29:26.589594+08:00",
+  "checked_at": "2026-10-16T03:15:03.756684+08:00",
   "ok": true,
   "checks": [
    {
@@ -6671,7 +6671,7 @@
   "note": "audit.yml 每次執行最前面跑，確認後面幾支腳本要用到的 import/常數撈得到——2026-09-10~17 因 data_audit.py 誤刪 TWSE_COMPANY 導致build_listed_universe.py 連續一週 ImportError 全滅，但audit_report.json 本身完全沒有任何紀錄，只能靠 gh run list 才查得到，這個欄位就是補這個盲點。"
  },
  "domain_blocklist_scan": {
-  "checked_at": "2026-10-15T03:29:26.589594+08:00",
+  "checked_at": "2026-10-16T03:15:03.756684+08:00",
   "domains": [
    "mopsov.twse.com.tw",
    "doc.twse.com.tw",
@@ -6733,13 +6733,13 @@
    },
    {
     "file": "research/buyback_announcement_probe.py",
-    "line": 24,
+    "line": 25,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
    {
     "file": "research/buyback_announcement_probe.py",
-    "line": 25,
+    "line": 26,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
@@ -6769,25 +6769,25 @@
    },
    {
     "file": "research/material_disclosure_order_win_count.py",
-    "line": 11,
+    "line": 12,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
    {
     "file": "research/material_disclosure_order_win_count.py",
-    "line": 13,
+    "line": 14,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
    {
     "file": "research/material_disclosure_order_win_count.py",
-    "line": 20,
+    "line": 21,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
    {
     "file": "research/material_disclosure_order_win_count.py",
-    "line": 29,
+    "line": 30,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
@@ -6799,31 +6799,25 @@
    },
    {
     "file": "research/material_disclosure_order_win_probe.py",
-    "line": 48,
-    "domain": "mopsov.twse.com.tw",
-    "guarded": true
-   },
-   {
-    "file": "research/material_disclosure_order_win_probe.py",
     "line": 49,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
    {
     "file": "research/material_disclosure_order_win_probe.py",
-    "line": 61,
+    "line": 50,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
    {
     "file": "research/material_disclosure_order_win_probe.py",
-    "line": 67,
+    "line": 62,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
    {
-    "file": "research/mops_buyback_client.py",
-    "line": 39,
+    "file": "research/material_disclosure_order_win_probe.py",
+    "line": 68,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
@@ -6835,13 +6829,19 @@
    },
    {
     "file": "research/mops_buyback_client.py",
-    "line": 86,
+    "line": 41,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
    {
     "file": "research/mops_buyback_client.py",
-    "line": 93,
+    "line": 87,
+    "domain": "mopsov.twse.com.tw",
+    "guarded": true
+   },
+   {
+    "file": "research/mops_buyback_client.py",
+    "line": 94,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
@@ -6865,12 +6865,6 @@
    },
    {
     "file": "research/mops_cb_conversion_price_client.py",
-    "line": 48,
-    "domain": "mopsov.twse.com.tw",
-    "guarded": true
-   },
-   {
-    "file": "research/mops_cb_conversion_price_client.py",
     "line": 49,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
@@ -6883,19 +6877,25 @@
    },
    {
     "file": "research/mops_cb_conversion_price_client.py",
-    "line": 54,
+    "line": 51,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
    {
     "file": "research/mops_cb_conversion_price_client.py",
-    "line": 171,
+    "line": 55,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
    {
     "file": "research/mops_cb_conversion_price_client.py",
-    "line": 178,
+    "line": 172,
+    "domain": "mopsov.twse.com.tw",
+    "guarded": true
+   },
+   {
+    "file": "research/mops_cb_conversion_price_client.py",
+    "line": 179,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
@@ -6907,31 +6907,31 @@
    },
    {
     "file": "research/mops_insider_holdings_client.py",
-    "line": 46,
-    "domain": "mopsov.twse.com.tw",
-    "guarded": true
-   },
-   {
-    "file": "research/mops_insider_holdings_client.py",
     "line": 47,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
    {
     "file": "research/mops_insider_holdings_client.py",
-    "line": 51,
+    "line": 48,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
    {
     "file": "research/mops_insider_holdings_client.py",
-    "line": 65,
+    "line": 52,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
    {
     "file": "research/mops_insider_holdings_client.py",
-    "line": 72,
+    "line": 66,
+    "domain": "mopsov.twse.com.tw",
+    "guarded": true
+   },
+   {
+    "file": "research/mops_insider_holdings_client.py",
+    "line": 73,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
@@ -6985,37 +6985,31 @@
    },
    {
     "file": "research/mops_material_news_client.py",
-    "line": 35,
-    "domain": "mopsov.twse.com.tw",
-    "guarded": true
-   },
-   {
-    "file": "research/mops_material_news_client.py",
     "line": 36,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
    {
     "file": "research/mops_material_news_client.py",
-    "line": 40,
+    "line": 37,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
    {
     "file": "research/mops_material_news_client.py",
-    "line": 123,
+    "line": 41,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
    {
     "file": "research/mops_material_news_client.py",
-    "line": 130,
+    "line": 124,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
    {
-    "file": "research/mops_material_news_probe.py",
-    "line": 32,
+    "file": "research/mops_material_news_client.py",
+    "line": 131,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
@@ -7027,7 +7021,13 @@
    },
    {
     "file": "research/mops_material_news_probe.py",
-    "line": 37,
+    "line": 34,
+    "domain": "mopsov.twse.com.tw",
+    "guarded": true
+   },
+   {
+    "file": "research/mops_material_news_probe.py",
+    "line": 38,
     "domain": "mopsov.twse.com.tw",
     "guarded": true
    },
@@ -7053,7 +7053,7 @@
   "note": "2026-09-20合規.三：掃repo全部.py找黑名單網域硬寫字串（黑名單來源research/net_guard.py::DOMAIN_BLOCKLIST）。unguarded=True代表該檔案提到黑名單網域卻沒有`import net_guard`，是最可能重演2026-09-19 mopsov違規事件的檔案，由check_external_connectivity.py轉成local_task_health告警。"
  },
  "queue_depth_sync": {
-  "checked_at": "2026-10-15T03:29:26.589594+08:00",
+  "checked_at": "2026-10-16T03:15:03.756684+08:00",
   "ok": true,
   "detail": {
    "ok": true,
@@ -7063,7 +7063,7 @@
   "note": "2026-09-20【Q4前視與#23無法重現】四：確認兩份*_CONTINUATION_PROMPT.txt跟research/queue_depth_config.py（單一事實來源）仍然一致，避免重演2026-09-19門檻更正只同步部分位置、連續5輪沒觸發補件規則的問題。"
  },
  "reproducibility_check": {
-  "checked_at": "2026-10-15T03:29:26.589594+08:00",
+  "checked_at": "2026-10-16T03:15:03.756684+08:00",
   "ok": false,
   "detail": {
    "ok": false,
