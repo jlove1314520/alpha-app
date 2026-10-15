@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import sys
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 import yfinance as yf
@@ -30,6 +31,10 @@ INDICES = {
 def main():
     indices = {}
     failed = []
+    # 先.一〇三-12：美東 16:00 前抓到「今天」那一列＝盤中值（yfinance 當日列會隨盤中更新），標 intraday，App 顯示「盤中」
+    now_et = datetime.now(ZoneInfo("America/New_York"))
+    et_today = now_et.strftime("%Y-%m-%d")
+    before_close = now_et.hour < 16
     for ticker, name in INDICES.items():
         try:
             # 2026-08-27：period 從 5d 改 1mo，多抓的天數用來附上近20日收盤序列給
@@ -48,6 +53,7 @@ def main():
                 "as_of": h.index[-1].strftime("%Y-%m-%d"),
                 "sparkline": [round(float(c), 2) for c in h["Close"].tail(20).tolist()],
             }
+            indices[ticker]["intraday"] = bool(indices[ticker]["as_of"] == et_today and before_close)
         except Exception as e:
             print(f"  ・{ticker} 失敗：{e}")
             failed.append(ticker)

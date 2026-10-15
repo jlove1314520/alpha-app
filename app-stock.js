@@ -622,6 +622,36 @@
       +boardCfg.factorOrder.map(k=>factorContribRowHtml(k,row,boardCfg.factorLabels,weights,allRows)).join('');
   }
 
+  // 先.一〇三-12：美股個股現價退回鏈（只用在個股頁頭部）。每一層都標明來源與資料時間，越後面越舊。
+  let US_DAILY_REPO=null;
+  async function _ensureUsDailyRepo(){
+    if(US_DAILY_REPO)return US_DAILY_REPO;
+    if(typeof US_SCREENER!=='undefined'&&US_SCREENER){US_DAILY_REPO=US_SCREENER;return US_DAILY_REPO}
+    try{const r=await fetch('data/us_screener.json');if(!r.ok)throw new Error('HTTP '+r.status);US_DAILY_REPO=await r.json()}
+    catch(e){console.warn('[_ensureUsDailyRepo]',e);recordGlobalError('_ensureUsDailyRepo',e)}
+    return US_DAILY_REPO;
+  }
+  function _usQuotesFileRow(code){return (INTRADAY_US&&INTRADAY_US.quotes&&INTRADAY_US.quotes[code])||null}
+  function _usTimeLabel(ms){if(!ms||!isFinite(ms))return '';const z=_zonedParts(new Date(ms),'America/New_York');return `${String(z.m).padStart(2,'0')}/${String(z.d).padStart(2,'0')} ${String(z.h).padStart(2,'0')}:${String(z.mi).padStart(2,'0')} 美東`}
+  function usHeadQuote(code,px){
+    const ib=ibkrQuote(code);
+    if(ib&&ib.price!=null)return {price:ib.price,change:ib.change??null,change_pct:ib.change_pct??null,note:'來源：'+(String(intradayTagText(ib,true)||'').replace(/^\s*·\s*/,'')||'IBKR')};
+    const q=_usQuotesFileRow(code);
+    if(q&&q.price!=null){
+      const t=q.quote_time?q.quote_time*1000:(INTRADAY_US.fetched_at?new Date(INTRADAY_US.fetched_at).getTime():null);
+      return {price:q.price,change:q.change??null,change_pct:q.change_pct??null,note:`來源：quotes_us 排程報價（Finnhub，${_usTimeLabel(t)||'時間不明'}）`};
+    }
+    const rows=(US_DAILY_REPO&&US_DAILY_REPO.stocks)||[];
+    const d=rows.find(r=>r&&r.code===code);
+    if(d&&d.close!=null){
+      const pct=(typeof d.change_pct==='number'&&isFinite(d.change_pct))?d.change_pct:null;
+      return {price:d.close,change:pct!=null?d.close-d.close/(1+pct/100):null,change_pct:pct,note:`來源：repo 日線收盤（us_screener.json，yfinance，資料日 ${d.date||'不明'}）`};
+    }
+    if(px&&px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].Close:null;
+      return {price:last.Close,change:prev!=null?last.Close-prev:null,change_pct:prev?(last.Close-prev)/prev*100:null,
+              note:`來源：FinMind USStockPrice（補充，${last.date} 日線收盤，非當下報價）`}}
+    return null;
+  }
   async function openStock(code){
     if(typeof code!=='string')code=currentCode;
     currentCode=code;
@@ -640,26 +670,26 @@
     document.getElementById('trend-chart').innerHTML=skeletonBlockHtml(220);  // 2026-09-15 P0產品.四：骨架屏取代純文字「載入中」，形狀貼近圖表區塊
     document.getElementById('stock-reason-card').innerHTML=skeletonHtml(4);  // 2026-09-15 P0產品.二/四，避免殘留上一檔的選股理由
     if(us){
-      const [px]=await Promise.all([fm('USStockPrice',code,_d(35)),ensureIbkrQuotes()]);
+      // 先.一〇三-12：現價退回鏈 IBKR → quotes_us（排程檔，不論新鮮度，標時間）→ repo 日線（us_screener.json 收盤，標日期）
+      // → FinMind 只當最後補充；走勢圖仍優先用 FinMind 有日期的日線，FinMind 失敗才退回 quotes_us 近 20 日收盤。
+      const [pxS]=await Promise.allSettled([fm('USStockPrice',code,_d(35)),ensureIbkrQuotes(),_ensureUsDailyRepo()]);
       if(currentCode!==code)return;  // 2026-09-06：await 期間已切到別檔，作廢
-      // 2026-09-03新增（P0全App現價掃描）：個股頁頭部價格原本完全略過
-      // IBKR即時/收盤報價，一律顯示FinMind日線最後一筆——現在改成跟
-      // 首頁自選股/市場頁同一套「先試intradayQuote()、查不到才退回FinMind」
-      // 規則，個股頁看到的現價才會跟其他分頁一致。
-      const iq=intradayQuote(code,true);
-      if(iq&&iq.price!=null){
-        const cls=(iq.change||0)>=0?'pos':'neg';
-        const pe=document.getElementById('sh-price');pe.textContent='$'+nf(iq.price);pe.className=cls;
-        const ce=document.getElementById('sh-chg');ce.textContent=`${(iq.change||0)>=0?'+':''}${(+(iq.change||0)).toFixed(2)}（${(iq.change_pct||0)>=0?'+':''}${(iq.change_pct||0).toFixed(2)}%）`;ce.className=cls;
-        if(px.length)renderStockChart(code,px,true);
-        setTxt('trend-note',`來源：IBKR${intradayTagText(iq)}`);  // 2026-09-08 實測.七
-      }else if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].Close:last.Close;
-        const chg=last.Close-prev;const pct=prev?chg/prev*100:0;const cls=chg>=0?'pos':'neg';
-        const pe=document.getElementById('sh-price');pe.textContent='$'+nf(last.Close);pe.className=cls;
-        const ce=document.getElementById('sh-chg');ce.textContent=`${chg>=0?'+':''}${(+chg).toFixed(2)}（${pct>=0?'+':''}${pct.toFixed(2)}%）`;ce.className=cls;
-        renderStockChart(code,px,true);
-        setTxt('trend-note',`來源：FinMind USStockPrice · 近 ${px.length} 個交易日收盤（日線收盤，非當下報價）`);
-      }else{setTxt('sh-price','—');setTxt('sh-chg',fmEmptyMsg('查無此代號'));document.getElementById('trend-chart').innerHTML='<div class="note">'+fmEmptyMsg('查無資料')+'</div>'}
+      const px=(pxS.status==='fulfilled'&&Array.isArray(pxS.value))?pxS.value:[];
+      if(pxS.status==='rejected'){console.warn('[openStock:USStockPrice]',pxS.reason);recordGlobalError('openStock:USStockPrice',pxS.reason)}
+      const hq=usHeadQuote(code,px);
+      if(hq){
+        const chg=hq.change,pct=hq.change_pct;
+        const cls=chg==null&&pct==null?'':((chg!=null?chg:pct)>=0?'pos':'neg');
+        const pe=document.getElementById('sh-price');pe.textContent='$'+nf(hq.price);pe.className=cls;
+        const ce=document.getElementById('sh-chg');
+        ce.textContent=(chg==null&&pct==null)?'—':`${chg!=null?((chg>=0?'+':'')+(+chg).toFixed(2)):''}${pct!=null?`（${pct>=0?'+':''}${(+pct).toFixed(2)}%）`:''}`;ce.className=cls;
+        setTxt('trend-note',hq.note);
+      }else{setTxt('sh-price','—');setTxt('sh-chg',fmEmptyMsg('查無此代號'))}
+      if(px.length)renderStockChart(code,px,true);
+      else{const spk=_usQuotesFileRow(code);
+        document.getElementById('trend-chart').innerHTML=(spk&&Array.isArray(spk.sparkline)&&spk.sparkline.length>=2)
+          ?'<div class="note">FinMind 日線取不到；近 '+spk.sparkline.length+' 個交易日收盤（quotes_us 排程檔，無日期軸）：</div>'+spark(spk.sparkline,spk.sparkline[spk.sparkline.length-1]>=spk.sparkline[0])
+          :'<div class="note">'+fmEmptyMsg('查無資料')+'</div>'}
       ['kn-per','kn-pbr','kn-yield','kn-yoy','kn-turnover','kn-vol-mult'].forEach(id=>setTxt(id,'—'));
       setTxt('kn-liquidity-flag','');
       REV_ROWS=[];

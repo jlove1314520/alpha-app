@@ -2717,6 +2717,17 @@
     const cv=(+item.close).toLocaleString('zh-TW',{maximumFractionDigits:2});
     return `<div class="idx-cap is-stale" title="${(srcLabel||'').replace(/"/g,'')}｜資料停在 ${item.stale_tag}"><div class="cn">${label} <span class="stale-tag">${item.stale_tag}</span></div><div class="cv" style="color:var(--ink-3)">${cv}</div><div class="cp" style="color:var(--ink-3)">${pctTxt}</div>${SPARK_PLACEHOLDER}</div>`;
   }
+  // 先.一〇三-12：回傳「MM/DD HH:MM 美東」＝這筆指數是盤中抓的；收盤後抓的回空字串。
+  // 產生端（fetch_market_us.py）也寫 intraday 欄位；舊檔沒有該欄位時用 fetched_at 與 as_of 推。
+  function _usIndexIntradayTag(file,item){
+    try{
+      if(!file||!file.fetched_at||!item)return '';
+      const z=_zonedParts(new Date(file.fetched_at),'America/New_York');
+      const etDate=`${z.y}-${String(z.m).padStart(2,'0')}-${String(z.d).padStart(2,'0')}`;
+      const intra=item.intraday===true||(item.intraday==null&&item.as_of===etDate&&z.h*60+z.mi<16*60);
+      return intra?`${String(z.m).padStart(2,'0')}/${String(z.d).padStart(2,'0')} ${String(z.h).padStart(2,'0')}:${String(z.mi).padStart(2,'0')} 美東`:'';
+    }catch(e){console.warn('[_usIndexIntradayTag]',e);recordGlobalError('_usIndexIntradayTag',e);return ''}
+  }
   async function loadUsIndexes(){
     await loadMarketDataFiles();
     await ensureIbkrQuotes();
@@ -2750,9 +2761,11 @@
       // 靜默降級比顯示錯誤更危險：錯誤會被修，靜默降級會被當成正常狀態放著，
       // 這次就是這樣拖了六天（09/02～09/08 排程根本不存在都沒人發現）。
       const _ibkrStale=INTRADAY_IBKR&&!ibkrFresh;
-      const _fbLabel=_ibkrStale
-        ?'本機IBKR逾期→Yahoo每日收盤快照'
-        :'Yahoo Finance（每日收盤快照）';
+      // 先.一〇三-12：market_us.json 是美東 16:00 前抓的（抓取時間與資料日同一天且未到 16:00）→ 那是盤中值，不是收盤，標「盤中」
+      const _intra=_usIndexIntradayTag(MARKET_US_CACHE,idx[id]);
+      const _fbLabel=_intra
+        ?(_ibkrStale?'本機IBKR逾期→Yahoo盤中快照（'+_intra+'，非收盤）':'Yahoo 盤中快照（'+_intra+'，非收盤）')
+        :(_ibkrStale?'本機IBKR逾期→Yahoo每日收盤快照':'Yahoo Finance（每日收盤快照）');
       const _it=idx[id]?Object.assign({},idx[id],{stale_tag:staleTag(idx[id].as_of,'us')}):idx[id];  // 先.一〇四-6
       return {html:idxRowHtml(label,_fbLabel,_it),date:idx[id]&&idx[id].as_of,label,srcLabel:_fbLabel,item:_it};
     });
@@ -4699,7 +4712,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-16.0530';
+  const APP_VERSION='2026-10-16.0728';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

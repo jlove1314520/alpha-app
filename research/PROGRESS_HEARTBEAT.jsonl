@@ -988,3 +988,5 @@
 {"ts": "2026-10-16T05:15:00+08:00", "source": "dev_queue", "cycle_id": "20261016-050101", "item": "先.一〇三-9", "summary": "補跑腳本 16:30～23:59 時窗、最近 5 交易日逐日缺漏檢查、標題用資料日、心跳改進 repo；自測 6/6"}
 {"ts": "2026-10-16T05:21:00+08:00", "source": "dev_queue", "cycle_id": "20261016-050101", "item": "先.一〇三-10", "summary": "官方除權息補帳重算 adj_close（242 檔；3114/6874/6590 修正，含 00697B）、0 價列標 no_trade、TAIEX/TPEx 移出"}
 {"ts": "2026-10-16T05:31:00+08:00", "source": "dev_queue", "cycle_id": "20261016-050101", "item": "先.一〇三-11", "summary": "picks_ledger 休市日不快照；既有 27 筆（9 個休市日×3 榜）標記並從 App 成績單排除"}
+{"ts": "2026-10-16T07:14:00+08:00", "source": "dev_queue", "cycle_id": "20261016-070101", "item": "先.一〇三-10c", "summary": "每日管線自動抓 TWTCAU/TWTB8U/pvChgAnn 分割與變更面額入帳（防重複除）；SPLITS 補 6696"}
+{"ts": "2026-10-16T07:29:00+08:00", "source": "dev_queue", "cycle_id": "20261016-070101", "item": "先.一〇三-12", "summary": "美股指數盤中抓的標盤中；個股價退回鏈 IBKR→quotes_us→us_screener 日線→FinMind 補充"}
