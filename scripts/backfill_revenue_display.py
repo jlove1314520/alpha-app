@@ -36,7 +36,7 @@ UNIVERSE = ROOT / "data" / "research.json"
 TW = timezone(timedelta(hours=8))
 Q_START, Q_END = "2024-01-01", "2026-07-01"
 KEEP_FROM, KEEP_TO = (2024, 12), (2026, 6)
-MAX_PER_RUN = 300
+MAX_PER_RUN = 150  # 2026-10-15 第一輪 111 檔就碰 FinMind 402 上限（帳號總用量），每輪降到 150 檔
 
 
 def _load(p: Path, default):
