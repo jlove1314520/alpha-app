@@ -519,7 +519,19 @@
     // Shioaji的數字、下面價差卻用TAIFEX CSV的數字算出不一致的結果。
     const txSrc=sources.find(c=>c.id==='TX'),taiexSrc=taiexRowSource(tw);
     const tx=txSrc&&txSrc.src.fut,taiex=taiexSrc.item;
-    if(tx&&tx.last!=null&&taiex&&taiex.close!=null){
+    // 先.一〇三-2（2026-10-15）：現貨與期貨的資料日不同就不算價差（例：現貨 10/15 收盤對期貨 10/14 收盤會算出假的逆價差）。
+    // Shioaji 即時／今日收盤算「今天」；TAIFEX 盤後用 data_date（沒有就用 date 的 YYYYMMDD）。
+    const _todayTw=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Taipei'});
+    const _ymd=s=>{s=String(s||'');return /^\d{8}$/.test(s)?`${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6)}`:s.slice(0,10)};
+    const spotDate=taiex?(taiexSrc.srcLabel!=='證交所'?_todayTw:_ymd(taiex.data_date)):'';
+    const futDate=tx?(txSrc.src.srcLabel?_todayTw:_ymd(tx.data_date||tx.date)):'';
+    const _md=d=>d?d.slice(5).replace('-','/'):'—';
+    if(tx&&tx.last!=null&&taiex&&taiex.close!=null&&spotDate&&futDate&&spotDate!==futDate){
+      setTxt('basis-spot',nf(taiex.close));setTxt('basis-fut',nf(tx.last));
+      document.getElementById('basis-note').textContent=futDate<spotDate
+        ?`期貨資料停在 ${_md(futDate)}，現貨是 ${_md(spotDate)}，日期不同無法計算。`
+        :`現貨資料停在 ${_md(spotDate)}，期貨是 ${_md(futDate)}，日期不同無法計算。`;
+    }else if(tx&&tx.last!=null&&taiex&&taiex.close!=null){
       setTxt('basis-spot',nf(taiex.close));
       setTxt('basis-fut',nf(tx.last));
       const basis=tx.last-taiex.close;
