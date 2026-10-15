@@ -1,3 +1,16 @@
+## 2026-10-15 22:15（互動視窗）先.一〇一 10/15 09:25 起本機停擺查因
+
+等待總司令審閱：2 件（先.九十八-3 Telegram 新裝置登入驗證；先.一〇一-3 重開機停擺防護提案，新增）。
+
+- **先.一〇一-1 根因**：09:29 Windows Update（事件 1074：MoUsoCoreWorker、TrustedInstaller）連續計畫中重開 3 次（KB5127648／KB5127690；26H2 功能更新失敗 0x8024202B，近期會重試）→ 09:29:28 登出，21:41:39 才登入。無事件 41／6008（不是當機）。09:47 進現代待命（網路保持連線），AlphaConnectivity 全天外網 132/132 正常 → **不是睡眠、不是斷網，是「更新重開機＋沒人登入」**。與 9/24 同型，第二次。
+- **先.一〇一-2**：35 個 Alpha 排程 33 個是 Interactive，整段 12 小時不跑；S4U 兩支有跑、有 commit，但 push 全失敗（拿不到認證存放區的 PAT），21:43 登入後一起推上去。現在 main 與 origin/main 一致，無待補推。雲端停擺告警第一次紅燈在 13:57（晚約 4.5 小時，GitHub 排程今天只跑 3 次），且只寄 email。Windows Update 使用時段目前是 00:00～08:00。
+- **先.一〇一-3**：提案 `docs/PROPOSAL_REBOOT_OUTAGE_GUARD.md`（a 電源／b 使用時段 07:00～01:00／c1 存一次密碼改不論登入與否（建議）／d1 GitHub 手機推播先做），已列 AWAITING_REVIEW。**未改任何電源、更新、登入或排程設定。**
+- **先.一〇一-4**：`scripts/market_local_catchup.py` 66 步 0 失敗（commit 084b43d24a），origin/main 的 market_tw.json data_date=2026-10-15；alpha-data `python run_daily.py` 補跑 exit=0（10/15 六類入庫，alpha.db 只新增、未覆蓋）。
+- **新發現→先.一〇一-5**：`Start-ScheduledTask AlphaData` 立刻以 0xC000013A 結束、只寫 ^C；直接跑正常。原因未查明，已排入佇列。
+- **git 事故如實記錄**：22:04 我的 `git pull --rebase --autostash` 的 autostash 還原時衝突（工作目錄有 DevQueue 20261015-214141 研究室.五的未提交變更 154 檔）。stash@{0} 保留未丟，已 `git stash apply` 乾淨還原、無衝突標記；stash@{0} 暫不 drop，待 DevQueue 本輪收工確認無誤再清。
+- 本輪純文件與資料補跑，無程式碼變更，未跑冒煙測試。
+- 檔案：`PENDING_QUEUE.md`、`docs/PROPOSAL_REBOOT_OUTAGE_GUARD.md`（新）、`research/AWAITING_REVIEW.md`、`research/PROGRESS_HEARTBEAT.jsonl`、`PROGRESS.md`。
+
 ## 2026-10-15 08:31（DevQueue 20261015-080102）研究室.三讓行／研究室.四第 1 批／研究室.五-3／自選股盤前 0.00% 修復
 
 等待總司令審閱：0 件（research/AWAITING_REVIEW.md 本輪未變動）。

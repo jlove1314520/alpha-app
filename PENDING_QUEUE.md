@@ -19912,7 +19912,7 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
 
 - [ ] **研究室.二-驗收 （補件，來源：研究室.二 驗收門檻需累積 20 個交易日）2026-11-12 起讀 data/research.json 的 meta.coverage.with_foreign 是否 ≥1,900（修正 2026-10-15 生效、只往後累積不回補；with_foreign 要求近 20 個交易日外資無缺值）；未達就列出仍缺值的上櫃代號數與缺值日期**（互動視窗執行；時間閘：2026-11-12 後）
 
-- [ ] **研究室.三 月營收歷史補齊（App 顯示用回補檔）**（DevQueue 可執行）〔進度 2026-10-15 08:2x 互動視窗：FinMind 不帶 data_id 被拒（免費層 400）、本機快取只到 2024-12 → 走「逐檔抓、記斷點」分支；程式 scripts/backfill_revenue_display.py（每輪上限 150 檔、已完成代號記在 data/revenue_backfill.json meta.done），第 1 輪 110/1,979 檔後 FinMind 402 上限、封鎖到 10:07。**續跑：解封後每輪跑一次 `python scripts/backfill_revenue_display.py`，碰 402 就停、下一輪再跑；全部完成（meta.remaining=0）後跑 build_research＋selftest_research 看 coverage.with_rev3_qoq ≥1,800、smoke，再標 - [x]**。holdout 守門已由先.一百-4 完成（DISPLAY_ONLY_DATA_FILES＋selftest_display_only_files）〕　〔2026-10-15 21:48 DevQueue 20261015-214141：封鎖已過（blocked_until 10:08），改回 - [ ]〕~~⛔ 自走中止（2026-10-15 09:01）~~：FinMind HTTP 402 封鎖到 2026-10-15 10:08（data/rate_limit_state.json blocked_until），超過本輪 09:46 收尾時間；解除條件：10:08 後下一輪改回 - [ ] 續跑 backfill_revenue_display.py（斷點 1506，剩 1,869 檔）
+- [ ] **研究室.三 月營收歷史補齊（App 顯示用回補檔）**（DevQueue 可執行）〔第 2 批 2026-10-15 21:49～22:00 DevQueue 20261015-214141：`--max 120`，120 檔全有資料、0 空、無 402；累計 230/1,979，剩 1,749 檔，斷點在 data/revenue_backfill.json meta.done；下一輪照跑同一指令（每檔約 6 秒）。〕〔進度 2026-10-15 08:2x 互動視窗：FinMind 不帶 data_id 被拒（免費層 400）、本機快取只到 2024-12 → 走「逐檔抓、記斷點」分支；程式 scripts/backfill_revenue_display.py（每輪上限 150 檔、已完成代號記在 data/revenue_backfill.json meta.done），第 1 輪 110/1,979 檔後 FinMind 402 上限、封鎖到 10:07。**續跑：解封後每輪跑一次 `python scripts/backfill_revenue_display.py`，碰 402 就停、下一輪再跑；全部完成（meta.remaining=0）後跑 build_research＋selftest_research 看 coverage.with_rev3_qoq ≥1,800、smoke，再標 - [x]**。holdout 守門已由先.一百-4 完成（DISPLAY_ONLY_DATA_FILES＋selftest_display_only_files）〕　〔2026-10-15 21:48 DevQueue 20261015-214141：封鎖已過（blocked_until 10:08），改回 - [ ]〕~~⛔ 自走中止（2026-10-15 09:01）~~：FinMind HTTP 402 封鎖到 2026-10-15 10:08（data/rate_limit_state.json blocked_until），超過本輪 09:46 收尾時間；解除條件：10:08 後下一輪改回 - [ ] 續跑 backfill_revenue_display.py（斷點 1506，剩 1,869 檔）
   做法：
   1. 新寫 `scripts/backfill_revenue_display.py`：用 FinMind `TaiwanStockMonthRevenue`，以「月份」為單位抓全市場（不帶 data_id），補 2024-12～2026-06 共 19 次請求。節流共用 rate_limit_state，token 讀環境變數。
   2. 寫入 `data/revenue_backfill.json`，格式為 `{"meta":{source,generated_at,months}, "stocks":{代號:[{year,month,revenue,yoy}]}}`。不改 fundamentals.json。
@@ -19980,12 +19980,15 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
   - 沒有「建置中」佔位字
   - 雷達檔載入 < 1 秒（測量方式沿用既有 measure 腳本）
 
-- [ ] **研究室.六 深度研究每週自動更新的接收端**（DevQueue 可執行）
+- [x] **研究室.六 深度研究每週自動更新的接收端**（DevQueue 可執行）
+  〔完成（⚠️ 尚未遇到真實週更新）2026-10-15 DevQueue 20261015-214141：新寫 scripts/lab_weekly_intake.py——git status 找 research/lab/config、guidance 有變動的代號 → build_research＋selftest_research 輸出到暫存目錄（不動 data/）→ 逐檔套第 10 項同一套規則（情境 EPS 公式／說法 asof≤recorded_at／說法格式）→ 通過的各自 commit「研究室.六 週更新 <代號>」，不通過的不 commit、原因寫進 research/lab/INTAKE_FAILURES.md。證據：--dry-run 假造 3167 一筆 asof 2026-12-01 晚於 recorded_at、3324 一筆正常 → 輸出「FAIL 3167：說法格式：第 8 行格式錯誤… → 不 commit」「PASS 3324」，測完還原、research/lab 無殘留。[自行裁量] ①不讓程式自動改 PENDING_QUEUE（互動視窗與排程同時在寫，自動插行容易互相覆蓋），失敗改寫獨立檔，由下一輪 DevQueue 抄進佇列；②不新增排程（新排程屬架構變更要提案），改成下方補件項每週一由 DevQueue 跑一次；③程式不 push，由呼叫端 push。〕
   做法：
   1. Cowork 每週日晚上會把新的 `research/lab/config/<代號>.json` 和 `research/lab/guidance/<代號>.jsonl` 直接寫進 repo 工作目錄。
   2. 本機 commit 前先跑 `python scripts/build_research.py && python scripts/selftest_research.py`：
      - 第 10 項（說法 PIT／格式）FAIL → 不 commit 那一檔，在 PENDING_QUEUE 記一行原因。
      - 通過 → commit，訊息寫「研究室.六 週更新 <代號>」。
+
+- [ ] **研究室.六-週跑 （補件，來源：研究室.六 接收端 2026-10-15）每週一（台北）第一輪 DevQueue 跑 `python scripts/lab_weekly_intake.py`；有 PASS 的 commit 就 push；research/lab/INTAKE_FAILURES.md 有新行就在本條補記代號與原因；第一次遇到真實週更新後回研究室.六把「⚠️ 尚未遇到真實週更新」改掉**（DevQueue 可執行；時間閘：2026-10-19 起每週一）
 
 - [ ] **研究室.七 說法資料集預登記（只登記不檢定）**（互動視窗執行：要碰 TRIALS 登記）
   做法：
@@ -19995,3 +19998,22 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
 
 **執行順序**：一 → 二 → 三 → 四 → 五 → 六；七由互動視窗擇時處理。
 每項各自 commit；完成時附 selftest 與 smoke 的實際輸出。
+
+# 2026-10-15【先.一〇一：10/15 09:25 起本機全部停擺查因】（總司令裁示原文，動工前先寫入；21:48 互動視窗收到）
+
+> 先.一〇一　10/15 09:25 起本機全部停擺查因（總司令說電腦與桌面 App 一直開著）
+> 1. 查 Windows 系統事件（只讀）：今天 09:00 以後的 1074（誰觸發重開機或關機）、6005／6006（開關機）、41（非預期關機）、42／1（睡眠／喚醒）、Windows Update 安裝紀錄、網路斷線事件。整理成時間軸，判定是更新重開機、睡眠還是斷網。
+> 2. 查同一段時間本機排程有沒有跑：dev_queue_cycle.log、market_local_catchup.jsonl、git log 有沒有「本機已提交但沒推上去」的 commit；有就補推。
+> 3. 依根因提出防護方案寫成提案，不得自行改電源或系統安全設定（屬系統設定，需總司令決定）。至少包含：
+>    a. 電源計畫：插電時永不睡眠、網路卡不省電
+>    b. Windows Update 使用時段設定，避開交易日 08:30～20:00 重開機
+>    c. 重開機後排程能否不登入就執行（需要在工作排程器存一次 Windows 密碼，由總司令本人操作；不採用自動登入）
+>    d. 停擺告警：本機超過 60 分鐘沒心跳就從雲端推播通知總司令
+> 4. 補跑今天 10/15 收盤資料（如果 17:30 前電腦還沒恢復），確認 market_tw data_date=2026-10-15。
+> 5. 每項完成標 - [x]，在 research/PROGRESS_HEARTBEAT.jsonl append item=先.一〇一-N。
+
+- [x] **先.一〇一-1 Windows 系統事件時間軸（只讀）**（互動視窗執行）〔22:10 完成：09:29 Windows Update（MoUsoCoreWorker／TrustedInstaller，事件1074）連重開 3 次、09:29:28 登出、21:41:39 才登入；無 41／6008（非當機）；09:47 進現代待命（網路保持連線）；AlphaConnectivity 全天外網 132/132 正常→判定「更新重開機＋無人登入」，非睡眠、非斷網。9/24 同型第二次。另 26H2 功能更新安裝失敗 0x8024202B、近期會重試。時間軸見 docs/PROPOSAL_REBOOT_OUTAGE_GUARD.md 一節〕
+- [x] **先.一〇一-2 停擺期間本機排程有沒有跑＋未推 commit 補推**（互動視窗執行）〔22:10 完成：35 個 Alpha 排程中 33 個是 Interactive，09:29～21:41 全停（dev_queue_cycle.log 09:01 輪被重開中斷、21:41 回收 stale lock；market_local_catchup.jsonl 10/15 只有 07:50 一筆）；S4U 的 AlphaConnectivity／AlphaTwsePublishProbe 有跑有 commit（作者時間 09:57～21:07），但 push 全失敗，21:43 登入後才一起推上去。22:10 查 main 與 origin/main 一致，無待補推 commit〕
+- [x] **先.一〇一-3 防護方案提案（電源／更新時段／不登入執行／停擺告警），交總司令審閱，不自行改系統設定**（互動視窗執行）〔22:15 完成：docs/PROPOSAL_REBOOT_OUTAGE_GUARD.md（a 電源：插電睡眠已是永不，建議休眠永不＋Wi-Fi 不省電＋接網路線；b 使用時段現為 00:00～08:00，建議改 07:00～01:00；c 建議 c1 存一次密碼改「不論登入與否」、分兩批；d 雲端告警已有但今天晚 4.5 小時且只寄 email，建議先開 GitHub 手機推播）。已列 research/AWAITING_REVIEW.md，等總司令四題回覆；未改任何系統設定〕
+- [x] **先.一〇一-4 補跑 10/15 收盤資料，確認 market_tw data_date=2026-10-15**（互動視窗執行）〔22:00 完成：scripts/market_local_catchup.py 66 步 0 失敗、commit 084b43d24a、origin/main 的 market_tw.json data_date=2026-10-15；alpha-data `python run_daily.py` 22:0x 補跑 exit=0（10/15 六類入庫）〕
+- [ ] **先.一〇一-5 AlphaData 由工作排程器啟動立刻 0xC000013A 結束查因**（互動視窗執行）〔來源：先.一〇一-4 補跑時發現：`Start-ScheduledTask AlphaData` 約 60 秒內以 0xC000013A（Ctrl+C 中斷）結束、run.log 只寫一個 ^C；直接 `python run_daily.py` 正常。9/24 也記錄 AlphaData 登入後沒補跑，可能同源。做法：只讀查 run.log 歷次結尾與工作設定（cmd /c 主控台、ExecutionTimeLimit、StartWhenAvailable）→ 找到根因寫提案；不得改 fetch.py／parsers.py／config.py。心跳：本條標 - [x]＋PROGRESS_HEARTBEAT item=先.一〇一-5〕
