@@ -631,9 +631,9 @@
       const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
       el.innerHTML=ev.length?ev.map(e=>`<div class="ir-row" style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-top:1px solid var(--hairline);cursor:pointer" onclick="openStock('${esc(e.code)}')">
           <span class="num" style="font-size:10px;color:var(--ink-4);min-width:34px;padding-top:2px">${esc(String(e.date||'').slice(5).replace('-','/'))}</span>
-          <span style="flex:1;font-size:12px;color:var(--ink-2);line-height:1.5"><b style="color:var(--ink)">${esc(e.name||'')} ${esc(e.code)}</b>・${esc(e.title)}${mopsIrLinkHtml({type:'法說會',code:e.code},true)}</span></div>`).join('')
+          <span style="flex:1;font-size:12px;color:var(--ink-2);line-height:1.5"><b style="color:var(--ink)">${esc(e.name||'')} ${esc(e.code)}</b>・${esc(e.title)}${e.call_date?`<span style="color:var(--gold)">（${esc(String(e.call_date).slice(5).replace('-','/'))} 舉行）</span>`:''}${mopsIrLinkHtml({type:'法說會',code:e.code},true)}</span></div>`).join('')
         :'<div class="note">近 60 天沒有法說會公告</div>';
-      document.getElementById('ir-events-datatime').textContent=`近 60 天共 ${d.count||0} 則${(d.count||0)>20?'，只顯示最近 20 則':''}；日期是重大訊息公告日，不一定是法說會舉行日。簡報 PDF 請點「MOPS簡報」自行開啟（MOPS 不開放程式抓取）。`;
+      document.getElementById('ir-events-datatime').textContent=`近 60 天共 ${d.count||0} 則${(d.count||0)>20?'，只顯示最近 20 則':''}；左邊日期是重大訊息公告日；公告有寫舉行日的另標「MM/DD 舉行」。簡報 PDF 請點「MOPS簡報」自行開啟（MOPS 不開放程式抓取）。`;
     }catch(e){
       console.warn('[loadIrEvents]',e);recordGlobalError('loadIrEvents',e);
       el.innerHTML='<div class="note">法說會列表載入失敗（'+String(e&&e.message||e).replace(/[&<>]/g,'')+'）</div>';

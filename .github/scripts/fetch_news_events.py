@@ -130,6 +130,119 @@ def classify(subject: str, clause: str) -> str:
     return "其他"
 
 
+def _valid_date(y: int, m: int, d: int) -> str | None:
+    try:
+        return datetime(y, m, d).strftime("%Y-%m-%d")
+    except ValueError:
+        return None
+
+
+def call_date_of(announce: str, title: str, desc: str = "", fact_date: str = "", clause: str = "") -> tuple[str | None, str | None]:
+    """法說會舉行日（先.一〇三-4）。回 (YYYY-MM-DD, 依據)；抓不到回 (None, None)，不猜。
+
+    依序：①重大訊息「說明」欄的「召開法人說明會之日期：115/10/28」（官方制式欄位）
+    ②符合條款＝第12款（法說會條款）時的「事實發生日」③主旨裡寫的日期（西元／民國／只寫月日）。
+    只寫月日的，年份取公告年；推出來比公告日早 30 天以上就算明年。與公告日差超過 180 天的視為不是舉行日，丟掉。
+    """
+    try:
+        ann = datetime.fromisoformat(str(announce)[:10])
+    except (TypeError, ValueError):
+        return None, None
+
+    def ok(iso):
+        if not iso:
+            return None
+        dd = (datetime.fromisoformat(iso) - ann).days
+        return iso if -180 <= dd <= 180 else None
+
+    m = re.search(r"召開法人說明會之日期\s*[:：]\s*(\d{2,4})\s*[/／.-]\s*(\d{1,2})\s*[/／.-]\s*(\d{1,2})", desc or "")
+    if m:
+        y = int(m.group(1))
+        iso = ok(_valid_date(y + 1911 if y < 1000 else y, int(m.group(2)), int(m.group(3))))
+        if iso:
+            return iso, "重大訊息說明欄「召開法人說明會之日期」"
+    if re.search(r"第\s*12\s*款", clause or ""):
+        iso = ok(roc_to_iso(fact_date))
+        if iso:
+            return iso, "重大訊息事實發生日（第12款）"
+    t = title or ""
+    m = re.search(r"(\d{2,4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日", t)
+    if m:
+        y = int(m.group(1))
+        iso = ok(_valid_date(y + 1911 if y < 1000 else y, int(m.group(2)), int(m.group(3))))
+        if iso:
+            return iso, "重大訊息主旨"
+    m = re.search(r"(?<![\d年])(\d{1,2})\s*月\s*(\d{1,2})\s*日", t)
+    if m:
+        iso = _valid_date(ann.year, int(m.group(1)), int(m.group(2)))
+        if iso and (datetime.fromisoformat(iso) - ann).days < -30:
+            iso = _valid_date(ann.year + 1, int(m.group(1)), int(m.group(2)))
+        iso = ok(iso)
+        if iso:
+            return iso, "重大訊息主旨（只寫月日，年份依公告日推）"
+    return None, None
+
+
+def ym_label(ym: str) -> tuple[str | None, str | None]:
+    """月營收資料年月（民國 11509 或西元 202609）→ ("2026-09", "9 月營收")。解析不了回 (None, None)。"""
+    t = re.sub(r"\D", "", str(ym or ""))
+    y = mo = None
+    if len(t) == 5:
+        y, mo = int(t[:3]) + 1911, int(t[3:])
+    elif len(t) == 6 and t.startswith(("19", "20")):
+        y, mo = int(t[:4]), int(t[4:])
+    if not y or not (1 <= mo <= 12):
+        return None, None
+    return f"{y:04d}-{mo:02d}", f"{mo} 月營收"
+
+
+def normalize_revenue_events(rows: list[dict]) -> list[dict]:
+    """先.一〇三-4：月營收事件以「代號＋資料年月」去重。
+
+    TWSE openapi t187ap05_L 是「當下最新一個月」的全市場彙總表，沒有公告日欄位；每天重抓同一個月會用新的
+    出表日期再記一筆，同一家同一個月最多累積 7 筆。這裡每組只留**最早**那筆的日期——那是我們第一次在官方
+    彙總表看到它的日子，實際公告日不晚於此日（官方未提供逐家公告日，MOPS 網頁不開放程式抓取，不爬）。
+    舊列標題「11509 月營收公布」一併改成「9 月營收公布」。非月營收列原樣保留、順序不動。
+    """
+    groups: dict[tuple, dict] = {}
+    out: list = []
+    for r in rows:
+        if r.get("type") != "月營收":
+            out.append(r)
+            continue
+        ym_iso = r.get("data_ym")
+        if ym_iso:
+            label = f"{int(str(ym_iso)[5:7])} 月營收"
+        else:
+            m = re.match(r"\s*(\d{5,6})\s*月營收", str(r.get("title") or ""))
+            ym_iso, label = ym_label(m.group(1)) if m else (None, None)
+        if not ym_iso:
+            out.append(r)  # 解析不了的不硬併，原樣保留
+            continue
+        key = (r.get("code"), ym_iso)
+        cur = groups.get(key)
+        if cur is None or str(r.get("date") or "") < str(cur.get("date") or ""):
+            nr = dict(r)
+            nr["data_ym"] = ym_iso
+            nr["title"] = re.sub(r"^\s*\d{5,6}\s*月營收", label, str(r.get("title") or ""))
+            nr["date_basis"] = "首次出現在 TWSE 月營收彙總表的日期（官方未提供逐家公告日；實際公告日不晚於此日）"
+            if cur is None:
+                out.append(key)  # 佔位：這一組放在第一次出現的位置
+            groups[key] = nr
+    return [groups[x] if isinstance(x, tuple) else x for x in out]
+
+
+def finalize_events(rows: list[dict]) -> list[dict]:
+    """先.一〇三-4：合併後收尾——月營收去重；舊法說會列（當時沒存說明欄）用主旨補舉行日。"""
+    rows = normalize_revenue_events(rows)
+    for r in rows:
+        if r.get("type") == "法說會" and not r.get("call_date"):
+            cd, basis = call_date_of(str(r.get("date") or ""), str(r.get("title") or ""))
+            if cd:
+                r["call_date"], r["call_date_basis"] = cd, basis
+    return rows
+
+
 def fetch_events(s: requests.Session) -> tuple[list[dict], dict]:
     events, meta = [], {}
 
@@ -143,10 +256,15 @@ def fetch_events(s: requests.Session) -> tuple[list[dict], dict]:
             subj = clean(r.get("主旨 ") or r.get("主旨"))
             if not (code and d and subj):
                 continue
-            events.append({"code": code, "name": clean(r.get("公司名稱")), "date": d,
-                           "type": classify(subj, clean(r.get("符合條款"))),
-                           "title": subj[:120], "source": "TWSE 重大訊息",
-                           "url": "https://mops.twse.com.tw/mops/web/t05st01"})
+            ev = {"code": code, "name": clean(r.get("公司名稱")), "date": d,
+                  "type": classify(subj, clean(r.get("符合條款"))),
+                  "title": subj[:120], "source": "TWSE 重大訊息",
+                  "url": "https://mops.twse.com.tw/mops/web/t05st01"}
+            if ev["type"] == "法說會":  # 先.一〇三-4：另存舉行日（date 仍是公告日）
+                cd, basis = call_date_of(d, subj, r.get("說明") or "", r.get("事實發生日") or "", r.get("符合條款") or "")
+                if cd:
+                    ev["call_date"], ev["call_date_basis"] = cd, basis
+            events.append(ev)
             n += 1
         meta["twse_mops"] = {"ok": True, "rows": len(rows), "kept": n}
     except Exception as e:  # noqa: BLE001
@@ -162,10 +280,15 @@ def fetch_events(s: requests.Session) -> tuple[list[dict], dict]:
             subj = clean(r.get("主旨"))
             if not (code and d and subj):
                 continue
-            events.append({"code": code, "name": clean(r.get("CompanyName")), "date": d,
-                           "type": classify(subj, clean(r.get("符合條款"))),
-                           "title": subj[:120], "source": "TPEx 重大訊息",
-                           "url": "https://mops.twse.com.tw/mops/web/t05st01"})
+            ev = {"code": code, "name": clean(r.get("CompanyName")), "date": d,
+                  "type": classify(subj, clean(r.get("符合條款"))),
+                  "title": subj[:120], "source": "TPEx 重大訊息",
+                  "url": "https://mops.twse.com.tw/mops/web/t05st01"}
+            if ev["type"] == "法說會":  # 先.一〇三-4：另存舉行日（date 仍是公告日）
+                cd, basis = call_date_of(d, subj, r.get("說明") or "", r.get("事實發生日") or "", r.get("符合條款") or "")
+                if cd:
+                    ev["call_date"], ev["call_date_basis"] = cd, basis
+            events.append(ev)
             n += 1
         meta["tpex_mops"] = {"ok": True, "rows": len(rows), "kept": n}
     except Exception as e:  # noqa: BLE001
@@ -185,12 +308,15 @@ def fetch_events(s: requests.Session) -> tuple[list[dict], dict]:
                 yoy_f = float(str(yoy).replace(",", ""))
             except (TypeError, ValueError):
                 yoy_f = None
-            ym = f'{clean(r.get("資料年月"))}'
-            title = f"{ym} 月營收公布" + (f"，年增 {yoy_f:.1f}%" if yoy_f is not None else "")
+            # 先.一〇三-4：標題寫「9 月營收」不寫民國「11509」；資料年月另存 data_ym（2026-09），去重靠它
+            ym_iso, label = ym_label(clean(r.get("資料年月")))
+            if not ym_iso:
+                continue
+            title = f"{label}公布" + (f"，年增 {yoy_f:.1f}%" if yoy_f is not None else "")
             events.append({"code": code, "name": clean(r.get("公司名稱")), "date": d,
                            "type": "月營收", "title": title, "source": "TWSE 月營收",
                            "url": "https://mops.twse.com.tw/mops/web/t21sc03",
-                           "yoy_pct": yoy_f})
+                           "yoy_pct": yoy_f, "data_ym": ym_iso})
             n += 1
         meta["twse_revenue"] = {"ok": True, "rows": len(rows), "kept": n}
     except Exception as e:  # noqa: BLE001
@@ -367,6 +493,7 @@ def main() -> int:
     ev_out = merge_keep(DATA / "events.json", "events", events,
                         lambda r: (r.get("code"), r.get("date"), r.get("title")),
                         keep_days=KEEP_DAYS)
+    ev_out = finalize_events(ev_out)
     nw_out = merge_keep(DATA / "news.json", "news", news,
                         lambda r: r.get("url"), cap=NEWS_KEEP)
 

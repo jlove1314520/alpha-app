@@ -49,7 +49,7 @@ RULE_TEXT = {
     "營收創新高": "最新月營收為近 24 個月以上最高",
     "毛利率跳升": "最新一季毛利率比上一季高 ≥3 個百分點",
     "毛利率轉差": "最新一季毛利率比上一季低 ≥3 個百分點",
-    "法說將至": "14 天內有法說會公告（日期為公告日，不一定是舉行日）",
+    "法說將至": "未來 14 天內（含今天）有法說會舉行（日期取重大訊息寫明的舉行日，沒寫舉行日的公告不算）",
     "帶量突破": "收盤為 60 日新高且近5日均量 ≥1.5×20日均量",
     "創高量縮": "收盤為 60 日新高但近5日均量 <0.8×20日均量",
     "帶量跌破季線": "近3日由季線上跌破 MA60 且當日量 ≥1.5×20日均量",
@@ -256,8 +256,16 @@ def event_metrics(evs, asof):
         delta = (d - asof).days
         if -30 <= delta <= 0 and e.get("type") not in ("月營收",):
             out["events_30d"] += 1
-        if e.get("type") == "法說會" and -1 <= delta <= 14 and (out["next_call"] is None or e["date"] < out["next_call"]["date"]):
-            out["next_call"] = {"date": e["date"][:10], "title": e.get("title", "")[:80], "url": e.get("url")}
+        # 先.一〇三-4：法說將至看「法說舉行日」call_date（重大訊息說明欄／主旨解析），不看公告日；抓不到舉行日的不算
+        cd = e.get("call_date") if e.get("type") == "法說會" else None
+        if cd:
+            try:
+                cdelta = (dt.date.fromisoformat(cd[:10]) - asof).days
+            except Exception:  # noqa: BLE001
+                cdelta = None
+            # delta<=0：公告要在 asof 當天或以前才看得到（--asof 回放時不偷看未來公告）
+            if cdelta is not None and delta <= 0 and 0 <= cdelta <= 14 and (out["next_call"] is None or cd < out["next_call"]["date"]):
+                out["next_call"] = {"date": cd[:10], "announced": e["date"][:10], "title": e.get("title", "")[:80], "url": e.get("url")}
         if e.get("type") in ("重大訂單", "併購", "處分資產", "財務", "訴訟") and -7 <= delta <= 0:
             out["recent_major"].append({"date": e["date"][:10], "type": e["type"], "title": e.get("title", "")[:80], "url": e.get("url")})
     return out

@@ -1408,7 +1408,7 @@
     h+=row('外資／投信 10 日',`${lots(ins.foreign10)}／${lots(ins.trust10)}`,esc(ins.reason||''));
     h+=hd?row('千張大戶週變化',pp(hd.week_change_pct),`持股 ${hd.big_holder_ratio}%（${md(hd.date)}）`):row('千張大戶週變化','—','無集保大戶資料');
     const nc=ev.next_call;
-    h+=row('下一場法說',nc?`<a href="${esc(nc.url)}" target="_blank" rel="noopener" style="color:var(--gold)">${md(nc.date)}</a>`:'—',nc?'日期為公告日，不一定是舉行日':'近期無法說會公告');
+    h+=row('下一場法說',nc?`<a href="${esc(nc.url)}" target="_blank" rel="noopener" style="color:var(--gold)">${md(nc.date)}</a>`:'—',nc?(nc.announced?`舉行日；${md(nc.announced)} 公告`:'舉行日'):'未來 14 天沒有寫明舉行日的法說會公告');
     const maj=ev.recent_major||[];
     h+='<div style="padding:8px 0;border-bottom:1px solid var(--hairline)"><div style="color:var(--ink-2);font-size:13px">近 7 日重大訊息</div>'
       +(maj.length?maj.map(x=>`<div style="font-size:12.5px;margin-top:4px">${md(x.date)} <span class="note" style="margin:0">${esc(x.type||'')}</span> <a href="${esc(x.url)}" target="_blank" rel="noopener" style="color:var(--gold)">${esc(x.title)}</a></div>`).join(''):'<div class="note" style="margin:4px 0 0">無</div>')+'</div>';

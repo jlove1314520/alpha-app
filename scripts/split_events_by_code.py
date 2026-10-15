@@ -94,8 +94,8 @@ def main() -> int:
                 key=lambda e: (str(e.get("date") or ""), str(e.get("code") or "")), reverse=True)
     _write_if_changed(ROOT / "data" / "ir_events.json", _dump({
         "fetched_at": doc.get("fetched_at"), "source": "data/events.json（TWSE／TPEx 重大訊息）type＝法說會、近 60 天；scripts/split_events_by_code.py",
-        "note": "日期是重大訊息公告日，不一定是法說會舉行日；簡報 PDF 請點 MOPS 連結自行開啟（MOPS 不開放程式抓取）",
-        "count": len(ir), "events": [{k: e.get(k) for k in ("code", "name", "date", "title", "source", "url")} for e in ir]}))
+        "note": "date 是重大訊息公告日；call_date 是法說會舉行日（取自重大訊息說明欄或主旨，沒寫就沒有）；簡報 PDF 請點 MOPS 連結自行開啟（MOPS 不開放程式抓取）",
+        "count": len(ir), "events": [{k: e.get(k) for k in ("code", "name", "date", "call_date", "title", "source", "url") if k != "call_date" or e.get(k)} for e in ir]}))
     # 先.八十一-30：全域搜尋等「要整份事件」的地方改讀精簡版 data/events_search.json（gzip 約 156KB，整份約 382KB）：
     # 網址／類型／來源只有少數幾種，改存索引；公司名另存一份對照。App 讀進來還原成與 events.json 完全相同的物件。
     U = sorted({str(e.get("url") or "") for e in events})
