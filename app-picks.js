@@ -254,7 +254,7 @@
   }
   // ══════ 研究室.五-2（2026-10-15）變化雷達：讀 research_radar.json 的 lists，只列描述性變化，不是買進訊號 ══════
   let RADAR_CACHE=null,RADAR_LIST='綜合變化';
-  const RADAR_ORDER=['綜合變化','營收加速','營收創新高','毛利率跳升','營收轉弱','法說將至','帶量突破','創高量縮','法人背離','重大訊息'];
+  const RADAR_ORDER=['綜合變化','營收加速','營收創新高','毛利率跳升','營收轉弱','法說將至','量增創 60 日新高','創高量縮','法人背離','重大訊息'];
   async function hydrateRadar(forceReload){
     const listEl=document.getElementById('radar-list');if(!listEl)return;
     if(RADAR_CACHE&&!forceReload){renderRadar();return}
@@ -575,7 +575,7 @@
     host.style.display='';
     // 2026-09-06（實測.四）總司令裁示取消「極端走勢就不顯示分批進場」：
     // 階梯照顯示，把判斷權留給使用者，這裡只負責把風險講得夠醒目。
-    host.innerHTML=`⚠ 追高風險提醒：${flags.join('；')}。下方回檔價位參考照常顯示，但請自行判斷是否值得追。`;
+    host.innerHTML=`⚠ 追高風險提醒：${flags.join('；')}。下方回檔價位參考照常顯示，只是價位換算，不代表進出場時點。`;
   }
   async function renderReport(){
     const row=REPORT_CACHE;
@@ -591,7 +591,6 @@
     ['report-factors','report-industry-tech','report-entry-plan','report-events','report-valuation-band'].forEach(id=>{
       const el=document.getElementById(id);if(el)el.innerHTML=skeletonHtml(4);  // 2026-09-15 P0產品.四：骨架屏
     });
-    const opEl=document.getElementById('report-order-plan');if(opEl)opEl.innerHTML='';
     ENTRY_PLAN_CACHE=null;
     document.getElementById('report-asof').textContent=`資料時間：${row.data_asof}（盤後/延遲資料） ｜ ⚠️ 非投資建議`;
     document.getElementById('report-name').textContent=pickLabel(row);
@@ -658,7 +657,6 @@
     document.getElementById('report-industry-tech').innerHTML=itHtml;
     });
 
-    document.getElementById('report-strategy').textContent='目前為「規則綜合評分排行」清單性質（規則加權，非 AI 判斷），不是自動交易策略；下方按鈕只依分批資金配置範例產生試算，不代表任何策略或買賣建議。台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單（只交易白名單 ETF，與本頁個股無關）。';
 
     // 分批進場計畫：機械式資金分配規則（現價/-4%/-8%），不是估值預測，不是投資建議
     const planEl=document.getElementById('report-entry-plan');
@@ -778,16 +776,7 @@
     localStorage.setItem('alpha_wl',JSON.stringify(WL));pushWatchlistSoon();pushSettingsSoon();
     updateReportWatchBtn(row.code);
   }
-  function generateOrderPlan(){
-    if(!ENTRY_PLAN_CACHE){toast('分批資金配置範例尚未載入完成');return}
-    const {tranches}=ENTRY_PLAN_CACHE;
-    document.getElementById('report-order-plan').innerHTML=`<div class="gate" style="margin-top:10px">
-      <div style="font-weight:700;margin-bottom:8px">📋 分批試算（僅顯示，不會送出）</div>
-      ${tranches.map((t,i)=>`<div class="g">批次 ${i+1}：${nf(t.price.toFixed(2))} 元 · 資金配置 ${t.pct}% · 張數請自行決定</div>`).join('')}
-      <div class="g" style="color:var(--warn);margin-top:8px">⚠️ 本試算非投資建議、不構成買賣訊號；只顯示、不會實際下單。台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單，只交易白名單 ETF，與本計畫無關。</div>
-    </div>`;
-    toast('已產生分批試算（僅顯示，未送出）');
-  }
+  // 先.一〇三-17：generateOrderPlan（分批試算）隨報告頁卡片一起移除
   // 近 30 日事件流。無事件時要**講清楚查了什麼**，不能只寫「無資料」——
   // 「沒查」跟「查了沒有」對使用者是完全不同的資訊。
   // ── 2026-09-10（建置一.2）估值區間（非目標價）─────────────────────────────

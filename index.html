@@ -43,7 +43,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(mq.addEventListener)mq.addEventListener('change',h);else if(mq.addListener)mq.addListener(h)}
 })();
 </script>
-<link rel="stylesheet" href="app.css?v=2026-10-16.0749">
+<link rel="stylesheet" href="app.css?v=2026-10-16.0755">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -606,16 +606,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div id="report-entry-plan"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
     </div>
 
-    <div class="card" style="background:linear-gradient(155deg, rgba(216,176,112,.12), var(--ai-tail));border-color:rgba(216,176,112,.25)">
-      <h3>分批試算</h3>
-      <div id="report-strategy" class="note"></div>
-      <button class="press" style="width:100%;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--gold-grad);color:#1a1005;font-size:14px;font-weight:700;padding:14px;border-radius:14px;border:0" onclick="generateOrderPlan()">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1a1005" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        產生分批試算
-      </button>
-      <div class="note" style="margin-top:8px;text-align:center">⚠️ 只算給你看，<b>不會下單</b></div>
-      <div id="report-order-plan"></div>
-    </div>
+    <!-- 先.一〇三-17（2026-10-16 總司令裁示）：報告頁「分批試算」整張卡移除（含 generateOrderPlan）。 -->
       </section>
 
   <!-- ════════ 3. 個股頁 ════════ -->
@@ -1568,6 +1559,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-16.0749"></script>
+<script src="app.js?v=2026-10-16.0755"></script>
 </body>
 </html>

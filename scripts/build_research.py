@@ -50,16 +50,16 @@ RULE_TEXT = {
     "毛利率跳升": "最新一季毛利率比上一季高 ≥3 個百分點",
     "毛利率轉差": "最新一季毛利率比上一季低 ≥3 個百分點",
     "法說將至": "未來 14 天內（含今天）有法說會舉行（日期取重大訊息寫明的舉行日，沒寫舉行日的公告不算）",
-    "帶量突破": "收盤為 60 日新高且近5日均量 ≥1.5×20日均量",
+    "量增創 60 日新高": "收盤為 60 日新高且近5日均量 ≥1.5×20日均量",
     "創高量縮": "收盤為 60 日新高但近5日均量 <0.8×20日均量",
-    "帶量跌破季線": "近3日由季線上跌破 MA60 且當日量 ≥1.5×20日均量",
+    "量增跌破 60 日均線": "近3日由 60 日均線上跌破 MA60 且當日量 ≥1.5×20日均量",
     "投信連買": "投信連續 ≥5 個交易日買超",
     "法人背離": "近20日股價 ≥+10% 但外資賣超，或 ≤−10% 但外資買超",
     "大戶增持": "千張大戶持股比例單週增 ≥0.5 個百分點且連 ≥2 週（集保缺週、兩筆相隔超過 9 天時不算單週、不打標籤）",
     "重大訊息": "近7日有重大訂單／併購／處分資產／財務／訴訟類重大訊息",
 }
 FUND_TAGS = {"營收加速", "營收轉正", "營收轉弱", "營收創新高", "毛利率跳升", "毛利率轉差"}
-NEG_TAGS = {"營收轉弱", "毛利率轉差", "帶量跌破季線", "創高量縮"}
+NEG_TAGS = {"營收轉弱", "毛利率轉差", "量增跌破 60 日均線", "創高量縮"}
 
 
 def load(p: Path, default=None):
@@ -342,10 +342,10 @@ def change_tags(rv, q, p, ins, hd, ev):
         if q["gm_qoq_pp"] <= -3: t.append("毛利率轉差")
     if ev.get("next_call"): t.append("法說將至")
     if p.get("close") and p.get("hi60") and p["close"] >= p["hi60"] and p.get("vol5_20") is not None:
-        if p["vol5_20"] >= 1.5: t.append("帶量突破")
+        if p["vol5_20"] >= 1.5: t.append("量增創 60 日新高")
         if p["vol5_20"] < 0.8: t.append("創高量縮")
     if any("帶量大跌" in f["tags"] for f in p.get("flags", [])[-3:]) and p.get("ma60") and p["close"] < p["ma60"]:
-        t.append("帶量跌破季線")
+        t.append("量增跌破 60 日均線")
     if ins.get("trust_streak", 0) >= 5: t.append("投信連買")
     r20, f20 = p.get("ret20"), ins.get("foreign20")
     if r20 is not None and f20 is not None and not ins.get("foreign_missing_days") and ((r20 >= 0.10 and f20 < 0) or (r20 <= -0.10 and f20 > 0)):
@@ -564,7 +564,7 @@ def main():
         "毛利率跳升": top(lambda s: "毛利率跳升" in s["change_tags"], lambda s: s["q"].get("gm_qoq_pp")),
         "營收轉弱": top(lambda s: "營收轉弱" in s["change_tags"], lambda s: -((s["rev"]["rev3_yoy"] or 0) - (s["rev"]["rev3_yoy_prev"] or 0))),
         "法說將至": top(lambda s: "法說將至" in s["change_tags"], lambda s: s["px"].get("turnover20")),
-        "帶量突破": top(lambda s: "帶量突破" in s["change_tags"], lambda s: s["px"].get("vol5_20")),
+        "量增創 60 日新高": top(lambda s: "量增創 60 日新高" in s["change_tags"], lambda s: s["px"].get("vol5_20")),
         "創高量縮": top(lambda s: "創高量縮" in s["change_tags"], lambda s: s["px"].get("ret20")),
         "法人背離": top(lambda s: "法人背離" in s["change_tags"], lambda s: abs(s["px"].get("ret20") or 0)),
         "重大訊息": top(lambda s: "重大訊息" in s["change_tags"], lambda s: s["px"].get("turnover20")),
