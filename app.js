@@ -2185,33 +2185,85 @@
   // fetch_earnings_calendar.py`追蹤清單裡的美股（yfinance來源），不是「今日
   // 所有市場事件」，也不含台股（台股月營收/財報公告日期目前沒有現成的
   // 行事曆資料源），卡片文案要講清楚範圍，不能讓使用者誤以為涵蓋全市場。
+  // 先.一〇四-5（2026-10-16）：今日事件加台股——除權息（全市場，未來 7 天）、法說（標題裡有會議日就用會議日，
+  // 未來 7 天；沒寫日期的只列近 2 天公告）、自選股重大訊息（近 2 天，不含月營收）；原本的美股財報（21 天內）保留。
+  // 自選股排前面；其他全市場的收進「全市場」摺疊。資料都是既有檔：ex_dividend_events.json／ir_events.json／events_by_code/。
+  let TODAY_EV_EXDIV=null,TODAY_EV_IR=null;
+  function _evYmd(d){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit'}).format(d)}
+  function _evAddDays(ymd,n){const d=new Date(ymd+'T12:00:00+08:00');d.setDate(d.getDate()+n);return _evYmd(d)}
+  function _irMeetingDate(title,annDate){
+    // 標題裡的「10月28日」「10/28」→ 用公告年份（跨年時往後一年）
+    const m=/(\d{1,2})\s*[月\/]\s*(\d{1,2})\s*日?/.exec(String(title||''));
+    if(!m||!annDate)return null;
+    const y=+annDate.slice(0,4),mo=+m[1],da=+m[2];
+    if(!(mo>=1&&mo<=12&&da>=1&&da<=31))return null;
+    let ymd=`${y}-${String(mo).padStart(2,'0')}-${String(da).padStart(2,'0')}`;
+    if(ymd<annDate)ymd=`${y+1}-${ymd.slice(5)}`;
+    return ymd;
+  }
+  async function _todayTwEvents(today){
+    const wl=new Set(WL.map(String)),rows=[];
+    const until=_evAddDays(today,7),since2=_evAddDays(today,-2);
+    const [exd,ir,mine]=await Promise.allSettled([
+      TODAY_EV_EXDIV?Promise.resolve(TODAY_EV_EXDIV):fetch('data/ex_dividend_events.json?t='+Math.floor(Date.now()/600000)).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}),
+      TODAY_EV_IR?Promise.resolve(TODAY_EV_IR):fetch('data/ir_events.json?t='+Math.floor(Date.now()/600000)).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}),
+      loadEventsForCodes([...wl])]);
+    if(exd.status==='fulfilled'){TODAY_EV_EXDIV=exd.value;
+      Object.entries((exd.value&&exd.value.events)||{}).forEach(([code,list])=>(list||[]).forEach(e=>{
+        if(e&&e.ex_date>=today&&e.ex_date<=until){
+          const parts=[];if(e.cash)parts.push('現金 '+(+e.cash).toLocaleString('zh-TW',{maximumFractionDigits:4})+' 元');if(e.stock_ratio)parts.push('配股');
+          rows.push({date:e.ex_date,kind:'除權息',code,name:nameOf(code)||code,note:(e.type?'除'+e.type:'除權息')+(parts.length?' · '+parts.join('、'):''),mine:wl.has(code)})}
+      }))}
+    else{console.warn('[todayEvents:exdiv]',exd.reason);recordGlobalError('todayEvents:exdiv',exd.reason)}
+    if(ir.status==='fulfilled'){TODAY_EV_IR=ir.value;
+      ((ir.value&&ir.value.events)||[]).forEach(e=>{
+        const meet=_irMeetingDate(e.title,e.date);
+        if(meet?(meet>=today&&meet<=until):(e.date>=since2&&e.date<=today))
+          rows.push({date:meet||e.date,kind:'法說',code:e.code,name:e.name||nameOf(e.code)||e.code,note:meet?'法說會':'公告將召開法說（會議日見公告）',mine:wl.has(String(e.code))})
+      })}
+    else{console.warn('[todayEvents:ir]',ir.reason);recordGlobalError('todayEvents:ir',ir.reason)}
+    if(mine.status==='fulfilled'){
+      ((mine.value&&mine.value.events)||[]).forEach(e=>{
+        if(e&&wl.has(String(e.code))&&e.type!=='月營收'&&e.type!=='法說會'&&e.date>=since2&&e.date<=today)
+          rows.push({date:e.date,kind:'重訊',code:String(e.code),name:e.name||nameOf(e.code)||e.code,note:String(e.title||'').slice(0,40),mine:true})
+      })}
+    else{console.warn('[todayEvents:mine]',mine.reason);recordGlobalError('todayEvents:mine',mine.reason)}
+    return rows;
+  }
   async function loadTodayEvents(){
     const el=document.getElementById('today-events');if(!el)return;
     try{
-      const cal=await loadEarningsCalendar();
+      const today=_evYmd(new Date());
+      const [calR,twR]=await Promise.allSettled([loadEarningsCalendar(),_todayTwEvents(today)]);
+      const rows=twR.status==='fulfilled'?twR.value:[];
+      if(twR.status!=='fulfilled'){console.warn('[loadTodayEvents:tw]',twR.reason);recordGlobalError('loadTodayEvents:tw',twR.reason)}
+      const cal=calR.status==='fulfilled'?calR.value:{};
       const now=Date.now();
-      const rows=Object.entries(cal)
-        .map(([code,info])=>{
-          if(!info||!info.next_earnings_date)return null;
-          const days=(new Date(info.next_earnings_date)-now)/86400000;
-          if(!(days>=0&&days<=21))return null;
-          return {code,days,...info};
-        })
-        .filter(Boolean)
-        .sort((a,b)=>a.days-b.days);
+      Object.entries(cal).forEach(([code,info])=>{
+        if(!info||!info.next_earnings_date)return;
+        const days=(new Date(info.next_earnings_date)-now)/86400000;
+        if(!(days>=0&&days<=21))return;
+        rows.push({date:String(info.next_earnings_date).slice(0,10),kind:'美股財報',code,name:nameOf(code)||code,note:{pre:'盤前',post:'盤後'}[info.estimated_session]||'',mine:WL.includes(code)});
+      });
       const card=document.getElementById('home-events-card');
-      if(!rows.length){el.innerHTML='<div class="note">近21天內（美股，`fetch_earnings_calendar.py`追蹤清單）查無即將公布的財報，或資料尚未更新</div>';if(card)card.hidden=true;return}
-      if(card)card.hidden=false;  // 2026-09-04 P0產品.一：只在有事件時顯示
-      const sessionLabel={pre:'盤前',post:'盤後'};
-      el.innerHTML=rows.map(r=>{
-        const d=new Date(r.next_earnings_date);
-        const dateTxt=`${d.getUTCMonth()+1}/${d.getUTCDate()}`;
-        const sess=sessionLabel[r.estimated_session]||'';
-        return `<div class="row" style="cursor:default"><div class="nm"><b>${nameOf(r.code)||r.code}</b><span>${r.code} · 美股財報</span></div><div class="px"><b>${dateTxt}</b><span>${sess}</span></div></div>`;
-      }).join('')+'<div class="note" style="margin-top:6px">僅涵蓋追蹤清單內的美股財報日期（yfinance），非全市場事件，不含台股</div>';
+      if(!rows.length){el.innerHTML='<div class="note">近期沒有自選股或全市場的除權息、法說、重訊與美股財報</div>';if(card)card.hidden=true;return}
+      if(card)card.hidden=false;
+      const byDate=(a,b)=>a.date<b.date?-1:a.date>b.date?1:0;
+      const mineRows=rows.filter(r=>r.mine).sort(byDate),other=rows.filter(r=>!r.mine).sort(byDate);
+      const KC={'除權息':'var(--gold)','法說':'var(--accent)','重訊':'var(--warn)','美股財報':'var(--ink-3)'};
+      const row=r=>{
+        const dt=r.date===today?'今天':`${+r.date.slice(5,7)}/${+r.date.slice(8,10)}`;
+        const tw=/^\d/.test(r.code);
+        return `<div class="row" style="cursor:pointer" onclick="openStock('${_uiEsc(r.code)}')"><div class="nm"><b>${_uiEsc(r.name)}</b><span>${_uiEsc(r.code)} · <span style="color:${KC[r.kind]||'var(--ink-3)'}">${r.kind}</span>${r.note?' · '+_uiEsc(r.note):''}</span></div><div class="px"><b>${dt}</b><span>${tw?'台股':'美股'}</span></div></div>`;
+      };
+      const cnt=k=>other.filter(r=>r.kind===k).length;
+      const sumTxt=['除權息','法說','美股財報'].map(k=>cnt(k)?`${k} ${cnt(k)}`:'').filter(Boolean).join('、');
+      el.innerHTML=(mineRows.length?mineRows.map(row).join(''):'<div class="note" style="margin:0 0 4px">自選股近期沒有事件</div>')
+        +(other.length?`<details style="margin-top:6px"><summary class="note" style="cursor:pointer;margin:0">全市場：${sumTxt}（點開看）</summary>${other.slice(0,40).map(row).join('')}${other.length>40?`<div class="note">另有 ${other.length-40} 筆未列出</div>`:''}</details>`:'')
+        +'<div class="note" style="margin-top:6px">除權息與法說為未來 7 天、重訊為自選股近 2 天、美股財報為 21 天內（追蹤清單）</div>';
     }catch(e){
       console.warn('[loadTodayEvents]',e);recordGlobalError('loadTodayEvents',e);
-      el.innerHTML='<div class="note">載入失敗：'+e.message+'</div>';
+      el.innerHTML='<div class="note">載入失敗：'+_uiEsc(e.message)+'</div>';
     }
   }
   // 2026-09-15（開發佇列自走，承接自競品一）「我的持股事件」卡：codes＝自選股(WL)
@@ -4569,7 +4621,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-16.0100';
+  const APP_VERSION='2026-10-16.0107';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
