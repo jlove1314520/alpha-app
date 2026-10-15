@@ -1,3 +1,20 @@
+## 2026-10-16 06:35（DevQueue 20261016-060101）先.一〇三-10a 除權息帳本補上櫃；先.一〇三-10b 還原價大漲跌歸類＋兩筆分割；先.一〇三-10c 櫃買面額變更端點（第 1 批）
+
+等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未新增）
+
+- **先.一〇三-10a ✅（90764e53a2）**：除權息帳本漏記根因。
+  - 做了什麼：根因比交辦描述大——`update_price_history.py` 的帳本只來自 TWSE TWT48U（上市預告表），**上櫃根本沒有來源**。每班新增 TWT49U（twse_exright）＋TPEx exDailyQ（tpex_www）各 1 次區間查詢，區間＝最近 10 個交易日（依 trading_calendar）；官方係數優先；`fix_backfill_exdiv.py` 已重算到的日期（price_history meta `adj_recompute_to_*`，目前 10/15）只記帳不重乘，帳本係數同步對齊官方（例 6834 10/02 帳本 0.898→官方 0.966，原值留存）；TWT48U 失敗不再擋補帳。
+  - 證據：新增 `scripts/selftest_exright_official.py` 12/12 PASS；`--live` 實打各 1 次：10/02～10/16 共 46 筆（上市 24、上櫃 22）無錯；既有 reduction_adjust／merge_rows_adj 自測全過；冒煙第一次第 18 項 FAIL（測試本身出錯「Resulting promise was garbage collected」，本項沒動前端），重跑全部通過。
+  - ⚠️ 未驗證：還沒在 market.yml 實跑，今天 17:13 班看 price_history meta `exright_official_backfill` 與帳本有沒有 `source＝TPEx exDailyQ` 的事件。
+  - [自行裁量]：回看 10 個交易日照交辦；超過 10 個交易日沒跑管線仍會漏，可用 `fix_backfill_exdiv.py --end` 手動補。`C:\alpha\CLAUDE.md` 除權除息節補記每日用量。
+- **先.一〇三-10b ✅（bb078ec6c1）**：171 筆還原價單日 >10.5%。
+  - 做了什麼：新增 `scripts/audit_price_jumps.py`（離線）→ `docs/PRICE_JUMP_AUDIT.json`：興櫃 94、跨多個交易日 25、ETF／ETN 漲跌幅規則 22（國內槓桿＝10%×倍數；跨境無限制）、大盤日 14（7/31 0050 +10%）、新上市前 5 日 5、現增除權 3、已知分割 2、疑似分割 2、未解釋 4。**兩筆分割沒還原（bug，已修）**：00685L 7/07 1 拆 24（TWSE TWTCAU）、6949 9/07 面額換股率 20（TWSE TWTB8U），加進 SPLITS。6225／7610 是現增除權（漲跌停以「減除股利參考價」計），不是 bug。
+  - 證據：離線模擬 apply_splits：00685L −96.0%→−4.1%、6949 −95.5%→−9.9%，重跑新套用 0；官方請求 TWTCAU、TWTB8U、TWT49U 各 1 次；冒煙全部通過。
+  - ⚠️ 未驗證：SPLITS 下一班 market.yml 才實際套用。未解釋 4 筆（2237 8/10、2938 6/23／9/16、6986 6/26）未查。
+- **先.一〇三-10c 第 1 批（查證，未改程式，維持 - [ ]）**：櫃買變更面額官方端點是 `www/zh-tw/bulletin/pvChgAnn`，但只回當日預告、不能查歷史（跟 TWT48U 同類）。尚餘：5904／6696／4747 歷史換股率改查櫃買公告原文；每日管線自動抓分割／面額變更取代手寫 SPLITS。端點補記 `C:\alpha\CLAUDE.md`。
+- 佇列深度：`- [ ]` 18 項（≥12）、DevQueue 可執行 8 項（≥6），不需補件。
+- 共用工作目錄：其他排程的未提交檔（audit_report、quotes_ibkr、rate_limit_state 等）沒有掃進本輪 commit。
+
 ## 2026-10-16 05:35（DevQueue 20261016-050101）先.一〇三-9 補跑腳本時窗／逐日缺漏；先.一〇三-10 還原價補除權息；先.一〇三-11 選股台帳休市日重複
 
 等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未新增）
