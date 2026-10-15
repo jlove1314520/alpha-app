@@ -75,11 +75,19 @@
   }
   function renderHoldings(h,syncedNote){
     const el=document.getElementById('journal-holdings');if(!el)return;
+    const card=document.getElementById('journal-holdings-card');if(card)card.hidden=false;
     el.innerHTML=holdingsHtml(h)+(syncedNote?'<div class="note" data-ui-keep style="margin-top:4px;color:var(--note-gold)">'+_autoEsc(syncedNote)+'</div>':'');
   }
   function renderHoldingsFromCache(why){
     const c=holdingsCacheLoad(),el=document.getElementById('journal-holdings');
-    if(!c||!c.holdings){if(el)el.textContent=why+'，尚未同步過持股資料';return}
+    const card=document.getElementById('journal-holdings-card'),ln=document.getElementById('journal-offline-line');
+    if(!c||!c.holdings){
+      if(el)el.textContent=why+'，尚未同步過持股資料';
+      // 先.一〇四：從沒同步過＝這張卡沒有任何資訊，收起並併入離線那一行（首屏卡數，先.七十二-C8）
+      if(card)card.hidden=true;
+      if(ln){ln.hidden=false;ln.textContent='自動投資帳本、真錢持股：連上電腦才看得到 →'}
+      return}
+    if(card)card.hidden=false;
     const t=new Date(c.at),md=t.toLocaleDateString('zh-TW',{timeZone:'Asia/Taipei',month:'2-digit',day:'2-digit'});
     renderHoldings(c.holdings,why+'，顯示 '+md+' '+fmtTzHHMM(t,'Asia/Taipei')+' 最後同步的資料');
   }
@@ -174,7 +182,13 @@
     const esc=_autoEsc,n=v=>v==null?'—':Number(v).toLocaleString('zh-TW',{maximumFractionDigits:2}),pp=v=>v==null?'—':(v>0?'+':'')+n(v);
     const t=d.trials||{},a=d.autopsy||{},o=d.oos||{},c=a.counts||{},lb=a.labels||{};
     const sec=(h,b)=>'<div style="margin-top:10px"><div style="font-weight:600;font-size:13px">'+h+'</div>'+b+'</div>';
-    let h='<div style="font-size:14px;font-weight:600;line-height:1.5">'+esc(o.conclusion||'樣本外對照讀取失敗')+'</div>';
+    // 先.一〇四-16：成績單先只給「標題＋3 個數字」，其餘全文收進「展開看全文」
+    const _ls=(o.lines||[]).filter(x=>x.days),_mat=_ls.filter(x=>o.min_days==null||x.days>=o.min_days),_win=_mat.filter(x=>x.gap_pp!=null&&x.gap_pp>0);
+    const _stat=(v,l)=>'<div style="flex:1;min-width:0;text-align:center;padding:6px 4px;border:1px solid var(--hairline);border-radius:10px"><div class="num" style="font-size:18px;font-weight:700;color:var(--ink)">'+v+'</div><div style="font-size:10.5px;color:var(--ink-3)">'+l+'</div></div>';
+    const head='<div style="font-size:14px;font-weight:600;line-height:1.5">'+esc(o.conclusion||'樣本外對照讀取失敗')+'</div>'
+      +'<div style="display:flex;gap:6px;margin-top:8px">'+_stat(t.error?'—':n(t.count),'測過的方法')+_stat(a.error?'—':n(a.total),'已判死')
+      +_stat(o.error?'—':(_mat.length?(_win.length+'／'+_mat.length):'—'),_mat.length?'樣本外贏 0050':('樣本外未滿 '+n(o.min_days)+' 天'))+'</div>';
+    let h="";
     h+=sec('一、測過幾種方法',t.error?'<div class="note">讀取失敗：'+esc(t.error)+'</div>':
       '<div class="note">試驗帳本共 <b>'+n(t.count)+'</b> 筆（就是多重比較用的試驗總數；框架自檢只列出、不計入）。</div>'+
       '<div class="note">'+(t.by_verdict||[]).map(([k,v])=>esc(k)+' '+n(v)).join('、')+'</div>'+
@@ -195,5 +209,5 @@
     // 先.九十一-1／-5-1：四、研究說明（已知現象與不做的路線）
     if((d.notes||[]).length)h+=sec('四、研究說明',(d.notes||[]).map(x=>'<div class="note rs-note" style="padding:4px 0"><b>'+esc(x.title)+'</b><br>'+esc(x.body)+'</div>').join(''));
     h+='<div style="margin-top:8px;font-size:10px;color:var(--ink-4)">資料：試驗帳本、墓園驗屍（研究紀錄）、策略曲線；產生於 '+esc(String((d.meta||{}).generated_at||'').slice(0,16).replace('T',' '))+'；研究紀錄整理。</div>';
-    return h;
+    return head+'<details class="rs-full" style="margin-top:8px"><summary class="press" style="font-size:12px;color:var(--accent);cursor:pointer">展開看全文</summary>'+h+'</details>';
   }

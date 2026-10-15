@@ -554,3 +554,13 @@ details.ui-more[open]>summary{color:var(--ink-2)}
 .rev-chart-amt .rc-ymax{position:absolute;left:0;top:-2px;font-size:9px;color:var(--ink-3);pointer-events:none}
 .rev-chart-amt .rc-val{font-size:9px;font-weight:700;color:var(--ink);white-space:nowrap;margin-bottom:2px;font-variant-numeric:tabular-nums}
 .rev-chart-labels span{flex:1;min-width:0;text-align:center;font-size:8.5px;letter-spacing:-.02em;color:var(--ink-3);white-space:nowrap;overflow:hidden}
+
+/* 先.一〇四-12 個股頁底部：不再浮動（原 position:sticky 蓋住內容），改成頁底一行；美股模擬按鈕縮小、沒價格時停用 */
+.buy-cta{position:static!important;background:none!important;padding:12px 0 4px!important;align-items:center}
+.buy-cta .btn{padding:7px 12px;font-size:12.5px;min-height:34px;flex:1}
+.buy-cta .btn:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.6)}
+
+/* 先.一〇四-13 選股頁子分頁：五個 chip 改兩排可換行，不再被切掉 */
+#picks-board-toggle.picks-board-wrap{flex-wrap:wrap;row-gap:6px;height:auto}
+#picks-board-toggle.picks-board-wrap .mtg-opt{flex:1 1 30%!important;min-width:0;white-space:nowrap}
+#picks-board-toggle.picks-board-wrap{border-radius:14px}

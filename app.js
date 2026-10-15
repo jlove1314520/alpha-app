@@ -1247,7 +1247,27 @@
     if(_nameSaveT)return;
     _nameSaveT=setTimeout(()=>{_nameSaveT=null;try{localStorage.setItem(NAME_SAVED_KEY,JSON.stringify(NAME_SAVED))}catch(e){console.warn('[nameRemember]',e)}},500);
   }
-  const nameOf=code=>{const n=STOCKNAME[code]||STOCKNAME_US[code]||LITE_NAME[code];if(n){_nameRemember(code,n);return n}return NAME_SAVED[code]||code};
+  // 先.一〇四-15（2026-10-16）：美股公司名顯示用——常用的用中文名，其餘去掉 SEC 名冊的 /DE/、Inc、Corp 等後綴並把全大寫字轉成首字大寫。
+  // 只改「顯示」，名單本身不動（搜尋照樣比對原始英文名）。
+  const US_ZH_NAME={NVDA:'輝達',AAPL:'蘋果',MSFT:'微軟',GOOGL:'Alphabet（谷歌）',GOOG:'Alphabet（谷歌）',AMZN:'亞馬遜',META:'Meta（臉書）',TSLA:'特斯拉',
+    TSM:'台積電 ADR',AVGO:'博通',AMD:'超微',INTC:'英特爾',QCOM:'高通',MU:'美光',NFLX:'網飛',ORCL:'甲骨文',ASML:'艾司摩爾',ARM:'安謀',SMCI:'美超微',
+    AMAT:'應用材料',LRCX:'科林研發',KLAC:'科磊',TXN:'德州儀器',ADI:'亞德諾',MRVL:'邁威爾',CSCO:'思科',IBM:'IBM',CRM:'Salesforce',ADBE:'Adobe',
+    PLTR:'Palantir',UBER:'Uber',COST:'好市多',WMT:'沃爾瑪',KO:'可口可樂',PEP:'百事',MCD:'麥當勞',SBUX:'星巴克',NKE:'耐吉',DIS:'迪士尼',
+    JPM:'摩根大通',BAC:'美國銀行',GS:'高盛',MS:'摩根士丹利',V:'Visa',MA:'萬事達卡',BRK_B:'波克夏',LLY:'禮來',JNJ:'嬌生',PFE:'輝瑞',MRK:'默克',
+    ABBV:'艾伯維',UNH:'聯合健康',XOM:'埃克森美孚',CVX:'雪佛龍',BA:'波音',CAT:'開拓重工',GE:'奇異',HD:'家得寶',PG:'寶僑',T:'AT&T',VZ:'威訊',
+    SPY:'標普500 ETF',QQQ:'那斯達克100 ETF',SOXX:'費半 ETF'};
+  const _US_SUFFIX=/(\s*[,.]?\s*(\/[A-Z]{2}\/?|INC\.?|INCORPORATED|CORP\.?|CORPORATION|CO\.?|COMPANY|LTD\.?|LIMITED|PLC|N\.?V\.?|S\.?A\.?|SAB DE CV|HOLDINGS?|COMMON STOCK|CLASS [A-Z]))+\s*\/?\s*$/i;
+  function usDisplayName(code,raw){
+    try{
+      const zh=US_ZH_NAME[String(code).replace('.','_')];if(zh)return zh;
+      let t=String(raw||'').trim();if(!t)return code;
+      for(let i=0;i<4;i++){const u=t.replace(_US_SUFFIX,'').trim();if(u===t||!u)break;t=u}
+      t=t.replace(/\s+COM$/i,'').replace(/[,\s]+$/,'');
+      // 全大寫且 4 個字母以上的字轉首字大寫（IBM、AMD 這類短縮寫保留）
+      return t.split(/\s+/).map(w=>/^[A-Z&.'-]{4,}$/.test(w)?w.charAt(0)+w.slice(1).toLowerCase():w).join(' ')||code;
+    }catch(e){console.warn('[usDisplayName]',e);return raw||code}
+  }
+  const nameOf=code=>{const us=STOCKNAME_US[code];const n=STOCKNAME[code]||(us?usDisplayName(code,us):'')||LITE_NAME[code];if(n){_nameRemember(code,n);return n}return NAME_SAVED[code]||code};
   // 2026-08-24 新增：手動「重新整理」按鈕用——清掉全部 FinMind 快取（記憶體＋localStorage），
   // 讓接下來的 hydrateXxx() 重新真的打一次 API，不要停在 3 分鐘內的舊快取。
   function fmClearCache(){
@@ -3243,7 +3263,7 @@
       if(FM_NAMES_SUPP&&FM_NAMES_SUPP_DONE&&FM_NAMES_SUPP_DONE.errs.length)noHit=`查無股票（repo 名單沒有；FinMind 補查失敗：${_gsEsc(FM_NAMES_SUPP_DONE.errs.join('；'))}）`;
     }
     out.push(`<div class="gs-group" data-group="stocks">`+_gsHead('股票',nStock,nStock>30?30:0)
-      +(res.length?res.map(s=>`<div class="sr" onclick="pickStock('${s.id}')"><div><b>${_gsEsc(s.name)}</b> <span class="sub">${s.id} · ${s.mkt==='US'?'美股':'台股'}</span><div class="sub">${_gsEsc(s.ind)}</div></div><span class="act">${WL.includes(s.id)?'✓ 已加入':'＋ 加入'}</span></div>`).join('')
+      +(res.length?res.map(s=>`<div class="sr" onclick="pickStock('${s.id}')"><div><b>${_gsEsc(s.mkt==='US'?usDisplayName(s.id,s.name):s.name)}</b> <span class="sub">${s.id} · ${s.mkt==='US'?'美股':'台股'}</span><div class="sub">${_gsEsc(s.ind)}</div></div><span class="act">${WL.includes(s.id)?'✓ 已加入':'＋ 加入'}</span></div>`).join('')
         :`<div class="note gs-nohit" style="padding:8px 4px">${noHit}</div>`)+`</div>`);
     // 名稱／代號對到的台股（只在 ≤5 檔時用，避免輸入「2」這種短字串把整個市場的新聞事件都帶出來）
     const codeSet=new Set(resTW.length&&resTW.length<=5?resTW.map(s=>s.id):[]);
@@ -4002,7 +4022,7 @@
       const top=items[0];
       app.classList.toggle('hub-collapsed',!(onHome&&HUB_OPEN));
       if(dot){
-        dot.hidden=!top||onHome;
+        dot.hidden=!top||onHome||top.sev<1;  // 凍結中（sev 0）是狀態說明不是告警，其他頁不亮點
         if(top)dot.style.background=HUB_SEV_COLOR[top.sev];
         dot.title=top?top.txt:'';
       }
@@ -4149,6 +4169,7 @@
     _safeAsync('loadAutoHeartbeat',loadAutoHeartbeat);
     _safeAsync('loadWhitelistPriceStatus',loadWhitelistPriceStatus);
     try{
+      _safeSync('liveAccountCardVis',()=>{const c=document.getElementById('live-account-card');if(c)c.hidden=!LIVE.configured||!LIVE.url});  // 先.一〇四：沒設定連線時真錢帳戶卡收起（首屏卡數，先.七十二-C8）
       if(!LIVE.configured||!LIVE.url){note.textContent='連上電腦才看得到';AUTO_BAN.offline='';AUTO_BAN.local='';renderAutoBanner();return}
       const r=await liveFetch('/auto/status',5000);
       if(!r.ok)throw new Error('HTTP '+r.status);
@@ -4663,7 +4684,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-16.0224';
+  const APP_VERSION='2026-10-16.0228';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

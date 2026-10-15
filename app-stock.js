@@ -830,10 +830,20 @@
   // ── 個股頁底部列（先.六十-A1，2026-10-10）──
   // 台股：唯讀說明（真錢只由本機 Bb-90 引擎執行，App 不提供手動下單）；
   // 美股：既有 IBKR 模擬（Paper）帳戶下單卡（research/ibkr_order_server.py）。
+  // 先.一〇四-12：台股改頁底一行小字（不再浮在內容上）；美股模擬買賣在還沒有價格時停用（disabled），價格一出來自動恢復。
+  function _buyCtaSyncPrice(){
+    try{
+      const px=(document.getElementById('sh-price')||{}).textContent||'';
+      const has=/\d/.test(px);
+      ['buy-cta-us-sell','buy-cta-us-buy'].forEach(id=>{const b=document.getElementById(id);if(!b)return;b.disabled=!has;b.title=has?'':'還沒有價格，暫不能模擬下單'});
+    }catch(e){console.warn('[buyCtaSyncPrice]',e)}
+  }
+  try{const sp=document.getElementById('sh-price');if(sp)new MutationObserver(_buyCtaSyncPrice).observe(sp,{childList:true,characterData:true,subtree:true})}catch(e){console.warn('[buyCta observer]',e)}
   function renderBuyCta(code){
     const us=isUS(code);
     const tw=document.getElementById('buy-cta-tw');if(tw)tw.style.display=us?'none':'';
     ['buy-cta-us-sell','buy-cta-us-buy'].forEach(id=>{const b=document.getElementById(id);if(b)b.style.display=us?'':'none'});
+    _buyCtaSyncPrice();
   }
   async function checkIbkrHealthAndAccount(){
     const he=document.getElementById('ibkr-health');
@@ -920,7 +930,9 @@
       _destroyStockChart();el.style.height='';
       const closes=STOCK_CHART.daily.map(x=>x.close);
       const lwcP=ensureLwc();
-      el.innerHTML=trendChart(closes,v=>(us?'$':'')+nf(v))+'<div class="note" style="font-size:10px">圖表函式庫（lightweight-charts）'+(LWC_LOADING?'載入中':'未載入')+'，顯示簡易折線</div>';
+      // 先.一〇四-11：載入中＝骨架畫面（不顯示函式庫名稱）；載入失敗才退回簡易折線並白話說明
+      el.innerHTML=LWC_LOADING?'<div class="skel-block" style="height:220px;width:100%" aria-label="K 線載入中"></div>'
+        :trendChart(closes,v=>(us?'$':'')+nf(v))+'<div class="note" style="font-size:10px">K 線圖暫時載不到（可能離線），先顯示收盤折線</div>';
       lwcP.then(ok=>{if(ok&&STOCK_CHART.code===code&&document.getElementById('trend-chart')===el)renderStockChart(code,rows,us)})
         .catch(e=>{console.warn('[renderStockChart:ensureLwc]',e);recordGlobalError('renderStockChart:ensureLwc',e)});
       return;
@@ -1056,10 +1068,11 @@
       el.innerHTML='<div class="note">查無足夠的日線價量資料可畫技術指標（需先在「總覽」分頁載入過這一檔的走勢圖）。</div>';
       return;
     }
+    if(!lwcAvailable())el.innerHTML='<div class="skel-block" style="height:300px;width:100%" aria-label="K 線載入中"></div>';  // 先.一〇四-11 骨架
     try{await ensureLwc()}catch(e){console.warn('[renderTechChartTab:ensureLwc]',e)}  // 常備.開發-20：函式庫改為用到才載入
     if(!lwcAvailable()){
       destroyTechChart();
-      el.innerHTML='<div class="note">圖表函式庫（lightweight-charts）未載入，暫無法顯示K線疊加均線/成交量。</div>';
+      el.innerHTML='<div class="note">K 線圖暫時載不到（可能離線），稍後再試。</div>';  // 先.一〇四-11：不顯示函式庫名稱
       return;
     }
     destroyTechChart();el.innerHTML='';el.style.height='300px';

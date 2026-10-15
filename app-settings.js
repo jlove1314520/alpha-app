@@ -152,6 +152,7 @@
   }
 
   function hydrateSettings(){
+    try{const c=document.getElementById('live-account-card');if(c)c.hidden=!LIVE.configured||!LIVE.url}catch(e){console.warn('[liveAccountCardVis]',e)}  // 先.一〇四：沒設定連線時真錢帳戶卡收起（首屏卡數，先.七十二-C8）
     _safeAsync('loadRiskLimits',loadRiskLimits);_safeAsync('loadNotif',loadNotif);_safeAsync('loadAlerts',loadAlerts);loadBroker();
     _safeAsync('loadInstallPush',loadInstallPush);  // 常備.開發-34
     setTxt('set-wl-count',WL.length);

@@ -610,8 +610,16 @@
     updateReportWatchBtn(row.code);
 
     _safeSync('renderReport:factors',()=>{
+      // 先.一〇四-16：依「貢獻度」排序——權重 ×（分數－5 中性），影響總分越大越前面；缺資料的排後面；
+      // 權重 0% 的成分（含方案B僅供參考）收到最後的「權重 0% 的成分」摺疊裡。
       const orderForBoard=BOARD_CONFIG[REPORT_CACHE_BOARD].factorOrder;
-      const factorsHtml=orderForBoard.map(factorRowHtml).join('');
+      const _cache=BOARD_CONFIG[REPORT_CACHE_BOARD].cacheGet(),_w=(_cache&&_cache.weights)||{},_f=(REPORT_CACHE&&REPORT_CACHE.factors)||{};
+      const _contrib=k=>{const f=_f[k];return f&&typeof f.score==='number'?(_w[k]||0)*(f.score-5):null};
+      const _live=orderForBoard.filter(k=>(_w[k]||0)>0),_zero=orderForBoard.filter(k=>!((_w[k]||0)>0));
+      _live.sort((a,b)=>{const ca=_contrib(a),cb=_contrib(b);if(ca==null&&cb==null)return 0;if(ca==null)return 1;if(cb==null)return -1;return Math.abs(cb)-Math.abs(ca)});
+      const factorsHtml=_live.map(factorRowHtml).join('')
+        +(_zero.length?`<details class="fr-zero" style="margin-top:6px"><summary class="note" style="cursor:pointer;margin:0">權重 0% 的成分（${_zero.length} 項，不影響總分）</summary>${_zero.map(factorRowHtml).join('')}</details>`:'')
+        +(_live.length?'<div class="note" style="margin-top:6px;font-size:10px">依對總分的影響大小排序（權重 ×（分數－5））</div>':'');
       document.getElementById('report-factors').innerHTML=factorsHtml||'<div class="note">無評分資料</div>';
     });
 

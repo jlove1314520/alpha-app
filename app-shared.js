@@ -131,9 +131,13 @@
     return{l:'正常',c:'var(--good)'};
   }
   const MKT_LABEL={TW:'台股',US:'美股',FUT:'期貨'};
+  // 先.一〇四-17：選股頁的「期貨」目前是空頁，先隱藏（等總司令決策 3）；市場頁、交易頁照舊三個
+  const MKT_HIDDEN={picks:['FUT']};
   function renderMktToggle(page){
     const el=document.getElementById(page+'-toggle');if(!el)return;
-    el.innerHTML=['TW','US','FUT'].map(m=>
+    const hide=MKT_HIDDEN[page]||[];
+    if(hide.includes(MKT_STATE[page]))MKT_STATE[page]='TW';
+    el.innerHTML=['TW','US','FUT'].filter(m=>!hide.includes(m)).map(m=>
       `<span class="press mtg-opt${MKT_STATE[page]===m?' on':''}" onclick="setMarketToggle('${page}','${m}')">${MKT_LABEL[m]}</span>`
     ).join('');
   }
