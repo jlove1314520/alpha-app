@@ -39,6 +39,7 @@ SEC 公平使用政策建議上限約 10 req/sec，本腳本只追蹤 us_sic.jso
 先例）。
 """
 from __future__ import annotations
+import os
 
 import json
 import re
@@ -53,7 +54,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 OUT_PATH = REPO_ROOT / "data" / "us_events.json"
 SIC_PATH = REPO_ROOT / "data" / "us_sic.json"
 
-HEADERS = {"User-Agent": "AlphaApp-US8K contact@alpha-app-project.example"}
+HEADERS = {"User-Agent": "AlphaApp-US8K " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example")}
 ATOM_NS = {"a": "http://www.w3.org/2005/Atom"}
 BROWSE_URL = "https://www.sec.gov/cgi-bin/browse-edgar"
 REQUEST_SLEEP_SEC = 0.2

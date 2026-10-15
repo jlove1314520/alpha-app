@@ -25,7 +25,13 @@ on:
     - cron: '13 9 * * 1-5'     # 台北 17:13 — 台股主班次
     - cron: '41 10 * * 1-5'    # 台北 18:41 — 補救班次
     - cron: '43 21 * * 1-5'    # 台北隔日 05:43 — 美股班次
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      reason:
+        # 先.一〇三-18：local_schedule_watchdog.yml 補救觸發時帶 watchdog_tw_catchup，跳過每日限 2 次的內部人轉讓步驟
+        description: "觸發原因（手動留空即可）"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -40,6 +46,9 @@ concurrency:
 jobs:
   fetch-market:
     runs-on: ubuntu-latest
+    # 先.一〇三-16：User-Agent 聯絡信箱改讀這個（選填 GitHub Secret）；沒設時腳本用專案佔位信箱，不再寫死個人 email
+    env:
+      ALPHA_UA_CONTACT: ${{ secrets.ALPHA_UA_CONTACT }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -92,7 +101,11 @@ jobs:
         # 2026-10-14 總司令裁示先.九十五-3 核准：只跑台北 05:43 班、每日 2 請求；姓名／受讓人改雜湊只留職稱與身分類別。
         # 輸出 data/insider_transfer_tw_history.json 已加進下方 git add 清單（十節）；共用 rate_limit_state（已在清單）。
         # 自身失敗只警告、兩邊都失敗不覆蓋既有檔（十二）。
-        if: github.event.schedule == '43 21 * * 1-5' || github.event_name == 'workflow_dispatch'
+        # 先.一〇三-18：watchdog 補救觸發（reason=watchdog_tw_catchup）不跑本步驟，維持先.九十五-3 核准的每日 2 次請求
+        if: github.event.schedule == '43 21 * * 1-5' || (github.event_name == 'workflow_dispatch' && inputs.reason != 'watchdog_tw_catchup')
+        # 先.一〇三-19：姓名雜湊改 HMAC，金鑰只從 GitHub Secret 讀（總司令本人建立）；沒設時腳本不寫姓名雜湊
+        env:
+          INSIDER_HASH_KEY: ${{ secrets.INSIDER_HASH_KEY }}
         run: python .github/scripts/fetch_insider_transfer_tw.py
         continue-on-error: true
       - name: 更新SEC 13F機構持倉（僅追蹤波克夏海瑟威，免金鑰，源頭二.3第6名）

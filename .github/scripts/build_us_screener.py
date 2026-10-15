@@ -21,6 +21,7 @@
 SEC 失敗只讓市值缺值，不擋價量。
 """
 from __future__ import annotations
+import os
 
 import json
 import math
@@ -43,7 +44,7 @@ FIN_PATH = ROOT / "data" / "us_financials.json"
 OUT_PATH = ROOT / "data" / "us_screener.json"
 TW_TZ = timezone(timedelta(hours=8))
 ET = ZoneInfo("America/New_York")
-SEC_HEADERS = {"User-Agent": "AlphaApp-USFinancials contact@alpha-app-project.example"}
+SEC_HEADERS = {"User-Agent": "AlphaApp-USFinancials " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example")}
 SEC_SLEEP_SEC = 0.2
 AVG_DAYS = 20
 SHARES_STALE_DAYS = 200

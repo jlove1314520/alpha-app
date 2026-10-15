@@ -73,7 +73,7 @@ OUT_PATH = REPO_ROOT / "data" / "securities_lending_sell.json"
 
 TWSE_URL = "https://www.twse.com.tw/rwd/zh/marginTrading/TWT93U"
 TPEX_URL = "https://www.tpex.org.tw/openapi/v1/tpex_short_sell"
-HEADERS = {"User-Agent": "AlphaApp-SecuritiesLendingSell contact@alpha-app-project.example"}
+HEADERS = {"User-Agent": "AlphaApp-SecuritiesLendingSell " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example")}
 
 RATE_LIMIT_STATE_PATH = REPO_ROOT / "data" / "rate_limit_state.json"
 RATE_LIMIT_MIN_INTERVAL_SEC = 3.0

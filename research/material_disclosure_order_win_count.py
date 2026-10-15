@@ -3,13 +3,14 @@
 未跨關鍵字去重——去重留給正式回補腳本）。只做計數，不做統計檢定。
 """
 from __future__ import annotations
+import os
 import json, re, sys, time
 import requests
 import net_guard  # 2026-09-20合規.二：網域層防呆疊加在既有腳本層防呆上（belt-and-suspenders）
 net_guard.install()
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 URL = "https://mopsov.twse.com.tw/mops/web/ajax_t51sb10"
-HEADERS = {"User-Agent": "AlphaApp/0.2 (jlove201314@yahoo.com.tw)",
+HEADERS = {"User-Agent": "AlphaApp/0.2 (" + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example") + ")",
            "Referer": "https://mopsov.twse.com.tw/mops/web/t51sb10_q1"}
 KEYWORDS = ["接單", "訂單", "得標", "簽約", "合作備忘"]
 KINDS = {"L": "上市", "O": "上櫃"}

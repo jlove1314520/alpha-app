@@ -20,6 +20,7 @@ SEC 禮儀：共用 sec_rate_limiter（與先.十八-二 的 SIC 抓取合計 �
 用法：python research/us_delisted_ticker_resolve.py
 """
 from __future__ import annotations
+import os
 
 import json
 import re
@@ -41,7 +42,7 @@ COVER = HERE / "data" / "raw" / "us_cover_pages"
 COVER.mkdir(parents=True, exist_ok=True)
 PROBE = HERE / "data" / "us_delisted_price_probe_unfiltered_frame.json"
 OUT = HERE / "data" / "us_delisted_ticker_resolve.json"
-HEADERS = {"User-Agent": "AlphaResearch-USTrack contact@alpha-research-project.example",
+HEADERS = {"User-Agent": "AlphaResearch-USTrack " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-research-project.example"),
            "Accept-Encoding": "gzip, deflate"}
 MAX_REQUESTS = 120
 

@@ -956,3 +956,6 @@
 {"ts": "2026-10-15T23:56:00+08:00", "source": "devqueue", "cycle_id": "20261015-233102", "item": "先.一〇三-1", "summary": "T86 改 ALLBUT0999、外資含外資自營商；market_tw.json 三大法人 9 天重產＋FMTQIK 成交量驗證全過；冒煙加第 160 項"}
 {"ts": "2026-10-16T00:06:00+08:00", "source": "devqueue", "cycle_id": "20261015-233102", "item": "先.一〇三-2", "summary": "正逆價差現貨／期貨資料日不同就不算、顯示停在哪天；根因：TAIFEX openapi 夜盤結束後才發布當日報表"}
 {"ts": "2026-10-16T00:10:00+08:00", "source": "interactive", "item": "先.一〇二-2a", "summary": "第一批 6 支全部驗證：DevQueue 23:31 輪非互動身分跑 claude 完成並 push。第二批待 3 個交易日觀察"}
+{"ts": "2026-10-16T00:45:00+08:00", "source": "interactive", "item": "先.一〇三-16", "summary": "UA 信箱改環境變數、移除 9 支腳本寫死的個人 email、FinMind 金鑰末碼遮蔽、證據檔手機遮蔽"}
+{"ts": "2026-10-16T00:45:00+08:00", "source": "interactive", "item": "先.一〇三-18", "summary": "watchdog 17:45 後 market_tw 未落地就以 GITHUB_TOKEN 觸發 market.yml（免另建 token）"}
+{"ts": "2026-10-16T00:45:00+08:00", "source": "interactive", "item": "先.一〇三-19", "summary": "內部人姓名雜湊改 HMAC，金鑰待總司令放 GitHub Secret INSIDER_HASH_KEY"}

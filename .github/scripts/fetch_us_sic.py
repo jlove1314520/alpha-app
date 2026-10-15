@@ -16,10 +16,11 @@ SIC 是公司登記類別，變動極罕見（公司變更主要業務才會改�
 不進 quotes.yml 那個10分鐘一次的高頻迴圈。
 
 SEC 公平使用政策要求識別用的 User-Agent，這裡刻意不用使用者本人 email（
-jlove201314@yahoo.com.tw）——那是給不相關第三方服務的請求，不該外流個資，
+使用者本人 email）——那是給不相關第三方服務的請求，不該外流個資，
 用專案識別用的佔位信箱即可（跟 research/sec_edgar_client.py 同款作法）。
 """
 from __future__ import annotations
+import os
 
 import json
 import sys
@@ -35,7 +36,7 @@ OUT_PATH = REPO_ROOT / "data" / "us_sic.json"
 # 跟 fetch_quotes_us.py 的 US_TICKERS 同一份清單。
 US_TICKERS = ["NVDA", "AAPL", "MSFT", "TSM", "GOOGL", "AMZN", "UMC", "ASX", "CHT"]
 
-HEADERS = {"User-Agent": "AlphaApp-USSectorSIC contact@alpha-app-project.example"}
+HEADERS = {"User-Agent": "AlphaApp-USSectorSIC " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example")}
 TICKER_MAP_URL = "https://www.sec.gov/files/company_tickers.json"
 SUBMISSIONS_URL = "https://data.sec.gov/submissions/CIK{cik}.json"
 

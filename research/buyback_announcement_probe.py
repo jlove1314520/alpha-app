@@ -13,6 +13,7 @@
 （`CLAUDE.md`已知地雷章節精神）。
 """
 from __future__ import annotations
+import os
 
 import time
 import requests
@@ -24,7 +25,7 @@ net_guard.install()
 URL = "https://mopsov.twse.com.tw/mops/web/ajax_t35sc09"
 REFERER = "https://mopsov.twse.com.tw/mops/web/t35sc09"
 HEADERS = {
-    "User-Agent": "AlphaApp/0.2 (jlove201314@yahoo.com.tw)",
+    "User-Agent": "AlphaApp/0.2 (" + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example") + ")",
     "Referer": REFERER,
     "Content-Type": "application/x-www-form-urlencoded",
 }

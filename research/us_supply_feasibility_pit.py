@@ -6,7 +6,7 @@ for s in (sys.stdout, sys.stderr):
     try: s.reconfigure(encoding="utf-8", errors="replace")
     except Exception: pass
 D = os.path.join(os.path.dirname(__file__), "data", "us_supply_feas")
-UA = {"User-Agent": "AlphaApp-USSupplyFeasibility contact@alpha-app-project.example"}
+UA = {"User-Agent": "AlphaApp-USSupplyFeasibility " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example")}
 fr = json.load(open(os.path.join(D, "frames_coverage.json"), encoding="utf-8"))
 C = fr["ciks"]
 def S(*keys, y):

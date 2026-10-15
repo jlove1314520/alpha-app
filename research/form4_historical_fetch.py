@@ -27,6 +27,7 @@ IBM三檔被標`delisted`但明顯是還在交易的公司（誤判，疑似Form
 未達成的目標，留給下一輪或待us_universe_pit.py修正涵蓋範圍後重新挑選。
 """
 from __future__ import annotations
+import os
 
 import json
 import time
@@ -39,7 +40,7 @@ import requests
 REPO_ROOT = Path(__file__).resolve().parent.parent
 OUT_PATH = Path(__file__).resolve().parent / "data" / "form4_historical_pilot15.json"
 
-HEADERS = {"User-Agent": "AlphaApp-USInsiderTradingHistorical contact@alpha-app-project.example"}
+HEADERS = {"User-Agent": "AlphaApp-USInsiderTradingHistorical " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example")}
 REQUEST_SLEEP_SEC = 0.2
 
 TRANSACTION_CODE_LABELS = {

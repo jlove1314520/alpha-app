@@ -38,6 +38,7 @@ an identifying User-Agent and reasonable request volume (documented
 endpoint across repeated runs within a marathon session.
 """
 from __future__ import annotations
+import os
 
 import json
 import time
@@ -49,10 +50,10 @@ import requests
 DATA_DIR = Path(__file__).parent / "data" / "raw"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-# Not the user's personal email (jlove201314@yahoo.com.tw) -- CLAUDE.md /
+# Not the user's personal email (使用者本人 email) -- CLAUDE.md /
 # system rules say never send that to an unrelated third-party service.
 # This is a project-identifying placeholder per SEC's fair-use guidance.
-HEADERS = {"User-Agent": "AlphaResearchMarathon-USTrack contact@alpha-research-project.example"}
+HEADERS = {"User-Agent": "AlphaResearchMarathon-USTrack " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-research-project.example")}
 
 _TICKER_MAP_URL = "https://www.sec.gov/files/company_tickers.json"
 _SUBMISSIONS_URL = "https://data.sec.gov/submissions/CIK{cik}.json"

@@ -37,6 +37,7 @@ opendata/t187ap04_L`）。本輪查證發現：**這個既有管線只回傳當�
 資料源禮儀：MOPS非商用API，逐筆查詢間隔加延遲（`CLAUDE.md`已知地雷章節精神）。
 """
 from __future__ import annotations
+import os
 
 import time
 
@@ -48,7 +49,7 @@ net_guard.install()
 URL = "https://mopsov.twse.com.tw/mops/web/ajax_t51sb10"
 REFERER = "https://mopsov.twse.com.tw/mops/web/t51sb10_q1"
 HEADERS = {
-    "User-Agent": "AlphaApp/0.2 (jlove201314@yahoo.com.tw)",
+    "User-Agent": "AlphaApp/0.2 (" + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example") + ")",
     "Referer": REFERER,
 }
 

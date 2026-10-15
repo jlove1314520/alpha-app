@@ -36,6 +36,7 @@ SEC 禮儀：共用 `sec_rate_limiter`（跨行程合計 ≤5 req/秒，官方�
 輸出：research/data/us_delisted_sample60.json（進 repo；原始申報快取不進 repo）
 """
 from __future__ import annotations
+import os
 
 import gzip
 import json
@@ -63,7 +64,7 @@ F25 = RAW / "sec_form25"
 CACHE = RAW / "us_sample60"
 CACHE.mkdir(parents=True, exist_ok=True)
 OUT = HERE / "data" / "us_delisted_sample60.json"
-HEADERS = {"User-Agent": "AlphaResearch-USTrack contact@alpha-research-project.example",
+HEADERS = {"User-Agent": "AlphaResearch-USTrack " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-research-project.example"),
            "Accept-Encoding": "gzip, deflate"}
 SEED = 20261014
 MAX_REQUESTS = 900

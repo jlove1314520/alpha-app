@@ -32,12 +32,13 @@ write to any other research/*.md file itself (those get updated by hand
 after reading this script's output, same convention as us_probe_milestone1.py).
 """
 from __future__ import annotations
+import os
 
 from datetime import date
 
 import requests
 
-HEADERS = {"User-Agent": "AlphaResearchMarathon-USTrack contact@alpha-research-project.example"}
+HEADERS = {"User-Agent": "AlphaResearchMarathon-USTrack " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-research-project.example")}
 
 
 def probe_ticker_cik_map(sample_tickers: list[str]) -> dict[str, int]:

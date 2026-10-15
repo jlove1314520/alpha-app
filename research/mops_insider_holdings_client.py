@@ -29,6 +29,7 @@
 2026-09-06 hypothesis_queue排程接續（#41第1關地基建置，本輪）。
 """
 from __future__ import annotations
+import os
 
 import time
 from pathlib import Path
@@ -46,7 +47,7 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 URL = "https://mopsov.twse.com.tw/mops/web/ajax_stapap1"
 REFERER = "https://mopsov.twse.com.tw/mops/web/stapap1"
 HEADERS = {
-    "User-Agent": "AlphaApp/0.2 (jlove201314@yahoo.com.tw)",
+    "User-Agent": "AlphaApp/0.2 (" + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example") + ")",
     "Referer": REFERER,
     "Origin": "https://mopsov.twse.com.tw",
     "Content-Type": "application/x-www-form-urlencoded",

@@ -16,6 +16,7 @@ SEC 流量禮儀（CLAUDE.md「外部 API 頻率上限清單」：官方 10 req/
 用法：python research/us_supply_feasibility_probe.py [--frames] [--pit] [--all]
 """
 from __future__ import annotations
+import os
 
 import json
 import sys
@@ -33,7 +34,7 @@ RAW = HERE / "data" / "raw" / "sec_frames"
 RAW.mkdir(parents=True, exist_ok=True)
 OUT = HERE / "data" / "us_supply_feasibility.json"
 UNIVERSE = HERE / "data" / "us_universe_pit.json"
-HEADERS = {"User-Agent": "AlphaResearch-USTrack contact@alpha-research-project.example",
+HEADERS = {"User-Agent": "AlphaResearch-USTrack " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-research-project.example"),
            "Accept-Encoding": "gzip, deflate"}
 SLEEP = 0.25  # 約 4 req/秒，低於 SEC 官方 10 req/秒
 

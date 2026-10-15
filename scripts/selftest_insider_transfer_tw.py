@@ -17,6 +17,11 @@ try:
 except Exception:  # noqa: BLE001
     pass
 
+import os
+
+# 先.一〇三-19：HMAC 金鑰用測試專用假值（不是正式金鑰；正式金鑰只在 GitHub Secret）
+os.environ["INSIDER_HASH_KEY"] = "selftest-only-not-a-real-key"
+
 ROOT = Path(__file__).resolve().parent.parent
 spec = importlib.util.spec_from_file_location("fit", ROOT / ".github" / "scripts" / "fetch_insider_transfer_tw.py")
 fit = importlib.util.module_from_spec(spec)
@@ -61,6 +66,16 @@ check("name" not in tw[0] and "transferee" not in tw[0], "輸出沒有 name／tr
 check(tw[0]["name_hash"] == tp[0]["name_hash"] and len(tw[0]["name_hash"]) == 16, "同一姓名雜湊相同（可辨識同一人）")
 check(tw[0]["name_hash"] != tw[0]["transferee_hash"], "不同人雜湊不同")
 check(fit.person_hash("") is None and fit.person_hash(None) is None, "空值雜湊回 None 不補")
+# 先.一〇三-19：HMAC 與舊 v1 不同、換金鑰雜湊就變、沒金鑰不寫雜湊（不退回 v1）
+import hashlib as _hl
+_v1 = _hl.sha256((fit.HASH_PREFIX + "測試甲").encode("utf-8")).hexdigest()[:16]
+check(fit.person_hash("測試甲") != _v1 and fit.hash_scheme() == "hmac-sha256-v2", "有金鑰時用 HMAC，不等於舊 v1 雜湊")
+_h1 = fit.person_hash("測試甲")
+os.environ["INSIDER_HASH_KEY"] = "another-selftest-key"
+check(fit.person_hash("測試甲") != _h1, "換金鑰雜湊就變（沒金鑰無法比對姓名）")
+os.environ["INSIDER_HASH_KEY"] = ""
+check(fit.person_hash("測試甲") is None and fit.hash_scheme() == "none", "沒設金鑰不寫姓名雜湊、不退回 v1")
+os.environ["INSIDER_HASH_KEY"] = "selftest-only-not-a-real-key"
 
 bad = dict(TWSE_ROW)
 bad.pop("受讓人")

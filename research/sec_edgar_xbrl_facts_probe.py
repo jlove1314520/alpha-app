@@ -32,12 +32,13 @@ updated by hand after reading its output, same convention as
 sec_edgar_probe.py).
 """
 from __future__ import annotations
+import os
 
 from datetime import date
 
 import requests
 
-HEADERS = {"User-Agent": "AlphaResearchMarathon-USTrack contact@alpha-research-project.example"}
+HEADERS = {"User-Agent": "AlphaResearchMarathon-USTrack " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-research-project.example")}
 
 # CIKs already validated live in round 3 (sec_edgar_probe.py) -- reused here
 # to avoid re-fetching the ticker->CIK map for the same three names.

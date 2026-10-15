@@ -36,6 +36,7 @@ Section 16 申報義務，預期查到 0 筆是正常狀態，不是抓取失敗
 Form 4 說明書 Table I/II 代碼定義）。
 """
 from __future__ import annotations
+import os
 
 import json
 import time
@@ -49,7 +50,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 OUT_PATH = REPO_ROOT / "data" / "us_insider_trading.json"
 SIC_PATH = REPO_ROOT / "data" / "us_sic.json"
 
-HEADERS = {"User-Agent": "AlphaApp-USInsiderTrading contact@alpha-app-project.example"}
+HEADERS = {"User-Agent": "AlphaApp-USInsiderTrading " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example")}
 ATOM_NS = {"a": "http://www.w3.org/2005/Atom"}
 BROWSE_URL = "https://www.sec.gov/cgi-bin/browse-edgar"
 REQUEST_SLEEP_SEC = 0.2

@@ -28,6 +28,7 @@
     python research/us_universe_pit.py --daily            # 每日增量
 """
 from __future__ import annotations
+import os
 
 import argparse
 import json
@@ -44,7 +45,7 @@ CACHE = ROOT / "research" / "data" / "us_delisting_index"
 TZ = timezone(timedelta(hours=8))
 # SEC 要求 User-Agent 帶可聯絡的識別資訊，否則會被擋。這是他們的公開存取條款要求，
 # 不是規避任何限制。
-UA = {"User-Agent": "Alpha Research jlove201314@yahoo.com.tw"}
+UA = {"User-Agent": "Alpha Research " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example")}
 TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"
 # SEC 對自動化存取的建議上限是每秒 10 次。我們用 0.35 秒間隔（約每秒 3 次），
 # 遠低於上限——依 CLAUDE.md「照官方上限做硬性預算」的原則，寧可慢也不要被擋。

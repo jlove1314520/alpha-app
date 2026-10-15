@@ -20,6 +20,9 @@ concurrency:
 jobs:
   fetch-us-financials:
     runs-on: ubuntu-latest
+    # 先.一〇三-16：User-Agent 聯絡信箱改讀這個（選填 GitHub Secret）；沒設時腳本用專案佔位信箱，不再寫死個人 email
+    env:
+      ALPHA_UA_CONTACT: ${{ secrets.ALPHA_UA_CONTACT }}
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4

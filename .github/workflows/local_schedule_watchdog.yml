@@ -17,6 +17,8 @@ on:
 
 permissions:
   contents: write
+  # 先.一〇三-18：補救觸發 market.yml 用 workflow 自帶 GITHUB_TOKEN（workflow_dispatch 例外，會建立新 run），不需另建 token
+  actions: write
 
 jobs:
   check:
@@ -63,6 +65,14 @@ jobs:
             git pull --rebase --autostash
             git push
           fi
+
+      # 先.一〇三-18（2026-10-16 總司令裁示）：台北 17:45 後當天 market_tw 還沒落地就觸發 market.yml（一天最多 1 次）。
+      # 條件與限制見 scripts/watchdog_dispatch_market.py docstring；自身失敗只警告、exit 0（十二節），排在 commit 之後、紅燈之前。
+      - name: 台股主班未落地就補觸發 market.yml
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/watchdog_dispatch_market.py
 
       - name: 停擺就讓這個 job 顯示紅燈（觸發 GitHub email 與手機 App 的 Actions 失敗推播）
         if: steps.heartbeat.outcome == 'failure'

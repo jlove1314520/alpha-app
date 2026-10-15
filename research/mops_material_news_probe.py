@@ -18,6 +18,7 @@
 （`CLAUDE.md`已知地雷章節），每次呼叫間隔`SLEEP_BETWEEN_CALLS`秒。
 """
 from __future__ import annotations
+import os
 
 import sys
 import time
@@ -32,7 +33,7 @@ net_guard.install()
 FORM_URL = "https://mopsov.twse.com.tw/mops/web/t05st01"
 AJAX_URL = "https://mopsov.twse.com.tw/mops/web/ajax_t05st01"
 HEADERS = {
-    "User-Agent": "AlphaApp/0.2 (jlove201314@yahoo.com.tw)",
+    "User-Agent": "AlphaApp/0.2 (" + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example") + ")",
     "Referer": FORM_URL,
     "Origin": "https://mopsov.twse.com.tw",
     "Content-Type": "application/x-www-form-urlencoded",

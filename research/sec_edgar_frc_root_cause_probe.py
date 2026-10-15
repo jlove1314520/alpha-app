@@ -34,6 +34,7 @@ forms=10-K only, same 2019 window: 74 total hits, entity buckets are all Sequoia
 (unrelated RMBS issuers that happen to reference "First Republic Bank" as a loan originator/
 servicer in boilerplate) plus a handful of unrelated banks. FRC's own FY2018 10-K (which should
 exist and should self-reference "First Republic Bank" on its cover page alone) is simply ABSENT
+import os
 from this index. This is the decisive anomaly: a company's own 10-K missing entirely from a
 full-text-search corpus that captures 7,802 incidental third-party mentions in the same year
 cannot be an indexing gap -- it means the 10-K was never filed with SEC EDGAR in the first place.
@@ -92,7 +93,7 @@ from collections import Counter
 
 import requests
 
-HEADERS = {"User-Agent": "AlphaResearchMarathon-USTrack contact@alpha-research-project.example"}
+HEADERS = {"User-Agent": "AlphaResearchMarathon-USTrack " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-research-project.example")}
 
 
 def browse_edgar_name_search(company: str, type_filter: str | None = None) -> None:

@@ -31,6 +31,7 @@
 （比照`#40`買回股份的per-window快取檔案設計），確認訓練期起點前也有資料。
 """
 from __future__ import annotations
+import os
 
 import re
 import time
@@ -49,7 +50,7 @@ STEP1_URL = "https://mopsov.twse.com.tw/mops/web/ajax_t108sb08_1_q2"
 STEP2_URL = "https://mopsov.twse.com.tw/mops/web/ajax_t108sb08_1"
 REFERER = "https://mopsov.twse.com.tw/mops/web/t108sb08_1_q2"
 HEADERS = {
-    "User-Agent": "AlphaApp/0.2 (jlove201314@yahoo.com.tw)",
+    "User-Agent": "AlphaApp/0.2 (" + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example") + ")",
     "Referer": REFERER,
     "Origin": "https://mopsov.twse.com.tw",
     "Content-Type": "application/x-www-form-urlencoded",

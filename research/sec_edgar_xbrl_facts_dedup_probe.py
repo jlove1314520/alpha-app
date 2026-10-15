@@ -23,12 +23,13 @@ prints; it does not write to other research/*.md files itself (those get
 updated by hand after reading its output, same convention as prior probes).
 """
 from __future__ import annotations
+import os
 
 from datetime import date
 
 import requests
 
-HEADERS = {"User-Agent": "AlphaResearchMarathon-USTrack contact@alpha-research-project.example"}
+HEADERS = {"User-Agent": "AlphaResearchMarathon-USTrack " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-research-project.example")}
 
 KNOWN_CIK = {"AAPL": 320193, "MSFT": 789019, "PLTR": 1321655}
 

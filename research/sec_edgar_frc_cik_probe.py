@@ -61,12 +61,13 @@ findings get written into DATA.md / US_MARATHON_STATE.md / US_LOG.md by hand aft
 output.
 """
 from __future__ import annotations
+import os
 
 from collections import Counter
 
 import requests
 
-HEADERS = {"User-Agent": "AlphaResearchMarathon-USTrack contact@alpha-research-project.example"}
+HEADERS = {"User-Agent": "AlphaResearchMarathon-USTrack " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-research-project.example")}
 
 
 def dump_cik_filing_profile(cik: int, label: str) -> None:

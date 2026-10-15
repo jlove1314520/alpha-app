@@ -37,6 +37,10 @@ mopsov（robots.txt 全站 Disallow，不抓），官方 openapi 只給「每日
   `transferee_hash`，SHA-256 前 16 碼、固定前綴），原文不寫進檔案；只留職稱與身分類別（`role`）。
   雜湊仍可去重、辨識「同一人多次申報」。⚠️ 限制：固定前綴寫在公開程式碼裡，有心人拿候選
   姓名逐一算雜湊仍可比對出來——它防的是「公開 repo 裡可直接搜尋到姓名」，不是加密。
+- 2026-10-16 先.一〇三-19 總司令裁示改 **HMAC-SHA256**（前 16 碼），金鑰只放 GitHub Secret
+  `INSIDER_HASH_KEY`（由總司令本人建立，CC 不經手），沒有金鑰就無法拿候選姓名比對。
+  **沒設金鑰時不寫姓名雜湊（存 null）**，不退回舊的固定前綴算法；`meta.hash_scheme` 標明用的是哪一種。
+  10/16 以前的舊紀錄仍是 v1 固定前綴雜湊（無原文可重算），新舊雜湊不互通。
 
 用法：
     python .github/scripts/fetch_insider_transfer_tw.py           # 正式抓取
@@ -46,6 +50,7 @@ mopsov（robots.txt 全站 Disallow，不抓），官方 openapi 只給「每日
 from __future__ import annotations
 
 import hashlib
+import hmac
 import os
 import contextlib
 import json
@@ -67,7 +72,7 @@ OUT_PATH = REPO_ROOT / "data" / "insider_transfer_tw_history.json"
 
 TWSE_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap12_L"
 TPEX_URL = "https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap12_O"
-HEADERS = {"User-Agent": "AlphaApp-InsiderTransferTW contact@alpha-app-project.example"}
+HEADERS = {"User-Agent": "AlphaApp-InsiderTransferTW " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example")}
 
 RATE_LIMIT_STATE_PATH = REPO_ROOT / "data" / "rate_limit_state.json"
 RATE_LIMIT_MIN_INTERVAL_SEC = 3.0
@@ -252,14 +257,23 @@ def normalize_rows(rows, market: str) -> tuple[list[dict], list[str]]:
     return out, warns
 
 
-HASH_PREFIX = "alpha-insider-transfer-v1|"
+HASH_PREFIX = "alpha-insider-transfer-v1|"  # 舊版（v1）前綴，只留供辨識舊紀錄，不再用來算新雜湊
+HASH_KEY_ENV = "INSIDER_HASH_KEY"
+
+
+def hash_scheme() -> str:
+    """目前會用的雜湊方式：有金鑰＝hmac-sha256-v2；沒金鑰＝none（不寫姓名雜湊）。"""
+    return "hmac-sha256-v2" if os.environ.get(HASH_KEY_ENV, "").strip() else "none"
 
 
 def person_hash(v) -> str | None:
-    """姓名／受讓人 → SHA-256 前 16 碼；空值回 None（照實，不補）。"""
+    """姓名／受讓人 → HMAC-SHA256 前 16 碼（先.一〇三-19）；空值或沒設金鑰回 None（照實，不補、不退回 v1）。"""
     if v is None or (isinstance(v, str) and not v.strip()):
         return None
-    return hashlib.sha256((HASH_PREFIX + str(v).strip()).encode("utf-8")).hexdigest()[:16]
+    key = os.environ.get(HASH_KEY_ENV, "").strip()
+    if not key:
+        return None
+    return hmac.new(key.encode("utf-8"), str(v).strip().encode("utf-8"), hashlib.sha256).hexdigest()[:16]
 
 
 def record_id(rec: dict) -> str:
@@ -296,6 +310,8 @@ def build_doc(records: list[dict], last_run: dict) -> dict:
             "note": ("只往前累積、不回補歷史（歷史在 mopsov，robots 禁止）；這是事前申報，不是實際成交；"
                      "排程沒跑的那天會永久缺一天，見 report_dates。欄位只改名不改值。"),
             "record_count": len(records),
+            # 先.一〇三-19：本次新寫入紀錄的姓名雜湊方式；10/16 以前的舊紀錄是 v1 固定前綴 SHA-256，新舊不互通
+            "hash_scheme": hash_scheme(),
             "report_dates": {m: sorted(set(v)) for m, v in dates.items()},
             "last_run": last_run,
         },

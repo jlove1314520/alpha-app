@@ -48,6 +48,7 @@ left undone rather than speculatively built):
   needed (institution identity + failure-event detail).
 """
 from __future__ import annotations
+import os
 
 import hashlib
 import json
@@ -62,7 +63,7 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 # Same identifying-User-Agent spirit as sec_edgar_client.py, even though
 # FDIC's public API doesn't document a strict requirement for one -- being
 # a good API citizen costs nothing.
-HEADERS = {"User-Agent": "AlphaResearchMarathon-USTrack contact@alpha-research-project.example"}
+HEADERS = {"User-Agent": "AlphaResearchMarathon-USTrack " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-research-project.example")}
 
 _INSTITUTIONS_URL = "https://api.fdic.gov/banks/institutions"
 _FAILURES_URL = "https://api.fdic.gov/banks/failures"

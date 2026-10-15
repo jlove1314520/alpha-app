@@ -29,6 +29,7 @@ https://publicreporting.cftc.gov/resource/6dca-aqww.json
 百分比）。
 """
 from __future__ import annotations
+import os
 
 import json
 import time
@@ -41,7 +42,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 OUT_PATH = REPO_ROOT / "data" / "cftc_cot.json"
 
 BASE_URL = "https://publicreporting.cftc.gov/resource/6dca-aqww.json"
-HEADERS = {"User-Agent": "AlphaApp-CftcCot contact@alpha-app-project.example"}
+HEADERS = {"User-Agent": "AlphaApp-CftcCot " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example")}
 REQUEST_SLEEP_SEC = 0.5
 HISTORY_WEEKS = 12
 

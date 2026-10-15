@@ -19,6 +19,7 @@ cookie（早前一度誤判被安全阻擋，其實是參數不完整+缺cookie�
 `mops_buyback_client.py`的`fetch_window()`一樣把重試邏輯上移一層）。
 """
 from __future__ import annotations
+import os
 
 from pathlib import Path
 
@@ -35,7 +36,7 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 FORM_URL = "https://mopsov.twse.com.tw/mops/web/t05st01"
 AJAX_URL = "https://mopsov.twse.com.tw/mops/web/ajax_t05st01"
 HEADERS = {
-    "User-Agent": "AlphaApp/0.2 (jlove201314@yahoo.com.tw)",
+    "User-Agent": "AlphaApp/0.2 (" + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example") + ")",
     "Referer": FORM_URL,
     "Origin": "https://mopsov.twse.com.tw",
     "Content-Type": "application/x-www-form-urlencoded",

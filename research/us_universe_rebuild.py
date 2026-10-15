@@ -23,6 +23,7 @@ SEC 流量禮儀（官方 10 req/秒）：固定 sleep 0.2 秒（約 5 req/秒�
   python research/us_universe_rebuild.py --build      # 步驟3：合成新版名冊＋報告
 """
 from __future__ import annotations
+import os
 
 import gzip
 import json
@@ -50,7 +51,7 @@ for d in (IDX, F25):
 OUT = HERE / "data" / "us_universe_pit.json"
 OUT_V1_BAK = HERE / "data" / "us_universe_pit.v1.bak.json"
 REPORT = HERE / "data" / "us_universe_rebuild_report.json"
-HEADERS = {"User-Agent": "AlphaResearch-USTrack contact@alpha-research-project.example",
+HEADERS = {"User-Agent": "AlphaResearch-USTrack " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-research-project.example"),
            "Accept-Encoding": "gzip, deflate"}
 SLEEP = 0.2
 STOPPED_FILING_MONTHS = 15

@@ -1,5 +1,6 @@
 """US track, marathon round 2026-08-23 (5th): follow-up to us_survivorship_probe.py's
 negative finding -- that round's "known last trading day" values were sanity-checked
+import os
 from human memory of news coverage, not from an authoritative source. This round uses
 the SEC EDGAR API (already live-verified working in sec_edgar_probe.py, round 3) to
 check the actual filing record for the same 5 tickers, specifically looking for Form 25
@@ -52,7 +53,7 @@ import time
 
 import requests
 
-HEADERS = {"User-Agent": "AlphaResearchMarathon-USTrack contact@alpha-research-project.example"}
+HEADERS = {"User-Agent": "AlphaResearchMarathon-USTrack " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-research-project.example")}
 
 # Fallback CIKs, used only if the live company_tickers.json lookup misses the ticker.
 # Verified correct (submissions API company name matches AND filing-type profile is

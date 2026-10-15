@@ -10,6 +10,7 @@
 輸出：research/data/insider_trading_historical.csv（append-only，逐CIK可續跑）
 """
 from __future__ import annotations
+import os
 
 import csv
 import json
@@ -24,7 +25,7 @@ sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 HERE = Path(__file__).resolve().parent
 PICKS_PATH = HERE / "data" / "insider_trading_pilot_ciks.json"
 OUT_CSV = HERE / "data" / "insider_trading_historical.csv"
-HEADERS = {"User-Agent": "AlphaApp-USInsiderTradingHistorical contact@alpha-app-project.example"}
+HEADERS = {"User-Agent": "AlphaApp-USInsiderTradingHistorical " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example")}
 REQUEST_SLEEP_SEC = 0.2
 
 

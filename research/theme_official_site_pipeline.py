@@ -83,6 +83,7 @@ MAX_RETRY = 1            # 連不上重試上限（新聞內文管線是2，官�
 RETRY_BACKOFF = 3.0
 MIN_TEXT_LEN = 200       # 抓到的可見文字低於這個字數視為可能JS渲染，跳過
 MIN_SENTENCE_LEN = 6     # 句子太短（導覽列殘留）不納入判定
+MOBILE_RE = re.compile(r"(?<!\d)09\d{2}[- ]?\d{3}[- ]?\d{3}(?!\d)")  # 台灣手機號碼（先.一〇三-16）
 
 _last = [0.0]
 
@@ -136,6 +137,8 @@ def fetch_homepage_sentences(url: str) -> tuple[list[str], str | None]:
         lines = [ln.strip() for ln in text.split("\n") if ln.strip()]
         joined = " ".join(lines)
         joined = re.sub(r"\s+", " ", joined).strip()
+        # 先.一〇三-16：新聞稿常附發言人個人手機，落地前遮掉（公司總機／傳真照留）
+        joined = MOBILE_RE.sub("[手機已移除]", joined)
         if len(joined) < MIN_TEXT_LEN:
             return [], "blocked_js_render"
         sentences = re.split(r"(?<=[。！？])", joined)

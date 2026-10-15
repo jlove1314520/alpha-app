@@ -28,6 +28,7 @@ CLAUDE.md「借券成本與可借量硬規則」提到的兩項缺口（成本�
 仍待採購或另尋來源，不得因為接入這個端點就宣稱借券成本問題已解決。
 """
 from __future__ import annotations
+import os
 
 import json
 from datetime import datetime, timezone
@@ -38,7 +39,7 @@ import requests
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 OUT_PATH = REPO_ROOT / "data" / "short_lending_available.json"
 URL = "https://openapi.twse.com.tw/v1/SBL/TWT96U"
-HEADERS = {"User-Agent": "AlphaApp-ShortLendingAvailable contact@alpha-app-project.example"}
+HEADERS = {"User-Agent": "AlphaApp-ShortLendingAvailable " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example")}
 
 
 def _to_int(s):

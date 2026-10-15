@@ -37,6 +37,7 @@ replace"/"to Replace"這類措辭（可能存在於未抽到的樣本，回補�
 本模組不內建重試/延遲。
 """
 from __future__ import annotations
+import os
 
 import re
 from pathlib import Path
@@ -50,7 +51,7 @@ DATA_DIR = Path(__file__).parent / "data" / "raw_sp_index_changes"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 LISTING_URL = "https://press.spglobal.com/index.php"
-HEADERS = {"User-Agent": "AlphaApp/0.2 (jlove201314@yahoo.com.tw)"}
+HEADERS = {"User-Agent": "AlphaApp/0.2 (" + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example") + ")"}
 
 DEFAULT_PAGE_SIZE = 50
 

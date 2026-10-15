@@ -20,6 +20,7 @@ SEC 禮儀：sleep 0.2 秒；Stooq 為公開靜態 CSV，同樣 sleep 0.2 秒。
 用法：python research/us_delisted_price_probe.py --sample --price --reason
 """
 from __future__ import annotations
+import os
 
 import csv
 import io
@@ -46,7 +47,7 @@ UNI = HERE / "data" / "us_universe_pit.json"
 UNI_V1 = HERE / "data" / "us_universe_pit.v1.bak.json"
 STATE = RAW / "us_universe_rebuild_state.json"
 OUT = HERE / "data" / "us_delisted_price_probe.json"
-HEADERS = {"User-Agent": "AlphaResearch-USTrack contact@alpha-research-project.example",
+HEADERS = {"User-Agent": "AlphaResearch-USTrack " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-research-project.example"),
            "Accept-Encoding": "gzip, deflate"}
 SLEEP = 0.2
 SEED = 20261005

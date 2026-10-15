@@ -37,6 +37,7 @@
 不覆蓋既有檔案、exit 1。
 """
 from __future__ import annotations
+import os
 
 import json
 import sys
@@ -57,7 +58,7 @@ sys.path.insert(0, str(REPO_ROOT / "research"))
 from sec_edgar_client import get_company_facts  # noqa: E402
 
 OUT_PATH = REPO_ROOT / "data" / "us_financials.json"
-HEADERS = {"User-Agent": "AlphaApp-USFinancials contact@alpha-app-project.example"}
+HEADERS = {"User-Agent": "AlphaApp-USFinancials " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example")}
 EXCHANGE_URL = "https://www.sec.gov/files/company_tickers_exchange.json"
 LISTED_EXCHANGES = {"NYSE", "Nasdaq"}
 MAX_TICKERS = 260

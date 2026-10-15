@@ -45,6 +45,7 @@ SEC公平使用政策建議上限約10 req/sec，這裡沿用`fetch_us_sic.py`/`
 insider_trading.py`同款保守間隔（每次請求後sleep 0.2秒）。
 """
 from __future__ import annotations
+import os
 
 import json
 import re
@@ -57,7 +58,7 @@ import requests
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 OUT_PATH = REPO_ROOT / "data" / "us_13f_holdings.json"
 
-HEADERS = {"User-Agent": "AlphaApp-US13F contact@alpha-app-project.example"}
+HEADERS = {"User-Agent": "AlphaApp-US13F " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example")}
 ATOM_NS = {"a": "http://www.w3.org/2005/Atom"}
 BROWSE_URL = "https://www.sec.gov/cgi-bin/browse-edgar"
 REQUEST_SLEEP_SEC = 0.2

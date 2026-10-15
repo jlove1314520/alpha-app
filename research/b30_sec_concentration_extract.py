@@ -49,7 +49,7 @@ OUT_DIR = HERE / "data" / "b30_concentration"
 STATUS = OUT_DIR / "_status.json"
 INDEX_URL = "https://www.sec.gov/data-research/sec-markets-data/financial-statement-notes-data-sets"
 BASE = "https://www.sec.gov"
-HEADERS = {"User-Agent": "AlphaApp-USFinancials contact@alpha-app-project.example"}
+HEADERS = {"User-Agent": "AlphaApp-USFinancials " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example")}
 SEC_SLEEP = 0.2
 # 2009～2013 年左右的 us-gaap 版本用 ConcentrationRiskPercentage（無 1），2011q2 實測
 # 140 列全是這個名字、0 列 ...1；維度命名也跟新版不同（例：ConcentrationRiskByType=
