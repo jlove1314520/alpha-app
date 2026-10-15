@@ -276,7 +276,10 @@
     const esc=_autoEsc,d=RADAR_CACHE||{},m=d.meta||{},lists=d.lists||{};
     const names=RADAR_ORDER.filter(n=>n in lists).concat(Object.keys(lists).filter(n=>!RADAR_ORDER.includes(n)));
     if(!names.includes(RADAR_LIST))RADAR_LIST=names[0]||'';
-    document.getElementById('radar-meta-line').textContent=`資料日 ${m.asof||'—'}（建檔 ${String(m.generated_at||'').slice(5,16).replace('T',' ')}）· 只含流動性門檻以上的股票`;
+    // 先.一〇三-14：揭露覆蓋率（meta.coverage），讓使用者知道各欄位實際有多少檔算得出來
+    const cv=m.coverage||{},cvN=(k)=>cv[k]==null?'—':cv[k];
+    const covTxt=cv.built!=null?` · 涵蓋 ${cvN('built')} 檔（流動性門檻以上 ${cvN('liquid')}）：近3月營收年增 ${cvN('with_rev3_yoy')}、營收季增 ${cvN('with_rev3_qoq')}、季報最新 ${cvN('with_fresh_quarter')}、外資完整 ${cvN('with_foreign')}、集保單週 ${cvN('with_holders_single_week')} 檔`:'';
+    document.getElementById('radar-meta-line').textContent=`資料日 ${m.asof||'—'}（建檔 ${String(m.generated_at||'').slice(5,16).replace('T',' ')}）· 只含流動性門檻以上的股票${covTxt}`;
     document.getElementById('radar-chips').innerHTML=names.map(n=>chip(`${esc(n)} ${(lists[n]||[]).length}`,n===RADAR_LIST,`switchRadarList('${esc(n)}')`)).join('');
     const rules=m.rules||{};
     document.getElementById('radar-rule').textContent=RADAR_LIST==='綜合變化'?'綜合變化＝同時觸發的變化標籤數（描述性，非分數）':(rules[RADAR_LIST]?`規則：${rules[RADAR_LIST]}`:'');

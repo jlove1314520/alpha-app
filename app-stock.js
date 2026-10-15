@@ -325,7 +325,13 @@
       }
       setTxt('tdcc-big-ratio',rec.big_holder_ratio!=null?rec.big_holder_ratio.toFixed(2)+'%':'—');
       setTxt('tdcc-small-ratio',rec.small_holder_ratio!=null?rec.small_holder_ratio.toFixed(2)+'%':'—');
-      setTxt('tdcc-week-chg',rec.week_change_pct!=null?((rec.week_change_pct>=0?'+':'')+rec.week_change_pct.toFixed(2)+'%'):'僅一週資料，無週變化');
+      // 先.一〇三-14：集保缺週（最後兩筆相隔超過 9 天）時，這個變化不是單週，照實標相隔天數
+      let gapDays=null;
+      try{const hs=(rec.history||[]).map(x=>String(x.date||'')).filter(x=>/^\d{8}$/.test(x)).sort();
+        if(hs.length>=2){const p=x=>Date.UTC(+x.slice(0,4),+x.slice(4,6)-1,+x.slice(6,8));gapDays=Math.round((p(hs[hs.length-1])-p(hs[hs.length-2]))/86400000)}}
+      catch(e){console.warn('[tdcc gap]',e)}
+      const chgTxt=rec.week_change_pct!=null?((rec.week_change_pct>=0?'+':'')+rec.week_change_pct.toFixed(2)+'%'):'僅一週資料，無週變化';
+      setTxt('tdcc-week-chg',rec.week_change_pct!=null&&gapDays!=null&&gapDays>9?chgTxt+`（相隔 ${gapDays} 天，集保缺週，非單週）`:chgTxt);
       setTxt('tdcc-streak',rec.streak_weeks!=null?rec.streak_weeks+' 週':'—');
       setTxt('tdcc-note',`資料日 ${rec.date||'—'} · 來源：集保結算所（每週五 20:00 排程）`);
     }catch(e){
@@ -1439,7 +1445,10 @@
       h+=row('近 20 日漲跌',pc(px.ret20));
     }else h+=row('價格','—','無近 60 日價');
     h+=row('外資／投信 10 日',`${lots(ins.foreign10)}／${lots(ins.trust10)}`,esc(ins.reason||''));
-    h+=hd?row('千張大戶週變化',pp(hd.week_change_pct),`持股 ${hd.big_holder_ratio}%（${md(hd.date)}）`):row('千張大戶週變化','—','無集保大戶資料');
+    // 先.一〇三-14：集保缺週時 build_research 給 single_week=false、week_change_pct=null，改顯示相隔天數的變化，不叫「週變化」
+    h+=!hd?row('千張大戶週變化','—','無集保大戶資料')
+      :hd.single_week===false?row(`千張大戶變化（相隔 ${hd.gap_days} 天）`,pp(hd.change_pp),`集保缺週，非單週 · 持股 ${hd.big_holder_ratio}%（${md(hd.date)}）`)
+      :row('千張大戶週變化',pp(hd.week_change_pct),`持股 ${hd.big_holder_ratio}%（${md(hd.date)}）`);
     const nc=ev.next_call;
     h+=row('下一場法說',nc?`<a href="${esc(nc.url)}" target="_blank" rel="noopener" style="color:var(--gold)">${md(nc.date)}</a>`:'—',nc?(nc.announced?`舉行日；${md(nc.announced)} 公告`:'舉行日'):'未來 14 天沒有寫明舉行日的法說會公告');
     const maj=ev.recent_major||[];

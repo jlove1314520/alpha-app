@@ -55,7 +55,7 @@ RULE_TEXT = {
     "帶量跌破季線": "近3日由季線上跌破 MA60 且當日量 ≥1.5×20日均量",
     "投信連買": "投信連續 ≥5 個交易日買超",
     "法人背離": "近20日股價 ≥+10% 但外資賣超，或 ≤−10% 但外資買超",
-    "大戶增持": "千張大戶持股比例單週增 ≥0.5 個百分點且連 ≥2 週",
+    "大戶增持": "千張大戶持股比例單週增 ≥0.5 個百分點且連 ≥2 週（集保缺週、兩筆相隔超過 9 天時不算單週、不打標籤）",
     "重大訊息": "近7日有重大訂單／併購／處分資產／財務／訴訟類重大訊息",
 }
 FUND_TAGS = {"營收加速", "營收轉正", "營收轉弱", "營收創新高", "毛利率跳升", "毛利率轉差"}
@@ -271,6 +271,64 @@ def event_metrics(evs, asof):
     return out
 
 
+# 先.一〇三-14（2026-10-16）：--asof 回放時真正把資料截到該日（原本只有季報新鮮度與事件看 asof，
+# 價量／月營收／季報／法人／集保／本益比都用到最新，回放會偷看未來）。截法一律保守：寧可少用一筆，不偷看。
+def cut_prices(rows, asof):
+    a = asof.isoformat()
+    return [r for r in (rows or []) if str(r.get("date", ""))[:10] <= a]
+
+
+def cut_revenue(h, asof):
+    """月營收依法要在次月 10 日前公告；asof 當天還沒到公告期限的月份一律不用（保守，不看實際公告日）。"""
+    out = []
+    for r in h or []:
+        y, m = int(r["year"]), int(r["month"])
+        ny, nm = (y + 1, 1) if m == 12 else (y, m + 1)
+        if dt.date(ny, nm, 10) <= asof:
+            out.append(r)
+    return out
+
+
+def cut_quarters(fin, backfill, asof):
+    """季報只留到 asof 當天已過法定公告期限的那一季（expected_latest_quarter），提早公告的也不用（保守）。"""
+    exp = expected_latest_quarter(asof)
+    ok = lambda q: (q["year"], q["quarter"]) <= exp  # noqa: E731
+    fin2 = dict(fin or {})
+    fin2["quarters"] = [q for q in ((fin or {}).get("quarters") or []) if ok(q)]
+    return fin2, [q for q in (backfill or []) if ok(q)]
+
+
+def holder_metrics(hd, asof):
+    """集保：只用 asof 當天以前的週別；兩筆相隔超過 9 天（中間缺週）時變化不是「單週」，week_change_pct 給 None 並寫 gap_days。"""
+    if not hd:
+        return None
+    a = asof.strftime("%Y%m%d")
+    hist = sorted((h for h in (hd.get("history") or []) if str(h.get("date", "")) <= a and h.get("big_holder_ratio") is not None),
+                  key=lambda h: h["date"])
+    if not hist:
+        return None
+    d = lambda x: dt.date(int(x[:4]), int(x[4:6]), int(x[6:8]))  # noqa: E731
+    last = hist[-1]
+    out = {"date": last["date"], "big_holder_ratio": last["big_holder_ratio"], "week_change_pct": None,
+           "change_pp": None, "gap_days": None, "single_week": None, "streak_weeks": 0, "weeks_available": len(hist)}
+    if len(hist) >= 2:
+        prev = hist[-2]
+        gap = (d(last["date"]) - d(prev["date"])).days
+        chg = round(last["big_holder_ratio"] - prev["big_holder_ratio"], 4)
+        out.update(change_pp=chg, gap_days=gap, single_week=gap <= 9)
+        if gap <= 9:
+            out["week_change_pct"] = chg
+        else:
+            out["reason"] = f"集保缺週：{prev['date']}→{last['date']} 相隔 {gap} 天，變化不是單週"
+    # 連續增持週數：從最新往回數，遇到缺週（相隔 >9 天）就中斷
+    for i in range(len(hist) - 1, 0, -1):
+        gap = (d(hist[i]["date"]) - d(hist[i - 1]["date"])).days
+        if gap > 9 or not hist[i]["big_holder_ratio"] > hist[i - 1]["big_holder_ratio"]:
+            break
+        out["streak_weeks"] += 1
+    return out
+
+
 def change_tags(rv, q, p, ins, hd, ev):
     t = []
     y, yp = rv.get("rev3_yoy"), rv.get("rev3_yoy_prev")
@@ -292,7 +350,7 @@ def change_tags(rv, q, p, ins, hd, ev):
     r20, f20 = p.get("ret20"), ins.get("foreign20")
     if r20 is not None and f20 is not None and not ins.get("foreign_missing_days") and ((r20 >= 0.10 and f20 < 0) or (r20 <= -0.10 and f20 > 0)):
         t.append("法人背離")
-    if hd and (hd.get("week_change_pct") or 0) >= 0.5 and (hd.get("streak_weeks") or 0) >= 2:
+    if hd and hd.get("single_week") and (hd.get("week_change_pct") or 0) >= 0.5 and (hd.get("streak_weeks") or 0) >= 2:
         t.append("大戶增持")
     if ev.get("recent_major"): t.append("重大訊息")
     return t
@@ -409,7 +467,10 @@ def guidance(code):
 
 # ---------------------------------------------------------------- 主流程
 def main():
-    asof_arg = next((a.split("=", 1)[1] for a in sys.argv[1:] if a.startswith("--asof=")), None)
+    argv = sys.argv[1:]
+    asof_arg = next((a.split("=", 1)[1] for a in argv if a.startswith("--asof=")), None)
+    if asof_arg is None and "--asof" in argv and argv.index("--asof") + 1 < len(argv):  # 用法寫的是「--asof YYYY-MM-DD」，兩種都收
+        asof_arg = argv[argv.index("--asof") + 1]
     now = dt.datetime.now(TZ)
     errors = []
     import price_history_store as PHS  # noqa: E402
@@ -431,26 +492,36 @@ def main():
         ev_by.setdefault(e.get("code"), []).append(e)
     last_dates = sorted({rows[-1]["date"] for rows in ph.values() if rows})
     asof = dt.date.fromisoformat(asof_arg or (last_dates[-1] if last_dates else now.date().isoformat()))
+    ih_dates = [x for x in ih_dates if x <= asof.strftime("%Y%m%d")]  # 先.一〇三-14：法人歷史截到 asof
+    # 月營收／季報的「公告期限」截法只在指定 --asof 回放時用；每日正式產出（asof＝最新資料日）不截，
+    # 否則每月 1～10 日會把已提早公告的上月營收、法定期限前已公告的季報丟掉。
+    replay = asof_arg is not None
+    cut_rv = (lambda h: cut_revenue(h, asof)) if replay else (lambda h: h)
 
     stocks = {}
     universe = sorted(c for c in active if not any(k in (comp.get(c, {}).get("industry") or "") for k in NON_STOCK_INDUSTRY)
                       and not c.startswith("0"))
     for code in universe:
         try:
-            rv = revenue_metrics(merged_revenue(fund.get(code), code))
-            q = quarter_metrics((sd.get(code) or {}).get("financials"), asof, FIN_BACKFILL.get(code))
-            p = price_metrics(ph.get(code))
+            rv = revenue_metrics(cut_rv(merged_revenue(fund.get(code), code)))
+            fin_c, bf_c = (cut_quarters((sd.get(code) or {}).get("financials"), FIN_BACKFILL.get(code), asof) if replay
+                           else ((sd.get(code) or {}).get("financials"), FIN_BACKFILL.get(code)))
+            q = quarter_metrics(fin_c, asof, bf_c)
+            p = price_metrics(cut_prices(ph.get(code), asof))
             ins = inst_metrics(ih_series.get(code), ih_dates)
-            hd = holders.get(code)
+            hd = holder_metrics(holders.get(code), asof)
             ev = event_metrics(ev_by.get(code, []), asof)
             tags = change_tags(rv, q, p, ins, hd, ev)
             ratios = (fund.get(code) or {}).get("ratios") or {}
+            if str(ratios.get("date") or "")[:10] > asof.isoformat():  # 只有最新快照、沒有歷史：晚於 asof 就不用
+                ratios = {}
             gaps = [x for x in (rv.get("reason"), q.get("reason"), p.get("reason"), ins.get("reason")) if x]
             stocks[code] = {
                 "name": comp.get(code, {}).get("name", ""), "industry": comp.get(code, {}).get("industry", ""),
                 "rev": rv, "q": q, "val": {"per": ratios.get("per"), "pbr": ratios.get("pbr"), "date": ratios.get("date")},
                 "px": p, "inst": ins,
-                "holders": None if not hd else {k: hd.get(k) for k in ("date", "big_holder_ratio", "week_change_pct", "streak_weeks")},
+                "holders": None if not hd else {k: hd.get(k) for k in ("date", "big_holder_ratio", "week_change_pct", "change_pp", "gap_days",
+                                                                        "single_week", "streak_weeks", "reason") if k in hd},
                 "events": ev, "change_tags": tags, "change_score": score(tags),
                 "liquid": (p.get("turnover20") or 0) >= LIQ_MIN_TURNOVER, "gaps": gaps,
             }
@@ -467,7 +538,7 @@ def main():
                 errors.append(f"{code}: 深度設定存在但不在全市場宇宙")
                 continue
             l1 = {"rv": stocks[code]["rev"], "q": stocks[code]["q"], "p": stocks[code]["px"]}
-            stocks[code]["deep"] = lab_deep(code, cfg, l1, merged_revenue(fund.get(code), code), asof.year)
+            stocks[code]["deep"] = lab_deep(code, cfg, l1, cut_rv(merged_revenue(fund.get(code), code)), asof.year)
             d = stocks[code]["deep"]
             deep_list.append({"code": code, "name": stocks[code]["name"], "headline": d["headline"], "position": d["scenario"]["position"],
                               "counts": d["thesis"]["counts"], "next": (d["next_checkpoints"] or [None])[0], "doc_url": d.get("doc_url")})
@@ -520,9 +591,12 @@ def main():
            "with_foreign": sum(s["inst"].get("foreign_missing_days", 0) == 0 and (s["inst"].get("inst_days") or 0) > 0 for s in stocks.values()),
            "with_price60": sum(s["px"].get("ma60") is not None for s in stocks.values()),
            "with_inst10": sum((s["inst"].get("inst_days") or 0) >= 10 for s in stocks.values()), "liquid": len(liq),
+           "with_holders": sum(bool(s.get("holders")) for s in stocks.values()),
+           "with_holders_single_week": sum(bool(s.get("holders") and s["holders"].get("single_week")) for s in stocks.values()),
            "deep": len(deep_list)}
     meta = {"schema": SCHEMA, "generated_at": now.isoformat(timespec="seconds"), "asof": asof.isoformat(), "disclaimer": DISCLAIMER,
             "source": "repo 內既有檔（price_history/fundamentals/stock_detail/institutional_history/events/holders/company_info/listed_universe，若有 revenue_backfill／financials_backfill 一併合併）＋research/lab；零外部請求",
+            "asof_cut": "價量／月營收（次月10日公告期限）／季報（法定期限）／法人／集保／本益比皆截到 asof，事件只用 asof 以前公告的" if asof_arg else "未指定 --asof：用最新資料",
             "rules": RULE_TEXT, "liquidity_min_turnover20": LIQ_MIN_TURNOVER, "coverage": cov, "errors": errors[:200], "n_errors": len(errors),
             "not_a_factor": "凍結.二：本檔欄位不得進 scores*.json 或當選股權重"}
     (OUT / "research.json").write_text(json.dumps({"meta": meta, "stocks": stocks}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
