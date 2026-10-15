@@ -8,13 +8,14 @@
   - ⚠️ 未驗證：16:30 後還沒實跑過，今天 17:30 AlphaMarketCatchup 是第一次，看 `research/market_local_catchup.jsonl` 有沒有新的一列進 repo。
 - **先.一〇三-10 ✅（80d0be73b6）**：price_history。
   - 做了什麼：查證四檔——3114／6874（9/3）、6590（9/8）是上櫃除權息（官方 exDailyQ）沒進帳本；2938 推定是興櫃轉上櫃（未用官方上櫃日核對）。**根因比四檔大**：8/26 起官方除權息 324 筆，帳本漏了 161 筆（多為上櫃債券 ETF，**含真錢持有的 00697B 9/21 除息**）。`fix_backfill_exdiv.py` 加 `--end`、官方優先去重，6/1 以後整段重算 adj_close（242 檔、16,140 列；持有標的只有 00697B 變動，最大 0.89%）。收盤 0 的 3,779 列標 `no_trade=true`（`price_history_store.save()` 之後每次自動標）；TAIEX／TPEx 偽代號移到 `data/price_history_index_legacy.json`（保留不刪）。
-  - 證據：官方請求 TWT49U 3 次、exDailyQ 3 次（間隔 ≥3 秒）；price_history 相關自測 4 支全過；冒煙全部通過。
+  - 證據：官方請求 TWT49U 4 次、exDailyQ 4 次（查證 2 次＋試跑 1 次＋正式 1 次，同源間隔 ≥3 秒，全部 200）；price_history 相關自測 4 支全過；冒煙全部通過。
   - [自行裁量]：00697B 還原價修正屬修 bug（補上官方除息），沒有手動重產 strategy_curves／紙上帳，下一班每日管線帶入。
   - 新增兩條 `[自走補入]`：先.一〇三-10a 每日管線改用區間查最近 10 個交易日補帳（根因修）；先.一〇三-10b 另外 171 筆還原價單日 >10.5%（例 3085 10/13 +33.9%、4747 8/31 −51.6%）。
 - **先.一〇三-11 ✅（e3ad179d9b）**：選股台帳。`build_picks_ledger.py` 休市日不快照；既有 9 個休市日×3 榜＝27 筆加 `non_trading_day_duplicate=true`（內容不改）；App 成績單統計與快照數排除（116→89）。冒煙全部通過；⚠️ 成績單畫面數字沒另外實測。
 - 沒做：先.一〇三-12 起留給下一輪（本輪 05:46 時間上限，剩餘時間不夠跑完一項＋冒煙）。
 - 佇列深度：`- [ ]` 19 項（≥12）、DevQueue 可執行 9 項（≥6），不需補件。
-- 共用工作目錄：其他排程的未提交檔（audit_report、quotes_ibkr 等）沒有掃進本輪 commit。repo 外 `C:lphaun-market-catchup.ps1` 註解同步改了心跳路徑。
+- 共用工作目錄：其他排程的未提交檔（audit_report、quotes_ibkr 等）沒有掃進本輪 commit。repo 外 `C:lpha
+un-market-catchup.ps1` 註解同步改了心跳路徑。
 
 ## 2026-10-16 04:30（DevQueue 20261016-040101）先.一〇三-6 捲動只捲 #main；先.一〇三-7 STATUS 通用日期解析；先.一〇三-8 融資維持率（第 1 批）
 
