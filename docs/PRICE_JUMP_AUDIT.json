@@ -1,0 +1,1731 @@
+{
+ "meta": {
+  "since": "2026-06-01",
+  "threshold": 0.105,
+  "total": 171,
+  "counts": {
+   "etf_limit_rule": 22,
+   "market_wide_day": 14,
+   "known_split": 2,
+   "listing_first_days": 5,
+   "no_limit_board": 94,
+   "unexplained": 4,
+   "ex_event_adj": 3,
+   "multi_day_gap": 25,
+   "suspected_split": 2
+  },
+  "note": "先.一〇三-10b 歸類，見 scripts/audit_price_jumps.py 檔頭"
+ },
+ "items": [
+  {
+   "code": "00631L",
+   "name": "元大台灣50正2",
+   "from": "2026-07-16",
+   "to": "2026-07-17",
+   "trading_days": 1,
+   "adj_pct": -13.5,
+   "close_pct": -13.5,
+   "class": "etf_limit_rule"
+  },
+  {
+   "code": "00663L",
+   "name": "國泰臺灣加權正2",
+   "from": "2026-07-16",
+   "to": "2026-07-17",
+   "trading_days": 1,
+   "adj_pct": -13.6,
+   "close_pct": -13.6,
+   "class": "etf_limit_rule"
+  },
+  {
+   "code": "00675L",
+   "name": "富邦臺灣加權正2",
+   "from": "2026-07-16",
+   "to": "2026-07-17",
+   "trading_days": 1,
+   "adj_pct": -13.7,
+   "close_pct": -13.7,
+   "class": "etf_limit_rule"
+  },
+  {
+   "code": "00685L",
+   "name": "群益臺灣加權正2",
+   "from": "2026-07-16",
+   "to": "2026-07-17",
+   "trading_days": 1,
+   "adj_pct": -13.4,
+   "close_pct": -13.4,
+   "class": "etf_limit_rule"
+  },
+  {
+   "code": "00715L",
+   "name": "期街口布蘭特正2",
+   "from": "2026-06-12",
+   "to": "2026-06-15",
+   "trading_days": 1,
+   "adj_pct": -11.4,
+   "close_pct": -11.4,
+   "class": "etf_limit_rule"
+  },
+  {
+   "code": "00715L",
+   "name": "期街口布蘭特正2",
+   "from": "2026-07-07",
+   "to": "2026-07-08",
+   "trading_days": 1,
+   "adj_pct": 10.7,
+   "close_pct": 10.7,
+   "class": "etf_limit_rule"
+  },
+  {
+   "code": "00715L",
+   "name": "期街口布蘭特正2",
+   "from": "2026-07-13",
+   "to": "2026-07-14",
+   "trading_days": 1,
+   "adj_pct": 11.9,
+   "close_pct": 11.9,
+   "class": "etf_limit_rule"
+  },
+  {
+   "code": "00715L",
+   "name": "期街口布蘭特正2",
+   "from": "2026-07-17",
+   "to": "2026-07-20",
+   "trading_days": 1,
+   "adj_pct": 11.4,
+   "close_pct": 11.4,
+   "class": "etf_limit_rule"
+  },
+  {
+   "code": "00715L",
+   "name": "期街口布蘭特正2",
+   "from": "2026-07-24",
+   "to": "2026-07-27",
+   "trading_days": 1,
+   "adj_pct": -14.1,
+   "close_pct": -14.1,
+   "class": "etf_limit_rule"
+  },
+  {
+   "code": "00715L",
+   "name": "期街口布蘭特正2",
+   "from": "2026-08-04",
+   "to": "2026-08-05",
+   "trading_days": 1,
+   "adj_pct": -14.5,
+   "close_pct": -14.5,
+   "class": "etf_limit_rule"
+  },
+  {
+   "code": "00715L",
+   "name": "期街口布蘭特正2",
+   "from": "2026-08-06",
+   "to": "2026-08-07",
+   "trading_days": 1,
+   "adj_pct": 11.8,
+   "close_pct": 11.8,
+   "class": "etf_limit_rule"
+  },
+  {
+   "code": "00715L",
+   "name": "期街口布蘭特正2",
+   "from": "2026-09-10",
+   "to": "2026-09-11",
+   "trading_days": 1,
+   "adj_pct": 12.1,
+   "close_pct": 12.1,
+   "class": "etf_limit_rule"
+  },
+  {
+   "code": "00715L",
+   "name": "期街口布蘭特正2",
+   "from": "2026-10-01",
+   "to": "2026-10-02",
+   "trading_days": 1,
+   "adj_pct": 11.3,
+   "close_pct": 11.3,
+   "class": "etf_limit_rule"
+  },
+  {
+   "code": "00897",
+   "name": "富邦基因免疫生技",
+   "from": "2026-08-19",
+   "to": "2026-08-20",
+   "trading_days": 1,
+   "adj_pct": 12.7,
+   "close_pct": 12.7,
+   "class": "etf_limit_rule"
+  },
+  {
+   "code": "00988A",
+   "name": "主動統一全球創新",
+   "from": "2026-07-16",
+   "to": "2026-07-17",
+   "trading_days": 1,
+   "adj_pct": -10.8,
+   "close_pct": -10.8,
+   "class": "etf_limit_rule"
+  },
+  {
+   "code": "02001L",
+   "name": "富邦蘋果正二N",
+   "from": "2026-06-25",
+   "to": "2026-06-26",
+   "trading_days": 1,
+   "adj_pct": -11.1,
+   "close_pct": -11.1,
+   "class": "etf_limit_rule"
+  },
+  {
+   "code": "02001L",
+   "name": "富邦蘋果正二N",
+   "from": "2026-06-29",
+   "to": "2026-06-30",
+   "trading_days": 1,
+   "adj_pct": 11.2,
+   "close_pct": 11.2,
+   "class": "etf_limit_rule"
+  },
+  {
+   "code": "02001L",
+   "name": "富邦蘋果正二N",
+   "from": "2026-07-16",
+   "to": "2026-07-17",
+   "trading_days": 1,
+   "adj_pct": -17.0,
+   "close_pct": -17.0,
+   "class": "etf_limit_rule"
+  },
+  {
+   "code": "02001L",
+   "name": "富邦蘋果正二N",
+   "from": "2026-07-20",
+   "to": "2026-07-21",
+   "trading_days": 1,
+   "adj_pct": 11.9,
+   "close_pct": 11.9,
+   "class": "etf_limit_rule"
+  },
+  {
+   "code": "02001L",
+   "name": "富邦蘋果正二N",
+   "from": "2026-07-27",
+   "to": "2026-07-28",
+   "trading_days": 1,
+   "adj_pct": -15.0,
+   "close_pct": -15.0,
+   "class": "etf_limit_rule"
+  },
+  {
+   "code": "02001L",
+   "name": "富邦蘋果正二N",
+   "from": "2026-07-28",
+   "to": "2026-07-29",
+   "trading_days": 1,
+   "adj_pct": -11.4,
+   "close_pct": -11.4,
+   "class": "etf_limit_rule"
+  },
+  {
+   "code": "02001L",
+   "name": "富邦蘋果正二N",
+   "from": "2026-10-14",
+   "to": "2026-10-15",
+   "trading_days": 1,
+   "adj_pct": -13.2,
+   "close_pct": -13.2,
+   "class": "etf_limit_rule"
+  },
+  {
+   "code": "2464",
+   "name": "盟立",
+   "from": "2026-09-01",
+   "to": "2026-09-02",
+   "trading_days": 1,
+   "adj_pct": 10.8,
+   "close_pct": 9.5,
+   "class": "ex_event_adj"
+  },
+  {
+   "code": "6225",
+   "name": "天瀚",
+   "from": "2026-08-17",
+   "to": "2026-08-18",
+   "trading_days": 1,
+   "adj_pct": 62.5,
+   "close_pct": 9.9,
+   "class": "ex_event_adj"
+  },
+  {
+   "code": "6834",
+   "name": "天二科技",
+   "from": "2026-10-01",
+   "to": "2026-10-02",
+   "trading_days": 1,
+   "adj_pct": 13.4,
+   "close_pct": 9.6,
+   "class": "ex_event_adj"
+  },
+  {
+   "code": "00685L",
+   "name": "群益臺灣加權正2",
+   "from": "2026-06-30",
+   "to": "2026-07-07",
+   "trading_days": 5,
+   "adj_pct": -96.0,
+   "close_pct": -96.0,
+   "class": "known_split"
+  },
+  {
+   "code": "6949",
+   "name": "沛爾生醫-創",
+   "from": "2026-08-26",
+   "to": "2026-09-07",
+   "trading_days": 8,
+   "adj_pct": -95.5,
+   "close_pct": -95.5,
+   "class": "known_split"
+  },
+  {
+   "code": "00910",
+   "name": "第一金太空衛星",
+   "from": "2026-06-11",
+   "to": "2026-06-12",
+   "trading_days": 1,
+   "adj_pct": 11.5,
+   "close_pct": 11.5,
+   "class": "listing_first_days"
+  },
+  {
+   "code": "009821",
+   "name": "野村稀土關鍵資源",
+   "from": "2026-06-18",
+   "to": "2026-06-22",
+   "trading_days": 1,
+   "adj_pct": 10.6,
+   "close_pct": 10.6,
+   "class": "listing_first_days"
+  },
+  {
+   "code": "7814",
+   "name": "海昌生技",
+   "from": "2026-07-16",
+   "to": "2026-07-17",
+   "trading_days": 1,
+   "adj_pct": 21.7,
+   "close_pct": 21.7,
+   "class": "listing_first_days"
+  },
+  {
+   "code": "7825",
+   "name": "和亞智慧",
+   "from": "2026-09-11",
+   "to": "2026-09-14",
+   "trading_days": 1,
+   "adj_pct": -14.0,
+   "close_pct": -14.0,
+   "class": "listing_first_days"
+  },
+  {
+   "code": "7825",
+   "name": "和亞智慧",
+   "from": "2026-09-14",
+   "to": "2026-09-15",
+   "trading_days": 1,
+   "adj_pct": -12.3,
+   "close_pct": -12.3,
+   "class": "listing_first_days"
+  },
+  {
+   "code": "00631L",
+   "name": "元大台灣50正2",
+   "from": "2026-07-30",
+   "to": "2026-07-31",
+   "trading_days": 1,
+   "adj_pct": 18.7,
+   "close_pct": 18.7,
+   "class": "market_wide_day"
+  },
+  {
+   "code": "00663L",
+   "name": "國泰臺灣加權正2",
+   "from": "2026-07-30",
+   "to": "2026-07-31",
+   "trading_days": 1,
+   "adj_pct": 18.3,
+   "close_pct": 18.3,
+   "class": "market_wide_day"
+  },
+  {
+   "code": "00675L",
+   "name": "富邦臺灣加權正2",
+   "from": "2026-07-30",
+   "to": "2026-07-31",
+   "trading_days": 1,
+   "adj_pct": 18.3,
+   "close_pct": 18.3,
+   "class": "market_wide_day"
+  },
+  {
+   "code": "00685L",
+   "name": "群益臺灣加權正2",
+   "from": "2026-07-30",
+   "to": "2026-07-31",
+   "trading_days": 1,
+   "adj_pct": 18.2,
+   "close_pct": 18.2,
+   "class": "market_wide_day"
+  },
+  {
+   "code": "00735",
+   "name": "國泰臺韓科技",
+   "from": "2026-07-30",
+   "to": "2026-07-31",
+   "trading_days": 1,
+   "adj_pct": 17.0,
+   "close_pct": 17.0,
+   "class": "market_wide_day"
+  },
+  {
+   "code": "00830",
+   "name": "國泰費城半導體",
+   "from": "2026-07-30",
+   "to": "2026-07-31",
+   "trading_days": 1,
+   "adj_pct": 10.7,
+   "close_pct": 10.7,
+   "class": "market_wide_day"
+  },
+  {
+   "code": "00876",
+   "name": "元大全球5G",
+   "from": "2026-07-30",
+   "to": "2026-07-31",
+   "trading_days": 1,
+   "adj_pct": 10.6,
+   "close_pct": 10.6,
+   "class": "market_wide_day"
+  },
+  {
+   "code": "00911",
+   "name": "兆豐洲際半導體",
+   "from": "2026-07-30",
+   "to": "2026-07-31",
+   "trading_days": 1,
+   "adj_pct": 11.0,
+   "close_pct": 11.0,
+   "class": "market_wide_day"
+  },
+  {
+   "code": "00951",
+   "name": "台新日本半導體",
+   "from": "2026-07-30",
+   "to": "2026-07-31",
+   "trading_days": 1,
+   "adj_pct": 12.4,
+   "close_pct": 12.4,
+   "class": "market_wide_day"
+  },
+  {
+   "code": "00954",
+   "name": "中信日本半導體",
+   "from": "2026-07-30",
+   "to": "2026-07-31",
+   "trading_days": 1,
+   "adj_pct": 12.7,
+   "close_pct": 12.7,
+   "class": "market_wide_day"
+  },
+  {
+   "code": "00988A",
+   "name": "主動統一全球創新",
+   "from": "2026-07-30",
+   "to": "2026-07-31",
+   "trading_days": 1,
+   "adj_pct": 14.8,
+   "close_pct": 14.8,
+   "class": "market_wide_day"
+  },
+  {
+   "code": "00990A",
+   "name": "主動元大AI新經濟",
+   "from": "2026-07-30",
+   "to": "2026-07-31",
+   "trading_days": 1,
+   "adj_pct": 14.0,
+   "close_pct": 14.0,
+   "class": "market_wide_day"
+  },
+  {
+   "code": "02001L",
+   "name": "富邦蘋果正二N",
+   "from": "2026-07-30",
+   "to": "2026-07-31",
+   "trading_days": 1,
+   "adj_pct": 18.3,
+   "close_pct": 18.3,
+   "class": "market_wide_day"
+  },
+  {
+   "code": "020025",
+   "name": "統一亞洲半導體N",
+   "from": "2026-07-30",
+   "to": "2026-07-31",
+   "trading_days": 1,
+   "adj_pct": 17.9,
+   "close_pct": 17.9,
+   "class": "market_wide_day"
+  },
+  {
+   "code": "020000",
+   "name": "富邦特選蘋果N",
+   "from": "2026-07-13",
+   "to": "2026-07-20",
+   "trading_days": 5,
+   "adj_pct": -11.6,
+   "close_pct": -11.6,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "020035",
+   "name": "元大上櫃ESG高息N",
+   "from": "2026-06-10",
+   "to": "2026-07-01",
+   "trading_days": 14,
+   "adj_pct": 15.2,
+   "close_pct": 15.2,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "020035",
+   "name": "元大上櫃ESG高息N",
+   "from": "2026-07-09",
+   "to": "2026-07-30",
+   "trading_days": 15,
+   "adj_pct": -23.8,
+   "close_pct": -23.8,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "020040",
+   "name": "元大上櫃ESG龍頭N",
+   "from": "2026-07-14",
+   "to": "2026-07-31",
+   "trading_days": 13,
+   "adj_pct": -22.7,
+   "close_pct": -22.7,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "020041",
+   "name": "兆豐半導體氣候N",
+   "from": "2026-07-15",
+   "to": "2026-07-17",
+   "trading_days": 2,
+   "adj_pct": -10.8,
+   "close_pct": -10.8,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "2071",
+   "name": "震南鐵",
+   "from": "2026-07-09",
+   "to": "2026-07-13",
+   "trading_days": 2,
+   "adj_pct": 17.3,
+   "close_pct": 17.3,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "2924",
+   "name": "宏太-KY",
+   "from": "2026-07-29",
+   "to": "2026-08-04",
+   "trading_days": 4,
+   "adj_pct": -11.9,
+   "close_pct": -11.9,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "3085",
+   "name": "新零售",
+   "from": "2026-09-30",
+   "to": "2026-10-13",
+   "trading_days": 8,
+   "adj_pct": 33.9,
+   "close_pct": 33.9,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "3152",
+   "name": "璟德",
+   "from": "2026-06-22",
+   "to": "2026-06-30",
+   "trading_days": 6,
+   "adj_pct": 56.0,
+   "close_pct": 56.0,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "3259",
+   "name": "鑫創",
+   "from": "2026-09-02",
+   "to": "2026-09-04",
+   "trading_days": 2,
+   "adj_pct": -11.3,
+   "close_pct": -11.3,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "3710",
+   "name": "連展投控",
+   "from": "2026-09-09",
+   "to": "2026-09-21",
+   "trading_days": 8,
+   "adj_pct": 48.1,
+   "close_pct": 48.1,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "4747",
+   "name": "強生",
+   "from": "2026-08-19",
+   "to": "2026-08-31",
+   "trading_days": 8,
+   "adj_pct": -51.6,
+   "close_pct": -51.6,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "4806",
+   "name": "桂田文創",
+   "from": "2026-09-22",
+   "to": "2026-10-02",
+   "trading_days": 6,
+   "adj_pct": 28.8,
+   "close_pct": 28.8,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "5301",
+   "name": "寶得利",
+   "from": "2026-09-29",
+   "to": "2026-10-07",
+   "trading_days": 6,
+   "adj_pct": 20.2,
+   "close_pct": 20.2,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "6103",
+   "name": "合邦",
+   "from": "2026-07-06",
+   "to": "2026-07-08",
+   "trading_days": 2,
+   "adj_pct": -12.8,
+   "close_pct": -12.8,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "6236",
+   "name": "中湛",
+   "from": "2026-09-01",
+   "to": "2026-09-18",
+   "trading_days": 13,
+   "adj_pct": -16.0,
+   "close_pct": -16.0,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "6241",
+   "name": "鑫永洋",
+   "from": "2026-08-17",
+   "to": "2026-08-25",
+   "trading_days": 6,
+   "adj_pct": 23.8,
+   "close_pct": 23.8,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "6461",
+   "name": "益得",
+   "from": "2026-09-01",
+   "to": "2026-09-09",
+   "trading_days": 6,
+   "adj_pct": 54.7,
+   "close_pct": 54.7,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "6762",
+   "name": "達亞",
+   "from": "2026-07-03",
+   "to": "2026-07-07",
+   "trading_days": 2,
+   "adj_pct": -10.7,
+   "close_pct": -10.7,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "7610",
+   "name": "聯友金屬-創",
+   "from": "2026-07-09",
+   "to": "2026-07-13",
+   "trading_days": 2,
+   "adj_pct": 11.2,
+   "close_pct": -8.5,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "7785",
+   "name": "北祥科服",
+   "from": "2026-06-04",
+   "to": "2026-06-08",
+   "trading_days": 2,
+   "adj_pct": 29.8,
+   "close_pct": 29.8,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "7785",
+   "name": "北祥科服",
+   "from": "2026-07-08",
+   "to": "2026-07-13",
+   "trading_days": 3,
+   "adj_pct": 18.9,
+   "close_pct": 18.9,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "8059",
+   "name": "凱碩",
+   "from": "2026-09-09",
+   "to": "2026-09-21",
+   "trading_days": 8,
+   "adj_pct": 50.4,
+   "close_pct": 50.4,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "8277",
+   "name": "商丞",
+   "from": "2026-09-09",
+   "to": "2026-09-21",
+   "trading_days": 8,
+   "adj_pct": 109.3,
+   "close_pct": 109.3,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "8444",
+   "name": "綠河-KY",
+   "from": "2026-09-30",
+   "to": "2026-10-07",
+   "trading_days": 5,
+   "adj_pct": -14.3,
+   "close_pct": -14.3,
+   "class": "multi_day_gap"
+  },
+  {
+   "code": "1343",
+   "name": "旭東環保",
+   "from": "2026-06-22",
+   "to": "2026-06-23",
+   "trading_days": 1,
+   "adj_pct": 17.4,
+   "close_pct": 17.4,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "1343",
+   "name": "旭東環保",
+   "from": "2026-06-23",
+   "to": "2026-06-24",
+   "trading_days": 1,
+   "adj_pct": 16.6,
+   "close_pct": 16.6,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "1343",
+   "name": "旭東環保",
+   "from": "2026-07-31",
+   "to": "2026-08-03",
+   "trading_days": 1,
+   "adj_pct": 14.5,
+   "close_pct": 14.5,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "2071",
+   "name": "震南鐵",
+   "from": "2026-06-17",
+   "to": "2026-06-18",
+   "trading_days": 1,
+   "adj_pct": 15.1,
+   "close_pct": 15.1,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "2071",
+   "name": "震南鐵",
+   "from": "2026-07-07",
+   "to": "2026-07-08",
+   "trading_days": 1,
+   "adj_pct": 12.1,
+   "close_pct": 12.1,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "2071",
+   "name": "震南鐵",
+   "from": "2026-07-15",
+   "to": "2026-07-16",
+   "trading_days": 1,
+   "adj_pct": -16.9,
+   "close_pct": -16.9,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "2071",
+   "name": "震南鐵",
+   "from": "2026-07-16",
+   "to": "2026-07-17",
+   "trading_days": 1,
+   "adj_pct": 17.1,
+   "close_pct": 17.1,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "2071",
+   "name": "震南鐵",
+   "from": "2026-07-17",
+   "to": "2026-07-20",
+   "trading_days": 1,
+   "adj_pct": -12.9,
+   "close_pct": -12.9,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "2245",
+   "name": "詠勝昌*",
+   "from": "2026-06-01",
+   "to": "2026-06-02",
+   "trading_days": 1,
+   "adj_pct": -10.5,
+   "close_pct": -10.5,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "2249",
+   "name": "湧盛",
+   "from": "2026-08-18",
+   "to": "2026-08-19",
+   "trading_days": 1,
+   "adj_pct": 10.8,
+   "close_pct": 10.8,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "2760",
+   "name": "巨宇翔",
+   "from": "2026-06-30",
+   "to": "2026-07-01",
+   "trading_days": 1,
+   "adj_pct": -15.0,
+   "close_pct": -15.0,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "4115",
+   "name": "善德生技",
+   "from": "2026-09-04",
+   "to": "2026-09-07",
+   "trading_days": 1,
+   "adj_pct": 14.0,
+   "close_pct": 14.0,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "4980",
+   "name": "佐臻",
+   "from": "2026-06-16",
+   "to": "2026-06-17",
+   "trading_days": 1,
+   "adj_pct": 23.1,
+   "close_pct": 23.1,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6027",
+   "name": "德信",
+   "from": "2026-07-20",
+   "to": "2026-07-21",
+   "trading_days": 1,
+   "adj_pct": 11.1,
+   "close_pct": 11.1,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6559",
+   "name": "研晶",
+   "from": "2026-06-10",
+   "to": "2026-06-11",
+   "trading_days": 1,
+   "adj_pct": -11.3,
+   "close_pct": -11.3,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6559",
+   "name": "研晶",
+   "from": "2026-07-17",
+   "to": "2026-07-20",
+   "trading_days": 1,
+   "adj_pct": -10.7,
+   "close_pct": -10.7,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6559",
+   "name": "研晶",
+   "from": "2026-08-03",
+   "to": "2026-08-04",
+   "trading_days": 1,
+   "adj_pct": 14.5,
+   "close_pct": 14.5,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6559",
+   "name": "研晶",
+   "from": "2026-08-28",
+   "to": "2026-08-31",
+   "trading_days": 1,
+   "adj_pct": 12.0,
+   "close_pct": 12.0,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6583",
+   "name": "友松",
+   "from": "2026-06-29",
+   "to": "2026-06-30",
+   "trading_days": 1,
+   "adj_pct": 11.5,
+   "close_pct": 11.5,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6673",
+   "name": "和詮",
+   "from": "2026-06-02",
+   "to": "2026-06-03",
+   "trading_days": 1,
+   "adj_pct": 21.1,
+   "close_pct": 21.1,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6673",
+   "name": "和詮",
+   "from": "2026-06-17",
+   "to": "2026-06-18",
+   "trading_days": 1,
+   "adj_pct": 20.2,
+   "close_pct": 20.2,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6673",
+   "name": "和詮",
+   "from": "2026-06-18",
+   "to": "2026-06-22",
+   "trading_days": 1,
+   "adj_pct": 31.3,
+   "close_pct": 31.3,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6673",
+   "name": "和詮",
+   "from": "2026-06-23",
+   "to": "2026-06-24",
+   "trading_days": 1,
+   "adj_pct": -11.9,
+   "close_pct": -11.9,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6673",
+   "name": "和詮",
+   "from": "2026-07-27",
+   "to": "2026-07-28",
+   "trading_days": 1,
+   "adj_pct": -10.8,
+   "close_pct": -10.8,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6673",
+   "name": "和詮",
+   "from": "2026-07-28",
+   "to": "2026-07-29",
+   "trading_days": 1,
+   "adj_pct": -10.9,
+   "close_pct": -10.9,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6673",
+   "name": "和詮",
+   "from": "2026-07-30",
+   "to": "2026-07-31",
+   "trading_days": 1,
+   "adj_pct": 17.4,
+   "close_pct": 17.4,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6673",
+   "name": "和詮",
+   "from": "2026-08-03",
+   "to": "2026-08-04",
+   "trading_days": 1,
+   "adj_pct": 25.0,
+   "close_pct": 25.0,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6673",
+   "name": "和詮",
+   "from": "2026-09-08",
+   "to": "2026-09-09",
+   "trading_days": 1,
+   "adj_pct": 20.7,
+   "close_pct": 20.7,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6696",
+   "name": "仁新",
+   "from": "2026-07-02",
+   "to": "2026-07-03",
+   "trading_days": 1,
+   "adj_pct": 12.9,
+   "close_pct": 12.9,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6696",
+   "name": "仁新",
+   "from": "2026-07-06",
+   "to": "2026-07-07",
+   "trading_days": 1,
+   "adj_pct": 17.9,
+   "close_pct": 17.9,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6696",
+   "name": "仁新",
+   "from": "2026-07-07",
+   "to": "2026-07-08",
+   "trading_days": 1,
+   "adj_pct": 13.9,
+   "close_pct": 13.9,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6696",
+   "name": "仁新",
+   "from": "2026-07-14",
+   "to": "2026-07-15",
+   "trading_days": 1,
+   "adj_pct": 14.6,
+   "close_pct": 14.6,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6696",
+   "name": "仁新",
+   "from": "2026-07-30",
+   "to": "2026-07-31",
+   "trading_days": 1,
+   "adj_pct": 24.7,
+   "close_pct": 24.7,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6696",
+   "name": "仁新",
+   "from": "2026-08-10",
+   "to": "2026-08-11",
+   "trading_days": 1,
+   "adj_pct": 13.9,
+   "close_pct": 13.9,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6696",
+   "name": "仁新",
+   "from": "2026-09-01",
+   "to": "2026-09-02",
+   "trading_days": 1,
+   "adj_pct": 11.3,
+   "close_pct": 11.3,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6696",
+   "name": "仁新",
+   "from": "2026-09-02",
+   "to": "2026-09-03",
+   "trading_days": 1,
+   "adj_pct": 22.2,
+   "close_pct": 22.2,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6696",
+   "name": "仁新",
+   "from": "2026-09-03",
+   "to": "2026-09-04",
+   "trading_days": 1,
+   "adj_pct": 23.3,
+   "close_pct": 23.3,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6696",
+   "name": "仁新",
+   "from": "2026-09-04",
+   "to": "2026-09-07",
+   "trading_days": 1,
+   "adj_pct": 19.9,
+   "close_pct": 19.9,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6696",
+   "name": "仁新",
+   "from": "2026-09-21",
+   "to": "2026-09-22",
+   "trading_days": 1,
+   "adj_pct": 17.6,
+   "close_pct": 17.6,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6808",
+   "name": "三鼎生技",
+   "from": "2026-06-24",
+   "to": "2026-06-25",
+   "trading_days": 1,
+   "adj_pct": 24.3,
+   "close_pct": 24.3,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6808",
+   "name": "三鼎生技",
+   "from": "2026-07-08",
+   "to": "2026-07-09",
+   "trading_days": 1,
+   "adj_pct": 17.5,
+   "close_pct": 17.5,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6898",
+   "name": "程曦資訊",
+   "from": "2026-06-12",
+   "to": "2026-06-15",
+   "trading_days": 1,
+   "adj_pct": 13.4,
+   "close_pct": 13.4,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6977",
+   "name": "聯純",
+   "from": "2026-07-30",
+   "to": "2026-07-31",
+   "trading_days": 1,
+   "adj_pct": 12.6,
+   "close_pct": 12.6,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "6977",
+   "name": "聯純",
+   "from": "2026-08-21",
+   "to": "2026-08-24",
+   "trading_days": 1,
+   "adj_pct": -14.2,
+   "close_pct": -14.2,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7516",
+   "name": "清淨海",
+   "from": "2026-06-17",
+   "to": "2026-06-18",
+   "trading_days": 1,
+   "adj_pct": 12.8,
+   "close_pct": 12.8,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7706",
+   "name": "宏碁創達",
+   "from": "2026-06-23",
+   "to": "2026-06-24",
+   "trading_days": 1,
+   "adj_pct": 11.7,
+   "close_pct": 11.7,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7785",
+   "name": "北祥科服",
+   "from": "2026-06-17",
+   "to": "2026-06-18",
+   "trading_days": 1,
+   "adj_pct": -13.9,
+   "close_pct": -13.9,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7785",
+   "name": "北祥科服",
+   "from": "2026-06-24",
+   "to": "2026-06-25",
+   "trading_days": 1,
+   "adj_pct": 26.0,
+   "close_pct": 26.0,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7785",
+   "name": "北祥科服",
+   "from": "2026-06-25",
+   "to": "2026-06-26",
+   "trading_days": 1,
+   "adj_pct": -19.2,
+   "close_pct": -19.2,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7785",
+   "name": "北祥科服",
+   "from": "2026-07-13",
+   "to": "2026-07-14",
+   "trading_days": 1,
+   "adj_pct": 12.4,
+   "close_pct": 12.4,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7785",
+   "name": "北祥科服",
+   "from": "2026-07-14",
+   "to": "2026-07-15",
+   "trading_days": 1,
+   "adj_pct": -18.2,
+   "close_pct": -18.2,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7785",
+   "name": "北祥科服",
+   "from": "2026-09-14",
+   "to": "2026-09-15",
+   "trading_days": 1,
+   "adj_pct": 14.0,
+   "close_pct": 14.0,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7797",
+   "name": "Q Burger",
+   "from": "2026-06-02",
+   "to": "2026-06-03",
+   "trading_days": 1,
+   "adj_pct": 14.4,
+   "close_pct": 14.4,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7797",
+   "name": "Q Burger",
+   "from": "2026-07-27",
+   "to": "2026-07-28",
+   "trading_days": 1,
+   "adj_pct": 16.8,
+   "close_pct": 16.8,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7843",
+   "name": "英柏得",
+   "from": "2026-07-03",
+   "to": "2026-07-06",
+   "trading_days": 1,
+   "adj_pct": 14.4,
+   "close_pct": 14.4,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7843",
+   "name": "英柏得",
+   "from": "2026-07-30",
+   "to": "2026-07-31",
+   "trading_days": 1,
+   "adj_pct": 14.0,
+   "close_pct": 14.0,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7843",
+   "name": "英柏得",
+   "from": "2026-08-10",
+   "to": "2026-08-11",
+   "trading_days": 1,
+   "adj_pct": -10.8,
+   "close_pct": -10.8,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7894",
+   "name": "瀚軒",
+   "from": "2026-07-01",
+   "to": "2026-07-02",
+   "trading_days": 1,
+   "adj_pct": 18.5,
+   "close_pct": 18.5,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7894",
+   "name": "瀚軒",
+   "from": "2026-07-02",
+   "to": "2026-07-03",
+   "trading_days": 1,
+   "adj_pct": 16.0,
+   "close_pct": 16.0,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7894",
+   "name": "瀚軒",
+   "from": "2026-07-07",
+   "to": "2026-07-08",
+   "trading_days": 1,
+   "adj_pct": -11.6,
+   "close_pct": -11.6,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7894",
+   "name": "瀚軒",
+   "from": "2026-07-13",
+   "to": "2026-07-14",
+   "trading_days": 1,
+   "adj_pct": -11.1,
+   "close_pct": -11.1,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7894",
+   "name": "瀚軒",
+   "from": "2026-07-27",
+   "to": "2026-07-28",
+   "trading_days": 1,
+   "adj_pct": -11.4,
+   "close_pct": -11.4,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7894",
+   "name": "瀚軒",
+   "from": "2026-07-30",
+   "to": "2026-07-31",
+   "trading_days": 1,
+   "adj_pct": 13.7,
+   "close_pct": 13.7,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7894",
+   "name": "瀚軒",
+   "from": "2026-08-07",
+   "to": "2026-08-10",
+   "trading_days": 1,
+   "adj_pct": 14.9,
+   "close_pct": 14.9,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7894",
+   "name": "瀚軒",
+   "from": "2026-08-26",
+   "to": "2026-08-27",
+   "trading_days": 1,
+   "adj_pct": 22.7,
+   "close_pct": 22.7,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7924",
+   "name": "TLC-KY",
+   "from": "2026-07-02",
+   "to": "2026-07-03",
+   "trading_days": 1,
+   "adj_pct": 48.5,
+   "close_pct": 48.5,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7924",
+   "name": "TLC-KY",
+   "from": "2026-07-30",
+   "to": "2026-07-31",
+   "trading_days": 1,
+   "adj_pct": 12.7,
+   "close_pct": 12.7,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7924",
+   "name": "TLC-KY",
+   "from": "2026-08-14",
+   "to": "2026-08-17",
+   "trading_days": 1,
+   "adj_pct": 15.0,
+   "close_pct": 15.0,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7924",
+   "name": "TLC-KY",
+   "from": "2026-09-09",
+   "to": "2026-09-10",
+   "trading_days": 1,
+   "adj_pct": 12.1,
+   "close_pct": 12.1,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7924",
+   "name": "TLC-KY",
+   "from": "2026-09-16",
+   "to": "2026-09-17",
+   "trading_days": 1,
+   "adj_pct": 16.5,
+   "close_pct": 16.5,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7924",
+   "name": "TLC-KY",
+   "from": "2026-09-21",
+   "to": "2026-09-22",
+   "trading_days": 1,
+   "adj_pct": 14.2,
+   "close_pct": 14.2,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7924",
+   "name": "TLC-KY",
+   "from": "2026-09-22",
+   "to": "2026-09-23",
+   "trading_days": 1,
+   "adj_pct": 20.7,
+   "close_pct": 20.7,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7930",
+   "name": "威世波",
+   "from": "2026-07-16",
+   "to": "2026-07-17",
+   "trading_days": 1,
+   "adj_pct": -14.2,
+   "close_pct": -14.2,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7930",
+   "name": "威世波",
+   "from": "2026-07-17",
+   "to": "2026-07-20",
+   "trading_days": 1,
+   "adj_pct": -15.8,
+   "close_pct": -15.8,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7930",
+   "name": "威世波",
+   "from": "2026-07-21",
+   "to": "2026-07-22",
+   "trading_days": 1,
+   "adj_pct": 23.6,
+   "close_pct": 23.6,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7930",
+   "name": "威世波",
+   "from": "2026-07-27",
+   "to": "2026-07-28",
+   "trading_days": 1,
+   "adj_pct": -12.0,
+   "close_pct": -12.0,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7930",
+   "name": "威世波",
+   "from": "2026-07-28",
+   "to": "2026-07-29",
+   "trading_days": 1,
+   "adj_pct": -15.3,
+   "close_pct": -15.3,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7930",
+   "name": "威世波",
+   "from": "2026-07-29",
+   "to": "2026-07-30",
+   "trading_days": 1,
+   "adj_pct": -15.2,
+   "close_pct": -15.2,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7930",
+   "name": "威世波",
+   "from": "2026-07-30",
+   "to": "2026-07-31",
+   "trading_days": 1,
+   "adj_pct": 19.5,
+   "close_pct": 19.5,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7930",
+   "name": "威世波",
+   "from": "2026-08-03",
+   "to": "2026-08-04",
+   "trading_days": 1,
+   "adj_pct": 25.0,
+   "close_pct": 25.0,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7930",
+   "name": "威世波",
+   "from": "2026-08-04",
+   "to": "2026-08-05",
+   "trading_days": 1,
+   "adj_pct": 19.6,
+   "close_pct": 19.6,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7930",
+   "name": "威世波",
+   "from": "2026-08-12",
+   "to": "2026-08-13",
+   "trading_days": 1,
+   "adj_pct": 20.1,
+   "close_pct": 20.1,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7930",
+   "name": "威世波",
+   "from": "2026-08-25",
+   "to": "2026-08-26",
+   "trading_days": 1,
+   "adj_pct": 19.7,
+   "close_pct": 19.7,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7930",
+   "name": "威世波",
+   "from": "2026-08-26",
+   "to": "2026-08-27",
+   "trading_days": 1,
+   "adj_pct": 18.5,
+   "close_pct": 18.5,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7930",
+   "name": "威世波",
+   "from": "2026-08-28",
+   "to": "2026-08-31",
+   "trading_days": 1,
+   "adj_pct": 27.2,
+   "close_pct": 27.2,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7930",
+   "name": "威世波",
+   "from": "2026-09-08",
+   "to": "2026-09-09",
+   "trading_days": 1,
+   "adj_pct": 14.0,
+   "close_pct": 14.0,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7930",
+   "name": "威世波",
+   "from": "2026-09-09",
+   "to": "2026-09-10",
+   "trading_days": 1,
+   "adj_pct": -11.4,
+   "close_pct": -11.4,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7930",
+   "name": "威世波",
+   "from": "2026-09-17",
+   "to": "2026-09-18",
+   "trading_days": 1,
+   "adj_pct": 17.8,
+   "close_pct": 17.8,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7939",
+   "name": "技宸",
+   "from": "2026-07-27",
+   "to": "2026-07-28",
+   "trading_days": 1,
+   "adj_pct": -15.5,
+   "close_pct": -15.5,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7939",
+   "name": "技宸",
+   "from": "2026-09-04",
+   "to": "2026-09-07",
+   "trading_days": 1,
+   "adj_pct": 11.0,
+   "close_pct": 11.0,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7945",
+   "name": "廣盛科技",
+   "from": "2026-08-21",
+   "to": "2026-08-24",
+   "trading_days": 1,
+   "adj_pct": -11.5,
+   "close_pct": -11.5,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "7945",
+   "name": "廣盛科技",
+   "from": "2026-09-22",
+   "to": "2026-09-23",
+   "trading_days": 1,
+   "adj_pct": 12.9,
+   "close_pct": 12.9,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "8298",
+   "name": "威睿",
+   "from": "2026-06-04",
+   "to": "2026-06-05",
+   "trading_days": 1,
+   "adj_pct": 12.4,
+   "close_pct": 12.4,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "8345",
+   "name": "超秦",
+   "from": "2026-06-16",
+   "to": "2026-06-17",
+   "trading_days": 1,
+   "adj_pct": -13.6,
+   "close_pct": -13.6,
+   "class": "no_limit_board"
+  },
+  {
+   "code": "5904",
+   "name": "寶雅*",
+   "from": "2026-07-29",
+   "to": "2026-08-10",
+   "trading_days": 8,
+   "adj_pct": -89.0,
+   "close_pct": -89.0,
+   "class": "suspected_split"
+  },
+  {
+   "code": "6696",
+   "name": "仁新",
+   "from": "2026-08-19",
+   "to": "2026-08-31",
+   "trading_days": 8,
+   "adj_pct": -89.8,
+   "close_pct": -89.8,
+   "class": "suspected_split"
+  },
+  {
+   "code": "2237",
+   "name": "華德動能-創",
+   "from": "2026-08-07",
+   "to": "2026-08-10",
+   "trading_days": 1,
+   "adj_pct": -13.3,
+   "close_pct": -13.3,
+   "class": "unexplained"
+  },
+  {
+   "code": "2938",
+   "name": "床的世界",
+   "from": "2026-06-22",
+   "to": "2026-06-23",
+   "trading_days": 1,
+   "adj_pct": 16.2,
+   "close_pct": 16.2,
+   "class": "unexplained"
+  },
+  {
+   "code": "2938",
+   "name": "床的世界",
+   "from": "2026-09-15",
+   "to": "2026-09-16",
+   "trading_days": 1,
+   "adj_pct": -11.2,
+   "close_pct": -11.2,
+   "class": "unexplained"
+  },
+  {
+   "code": "6986",
+   "name": "和迅",
+   "from": "2026-06-25",
+   "to": "2026-06-26",
+   "trading_days": 1,
+   "adj_pct": -11.9,
+   "close_pct": -11.9,
+   "class": "unexplained"
+  }
+ ]
+}

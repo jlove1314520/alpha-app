@@ -955,6 +955,11 @@ def merge_reductions(ledger: dict, items: list[dict], today_iso: str) -> int:
 SPLITS = [
     {"code": "00631L", "effective": "2026-03-31", "ratio": 22.0,
      "evidence": "TWSE STOCK_DAY 2026-03-24 收 443.15／2026-03-31 收 19.26；Yahoo 已還原 03-24＝20.143181；443.15÷20.143181＝22.000"},
+    # 先.一〇三-10b（2026-10-16）：官方恢復買賣參考價表查證
+    {"code": "00685L", "effective": "2026-07-07", "ratio": 24.0,
+     "evidence": "TWSE rwd/zh/split/TWTCAU 115/07/07 分割：停止買賣前收盤 306.00、恢復買賣參考價 12.75；306÷12.75＝24.000"},
+    {"code": "6949", "effective": "2026-09-07", "ratio": 20.0,
+     "evidence": "TWSE rwd/zh/change/TWTB8U 115/09/07 變更面額：停止買賣前收盤 1,490.00、恢復買賣參考價 74.50；1490÷74.5＝20.000"},
 ]
 
 
