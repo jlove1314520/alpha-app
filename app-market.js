@@ -92,7 +92,8 @@
     if(q&&q.last!=null){
       return {srcLabel:liveIdx.market_status==='closed'?'永豐 今日收盤':'永豐 即時',item:{close:q.last,change_pct:q.change_pct,sparkline:twCache.tpex&&twCache.tpex.sparkline}};
     }
-    return {srcLabel:'櫃買 '+twCloseDateLabel(twCache),item:twCache.tpex&&{close:twCache.tpex.close,change_pct:twCache.tpex.change_pct,sparkline:twCache.tpex.sparkline}};
+    // 先.一〇四-6：落後與否看櫃買自己的資料日（不再沿用整份檔的 stale_note）
+    return {srcLabel:'櫃買 '+twCloseDateLabel(twCache),item:twCache.tpex&&{close:twCache.tpex.close,change_pct:twCache.tpex.change_pct,sparkline:twCache.tpex.sparkline,stale_tag:staleTag(twCache.tpex.date,'tw')}};
   }
   async function loadMarketIndex(){
     const el=document.getElementById('idx-rows');if(!el)return;
@@ -107,6 +108,7 @@
     // 把它傳進去，櫃買指數那條走勢線注定永久畫不出來。改成把sparkline也一併帶進去。
     const liveIdx=await getLiveIndices();
     const tpexSrc=tpexRowSource(tw,liveIdx);
+    if(taiexSrc.item&&!(taiexSrc.srcLabel||'').startsWith('Shioaji'))taiexSrc.item=Object.assign({},taiexSrc.item,{stale_tag:staleTag(taiexSrc.item.data_date||tw.data_date,'tw')});  // 先.一〇四-6
     el.innerHTML=idxRowHtml('加權指數',taiexSrc.srcLabel,taiexSrc.item)+idxRowHtml('櫃買指數',tpexSrc.srcLabel,tpexSrc.item);
     // 2026-09-04四修.二：時間戳跟著實際來源走——即時就寫即時時間，退回盤後就明標收盤日
     if(liveIdx&&liveIdx.tpex)document.getElementById('idx-datatime').textContent=`Shioaji 即時（${liveIdx.generated_at?fmtTzHHMM(new Date(liveIdx.generated_at),'Asia/Taipei'):'—'}）· 走勢線為近20日收盤`;
@@ -114,11 +116,13 @@
   }
   function futRowHtml(label,fut,srcLabel){
     if(!fut||fut.last==null)return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>TAIFEX</span></div><div class="px"><b>—</b><span>查無資料</span></div></div>`;
-    const cls=fut.change_pct>=0?'pos':'neg';
+    // 先.一〇四-6：盤後資料（非即時）資料日落後台股最後交易日 → 整列灰、不上紅綠、標 MM/DD
+    const stale=srcLabel?'':staleTag(fut.data_date||fut.date,'tw');
+    const cls=stale?'':(fut.change_pct>=0?'pos':'neg');
     const cm=fut.contract_month?`${fut.contract_month.slice(0,4)}/${fut.contract_month.slice(4,6)}`:'';
     const srcHtml=srcLabel||`期交所${cm?` · ${cm} 近月`:''}`;
     const sp=rowSparkline('TXF_NEAR',null,(fut.change_pct||0)>=0).html;  // 2026-09-04四修.三：即時時畫台指期當日1分K
-    return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcHtml}</span></div>${sp}<div class="px"><b class="num">${nf(fut.last)}</b><span class="num ${cls}">${fut.change_pct>=0?'+':''}${(fut.change_pct||0).toFixed(2)}%</span></div></div>`;
+    return `<div class="row${stale?' is-stale':''}" style="cursor:default"><div class="nm"><b>${label}${stale?` <span class="stale-tag">${stale}</span>`:''}</b><span>${srcHtml}</span></div>${sp}<div class="px"><b class="num">${nf(fut.last)}</b><span class="num ${cls}">${fut.change_pct>=0?'+':''}${(fut.change_pct||0).toFixed(2)}%</span></div></div>`;
   }
   function hexMix(c1,c2,t){
     const p=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
@@ -365,7 +369,7 @@
     let html='';
     try{html+='<div style="font-weight:600;margin-bottom:2px">盤勢解讀</div>'+_briefLines(buildMarketReadLines({mkt:MARKET_TW_CACHE,margin:mR.status==='fulfilled'?mR.value:null}))}
     catch(e){console.warn('[loadMarketBrief:read]',e);recordGlobalError('loadMarketBrief:read',e);html+='<div>盤勢解讀計算失敗（'+_autoEsc(e&&e.message||e)+'）</div>'}
-    if(dR.status==='fulfilled'){const d=dR.value;html+='<div style="font-weight:600;margin:6px 0 2px">盤前資訊</div>'+_briefLines(d.premarket&&d.premarket.lines)+_briefFoot(d)}
+    if(dR.status==='fulfilled'){const d=dR.value;html+='<div style="font-weight:600;margin:6px 0 2px">盤前資訊</div>'+_briefLines(d.premarket&&d.premarket.lines,d.premarket&&d.premarket.line_dates,d.premarket&&d.premarket.line_markets)+_briefFoot(d)}
     else{console.warn('[loadMarketBrief]',dR.reason);recordGlobalError('loadMarketBrief',dR.reason);html+='<div>讀取盤前資訊失敗（'+_autoEsc(dR.reason&&dR.reason.message||dR.reason)+'）</div><div style="margin-top:6px;font-size:10px;color:var(--ink-4)">規則摘要，非 AI 判斷、非投資建議</div>'}
     el.innerHTML=html;
   }

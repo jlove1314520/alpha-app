@@ -900,6 +900,25 @@
   const FAST_POLL_INTERVAL_MS=15000;
   let PREV_QUOTE_PRICES={}; // code/指數label -> 上一次輪詢看到的價格，判斷要不要閃爍用，非權威資料
   function _ymd(z){return `${z.y}-${String(z.m).padStart(2,'0')}-${String(z.d).padStart(2,'0')}`}
+  // 先.一〇四-6（2026-10-16）：資料日 ≠ 該市場最後交易日 → 整列灰、旁標 MM/DD、漲跌不上紅綠。
+  // 最後交易日＝今天是交易日且已過收盤資料落地時刻（台股 18:00／美股 16:30 當地）就是今天，否則往前找最近的交易日。
+  function lastTradingDay(mkt){
+    try{
+      const tz=mkt==='us'?'America/New_York':'Asia/Taipei',hol=mkt==='us'?US_HOLIDAYS:TW_HOLIDAYS,cut=mkt==='us'?16*60+30:18*60;
+      const now=new Date(),z=_zonedParts(now,tz);
+      let d=new Date(Date.UTC(z.y,z.m-1,z.d,12));
+      const isTd=x=>{const wd=x.getUTCDay();if(wd===0||wd===6)return false;return !hol.has(x.toISOString().slice(0,10))};
+      if(!(isTd(d)&&z.h*60+z.mi>=cut)){do{d=new Date(d.getTime()-86400000)}while(!isTd(d))}
+      return d.toISOString().slice(0,10);
+    }catch(e){console.warn('[lastTradingDay]',e);return null}
+  }
+  function _normYmd(v){const t=String(v||'');return /^\d{8}$/.test(t)?`${t.slice(0,4)}-${t.slice(4,6)}-${t.slice(6,8)}`:(/^\d{4}-\d{2}-\d{2}/.test(t)?t.slice(0,10):null)}
+  // 回傳 'MM/DD'（落後時）或 ''（不落後／不知道日期——不知道就不亂標）
+  function staleTag(dateLike,mkt){
+    const d=_normYmd(dateLike),exp=lastTradingDay(mkt);
+    if(!d||!exp||d>=exp)return '';
+    return d.slice(5,7)+'/'+d.slice(8,10);
+  }
   function isTradingDay(dateObj,tz,holidays){
     const z=_zonedParts(dateObj,tz);
     if(z.wd===0||z.wd===6)return false;            // 週末
@@ -2631,7 +2650,9 @@
   function idxRowHtml(label,srcLabel,item,changePctOverride){
     if(!item||item.close==null)return `<div class="row idx-row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel}</span></div>${SPARK_PLACEHOLDER}<div class="px"><b>—</b><span>查無資料</span></div></div>`;
     const pct=changePctOverride!=null?changePctOverride:item.change_pct;
-    const cls=(pct==null)?'':(pct>=0?'pos':'neg');
+    // 先.一〇四-6：item.stale_tag（MM/DD）有值＝資料日落後該市場最後交易日 → 整列灰、漲跌不上紅綠、名稱旁標日期
+    const stale=item.stale_tag||'';
+    const cls=(pct==null||stale)?'':(pct>=0?'pos':'neg');
     const pctTxt=pct==null?'—':`${pct>=0?'+':''}${pct.toFixed(2)}%`;
     // 2026-08-27：近20日收盤序列跟著market_tw.json/market_us.json一起排程抓（見
     // fetch_market_tw.py/fetch_market_us.py），不用另外呼叫FinMind畫這條走勢線。
@@ -2640,11 +2661,13 @@
     // data-flash-code用label（可能含中文/空白，用encodeURIComponent避免破壞屬性值）：
     // 給盤中快速輪詢(fastPollTick())的flashPriceEls()判斷這個指數的價格是否較上次
     // 輪詢變動，見hydrateHome()裡自選股列同樣的用法。
-    return `<div class="row idx-row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel}</span></div>${sp}<div class="px"><b data-flash-code="${encodeURIComponent(label)}" data-flash-value="${item.close}">${nf(item.close)}</b><span class="${cls}">${pctTxt}</span></div></div>`;
+    return `<div class="row idx-row${stale?' is-stale':''}" style="cursor:default"><div class="nm"><b>${label}${stale?` <span class="stale-tag">${stale}</span>`:''}</b><span>${srcLabel}</span></div>${sp}<div class="px"><b data-flash-code="${encodeURIComponent(label)}" data-flash-value="${item.close}">${nf(item.close)}</b><span class="${cls}">${pctTxt}</span></div></div>`;
   }
   // 2026-09-04 P0產品.一：首頁大盤速覽膠囊（跟idxRowHtml同一份資料，不同排版）
   function idxCapsuleHtml(label,srcLabel,item){
     if(!item||item.close==null)return `<div class="idx-cap"><div class="cn">${label}</div><div class="cv" style="color:var(--ink-3)">—</div><div class="cp" style="color:var(--ink-3)">查無資料</div></div>`;
+    // 先.一〇四-6：落後的那顆整顆灰、漲跌不上紅綠、名稱旁標 MM/DD
+    if(item.stale_tag)return _staleCapsuleHtml(label,srcLabel,item);
     const pct=item.change_pct;const cls=pct==null?'':(pct>=0?'pos':'neg');
     const up=(pct==null&&item.sparkline&&item.sparkline.length>=2)?item.sparkline[item.sparkline.length-1]>=item.sparkline[0]:(pct==null?true:pct>=0);
     const spk=rowSparkline(item.liveKey||'',item.sparkline,up);
@@ -2652,6 +2675,12 @@
     const capSvg=spark(live||item.sparkline||[],up);
     const isLive=/Shioaji 即時|IBKR (即時|延遲)|Yahoo 延遲/.test(srcLabel||'');
     return `<div class="idx-cap" title="${(srcLabel||'').replace(/"/g,'')}"><div class="cn"><span class="sdot ${isLive?'g':'gr'}" style="width:6px;height:6px;margin-right:4px"></span>${label}</div><div class="cv ${cls}" data-flash-code="${encodeURIComponent(label)}" data-flash-value="${item.close}">${nf(item.close)}</div><div class="cp ${cls}">${pct==null?'—':`${pct>=0?'+':''}${pct.toFixed(2)}%`}${spk.mode?`<span style="font-size:9px;color:var(--ink-3);font-weight:400;margin-left:4px">${spk.mode==='today'?'今日':'20日'}</span>`:''}</div>${capSvg}</div>`;
+  }
+  function _staleCapsuleHtml(label,srcLabel,item){
+    const pct=item.change_pct;
+    const pctTxt=pct==null?'—':`${pct>=0?'+':''}${(+pct).toFixed(2)}%`;
+    const cv=(+item.close).toLocaleString('zh-TW',{maximumFractionDigits:2});
+    return `<div class="idx-cap is-stale" title="${(srcLabel||'').replace(/"/g,'')}｜資料停在 ${item.stale_tag}"><div class="cn">${label} <span class="stale-tag">${item.stale_tag}</span></div><div class="cv" style="color:var(--ink-3)">${cv}</div><div class="cp" style="color:var(--ink-3)">${pctTxt}</div>${SPARK_PLACEHOLDER}</div>`;
   }
   async function loadUsIndexes(){
     await loadMarketDataFiles();
@@ -2689,7 +2718,8 @@
       const _fbLabel=_ibkrStale
         ?'本機IBKR逾期→Yahoo每日收盤快照'
         :'Yahoo Finance（每日收盤快照）';
-      return {html:idxRowHtml(label,_fbLabel,idx[id]),date:idx[id]&&idx[id].as_of,label,srcLabel:_fbLabel,item:idx[id]};
+      const _it=idx[id]?Object.assign({},idx[id],{stale_tag:staleTag(idx[id].as_of,'us')}):idx[id];  // 先.一〇四-6
+      return {html:idxRowHtml(label,_fbLabel,_it),date:idx[id]&&idx[id].as_of,label,srcLabel:_fbLabel,item:_it};
     });
   }
   // market_tw.json這批盤後資料的「收盤日」標籤：今天→今日收盤（MM-DD）；昨天→昨日收盤（MM-DD）；
@@ -2698,7 +2728,10 @@
     let d=null;
     // 先.八十一-1：優先用加權指數自己的資料日（data_date），落後時尾巴附「大盤資料停在 MM/DD」（stale_note 由排程寫入）
     const dd=twCache&&(twCache.data_date||(twCache.taiex&&twCache.taiex.data_date));
-    const stale=twCache&&twCache.stale_note?`｜⚠ ${twCache.stale_note}`:'';
+    // 先.一〇四-6：stale_note 是整份檔的一句。講「台指期／期貨」的不再掛到大盤／櫃買列（原本櫃買列因此誤掛台指期警語），
+    // 期貨落後改由期貨列自己的資料日標示（staleTag）；講大盤本身落後的（先.八十一-1「大盤資料停在 MM/DD」）照舊附加。
+    const _sn=twCache&&twCache.stale_note?String(twCache.stale_note):'';
+    const stale=_sn&&!/台指期|期貨/.test(_sn)?`｜⚠ ${_sn}`:'';
     if(dd&&/^\d{4}-\d{2}-\d{2}$/.test(dd))d=new Date(`${dd}T14:00:00+08:00`);
     const raw=twCache&&((twCache.tpex&&twCache.tpex.date)||(twCache.taiex&&twCache.taiex.date));
     if(!d&&raw&&/^\d{8}$/.test(raw))d=new Date(`${raw.slice(0,4)}-${raw.slice(4,6)}-${raw.slice(6,8)}T14:00:00+08:00`);
@@ -2742,19 +2775,22 @@
     if(LIVE.configured){mergeLiveKbarsLast();await Promise.allSettled(['TAIEX','TXF_NEAR'].map(getLiveCloses))}  // 2026-09-06實測.二
     const taiexSrc=taiexRowSource(tw),txfSrc=shioajiFutRowSource('TX',tw.tx_futures);
     // 2026-09-04 P0產品.一：首頁改橫向膠囊帶（名稱、點數、%、迷你走勢），一屏約三顆
+    // 先.一〇四-6：即時來源（Shioaji）不標落後；收盤快照用各自的資料日判斷
+    const _twLive=(taiexSrc.srcLabel||'').startsWith('Shioaji');
+    if(taiexSrc.item&&!_twLive)taiexSrc.item=Object.assign({},taiexSrc.item,{stale_tag:staleTag(taiexSrc.item.data_date||tw.data_date,'tw')});
     const capsules=[idxCapsuleHtml('加權指數',taiexSrc.srcLabel,taiexSrc.item)];
     // 先.一〇四-4：今日摘要只放加權／櫃買／台指期／費半（其他美股指數在市場頁）
-    if(tw.tpex&&tw.tpex.close!=null)capsules.push(idxCapsuleHtml('櫃買指數','櫃買中心',tw.tpex));
+    if(tw.tpex&&tw.tpex.close!=null)capsules.push(idxCapsuleHtml('櫃買指數','櫃買中心',Object.assign({},tw.tpex,{stale_tag:staleTag(tw.tpex.date,'tw')})));
     // 先.八十-8：台指期膠囊補近月日線走勢（data/market_tw.json tx_futures.sparkline，近月連續、未做轉倉調整）；連上即時則照舊畫當日 1 分K
-    if(txfSrc.fut&&txfSrc.fut.last!=null)capsules.push(idxCapsuleHtml('台指期近月',txfSrc.srcLabel||'TAIFEX',{close:txfSrc.fut.last,change_pct:txfSrc.fut.change_pct,liveKey:'TXF_NEAR',sparkline:((tw.tx_futures||{}).sparkline||[]).filter(v=>v!=null)}));
+    if(txfSrc.fut&&txfSrc.fut.last!=null)capsules.push(idxCapsuleHtml('台指期近月',txfSrc.srcLabel||'TAIFEX',{stale_tag:txfSrc.srcLabel?'':staleTag(txfSrc.fut.data_date||txfSrc.fut.date,'tw'),close:txfSrc.fut.last,change_pct:txfSrc.fut.change_pct,liveKey:'TXF_NEAR',sparkline:((tw.tx_futures||{}).sparkline||[]).filter(v=>v!=null)}));
     const sox=usIdx.find(r=>r.label==='費城半導體指數');
-    if(sox&&sox.item)capsules.push(idxCapsuleHtml(sox.label,sox.srcLabel,sox.item));
+    if(sox&&sox.item)capsules.push(idxCapsuleHtml(sox.label,sox.srcLabel,/IBKR/.test(sox.srcLabel||'')?sox.item:Object.assign({},sox.item,{stale_tag:staleTag(sox.item.as_of,'us')})));
     el.innerHTML=capsules.join('')||'<div class="note">查無資料</div>';
     _safeSync('homeIdxSentence',()=>{
       const sen=document.getElementById('home-idx-sentence');if(!sen)return;
-      const f=(nm,v)=>v==null||!isFinite(v)?'':`${nm} ${v>=0?'+':''}${(+v).toFixed(2)}%`;
-      const tw1=[f('加權',taiexSrc.item&&taiexSrc.item.change_pct),f('櫃買',tw.tpex&&tw.tpex.change_pct)].filter(Boolean).join('、');
-      const oth=[f('台指期',txfSrc.fut&&txfSrc.fut.change_pct),f('費半',sox&&sox.item&&sox.item.change_pct)].filter(Boolean).join('、');
+      const f=(nm,v,tag)=>v==null||!isFinite(v)?'':`${nm}${tag?'（'+tag+'）':''} ${v>=0?'+':''}${(+v).toFixed(2)}%`;
+      const tw1=[f('加權',taiexSrc.item&&taiexSrc.item.change_pct,taiexSrc.item&&taiexSrc.item.stale_tag),f('櫃買',tw.tpex&&tw.tpex.change_pct,staleTag(tw.tpex&&tw.tpex.date,'tw'))].filter(Boolean).join('、');
+      const oth=[f('台指期',txfSrc.fut&&txfSrc.fut.change_pct,txfSrc.srcLabel?'':staleTag(txfSrc.fut&&(txfSrc.fut.data_date||txfSrc.fut.date),'tw')),f('費半',sox&&sox.item&&sox.item.change_pct,/IBKR/.test((sox&&sox.srcLabel)||'')?'':staleTag(sox&&sox.item&&sox.item.as_of,'us'))].filter(Boolean).join('、');
       const tpct=taiexSrc.item&&taiexSrc.item.change_pct;
       const head=tpct==null?'台股':(tpct>0.05?'台股收漲':(tpct<-0.05?'台股收跌':'台股持平'));
       sen.textContent=tw1?`${head}：${tw1}${oth?'；'+oth:''}。`:(oth?oth+'。':'');
@@ -2791,7 +2827,12 @@
     if(!r.ok)throw new Error('HTTP '+r.status);
     return DAILY_BRIEF_CACHE=await r.json();
   }
-  const _briefLines=ls=>(ls||[]).map(l=>'<div style="padding:2px 0">· '+_autoEsc(uiPlain(l))+'</div>').join('');
+  // 先.一〇四-6：第二、三參數為 daily_brief.json 的 line_dates／line_markets（一一對應），落後的行灰色＋MM/DD
+  const _briefLines=(ls,dates,mkts)=>(ls||[]).map((l,i)=>{
+    const tag=(dates&&mkts&&dates[i]&&mkts[i])?staleTag(dates[i],mkts[i]):'';
+    return tag?`<div class="brief-stale" style="padding:2px 0;color:var(--ink-3)">· ${_autoEsc(uiPlain(l))} <span class="stale-tag">${tag}</span></div>`
+      :'<div style="padding:2px 0">· '+_autoEsc(uiPlain(l))+'</div>';
+  }).join('');
   const _briefFoot=d=>'<div style="margin-top:6px;font-size:10px;color:var(--ink-4)">'+_autoEsc(String(d.disclaimer||'規則摘要，非 AI 判斷').replace(/、?非投資建議/g,''))+(d.data_asof?'；資料日 '+_autoEsc(d.data_asof)+'（最後交易日）':'')+'</div>';
   function _briefWatchLine(d){
     const ev=d.premarket&&d.premarket.events||{},nw=d.premarket&&d.premarket.news||{};
@@ -2805,7 +2846,8 @@
     if(!card||!el)return;
     try{
       const d=await loadDailyBrief();
-      el.innerHTML=_briefLines((d.premarket&&d.premarket.lines||[]).concat([_briefWatchLine(d)]))+_briefFoot(d);
+      const pm=d.premarket||{};
+      el.innerHTML=_briefLines((pm.lines||[]).concat([_briefWatchLine(d)]),pm.line_dates,pm.line_markets)+_briefFoot(d);
       card.hidden=false;
     }catch(e){console.warn('[loadHomeBrief]',e);recordGlobalError('loadHomeBrief',e);card.hidden=true}
   }
@@ -4621,7 +4663,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-16.0107';
+  const APP_VERSION='2026-10-16.0125';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

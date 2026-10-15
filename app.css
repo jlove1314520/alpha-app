@@ -535,3 +535,9 @@ details.ui-more[open]>summary{color:var(--ink-2)}
 #alert-hub-dot{display:inline-block;width:10px;height:10px;border-radius:50%;align-self:center;cursor:pointer;box-shadow:0 0 0 3px color-mix(in srgb,currentColor 0%,transparent)}
 #alert-hub-dot[hidden]{display:none}
 #auto-banner[data-sev="frozen"]{background:color-mix(in srgb,var(--ink-3) 12%,transparent)!important;border-bottom-color:color-mix(in srgb,var(--ink-3) 30%,transparent)!important;color:var(--ink-3)!important;font-weight:500!important}
+
+/* 先.一〇四-6 舊資料：整列灰、漲跌不上色、旁標 MM/DD */
+.stale-tag{display:inline-block;font-size:9.5px;font-weight:600;color:var(--ink-3);border:1px solid var(--hairline);border-radius:5px;padding:0 4px;margin-left:3px;line-height:1.4;vertical-align:1px}
+.idx-cap.is-stale{opacity:.75}
+.idx-cap.is-stale .cn{color:var(--ink-3)}
+.row.is-stale .nm b,.row.is-stale .px b,.row.is-stale .px span{color:var(--ink-3)!important}

@@ -76,7 +76,9 @@ def block_tw():
         "taiex": {"close": tx.get("close"), "change_pct": _pct(tx.get("change_pct")),
                   "as_of": dates[-1] if dates else None},
         "tx_futures": {"contract_month": fut.get("contract_month"), "last": fut.get("last"),
-                       "change_pct": _pct(fut.get("change_pct")), "session": fut.get("trading_session")},
+                       "change_pct": _pct(fut.get("change_pct")), "session": fut.get("trading_session"),
+                       # 先.一〇四-6：台指期自己的資料日（晚班可能落後現貨一天），App 用來把落後的那行變灰
+                       "as_of": fut.get("data_date") or (f"{fut['date'][:4]}-{fut['date'][4:6]}-{fut['date'][6:8]}" if str(fut.get("date") or "").isdigit() and len(str(fut.get("date"))) == 8 else None)},
     }
 
 
@@ -152,16 +154,22 @@ def main():
     us, tw, evs, news = _safe(block_us), _safe(block_tw), _safe(block_events, today), _safe(block_news)
 
     lines = []
+    # 先.一〇四-6：line_dates／line_markets 跟 lines 一一對應（非行情行為 None），App 比對各市場最後交易日決定要不要變灰
+    line_dates: list = []
+    line_markets: list = []
     if "error" not in us and us.get("indices"):
         asof = us["indices"][0].get("as_of")
         lines.append(f"美股（{asof}）：" + "、".join(f"{r['name']} {_sign(r['change_pct'])}" for r in us["indices"]))
+        line_dates.append(asof); line_markets.append("us")
     if "error" not in tw:
         f = tw["tx_futures"]
         if f.get("last") is not None:
             lines.append(f"台指期 {f.get('contract_month')}（{f.get('session') or '—'}盤）{f['last']:,.0f}，{_sign(f.get('change_pct'))}")
+            line_dates.append(f.get("as_of")); line_markets.append("tw")
         t = tw["taiex"]
         if t.get("close") is not None:
             lines.append(f"加權指數前收（{t.get('as_of')}）{t['close']:,.2f}，{_sign(t.get('change_pct'))}")
+            line_dates.append(t.get("as_of")); line_markets.append("tw")
     if "error" not in evs:
         uc = evs["upcoming_counts"]
         lines.append(f"未來 {UPCOMING_DAYS} 天事件：法說會 {uc.get('法說會', 0)} 場、除權息 {uc.get('除權息', 0)} 檔")
@@ -189,7 +197,9 @@ def main():
         "data_asof": ((_load("market_tw.json").get("taiex") or {}).get("sparkline_dates") or [None])[-1],
         "method": "固定規則摘要（不呼叫語言模型、不做市場判斷）；只讀 repo 內既有排程產物，不額外請求外部 API",
         "disclaimer": DISCLAIMER,
-        "premarket": {"lines": lines, "us": us, "tw": tw, "events": evs, "news": news},
+        "premarket": {"lines": lines, "line_dates": line_dates + [None] * (len(lines) - len(line_dates)),
+                      "line_markets": line_markets + [None] * (len(lines) - len(line_markets)),
+                      "us": us, "tw": tw, "events": evs, "news": news},
         "weekly": dict(weekly, lines=wl),
     }
     tmp = OUT.with_suffix(".json.tmp")
