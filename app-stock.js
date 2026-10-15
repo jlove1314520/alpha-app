@@ -502,13 +502,30 @@
     if(last||lc)setTxt('fin-note',`來源：${srcTxt}${last?` · 單季 ${last.year}Q${last.quarter}`:''}${lcTxt}；${fcfNote}`);
     else setTxt('fin-note','查無財報資料（TWSE／TPEx 官方開放資料皆無此代號，可能為興櫃、ETF 或新上市）');
   }
+  // 先.一〇四-8：fundamentals.json 只有近 8 個月；data/revenue_backfill.json（研究室.三 App 顯示用回補，約 260KB）有就合併，
+  // 同月以 fundamentals（官方每日管線）為準。回補檔讀不到只降級成 8 個月（十二節）。
+  let REV_BACKFILL=null,REV_BACKFILL_P=null;
+  function ensureRevBackfill(){
+    if(REV_BACKFILL)return Promise.resolve(REV_BACKFILL);
+    if(!REV_BACKFILL_P)REV_BACKFILL_P=fetch('data/revenue_backfill.json?t='+Math.floor(Date.now()/3600000)).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})
+      .then(d=>{REV_BACKFILL=(d&&d.stocks)||{};return REV_BACKFILL})
+      .catch(e=>{console.warn('[ensureRevBackfill]',e);recordGlobalError('ensureRevBackfill',e);REV_BACKFILL_P=null;return {}});
+    return REV_BACKFILL_P;
+  }
+  function _mergeRevBackfill(rev,bf){
+    if(!Array.isArray(bf)||!bf.length)return rev;
+    const key=r=>r.revenue_year*100+r.revenue_month,have=new Set(rev.map(key));
+    const add=bf.filter(x=>x&&x.revenue!=null).map(x=>({revenue_year:x.year,revenue_month:x.month,revenue:x.revenue,yoyPre:x.yoy!=null?x.yoy*100:null,_src:'backfill'})).filter(r=>!have.has(key(r)));
+    return rev.concat(add).sort((a,b)=>key(a)-key(b));
+  }
   async function loadRevenueChart(code,rev){
     const amtEl=document.getElementById('rev-chart-amt'),yoyEl=document.getElementById('rev-chart-yoy'),lblEl=document.getElementById('rev-chart-labels');
     if(!amtEl)return;
+    try{const bf=await ensureRevBackfill();if(currentCode!==code)return;rev=_mergeRevBackfill(rev||[],bf[code])}catch(e){console.warn('[loadRevenueChart:backfill]',e)}
     if(!rev.length){amtEl.innerHTML='<div class="note">查無月營收</div>';yoyEl.innerHTML='';lblEl.innerHTML='';setTxt('kn-yoy','—');REV_ROWS=[];return}
     // 先.八十一-22：月底股價改 repo 為主——by_code 小檔的 monthly_close（scripts/build_monthly_close.py，往前累積的
     // 市場月底交易日收盤）；這 8 個營收月份有缺的才向 FinMind 要 430 天日線補。
-    const bars=rev.slice(-8);
+    const bars=rev.slice(-13);  // 先.一〇四-8：13 個月（同月去年對照可見）
     const mkey=(y,m)=>`${y}-${String(m).padStart(2,'0')}`;
     const bc=await byCode(code);
     if(currentCode!==code)return;
@@ -532,7 +549,12 @@
       return {...r,mom,yoy,price:priceAt(r.revenue_year,r.revenue_month)};
     });
     const amtVals=REV_ROWS.map(r=>r.revenue/1e8);const amtMax=Math.max(...amtVals)||1;
-    amtEl.innerHTML=REV_ROWS.map((r,i)=>`<div class="rc-bar" data-i="${i}"><i style="height:${Math.max(6,r.revenue/1e8/amtMax*100).toFixed(0)}%"></i></div>`).join('');
+    // 先.一〇四-8：最新一根標金額；左上標本圖最高值當刻度
+    const _yi=v=>v>=100?Math.round(v).toLocaleString('zh-TW'):v.toFixed(1);
+    amtEl.innerHTML=`<span class="rc-ymax">最高 ${_yi(amtMax)} 億</span>`+REV_ROWS.map((r,i)=>{
+      const last=i===REV_ROWS.length-1;
+      return `<div class="rc-bar" data-i="${i}">${last?`<b class="rc-val">${_yi(r.revenue/1e8)}億</b>`:''}<i style="height:${Math.max(6,r.revenue/1e8/amtMax*100).toFixed(0)}%"></i></div>`;
+    }).join('');
     const yoyVals=REV_ROWS.map(r=>r.yoy).filter(v=>v!=null);
     const yoyAbsMax=Math.max(...yoyVals.map(Math.abs),1)||1;
     yoyEl.innerHTML='<div class="rc-zero"></div>'+REV_ROWS.map((r,i)=>{
@@ -540,8 +562,9 @@
       const h=Math.min(50,Math.abs(r.yoy)/yoyAbsMax*50);
       return `<div class="rc-bar" data-i="${i}"><i class="${r.yoy>=0?'up':'dn'}" style="height:${h.toFixed(0)}%"></i></div>`;
     }).join('');
-    lblEl.innerHTML=REV_ROWS.map(r=>`<span>${r.revenue_month}月</span>`).join('');
+    lblEl.innerHTML=REV_ROWS.map(r=>`<span>${String(r.revenue_year).slice(2)}/${String(r.revenue_month).padStart(2,'0')}</span>`).join('');  // 先.一〇四-8：月份帶年份
     const rl=REV_ROWS[REV_ROWS.length-1];
+    setTxt('rev-months-note',REV_ROWS.length>=13?'近 13 個月':`近 ${REV_ROWS.length} 個月（目前只有這些月份的資料，補齊中）`);  // 先.一〇四-8
     const ye=document.getElementById('kn-yoy');ye.textContent=rl.yoy!=null?(rl.yoy>=0?'+':'')+rl.yoy.toFixed(1)+'%':'—';ye.className=rl.yoy>=0?'pos':'neg';
     document.getElementById('rev-note').innerHTML=`${rl.revenue_year}/${rl.revenue_month} 月營收 ${nf(Math.round(rl.revenue/1e8))} 億${rl.yoy!=null?` · YoY <b class="${rl.yoy>=0?'pos':'neg'}">${rl.yoy>=0?'+':''}${rl.yoy.toFixed(1)}%</b>`:''} · research快照<span class="rev-px-src" style="display:block;font-size:10px;color:var(--ink-4)">${pxSrc}</span>`;
   }

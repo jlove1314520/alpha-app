@@ -547,3 +547,10 @@ details.ui-more[open]>summary{color:var(--ink-2)}
 .div-bars .db-val{position:absolute;right:0;font-size:9.5px;font-weight:700;line-height:1.2;white-space:nowrap;font-variant-numeric:tabular-nums;pointer-events:none}
 .div-bars .db-val.neg-v{top:calc(50% - 22px)}
 .div-bars .db-val.pos-v{top:calc(50% + 4px)}
+
+/* 先.一〇四-8 月營收：13 根、最新值與最高值標籤、月份帶年份 */
+.rev-chart-amt{position:relative;gap:2px}
+.rev-chart-yoy,.rev-chart-labels{gap:2px}
+.rev-chart-amt .rc-ymax{position:absolute;left:0;top:-2px;font-size:9px;color:var(--ink-3);pointer-events:none}
+.rev-chart-amt .rc-val{font-size:9px;font-weight:700;color:var(--ink);white-space:nowrap;margin-bottom:2px;font-variant-numeric:tabular-nums}
+.rev-chart-labels span{flex:1;min-width:0;text-align:center;font-size:8.5px;letter-spacing:-.02em;color:var(--ink-3);white-space:nowrap;overflow:hidden}
