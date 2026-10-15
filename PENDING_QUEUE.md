@@ -20193,4 +20193,7 @@ un-market-catchup.ps1 註解同步改心跳路徑（repo 外）。〕
 - [ ] **先.一〇三-1b-1 BFI82U 10/02～10/15 存 market_tw.institutional *_net_amt（億元）；首頁與籌碼總覽合計改億元、張數進「看細節」；個股維持張數**（DevQueue 可執行；請求前對照 C:\alpha\CLAUDE.md 頻率上限，TWSE rwd 同源間隔 ≥3 秒）
 - [ ] **先.一〇三-1b-2 BFI82U 對 T86 ALLBUT0999 逐日三方向正負號比對；自營商 10/13、10/15 前 10 大貢獻個股/ETF 寫 PROGRESS，真的就標「多為 ETF 避險」，bug 就修並重產**（DevQueue 可執行）
 - [ ] **先.一〇三-1b-3 SEC 系列腳本回 403 → 黃色警告＋STATUS 寫「疑似 User-Agent 被擋，請總司令設 ALPHA_UA_CONTACT」**（DevQueue 可執行）
+- [ ] **先.一〇三-14v [自走補入，來源：本檔先.一〇三-14／-17 完成紀錄「data/research*.json 等 market.yml 下一班重產」] market.yml 下一班跑完後驗收：data/research.json meta 有 coverage.with_holders_single_week、holders 有 single_week／gap_days；research_radar.json 名單是「量增創 60 日新高」不再有「帶量突破」；App 變化雷達資料日那行顯示涵蓋檔數；selftest_research 全 PASS。若沒換新→查 market.yml 那一步的 log，修好重跑**（DevQueue 可執行）
+- [ ] **先.一〇三-12v [自走補入，來源：PROGRESS.md 2026-10-16 07:32 段「⚠️ 未驗證：market.yml 尚未實跑」（先.一〇三-10a／10c／12）] 今天 17:13 班 market.yml 跑完後驗收：price_history meta 有 exright_official_backfill、ex_dividend_events.json 出現 source＝TPEx exDailyQ 事件與 reductions 的分割／面額事件、market_us.json 每檔有 intraday 欄位；任一沒有→查 log 修 bug 重跑**（DevQueue 可執行）
+- [!] **先.一〇三-13b [自走補入，來源：先.一〇三-13 完成紀錄] 前台工程術語清單、「原始數字」兩點照全檢報告改** BLOCKED：claude/Alpha_全檢報告_2026-10-15.md 本機找不到（C:\alpha、使用者目錄往下 5 層），解除條件：總司令把報告放到 C:\alpha\claude\（DevQueue 可執行）
 - [x] **先.一〇三-1b-4 PROGRESS_HEARTBEAT ts 一律用寫入當下系統時間**（互動視窗 00:28 起執行；以後所有心跳由程式取 `datetime.now()` 寫入，不手填時間）
