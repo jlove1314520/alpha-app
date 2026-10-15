@@ -1,7 +1,7 @@
 {
   "meta": {
     "backfill_note": "2026-08-27一次性回補：讀research端FinMind歷史parquet快取（TaiwanStockPrice）補上約90個交易日OHLCV歷史，供generate_scores_live.py的technical因子(站上60日均線×20/60日均量比)使用。close為原始收盤價（未還原權息，MA60在除權息當天附近會有跳空失真，是刻意的簡化，見generate_scores_live.py檔頭說明）。2026-08-27新增adj_close（還原權息收盤價，讀本機FinMind TaiwanStockDividend快取算出，跟research/adjust.py同一條TWSE官方公式），供generate_scores_momentum.py的relative_strength因子改用，修正除息跳空被誤判成下跌的P0 bug——之後由update_price_history.py每日排程用TWSE官方TWT48U接續回溯調整新事件。merge-safe，既有較新資料不會被覆蓋。",
-    "generated_at": "2026-10-14T22:34:10.277735+08:00",
+    "generated_at": "2026-10-15T08:10:59.219922+08:00",
     "twse_updated_count": 1369,
     "tpex_updated_count": 989,
     "errors": [],
@@ -11,9 +11,11 @@
     "gap_backfill_note_round2": "2026-08-28 03點場保守測試批次：目標80檔，成功0、失敗56",
     "source": "TWSE STOCK_DAY_ALL（上市）+ TPEx tpex_mainboard_quotes（上櫃）每日累積式寫回；adj_close由TWSE TWT48U除權息事件回溯調整；起始種子=research/build_price_history.py（FinMind快取）",
     "mixed_date_warning": null,
-    "twse_openapi_date": "2026-10-13",
+    "twse_openapi_date": "2026-10-14",
     "twse_gap_filled_dates": [],
-    "twse_no_data_dates": [],
+    "twse_no_data_dates": [
+      "2026-10-15"
+    ],
     "twse_latest_check": {
       "expected_latest_trading_day": "2026-10-14",
       "actual_0050_last_date": "2026-10-14",
@@ -36,7 +38,7 @@
     ],
     "splits_note": "股票分割還原（先.八十-12）：分割前 adj_close ÷ 分割比例；close 為原始成交價",
     "whitelist_fill": {
-      "generated_at": "2026-10-14T22:34:10.256283+08:00",
+      "generated_at": "2026-10-15T08:10:59.197114+08:00",
       "target_dates": {
         "twse": "2026-10-14",
         "tpex": "2026-10-14"
