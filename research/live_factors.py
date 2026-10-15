@@ -262,7 +262,13 @@ def inst_behavior(institutional: dict | None) -> tuple[float | None, dict]:
 
     def streak(field: str) -> int | None:
         vals = [_f(h.get(field)) for h in hist]
-        vals = [v for v in vals if v is not None]
+        # 先.一〇三-3：缺值日排除——只看最新一段連續有值的日子，不跨過缺值日接成連續
+        tail = []
+        for v in reversed(vals):
+            if v is None:
+                break
+            tail.append(v)
+        vals = tail[::-1]
         if not vals:
             return None
         sign = 1 if vals[-1] > 0 else (-1 if vals[-1] < 0 else 0)
@@ -284,9 +290,11 @@ def inst_behavior(institutional: dict | None) -> tuple[float | None, dict]:
     totals = []
     for h in hist:
         vals = [_f(h.get(k)) for k in ("foreign_lots", "trust_lots", "dealer_lots")]
-        vals = [v for v in vals if v is not None]
-        if vals:
+        # 先.一〇三-3：任一欄缺值的日子整天排除（只加有值的欄會把合計低估，null 不等於 0）
+        if all(v is not None for v in vals):
             totals.append(sum(vals))
+        else:
+            comp["missing_days"] = comp.get("missing_days", 0) + 1
     if len(totals) >= 2:
         half = len(totals) // 2
         early, late = totals[:half] or totals[:1], totals[half:]

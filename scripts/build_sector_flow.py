@@ -120,13 +120,15 @@ def _streak(vals: list) -> int:
 
     由最新往回數，方向一變就停。
     """
-    if not vals:
+    if not vals or vals[-1] is None:
         return 0
     sign = 1 if vals[-1] > 0 else (-1 if vals[-1] < 0 else 0)
     if sign == 0:
         return 0
     n = 0
     for v in reversed(vals):
+        if v is None:      # 先.一〇三-3：缺值日不知道方向，連續天數到此為止（不當 0、不跨過）
+            break
         if (v > 0 and sign > 0) or (v < 0 and sign < 0):
             n += 1
         else:
@@ -166,6 +168,8 @@ def main() -> int:
         if code not in active:
             continue
         # 對齊到全體日期軸；某天缺資料視為「當天無法人進出」，但記錄 days_present
+        # 先.一〇三-3：當天有列但外資欄位缺值（上櫃常見）→ 記 None，不當 0；
+        # 投信／自營缺值同理。合計只在三欄都有值時才算。
         f_ser, t_ser, d_ser, present = [], [], [], 0
         for d in dates:
             r = bucket.get(d)
@@ -175,10 +179,11 @@ def main() -> int:
                 d_ser.append(0.0)
             else:
                 present += 1
-                f_ser.append(float(r[0] or 0))
-                t_ser.append(float(r[1] or 0))
-                d_ser.append(float(r[2] or 0))
-        total_ser = [a + b + c for a, b, c in zip(f_ser, t_ser, d_ser)]
+                f_ser.append(None if r[0] is None else float(r[0]))
+                t_ser.append(None if len(r) < 2 or r[1] is None else float(r[1]))
+                d_ser.append(None if len(r) < 3 or r[2] is None else float(r[2]))
+        total_ser = [None if None in (a, b, c) else a + b + c for a, b, c in zip(f_ser, t_ser, d_ser)]
+        _nn = lambda xs: sum(x for x in xs if x is not None)  # noqa: E731
         close = closes.get(code)
 
         entry = {
@@ -188,10 +193,11 @@ def main() -> int:
             "dealer_lots_includes_hedge": True,   # 已知缺口 1
         }
         for w in usable:
-            fw = sum(f_ser[-w:])
-            tw = sum(t_ser[-w:])
-            dw = sum(d_ser[-w:])
-            allw = sum(total_ser[-w:])
+            fw = _nn(f_ser[-w:])
+            tw = _nn(t_ser[-w:])
+            dw = _nn(d_ser[-w:])
+            allw = _nn(total_ser[-w:])
+            miss_w = sum(1 for x in total_ser[-w:] if x is None)
             entry[f"net_{w}d"] = {
                 "foreign_lots": round(fw, 1),
                 "trust_lots": round(tw, 1),
@@ -200,17 +206,25 @@ def main() -> int:
                 # 估算：張×1000×收盤。不是真實成交金額，故欄位名帶 est_
                 "est_amount": round(allw * 1000 * close) if close else None,
             }
+            if miss_w:
+                # 先.一〇三-3：視窗內有法人欄位缺值的日子（合計只加完整日），前端標「資料不全」
+                entry[f"net_{w}d"]["missing_days"] = miss_w
         entry["streak_days"] = {
             "foreign": _streak(f_ser),
             "trust": _streak(t_ser),
             "total": _streak(total_ser),
         }
         w0 = usable[0]
-        fs, ts = sum(f_ser[-w0:]), sum(t_ser[-w0:])
-        entry["foreign_trust_aligned"] = bool((fs > 0 and ts > 0) or (fs < 0 and ts < 0))
+        fs, ts = _nn(f_ser[-w0:]), _nn(t_ser[-w0:])
+        f_miss = any(x is None for x in f_ser[-w0:]) or any(x is None for x in t_ser[-w0:])
+        entry["foreign_trust_aligned"] = (not f_miss) and bool((fs > 0 and ts > 0) or (fs < 0 and ts < 0))
+        # 先.一〇三-3：近 5 個交易日外資缺值日數，前端徽章標「資料不全」
+        fm = sum(1 for x in f_ser[-5:] if x is None)
+        if fm:
+            entry["foreign_missing_days"] = fm
 
         # 異常大買/大賣 z 分數：資料不足就**不給**，不降級用短視窗冒充
-        if n_dates >= ZSCORE_WINDOW and close:
+        if n_dates >= ZSCORE_WINDOW and close and None not in total_ser[-ZSCORE_WINDOW:]:
             amts = [v * 1000 * close for v in total_ser[-ZSCORE_WINDOW:]]
             sd = statistics.pstdev(amts)
             if sd > 0:

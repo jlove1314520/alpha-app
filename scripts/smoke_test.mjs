@@ -985,6 +985,42 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("26. 籌碼分頁三大法人逐日／累計表有資料列或誠實空狀態、免責文字與「估算」標示都在",
     chipErrors.length === 0, chipErrors.join("; ") || `rows=${results.chip_trend_rows}`);
 
+  // 26b.【先.一〇三-3】null 不等於 0：上櫃股外資缺值日一律「—」，合計／累計標「資料不全」，
+  // 來源依上市／上櫃標示（5347 世界＝上櫃，company_info 官方來源 tpex）。stock_detail 用固定假資料，
+  // 不受當天真實資料是否已補齊影響。
+  const nullChipErrors = [];
+  try {
+    const fixture = { institutional: { date: "20261015", foreign_lots: null, trust_lots: 538.0, dealer_lots: -416.2, history: [
+      { date: "20261013", foreign_lots: null, trust_lots: -1583.6, dealer_lots: -18.7 },
+      { date: "20261014", foreign_lots: -1290.1, trust_lots: -216.0, dealer_lots: -92.4 },
+      { date: "20261015", foreign_lots: null, trust_lots: 538.0, dealer_lots: -416.2 }] } };
+    await page.route("**/data/stock_detail/5347.json*", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fixture) }));
+    await page.evaluate(() => window.openStock("5347"));
+    await page.evaluate(() => { document.querySelector('#stock-tabs button[data-sub="chip"]')?.click(); });
+    await page.waitForFunction(() => { const t = document.getElementById("chip-note")?.textContent || ""; return /TPEx|櫃買中心/.test(t) && /資料不全/.test(t); }, null, { timeout: 15000 }).catch(() => {});
+    const n = await page.evaluate(() => ({
+      foreign: document.getElementById("chip-foreign")?.textContent || "",
+      total: document.getElementById("chip-total")?.textContent || "",
+      note: document.getElementById("chip-note")?.textContent || "",
+      rows: [...document.querySelectorAll("#chip-trend-table tbody tr")].map(tr => [...tr.cells].map(td => td.textContent.trim())),
+      trendNote: document.getElementById("chip-trend-note")?.textContent || "",
+    }));
+    await page.unroute("**/data/stock_detail/5347.json*");
+    if (n.foreign !== "—") nullChipErrors.push(`外資缺值應顯示「—」，拿到「${n.foreign}」`);
+    if (n.total !== "—") nullChipErrors.push(`外資缺值時合計應顯示「—」，拿到「${n.total}」`);
+    if (!/TPEx|櫃買中心/.test(n.note) || /TWSE|證交所/.test(n.note)) nullChipErrors.push(`上櫃股來源應標櫃買中心（TPEx）：「${n.note}」`);
+    if (!/資料不全/.test(n.note)) nullChipErrors.push(`最新一日缺值，來源列應標「資料不全」：「${n.note}」`);
+    const r0 = n.rows[0] || [];
+    if (r0[1] !== "—" || r0[4] !== "—") nullChipErrors.push(`逐日表缺值日外資／合計應為「—」：${JSON.stringify(r0)}`);
+    if (!/資料不全/.test(n.trendNote)) nullChipErrors.push(`累計說明應標「資料不全」：「${n.trendNote}」`);
+    // 累計只加完整日（10/14：-1290.1-216-92.4＝-1598.5，Math.round → -1,598），不把缺值當 0
+    if (!/累計 -1,598 張/.test(n.trendNote)) nullChipErrors.push(`累計應只計完整日（-1,598 張）：「${n.trendNote}」`);
+  } catch (e) {
+    nullChipErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("26b. 上櫃外資缺值顯示「—」、合計／累計標「資料不全」且不把缺值當 0、來源標 TPEx（先.一〇三-3）",
+    nullChipErrors.length === 0, nullChipErrors.join("; "));
+
   // 27.【2026-09-04新增，四修.二】未連即時伺服器時，市場頁櫃買指數列與類股熱力圖
   // 的來源標示必須帶收盤日期（今日/昨日/前次收盤（MM-DD）），不得讓盤後漲跌幅
   // 不標日期地顯示（總司令原話）。
@@ -3044,7 +3080,8 @@ async function runSmokeTest(baseUrl, headless = true) {
       // 設定頁兩層
       document.querySelector('nav#nav button[data-scr="settings"]').click();
       const advCards = [...document.querySelectorAll("#scr-settings [data-ui-advanced]")];
-      const commonCards = [...document.querySelectorAll("#scr-settings > .card:not([data-ui-advanced])")];
+      // 先.一〇四：沒設定連線時「真錢帳戶」卡刻意 hidden（首屏卡數），不算在「應顯示的常用卡」裡
+      const commonCards = [...document.querySelectorAll("#scr-settings > .card:not([data-ui-advanced])")].filter(e => !e.hidden);
       const shown = (els) => els.filter(e => getComputedStyle(e).display !== "none").length;
       out.set0 = { adv: shown(advCards), common: shown(commonCards), nAdv: advCards.length, nCommon: commonCards.length };
       uiSettingsLayer("adv");

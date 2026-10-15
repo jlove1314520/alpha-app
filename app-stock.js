@@ -41,7 +41,17 @@
   // 不像舊版FinMind路徑的setChip()/zhang()還要再/1000一次。
   function setChipLots(id,v){const el=document.getElementById(id);if(!el)return;
     el.textContent=(v==null||isNaN(v)?'—':(v>=0?'+':'−')+Math.round(Math.abs(v)).toLocaleString()+' 張');
-    el.className=v>=0?'pos':'neg'}
+    el.className=(v==null||isNaN(v))?'':(v>=0?'pos':'neg')}  // 先.一〇三-3：缺值不上色（null 不等於 0）
+  // 先.一〇三-3：法人資料來源依上市／上櫃正確標示（company_info 的官方來源欄位；查不到就不猜）
+  async function _twListMarket(code){
+    try{const c=(await loadCompanyInfo())[code]||{};
+      const src=String(c.industry_source||'')+'|'+String(c.official_website_source||'');
+      if(/t187ap03_L|twse_L/.test(src))return 'TWSE';
+      if(/t187ap03_O|tpex_O/.test(src))return 'TPEx';
+    }catch(e){console.warn('[_twListMarket]',code,e);recordGlobalError('_twListMarket',e)}
+    return null;
+  }
+  function _instSrcLabel(mkt){return mkt==='TWSE'?'TWSE T86（上市）':mkt==='TPEx'?'TPEx 三大法人（上櫃）':'TWSE T86／TPEx 三大法人'}
   function trendChart(cl,fmtLabel){
     if(cl.length<2)return '<div class="note">近月資料不足</div>';
     const mn=Math.min(...cl),mx=Math.max(...cl),rg=(mx-mn)||1;
@@ -129,7 +139,9 @@
     const inst=detail.institutional;
     if(!inst)return null;
     const series=(inst.history||[]).map(h=>({date:_t86Date(h.date),v:h.foreign_lots}));
-    return{date:_t86Date(inst.date),foreign:inst.foreign_lots,trust:inst.trust_lots,dealer:inst.dealer_lots,total:inst.foreign_lots+inst.trust_lots+(inst.dealer_lots||0),series,history:inst.history||[]};
+    // 先.一〇三-3：外資或投信缺值（上櫃常見）時合計不算，顯示「—」——null 不等於 0
+    const total=(inst.foreign_lots==null||inst.trust_lots==null)?null:inst.foreign_lots+inst.trust_lots+(inst.dealer_lots||0);
+    return{date:_t86Date(inst.date),foreign:inst.foreign_lots,trust:inst.trust_lots,dealer:inst.dealer_lots,total,series,history:inst.history||[]};
   }
   // 2026-09-04（籌碼分頁免費層第一單位）：三大法人逐日／累計表＋外資估算成本。
   // 資料只用stock_detail.json既有的institutional.history（market.yml每日累積，剛開始
@@ -163,6 +175,9 @@
     }
     if(e.abnormal&&e.z_today!=null)
       badges.push(pill(`異常大${e.z_today>0?'買':'賣'}（z=${e.z_today}）`,'var(--gold)'));
+    // 先.一〇三-3：近 5 日有外資缺值（上櫃常見）→ 連買賣天數／土洋同買是用不完整資料算的，標「資料不全」
+    if(e.foreign_missing_days)
+      badges.push(pill(`資料不全（近 5 日外資缺 ${e.foreign_missing_days} 日）`,'var(--ink-3)'));
     if(!badges.length){
       host.innerHTML='<div class="note">近期無連續買賣（≥2 日）或土洋同買情形。</div>';
       return;
@@ -181,15 +196,18 @@
     if(!tbl)return;
     const hist=(inst&&inst.history||[]).filter(h=>h&&h.date).slice().sort((a,b)=>a.date<b.date?-1:1);
     if(!hist.length){tbl.innerHTML='<div class="note">查無逐日法人資料（僅涵蓋TWSE上市／TPEx上櫃股票，且排程剛開始累積）</div>';if(note)note.textContent='';if(cost)cost.textContent='外資估算成本：—（無逐日資料）';return}
-    let cum=0;const fmt=v=>v==null?'—':`<span class="${v>=0?'pos':'neg'}">${v>=0?'+':''}${nf(Math.round(v))}</span>`;
-    const rows=hist.map(h=>{const f=h.foreign_lots||0,t=h.trust_lots||0,d=h.dealer_lots||0,tot=f+t+d;cum+=tot;
-      return `<tr><td style="color:var(--ink-3)">${_t86Date(h.date).slice(5)}</td><td>${fmt(f)}</td><td>${fmt(t)}</td><td>${fmt(d)}</td><td>${fmt(tot)}</td><td>${fmt(cum)}</td></tr>`}).join('');
+    // 先.一〇三-3：缺值一律「—」、不當 0；有缺值的日子合計不算、累計只加完整日並標「資料不全」
+    let cum=0,missDays=0;const fmt=v=>v==null?'—':`<span class="${v>=0?'pos':'neg'}">${v>=0?'+':''}${nf(Math.round(v))}</span>`;
+    const rows=hist.map(h=>{const f=h.foreign_lots,t=h.trust_lots,d=h.dealer_lots;
+      const miss=f==null||t==null||d==null;const tot=miss?null:f+t+d;if(miss)missDays++;else cum+=tot;
+      return `<tr><td style="color:var(--ink-3)">${_t86Date(h.date).slice(5)}</td><td>${fmt(f)}</td><td>${fmt(t)}</td><td>${fmt(d)}</td><td>${fmt(tot)}</td><td>${fmt(cum)}${missDays?'<span style="color:var(--gold);font-size:10px">*</span>':''}</td></tr>`}).join('');
     tbl.innerHTML=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;text-align:right"><thead><tr style="color:var(--ink-3)"><th style="text-align:left">日期</th><th>外資</th><th>投信</th><th>自營</th><th>合計</th><th>累計</th></tr></thead><tbody>${rows}</tbody></table></div>`;
-    if(note)note.textContent=`自 ${_t86Date(hist[0].date)} 起累積 ${hist.length} 個交易日（TWSE T86／TPEx 每日排程累積，天數會逐日增加）· 三大法人累計 ${cum>=0?'+':''}${nf(Math.round(cum))} 張`;
+    if(note)note.textContent=`自 ${_t86Date(hist[0].date)} 起累積 ${hist.length} 個交易日（${_instSrcLabel(inst&&inst.market)}每日排程累積，天數會逐日增加）· 三大法人累計 ${cum>=0?'+':''}${nf(Math.round(cum))} 張`
+      +(missDays?`（資料不全：${missDays} 日有法人欄位缺值，累計未計入這些日子，標 * ）`:'');
     // 外資估算成本
     const closeByDate={};(px||[]).forEach(r=>{if(r&&r.date&&r.close!=null)closeByDate[r.date]=r.close});
     let lots=0,amt=0,used=0;
-    hist.forEach(h=>{const f=h.foreign_lots||0;const c=closeByDate[_t86Date(h.date)];if(f>0&&c!=null){lots+=f;amt+=f*c;used++}});
+    hist.forEach(h=>{const f=h.foreign_lots;if(f==null)return;const c=closeByDate[_t86Date(h.date)];if(f>0&&c!=null){lots+=f;amt+=f*c;used++}});
     if(cost){
       if(lots>0){const est=amt/lots;cost.innerHTML=`外資估算成本：<b>${nf(est)}</b>（估算、非精確成本：以近 ${hist.length} 日中 ${used} 個外資淨買超日的淨買張數×當日收盤加權概算，不是逐筆成交成本；資料天數愈少愈不可靠）`;
         try{if(STOCK_CHART.series&&STOCK_CHART.code===code){if(STOCK_CHART.costLine){try{STOCK_CHART.series.removePriceLine(STOCK_CHART.costLine)}catch(e){}}STOCK_CHART.costLine=STOCK_CHART.series.createPriceLine({price:est,color:'#d4a84b',lineWidth:1,lineStyle:2,axisLabelVisible:true,title:'外資估算成本'})}}catch(e){console.warn('[renderChipTrend:priceLine]',e)}
@@ -776,7 +794,8 @@
     loadRevenueChart(code,rev);
     if(inst){
       setChipLots('chip-foreign',inst.foreign);setChipLots('chip-trust',inst.trust);setChipLots('chip-dealer',inst.dealer);setChipLots('chip-total',inst.total);
-      setTxt('chip-note',`最新 ${inst.date} · TWSE T86（GitHub Actions 排程）`);
+      inst.market=await _twListMarket(code);if(currentCode!==code)return;
+      setTxt('chip-note',`最新 ${inst.date} · ${_instSrcLabel(inst.market)}（GitHub Actions 排程）${inst.total==null?'　資料不全：最新一日法人欄位有缺值，合計不計算':''}`);
       // 先.一〇四-10：沒有任何有值的日子就講「尚無資料」，不留空白圖區（缺值日不畫成 0）
       const _ser=(inst.series||[]).filter(s=>s&&s.v!=null&&isFinite(s.v));
       const mx=Math.max(...(_ser.length?_ser:[{v:1}]).map(s=>Math.abs(s.v)))||1;
@@ -786,8 +805,8 @@
       _safeAsync('renderChipBadges',()=>renderChipBadges(code));  // 2026-09-08 金流一.3
     }else{['chip-foreign','chip-trust','chip-dealer','chip-total'].forEach(id=>setTxt(id,'—'));
       _safeSync('renderChipTrend',()=>renderChipTrend(code,null,px));
-      document.getElementById('chip-bars').innerHTML='<div class="note">查無法人資料（僅涵蓋TWSE上市「一般業」，上櫃/金融股暫無）</div>';
-      setTxt('chip-note','查無資料（僅涵蓋TWSE上市「一般業」，上櫃/金融股暫無）');
+      document.getElementById('chip-bars').innerHTML='<div class="note">查無法人資料（涵蓋 TWSE 上市／TPEx 上櫃股票；此代號排程沒有資料）</div>';
+      setTxt('chip-note','查無資料（涵蓋 TWSE 上市／TPEx 上櫃股票；此代號排程沒有資料）');
     }
   }
 
