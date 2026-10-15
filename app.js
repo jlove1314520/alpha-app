@@ -749,6 +749,8 @@
     const src=us?INTRADAY_US:INTRADAY_TW;
     if(!src||!src.quotes)return null;
     const q=src.quotes[code];if(!q)return null;
+    // 2026-10-15：stale:true（昨收頂上、漲跌固定 0）不是報價；檔案本身新鮮時這裡會先回傳、繞過 resolveQuote 的先.八十一-24 防線
+    if(!us&&q.stale===true)return null;
     const age=intradayAgeMin(src);
     if(age==null||age>INTRADAY_STALE_MIN)return null;
     return{...q,ageMin:age,source:'finmind'};
@@ -4420,7 +4422,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-15.0155';
+  const APP_VERSION='2026-10-15.0827';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
