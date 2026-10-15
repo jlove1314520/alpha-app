@@ -62,6 +62,13 @@ EX_RIGHT_URL = "https://www.twse.com.tw/rwd/zh/exRight/TWT48U"
 # 2026-09-30（修.八）：TWSE官方rwd每日收盤行情（含歷史日期），STOCK_DAY_ALL
 # OpenAPI檔案是「隔天清晨才更新」的快照（見fetch_twse()診斷），夜間排程時上市
 # 永遠比上櫃慢一個交易日；這個端點同日收盤後即有資料，當補洞／備援用。
+# 2026-10-16 先.一〇三-10a：除權息「計算結果」官方區間查詢（上市 TWT49U／上櫃 exDailyQ），每日查最近 10 個交易日補帳。
+# TWT48U 是上市預告表、沒有上櫃；openapi tpex_exright_daily 只有當天——漏跑那天就永遠漏（8/26 起漏 161 筆，含 00697B）。
+EXRIGHT_RESULT_TWSE_URL = "https://www.twse.com.tw/rwd/zh/exRight/TWT49U"
+EXRIGHT_RESULT_TPEX_URL = "https://www.tpex.org.tw/www/zh-tw/bulletin/exDailyQ"
+EXRIGHT_RESULT_TPEX_SOURCE = "tpex_www"
+EXRIGHT_LOOKBACK_TRADING_DAYS = 10
+TRADING_CALENDAR_PATH = REPO_ROOT / "data" / "trading_calendar.json"
 REDUCTION_URL = "https://www.twse.com.tw/rwd/zh/reducation/TWTAUU"  # 減資恢復買賣參考價（TWSE官方，免金鑰）
 REDUCTION_SOURCE = "twse_reduction"
 REDUCTION_ANCHOR_TOL = 0.005  # 前一筆close需貼近「停止買賣前收盤價」（0.5%），否則視為定錨失敗
@@ -680,6 +687,126 @@ def merge_ex_dividend_events(ledger: dict, announcements: list[dict], today_iso:
     return added
 
 
+def _tw_closed_days() -> set:
+    """data/trading_calendar.json 的台股休市日；讀不到回空集合（只排除週末，視窗會略長，不影響正確性）。"""
+    try:
+        cal = json.loads(TRADING_CALENDAR_PATH.read_text(encoding="utf-8")).get("tw") or {}
+        return {d for y in cal.values() for d in ((y or {}).get("closed") or [])}
+    except Exception as e:  # noqa: BLE001 -- 日曆讀不到只會讓視窗多幾天，不中止（十二節）
+        print(f"[exright] 警告：讀不到 trading_calendar.json（{e!r}），只排除週末")
+        return set()
+
+
+def exright_lookback_start(today_iso: str, n: int = EXRIGHT_LOOKBACK_TRADING_DAYS, closed: set | None = None) -> str:
+    """含 today_iso 往回數 n 個交易日（週末與休市日不算），回傳最早那天。"""
+    closed = _tw_closed_days() if closed is None else closed
+    d = datetime.strptime(today_iso, "%Y-%m-%d")
+    got, start = 0, today_iso
+    for _ in range(n * 3 + 30):
+        iso = d.strftime("%Y-%m-%d")
+        if d.weekday() < 5 and iso not in closed:
+            got += 1
+            start = iso
+            if got >= n:
+                break
+        d -= timedelta(days=1)
+    return start
+
+
+def _roc_slash_to_iso(s) -> str | None:
+    """「115年09月21日」或「115/09/21」→ 2026-09-21。"""
+    try:
+        t = str(s).replace("年", "/").replace("月", "/").replace("日", "").strip()
+        y, m, dd = [int(x) for x in t.split("/")]
+        return f"{y + 1911:04d}-{m:02d}-{dd:02d}"
+    except (ValueError, AttributeError):
+        return None
+
+
+def _parse_exright_rows(fields, data, date_key, code_key, src) -> list[dict]:
+    """欄位名對應（不寫死位置）。係數＝除權息參考價 ÷ 除權息前收盤價（官方數字）。"""
+    fields = list(fields or [])
+    for k in (date_key, code_key, "除權息前收盤價", "除權息參考價"):
+        if k not in fields:
+            raise RuntimeError(f"{src} 欄位對應失敗：找不到「{k}」（可能改版）")
+    i_d, i_c = fields.index(date_key), fields.index(code_key)
+    i_pc, i_ref = fields.index("除權息前收盤價"), fields.index("除權息參考價")
+    out = []
+    for row in data or []:
+        ex_date, code = _roc_slash_to_iso(row[i_d]), str(row[i_c]).strip()
+        pc, ref = _num(row[i_pc]), _num(row[i_ref])
+        if ex_date and code and pc and ref and pc > 0 and ref > 0:
+            out.append({"code": code, "ex_date": ex_date, "pre_close": pc, "ref_price": ref,
+                        "factor": ref / pc, "src": src})
+    return out
+
+
+def fetch_official_exright_results(start_iso: str, end_iso: str, errors: list) -> list[dict]:
+    """上市 TWT49U、上櫃 exDailyQ 各 1 次區間請求（共用 rate_limit_state，同源間隔 ≥3 秒，402/403/428/429 封鎖不重試）。
+    兩邊各自 try：一邊失敗不影響另一邊（十二節）。區間內沒有事件時兩邊都回空 data，視為 0 筆。"""
+    out = []
+    try:
+        r = _get_retry(EXRIGHT_RESULT_TWSE_URL, "twse_exright", timeout=30, params={
+            "startDate": start_iso.replace("-", ""), "endDate": end_iso.replace("-", ""), "response": "json"})
+        r.raise_for_status()
+        j = r.json()
+        if j.get("data"):
+            out += _parse_exright_rows(j.get("fields"), j.get("data"), "資料日期", "股票代號", "TWSE TWT49U")
+    except Exception as e:  # noqa: BLE001
+        print(f"除權息計算結果(TWT49U) 區間查詢失敗（略過上市補帳）：{e}")
+        errors.append(f"exright_twse_result: {e}")
+    try:
+        r = _get_retry(EXRIGHT_RESULT_TPEX_URL, EXRIGHT_RESULT_TPEX_SOURCE, timeout=30, params={
+            "startDate": start_iso.replace("-", "/"), "endDate": end_iso.replace("-", "/"), "response": "json"})
+        r.raise_for_status()
+        t = (r.json().get("tables") or [{}])[0]
+        if t.get("data"):
+            out += _parse_exright_rows(t.get("fields"), t.get("data"), "除權息日期", "代號", "TPEx exDailyQ")
+    except Exception as e:  # noqa: BLE001
+        print(f"除權息計算結果(exDailyQ) 區間查詢失敗（略過上櫃補帳）：{e}")
+        errors.append(f"exright_tpex_result: {e}")
+    return out
+
+
+def merge_official_exright(ledger: dict, official: list[dict], today_iso: str, covered_through: str | None) -> dict:
+    """官方計算結果併入帳本（先.一〇三-10a）。
+    - 帳本已有同（代號,日期）且已套用：不動（避免係數乘兩次）。
+    - 帳本已有但未套用：補上 official_factor，套用時優先用官方係數。
+    - 帳本沒有：新增一筆（source＝官方）。ex_date ≤ covered_through（scripts/fix_backfill_exdiv.py 已用官方係數
+      整段重算過 adj_close 的日期，讀 price_history meta 的 adj_recompute_to_*）直接標 applied＝True，只記帳不再乘。
+    回傳計數。"""
+    stats = {"added": 0, "added_already_folded": 0, "official_factor_attached": 0, "already_applied": 0}
+    events = ledger.setdefault("events", {})
+    for o in official:
+        bucket = events.setdefault(o["code"], [])
+        ev = next((e for e in bucket if e.get("ex_date") == o["ex_date"]), None)
+        if ev is not None:
+            if ev.get("applied"):
+                stats["already_applied"] += 1
+                # 重算涵蓋日以前：adj_close 已是官方係數，帳本係數跟著對齊（fix_inserted_rows 會讀它），原值留存
+                if (covered_through and o["ex_date"] <= covered_through and ev.get("factor_applied")
+                        and abs(ev["factor_applied"] - o["factor"]) > 1e-6):
+                    ev.setdefault("factor_applied_before_official", ev["factor_applied"])
+                    ev["factor_applied"] = o["factor"]
+                    ev["official_source"] = o["src"]
+                    stats["ledger_factor_aligned"] = stats.get("ledger_factor_aligned", 0) + 1
+            elif not ev.get("official_factor"):
+                ev["official_factor"] = o["factor"]
+                ev["official_source"] = o["src"]
+                stats["official_factor_attached"] += 1
+            continue
+        new = {"ex_date": o["ex_date"], "official_factor": o["factor"], "pre_close": o["pre_close"],
+               "ref_price": o["ref_price"], "source": o["src"], "first_seen": today_iso, "applied": False}
+        if covered_through and o["ex_date"] <= covered_through:
+            new.update(applied=True, factor_applied=o["factor"],
+                       note=f"adj_close 已由 scripts/fix_backfill_exdiv.py 以官方係數重算（至 {covered_through}），只補記帳、不再乘")
+            stats["added_already_folded"] += 1
+        else:
+            stats["added"] += 1
+        bucket.append(new)
+    return stats
+
+
 def _days_between(iso_a: str, iso_b: str) -> int:
     a = datetime.strptime(iso_a, "%Y-%m-%d")
     b = datetime.strptime(iso_b, "%Y-%m-%d")
@@ -720,6 +847,20 @@ def apply_dividend_adjustments(prices: dict, ledger: dict, today_iso: str) -> in
             prior = [r for r in rows_sorted if r["date"] < ev["ex_date"]]
             if not prior:
                 continue  # 這檔股票的歷史還沒涵蓋到除權息日前一天，等之後累積夠了再套用
+            if ev.get("official_factor"):
+                # 先.一〇三-10a：官方計算結果（參考價÷前收）直接用，不需要拿本地前一筆收盤定錨
+                factor = ev["official_factor"]
+                for r in rows:
+                    if r["date"] < ev["ex_date"]:
+                        base = r.get("adj_close")
+                        if base is None:
+                            base = r.get("close")
+                        if base is not None:
+                            r["adj_close"] = base * factor
+                ev["applied"] = True
+                ev["factor_applied"] = factor
+                applied_count += 1
+                continue
             prior_date = prior[-1]["date"]
             if _days_between(prior_date, ev["ex_date"]) > MAX_PREV_CLOSE_GAP_DAYS:
                 ev["applied"] = True
@@ -909,6 +1050,7 @@ def main():
     # 才退回now()，處理假日補跑等邊界情況）。
     ex_div_applied = 0
     ex_div_added = 0
+    exright_official_stats = None
     twse = {}
     today_tw = datetime.now(TW_TZ).strftime("%Y-%m-%d")
     openapi_date = None
@@ -965,8 +1107,24 @@ def main():
 
     try:
         ledger = load_ex_dividend_ledger()
-        announcements = fetch_ex_dividend_announcements()
+        try:  # 先.一〇三-10a：預告表失敗不得連帶擋掉下面的官方計算結果補帳
+            announcements = fetch_ex_dividend_announcements()
+        except Exception as e:  # noqa: BLE001
+            print(f"除權息預告表(TWT48U) 抓取失敗（只略過預告表，官方計算結果補帳照跑）：{e}")
+            errors.append(f"ex_dividend_twt48u: {e}")
+            announcements = []
         ex_div_added = merge_ex_dividend_events(ledger, announcements, today_iso)
+        try:  # 先.一〇三-10a：官方計算結果補帳（最近 10 個交易日），失敗只記錯、不擋預告表那條路
+            covered = max((k.replace("adj_recompute_to_", "") for k in (payload.get("meta") or {})
+                           if k.startswith("adj_recompute_to_")), default=None)
+            lb_start = exright_lookback_start(today_iso)
+            official = fetch_official_exright_results(lb_start, today_iso, errors)
+            exright_official_stats = merge_official_exright(ledger, official, today_iso, covered)
+            exright_official_stats.update(window=[lb_start, today_iso], fetched=len(official))
+            print(f"除權息官方計算結果補帳：{exright_official_stats}")
+        except Exception as e:  # noqa: BLE001
+            print(f"除權息官方計算結果補帳失敗（略過）：{e}")
+            errors.append(f"exright_official_merge: {e}")
         ex_div_applied = apply_dividend_adjustments(prices, ledger, today_iso)
         ledger.setdefault("meta", {})
         ledger["meta"]["generated_at"] = datetime.now(TW_TZ).isoformat()
@@ -1058,12 +1216,13 @@ def main():
     payload.setdefault("meta", {})
     payload["meta"]["inserted_rows_adj_fixed"] = inserted_fixed
     payload["meta"]["generated_at"] = datetime.now(TW_TZ).isoformat()
-    payload["meta"]["source"] = "TWSE STOCK_DAY_ALL（上市）+ TPEx tpex_mainboard_quotes（上櫃）每日累積式寫回；adj_close由TWSE TWT48U除權息事件回溯調整；起始種子=research/build_price_history.py（FinMind快取）"  # 2026-09-03（P0三-三.3）
+    payload["meta"]["source"] = "TWSE STOCK_DAY_ALL（上市）+ TPEx tpex_mainboard_quotes（上櫃）每日累積式寫回；adj_close由TWSE TWT48U除權息預告＋TWT49U／TPEx exDailyQ官方計算結果（最近10個交易日補帳）回溯調整；起始種子=research/build_price_history.py（FinMind快取）"  # 2026-09-03（P0三-三.3）
     payload["meta"]["twse_updated_count"] = twse_updated
     payload["meta"]["tpex_updated_count"] = tpex_updated
     payload["meta"]["errors"] = errors
     payload["meta"]["ex_dividend_events_added"] = ex_div_added
     payload["meta"]["ex_dividend_events_applied"] = ex_div_applied
+    payload["meta"]["exright_official_backfill"] = exright_official_stats
     payload["meta"]["capital_reduction_events_added"] = reductions_added
     payload["meta"]["capital_reduction_events_applied"] = reductions_applied
     payload["meta"]["mixed_date_warning"] = mixed_date_warning
