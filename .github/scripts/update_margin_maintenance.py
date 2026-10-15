@@ -468,7 +468,59 @@ def merge_stock_detail_margin(per_stock: dict[str, dict], tpex_codes: set[str] |
     print(f"併入 {detail_path}：融資融券合併 {matched} 檔（含TPEx {len(tpex_codes)}檔）")
 
 
+def _tw_closed(day: str) -> bool:
+    """先.一〇三-8：台股休市日（週末或官方日曆 data/trading_calendar.json 的 closed）。讀不到日曆只看週末。"""
+    try:
+        if datetime.fromisoformat(day).weekday() >= 5:
+            return True
+        cal = json.loads((REPO_ROOT / "data" / "trading_calendar.json").read_text(encoding="utf-8"))
+        return day in ((cal.get("tw") or {}).get(day[:4]) or {}).get("closed", [])
+    except Exception as e:  # noqa: BLE001 — 日曆讀不到只降級成「只看週末」
+        print(f"::warning::讀不到交易日曆，只用週末判斷休市：{type(e).__name__}")
+        return False
+
+
+def _data_day(row: dict) -> str | None:
+    return row.get("margin_money_date") or row.get("finmind_margin_money_date")
+
+
+def normalize_history(history: list[dict]) -> list[dict]:
+    """先.一〇三-8：列日期一律用資料日（分母融資金額的日期）；同一資料日只留一列；休市日不出列。
+
+    同資料日多列時，優先留「資料完整、分子收盤日＝資料日」的那一列，其次留最新產生的。
+    原本的紀錄日存進 recorded_on（只在跟資料日不同時才記），不丟掉可稽核的痕跡。"""
+    groups: dict[str, list[dict]] = {}
+    for h in history:
+        day = _data_day(h) or h.get("date")
+        if not day:
+            continue
+        groups.setdefault(day, []).append(h)
+    out = []
+    for day, rows in groups.items():
+        if _tw_closed(day):
+            continue
+
+        def _rank(r):
+            paired = (not r.get("data_incomplete")) and r.get("ratio_pct") is not None
+            return (1 if paired else 0, str(r.get("generated_at") or r.get("date") or ""))
+
+        best = dict(max(rows, key=_rank))
+        if best.get("date") != day:
+            best.setdefault("recorded_on", best.get("date"))
+            best["date"] = day
+        out.append(best)
+    out.sort(key=lambda h: h["date"])
+    return out
+
+
 def main():
+    if "--normalize-only" in sys.argv:
+        history = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+        before = len(history)
+        history = normalize_history(history)[-HISTORY_DAYS_KEEP:]
+        OUT_PATH.write_text(json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f"只整理既有歷史：{before} 列 → {len(history)} 列")
+        return
     margin_by_stock, margin_per_stock_detail = fetch_margin_by_stock()  # 個股頁用（不變）
     close_by_stock, close_date = fetch_close_by_stock()
     print(f"融資個股 {len(margin_by_stock)} 檔，收盤價個股 {len(close_by_stock)} 檔（收盤日 {close_date}）")
@@ -526,8 +578,12 @@ def main():
                              if numerator_close_date != money_date
                              else f"同日收盤價只涵蓋 {coverage:.1%} 的融資張數（<99%），不相除")
     ratio = collateral_value / margin_money * 100 if (margin_money and not data_incomplete) else None
+    # 先.一〇三-8：列日期用資料日（分母融資金額的日期）；分母失敗且今天休市就不寫（不製造休市日列）
+    if money_date is None and _tw_closed(today):
+        print(f"今天 {today} 休市且分母取得失敗，不寫入")
+        return
     record = {
-        "date": today,
+        "date": money_date or today,
         "margin_money_date": money_date,
         "numerator_margin_date": money_date if lots_same_day else None,
         "numerator_close_date": numerator_close_date,
@@ -568,10 +624,11 @@ def main():
             history = json.loads(OUT_PATH.read_text(encoding="utf-8"))
         except Exception:
             history = []
-    history = [h for h in history if h.get("date") != today]
+    if record["date"] != today:
+        record["recorded_on"] = today
+    history = [h for h in history if (_data_day(h) or h.get("date")) != record["date"]]
     history.append(record)
-    history.sort(key=lambda h: h["date"])
-    history = history[-HISTORY_DAYS_KEEP:]
+    history = normalize_history(history)[-HISTORY_DAYS_KEEP:]
     OUT_PATH.write_text(json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"寫入 {OUT_PATH}（累積 {len(history)} 天）")
 
