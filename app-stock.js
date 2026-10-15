@@ -777,8 +777,11 @@
     if(inst){
       setChipLots('chip-foreign',inst.foreign);setChipLots('chip-trust',inst.trust);setChipLots('chip-dealer',inst.dealer);setChipLots('chip-total',inst.total);
       setTxt('chip-note',`最新 ${inst.date} · TWSE T86（GitHub Actions 排程）`);
-      const mx=Math.max(...inst.series.map(s=>Math.abs(s.v)))||1;
-      document.getElementById('chip-bars').innerHTML=inst.series.map(s=>divBarHTML(s.date.slice(5),s.v,mx)).join('');
+      // 先.一〇四-10：沒有任何有值的日子就講「尚無資料」，不留空白圖區（缺值日不畫成 0）
+      const _ser=(inst.series||[]).filter(s=>s&&s.v!=null&&isFinite(s.v));
+      const mx=Math.max(...(_ser.length?_ser:[{v:1}]).map(s=>Math.abs(s.v)))||1;
+      document.getElementById('chip-bars').innerHTML=_ser.length?_ser.map(s=>divBarHTML(s.date.slice(5),s.v,mx)).join('')
+        :'<div class="note" style="align-self:center;width:100%;text-align:center">尚無資料（近五日外資買賣超還沒累積到資料）</div>';
       _safeSync('renderChipTrend',()=>renderChipTrend(code,inst,px));
       _safeAsync('renderChipBadges',()=>renderChipBadges(code));  // 2026-09-08 金流一.3
     }else{['chip-foreign','chip-trust','chip-dealer','chip-total'].forEach(id=>setTxt(id,'—'));
