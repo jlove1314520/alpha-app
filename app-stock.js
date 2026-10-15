@@ -778,6 +778,7 @@
       // 尺寸算錯，兩者都不適合跟其他分頁一樣在openStock()就直接畫。
       if(subs.includes('events'))_safeAsync('renderStockEventsTab',()=>renderStockEventsTab(currentCode));
       if(subs.includes('tech'))_safeAsync('renderTechChartTab',()=>renderTechChartTab(currentCode));
+      if(subs.includes('research'))_safeAsync('renderStockResearchTab',()=>renderStockResearchTab(currentCode));
     });
   });
 
@@ -1287,6 +1288,103 @@
       if(d&&Array.isArray(d.events))return d;
       throw new Error('格式不符');
     }catch(e){console.warn('[eventsForStock]',code,e);recordGlobalError('eventsForStock',e);return ensureEvents()}
+  }
+  // ── 研究室.五-1（2026-10-15）：個股「研究」分頁 ──
+  // 讀 data/by_code/<代號>.json 的 research 節（byCodeSection）；小檔讀不到才退回整份 data/research.json。
+  // 只把 build_research.py 已算好的數字翻成白話，不做判斷；缺值一律寫原因（gaps／reason），不補假數字。
+  let RESEARCH_FULL_P=null;
+  async function _researchFor(code){
+    let d=await byCodeSection(code,'research');
+    if(!d){
+      if(!RESEARCH_FULL_P)RESEARCH_FULL_P=fetch('data/research.json?t='+Math.floor(Date.now()/600000))
+        .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})
+        .catch(e=>{RESEARCH_FULL_P=null;throw e});
+      d=await RESEARCH_FULL_P;
+    }
+    return {meta:(d&&d.meta)||{},s:d&&d.stocks&&d.stocks[code]};
+  }
+  function toggleResearchRule(el){
+    const box=document.getElementById('research-rule-text');if(!box)return;
+    const same=box.dataset.tag===el.dataset.tag&&box.style.display!=='none';
+    box.style.display=same?'none':'';box.dataset.tag=el.dataset.tag;
+    box.textContent=same?'':`${el.dataset.tag}：${el.dataset.rule||'（規則文字缺）'}`;
+  }
+  async function renderStockResearchTab(code){
+    const host=document.getElementById('stock-research-body');if(!host)return;
+    const esc=_autoEsc;
+    if(isUS(code)){host.innerHTML='<div class="note">尚未建檔｜研究室目前只涵蓋台股上市櫃普通股｜美股請看「總覽」與「事件」分頁</div>';return}
+    host.innerHTML=skeletonRowsHtml(4);
+    let r;
+    try{r=await _researchFor(code)}catch(e){
+      console.warn('[renderStockResearchTab]',e);recordGlobalError('renderStockResearchTab',e);
+      if(currentCode===code)host.innerHTML=`<div class="note">尚未建檔｜研究檔載入失敗（${esc(e.message)}）｜稍後重新開啟這個分頁</div>`;
+      return;
+    }
+    if(currentCode!==code)return;  // await 期間已切到別檔，作廢
+    const m=r.meta,s=r.s;
+    // 免責固定寫在 #stock-research-disclaimer；「非投資建議」前台只在頁尾一處（先.七十二-A2／#91），這裡不用 meta.disclaimer 覆寫
+    if(!s){host.innerHTML=`<div class="note">尚未建檔｜原因：研究室名冊（上市櫃普通股）沒有 ${esc(code)}（ETF／權證／興櫃／已下市不在名冊）｜下一步：名冊每日由排程重建，新上市股請隔日再看</div>`;return}
+    const pc=(v,d=1)=>v==null?'—':(v>0?'+':'')+(v*100).toFixed(d)+'%';
+    const pp=v=>v==null?'—':(v>0?'+':'')+Number(v).toFixed(2)+' 個百分點';
+    const lots=v=>v==null?'—':(v>0?'+':'')+Math.round(v).toLocaleString('zh-TW')+' 張';
+    const md=d=>d?String(d).replace(/^(\d{4})(\d{2})(\d{2})$/,'$1-$2-$3').slice(5).replace('-','/'):'—';
+    const row=(k,v,note)=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--hairline)"><span style="color:var(--ink-2);font-size:13px">${k}</span><span style="text-align:right"><b class="num" style="font-size:13px">${v}</b>${note?`<div class="note" style="margin:2px 0 0;font-size:11px">${note}</div>`:''}</span></div>`;
+    const rules=m.rules||{};
+    let h='';
+    const tags=s.change_tags||[];
+    h+=tags.length
+      ?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">${tags.map(t=>`<span class="press" style="white-space:nowrap;font-size:12px;padding:5px 11px;border-radius:999px;border:1px solid rgba(var(--fg-rgb),.12);background:rgba(var(--fg-rgb),.05);cursor:pointer" data-tag="${esc(t)}" data-rule="${esc(rules[t]||'')}" onclick="toggleResearchRule(this)">${esc(t)}</span>`).join('')}</div>`
+        +'<div class="note" id="research-rule-text" style="display:none;margin:0 0 6px"></div>'
+      :'<div class="note" style="margin:0 0 6px">目前沒有觸發任何變化標籤。</div>';
+    const rv=s.rev||{},q=s.q||{},v=s.val||{},px=s.px||{},ins=s.inst||{},hd=s.holders,ev=s.events||{};
+    h+=row('近3月營收年增',pc(rv.rev3_yoy),rv.rev_last_month?`最新月份 ${esc(rv.rev_last_month)}`:esc(rv.reason||''));
+    h+=row('近3月營收 vs 前3月',pc(rv.rev3_qoq),rv.rev3_qoq==null?esc(rv.reason||'前3月月營收不齊'):'');
+    if(q.gm!=null&&!q.q_stale)h+=row(`毛利率（${esc(q.q_last)}）`,Number(q.gm).toFixed(2)+'%','季變化 '+pp(q.gm_qoq_pp));
+    else h+=row('最新一季毛利率','—',esc(q.reason||(q.q_last?`季報停在 ${q.q_last}`:'無季報')));
+    h+=row('本益比',v.per==null?'—':Number(v.per).toFixed(1)+' 倍',v.date?`資料日 ${md(v.date)}`:'');
+    if(px.close!=null){
+      const vs=(c,ma)=>ma?pc(c/ma-1):'—';
+      h+=row('價格對 MA20／MA60',`${vs(px.close,px.ma20)}／${vs(px.close,px.ma60)}`,`收盤 ${px.close}（${md(px.price_date)}）`);
+      h+=row('近 20 日漲跌',pc(px.ret20));
+    }else h+=row('價格','—','無近 60 日價');
+    h+=row('外資／投信 10 日',`${lots(ins.foreign10)}／${lots(ins.trust10)}`,esc(ins.reason||''));
+    h+=hd?row('千張大戶週變化',pp(hd.week_change_pct),`持股 ${hd.big_holder_ratio}%（${md(hd.date)}）`):row('千張大戶週變化','—','無集保大戶資料');
+    const nc=ev.next_call;
+    h+=row('下一場法說',nc?`<a href="${esc(nc.url)}" target="_blank" rel="noopener" style="color:var(--gold)">${md(nc.date)}</a>`:'—',nc?'日期為公告日，不一定是舉行日':'近期無法說會公告');
+    const maj=ev.recent_major||[];
+    h+='<div style="padding:8px 0;border-bottom:1px solid var(--hairline)"><div style="color:var(--ink-2);font-size:13px">近 7 日重大訊息</div>'
+      +(maj.length?maj.map(x=>`<div style="font-size:12.5px;margin-top:4px">${md(x.date)} <span class="note" style="margin:0">${esc(x.type||'')}</span> <a href="${esc(x.url)}" target="_blank" rel="noopener" style="color:var(--gold)">${esc(x.title)}</a></div>`).join(''):'<div class="note" style="margin:4px 0 0">無</div>')+'</div>';
+    const fl=(px.flags||[]).slice(-10);
+    h+='<div style="padding:8px 0;border-bottom:1px solid var(--hairline)"><div style="color:var(--ink-2);font-size:13px">近 10 日量價標記</div>'
+      +(fl.length?fl.map(f=>`<div class="num" style="font-size:12.5px;margin-top:4px">${md(f.date)} ${esc((f.tags||[]).join('、'))} · 漲跌 ${pc(f.ret)} · 量 ${f.vol_ratio}×20日均量</div>`).join(''):'<div class="note" style="margin:4px 0 0">無</div>')+'</div>';
+    if(s.deep)h+=_researchDeepHtml(s.deep,px.close,esc);
+    if((s.gaps||[]).length)h+=`<div class="note" style="margin-top:8px">資料缺口：${s.gaps.map(esc).join('；')}</div>`;
+    h+=`<div class="note" style="margin-top:6px">資料日 ${esc(m.asof||'—')}（建檔 ${esc(String(m.generated_at||'').slice(5,16).replace('T',' '))}）· 來源：repo 內既有官方資料檔，零外部請求</div>`;
+    host.innerHTML=h;
+  }
+  function _researchDeepHtml(dp,close,esc){
+    const ST={support:['支持','var(--gold)'],neutral:['中性','var(--ink-3)'],review:['需檢討','var(--caution)'],no_data:['無資料','var(--ink-3)']};
+    let h='<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--hairline)"><div style="font-weight:700;font-size:14px;margin-bottom:6px">深度研究</div>';
+    if(dp.headline)h+=`<div style="font-size:13px;line-height:1.5">${esc(dp.headline)}</div>`;
+    const th=dp.thesis||{};
+    if(th.statement)h+=`<div class="note" style="margin-top:6px">論點：${esc(th.statement)}${th.confirmed_by_user?'':'（尚未經使用者確認）'}</div>`;
+    const ind=th.indicators||[];
+    if(ind.length)h+=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">${ind.map(i=>{const st=ST[i.status]||[i.status,'var(--ink-3)'];return `<span style="white-space:nowrap;font-size:11.5px;padding:4px 10px;border-radius:999px;border:1px solid ${st[1]};color:${st[1]}" title="${esc(i.detail||i.reason||'')}">${esc(i.label)}・${st[0]}</span>`}).join('')}</div>`;
+    const sc=dp.scenario;
+    if(sc&&(sc.rows||[]).length){
+      const all=sc.rows.flatMap(x=>x.price_band||[]).concat(close!=null?[close]:[]);
+      const lo=Math.min(...all),hi=Math.max(...all),span=(hi-lo)||1,x=v=>((v-lo)/span*100).toFixed(1)+'%';
+      h+=`<div style="margin-top:10px;font-size:12.5px;color:var(--ink-2)">${esc(sc.target_year||'')} 情境價格帶${sc.position?'（現價：'+esc(sc.position)+'）':''}</div>`;
+      h+=sc.rows.map(rw=>{const b=rw.price_band||[];return b.length===2?`<div style="display:flex;align-items:center;gap:8px;margin-top:5px"><span style="width:34px;font-size:12px">${esc(rw.name)}</span><div style="position:relative;flex:1;height:10px;background:rgba(var(--fg-rgb),.06);border-radius:5px"><div style="position:absolute;left:${x(b[0])};width:calc(${x(b[1])} - ${x(b[0])});top:0;bottom:0;background:rgba(var(--fg-rgb),.28);border-radius:5px"></div>${close!=null?`<div style="position:absolute;left:${x(close)};top:-3px;bottom:-3px;width:2px;background:var(--gold)"></div>`:''}</div><span class="num" style="font-size:11.5px;width:78px;text-align:right">${b[0]}～${b[1]}</span></div>`:''}).join('');
+      h+=`<div class="note" style="margin-top:4px">金色直線＝現價 ${close!=null?close:'—'}；${esc(sc.assumption_owner||'情境為假設，非預測')}</div>`;
+    }
+    const ch=((dp.guidance||{}).changes||[]).filter(c=>c.latest);
+    if(ch.length)h+='<div style="margin-top:10px;font-size:12.5px;color:var(--ink-2)">說法變化</div>'+ch.map(c=>`<div style="font-size:12px;margin-top:4px">${esc(c.latest.asof||'')} <b>${esc(c.topic_zh||c.topic)}</b>${c.shift?'（'+esc(c.shift)+'）':''}：${c.latest.source_url?`<a href="${esc(c.latest.source_url)}" target="_blank" rel="noopener" style="color:var(--gold)">${esc(c.latest.statement)}</a>`:esc(c.latest.statement)}</div>`).join('');
+    const nx=(dp.next_checkpoints||[])[0];
+    if(nx)h+=`<div class="note" style="margin-top:8px">下一個檢查日：${esc(nx.date)} ${esc(nx.item)}</div>`;
+    if(dp.doc_url)h+=`<div class="note" style="margin-top:4px"><a href="${esc(dp.doc_url)}" target="_blank" rel="noopener" style="color:var(--gold)">研究檔 ›</a></div>`;
+    if((dp.known_gaps||[]).length)h+=`<div class="note" style="margin-top:4px">已知缺口：${dp.known_gaps.map(esc).join('；')}</div>`;
+    return h+'</div>';
   }
   async function renderStockEventsTab(code){
     const host=document.getElementById('stock-events-list');if(!host)return;

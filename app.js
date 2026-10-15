@@ -2003,10 +2003,28 @@
     }
     if(runId!==HYDRATE_HOME_SEQ)return;  // 期間又有一次更新開跑，這批結果作廢，讓最新那次接手
     el.replaceChildren(frag);
+    _safeAsync('applyWatchResearchDots',applyWatchResearchDots);  // 研究室.五-4
     const extNote=document.getElementById('wl-extended-hours-note');
     if(extNote)extNote.style.display=showedExtendedHours?'':'none';
     stampUpdated('home');
     updateDiagBanner();
+  }
+
+  // 研究室.五-4（2026-10-15）：自選股列研究狀態點。讀 research_radar.json 的 dots（scripts/build_research.py）：
+  // review＝有深度研究且論點指標有「需檢討」→紅點；tags＝變化標籤 ≥2 個→藍點；其他不顯示。只是提示去看「研究」分頁，不是訊號。
+  let RESEARCH_DOTS_P=null;
+  async function applyWatchResearchDots(){
+    if(!RESEARCH_DOTS_P)RESEARCH_DOTS_P=fetch('data/research_radar.json?t='+Math.floor(Date.now()/600000))
+      .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(j=>j.dots||{})
+      .catch(e=>{RESEARCH_DOTS_P=null;throw e});
+    const dots=await RESEARCH_DOTS_P;
+    document.querySelectorAll('#wl-list .swipe-wrap').forEach(w=>{
+      const btn=w.querySelector('.swipe-del'),b=w.querySelector('.swipe-row .nm b');
+      if(!btn||!b||b.querySelector('.wl-rdot'))return;
+      const k=dots[btn.dataset.code];if(!k)return;
+      const red=k==='review';
+      b.insertAdjacentHTML('beforeend',`<span class="wl-rdot" data-rdot="${k}" title="${red?'深度研究有指標需檢討':'近期有 2 個以上變化標籤'}，見個股「研究」分頁" style="display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:6px;vertical-align:middle;background:${red?'#e5484d':'#3b82f6'}"></span>`);
+    });
   }
 
   // ══════ 市場頁（大盤指數 / 類股 / 三大法人 / 期貨籌碼）══════
@@ -4422,7 +4440,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-15.0828';
+  const APP_VERSION='2026-10-15.2148';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

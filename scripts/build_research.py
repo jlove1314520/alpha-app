@@ -518,7 +518,15 @@ def main():
             "rules": RULE_TEXT, "liquidity_min_turnover20": LIQ_MIN_TURNOVER, "coverage": cov, "errors": errors[:200], "n_errors": len(errors),
             "not_a_factor": "凍結.二：本檔欄位不得進 scores*.json 或當選股權重"}
     (OUT / "research.json").write_text(json.dumps({"meta": meta, "stocks": stocks}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    radar = {"meta": meta, "lists": lists, "industry_heat": heat, "deep": deep_list}
+    # 研究室.五-4：自選股列研究狀態點（全宇宙、不設流動性門檻）。review＝有深度研究且論點指標有「需檢討」；
+    # tags＝change_tags ≥2 個。只給 App 畫點用，不是分數。
+    dots = {}
+    for c, s in stocks.items():
+        if s.get("deep") and (s["deep"]["thesis"]["counts"].get("review") or 0) > 0:
+            dots[c] = "review"
+        elif len(s["change_tags"]) >= 2:
+            dots[c] = "tags"
+    radar = {"meta": meta, "lists": lists, "industry_heat": heat, "deep": deep_list, "dots": dots}
     (OUT / "research_radar.json").write_text(json.dumps(radar, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     print(f"research.json {len(stocks)} 檔；雷達綜合 {len(lists['綜合變化'])}；深度 {len(deep_list)}；錯誤 {len(errors)}；涵蓋 {cov}")
 

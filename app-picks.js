@@ -208,6 +208,7 @@
     renderMktToggle('picks');onPicksToggleChange();
     renderPicksBoardToggle();
     applySupplyMode();
+    if(SUPPLY_VIEW==='radar'){_safeAsync('hydrateRadar',()=>hydrateRadar(forceReload));return}
     if(SUPPLY_VIEW){_safeAsync('hydrateSupply',()=>hydrateSupply(forceReload));return}
     _safeAsync('loadMainstreamIndustries',loadMainstreamIndustries);
     const cfg=_picksBoardConfig();
@@ -239,13 +240,55 @@
   const SUPPLY_IND_LABEL={I1:'預收增加',I2:'存貨周轉',I3:'毛利率',I4:'資本支出'};
   function applySupplyMode(){
     const sc=document.getElementById('scr-picks');if(sc)sc.classList.toggle('supply-mode',!!SUPPLY_VIEW);
-    const card=document.getElementById('picks-supply-card');if(card)card.style.display=SUPPLY_VIEW?'':'none';
+    const card=document.getElementById('picks-supply-card');if(card)card.style.display=SUPPLY_VIEW==='supply'?'':'none';
+    const rc=document.getElementById('picks-radar-card');if(rc)rc.style.display=SUPPLY_VIEW==='radar'?'':'none';
   }
-  function switchSupplyView(){
-    if(SUPPLY_VIEW)return;
-    SUPPLY_VIEW=true;
+  // 研究室.五-2：SUPPLY_VIEW 由布林改成 false｜'supply'｜'radar'（兩種都是「非排行榜」檢視，隱藏 .picks-lb-only）
+  function switchSupplyView(kind){
+    kind=kind==='radar'?'radar':'supply';
+    if(SUPPLY_VIEW===kind)return;
+    SUPPLY_VIEW=kind;
     renderPicksBoardToggle();applySupplyMode();
-    _safeAsync('hydrateSupply',()=>hydrateSupply(false));
+    if(kind==='radar')_safeAsync('hydrateRadar',()=>hydrateRadar(false));
+    else _safeAsync('hydrateSupply',()=>hydrateSupply(false));
+  }
+  // ══════ 研究室.五-2（2026-10-15）變化雷達：讀 research_radar.json 的 lists，只列描述性變化，不是買進訊號 ══════
+  let RADAR_CACHE=null,RADAR_LIST='綜合變化';
+  const RADAR_ORDER=['綜合變化','營收加速','營收創新高','毛利率跳升','營收轉弱','法說將至','帶量突破','創高量縮','法人背離','重大訊息'];
+  async function hydrateRadar(forceReload){
+    const listEl=document.getElementById('radar-list');if(!listEl)return;
+    if(RADAR_CACHE&&!forceReload){renderRadar();return}
+    listEl.innerHTML=skeletonRowsHtml(6);
+    try{
+      const t0=performance.now();
+      const res=await fetch('data/research_radar.json?t='+Math.floor(Date.now()/600000));
+      if(!res.ok)throw new Error('HTTP '+res.status);
+      RADAR_CACHE=await res.json();
+      window.__radarLoadMs=Math.round(performance.now()-t0);  // 冒煙測試量測用（雷達檔載入 < 1 秒）
+      renderRadar();
+    }catch(e){
+      console.warn('[hydrateRadar]',e);recordGlobalError('hydrateRadar',e);
+      listEl.innerHTML=`<div class="note">變化雷達載入失敗（${_autoEsc(e.message)}）。此檔由 scripts/build_research.py 每日排程產生。</div>`;
+    }
+  }
+  function switchRadarList(name){RADAR_LIST=name;renderRadar()}
+  function renderRadar(){
+    const esc=_autoEsc,d=RADAR_CACHE||{},m=d.meta||{},lists=d.lists||{};
+    const names=RADAR_ORDER.filter(n=>n in lists).concat(Object.keys(lists).filter(n=>!RADAR_ORDER.includes(n)));
+    if(!names.includes(RADAR_LIST))RADAR_LIST=names[0]||'';
+    document.getElementById('radar-meta-line').textContent=`資料日 ${m.asof||'—'}（建檔 ${String(m.generated_at||'').slice(5,16).replace('T',' ')}）· 只含流動性門檻以上的股票`;
+    document.getElementById('radar-chips').innerHTML=names.map(n=>chip(`${esc(n)} ${(lists[n]||[]).length}`,n===RADAR_LIST,`switchRadarList('${esc(n)}')`)).join('');
+    const rules=m.rules||{};
+    document.getElementById('radar-rule').textContent=RADAR_LIST==='綜合變化'?'綜合變化＝同時觸發的變化標籤數（描述性，非分數）':(rules[RADAR_LIST]?`規則：${rules[RADAR_LIST]}`:'');
+    const rows=lists[RADAR_LIST]||[];
+    const pc=v=>v==null?'—':(v>0?'+':'')+(v*100).toFixed(1)+'%';
+    const listEl=document.getElementById('radar-list');
+    if(!rows.length){listEl.innerHTML='<div class="note">今天沒有股票觸發這個變化。</div>';return}
+    listEl.innerHTML=rows.map(r=>`<div class="press" style="padding:9px 0;border-bottom:1px solid var(--hairline);cursor:pointer" onclick="openStock('${esc(r.code)}')">`
+      +`<div style="display:flex;justify-content:space-between;gap:8px"><b style="font-size:13.5px">${esc(r.name||'')} ${esc(r.code)}</b><span class="note" style="margin:0">${esc(r.industry||'')}</span></div>`
+      +`<div class="note" style="margin:3px 0 0">${(r.tags||[]).map(esc).join('・')}</div>`
+      +`<div class="num" style="display:flex;gap:14px;margin-top:3px;font-size:12px;color:var(--ink-2)"><span>近3月營收年增 ${pc(r.rev3_yoy)}</span><span>20日漲跌 ${pc(r.ret20)}</span></div></div>`).join('')
+      +`<div class="note" style="margin-top:6px">共 ${rows.length} 檔，點一列看個股「研究」分頁同一份資料。</div>`;
   }
   async function hydrateSupply(forceReload){
     const listEl=document.getElementById('supply-list');if(!listEl)return;
@@ -334,7 +377,8 @@
     const el=document.getElementById('picks-board-toggle');if(!el)return;
     const mk=(id)=>`<span class="mtg-opt press${(!SUPPLY_VIEW&&PICKS_BOARD===id)?' on':''}" style="flex:1;text-align:center" onclick="switchPicksBoard('${id}')">${BOARD_CONFIG[id].title}</span>`;
     el.innerHTML=Object.keys(BOARD_CONFIG).map(mk).join('')
-      +`<span class="mtg-opt press${SUPPLY_VIEW?' on':''}" style="flex:1;text-align:center" onclick="switchSupplyView()">供給觀察</span>`;
+      +`<span class="mtg-opt press${SUPPLY_VIEW==='supply'?' on':''}" style="flex:1;text-align:center" onclick="switchSupplyView('supply')">供給觀察</span>`
+      +`<span class="mtg-opt press${SUPPLY_VIEW==='radar'?' on':''}" style="flex:1;text-align:center" onclick="switchSupplyView('radar')">變化雷達</span>`;
   }
   // 沒有公司名稱（null/缺欄位）時退回只顯示代號，不要顯示 "null"/"undefined" 這種假名稱。
   function pickLabel(r){

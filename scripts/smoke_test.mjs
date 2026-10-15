@@ -3067,7 +3067,8 @@ async function runSmokeTest(baseUrl, headless = true) {
     if (ia.set0.adv !== 0 || ia.set0.common !== ia.set0.nCommon) iaErrs.push(`設定頁預設應只顯示常用（${JSON.stringify(ia.set0)}）`);
     if (ia.set1.common !== 0 || ia.set1.adv < ia.set0.nAdv - 1) iaErrs.push(`切到進階應只顯示進階（${JSON.stringify(ia.set1)}）`);
     for (const t of ["券商帳戶", "自動投資", "通知", "自選股", "顯示偏好", "破億試算"]) if (!ia.commonTitles.includes(t)) iaErrs.push(`常用缺「${t}」`);
-    if (JSON.stringify(ia.stockTabs) !== JSON.stringify(["總覽", "籌碼", "財務", "事件"])) iaErrs.push(`個股頁分頁應為總覽／籌碼／財務／事件：${ia.stockTabs}`);
+    // 研究室.五（2026-10-15 總司令交辦「個股頁『研究』分頁」）：4 分頁之後加第 5 個「研究」
+    if (JSON.stringify(ia.stockTabs) !== JSON.stringify(["總覽", "籌碼", "財務", "事件", "研究"])) iaErrs.push(`個股頁分頁應為總覽／籌碼／財務／事件／研究：${ia.stockTabs}`);
     if (ia.more.some(m => !m || m.open || m.n < 1)) iaErrs.push(`市場頁「更多」應存在、預設收合且有卡：${JSON.stringify(ia.more)}`);
     // 個股頁「財務」分頁同時顯示營收與財報
     await page.evaluate(() => openStock("2330"));
@@ -5154,6 +5155,68 @@ async function runSmokeTest(baseUrl, headless = true) {
     }
   } catch (e) { frErrs.push(`測試本身出錯：${e.message || e}`); }
   record("158. 資料新鮮度表 market.yml 每日項目讀 STATUS.json crons、讀不到才退回舊時刻，不再寫死 run:[6,10]（先.九十七-R8）", frErrs.length === 0, frErrs.join("; ") || frInfo);
+
+  // 159.【研究室.五（2026-10-15）】個股「研究」分頁／選股頁「變化雷達」／自選股研究狀態點：
+  // ①研究分頁有免責聲明 ②雷達頁有「不是買進訊號」那一行 ③research 節缺少時只顯示一行空狀態（尚未建檔｜原因｜下一步）
+  // ④沒有「建置中」佔位字 ⑤雷達檔載入 < 1 秒（Resource Timing，同 measure_first_load.mjs 用瀏覽器實測時間的做法）
+  // ＋自選股狀態點：review→紅、tags→藍、其他不顯示。
+  const rlabErrs = []; let rlabInfo = "";
+  try {
+    await page.evaluate(() => window.openStock("2330"));
+    await page.waitForTimeout(300);
+    await page.evaluate(() => document.querySelector('#stock-tabs button[data-sub="research"]').click());
+    await page.waitForFunction(() => { const b = document.getElementById("stock-research-body"); return b && /近3月營收年增|尚未建檔/.test(b.textContent); }, null, { timeout: 10000 });
+    const a = await page.evaluate(() => {
+      const vis = el => !!el && el.offsetParent !== null;
+      const d = document.getElementById("stock-research-disclaimer"), b = document.getElementById("stock-research-body");
+      return { dVis: vis(d), dTxt: d ? d.textContent : "", bTxt: b.textContent, bVis: vis(b) };
+    });
+    if (!a.bVis) rlabErrs.push("研究分頁點了沒顯示");
+    if (!a.dVis || !/不是買賣訊號/.test(a.dTxt)) rlabErrs.push("① 研究分頁沒有可見的免責聲明：" + a.dTxt);
+    if (!/近3月營收年增/.test(a.bTxt)) rlabErrs.push("2330 研究分頁沒有營收列：" + a.bTxt.slice(0, 80));
+    // ③ 不在研究室名冊的代號（0050 是 ETF）→ 只顯示一行空狀態
+    await page.evaluate(() => window.openStock("0050"));
+    await page.waitForTimeout(300);
+    await page.evaluate(() => document.querySelector('#stock-tabs button[data-sub="research"]').click());
+    await page.waitForFunction(() => { const b = document.getElementById("stock-research-body"); return b && /尚未建檔|近3月營收年增/.test(b.textContent); }, null, { timeout: 10000 });
+    const e = await page.evaluate(() => { const b = document.getElementById("stock-research-body"); return { n: b.children.length, t: b.textContent }; });
+    if (e.n !== 1 || !/^尚未建檔｜[^｜]+｜[^｜]+$/.test(e.t)) rlabErrs.push(`③ 0050 空狀態不是一行「尚未建檔｜原因｜下一步」：${e.n} 個元素／${e.t.slice(0, 80)}`);
+    // ② ⑤ 變化雷達
+    await page.evaluate(() => go("picks"));
+    await page.waitForTimeout(300);
+    await page.evaluate(() => { RADAR_CACHE = null; performance.clearResourceTimings(); switchSupplyView("radar"); });
+    await page.waitForFunction(() => document.querySelectorAll("#radar-list > div.press").length > 0 || /載入失敗/.test(document.getElementById("radar-list").textContent), null, { timeout: 10000 });
+    const r = await page.evaluate(() => {
+      const vis = el => !!el && el.offsetParent !== null;
+      const ns = document.getElementById("radar-not-signal");
+      const ent = performance.getEntriesByType("resource").filter(x => /research_radar\.json/.test(x.name)).pop();
+      return { nsVis: vis(ns), nsTxt: ns ? ns.textContent : "", rows: document.querySelectorAll("#radar-list > div.press").length,
+        chips: document.querySelectorAll("#radar-chips > span").length, lbHidden: !vis(document.getElementById("picks-list-card")),
+        ms: ent ? Math.round(ent.duration) : window.__radarLoadMs, cardTxt: document.getElementById("picks-radar-card").textContent };
+    });
+    if (!r.nsVis || !r.nsTxt.includes("不是買進訊號")) rlabErrs.push("② 雷達頁沒有可見的「不是買進訊號」那一行");
+    if (!r.rows) rlabErrs.push("雷達沒有列");
+    if (!r.lbHidden) rlabErrs.push("雷達檢視時排行榜沒隱藏");
+    if (!(r.ms < 1000)) rlabErrs.push(`⑤ 雷達檔載入 ${r.ms} ms（≥1 秒）`);
+    if (/建置中/.test(r.cardTxt + a.bTxt + e.t)) rlabErrs.push("④ 出現「建置中」佔位字");
+    // 自選股狀態點（純 DOM，假資料只注入 dots 對照表，不改任何資料檔）
+    const d = await page.evaluate(async () => {
+      const box = document.createElement("div"); box.id = "wl-list-test";
+      const mk = c => `<div class="swipe-wrap"><button class="swipe-del" data-code="${c}"></button><div class="swipe-row"><div class="nm"><b>${c}</b></div></div></div>`;
+      const host = document.getElementById("wl-list"); const saved = host.innerHTML;
+      host.innerHTML = mk("AAAA") + mk("BBBB") + mk("CCCC");
+      const savedP = RESEARCH_DOTS_P; RESEARCH_DOTS_P = Promise.resolve({ AAAA: "review", BBBB: "tags" });
+      await applyWatchResearchDots();
+      const k = c => { const s = host.querySelector(`.swipe-del[data-code="${c}"]`).parentNode.querySelector(".wl-rdot"); return s ? s.dataset.rdot + ":" + s.style.background : "none"; };
+      const out = { a: k("AAAA"), b: k("BBBB"), c: k("CCCC") };
+      host.innerHTML = saved; RESEARCH_DOTS_P = savedP;
+      return out;
+    });
+    if (!/^review:/.test(d.a) || !/^tags:/.test(d.b) || d.c !== "none") rlabErrs.push("自選股狀態點不對：" + JSON.stringify(d));
+    rlabInfo = `2330 研究分頁有免責聲明；0050 空狀態「${e.t.slice(0, 30)}…」；雷達 ${r.chips} 個名單、${r.rows} 列、載入 ${r.ms} ms；狀態點 ${JSON.stringify(d)}`;
+    await page.evaluate(() => switchPicksBoard("value"));
+  } catch (e) { rlabErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("159. 研究分頁免責聲明／雷達「不是買進訊號」／缺 research 一行空狀態／無「建置中」／雷達檔 <1 秒／自選股狀態點（研究室.五）", rlabErrs.length === 0, rlabErrs.join("; ") || rlabInfo);
 
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。

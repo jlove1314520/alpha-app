@@ -43,7 +43,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(mq.addEventListener)mq.addEventListener('change',h);else if(mq.addListener)mq.addListener(h)}
 })();
 </script>
-<link rel="stylesheet" href="app.css?v=2026-10-15.0828">
+<link rel="stylesheet" href="app.css?v=2026-10-15.2148">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -488,6 +488,17 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" id="supply-defs" style="margin-top:10px"></div>
     </div>
 
+    <!-- 研究室.五-2（2026-10-15）：變化雷達，讀 data/research_radar.json 的 lists（scripts/build_research.py，零外部請求）。
+         只列「最近哪裡變了」的描述性名單，不是排名分數、不是買進訊號。 -->
+    <div class="card tw-only" id="picks-radar-card" style="display:none;margin-top:10px">
+      <h3>變化雷達</h3>
+      <div class="note" id="radar-not-signal" style="color:var(--caution);font-weight:600">變化排序不是買進訊號，規則未經回測</div>
+      <div class="note" id="radar-meta-line" style="margin-top:6px">載入中…</div>
+      <div id="radar-chips" style="display:flex;gap:8px;margin-top:10px;overflow-x:auto;padding-bottom:4px"></div>
+      <div class="note" id="radar-rule" style="margin-top:6px"></div>
+      <div id="radar-list" style="margin-top:6px"></div>
+    </div>
+
     <!-- 美股/期貨：見 PROGRESS.md -->
     <div class="card picks-lb-only" id="picks-us-panel" style="display:none">
       <h3>美股評分 <span data-ui-aux style="font-size:11px;color:var(--caution);font-weight:600">未經回測</span></h3>
@@ -609,6 +620,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <button data-sub="chip" data-subs="chip">籌碼</button>
       <button data-sub="fin" data-subs="rev,fin">財務</button>
       <button data-sub="events" data-subs="events">事件</button>
+      <button data-sub="research" data-subs="research">研究</button>
     </div>
 
     <div class="subscreen active" id="sub-ov">
@@ -783,6 +795,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <h3>重大訊息</h3>
         <div id="us8k-table"><div class="note">—</div></div>
         <div class="note" id="us8k-note">來源：SEC EDGAR Form 8-K（GitHub Actions 排程）</div>
+      </div>
+    </div>
+
+    <!-- 研究室.五-1（2026-10-15）：個股「研究」分頁，讀 data/by_code/<代號>.json 的 research 節（scripts/build_research.py，
+         零外部請求）。變化標籤只是描述「最近哪裡變了」，規則未經回測、不是買賣訊號；點到才載入。 -->
+    <div class="subscreen" id="sub-research">
+      <div class="card">
+        <h3>研究紀錄</h3>
+        <div id="stock-research-body"><div class="note">載入中…</div></div>
+        <div class="note" id="stock-research-disclaimer" style="margin-top:10px;color:var(--caution);font-weight:600">研究紀錄與變化偵測；變化標籤規則未經回測，不是買賣訊號。</div>
       </div>
     </div>
 
@@ -1516,6 +1538,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-15.0828"></script>
+<script src="app.js?v=2026-10-15.2148"></script>
 </body>
 </html>

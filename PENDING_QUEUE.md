@@ -19912,7 +19912,7 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
 
 - [ ] **研究室.二-驗收 （補件，來源：研究室.二 驗收門檻需累積 20 個交易日）2026-11-12 起讀 data/research.json 的 meta.coverage.with_foreign 是否 ≥1,900（修正 2026-10-15 生效、只往後累積不回補；with_foreign 要求近 20 個交易日外資無缺值）；未達就列出仍缺值的上櫃代號數與缺值日期**（互動視窗執行；時間閘：2026-11-12 後）
 
-- [ ] **研究室.三 月營收歷史補齊（App 顯示用回補檔）**（DevQueue 可執行）〔進度 2026-10-15 08:2x 互動視窗：FinMind 不帶 data_id 被拒（免費層 400）、本機快取只到 2024-12 → 走「逐檔抓、記斷點」分支；程式 scripts/backfill_revenue_display.py（每輪上限 150 檔、已完成代號記在 data/revenue_backfill.json meta.done），第 1 輪 110/1,979 檔後 FinMind 402 上限、封鎖到 10:07。**續跑：解封後每輪跑一次 `python scripts/backfill_revenue_display.py`，碰 402 就停、下一輪再跑；全部完成（meta.remaining=0）後跑 build_research＋selftest_research 看 coverage.with_rev3_qoq ≥1,800、smoke，再標 - [x]**。holdout 守門已由先.一百-4 完成（DISPLAY_ONLY_DATA_FILES＋selftest_display_only_files）〕
+- [ ] **研究室.三 月營收歷史補齊（App 顯示用回補檔）**（DevQueue 可執行）〔進度 2026-10-15 08:2x 互動視窗：FinMind 不帶 data_id 被拒（免費層 400）、本機快取只到 2024-12 → 走「逐檔抓、記斷點」分支；程式 scripts/backfill_revenue_display.py（每輪上限 150 檔、已完成代號記在 data/revenue_backfill.json meta.done），第 1 輪 110/1,979 檔後 FinMind 402 上限、封鎖到 10:07。**續跑：解封後每輪跑一次 `python scripts/backfill_revenue_display.py`，碰 402 就停、下一輪再跑；全部完成（meta.remaining=0）後跑 build_research＋selftest_research 看 coverage.with_rev3_qoq ≥1,800、smoke，再標 - [x]**。holdout 守門已由先.一百-4 完成（DISPLAY_ONLY_DATA_FILES＋selftest_display_only_files）〕　〔2026-10-15 21:48 DevQueue 20261015-214141：封鎖已過（blocked_until 10:08），改回 - [ ]〕~~⛔ 自走中止（2026-10-15 09:01）~~：FinMind HTTP 402 封鎖到 2026-10-15 10:08（data/rate_limit_state.json blocked_until），超過本輪 09:46 收尾時間；解除條件：10:08 後下一輪改回 - [ ] 續跑 backfill_revenue_display.py（斷點 1506，剩 1,869 檔）
   做法：
   1. 新寫 `scripts/backfill_revenue_display.py`：用 FinMind `TaiwanStockMonthRevenue`，以「月份」為單位抓全市場（不帶 data_id），補 2024-12～2026-06 共 19 次請求。節流共用 rate_limit_state，token 讀環境變數。
   2. 寫入 `data/revenue_backfill.json`，格式為 `{"meta":{source,generated_at,months}, "stocks":{代號:[{year,month,revenue,yoy}]}}`。不改 fundamentals.json。
@@ -19926,7 +19926,7 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
   - FinMind 不帶 data_id 被拒 → 改用研究端本機 parquet 快取。
   - 快取也缺 → 逐檔抓，每輪上限 300 檔，記斷點，維持 `- [ ]` 續跑。
 
-- [ ] **研究室.四 季報補齊（上櫃＋2025 起缺季）**（DevQueue 可執行）
+- [ ] **研究室.四 季報補齊（上櫃＋2025 起缺季）**（DevQueue 可執行）　〔2026-10-15 21:48 DevQueue 20261015-214141：封鎖已過，改回 - [ ]〕~~⛔ 自走中止（2026-10-15 09:01）~~：FinMind HTTP 402 封鎖到 2026-10-15 10:08，與研究室.三共用每小時 600 上限；解除條件：10:08 後且研究室.三該輪未跑時，改回 - [ ] 續跑 backfill_financials_display.py --max 300（剩 1,945 檔）
   〔進度 2026-10-15 DevQueue 20261015-080102（第 1 批，未完成，維持 - [ ]）：
   ①第 1 步「TPEx 上櫃綜合損益表」查證後**已存在**（.github/scripts/update_stock_financials.py EXTRA_SOURCES 已含 mopsfin_t187ap06/07_O_ci 等 6 類）；上櫃 715 檔卡在 2024Q4 的根因是 2025Q1～2026Q1 斷層（openapi 只給最新一季累計數，缺上一季累計就無法差分出單季），不是端點沒接——補齊 2 步即可解。
   ②第 2 步原案「FinMind TaiwanStockFinancialStatements 以日期抓全市場」實測 HTTP 400（"Your level is register"，免費層不開放不帶 data_id）；本機 parquet 快取只到 2024-12-31；→ 照研究室.三同一分支改逐檔：新寫 scripts/backfill_financials_display.py（每輪上限 300 檔、季報過期者優先、每 25 檔中途存檔、--until 時間上限、滾動 1 小時用量封頂、402/403/428/429 即停），輸出 data/financials_backfill.json（2025Q1～2026Q2 單季：revenue／gross_margin_pct／op_margin_pct／net_income_parent／eps）。單位核對：6488 2024Q4 營收與官方管線單季值相同、2026Q1＋Q2＝官方累計數。
@@ -19944,7 +19944,8 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
   做法：讀改寫 data/rate_limit_state.json 的那段加跨行程檔案鎖（可沿用 scripts/git_op_lock.py 的作法或 msvcrt.locking），sleep 後重新讀一次狀態再寫；鎖本身失敗只降級成警告、照舊送請求（十二節）。
   驗收：兩支行程各送 10 次假請求（mock requests，不打 FinMind），狀態檔 calls_by_minute 合計＝20、相鄰 last_request_at 間隔都 ≥ 最小間隔。→ 若 mock 很難做，改成單元測試直接呼叫 _bump_call_counter 兩個 thread 並行 → 只有鎖壞掉時才停。
 
-- [ ] **研究室.五 App 顯示**（DevQueue 可執行）
+- [x] **研究室.五 App 顯示**（DevQueue 可執行）
+  〔完成 2026-10-15 DevQueue 20261015-214141：第 1、2、4 小項的程式碼是 09:01 那輪（被外層 60 分鐘砍掉、未 commit）留在工作目錄的，本輪逐段讀過後驗證提交——①個股頁第 5 分頁「研究」（app-stock.js renderStockResearchTab：變化標籤晶片點開規則文字／營收年增季增／毛利率含過期原因／本益比／MA20・MA60／20 日漲跌／外資投信 10 日／千張大戶／下一場法說／7 日重大訊息連結／10 日量價標記／有 deep 時 headline・論點晶片・情境價格帶標現價・說法變化・下一檢查日・研究檔連結；底部固定免責）②選股頁「變化雷達」（app-picks.js hydrateRadar，10 個名單晶片、頂部固定「變化排序不是買進訊號，規則未經回測」）④自選股研究狀態點（app.js applyWatchResearchDots，讀 research_radar.json 新增的 dots：review 紅／tags 藍；build_research.py 產生 dots，現檔 164 檔有點）。證據：冒煙 158 項全過（新增第 159 項：2330 研究分頁有免責、0050 空狀態一行「尚未建檔｜原因｜下一步」、雷達 10 名單 50 列載入 6 ms、無「建置中」、狀態點紅藍無三種情況），個股頁分頁清單測試同步改為 5 分頁。[自行裁量] 情境價格帶用 CSS 橫條不另引圖表庫；美股代號進研究分頁顯示一行空狀態。〕
   〔進度 2026-10-15 DevQueue 20261015-080102：第 3 小項「市場頁產業營收熱度表」已做（app-market.js loadIndustryHeat＋index.html「更多」區第一張卡，讀 research_radar.json industry_heat，依營收年增中位數排序，附資料日與「未經回測、非投資建議」）；Playwright 實測 33 列、pageerror 0；冒煙 157 項全過。[自行裁量] 卡片放進市場頁「更多」收合區（市場頁主畫面已滿，先.七十二-B7 慣例）。尚餘第 1、2、4 小項，維持 - [ ]〕
   做法（用詞依 `docs` 人因改版用詞表）：
   1. **個股頁「研究」分頁**（讀 by_code 的 research 節）。由上而下：
