@@ -271,7 +271,11 @@
         +(prev?`<div class="note" style="margin-top:4px">上一筆有效：資料日 ${marginDataDay(prev)}　${fmt(prev)}</div>${raw(prev)}`:'<div class="note">尚無有效的上一筆</div>')+calHead+`</div>`;
     }else{
       const lv=marginLevel(marginVal(last));
-      sumEl.innerHTML=`<div style="padding:6px 0 10px"><div id="margin-main" style="font-size:28px;font-weight:700;color:${lv?lv.c:'var(--ink)'}">${fmt(last)}</div><div class="note">${lv?lv.l+' · ':''}資料日 ${marginDataDay(last)}</div>${calHead}${raw(last)}</div>`;
+      // 先.一〇四-9：校準誤差超過門檻（warn 或最大誤差 > warn_pp）→ 不給假精確的一位小數，改「約 低–高%」（±最大誤差、取整）、字級降一級
+      const _v=marginVal(last),_err=calib&&typeof calib.max_err_pp==='number'?calib.max_err_pp:null;
+      const _fuzzy=_v!=null&&_err!=null&&(calib.warn||_err>(calib.warn_pp!=null?calib.warn_pp:0.5));
+      const mainTxt=_fuzzy?`約 ${Math.floor(_v-_err)}–${Math.ceil(_v+_err)}%`:fmt(last);
+      sumEl.innerHTML=`<div style="padding:6px 0 10px"><div id="margin-main" data-fuzzy="${_fuzzy?1:0}" title="${_fuzzy?'校準值 '+fmt(last)+'，誤差最大 ±'+_err+' pp':''}" style="font-size:${_fuzzy?22:28}px;font-weight:700;color:${lv?lv.c:'var(--ink)'}">${mainTxt}</div>${_fuzzy?`<div class="note" id="margin-ck-val" style="margin-top:0">校準值 ${fmt(last)}（誤差最大 ±${_err} pp，數字僅供參考）</div>`:''}<div class="note">${lv?lv.l+' · ':''}資料日 ${marginDataDay(last)}</div>${calHead}${raw(last)}</div>`;
     }
     let chartHtml=marginChart(valid);
     try{
@@ -291,7 +295,8 @@
     const ee=document.getElementById('chips-entry-margin');
     if(ee){
       if(last.data_incomplete){ee.textContent='資料不完整'+(prev&&marginVal(prev)!=null?'（上一筆 '+marginVal(prev).toFixed(1)+'%）':'');ee.style.color='var(--warn)'}
-      else{const lv=marginLevel(marginVal(last));ee.textContent=(marginVal(last)!=null?marginVal(last).toFixed(1)+'%':'—')+(lv?'·'+lv.l:'');ee.style.color=lv?lv.c:'var(--ink)'}
+      else{const lv=marginLevel(marginVal(last));const mm=document.getElementById('margin-main');  // 先.一〇四-9：入口卡跟主數字同一種寫法
+        ee.textContent=(mm&&mm.dataset.fuzzy==='1'?'約 ':'')+(marginVal(last)!=null?marginVal(last).toFixed(1)+'%':'—')+(lv?'·'+lv.l:'');ee.style.color=lv?lv.c:'var(--ink)'}
     }
   }
 
