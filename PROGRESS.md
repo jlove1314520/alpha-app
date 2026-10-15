@@ -1,3 +1,21 @@
+## 2026-10-16 04:30（DevQueue 20261016-040101）先.一〇三-6 捲動只捲 #main；先.一〇三-7 STATUS 通用日期解析；先.一〇三-8 融資維持率（第 1 批）
+
+等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未新增）。
+
+- **先.一〇三-6 ✅（a1d42def78）**：捲動與面板。
+  - 做了什麼：`uiScrollIntoView` 對 #main 內的元素改用 `main.scrollTo`（支援 start／center／end／nearest、保留減少動態），研究室跳轉也改走它；底部面板 `.sheet` 關閉時 `display:none`（原本停在畫面下方，把 #app 撐出 666px 捲動空間，程式捲動會把導覽列一起捲走），開啟改滑入動畫、關閉改立即收起；選股子分頁文字過長以省略號收尾、標題欄可縮。
+  - 證據：修前 #app scrollHeight 1518／clientHeight 852，修後 852／852；冒煙新增第 161 項（七頁 main.scrollWidth ≤ clientWidth、關閉面板 display:none、設定頁／交易頁跳到最後一張卡後 #app.scrollTop=0、導覽列底＝852）PASS；第 157 項改成同時攔 scrollTo，檢查標準不變，PASS；冒煙全部通過。
+  - [自行裁量]：選股切換列在 Chromium 320／360／393 寬（含字級放大 25%）與 WebKit 375 寬都量不到溢出（先.一〇四-13 已改兩排），只補防護。未在實機 iPhone 驗證。
+- **先.一〇三-7 ✅（a989fd6d83）**：監控誤報。
+  - 做了什麼：`generate_status_json.py` 新增通用解析（讀 generated_at／fetched_at／data_date 等，頂層或 meta 底下）；沒日期欄位標 no_date、四個設定檔標 static；週／月頻檔給 192／840 小時門檻。pipeline_registry 的 AlphaPriceHistory 改指 `data/price_history/_meta.json`，方法頁同步。`pipeline_freshness.py` 新增 `log_last_timestamp`，7 條 cycle log 改讀 log 內最後時間戳。
+  - 證據：離線呼叫 build_data_files()：error 77→0（ok 79、stale 16、no_date 11、static 4）；evaluate() 各 cycle log 正確讀到 log 內時間；冒煙全部通過。
+  - ⚠️ 未驗證：本機沒重產 STATUS.json（要打 GitHub API），等下一班 market.yml 確認。
+  - **新發現（真訊號）**：改讀 log 內時間後，AlphaMarathon／AlphaHypothesisQueue 最後一次在 10/13 12:05，已 64 小時沒跑——舊的 mtime 判斷看不出來。需要查這兩條自走是否被刻意停用（本輪未查）。
+  - [自行裁量]：其餘 stale 的 12 個檔更新頻率沒查證，先不放寬門檻，讓它們照實亮 stale。
+- **先.一〇三-8 第 1 批（a882e4fd69，條目維持 - [ ]）**：融資維持率列日期改用資料日、同資料日只留一列、休市日不出列；既有檔 42→27 列、同日重複 0。冒煙全部通過。**尚餘**：9/1 起缺 7 個交易日（09-01、09-07、09-08、09-15、10-01、10-05、10-13）要用官方 MI_MARGN 逐日補（7 次請求、間隔 ≥3 秒），下一輪做。
+- 佇列深度：`- [ ]` 21 項（≥12）、DevQueue 可執行 11 項（≥6），不需補件。
+- 共用工作目錄：其他排程的未提交檔（audit_report、quotes_ibkr 等）未掃入本輪 commit；先.一〇三-7 的 pipeline_registry.json 一併帶入了排程先前寫入的 fault_history 計數。
+
 ## 2026-10-16 03:35（DevQueue 20261016-030101）先.一〇三-4 月營收去重／法說看舉行日；先.一〇三-5 模擬帳戶單一來源
 
 等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未新增）。
