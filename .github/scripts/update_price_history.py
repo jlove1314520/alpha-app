@@ -947,6 +947,83 @@ def merge_reductions(ledger: dict, items: list[dict], today_iso: str) -> int:
     return added
 
 
+# 先.一〇三-10c（2026-10-16）：分割／變更面額改由官方表自動入帳（取代逐筆手寫 SPLITS）。
+# 調整式與減資相同（係數＝恢復買賣參考價／停止買賣前收盤價），所以併進帳本 reductions，
+# 沿用 apply_reduction_adjustments 的定錨與「來源已含調整」兩道守門；reason 標事件類別。
+SPLIT_TWSE_ETF_URL = "https://www.twse.com.tw/rwd/zh/split/TWTCAU"      # 上市 ETF 分割／反分割，可查區間
+PARVALUE_TWSE_URL = "https://www.twse.com.tw/rwd/zh/change/TWTB8U"      # 上市變更面額，可查區間
+PARVALUE_TPEX_URL = "https://www.tpex.org.tw/www/zh-tw/bulletin/pvChgAnn"  # 上櫃變更面額預告表，只有當日、每日累積
+
+
+def _parse_twse_resume_table(body: dict, code_field: str, src: str, reason_fn) -> list[dict]:
+    """TWTCAU／TWTB8U 共用：欄位名對應（不寫死位置），只回參考價已公布的事件。"""
+    if body.get("stat") != "OK" or not body.get("data"):
+        return []
+    fields = list(body.get("fields") or [])
+    need = ("恢復買賣日期", code_field, "停止買賣前收盤價格", "恢復買賣參考價")
+    if any(k not in fields for k in need):
+        raise RuntimeError(f"{src} 欄位對應失敗（TWSE 可能改版了欄位名稱）：{fields}")
+    i_d, i_c, i_pre, i_ref = (fields.index(k) for k in need)
+    out = []
+    for row in body["data"]:
+        d, code = _roc_slash_to_iso(row[i_d]), str(row[i_c] or "").strip()
+        pre, ref = _num(row[i_pre]), _num(row[i_ref])
+        if d and code and pre and ref and pre > 0 and ref > 0:
+            out.append({"code": code, "resume_date": d, "pre_close": pre, "ref_price": ref,
+                        "reason": reason_fn(fields, row), "source": src})
+    return out
+
+
+def _parse_tpex_parvalue(body: dict) -> list[dict]:
+    """pvChgAnn 沒有「停止買賣前收盤價」欄，改用 換股率×參考價 還原（官方公式：參考價＝前收÷換股率）。"""
+    out = []
+    for t in body.get("tables") or []:
+        fields = list(t.get("fields") or [])
+        if not t.get("data"):
+            continue
+        need = ("證券代號", "變更股票面額換股率", "恢復買賣日期", "恢復買賣參考價")
+        if any(k not in fields for k in need):
+            raise RuntimeError(f"TPEx pvChgAnn 欄位對應失敗（可能改版）：{fields}")
+        i_c, i_x, i_d, i_ref = (fields.index(k) for k in need)
+        for row in t["data"]:
+            code, x, ref = str(row[i_c] or "").strip(), _num(row[i_x]), _num(row[i_ref])
+            d = _roc_slash_to_iso(row[i_d])
+            if d and code and x and ref and x > 0 and ref > 0:
+                out.append({"code": code, "resume_date": d, "pre_close": round(ref * x, 6), "ref_price": ref,
+                            "reason": f"變更面額（換股率 {x:g}）", "source": "TPEx pvChgAnn",
+                            "note": "pre_close＝換股率×恢復買賣參考價（官方表無停止買賣前收盤價欄）"})
+    return out
+
+
+def fetch_split_parvalue_events(today_iso: str, errors: list) -> list[dict]:
+    """上市 TWTCAU、TWTB8U（今天前 120 天～後 60 天，同 TWTAUU）＋上櫃 pvChgAnn（當日）各 1 次請求。
+    TWSE 兩支與 TWTAUU 同屬 rwd 減資／參考價家族，共用節流來源名 REDUCTION_SOURCE；TPEx 用 tpex_www。
+    三支各自 try：一支失敗只略過那一支（十二節）。"""
+    today = datetime.strptime(today_iso, "%Y-%m-%d")
+    params = {"response": "json", "startDate": (today - timedelta(days=120)).strftime("%Y%m%d"),
+              "endDate": (today + timedelta(days=60)).strftime("%Y%m%d")}
+    out = []
+    jobs = [
+        ("split_twse_twtcau", lambda: _parse_twse_resume_table(
+            _get_retry(SPLIT_TWSE_ETF_URL, REDUCTION_SOURCE, params=params, timeout=20).json(), "ETF代號",
+            "TWSE TWTCAU", lambda f, r: str(r[f.index("分割(反分割)")]) if "分割(反分割)" in f else "分割")),
+        ("parvalue_twse_twtb8u", lambda: _parse_twse_resume_table(
+            _get_retry(PARVALUE_TWSE_URL, REDUCTION_SOURCE, params=params, timeout=20).json(), "股票代號",
+            "TWSE TWTB8U", lambda f, r: "變更面額")),
+        ("parvalue_tpex_pvchgann", lambda: _parse_tpex_parvalue(
+            _get_retry(PARVALUE_TPEX_URL, EXRIGHT_RESULT_TPEX_SOURCE, params={"response": "json"}, timeout=20).json())),
+    ]
+    for name, job in jobs:
+        try:
+            got = job()
+            out += got
+            print(f"分割／變更面額 {name}：{len(got)} 筆")
+        except Exception as e:  # noqa: BLE001
+            print(f"分割／變更面額 {name} 抓取失敗（只略過這一支）：{e}")
+            errors.append(f"{name}: {e}")
+    return out
+
+
 # 先.八十-12（2026-10-12）：股票分割（拆股）還原。TWT48U／TWTAUU 都不涵蓋 ETF 分割，官方沒有可程式讀取的分割表，
 # 這裡逐筆登記、逐筆查證後才寫入（不得憑轉述數字）。
 # 00631L 元大台灣50正2：2026-03-25～03-30 暫停交易，03-31 以 1:22 分割後恢復。查證（2026-10-12）：
@@ -965,16 +1042,38 @@ SPLITS = [
      "evidence": "公司重訊與櫃買公告（轉載）：面額 10→1 元、7/29 舊股最後交易、8/10 新股恢復買賣、參考價為 7/29 收盤 1/10；7/29 收 720→參考 72，8/10 收 79.2（+10% 漲停）吻合"},
     {"code": "4747", "effective": "2026-08-31", "ratio": 2.0,
      "evidence": "櫃買公告（轉載，三立新聞 1883764）：面額 10→5 元、8/19 舊股最後交易、參考價為收盤 1/2；8/19→8/31 收盤 −51.6%＝÷2 後 −3.2% 吻合"},
+    {"code": "6696", "effective": "2026-08-31", "ratio": 10.0,
+     "evidence": "櫃買公告（轉載，uanalyze 6247953116）：興櫃，面額 10→1 元、每 1 股換 10 股、8/19 舊股最後交易、8/31 新股恢復買賣；8/19 收 939→參考 93.9，8/31 收 95.6（+1.8%）吻合"},
 ]
 
 
-def apply_splits(prices: dict, meta: dict) -> int:
-    """股票分割還原（冪等）：已套用者記在 meta["splits_applied"]，不重複除。回傳這輪新套用的分割數。"""
+def _ledger_handled_split(ledger: dict | None, code: str, effective: str) -> str | None:
+    """先.一〇三-10c：帳本 reductions 已由官方表自動處理過同一事件（已乘係數，或判定來源已含調整）就回傳原因，
+    手寫 SPLITS 不得再除一次。定錨失敗而略過的不算（維持手寫 SPLITS 原本行為）。"""
+    for ev in ((ledger or {}).get("reductions") or {}).get(code) or []:
+        if ev.get("resume_date") != effective or not ev.get("applied"):
+            continue
+        if ev.get("factor_applied"):
+            return f"帳本已由 {ev.get('source', '官方表')} 套用係數 {ev['factor_applied']:.6f}"
+        if str(ev.get("skip_reason", "")).startswith("來源adj_close已含"):
+            return "帳本判定來源已含此次調整"
+    return None
+
+
+def apply_splits(prices: dict, meta: dict, ledger: dict | None = None) -> int:
+    """股票分割還原（冪等）：已套用者記在 meta["splits_applied"]，不重複除。回傳這輪新套用的分割數。
+    先.一〇三-10c：同一事件若已由官方表自動入帳並套用（apply_reduction_adjustments 先跑），只記帳不再除。"""
     done = set(meta.get("splits_applied") or [])
+    skipped = meta.setdefault("splits_skipped_ledger", {})
     n = 0
     for sp in SPLITS:
         key = f"{sp['code']}@{sp['effective']}x{sp['ratio']}"
         if key in done or not prices.get(sp["code"]):
+            continue
+        why = _ledger_handled_split(ledger, sp["code"], sp["effective"])
+        if why:
+            skipped[key] = why
+            done.add(key)
             continue
         for r in prices[sp["code"]]:
             if r.get("date", "") < sp["effective"]:
@@ -1146,9 +1245,19 @@ def main():
         errors.append(f"ex_dividend: {e}")
 
     reductions_added = reductions_applied = 0
+    split_events_added = 0
     try:
         ledger = load_ex_dividend_ledger()
-        reductions_added = merge_reductions(ledger, fetch_capital_reductions(today_iso), today_iso)
+        try:  # 先.一〇三-10c：TWTAUU 失敗不得連帶擋掉下面的分割／變更面額入帳與既有事件套用
+            reductions_added = merge_reductions(ledger, fetch_capital_reductions(today_iso), today_iso)
+        except Exception as e:  # noqa: BLE001
+            print(f"減資參考價表(TWTAUU) 抓取失敗（只略過減資新事件入帳）：{e}")
+            errors.append(f"capital_reduction_fetch: {e}")
+        try:  # 先.一〇三-10c：分割／變更面額官方表，失敗只略過（十二節），不擋減資
+            split_events_added = merge_reductions(ledger, fetch_split_parvalue_events(today_iso, errors), today_iso)
+        except Exception as e:  # noqa: BLE001
+            print(f"分割／變更面額官方表入帳失敗（略過）：{e}")
+            errors.append(f"split_parvalue: {e}")
         reductions_applied = apply_reduction_adjustments(prices, ledger, today_iso)
         ledger.setdefault("meta", {})["reductions_generated_at"] = datetime.now(TW_TZ).isoformat()
         EX_DIVIDEND_EVENTS_PATH.write_text(
@@ -1158,7 +1267,12 @@ def main():
         errors.append(f"capital_reduction: {e}")
 
     try:
-        n_split = apply_splits(prices, payload.setdefault("meta", {}))
+        try:
+            split_ledger = load_ex_dividend_ledger()
+        except Exception as e:  # noqa: BLE001 -- 帳本讀不到時維持舊行為（只靠 meta 冪等）
+            print(f"分割還原讀帳本失敗（只用 meta 冪等）：{e}")
+            split_ledger = None
+        n_split = apply_splits(prices, payload.setdefault("meta", {}), split_ledger)
         if n_split:
             print(f"股票分割還原：本輪新套用 {n_split} 筆")
     except Exception as e:  # noqa: BLE001 -- 分割還原失敗不影響價量本身（十二節）
@@ -1235,6 +1349,7 @@ def main():
     payload["meta"]["exright_official_backfill"] = exright_official_stats
     payload["meta"]["capital_reduction_events_added"] = reductions_added
     payload["meta"]["capital_reduction_events_applied"] = reductions_applied
+    payload["meta"]["split_parvalue_events_added"] = split_events_added
     payload["meta"]["mixed_date_warning"] = mixed_date_warning
     payload["meta"]["twse_openapi_date"] = openapi_date
     payload["meta"]["twse_gap_filled_dates"] = twse_gap_dates
