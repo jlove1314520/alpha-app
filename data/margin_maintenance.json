@@ -51,6 +51,22 @@
     "ratio_pct_ck": 170.6
   },
   {
+    "date": "2026-09-01",
+    "margin_money_date": "2026-09-01",
+    "numerator_margin_date": "2026-09-01",
+    "numerator_close_date": "2026-09-01",
+    "numerator_close_source": "price_history（補抓）",
+    "collateral_value": null,
+    "margin_money": 578115458000,
+    "matched_stocks": 0,
+    "ratio_pct": null,
+    "data_incomplete": true,
+    "incomplete_reason": "同日收盤價只涵蓋 0.0% 的融資張數（<99%），不相除",
+    "generated_at": "2026-10-16T04:28:08.600350+08:00",
+    "recorded_on": "2026-10-16",
+    "source": "先.一〇三-8 補抓：TWSE www.twse.com.tw/rwd MI_MARGN 指定日期（分子分母同一回應）×price_history 同日收盤"
+  },
+  {
     "date": "2026-09-02",
     "finmind_margin_money_date": "2026-09-02",
     "collateral_value": 1113537766150,
@@ -95,6 +111,38 @@
     "numerator_date_verified": false,
     "ratio_pct_unpaired": 188.39,
     "recorded_on": "2026-09-07"
+  },
+  {
+    "date": "2026-09-07",
+    "margin_money_date": "2026-09-07",
+    "numerator_margin_date": "2026-09-07",
+    "numerator_close_date": "2026-09-07",
+    "numerator_close_source": "price_history（補抓）",
+    "collateral_value": null,
+    "margin_money": 588271579000,
+    "matched_stocks": 0,
+    "ratio_pct": null,
+    "data_incomplete": true,
+    "incomplete_reason": "同日收盤價只涵蓋 0.0% 的融資張數（<99%），不相除",
+    "generated_at": "2026-10-16T04:28:13.269507+08:00",
+    "recorded_on": "2026-10-16",
+    "source": "先.一〇三-8 補抓：TWSE www.twse.com.tw/rwd MI_MARGN 指定日期（分子分母同一回應）×price_history 同日收盤"
+  },
+  {
+    "date": "2026-09-08",
+    "margin_money_date": "2026-09-08",
+    "numerator_margin_date": "2026-09-08",
+    "numerator_close_date": "2026-09-08",
+    "numerator_close_source": "price_history（補抓）",
+    "collateral_value": null,
+    "margin_money": 586266976000,
+    "matched_stocks": 0,
+    "ratio_pct": null,
+    "data_incomplete": true,
+    "incomplete_reason": "同日收盤價只涵蓋 0.0% 的融資張數（<99%），不相除",
+    "generated_at": "2026-10-16T04:28:15.625169+08:00",
+    "recorded_on": "2026-10-16",
+    "source": "先.一〇三-8 補抓：TWSE www.twse.com.tw/rwd MI_MARGN 指定日期（分子分母同一回應）×price_history 同日收盤"
   },
   {
     "date": "2026-09-09",
@@ -150,6 +198,22 @@
     "numerator_date_verified": false,
     "ratio_pct_unpaired": 183.15,
     "recorded_on": "2026-09-15"
+  },
+  {
+    "date": "2026-09-15",
+    "margin_money_date": "2026-09-15",
+    "numerator_margin_date": "2026-09-15",
+    "numerator_close_date": "2026-09-15",
+    "numerator_close_source": "price_history（補抓）",
+    "collateral_value": 341394160,
+    "margin_money": 582240465000,
+    "matched_stocks": 4,
+    "ratio_pct": null,
+    "data_incomplete": true,
+    "incomplete_reason": "同日收盤價只涵蓋 0.4% 的融資張數（<99%），不相除",
+    "generated_at": "2026-10-16T04:28:18.746869+08:00",
+    "recorded_on": "2026-10-16",
+    "source": "先.一〇三-8 補抓：TWSE www.twse.com.tw/rwd MI_MARGN 指定日期（分子分母同一回應）×price_history 同日收盤"
   },
   {
     "date": "2026-09-16",
@@ -279,6 +343,23 @@
     "ratio_pct_ck": 167.9
   },
   {
+    "date": "2026-10-01",
+    "margin_money_date": "2026-10-01",
+    "numerator_margin_date": "2026-10-01",
+    "numerator_close_date": "2026-10-01",
+    "numerator_close_source": "price_history（補抓）",
+    "collateral_value": 1228714260120,
+    "margin_money": 629867193000,
+    "matched_stocks": 1229,
+    "ratio_pct": 195.08,
+    "data_incomplete": false,
+    "incomplete_reason": null,
+    "generated_at": "2026-10-16T04:28:21.716610+08:00",
+    "recorded_on": "2026-10-16",
+    "source": "先.一〇三-8 補抓：TWSE www.twse.com.tw/rwd MI_MARGN 指定日期（分子分母同一回應）×price_history 同日收盤",
+    "ratio_pct_ck": 172.4
+  },
+  {
     "date": "2026-10-02",
     "margin_money_date": "2026-10-02",
     "collateral_value": 1228714260120,
@@ -291,6 +372,23 @@
     "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）",
     "numerator_date_verified": false,
     "ratio_pct_ck": 170.8
+  },
+  {
+    "date": "2026-10-05",
+    "margin_money_date": "2026-10-05",
+    "numerator_margin_date": "2026-10-05",
+    "numerator_close_date": "2026-10-05",
+    "numerator_close_source": "price_history（補抓）",
+    "collateral_value": 1270939147650,
+    "margin_money": 633351721000,
+    "matched_stocks": 1232,
+    "ratio_pct": 200.67,
+    "data_incomplete": false,
+    "incomplete_reason": null,
+    "generated_at": "2026-10-16T04:28:24.765345+08:00",
+    "recorded_on": "2026-10-16",
+    "source": "先.一〇三-8 補抓：TWSE www.twse.com.tw/rwd MI_MARGN 指定日期（分子分母同一回應）×price_history 同日收盤",
+    "ratio_pct_ck": 178.2
   },
   {
     "date": "2026-10-06",
@@ -351,6 +449,23 @@
     "source": "分子=TWSE官方www.twse.com.tw/rwd MI_MARGN 融資融券彙總(逐股融資今日餘額，與分母同一天同一回應)×同日收盤價（STOCK_DAY_ALL；日期不同改用price_history.json同日收盤）加總；分母=同一回應信用交易統計「融資金額(仟元)」今日餘額×1000（2026-10-07 先.四十三-三 起分子分母強制同一天）",
     "ratio_pct_ck": 173.6,
     "recorded_on": "2026-10-13"
+  },
+  {
+    "date": "2026-10-13",
+    "margin_money_date": "2026-10-13",
+    "numerator_margin_date": "2026-10-13",
+    "numerator_close_date": "2026-10-13",
+    "numerator_close_source": "price_history（補抓）",
+    "collateral_value": 1225088323290,
+    "margin_money": 644978625000,
+    "matched_stocks": 1228,
+    "ratio_pct": 189.94,
+    "data_incomplete": false,
+    "incomplete_reason": null,
+    "generated_at": "2026-10-16T04:28:27.675217+08:00",
+    "recorded_on": "2026-10-16",
+    "source": "先.一〇三-8 補抓：TWSE www.twse.com.tw/rwd MI_MARGN 指定日期（分子分母同一回應）×price_history 同日收盤",
+    "ratio_pct_ck": 167.1
   },
   {
     "date": "2026-10-14",
