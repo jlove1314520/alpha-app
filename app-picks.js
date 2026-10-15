@@ -638,7 +638,7 @@
     if(f.earnings_growth)fact('EPS 年增',f.earnings_growth.raw.eps_yoy,v=>fmtPct(v));
     if(f.revenue_momentum)fact('月營收年增',f.revenue_momentum.raw.rev_yoy,v=>fmtPctCapped(v,REVENUE_YOY_CAP));
     if(f.growth_quality)fact('近12月營收年增',f.growth_quality.raw.rev_growth_12m_yoy,v=>fmtPctCapped(v,REVENUE_YOY_CAP));
-    if(f.valuation_adj)fact('本益比 PE',f.valuation_adj.raw.pe,v=>fmtN(v,1));
+    if(f.valuation_adj)fact('本益比',f.valuation_adj.raw.pe,v=>fmtN(v,1)+' 倍');  // 先.一〇三-13：與個股頁總覽／研究分頁同格式
     if(f.valuation_adj)fact('PEG',f.valuation_adj.raw.peg,v=>fmtN(v,2));
     // 2026-08-27修正（真bug）：scores.json現在有兩條產生管線——研究端
     // score_v2.py的chips原始值是「近20日均成交值的百分比」

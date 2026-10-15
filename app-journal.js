@@ -39,7 +39,9 @@
       return '<div style="padding:3px 0;display:flex;gap:8px;align-items:flex-start"><span style="flex-shrink:0;width:9px;height:9px;border-radius:50%;margin-top:5px;background:'+_SYSWK_DOT[lv]+'"></span><span><b>'+esc(lab)+'</b>　'+esc(uiPlain(txt||'—'))+'</span></div>';
     }).join('');
     const det=[];
-    const f=d.freshness||{};(f.stalled||[]).forEach(x=>det.push('停擺：'+x.task+(x.age_min!=null?'（'+Math.round(x.age_min/60)+' 小時沒新產出）':'')));
+    // 先.一〇三-13：多個停擺項目合併成一行（原本一項一行）
+    const f=d.freshness||{},stl=(f.stalled||[]).map(x=>x.task+(x.age_min!=null?'（'+Math.round(x.age_min/60)+' 小時沒新產出）':''));
+    if(stl.length)det.push('停擺：'+stl.join('、'));
     const lv=d.live_execution||{};if(lv.codes_week)det.push('真錢排程事件：'+Object.keys(lv.codes_week).map(k=>k+' '+lv.codes_week[k]).join('、'));
     ((d.paper||{}).books||[]).forEach(b=>{if(b.total_return_pct!=null)det.push(b.label+'：累計 '+(b.total_return_pct>0?'+':'')+b.total_return_pct+'%（'+(b.as_of||'—')+'）')});
     return '<div class="note" style="margin-bottom:4px">'+esc(d.week_start||'')+' ～ '+esc(d.week_end||'')+'</div>'+rows+

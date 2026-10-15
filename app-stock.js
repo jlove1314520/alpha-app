@@ -820,7 +820,10 @@
       flagEl.textContent=todayMoney<LIQUIDITY_FLOOR?'⚠ 量能不足，漲不動（今日成交值低於3000萬元流動性門檻）':'';
     }else{setTxt('kn-turnover','—');setTxt('kn-vol-mult','—');setTxt('kn-liquidity-flag','')}
     const p=per.length?per[per.length-1]:{};
-    setTxt('kn-per',p.per??'—');setTxt('kn-pbr',p.pbr??'—');setTxt('kn-yield',p.dividend_yield!=null?p.dividend_yield+'%':'—');
+    // 先.一〇三-13：本益比原本印原始數字（28.86、無單位），研究分頁／評分報告是「28.9 倍」——統一成 1 位小數＋「倍」，資料日放 title
+    const _x=(v,d)=>v==null||!isFinite(+v)?'—':Number(v).toFixed(d)+' 倍';
+    setTxt('kn-per',_x(p.per,1));setTxt('kn-pbr',_x(p.pbr,2));
+    {const pe=document.getElementById('kn-per');if(pe)pe.title=p.date?'資料日 '+p.date:''}setTxt('kn-yield',p.dividend_yield!=null?p.dividend_yield+'%':'—');
     loadRevenueChart(code,rev);
     if(inst){
       setChipLots('chip-foreign',inst.foreign);setChipLots('chip-trust',inst.trust);setChipLots('chip-dealer',inst.dealer);setChipLots('chip-total',inst.total);

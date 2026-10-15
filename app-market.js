@@ -131,17 +131,19 @@
     return `#${[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('')}`;
   }
   function heatColor(pct){
-    const t=Math.max(-3,Math.min(3,pct))/3;
+    let t=Math.max(-3,Math.min(3,pct))/3;
+    // 先.一〇三-13：跟隨設定頁「漲跌顏色」——國際慣例（綠漲紅跌）時把正負對調，原本永遠紅漲綠跌
+    if(document.documentElement.getAttribute('data-updown')==='intl')t=-t;
     // 先.九十五-4：淺色模式改用淺底＋淡紅／淡綠（字是深色 --ink），深色模式維持原本的值
     if(document.documentElement.getAttribute('data-theme')==='light')
       return t>=0?hexMix('#ebe6dc','#ef9a96',t):hexMix('#ebe6dc','#8fd0b0',-t);
     return t>=0?hexMix('#383835','#8f2f2f',t):hexMix('#383835','#265244',-t);
   }
-  // 外觀切換（設定頁或手機系統切換）時重畫熱力圖，顏色才會跟著換；自身失敗只警告
-  window.addEventListener('alpha-theme-change',()=>{
+  // 外觀切換（設定頁或手機系統切換）或漲跌顏色切換時重畫熱力圖，顏色才會跟著換；自身失敗只警告
+  ['alpha-theme-change','alpha-updown-change'].forEach(ev=>window.addEventListener(ev,()=>{
     try{if(document.getElementById('heat-grid')&&typeof loadHeatmap==='function')loadHeatmap().catch(e=>{console.warn('[heat theme]',e);recordGlobalError('heatThemeRedraw',e)})}
     catch(e){console.warn('[heat theme]',e);recordGlobalError('heatThemeRedraw',e)}
-  });
+  }));
   // 2026-08-26 架構修正：類股表現改讀 market_tw.json 的 sectors（TWSE MI_INDEX
   // 官方28類產業分類，見 fetch_market_tw.py），不再逐類呼叫 FinMind。
   async function loadHeatmap(){

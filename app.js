@@ -3850,7 +3850,10 @@
     if(BT_RATE!=null)return Promise.resolve(BT_RATE);
     if(!BT_RATE_LOADING)BT_RATE_LOADING=(SC_HIST?Promise.resolve():loadStrategyHistory()).then(()=>{
       const c=SC_HIST&&SC_HIST.lines&&SC_HIST.lines.live_bb90&&SC_HIST.lines.live_bb90.backtest&&SC_HIST.lines.live_bb90.backtest.cagr;
-      BT_RATE=(typeof c==='number'&&isFinite(c))?c:null;return BT_RATE;
+      BT_RATE=(typeof c==='number'&&isFinite(c))?c:null;
+      // 先.一〇三-13：說明文字原本寫死「年化 10.19%」，改顯示實際讀到的回測年化
+      const nt=document.getElementById('bt-rate-note');if(nt&&BT_RATE!=null)nt.textContent='數字只存在你的裝置與電腦；年化 '+(BT_RATE*100).toFixed(2)+'%（自動投資 Bb-90 回測）是過去回測，不是保證';
+      return BT_RATE;
     }).catch(e=>{console.warn('[btEnsureRate]',e);recordGlobalError('btEnsureRate',e);return null}).finally(()=>{BT_RATE_LOADING=null});
     return BT_RATE_LOADING;
   }
@@ -3871,6 +3874,7 @@
   function btPct(v){return v==null||!isFinite(v)?'—':(v*100).toFixed(2)+'%'}
   function renderBtPath(){
     const out=document.getElementById('bt-out');if(!out)return;
+    if(BT_RATE==null)btEnsureRate();  // 先.一〇三-13：沒填資料也先讀年化，讓說明文字顯示實際數字（失敗已在 btEnsureRate 內記錄）
     const s=btRead();
     const set=(id,v)=>{const el=document.getElementById(id);if(el&&document.activeElement!==el&&v!=null)el.value=v};
     set('bt-nw',s.nw);set('bt-pmt',s.pmt);set('bt-birth',s.birth);set('bt-age',s.age==null?40:s.age);
@@ -4712,7 +4716,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-16.0728';
+  const APP_VERSION='2026-10-16.0743';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

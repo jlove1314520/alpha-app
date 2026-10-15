@@ -43,7 +43,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(mq.addEventListener)mq.addEventListener('change',h);else if(mq.addListener)mq.addListener(h)}
 })();
 </script>
-<link rel="stylesheet" href="app.css?v=2026-10-16.0728">
+<link rel="stylesheet" href="app.css?v=2026-10-16.0743">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -537,7 +537,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     </div>
     <div class="card picks-lb-only" id="picks-fut-panel" style="display:none">
       <h3>期貨策略訊號</h3>
-      <div class="note"><b style="color:var(--ink-2)">無已驗證策略，不提供訊號。</b>期貨軌（TAIFEX台指期）研究馬拉松目前已測過22個策略假說，全部未通過統計驗證關卡（含一個一度看似通過便宜關卡、但完整樣本外驗證後證實失敗的候選）——這不是還沒開始做，是誠實做過、目前確實還沒有找到站得住腳的訊號。不會為了「有東西可以顯示」硬推一個沒驗證過的訊號上來，那樣比不顯示更危險。</div>
+      <div class="note"><b style="color:var(--ink-2)">無已驗證策略，不提供訊號。</b>期貨軌（TAIFEX台指期）研究馬拉松目前已測過<span id="fut-trials-n">—</span>個策略假說，沒有任何一個通過完整驗證、可以部署（曾有一度看似通過便宜關卡、但完整樣本外驗證後證實失敗的候選）——這不是還沒開始做，是誠實做過、目前確實還沒有找到站得住腳的訊號。不會為了「有東西可以顯示」硬推一個沒驗證過的訊號上來，那樣比不顯示更危險。</div>
     </div>
   </section>
 
@@ -645,7 +645,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="card">
         <h3>關鍵數字</h3>
         <div class="facts">
-          <div class="f"><span>本益比 PER</span><b id="kn-per">—</b></div>
+          <div class="f"><span>本益比</span><b id="kn-per">—</b></div>
           <div class="f"><span>殖利率</span><b id="kn-yield">—</b></div>
           <div class="f"><span>月營收 YoY</span><b id="kn-yoy">—</b></div>
           <div class="f"><span>淨值比 PBR</span><b id="kn-pbr">—</b></div>
@@ -1272,7 +1272,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="setting-row" style="margin-top:8px"><span>目標年齡</span><div class="setting-input"><input id="bt-age" type="number" inputmode="numeric" placeholder="40" style="width:140px;text-align:right" onchange="btSave()"></div></div>
       <div id="bt-out" class="note" style="margin-top:10px;line-height:1.8">請填入上方四欄</div>
       <div id="bt-prob" class="note" style="margin-top:10px;line-height:1.7">假設情境（歷史重抽樣）達標比例：先填淨資產與出生日期</div>
-      <div class="note" style="margin-top:6px">數字只存在你的裝置與電腦；年化 10.19% 是過去回測，不是保證</div>
+      <div class="note" style="margin-top:6px" id="bt-rate-note">數字只存在你的裝置與電腦；推算用的年化（自動投資 Bb-90 回測，讀 data/strategy_history.json）是過去回測，不是保證</div>
       <div class="note" style="margin-top:6px">假設情境估計（區塊自助法，描述性、樣本內、非保證）：<a href="https://github.com/jlove1314520/alpha-app/blob/main/research/WIN_PROBABILITY_2026-10.md" target="_blank" rel="noopener">WIN_PROBABILITY_2026-10</a></div>
     </div>
 
@@ -1281,12 +1281,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div class="card" data-ui-advanced>
       <h3>資料來源</h3>
       <div class="facts">
-        <div class="f"><span>台美股報價/財務</span><b>FinMind API v4</b></div>
+        <div class="f"><span>台股行情／籌碼／財報</span><b>證交所・櫃買中心官方開放資料</b></div>
+        <div class="f"><span>台股歷史補充</span><b>FinMind（免費層）</b></div>
+        <div class="f"><span>期貨行情／三大法人</span><b>期交所官方開放資料</b></div>
         <div class="f"><span>美股財報原始文件</span><b>SEC EDGAR</b></div>
-        <div class="f"><span>期貨報價/籌碼</span><b>TAIFEX（經 FinMind）</b></div>
+        <div class="f"><span>美股行情</span><b>IBKR（本機）・Finnhub・Yahoo 日線</b></div>
         <div class="f"><span>本機快取</span><b id="set-cache-count">—</b></div>
       </div>
-      <div class="note">FinMind 免費方案有流量上限，App 已加上 3 分鐘本機快取降低用量，抓取失敗會誠實顯示查無資料，不會偷用過期的舊快取頂替。所有資料為盤後/延遲資料，非即時報價。</div>
+      <!-- 先.一〇三-13（2026-10-16）：原表寫「台美股報價／財務＝FinMind」「期貨＝TAIFEX（經 FinMind）」、
+           「不會用舊快取頂替」，都已過時（9/8 起各市場改原生官方來源；10/13 起 data/*.json 先顯示上次資料、背景更新）。 -->
+      <div class="note">台股、期貨以官方開放資料為主（每日排程抓好存成 data/*.json），FinMind 只補歷史；FinMind 免費層有流量上限，App 對 FinMind 加了 3 分鐘本機快取。資料檔會先顯示上次存的資料、背景更新，畫面一律標資料日期。除本機 IBKR／永豐即時來源外，都是盤後或延遲資料，非即時報價。</div>
     </div>
 
 
@@ -1413,7 +1417,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="facts">
         <div class="f"><span>App 版本</span><b id="about-app-ver" onclick="tapVersionForDebug()" style="cursor:pointer">—</b></div>
         <div class="f"><span>Service Worker 版本</span><b id="about-sw-ver">查詢中…</b></div>
-        <div class="f"><span>資料源</span><b>FinMind / SEC EDGAR</b></div>
+        <div class="f"><span>資料源</span><b>證交所・櫃買・期交所・SEC 等（見「資料來源」）</b></div>
         <div class="f"><span>SW 狀態</span><b id="about-sw-status">查詢中…</b></div>
       </div>
       <div class="note">Alpha 台美股 AI 交易 · 台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單</div>
@@ -1564,6 +1568,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-16.0728"></script>
+<script src="app.js?v=2026-10-16.0743"></script>
 </body>
 </html>

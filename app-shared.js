@@ -237,9 +237,23 @@
     document.getElementById('picks-chips').classList.toggle('off-mkt',mkt!=='TW');  // 先.八十-4：切 class，不設 style.display
     document.getElementById('picks-us-panel').style.display=mkt==='US'?'':'none';
     document.getElementById('picks-fut-panel').style.display=mkt==='FUT'?'':'none';
+    if(mkt==='FUT')loadFutTrialsCount().catch(e=>{console.warn('[loadFutTrialsCount]',e);recordGlobalError('loadFutTrialsCount',e)});
     if(mkt==='US')loadUsScoresV0().catch(e=>{console.warn('[loadUsScoresV0]',e);recordGlobalError('loadUsScoresV0',e)});
     document.getElementById('us-screen-panel').style.display=mkt==='US'?'':'none';
     if(mkt==='US')loadUsScreener().catch(e=>{console.warn('[loadUsScreener]',e);recordGlobalError('loadUsScreener',e)});
+  }
+  // 先.一〇三-13（2026-10-16）：期貨軌已測假說數原本寫死「22」，改讀 data/strategies.json 的 fut_track.trials_summary
+  //（generate_strategies_json.py 從 TRIALS_LEDGER.md 動態算出）。讀不到就維持「—」，不猜數字。
+  async function loadFutTrialsCount(){
+    const el=document.getElementById('fut-trials-n');if(!el||el.dataset.loaded)return;
+    const r=await fetch('data/strategies.json?t='+Math.floor(Date.now()/60000));
+    if(!r.ok)throw new Error('strategies.json HTTP '+r.status);
+    const d=await r.json();
+    const list=Array.isArray(d)?d:(d.strategies||[]);
+    const f=list.find(x=>x&&x.id==='fut_track');
+    const n=f&&f.trials_summary&&f.trials_summary['已測試假說數'];
+    if(typeof n==='number'){el.textContent=n;el.dataset.loaded='1';
+      const u=f.last_updated?String(f.last_updated).slice(5,10).replace('-','/'):'';if(u)el.title='截至 '+u}
   }
   // 2026-10-11 常備.開發-17：美股評分 v0（價值/成長/品質三分項）。失敗只影響本面板。
   let US_SCORES_V0=null;
@@ -384,9 +398,10 @@
         <div class="bar-fill" style="position:absolute;top:0;bottom:0;${dirUp?`left:50%;width:${mag}%`:`right:50%;width:${mag}%`};background:${dirUp?'var(--gold-grad)':'rgba(138,133,123,.55)'};border-radius:999px"></div>
       </div>
       <div style="margin-top:5px;display:flex;flex-wrap:wrap;align-items:center;gap:4px">${dirTag}${pctBadge}${indBadge}</div>
-      <div class="fr-reason">${uiPlain(f.reason||'')}</div>
+      <div class="fr-reason">${uiPlain(f.reason||'').replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>')}</div>
     </div>`;
   }
+  // 先.一〇三-13：因子說明裡的 **粗體**（generate_scores_live.py 法人行為那句）原本原樣印出星號，改轉成 <b>
   // 規則式一句話摘要：取百分位最高的1~2個因子＋（若明顯偏弱）百分位最低的因子，
   // 例如「毛利率 78 百分位、動能 91 百分位，但估值偏貴」這種格式（總司令原話範例）。
   // 跟 scores.json 既有的 row.summary（伺服器端只挑單一最突出因子）分開，這裡是

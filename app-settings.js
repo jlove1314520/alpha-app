@@ -1053,10 +1053,15 @@
           // 雲端排程還沒跑過新版腳本時這裡直接壞掉。
           const tracks=hb.tracks||{devqueue:hb.devqueue};
           let freshest=null;
+          // 先.一〇三-13：「距今」原本用 STATUS.json 寫入當下算好的 minutes_since（雲端每 30 分鐘才寫一次，
+          // 打開 App 時可能已過時），改用各軌最新心跳時間 last_commit_at 對手機現在時間現算；拿不到時間才退回 minutes_since。
+          const nowMs=Date.now();
           for(const name in tracks){
             const t=tracks[name];if(!t)continue;
-            if(t.minutes_since!=null&&(freshest==null||t.minutes_since<freshest.minutes_since)){
-              freshest={name,minutes_since:t.minutes_since,last_commit_at:t.last_commit_at};
+            const ts=t.last_commit_at?Date.parse(t.last_commit_at):NaN;
+            const m=isFinite(ts)?Math.max(0,(nowMs-ts)/60000):t.minutes_since;
+            if(m!=null&&(freshest==null||m<freshest.minutes_since)){
+              freshest={name,minutes_since:m,last_commit_at:t.last_commit_at};
             }
           }
           const mins=freshest&&freshest.minutes_since;
@@ -1064,11 +1069,13 @@
           const trackLabel=freshest?freshest.name:'—';
           const stalledTracks=hb.track_stalled||[];
           const stalledNote=stalledTracks.length?`；個別軌道停擺：${stalledTracks.join('、')}`:'';
-          if(hb.stalled){
+          // 先.一〇三-13：雲端判停擺之後，若手機現算最新心跳已在門檻內（雲端判定是舊的），以最新心跳為準
+          const stalledNow=hb.stalled&&!(mins!=null&&hb.stall_threshold_minutes!=null&&mins<hb.stall_threshold_minutes);
+          if(stalledNow){
             // 先.一〇二-3：文字與雲端告警一致
-            hbNote.innerHTML=`本機排程心跳：<b style="color:${FRESH_BAD_COLOR}">本機停擺 ${mins==null?'—':mins.toFixed(0)} 分鐘，可能是重開機未登入</b>（最新心跳為${trackLabel} ${at}，門檻${hb.stall_threshold_minutes}分鐘）`;
+            hbNote.innerHTML=`本機排程心跳：<b style="color:${FRESH_BAD_COLOR}">本機停擺 ${mins==null?'—':mins.toFixed(0)} 分鐘，可能是重開機未登入</b>（最新心跳為${trackLabel} ${at}，門檻${hb.stall_threshold_minutes}分鐘${stalledNote}）`;
           }else{
-            hbNote.innerHTML=`本機排程心跳：<b style="color:${FRESH_OK_COLOR}">正常</b>（${trackLabel}最近一次commit ${at}，距今約${mins==null?'—':mins.toFixed(0)}分鐘${stalledNote}）`;
+            hbNote.innerHTML=`本機排程心跳：<b style="color:${FRESH_OK_COLOR}">正常</b>（最新心跳：${trackLabel} ${at}，距今約${mins==null?'—':mins.toFixed(0)}分鐘${stalledNote}）`;
           }
         }
       }catch(e){
@@ -1099,4 +1106,5 @@
     renderThemeToggle();
     toast('外觀：'+(THEME_OPTS.find(o=>o[0]===k)||['',''])[1]+(k==='system'?'（目前'+(now==='light'?'淺色':'深色')+'）':''));
   }
-  function setColorScheme(key){applyColorScheme(key);renderColorSchemeToggle();toast('已切換：'+COLOR_SCHEMES[key].label)}
+  function setColorScheme(key){applyColorScheme(key);renderColorSchemeToggle();toast('已切換：'+COLOR_SCHEMES[key].label);
+    try{window.dispatchEvent(new Event('alpha-updown-change'))}catch(e){console.warn('[setColorScheme event]',e);recordGlobalError('setColorScheme:event',e)}}  // 先.一〇三-13：通知熱力圖重畫
