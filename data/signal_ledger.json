@@ -2,8 +2,8 @@
  "meta": {
   "created_at": "2026-10-11T14:17:33.521387+08:00",
   "schema_note": "B19 前瞻訊號台帳（非回測）：每筆在事件發生後 4 日內事前寫入，寫入後內容不可修改；entry_close 為寫入日之後第一個交易日收盤（避免前視）；returns.t5/t20/t60 由 update_signal_ledger_returns.py 只回填 null 欄位。status=待驗證線索 者不得影響任何評分。規格 research/B19_SIGNAL_LEDGER_SPEC.md。非投資建議。",
-  "last_build_at": "2026-10-16T00:28:35.249271+08:00",
-  "total_signals": 247,
+  "last_build_at": "2026-10-16T07:57:19.003047+08:00",
+  "total_signals": 286,
   "source": ".github/scripts/build_signal_ledger.py（讀 events.json L1＋news.json L3＋price_history.json）",
   "last_returns_backfill_at": "2026-10-15T21:56:35.671679+08:00"
  },
@@ -8293,6 +8293,1346 @@
    "reflected": "fresh",
    "pre_volume_spike": false,
    "anchor_trade_date": "2026-10-12",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "ea95875773245221",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "增減資",
+   "code": "3406",
+   "event_date": "2026-10-15",
+   "title": "公告本公司董事會決議私募普通股定價及應募人資訊",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0276,
+   "pre_vol_spike": 2.216,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 0.5,
+   "ref_close": 1115.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "753705f18f12bf39",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "增減資",
+   "code": "3406",
+   "event_date": "2026-10-15",
+   "title": "公告本公司董事會決議與3M United Kingdom Limited簽署 私募普通股認購協議書",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0276,
+   "pre_vol_spike": 2.216,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 0.5,
+   "ref_close": 1115.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "1faf3250e0d0b823",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "財務",
+   "code": "3042",
+   "event_date": "2026-10-15",
+   "title": "本公司115年9月自結損益公告",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0998,
+   "pre_vol_spike": 0.503,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 189.5,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "1c446ca6d9ea8eb0",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "增減資",
+   "code": "2388",
+   "event_date": "2026-10-15",
+   "title": "代子公司VIA CPU PLATFORM CO., LTD.公告辦理現金增資",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0839,
+   "pre_vol_spike": 1.352,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 65.5,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "565fe1d0e4eadb06",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "財務",
+   "code": "7765",
+   "event_date": "2026-10-15",
+   "title": "本公司115年第三季自結損益",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0191,
+   "pre_vol_spike": 0.276,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 230.5,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "b48998f7bfb8bc1c",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "法說會",
+   "code": "5469",
+   "event_date": "2026-10-15",
+   "title": "公告本公司召開法說會相關內容",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0149,
+   "pre_vol_spike": 1.525,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 81.7,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "50457ff98bec9b2a",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "法說會",
+   "code": "6191",
+   "event_date": "2026-10-15",
+   "title": "公告本公司召開法說會相關內容",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0286,
+   "pre_vol_spike": 12.813,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 0.5,
+   "ref_close": 90.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "35641a9d1b4efeee",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "法說會",
+   "code": "6657",
+   "event_date": "2026-10-15",
+   "title": "本公司受邀參加統一證券舉辦之法人說明會",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0329,
+   "pre_vol_spike": 0.972,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 32.3,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "6f12d0c11d95c4d8",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "法說會",
+   "code": "2308",
+   "event_date": "2026-10-15",
+   "title": "本公司自辦法人說明會之相關資訊",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1809,
+   "pre_vol_spike": 1.222,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 1630.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "20618b3770e6f5df",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "併購",
+   "code": "2881",
+   "event_date": "2026-10-15",
+   "title": "公告本公司暨主要子公司115年9月合併自結損益",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0257,
+   "pre_vol_spike": 1.906,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 159.5,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "1081063e7210731c",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "財務",
+   "code": "3003",
+   "event_date": "2026-10-15",
+   "title": "公告本公司115年09月份自結損益",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0393,
+   "pre_vol_spike": 0.91,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 56.2,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "04558b55f34c5f7c",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "財務",
+   "code": "2884",
+   "event_date": "2026-10-15",
+   "title": "公告本公司暨子公司115年9月自結盈餘",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0667,
+   "pre_vol_spike": 1.118,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 48.8,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "ce489384071fe3c6",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "併購",
+   "code": "2882",
+   "event_date": "2026-10-15",
+   "title": "公告本公司暨主要子公司115年09月自結合併稅後損益",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0044,
+   "pre_vol_spike": 1.115,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 113.5,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "5e6466fca8b4b0f1",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "法說會",
+   "code": "2379",
+   "event_date": "2026-10-15",
+   "title": "115年第3季線上法人說明會",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.031,
+   "pre_vol_spike": 1.176,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 764.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "a7240adc988e5c39",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "增減資",
+   "code": "3701",
+   "event_date": "2026-10-15",
+   "title": "公告本公司董事會決議通過以私募方式辦理 現金增資發行普通股",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0164,
+   "pre_vol_spike": 0.803,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 60.1,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "154f56a2e8dec2bc",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "法說會",
+   "code": "1590",
+   "event_date": "2026-10-15",
+   "title": "公告本公司受邀參加盛博香港有限公司舉辦之法人說明會",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.061,
+   "pre_vol_spike": 1.539,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 1155.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "a081695d4f99e995",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "法說會",
+   "code": "1590",
+   "event_date": "2026-10-15",
+   "title": "公告本公司受邀參加永豐金證券匯立分公司舉辦之法人說明會",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.061,
+   "pre_vol_spike": 1.539,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 1155.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "cf27e65545fa4bbe",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "法說會",
+   "code": "1590",
+   "event_date": "2026-10-15",
+   "title": "公告本公司受邀參加摩根大通證券股份有限公司舉辦之法人說明會",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.061,
+   "pre_vol_spike": 1.539,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 1155.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "b360d21f9ef85e3f",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "法說會",
+   "code": "1590",
+   "event_date": "2026-10-15",
+   "title": "公告本公司受邀參加華南永昌綜合證券舉辦之法人說明會",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.061,
+   "pre_vol_spike": 1.539,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 1155.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "7f72b4832b6afe7d",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "法說會",
+   "code": "1590",
+   "event_date": "2026-10-15",
+   "title": "公告本公司受邀參加花旗環球證券股份有限公司舉辦之法人說明會",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.061,
+   "pre_vol_spike": 1.539,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 1155.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "f7da093dae8cd3a0",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "法說會",
+   "code": "1590",
+   "event_date": "2026-10-15",
+   "title": "公告本公司受邀參加凱基證券股份有限公司舉辦之法人說明會",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.061,
+   "pre_vol_spike": 1.539,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 1155.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "5b3a1e9d3e65035a",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "併購",
+   "code": "2402",
+   "event_date": "2026-10-15",
+   "title": "公告本公司自行結算115年度第三季合併損益。",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0194,
+   "pre_vol_spike": 9.841,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 0.5,
+   "ref_close": 63.1,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "0d1b300b6be3849e",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E7%BE%8E%E8%82%A1%E6%BC%B2%E8%B7%8C%E4%BA%92%E7%8F%BE-%E9%81%93%E7%93%8A%E6%BC%B2556%E9%BB%9E-%E5%8F%B0%E7%A9%8D%E9%9B%BBadr%E8%B7%8C%E8%BF%912-221434186.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-16",
+   "title": "美股漲跌互現！道瓊漲556點、台積電ADR跌近2％",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0561,
+   "pre_vol_spike": 1.846,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "46e23e8db25bf44d",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E7%A9%8D%E9%9B%BBadr15%E6%97%A5%E4%B8%8B%E8%B7%8C7-75%E7%BE%8E%E5%85%83%E8%B7%8C%E5%B9%851-80-%E6%8A%98%E5%8F%B0%E8%82%A12724-78%E5%85%83-214631964.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-16",
+   "title": "台積電ADR15日下跌7.75美元跌幅1.80%折台股2724.78元",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0561,
+   "pre_vol_spike": 1.846,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "bacc9be150bce7a7",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E7%A9%8D%E9%9B%BBadr15%E6%97%A5%E4%B8%8B%E8%B7%8C7-75%E7%BE%8E%E5%85%83%E8%B7%8C%E5%B9%851-80-%E6%8A%98%E5%8F%B0%E8%82%A12724-78%E5%85%83-214631964.html",
+   "type": "媒體報導",
+   "code": "2724",
+   "event_date": "2026-10-16",
+   "title": "台積電ADR15日下跌7.75美元跌幅1.80%折台股2724.78元",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0591,
+   "pre_vol_spike": 0.455,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-13",
+   "weight": 1.0,
+   "ref_close": 11.95,
+   "ref_close_date": "2026-10-13",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "4d1866a9c609f7b0",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E4%B8%AD%E8%8F%AF%E9%9B%BB%E4%BF%A1adr15%E6%97%A5%E4%B8%8A%E6%BC%B21-15%E7%BE%8E%E5%85%83%E6%BC%B2%E5%B9%852-47-%E6%8A%98%E5%8F%B0%E8%82%A1153-77%E5%85%83-214625701.html",
+   "type": "媒體報導",
+   "code": "2412",
+   "event_date": "2026-10-16",
+   "title": "中華電信ADR15日上漲1.15美元漲幅2.47%折台股153.77元",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0481,
+   "pre_vol_spike": 1.196,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 152.5,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "b0b66a348b4f9907",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E7%BE%8E%E8%82%A1%E7%9B%A4%E5%BE%8C-%E9%BB%83%E4%BB%81%E5%8B%B3%E5%8A%9B%E6%8C%BAcoreweave-%E9%81%93%E7%93%8A%E5%8B%81%E6%8F%9A556%E9%BB%9E-%E5%8F%B0%E7%A9%8D%E9%9B%BBadr%E8%B7%8C%E8%BF%912-214431303.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-16",
+   "title": "〈美股盤後〉黃仁勳力挺CoreWeave 道瓊勁揚556點 台積電ADR跌近2%",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0561,
+   "pre_vol_spike": 1.846,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "263c28d196747ce7",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E8%82%A1%E7%9B%A4%E5%89%8D%E8%A6%81%E8%81%9E-%E5%8F%B0%E7%A9%8D%E9%9B%BB%E5%85%A8%E5%B9%B4%E7%BE%8E%E5%85%83%E7%87%9F%E6%94%B6%E5%86%8D%E4%B8%8A%E4%BF%AE%E8%87%B344-%E5%A4%96%E8%B3%87%E7%88%86%E7%A0%8D3025%E5%84%84%E5%85%83%E5%89%B5%E7%B4%80%E9%8C%84-211003771.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-16",
+   "title": "〈台股盤前要聞〉台積電全年美元營收再上修至44%、外資爆砍3025億元創紀錄",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0561,
+   "pre_vol_spike": 1.846,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "836ea50dcd38cb48",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/gogolook-10-16%E5%8F%83%E5%8A%A0%E5%AF%AC%E9%87%8F%E5%9C%8B%E9%9A%9B%E8%88%89%E8%BE%A6%E4%B9%8B%E5%8F%B0%E7%81%A3%E8%B7%AF%E6%BC%94-210400463.html",
+   "type": "媒體報導",
+   "code": "6902",
+   "event_date": "2026-10-16",
+   "title": "GOGOLOOK 10/16參加寬量國際舉辦之台灣路演",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0471,
+   "pre_vol_spike": 0.915,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 131.5,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "ac411cceefd151e6",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/lenovo%E6%8F%AD%E7%A4%BA%E5%89%B5%E6%A5%AD%E5%AE%B6%E8%B7%A8%E8%B6%8A%E5%9C%8B%E7%95%8C%E5%B0%8B%E6%B1%82%E6%94%AF%E6%8C%81%E6%99%82%E7%99%BC%E7%94%9F%E7%9A%84%E6%95%85%E4%BA%8B-194000826.html",
+   "type": "媒體報導",
+   "code": "8477",
+   "event_date": "2026-10-16",
+   "title": "Lenovo揭示創業家跨越國界尋求支持時發生的故事",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0177,
+   "pre_vol_spike": 2.143,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 0.5,
+   "ref_close": 13.85,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "0f5eac0337b4d7e1",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9817828",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-16",
+   "title": "台積電：台南增建一座3奈米廠",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0561,
+   "pre_vol_spike": 1.846,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "f53f9d7dc0f90de2",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9817803",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-16",
+   "title": "超級印鈔機再進化！台積電上季獲利猛 每天賺 83 億",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0561,
+   "pre_vol_spike": 1.846,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "029824581313e4ba",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9817832",
+   "type": "媒體報導",
+   "code": "2030",
+   "event_date": "2026-10-16",
+   "title": "HIGH NA EUV 設備 台積電 2030 年導入",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.2313,
+   "pre_vol_spike": 1.844,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 28.25,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "a69dcec7fa866649",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9817832",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-16",
+   "title": "HIGH NA EUV 設備 台積電 2030 年導入",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0561,
+   "pre_vol_spike": 1.846,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 2440.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "62f5f4233a6e1c64",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9817865",
+   "type": "媒體報導",
+   "code": "2454",
+   "event_date": "2026-10-16",
+   "title": "聯發科傳奪字節跳動 ASIC 大單 有望與勁敵高通一較高下",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1386,
+   "pre_vol_spike": 1.024,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 4165.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "f6d8adc0698d7de2",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9817868",
+   "type": "媒體報導",
+   "code": "2454",
+   "event_date": "2026-10-16",
+   "title": "資料中心 ASIC 成營運新亮點 聯發科發掘新客戶",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1386,
+   "pre_vol_spike": 1.024,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 4165.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "7362b037fcbc84e7",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/eagle-venture-fund-%E7%BE%8E%E5%9C%8B%E5%8F%8D%E4%BA%BA%E5%8F%A3%E8%B2%A9%E9%81%8B%E7%A7%91%E6%8A%80%E5%B8%82%E5%A0%B4-2031-173016824.html",
+   "type": "媒體報導",
+   "code": "2031",
+   "event_date": "2026-10-16",
+   "title": "Eagle Venture Fund：美國反人口販運科技市場 2031 年上看 46 億美元",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0229,
+   "pre_vol_spike": 1.64,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 46.95,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "e8d705d430db4cb9",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9818002",
+   "type": "媒體報導",
+   "code": "3026",
+   "event_date": "2026-10-16",
+   "title": "禾伸堂輝達 Vera Rubin 訂單塞爆 不僅漲價、備料量還大翻倍",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0334,
+   "pre_vol_spike": 1.212,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
+   "weight": 1.0,
+   "ref_close": 811.0,
+   "ref_close_date": "2026-10-15",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "50decf24fde16fc1",
+   "recorded_at": "2026-10-16T07:57:19.003047+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E6%AF%8F%E5%A4%A9%E8%87%B3%E5%B0%9110%E9%80%9A%E9%9B%BB%E8%A9%B1%E8%BF%BD%E7%94%A2%E8%83%BD-ai%E5%A4%A7%E5%BB%A0%E6%90%B6%E5%8F%B0%E7%A9%8D%E9%9B%BB-%E6%93%B4%E5%BC%B5%E8%A8%88%E7%95%AB%E6%81%90%E5%8F%97%E9%99%90-163010558.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-16",
+   "title": "每天至少10通電話追產能！AI大廠搶台積電 擴張計畫恐受限",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0561,
+   "pre_vol_spike": 1.846,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-15",
    "weight": 1.0,
    "ref_close": 2440.0,
    "ref_close_date": "2026-10-15",
