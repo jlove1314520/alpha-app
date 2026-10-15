@@ -19934,6 +19934,7 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
   驗收：`coverage.with_fresh_quarter` 從 1,020 升到 ≥1,850。
 
 - [ ] **研究室.五 App 顯示**（DevQueue 可執行）
+  〔進度 2026-10-15 DevQueue 20261015-080102：第 3 小項「市場頁產業營收熱度表」已做（app-market.js loadIndustryHeat＋index.html「更多」區第一張卡，讀 research_radar.json industry_heat，依營收年增中位數排序，附資料日與「未經回測、非投資建議」）；Playwright 實測 33 列、pageerror 0；冒煙 157 項全過。[自行裁量] 卡片放進市場頁「更多」收合區（市場頁主畫面已滿，先.七十二-B7 慣例）。尚餘第 1、2、4 小項，維持 - [ ]〕
   做法（用詞依 `docs` 人因改版用詞表）：
   1. **個股頁「研究」分頁**（讀 by_code 的 research 節）。由上而下：
      - 變化標籤晶片，點一下顯示 `meta.rules` 的規則文字

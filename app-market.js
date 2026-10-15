@@ -569,8 +569,8 @@
     // 這些後續程式碼整批不執行，變成「一個面板壞掉、其他面板的收尾也跟著壞」。
     // 2026-09-08（金流一.3）產業金流併入同一批 allSettled——它自己有 try/catch，
     // 掛了只影響自己那張卡，不會拖垮其他面板（錯誤隔離原則）。
-    const results=await Promise.allSettled([loadMarketIndex(),loadHeatmap(),loadInstTotal(),loadFutInst(),loadMarginMaintenance(),renderSectorFlow(),loadCustomsTrade(),loadIndustrialProduction(),loadScanners(),loadIrEvents()]);
-    const labels=['loadMarketIndex','loadHeatmap','loadInstTotal','loadFutInst','loadMarginMaintenance','renderSectorFlow','loadCustomsTrade','loadIndustrialProduction','loadScanners'];
+    const results=await Promise.allSettled([loadMarketIndex(),loadHeatmap(),loadInstTotal(),loadFutInst(),loadMarginMaintenance(),renderSectorFlow(),loadCustomsTrade(),loadIndustrialProduction(),loadScanners(),loadIrEvents(),loadIndustryHeat()]);
+    const labels=['loadMarketIndex','loadHeatmap','loadInstTotal','loadFutInst','loadMarginMaintenance','renderSectorFlow','loadCustomsTrade','loadIndustrialProduction','loadScanners','loadIrEvents','loadIndustryHeat'];
     results.forEach((r,i)=>{if(r.status==='rejected'){console.warn('['+labels[i]+']',r.reason);recordGlobalError(labels[i],r.reason)}});
     _safeAsync('loadMarketBrief',loadMarketBrief);  // 常備.開發-2
     if(MKT_STATE.market==='US')_safeAsync('loadMarketUS',loadMarketUS);
@@ -596,6 +596,29 @@
     }catch(e){
       console.warn('[loadIrEvents]',e);recordGlobalError('loadIrEvents',e);
       el.innerHTML='<div class="note">法說會列表載入失敗（'+String(e&&e.message||e).replace(/[&<>]/g,'')+'）</div>';
+    }
+  }
+  // 研究室.五-3（2026-10-15）：產業營收熱度表，讀 research_radar.json 的 industry_heat，依營收年增中位數排序。
+  let INDUSTRY_HEAT_CACHE=null;
+  async function loadIndustryHeat(){
+    const el=document.getElementById('industry-heat-rows');if(!el)return;
+    try{
+      if(!INDUSTRY_HEAT_CACHE){const r=await fetch('data/research_radar.json?t='+Math.floor(Date.now()/600000));if(!r.ok)throw new Error('HTTP '+r.status);INDUSTRY_HEAT_CACHE=await r.json()}
+      const d=INDUSTRY_HEAT_CACHE,meta=d.meta||{};
+      const rows=(d.industry_heat||[]).slice().sort((a,b)=>(b.median_rev3_yoy??-1e9)-(a.median_rev3_yoy??-1e9));
+      const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      const pct=v=>v==null||!isFinite(v)?'—':(v>=0?'+':'')+(v*100).toFixed(1)+'%';
+      const cls=v=>v==null?'':(v>=0?'pos':'neg');
+      const th='style="text-align:right;font-weight:500;color:var(--ink-4);padding:4px 2px"';
+      const td='class="num" style="text-align:right;padding:4px 2px"';
+      el.innerHTML=rows.length?`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr><th style="text-align:left;font-weight:500;color:var(--ink-4);padding:4px 2px">產業</th><th ${th}>檔數</th><th ${th}>營收年增中位數</th><th ${th}>營收成長家數比</th><th ${th}>20日漲跌中位數</th></tr></thead>
+          <tbody>${rows.map(x=>`<tr style="border-top:1px solid var(--hairline)"><td style="padding:4px 2px;color:var(--ink-2)">${esc(x.industry)}</td><td ${td}>${esc(x.n)}</td><td ${td}><span class="${cls(x.median_rev3_yoy)}">${pct(x.median_rev3_yoy)}</span></td><td ${td}>${x.share_rev_up==null?'—':(x.share_rev_up*100).toFixed(0)+'%'}</td><td ${td}><span class="${cls(x.median_ret20)}">${pct(x.median_ret20)}</span></td></tr>`).join('')}</tbody></table></div>`
+        :'<div class="note">目前沒有產業營收熱度資料</div>';
+      document.getElementById('industry-heat-datatime').textContent=`資料日 ${esc(meta.asof||'—')}；營收年增＝近 3 個月營收合計比去年同期；成長家數比＝該產業近 3 月營收年增 >0 的家數比例。${meta.disclaimer||'變化排序未經回測，不是買賣訊號；非投資建議。'}`;
+    }catch(e){
+      console.warn('[loadIndustryHeat]',e);recordGlobalError('loadIndustryHeat',e);
+      el.innerHTML='<div class="note">產業營收熱度載入失敗（'+String(e&&e.message||e).replace(/[&<>]/g,'')+'）</div>';
     }
   }
   async function loadCustomsTrade(){
