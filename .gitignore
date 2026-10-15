@@ -99,3 +99,7 @@ data/app_errors_summary.json
 research/news_local_fallback.log
 research/git_op_lock.log
 research/archive/stash_patches/
+
+# 修.FinMind計數（2026-10-15）：data/rate_limit_state.json 的跨行程鎖檔與原子寫入暫存檔，不得被 git add -A data/ 掃進去
+data/rate_limit_state.json.lock
+data/rate_limit_state.json.*.tmp

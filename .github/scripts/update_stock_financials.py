@@ -50,6 +50,9 @@
 """
 from __future__ import annotations
 
+import os
+import sys
+import contextlib
 import json
 import time
 from datetime import datetime, timedelta, timezone
@@ -73,37 +76,102 @@ RATE_LIMIT_MIN_INTERVAL_SEC = 3.0
 RATE_LIMIT_BLOCK_SECONDS = 2 * 60 * 60
 
 
+RATE_LIMIT_LOCK_PATH = RATE_LIMIT_STATE_PATH.with_name(RATE_LIMIT_STATE_PATH.name + ".lock")
+
+
+@contextlib.contextmanager
+def _rate_limit_lock(timeout: float = 15.0, stale_sec: float = 60.0):
+    """修.FinMind計數（2026-10-15）：跨行程檔案鎖（O_CREAT|O_EXCL 建 .lock 檔），保護共用狀態檔的
+    「讀→改→寫」，避免兩支行程互相覆寫 calls_by_minute／last_request_at（10/15 08:08 撞 402 時狀態檔只記 1～11 次）。
+    超過 stale_sec 的鎖視為前一個行程死掉留下的，直接清掉；等不到鎖或建鎖失敗只印警告、不加鎖照常進行
+    （fail open，CLAUDE.md 十二節）。各腳本自成一體複製這段（不跨目錄 import 的既有慣例）。"""
+    fd = None
+    deadline = time.time() + timeout
+    while True:
+        try:
+            fd = os.open(str(RATE_LIMIT_LOCK_PATH), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            break
+        except (FileExistsError, PermissionError):
+            try:
+                if time.time() - RATE_LIMIT_LOCK_PATH.stat().st_mtime > stale_sec:
+                    RATE_LIMIT_LOCK_PATH.unlink()
+                    continue
+            except OSError:
+                pass  # 鎖剛好被別人釋放／正在刪，下一圈重試
+            if time.time() > deadline:
+                print(f"[rate_limit] 警告：{timeout:.0f} 秒等不到 {RATE_LIMIT_LOCK_PATH.name}，本次不加鎖照常進行", file=sys.stderr)
+                break
+            time.sleep(0.05)
+        except Exception as e:  # noqa: BLE001 -- 鎖本身失敗只降級成警告（十二節）
+            print(f"[rate_limit] 警告：建鎖失敗（{e!r}），本次不加鎖照常進行", file=sys.stderr)
+            break
+    try:
+        yield
+    finally:
+        if fd is not None:
+            try:
+                os.close(fd)
+                RATE_LIMIT_LOCK_PATH.unlink()
+            except OSError as e:
+                print(f"[rate_limit] 警告：釋放鎖失敗（{e!r}），{stale_sec:.0f} 秒後會被視為過期鎖清掉", file=sys.stderr)
+
+
 def _load_rate_limit_state() -> dict:
     if RATE_LIMIT_STATE_PATH.exists():
-        try:
-            return json.loads(RATE_LIMIT_STATE_PATH.read_text(encoding="utf-8"))
-        except Exception:
-            pass
+        for _ in range(3):  # 修.FinMind計數：別的行程正在換檔時可能讀到半份，稍等重讀，避免拿空狀態蓋掉全部來源
+            try:
+                return json.loads(RATE_LIMIT_STATE_PATH.read_text(encoding="utf-8"))
+            except Exception:
+                time.sleep(0.05)
     return {"sources": {}}
 
 
 def _save_rate_limit_state(state: dict) -> None:
+    """修.FinMind計數：先寫暫存檔再 os.replace（原子換檔），別的行程不會讀到寫一半的 JSON；
+    Windows 上目標檔被開著時 replace 可能 PermissionError，重試 5 次後退回直接覆寫。"""
     RATE_LIMIT_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    RATE_LIMIT_STATE_PATH.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+    text = json.dumps(state, ensure_ascii=False, indent=2)
+    tmp = RATE_LIMIT_STATE_PATH.with_name(f"{RATE_LIMIT_STATE_PATH.name}.{os.getpid()}.tmp")
+    try:
+        tmp.write_text(text, encoding="utf-8")
+        for _ in range(5):
+            try:
+                os.replace(tmp, RATE_LIMIT_STATE_PATH)
+                return
+            except PermissionError:
+                time.sleep(0.05)
+    except Exception as e:  # noqa: BLE001 -- 原子寫入失敗退回直接覆寫（十二節）
+        print(f"[rate_limit] 警告：原子寫入失敗（{e!r}），改直接覆寫", file=sys.stderr)
+    try:
+        tmp.unlink()
+    except OSError:
+        pass
+    RATE_LIMIT_STATE_PATH.write_text(text, encoding="utf-8")
 
 
 def _rate_limit_wait_or_raise(source: str) -> None:
-    state = _load_rate_limit_state()
-    src = state["sources"].get(source, {})
-    now = time.time()
-    blocked_until = src.get("blocked_until")
-    if blocked_until and now < blocked_until:
-        remain_min = round((blocked_until - now) / 60, 1)
-        raise RuntimeError(
-            f"{source} 目前處於封鎖冷卻中（還剩約{remain_min}分鐘，"
-            f"原因：{src.get('block_reason', '未知')}），依「資料源禮儀」規則拒絕發送請求"
-        )
-    last = src.get("last_request_at")
-    if last and (now - last) < RATE_LIMIT_MIN_INTERVAL_SEC:
-        time.sleep(RATE_LIMIT_MIN_INTERVAL_SEC - (now - last))
-    src["last_request_at"] = time.time()
-    state["sources"][source] = src
-    _save_rate_limit_state(state)
+    # 修.FinMind計數：鎖內「重讀→判斷→只改自己這個來源→寫回」；間隔不夠就放開鎖去睡，醒來重讀再判斷，
+    # 不再拿睡前讀到的舊狀態整份寫回（那會蓋掉別的行程在這段時間寫進去的計數）。
+    while True:
+        with _rate_limit_lock():
+            state = _load_rate_limit_state()
+            src = state["sources"].get(source, {})
+            now = time.time()
+            blocked_until = src.get("blocked_until")
+            if blocked_until and now < blocked_until:
+                remain_min = round((blocked_until - now) / 60, 1)
+                raise RuntimeError(
+                    f"{source} 目前處於封鎖冷卻中（還剩約{remain_min}分鐘，"
+                    f"原因：{src.get('block_reason', '未知')}），依「資料源禮儀」規則拒絕發送請求"
+                )
+            last = src.get("last_request_at")
+            wait = (RATE_LIMIT_MIN_INTERVAL_SEC - (now - last)) if last else 0.0
+            if wait <= 0:
+                src["last_request_at"] = now
+                state["sources"][source] = src
+                _save_rate_limit_state(state)
+                return
+        time.sleep(wait)
 
 
 import re as _re_secret
@@ -136,7 +204,13 @@ def _redact_secrets(text: str) -> str:
         return "[redacted-unparseable]"
 
 
-def _rate_limit_record_block(source: str, status_code: int, detail: str = "") -> None:
+def _rate_limit_record_block(*args, **kwargs) -> None:
+    """修.FinMind計數：在跨行程鎖內做「重讀→標封鎖→寫回」（參數原樣轉給 _rate_limit_record_block_unlocked）。"""
+    with _rate_limit_lock():
+        _rate_limit_record_block_unlocked(*args, **kwargs)
+
+
+def _rate_limit_record_block_unlocked(source: str, status_code: int, detail: str = "") -> None:
     state = _load_rate_limit_state()
     src = state["sources"].setdefault(source, {})
     src["blocked_until"] = time.time() + RATE_LIMIT_BLOCK_SECONDS

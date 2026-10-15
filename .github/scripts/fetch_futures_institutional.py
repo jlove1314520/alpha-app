@@ -9,8 +9,10 @@
 的節流／封鎖紀錄（來源名 taifex_openapi，同源最少間隔 3 秒，402/403/428/429 封鎖 2 小時不重試）。
 失敗不覆蓋既有檔（App 會顯示資料日，落後時看得出來）。用法：python .github/scripts/fetch_futures_institutional.py
 """
+import contextlib
 import csv
 import io
+import os
 import json
 import sys
 import time
@@ -45,25 +47,90 @@ def _state():
     except (OSError, ValueError):
         return {"sources": {}}
 
+# 修.FinMind計數（2026-10-15）：與 finmind_client 等共用同一個 data/rate_limit_state.json.lock；
+# 鎖內「重讀→只改自己的來源→原子寫回」，避免蓋掉別支行程寫進去的計數。鎖本身失敗只警告、照常進行（十二節）。
+STATE_LOCK = STATE.with_name(STATE.name + ".lock")
+
+
+@contextlib.contextmanager
+def _state_lock(timeout: float = 15.0, stale_sec: float = 60.0):
+    fd = None
+    deadline = time.time() + timeout
+    while True:
+        try:
+            fd = os.open(str(STATE_LOCK), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            break
+        except (FileExistsError, PermissionError):
+            try:
+                if time.time() - STATE_LOCK.stat().st_mtime > stale_sec:
+                    STATE_LOCK.unlink()
+                    continue
+            except OSError:
+                pass  # 鎖剛好被別人釋放／正在刪，下一圈重試
+            if time.time() > deadline:
+                print(f"[rate_limit] 警告：{timeout:.0f} 秒等不到 {STATE_LOCK.name}，本次不加鎖照常進行", file=sys.stderr)
+                break
+            time.sleep(0.05)
+        except Exception as e:  # noqa: BLE001 -- 鎖本身失敗只降級成警告（十二節）
+            print(f"[rate_limit] 警告：建鎖失敗（{e!r}），本次不加鎖照常進行", file=sys.stderr)
+            break
+    try:
+        yield
+    finally:
+        if fd is not None:
+            try:
+                os.close(fd)
+                STATE_LOCK.unlink()
+            except OSError as e:
+                print(f"[rate_limit] 警告：釋放鎖失敗（{e!r}），{stale_sec:.0f} 秒後會被視為過期鎖清掉", file=sys.stderr)
+
+
+def _write_state(st: dict) -> None:
+    """先寫暫存檔再 os.replace（原子換檔）；Windows 上 replace 被擋就重試 5 次，再不行退回直接覆寫。"""
+    text = json.dumps(st, ensure_ascii=False, indent=2)
+    tmp = STATE.with_name(f"{STATE.name}.{os.getpid()}.tmp")
+    try:
+        tmp.write_text(text, encoding="utf-8")
+        for _ in range(5):
+            try:
+                os.replace(tmp, STATE)
+                return
+            except PermissionError:
+                time.sleep(0.05)
+    except Exception as e:  # noqa: BLE001 -- 原子寫入失敗退回直接覆寫（十二節）
+        print(f"[rate_limit] 警告：原子寫入失敗（{e!r}），改直接覆寫", file=sys.stderr)
+    try:
+        tmp.unlink()
+    except OSError:
+        pass
+    STATE.write_text(text, encoding="utf-8")
+
 
 def _gate():
-    st = _state()
-    src = st.setdefault("sources", {}).setdefault(SOURCE, {})
-    now = time.time()
-    if src.get("blocked_until") and now < src["blocked_until"]:
-        raise RuntimeError(f"{SOURCE} 封鎖冷卻中（還剩約 {round((src['blocked_until'] - now) / 60, 1)} 分鐘），依資料源禮儀不送請求")
-    if src.get("last_request_at") and now - src["last_request_at"] < 3.0:
-        time.sleep(3.0 - (now - src["last_request_at"]))
-    src["last_request_at"] = time.time()
-    STATE.write_text(json.dumps(st, ensure_ascii=False, indent=2), encoding="utf-8")
+    # 修.FinMind計數：間隔不夠就放開鎖去睡、醒來重讀再判斷，不拿睡前的舊狀態整份寫回
+    while True:
+        with _state_lock():
+            st = _state()
+            src = st.setdefault("sources", {}).setdefault(SOURCE, {})
+            now = time.time()
+            if src.get("blocked_until") and now < src["blocked_until"]:
+                raise RuntimeError(f"{SOURCE} 封鎖冷卻中（還剩約 {round((src['blocked_until'] - now) / 60, 1)} 分鐘），依資料源禮儀不送請求")
+            last = src.get("last_request_at")
+            wait = (3.0 - (now - last)) if last else 0.0
+            if wait <= 0:
+                src["last_request_at"] = now
+                _write_state(st)
+                return
+        time.sleep(wait)
 
 
 def _block(code: int):
-    st = _state()
-    src = st.setdefault("sources", {}).setdefault(SOURCE, {})
-    src["blocked_until"] = time.time() + 2 * 3600
-    src["block_reason"] = f"HTTP {code}（fetch_futures_institutional.py）"
-    STATE.write_text(json.dumps(st, ensure_ascii=False, indent=2), encoding="utf-8")
+    with _state_lock():
+        st = _state()
+        src = st.setdefault("sources", {}).setdefault(SOURCE, {})
+        src["blocked_until"] = time.time() + 2 * 3600
+        src["block_reason"] = f"HTTP {code}（fetch_futures_institutional.py）"
+        _write_state(st)
 
 
 def _int(x):
