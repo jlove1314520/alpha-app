@@ -20017,3 +20017,24 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
 - [x] **先.一〇一-3 防護方案提案（電源／更新時段／不登入執行／停擺告警），交總司令審閱，不自行改系統設定**（互動視窗執行）〔22:15 完成：docs/PROPOSAL_REBOOT_OUTAGE_GUARD.md（a 電源：插電睡眠已是永不，建議休眠永不＋Wi-Fi 不省電＋接網路線；b 使用時段現為 00:00～08:00，建議改 07:00～01:00；c 建議 c1 存一次密碼改「不論登入與否」、分兩批；d 雲端告警已有但今天晚 4.5 小時且只寄 email，建議先開 GitHub 手機推播）。已列 research/AWAITING_REVIEW.md，等總司令四題回覆；未改任何系統設定〕
 - [x] **先.一〇一-4 補跑 10/15 收盤資料，確認 market_tw data_date=2026-10-15**（互動視窗執行）〔22:00 完成：scripts/market_local_catchup.py 66 步 0 失敗、commit 084b43d24a、origin/main 的 market_tw.json data_date=2026-10-15；alpha-data `python run_daily.py` 22:0x 補跑 exit=0（10/15 六類入庫）〕
 - [ ] **先.一〇一-5 AlphaData 由工作排程器啟動立刻 0xC000013A 結束查因**（互動視窗執行）〔來源：先.一〇一-4 補跑時發現：`Start-ScheduledTask AlphaData` 約 60 秒內以 0xC000013A（Ctrl+C 中斷）結束、run.log 只寫一個 ^C；直接 `python run_daily.py` 正常。9/24 也記錄 AlphaData 登入後沒補跑，可能同源。做法：只讀查 run.log 歷次結尾與工作設定（cmd /c 主控台、ExecutionTimeLimit、StartWhenAvailable）→ 找到根因寫提案；不得改 fetch.py／parsers.py／config.py。心跳：本條標 - [x]＋PROGRESS_HEARTBEAT item=先.一〇一-5〕
+
+# 2026-10-15【先.一〇二：重開機停擺防護四題裁示＋雜項】（總司令裁示原文，動工前先寫入；22:2x 互動視窗收到）
+
+> 先.一〇二　重開機停擺防護（docs/PROPOSAL_REBOOT_OUTAGE_GUARD.md 四題裁示）＋雜項（每項標 - [x]，在 research/PROGRESS_HEARTBEAT.jsonl append item=先.一〇二-N）
+> 1. ①使用時段改 07:00～01:00。由 CC 準備好指令或設定步驟，總司令同意當下執行；執行後列出設定值確認。
+> 2. ②採 c1：工作排程器存一次 Windows 密碼，改「不論登入與否都執行」，分兩批：
+>    a. 第一批：AlphaMarketCatchup、AlphaMarketCatchupLate、AlphaData、盤中報價備援、權證快照、DevQueue。
+>    b. 第二批（第一批觀察 3 個交易日沒問題後）：其餘排程。
+>    密碼由總司令本人在 Windows 跳出的視窗輸入，CC 只負責開視窗並列出要改哪些工作，不得讀出、記錄或在對話要求密碼。改完逐一確認「上次執行結果」與心跳，並用一次手動登出（或排程測試）驗證沒登入時也會跑、而且推得上 GitHub。
+> 3. ③雲端檢查：本機心跳（DevQueue／市場補跑／連線監測）超過 60 分鐘沒更新，就讓雲端 workflow 以失敗結束（紅燈）；總司令開啟 GitHub 手機 App 的 Actions 失敗推播。告警文字寫「本機停擺 N 分鐘，可能是重開機未登入」。
+> 4. ④網路線：記錄為建議，不列阻塞。
+> 5. 自動交易解凍前置條件加一條：重開機停擺防護（第 2 項）已上線並驗證，否則不得解凍。
+> 6. AWAITING_REVIEW 清掉先.九十九-0 殘留列；先.一〇一-3 結案。
+
+- [ ] **先.一〇二-1 Windows Update 使用時段改 07:00～01:00（CC 備指令，總司令在 UAC 視窗同意當下執行；執行後列設定值）**（互動視窗執行；需總司令本人操作）
+- [ ] **先.一〇二-2a 第一批改「不論登入與否都執行」（存一次密碼）：AlphaMarketCatchup、AlphaMarketCatchupLate、AlphaData、AlphaQuotesFallback、AlphaWarrantSnapshot、AlphaDevQueue；改完逐一確認上次執行結果＋心跳＋非互動身分 push 測試**（互動視窗執行；需總司令本人在 Windows 視窗輸入密碼，CC 不得讀出／記錄／索取）
+- [ ] **先.一〇二-2b 第二批（其餘排程），第一批觀察 3 個交易日無問題後才做**（互動視窗執行；需總司令本人輸入密碼）〔前置：2a 完成後 3 個交易日〕
+- [ ] **先.一〇二-3 雲端停擺告警：本機心跳（DevQueue／市場補跑／連線監測）最新一筆超過 60 分鐘 → workflow 紅燈，訊息「本機停擺 N 分鐘，可能是重開機未登入」；總司令開 GitHub 手機 App Actions 失敗推播**（互動視窗執行）
+- [ ] **先.一〇二-4 網路線記錄為建議（不列阻塞）**（互動視窗執行）
+- [ ] **先.一〇二-5 自動交易解凍前置條件加一條：重開機停擺防護（先.一〇二-2）已上線並驗證**（互動視窗執行）
+- [ ] **先.一〇二-6 AWAITING_REVIEW 清掉先.九十九-0 殘留列；先.一〇一-3 結案**（互動視窗執行）
