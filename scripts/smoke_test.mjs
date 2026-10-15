@@ -3023,7 +3023,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { banErrs.push(`測試本身出錯：${e.message || e}`); }
   record("92. 紅色橫幅「狀況＋下一步」兩段式、細節收合、原始訊息經白話轉換（先.七十二-A3）", banErrs.length === 0, banErrs.join("; "));
 
-  // 93.【2026-10-11 先.七十二-B】資訊架構：首頁順序（狀態列→我的資產→自動投資這一期→自選股→大盤一眼→跟 0050 比→今日事件）、
+  // 93.【2026-10-11 先.七十二-B；2026-10-16 先.一〇四-4 改順序】資訊架構：首頁順序（狀態列→今日摘要→自選股→今日事件→跟 0050 比→我的資產→自動投資這一期→盤前日報→沒連線提示）、
   // 電腦沒連線時兩張錢的卡收成一行；設定頁常用／進階兩層；個股頁 4 分頁（總覽／籌碼／財務／事件）；市場頁冷門卡收進「更多」。
   const iaErrs = [];
   try {
@@ -3034,9 +3034,10 @@ async function runSmokeTest(baseUrl, headless = true) {
       const pos = (sel) => { const el = typeof sel === "string" ? document.querySelector(sel) : sel; if (!el) return -1;
         return [...document.querySelectorAll("#scr-home *")].indexOf(el); };
       const h3 = (t) => [...document.querySelectorAll("#scr-home .card h3")].find(h => h.textContent.trim().startsWith(t));
-      const order = [pos("#home-status-strip"), pos("#home-offline-line"), pos("#home-money-card"), pos("#home-exec-card"),
-        pos(h3("自選股") && h3("自選股").closest(".card")), pos(h3("大盤一眼") && h3("大盤一眼").closest(".card")),
-        pos("#strategy-curves-card"), pos("#home-events-card")];
+      // 先.一〇四-4（2026-10-16）新順序：狀態列→今日摘要→自選股→今日事件→跟 0050 比→我的資產→自動投資這一期→盤前日報→沒連線提示（頁尾）
+      const order = [pos("#home-status-strip"), pos(h3("今日摘要") && h3("今日摘要").closest(".card")),
+        pos(h3("自選股") && h3("自選股").closest(".card")), pos("#home-events-card"), pos("#strategy-curves-card"),
+        pos("#home-money-card"), pos("#home-exec-card"), pos("#home-ai-card"), pos("#home-offline-line")];
       const vis = (id) => { const e = document.getElementById(id); return !!(e && !e.hidden && getComputedStyle(e).display !== "none" && e.getBoundingClientRect().height > 0); };
       const out = { order, offlineLine: vis("home-offline-line"), money: vis("home-money-card"), exec: vis("home-exec-card"),
         liveConfigured: !!(window.LIVE && LIVE.configured && LIVE.url) };

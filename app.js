@@ -1290,12 +1290,24 @@
   const SC_BENCH_COLOR='#8b8b8b';
   const scColor=id=>SC_COLOR_BY[id]||'#9e9e9e';
   let SC_PLOT=null;  // 目前畫面上那張圖的資料（按住圖顯示當日數值用）
+  // 先.一〇四-4：「跟 0050 比」讀檔失敗要講原因（不能永遠停在載入中）；15 秒逾時
+  let SC_ERR='';
   async function loadStrategyCurves(){
+    SC_ERR='';
+    const ac=typeof AbortController!=='undefined'?new AbortController():null;
+    const to=ac?setTimeout(()=>ac.abort(),15000):null;
     try{
-      const r=await fetch('data/strategy_curves.json?t='+Math.floor(Date.now()/60000));
+      const r=await fetch('data/strategy_curves.json?t='+Math.floor(Date.now()/60000),ac?{signal:ac.signal}:undefined);
       if(!r.ok)throw new Error('HTTP '+r.status);
       SC_DATA=await r.json();
-    }catch(e){console.warn('[loadStrategyCurves]',e);recordGlobalError('loadStrategyCurves',e);SC_DATA=null}
+    }catch(e){
+      console.warn('[loadStrategyCurves]',e);recordGlobalError('loadStrategyCurves',e);SC_DATA=null;
+      SC_ERR=(e&&e.name==='AbortError')?'等了 15 秒還沒下載完（網路慢或斷線）'
+        :(navigator.onLine===false||_isOfflineErr(e))?'目前離線，讀不到資料檔'
+        :/HTTP 404/.test(String(e&&e.message))?'資料檔還沒產生（雲端排程尚未跑過）'
+        :/HTTP/.test(String(e&&e.message))?('伺服器回應 '+String(e.message).replace('HTTP ',''))
+        :('資料檔格式讀不出來（'+String(e&&e.message||e).slice(0,40)+'）');
+    }finally{if(to)clearTimeout(to)}
     SC_LIVE=null;SC_LIVE_ERR='';
     if(!LIVE.configured||!LIVE.url){SC_LIVE_ERR='連上電腦才看得到';return SC_DATA}
     try{
@@ -1309,6 +1321,13 @@
     }
     return SC_DATA;
   }
+  async function retryStrategyCurves(){
+    try{
+      const b=document.getElementById('sc-body');if(b)b.innerHTML='<div class="note" style="color:var(--ink-3)">載入中…</div>';
+      await Promise.allSettled([loadStrategyCurves(),loadStrategyHistory()]);renderStrategyCurves();
+    }catch(e){console.warn('[retryStrategyCurves]',e);recordGlobalError('retryStrategyCurves',e)}
+  }
+  window.retryStrategyCurves=retryStrategyCurves;
   function scLines(){
     const ls=(SC_DATA&&SC_DATA.lines||[]).slice();
     const i=ls.findIndex(l=>l.id==='live_bb90');
@@ -1554,7 +1573,9 @@
   function renderStrategyCurves(){
     const tabsEl=document.getElementById('sc-tabs'),bodyEl=document.getElementById('sc-body');
     if(!tabsEl||!bodyEl)return;
-    if(!SC_DATA||!SC_DATA.lines){bodyEl.innerHTML='<div class="note" style="color:var(--ink-3)">策略曲線資料尚未產生</div>';tabsEl.innerHTML='';return}
+    if(!SC_DATA||!SC_DATA.lines){
+      bodyEl.innerHTML=`<div class="note" style="color:var(--ink-3)">載入失敗：${_uiEsc(SC_ERR||'資料檔裡沒有策略曲線')} <span class="press" style="text-decoration:underline;cursor:pointer" onclick="retryStrategyCurves()">重試</span></div>`;
+      tabsEl.innerHTML='';return}
     const chip=(on,label,js,attr,dim)=>`<span class="press sc-tab" ${attr} style="padding:3px 9px;border-radius:14px;font-size:11px;white-space:nowrap;border:1px solid ${on?'var(--accent)':'var(--hairline)'};color:${on?'var(--accent)':'var(--ink-2)'};cursor:pointer;opacity:${dim?'.45':'1'}" onclick="${js}">${label}</span>`;
     tabsEl.innerHTML=SC_TABS.map(([k,lb])=>{const has=scTabHasData(k);return chip(k===SC_TAB,lb,`SC_TAB='${k}';renderStrategyCurves()`,`data-tab="${k}" data-has-data="${has?1:0}"`,!has)}).join('');
     // 先.八十一-16：計算口徑一行（還原價、0050 含息、現金計息），每個分頁都顯示
@@ -1887,7 +1908,11 @@
     // 先.八十一-7：破億試算在設定頁，設定頁 hydrateSettings 自己會呼叫 renderBtPath，首頁不再提早抓 strategy_history
     _safeAsync('loadHomeExecCard',loadHomeExecCard);  // 常備.開發-11 真錢執行總覽卡（唯讀）
     _safeAsync('loadHomeBrokerCard',loadHomeBrokerCard);  // 2026-09-15 開發佇列自走，週六.五：總資產卡吃/live/positions+/live/balance真數字
-    uiLazyHome('loadStrategyCurves',async()=>{await Promise.allSettled([loadStrategyCurves(),loadStrategyHistory()]);renderStrategyCurves()});  // 先.六十八；先.八十一-7 捲到才載
+    uiLazyHome('loadStrategyCurves',async()=>{
+      // 先.一〇四-4：開始載入後 20 秒仍是「載入中」就改講原因＋重試（逾時本身另由 loadStrategyCurves 15 秒中止）
+      const t=setTimeout(()=>{try{const b=document.getElementById('sc-body');if(b&&/載入中/.test(b.textContent||''))b.innerHTML='<div class="note" style="color:var(--ink-3)">還在載入（已等 20 秒，可能是網路慢） <span class="press" style="text-decoration:underline;cursor:pointer" onclick="retryStrategyCurves()">重試</span></div>'}catch(e){console.warn('[sc watchdog]',e)}},20000);
+      try{await Promise.allSettled([loadStrategyCurves(),loadStrategyHistory()]);renderStrategyCurves()}finally{clearTimeout(t)}
+    });  // 先.六十八；先.八十一-7 捲到才載
     await loadIntradayQuotes();
     if(!WL.length){el.innerHTML='<div class="note" style="padding:14px 2px">尚無自選股，點右上「管理」搜尋加入</div>';return}
     // 2026-09-06（實測.一）三份檔案一起備妥再畫：sparklines（走勢線＋回退鏈最後一層）、
@@ -2666,10 +2691,22 @@
     const taiexSrc=taiexRowSource(tw),txfSrc=shioajiFutRowSource('TX',tw.tx_futures);
     // 2026-09-04 P0產品.一：首頁改橫向膠囊帶（名稱、點數、%、迷你走勢），一屏約三顆
     const capsules=[idxCapsuleHtml('加權指數',taiexSrc.srcLabel,taiexSrc.item)];
+    // 先.一〇四-4：今日摘要只放加權／櫃買／台指期／費半（其他美股指數在市場頁）
+    if(tw.tpex&&tw.tpex.close!=null)capsules.push(idxCapsuleHtml('櫃買指數','櫃買中心',tw.tpex));
     // 先.八十-8：台指期膠囊補近月日線走勢（data/market_tw.json tx_futures.sparkline，近月連續、未做轉倉調整）；連上即時則照舊畫當日 1 分K
     if(txfSrc.fut&&txfSrc.fut.last!=null)capsules.push(idxCapsuleHtml('台指期近月',txfSrc.srcLabel||'TAIFEX',{close:txfSrc.fut.last,change_pct:txfSrc.fut.change_pct,liveKey:'TXF_NEAR',sparkline:((tw.tx_futures||{}).sparkline||[]).filter(v=>v!=null)}));
-    usIdx.forEach(r=>{if(r.item)capsules.push(idxCapsuleHtml(r.label,r.srcLabel,r.item))});
+    const sox=usIdx.find(r=>r.label==='費城半導體指數');
+    if(sox&&sox.item)capsules.push(idxCapsuleHtml(sox.label,sox.srcLabel,sox.item));
     el.innerHTML=capsules.join('')||'<div class="note">查無資料</div>';
+    _safeSync('homeIdxSentence',()=>{
+      const sen=document.getElementById('home-idx-sentence');if(!sen)return;
+      const f=(nm,v)=>v==null||!isFinite(v)?'':`${nm} ${v>=0?'+':''}${(+v).toFixed(2)}%`;
+      const tw1=[f('加權',taiexSrc.item&&taiexSrc.item.change_pct),f('櫃買',tw.tpex&&tw.tpex.change_pct)].filter(Boolean).join('、');
+      const oth=[f('台指期',txfSrc.fut&&txfSrc.fut.change_pct),f('費半',sox&&sox.item&&sox.item.change_pct)].filter(Boolean).join('、');
+      const tpct=taiexSrc.item&&taiexSrc.item.change_pct;
+      const head=tpct==null?'台股':(tpct>0.05?'台股收漲':(tpct<-0.05?'台股收跌':'台股持平'));
+      sen.textContent=tw1?`${head}：${tw1}${oth?'；'+oth:''}。`:(oth?oth+'。':'');
+    });
     if(capsules.length&&window.__ALPHA_DATA_MS==null)window.__ALPHA_DATA_MS=performance.now();  // 先.八十一-8：第一次有資料數字出現的時間（量測用）
     // 2026-09-04（四修.四）：加權/台指期走Shioaji即時時，時間戳寫即時時間；否則明標收盤日
     const liveTw=(taiexSrc.srcLabel||'').startsWith('Shioaji')||!!txfSrc.srcLabel;
@@ -3420,7 +3457,8 @@
     else{liveTxt='未設即時源';cls='gr'}
     if(!twOpen&&usSess==='closed'&&cls==='g')cls='gr';  // 全部收盤時即使連著也是灰（沒有在動的東西）
     const upd=document.getElementById('home-updated-tm');const updTxt=upd&&upd.textContent&&upd.textContent!=='--:--'?' · 更新 '+upd.textContent:'';
-    const txt=`${twTxt} · ${usTxt} · ${liveTxt}${updTxt}`;
+    // 先.一〇四-3：台股／美股開收盤狀態頂部膠囊已顯示，這裡不重複，只講連線與更新時間
+    const txt=`${liveTxt}${updTxt}`;
     if(el.textContent!==txt)el.textContent=txt;
     dot.className='sdot '+cls;
   }
@@ -4531,7 +4569,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-16.0053';
+  const APP_VERSION='2026-10-16.0100';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

@@ -43,7 +43,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(mq.addEventListener)mq.addEventListener('change',h);else if(mq.addListener)mq.addListener(h)}
 })();
 </script>
-<link rel="stylesheet" href="app.css?v=2026-10-16.0053">
+<link rel="stylesheet" href="app.css?v=2026-10-16.0100">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -120,9 +120,56 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       </div>
     </div>
 
+    <!-- 先.一〇四-4（2026-10-16）首頁順序：今日摘要 → 自選股 → 今日事件（＋我的持股事件）→ 跟 0050 比 → 我的資產／自動投資這一期（連上電腦時）→ 盤前日報（收合）→ 沒連線提示（頁尾小字） -->
+    <div class="card">
+      <h3>今日摘要</h3>
+      <!-- 先.一〇四-4：加權／櫃買／台指期／費半＋一句話（固定規則組字，不做判斷） -->
+      <div class="note" id="home-idx-sentence" style="margin:-2px 0 8px;color:var(--ink-2)"></div>
+      <div class="idx-strip" id="home-idx-rows"><div class="skel-block" style="height:52px;width:100%"></div></div>
+      <div class="note" id="home-idx-datatime"></div>
+    </div>
+
+    <div class="card">
+      <h3>自選股 <span class="more" onclick="editWL()">管理 →</span></h3>
+      <!-- 常備.開發-8（2026-10-11）：多自選清單。點清單名稱切換；「＋」新增；「下架」移除目前清單（至少保留一個）。 -->
+      <div id="wl-tabs" style="display:flex;gap:6px;overflow-x:auto;margin:-2px 0 8px"></div>
+      <div id="wl-list"><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div></div>
+      <!-- 2026-08-27新增（P2-新，盤前盤後）：只在畫面上真的顯示了盤前/盤後價格時
+           才出現，不是固定貼一段沒人看的警語。 -->
+      <div class="note" id="wl-extended-hours-note" style="display:none;color:var(--warn);margin-top:6px">⚠ 延長交易時段（盤前/盤後）流動性低、價差大，僅接受限價單，價格僅供參考</div>
+      <div class="note" style="margin-top:6px;font-size:10px">來源小點：<span class="sdot g" style="width:6px;height:6px"></span> 即時 · <span class="sdot y" style="width:6px;height:6px"></span> 延遲 · <span class="sdot gr" style="width:6px;height:6px"></span> 盤後／收盤，點小點看說明</div>
+    </div>
+
+    <div class="card" id="home-events-card" hidden>
+      <h3>今日事件</h3>
+      <div id="today-events"></div>
+    </div>
+
+    <!-- 2026-09-15（開發佇列自走，承接自競品一）「我的持股事件」卡：自選股與真錢持股
+    （先.八十一-11 起不含研究策略／模擬持股）的events.json/news.json依時間排一條流，
+    點開跳個股頁。跟上面「今日事件」卡不同——那張只顯示21天內美股財報日期，
+    這張是已發生事件/新聞的回顧流，範圍也不同（含台股）。無事件時整張卡隱藏
+    （比照home-ai-card的既有做法），不畫空狀態佔位。 -->
+    <div class="card" id="home-my-events-card" hidden>
+      <h3>我的持股事件</h3>
+      <div id="my-holdings-events"></div>
+    </div>
+
+    <!-- 2026-10-11 先.六十八：「策略 vs 0050」（取代「我們 vs 0050」）。資料 data/strategy_curves.json
+    （build_strategy_curves.py，選股三榜改重疊組合法）＋本機 /auto/strategy_line（真錢 Bb-90）。
+    判讀文字為固定規則（<60 交易日「尚不足以判斷」），由 Python 端 metrics() 產生，前端不自行推論。 -->
+    <!-- 先.八十一-7：下方卡片捲到才載——這個哨兵真的進入畫面才抓 strategy_curves／history、我的持股事件 -->
+    <div id="home-lazy-sentinel" style="height:1px"></div>
+    <div class="card" id="strategy-curves-card">
+      <h3>跟 0050 比</h3>
+      <!-- 先.七十-5：卡頂固定一句（總司令裁示原文，靜態文字，不隨資料變動） -->
+      <div class="note" id="sc-positioning" style="margin:0 0 8px;padding:6px 8px;border-radius:8px;background:rgba(127,127,127,.08);color:var(--ink-2)">守回檔的策略大漲時會落後 0050，這是設計；看滿 60 個交易日與最大跌幅</div>
+      <div id="sc-tabs" style="display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;padding-bottom:2px"></div>
+      <div id="sc-body"><div class="note" style="color:var(--ink-3)">載入中…</div></div>
+    </div>
+
     <!-- 先.七十二-B5（2026-10-11）：「我的資產與今日損益」合成一張卡（原總資產卡 home-asset-card、持股損益卡 home-pos-card
          改成卡內區塊，id 保留）。電腦沒連線時整張卡與「自動投資這一期」都收起，只顯示一行 #home-offline-line。 -->
-    <div class="cta-line" id="home-offline-line" hidden onclick="go('settings')">我的資產、自動投資：連上電腦才看得到 →</div>
     <div class="card" id="home-money-card">
       <h3>我的資產 <span class="more" onclick="go('settings')">設定 →</span></h3>
       <div class="cta-line" id="home-broker-cta" onclick="go('settings')" style="margin:0 0 6px">連上電腦才看得到 →</div>
@@ -144,58 +191,17 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div id="home-exec-body" class="note">連上電腦才看得到</div>
     </div>
 
-    <div class="card">
-      <h3>自選股 <span class="more" onclick="editWL()">管理 →</span></h3>
-      <!-- 常備.開發-8（2026-10-11）：多自選清單。點清單名稱切換；「＋」新增；「下架」移除目前清單（至少保留一個）。 -->
-      <div id="wl-tabs" style="display:flex;gap:6px;overflow-x:auto;margin:-2px 0 8px"></div>
-      <div id="wl-list"><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div></div>
-      <!-- 2026-08-27新增（P2-新，盤前盤後）：只在畫面上真的顯示了盤前/盤後價格時
-           才出現，不是固定貼一段沒人看的警語。 -->
-      <div class="note" id="wl-extended-hours-note" style="display:none;color:var(--warn);margin-top:6px">⚠ 延長交易時段（盤前/盤後）流動性低、價差大，僅接受限價單，價格僅供參考</div>
-      <div class="note" style="margin-top:6px;font-size:10px">來源小點：<span class="sdot g" style="width:6px;height:6px"></span> 即時 · <span class="sdot y" style="width:6px;height:6px"></span> 延遲 · <span class="sdot gr" style="width:6px;height:6px"></span> 盤後／收盤，點小點看說明</div>
-    </div>
-
-    <div class="card">
-      <h3>大盤一眼</h3>
-      <div class="idx-strip" id="home-idx-rows"><div class="skel-block" style="height:52px;width:100%"></div></div>
-      <div class="note" id="home-idx-datatime"></div>
-    </div>
-
-    <!-- 2026-10-11 先.六十八：「策略 vs 0050」（取代「我們 vs 0050」）。資料 data/strategy_curves.json
-    （build_strategy_curves.py，選股三榜改重疊組合法）＋本機 /auto/strategy_line（真錢 Bb-90）。
-    判讀文字為固定規則（<60 交易日「尚不足以判斷」），由 Python 端 metrics() 產生，前端不自行推論。 -->
-    <!-- 先.八十一-7：下方卡片捲到才載——這個哨兵真的進入畫面才抓 strategy_curves／history、我的持股事件 -->
-    <div id="home-lazy-sentinel" style="height:1px"></div>
-    <div class="card" id="strategy-curves-card">
-      <h3>跟 0050 比</h3>
-      <!-- 先.七十-5：卡頂固定一句（總司令裁示原文，靜態文字，不隨資料變動） -->
-      <div class="note" id="sc-positioning" style="margin:0 0 8px;padding:6px 8px;border-radius:8px;background:rgba(127,127,127,.08);color:var(--ink-2)">守回檔的策略大漲時會落後 0050，這是設計；看滿 60 個交易日與最大跌幅</div>
-      <div id="sc-tabs" style="display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;padding-bottom:2px"></div>
-      <div id="sc-body"><div class="note" style="color:var(--ink-3)">載入中…</div></div>
-    </div>
-
-    <div class="card" id="home-events-card" hidden>
-      <h3>今日事件</h3>
-      <div id="today-events"></div>
-    </div>
-
-    <!-- 2026-09-15（開發佇列自走，承接自競品一）「我的持股事件」卡：自選股與真錢持股
-    （先.八十一-11 起不含研究策略／模擬持股）的events.json/news.json依時間排一條流，
-    點開跳個股頁。跟上面「今日事件」卡不同——那張只顯示21天內美股財報日期，
-    這張是已發生事件/新聞的回顧流，範圍也不同（含台股）。無事件時整張卡隱藏
-    （比照home-ai-card的既有做法），不畫空狀態佔位。 -->
-    <div class="card" id="home-my-events-card" hidden>
-      <h3>我的持股事件</h3>
-      <div id="my-holdings-events"></div>
-    </div>
-
     <!-- 常備.開發-2（2026-10-11）：讀 data/daily_brief.json（.github/scripts/build_daily_brief.py 固定規則產生，
          不呼叫語言模型、不做市場判斷）。讀到才顯示，讀不到維持隱藏。 -->
     <div class="card ai-card" id="home-ai-card" hidden>
-      <div class="ai-tag">✦ 盤前日報 · 規則摘要</div>
+      <!-- 先.一〇四-4：盤前日報預設收合 -->
+      <details id="home-ai-details"><summary class="ai-tag" style="cursor:pointer">✦ 盤前日報 · 規則摘要</summary>
       <div class="note" id="home-ai-body"></div>
+      </details>
     </div>
 
+    <!-- 先.一〇四-3：沒連上電腦時「我的資產／自動投資」只剩頁尾一行小字（不再佔第一屏） -->
+    <div class="note" id="home-offline-line" hidden onclick="go('settings')" style="text-align:center;font-size:11px;margin:14px 0 0;cursor:pointer;color:var(--ink-3)">我的資產、自動投資：連上電腦才看得到 →</div>
     <!-- 2026-08-28新增（使用者要求：手機第五次回報時鐘/資料卡舊，最大嫌疑是SW快取
          舊版index.html——首頁底部固定顯示版本號，讓使用者一眼比對手機是不是新版，
          不用進設定頁翻）。 -->
@@ -1542,6 +1548,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-16.0053"></script>
+<script src="app.js?v=2026-10-16.0100"></script>
 </body>
 </html>
