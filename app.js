@@ -13,9 +13,24 @@
     try{return !!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)}
     catch(e){console.warn('[uiReducedMotion] 讀不到系統設定，視為未要求減少動態',e);return false}
   }
+  // 先.一〇三-6（2026-10-16）：只捲 #main。原生 scrollIntoView 會連祖先一起捲，#app 雖然是 overflow:hidden，
+  // 程式捲動照樣有效（關閉的底部面板在 #app 下方撐出捲動空間），#app 被捲走後底部導覽列就離開畫面底部。
+  // #main 以外的元素（例如面板內）才退回原生 scrollIntoView。
   function uiScrollIntoView(el,opt){
     if(!el)return;
-    el.scrollIntoView(Object.assign({block:'start'},opt||{},{behavior:uiReducedMotion()?'auto':'smooth'}));
+    const o=Object.assign({block:'start'},opt||{});
+    const behavior=uiReducedMotion()?'auto':'smooth';
+    const main=document.getElementById('main');
+    if(!main||!main.contains(el)){el.scrollIntoView(Object.assign(o,{behavior}));return}
+    const mr=main.getBoundingClientRect(),er=el.getBoundingClientRect();
+    let top=main.scrollTop+(er.top-mr.top);
+    if(o.block==='center')top-=(main.clientHeight-er.height)/2;
+    else if(o.block==='end')top-=main.clientHeight-er.height;
+    else if(o.block==='nearest'){
+      if(er.top>=mr.top&&er.bottom<=mr.bottom)return;
+      if(er.bottom>mr.bottom&&er.height<=main.clientHeight)top-=main.clientHeight-er.height;
+    }
+    main.scrollTo({top:Math.max(0,top),behavior});
   }
 
   // ══════ 先.七十二-A1／A3（2026-10-11）：白話轉換表（前台唯一一份；對照 data/ui_glossary.json）══════
@@ -2446,7 +2461,7 @@
   }
   function methodGoResearch(){
     closeMethodSheet();go('journal');
-    setTimeout(()=>{const c=document.getElementById('journal-research-card');if(c)c.scrollIntoView({block:'start'})},200);
+    setTimeout(()=>{const c=document.getElementById('journal-research-card');if(c)uiScrollIntoView(c)},200);  // 先.一〇三-6：只捲 #main
   }
   async function renderMethodBoard(board){
     const el=document.getElementById('method-board-body');if(!el)return;
@@ -4684,7 +4699,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-16.0331';
+  const APP_VERSION='2026-10-16.0412';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

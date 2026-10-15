@@ -423,8 +423,11 @@
   /* ===== 下單抽屜 ===== */
   .sheet-mask{position:absolute;inset:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:.25s;z-index:40}
   .sheet-mask.open{opacity:1;pointer-events:auto}
-  .sheet{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:18px 18px 0 0;transform:translateY(105%);transition:.28s cubic-bezier(.3,.9,.3,1);z-index:41;padding:18px 18px calc(env(safe-area-inset-bottom) + 18px);max-height:86%;overflow-y:auto}
-  .sheet.open{transform:none}
+  /* 先.一〇三-6：關閉時 display:none。舊版關閉時只 translateY(105%) 移到 #app 下方，仍在 #app 撐出捲動空間，
+     程式捲動會把 #app 一起捲走、底部導覽列離開畫面底部。開啟改用 keyframes 滑入（關閉改為立即收起）。 */
+  .sheet{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:18px 18px 0 0;display:none;z-index:41;padding:18px 18px calc(env(safe-area-inset-bottom) + 18px);max-height:86%;overflow-y:auto}
+  .sheet.open{display:block;animation:sheet-up .28s cubic-bezier(.3,.9,.3,1)}
+  @keyframes sheet-up{from{transform:translateY(105%)}to{transform:none}}
   .sheet .grab{width:38px;height:4px;border-radius:999px;background:var(--surface-3);margin:0 auto 14px}
   .sheet h2{font-size:16px;margin-bottom:var(--sp-3)}
   .frow{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--hairline);font-size:var(--fs-sm)}
@@ -564,3 +567,7 @@ details.ui-more[open]>summary{color:var(--ink-2)}
 #picks-board-toggle.picks-board-wrap{flex-wrap:wrap;row-gap:6px;height:auto}
 #picks-board-toggle.picks-board-wrap .mtg-opt{flex:1 1 30%!important;min-width:0;white-space:nowrap}
 #picks-board-toggle.picks-board-wrap{border-radius:14px}
+/* 先.一〇三-6 選股切換列防溢出：子分頁字太長時省略號收尾，台股／美股切換不被左側標題擠出畫面 */
+#picks-board-toggle.picks-board-wrap .mtg-opt{overflow:hidden;text-overflow:ellipsis;text-align:center}
+#picks-board-toggle{max-width:100%}
+#picks-head-row>div:first-child{min-width:0}

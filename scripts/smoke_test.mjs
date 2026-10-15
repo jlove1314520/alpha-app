@@ -5133,9 +5133,11 @@ async function runSmokeTest(baseUrl, headless = true) {
   try {
     const probe = async (pg) => pg.evaluate(() => {
       if (typeof uiReducedMotion !== "function" || typeof uiScrollIntoView !== "function" || typeof flashPriceEls !== "function") return { err: "uiReducedMotion／uiScrollIntoView 未載入" };
-      const calls = []; const orig = Element.prototype.scrollIntoView;
+      // 先.一〇三-6：uiScrollIntoView 對 #main 內元素改走 #main.scrollTo，兩種都攔，檢查標準不變
+      const calls = []; const orig = Element.prototype.scrollIntoView; const origTo = Element.prototype.scrollTo;
       Element.prototype.scrollIntoView = function (o) { calls.push(o && o.behavior); };
-      try { uiScrollIntoView(document.getElementById("main") || document.body); } finally { Element.prototype.scrollIntoView = orig; }
+      Element.prototype.scrollTo = function (o) { calls.push(o && o.behavior); };
+      try { uiScrollIntoView(document.getElementById("main") || document.body); } finally { Element.prototype.scrollIntoView = orig; Element.prototype.scrollTo = origTo; }
       const box = document.createElement("div"); box.id = "__rm_probe";
       box.innerHTML = '<b data-flash-code="__RM" data-flash-value="2">2</b>'; document.body.appendChild(box);
       PREV_QUOTE_PRICES["__RM"] = 1; flashPriceEls("#__rm_probe");
@@ -5281,6 +5283,49 @@ async function runSmokeTest(baseUrl, headless = true) {
     rlabInfo = `2330 研究分頁有免責聲明；0050 空狀態「${e.t.slice(0, 30)}…」；雷達 ${r.chips} 個名單、${r.rows} 列、載入 ${r.ms} ms；狀態點 ${JSON.stringify(d)}`;
     await page.evaluate(() => switchPicksBoard("value"));
   } catch (e) { rlabErrs.push(`測試本身出錯：${e.message || e}`); }
+  // 161.【2026-10-16 先.一〇三-6】只捲 #main：各分頁 main.scrollWidth ≤ clientWidth；關閉的底部面板 display:none、不在 #app 撐出捲動空間；
+  // 設定頁／交易頁跳卡片（uiScrollIntoView）後 #app.scrollTop 仍為 0、導覽列仍貼齊畫面底部。
+  const scrErrs = []; let scrInfo = "";
+  try {
+    const vh = await page.evaluate(() => innerHeight);
+    const sw = [];
+    for (const t of ["home", "market", "picks", "report", "trade", "journal", "settings"]) {
+      const r = await page.evaluate((t) => { try { go(t); } catch (e) { return { err: String(e) }; } const m = document.getElementById("main"); return { sw: m.scrollWidth, cw: m.clientWidth }; }, t);
+      await page.waitForTimeout(250);
+      if (r.err) scrErrs.push(`${t} 切換出錯：${r.err}`);
+      else { if (r.sw > r.cw) scrErrs.push(`${t} 頁 main.scrollWidth ${r.sw} > clientWidth ${r.cw}`); sw.push(`${t}:${r.sw}/${r.cw}`); }
+    }
+    const sheets = await page.evaluate(() => {
+      const a = document.getElementById("app");
+      const bad = [...document.querySelectorAll(".sheet:not(.open)")].filter(s => getComputedStyle(s).display !== "none").map(s => s.id);
+      return { bad, sh: a.scrollHeight, ch: a.clientHeight };
+    });
+    if (sheets.bad.length) scrErrs.push(`關閉的面板仍佔版面：${sheets.bad.join(",")}`);
+    if (sheets.sh > sheets.ch + 1) scrErrs.push(`#app 有捲動空間 scrollHeight ${sheets.sh} > clientHeight ${sheets.ch}`);
+    const jumps = [];
+    for (const t of ["settings", "trade"]) {
+      const r = await page.evaluate((t) => {
+        go(t);
+        const cards = [...document.querySelectorAll(`#${t === "settings" ? "scr-settings" : "scr-trade"} .card`)].filter(c => c.offsetParent);
+        const c = cards[cards.length - 1]; if (!c) return { err: `${t} 頁找不到卡片` };
+        const a = document.getElementById("app"); a.scrollTop = 0;
+        uiScrollIntoView(c, { behavior: "auto" });
+        return { ok: 1 };
+      }, t);
+      await page.waitForTimeout(900);
+      const s = await page.evaluate(() => ({ appST: document.getElementById("app").scrollTop, mainST: Math.round(document.getElementById("main").scrollTop), nav: Math.round(document.getElementById("nav").getBoundingClientRect().bottom), bodyST: (document.scrollingElement || document.body).scrollTop }));
+      if (r.err) scrErrs.push(r.err);
+      else {
+        if (s.appST !== 0) scrErrs.push(`${t} 跳卡片後 #app.scrollTop=${s.appST}（應為 0）`);
+        if (s.bodyST !== 0) scrErrs.push(`${t} 跳卡片後頁面本身被捲動 ${s.bodyST}`);
+        if (Math.abs(s.nav - vh) > 1) scrErrs.push(`${t} 跳卡片後導覽列底部 ${s.nav} ≠ 視窗高 ${vh}`);
+        jumps.push(`${t}:main捲到${s.mainST}、nav底${s.nav}`);
+      }
+    }
+    await page.evaluate(() => go("home"));
+    scrInfo = `${sw.join(" ")}；#app ${sheets.sh}/${sheets.ch}；${jumps.join("；")}`;
+  } catch (e) { scrErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("161. 只捲 #main：各頁 main.scrollWidth ≤ clientWidth、關閉面板 display:none、跳卡片後導覽列仍在底部（先.一〇三-6）", scrErrs.length === 0, scrErrs.join("; ") || scrInfo);
   record("159. 研究分頁免責聲明／雷達「不是買進訊號」／缺 research 一行空狀態／無「建置中」／雷達檔 <1 秒／自選股狀態點（研究室.五）", rlabErrs.length === 0, rlabErrs.join("; ") || rlabInfo);
 
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
@@ -5311,7 +5356,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144/146/147/148/151/152/157/158新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144/146/147/148/151/152/157/158/161新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
