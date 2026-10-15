@@ -20038,3 +20038,52 @@ C. 原先.九十一-5 的掩護性買權 ETF 查證與小型指數選擇權查�
 - [x] **先.一〇二-4 網路線記錄為建議（不列阻塞）**（互動視窗執行）〔記在 docs/PROPOSAL_REBOOT_OUTAGE_GUARD.md 第四節〕
 - [x] **先.一〇二-5 自動交易解凍前置條件加一條：重開機停擺防護（先.一〇二-2）已上線並驗證**（互動視窗執行）〔docs/UNFREEZE_CHECKLIST.md 第 5 項〕
 - [x] **先.一〇二-6 AWAITING_REVIEW 清掉先.九十九-0 殘留列；先.一〇一-3 結案**（互動視窗執行）〔兩列移到「已結案審閱紀錄」，等待中剩 1 件（先.九十八-3）〕
+
+# 2026-10-15【先.一〇三：2026-10-15 全檢修正】（總司令裁示原文，動工前先寫入；23:4x 互動視窗收到）
+
+> 先.一〇三　2026-10-15 全檢修正（依 claude/Alpha_全檢報告_2026-10-15.md；每項標 - [x]，在 research/PROGRESS_HEARTBEAT.jsonl append item=先.一〇三-N；每項附冒煙輸出；修 bug 類 DevQueue 可執行）
+> A. 數字錯誤（最優先，依序）
+> 1. 三大法人全市場合計：fetch_market_tw.py:456 T86 改 selectType=ALLBUT0999（排除權證），或改用官方 BFI82U 金額表；外資口徑統一含外資自營商；重產 10/12～10/15 並驗證合計 < 全市場成交量；冒煙加合理性檢查。
+> 2. 正逆價差：app-market.js:521-526，現貨與期貨日期不同就顯示「期貨資料停在 MM/DD，無法計算」；台指期晚班落後一天的根因一併查。
+> 3. null 不等於 0：上櫃外資缺值一律顯示「—」，累計與徽章標「資料不全」，籌碼評分排除缺值日，來源依上市／上櫃正確標示；冒煙加檢查。
+> 4. 月營收事件：fetch_news_events.py:177-190 以「代號＋資料年月」去重，日期改公告日，「11509」改「9 月營收」；研究分頁法說判斷改看法說日期，不看公告日。
+> 5. 模擬帳戶單一來源：交易頁策略卡與週覆盤改讀 strategy_curves.json，名稱照 UI_GLOSSARY 統一；模擬 F 起始日 paper_5（11/01）與 strategy_curves（11/02）對齊。
+> 6. app-settings.js:71、app-trade.js:357／359 的 uiScrollIntoView 改只捲 #main；底部面板關閉時 display:none；選股切換列溢出修正。冒煙加「main.scrollWidth ≤ clientWidth」與「捲動後導覽列仍在底部」。
+> B. 監控與資料品質
+> 7. generate_status_json 加通用日期解析（meta.generated_at／data_date），77 檔誤報清掉；pipeline_registry 與 App 方法頁改指 data/price_history/；cycle log 新鮮度改讀 log 內時間戳。
+> 8. 融資維持率：列日期一律用資料日、同資料日去重、休市日不出列；從官方歷史端點補回 9/1 起缺的 14 天（含 10/01、10/05、10/13）。
+> 9. 補跑腳本：只在 16:30～23:59 執行；逐日檢查最近 5 個交易日缺什麼就補什麼；commit 標題用資料日；心跳改記到會進 repo 的檔案。
+> 10. price_history：0 價列標成無成交或移除；偽代號 TAIEX／TPEx 處理；查 2938、6590、6874（減資未套用）、3114 四筆單日超過 10.5%。
+> 11. picks_ledger 休市日快照不再重複記錄，並標記既有的 9 次重複。
+> 12. 美股：指數 16:00 前抓的標「盤中」；個股價退回鏈改成 IBKR → quotes_us → repo 日線，FinMind 只當補充。
+> 13. 寫死過時文字（index.html:1249、1256-1263、1390、527）、本益比兩處不一致、星號未渲染、原始數字、熱力圖跟隨漲跌色設定、前台工程術語（清單見全檢報告）、停擺橫幅改讀最新心跳並合併成一行。
+> 14. 研究層：build_research --asof 真正把資料截到該日；集保缺週時不打「單週」標籤；App 揭露覆蓋率。
+> 15. 試驗帳本：事前登記與結果算 1 筆並寫進 selection_bias_ledger；修 trials_index 判定欄解析與重複編號；以後登記一律綁程式 commit（照 #445）。
+> 16. 隱私：SEC User-Agent 的 email 改讀環境變數或 GitHub Secret；檢查 PENDING_QUEUE.md:17417，有 token 片段就遮蔽（歷史不改寫）；theme_official_site_evidence_draft.json 去掉個人手機。
+> C. 總司令裁示（2026-10-16）
+> 17. 報告頁「分批試算」整張卡移除；「追高風險…是否值得追」改中性說法；雷達「帶量突破」改「量增創 60 日新高」，「帶量跌破季線」改「量增跌破 60 日均線」。
+> 18. 雲端 watchdog 17:45 發現當天 market_tw 未落地就觸發 market.yml。需要的 GitHub token 權限，請 CC 寫成步驟交總司令操作，CC 不得讀出 token。
+> 19. 內部人姓名雜湊改用 HMAC，金鑰由總司令放進 GitHub Secrets（CC 只給步驟，不經手金鑰）。
+
+**收件時查證（互動視窗 23:4x）**：`claude/Alpha_全檢報告_2026-10-15.md` 在本機找不到（搜過 C:\alpha、文件、桌面、下載）。各項裁示原文已有檔案行號與做法，照原文做；第 13 項「清單見全檢報告」與第 17 項的報告頁位置若原文不足以定位，標 [!] 並請總司令把報告放到 `C:\alpha\claude\`。
+**執行順序**：A1→A6 依序（最優先），再 B7→B16，C17 可與 B 並行；18、19 需總司令本人在 GitHub 操作（CC 只寫步驟、不經手 token／金鑰）。每項完成標 - [x]＋PROGRESS_HEARTBEAT item=先.一〇三-N＋冒煙輸出。
+
+- [ ] **先.一〇三-1 三大法人全市場合計排除權證（T86 selectType=ALLBUT0999 或 BFI82U）、外資含外資自營商、重產 10/12～10/15、驗證合計<全市場成交量、冒煙加合理性檢查**（DevQueue 可執行；修 bug）
+- [ ] **先.一〇三-2 正逆價差現貨／期貨日期不同就顯示「期貨資料停在 MM/DD，無法計算」＋查台指期晚班落後一天根因**（DevQueue 可執行；修 bug）
+- [ ] **先.一〇三-3 上櫃外資缺值顯示「—」、累計與徽章標「資料不全」、籌碼評分排除缺值日、來源依上市／上櫃正確標示；冒煙加檢查**（DevQueue 可執行；修 bug）
+- [ ] **先.一〇三-4 月營收事件以「代號＋資料年月」去重、日期改公告日、「11509」改「9 月營收」；研究分頁法說判斷看法說日期**（DevQueue 可執行；修 bug）
+- [ ] **先.一〇三-5 交易頁策略卡與週覆盤改讀 strategy_curves.json、名稱照 UI_GLOSSARY、模擬 F 起始日對齊**（DevQueue 可執行；修 bug）
+- [ ] **先.一〇三-6 uiScrollIntoView 只捲 #main、底部面板關閉時 display:none、選股切換列溢出；冒煙加 scrollWidth 與導覽列位置檢查**（DevQueue 可執行；修 bug）
+- [ ] **先.一〇三-7 generate_status_json 通用日期解析（清 77 檔誤報）、pipeline_registry 與方法頁改指 data/price_history/、cycle log 新鮮度讀 log 內時間戳**（DevQueue 可執行）
+- [ ] **先.一〇三-8 融資維持率列日期用資料日、同日去重、休市日不出列；官方歷史端點補 9/1 起缺的 14 天**（DevQueue 可執行；請求前先對照 C:\alpha\CLAUDE.md 頻率上限清單）
+- [ ] **先.一〇三-9 補跑腳本只在 16:30～23:59 執行、逐日檢查最近 5 個交易日缺漏、commit 標題用資料日、心跳寫進會進 repo 的檔案**（DevQueue 可執行）
+- [ ] **先.一〇三-10 price_history 0 價列標無成交、TAIEX／TPEx 偽代號處理、查 2938／6590／6874／3114 單日超過 10.5%**（DevQueue 可執行）
+- [ ] **先.一〇三-11 picks_ledger 休市日快照不重複記錄、標記既有 9 次重複**（DevQueue 可執行）
+- [ ] **先.一〇三-12 美股指數 16:00 前標「盤中」；個股價退回鏈 IBKR → quotes_us → repo 日線，FinMind 只當補充**（DevQueue 可執行）
+- [ ] **先.一〇三-13 寫死過時文字（index.html:1249、1256-1263、1390、527）、本益比兩處一致、星號渲染、原始數字、熱力圖跟隨漲跌色、前台工程術語、停擺橫幅讀最新心跳並合併一行**（DevQueue 可執行；工程術語清單在全檢報告，找不到報告就先做有行號的部分）
+- [ ] **先.一〇三-14 build_research --asof 真正截資料、集保缺週不打「單週」、App 揭露覆蓋率**（DevQueue 可執行）
+- [ ] **先.一〇三-15 試驗帳本：事前登記與結果算 1 筆並寫進 selection_bias_ledger、修 trials_index 判定欄解析與重複編號、登記綁程式 commit**（互動視窗執行：碰 trial_registry 屬十三節單一寫入者）
+- [ ] **先.一〇三-16 隱私：SEC User-Agent email 改讀環境變數／GitHub Secret、PENDING_QUEUE.md:17417 token 片段遮蔽（歷史不改寫）、theme_official_site_evidence_draft.json 去個人手機**（互動視窗執行）
+- [ ] **先.一〇三-17 報告頁「分批試算」卡移除、「是否值得追」改中性、雷達「帶量突破」→「量增創 60 日新高」、「帶量跌破季線」→「量增跌破 60 日均線」**（DevQueue 可執行）
+- [ ] **先.一〇三-18 雲端 watchdog 17:45 發現 market_tw 未落地就觸發 market.yml；token 權限步驟交總司令操作，CC 不讀 token**（互動視窗執行；需總司令本人在 GitHub 操作）
+- [ ] **先.一〇三-19 內部人姓名雜湊改 HMAC，金鑰由總司令放 GitHub Secrets（CC 只給步驟）**（互動視窗執行；需總司令本人在 GitHub 操作）
