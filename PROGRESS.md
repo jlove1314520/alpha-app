@@ -6,7 +6,7 @@
   - 做了什麼：`update_price_history.py` 每班多打 TWSE TWTCAU、TWTB8U（今天前 120 天～後 60 天）＋TPEx pvChgAnn（當日）各 1 次，事件併進 `data/ex_dividend_events.json` 的 `reductions`，沿用減資的定錨與「來源已含調整」守門；`apply_splits` 讀帳本，同一事件已由官方表套用就不再除。TWTAUU 抓取失敗不再連帶擋掉分割入帳。SPLITS 補 6696 仁新（換股 10）。
   - 證據：離線模擬（不寫檔）兩種先後順序都只除一次、第二次跑 0／0／0；三支請求全丟例外 → 回空＋3 筆 errors、不中止；調整後 00685L −4.1%、6949 −9.9%、5904 +10.0%、4747 −3.2%、6696 +1.8%。官方請求各 1 次查欄位。冒煙全部通過。
   - [自行裁量]：6696 證據是櫃買公告轉載（uanalyze）＋本地 8/19 收 939 吻合，比照 5904／4747；手寫 SPLITS 保留（櫃買歷史官方查不到）。
-  - ⚠️ 未驗證：market.yml 尚未實跑；pvChgAnn 有資料時換股率欄格式沒見過（非數字會略過，不會亂套）。`C:lpha\CLAUDE.md` 頻率清單已更新。
+  - ⚠️ 未驗證：market.yml 尚未實跑；pvChgAnn 有資料時換股率欄格式沒見過（非數字會略過，不會亂套）。`C:\alpha\CLAUDE.md` 頻率清單已更新。
 - **先.一〇三-12 ✅（6b5d1e997e）**：
   - 做了什麼：`fetch_market_us.py` 加 `intraday`；App 指數退回 Yahoo 時，盤中抓的標「Yahoo 盤中快照（MM/DD HH:MM 美東，非收盤）」（舊檔用 fetched_at＋as_of 推）。個股頁美股現價改 IBKR → quotes_us → us_screener.json 日線 → FinMind（標「補充」），每層標來源與時間；FinMind 失敗不卡頁。
   - 證據：Playwright 本機：AAPL「來源：IBKR 延遲~15分」、META 走 us_screener「資料日 2026-10-14」、強制 IBKR 無資料時四指數標盤中、pageerror 0；冒煙全部通過。
@@ -50,7 +50,7 @@
 - **先.一〇三-11 ✅（e3ad179d9b）**：選股台帳。`build_picks_ledger.py` 休市日不快照；既有 9 個休市日×3 榜＝27 筆加 `non_trading_day_duplicate=true`（內容不改）；App 成績單統計與快照數排除（116→89）。冒煙全部通過；⚠️ 成績單畫面數字沒另外實測。
 - 沒做：先.一〇三-12 起留給下一輪（本輪 05:46 時間上限，剩餘時間不夠跑完一項＋冒煙）。
 - 佇列深度：`- [ ]` 19 項（≥12）、DevQueue 可執行 9 項（≥6），不需補件。
-- 共用工作目錄：其他排程的未提交檔（audit_report、quotes_ibkr 等）沒有掃進本輪 commit。repo 外 `C:lpha
+- 共用工作目錄：其他排程的未提交檔（audit_report、quotes_ibkr 等）沒有掃進本輪 commit。repo 外 `C:\alpha
 un-market-catchup.ps1` 註解同步改了心跳路徑。
 
 ## 2026-10-16 04:30（DevQueue 20261016-040101）先.一〇三-6 捲動只捲 #main；先.一〇三-7 STATUS 通用日期解析；先.一〇三-8 融資維持率（第 1 批）
@@ -219,7 +219,7 @@ un-market-catchup.ps1` 註解同步改了心跳路徑。
 
 ## 2026-10-15 07:39（互動視窗）先.一百-3 研究室 README 凍結.二描述更正
 
-- 更正 `C:lpha\pending_patches
+- 更正 `C:\alpha\pending_patches
 esearch_lab_2026-10-14inal\README_給ClaudeCode.md`「定位」：凍結.二已於 2026-10-11 解除（舊句劃線保留），但 research*.json 不得進 scores*.json、不得當選股權重照舊有效。README 在 repo 外，不 commit。
 
 ## 2026-10-15 07:39（互動視窗）先.一百-2 研究室.一～七登記進權威清單最前面
