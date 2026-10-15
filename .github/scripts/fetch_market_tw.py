@@ -45,6 +45,7 @@ MI_INDEX_URL = "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
 TPEX_INDEX_URL = "https://www.tpex.org.tw/openapi/v1/tpex_index"
 TAIFEX_FUT_URL = "https://openapi.taifex.com.tw/v1/DailyMarketReportFut"
 T86_URL = "https://www.twse.com.tw/rwd/zh/fund/T86"
+T86_SELECT_TYPE = "ALLBUT0999"  # 先.一〇三-1：排除權證、牛熊證、可展延牛熊證
 TSE_LIST_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"  # 上市公司基本資料（含金融股，不含ETF/權證）
 # 2026-08-27新增（P1-新，使用者要求補齊TPEx上櫃三大法人缺口）：TPEx官方對應
 # 端點，全市場單日快照（免金鑰，不像T86_URL有反爬蟲風險）。跟fundamentals.json
@@ -365,6 +366,10 @@ def fetch_mi_index_rwd(date_iso: str) -> tuple[dict | None, list[dict]]:
     return headline, sectors
 
 
+# 先.一〇三-1：FMTQIK 同一次回應順手記下每日全市場成交股數（張），給三大法人合計做合理性驗證（不多打請求）。
+_FMTQIK_VOLUME_LOTS: dict[str, float] = {}
+
+
 def fetch_taiex_history_twse(months: int = 4) -> tuple[list[float], list[str]]:
     """證交所 FMTQIK 逐月的「發行量加權股價指數」日收盤（官方），近 months 個月。"""
     now = datetime.now(TW_TZ)
@@ -384,11 +389,15 @@ def fetch_taiex_history_twse(months: int = 4) -> tuple[list[float], list[str]]:
             continue
         f = j["fields"]
         i_d, i_x = f.index("日期"), f.index("發行量加權股價指數")
+        i_vol = f.index("成交股數") if "成交股數" in f else None
         for row in j.get("data") or []:
             d = _roc_to_iso(row[i_d])
             v = _num(row[i_x])
             if d and v is not None:
                 rows[d] = v
+            vol = _num(row[i_vol]) if (d and i_vol is not None) else None
+            if vol:
+                _FMTQIK_VOLUME_LOTS[d.replace("-", "")] = round(vol / 1000, 1)
     ds = sorted(rows)
     return [rows[d] for d in ds], ds
 
@@ -526,7 +535,9 @@ def fetch_institutional_aggregate(date_str: str) -> tuple[dict, dict | None]:
     # 嘗試不重試」的既有設計（見上面_get_retry() docstring說明），只是這裡是
     # 直接requests.get()不經過_get_retry()，所以節流/斷路邏輯要手動呼叫一次。
     _rate_limit_wait_or_raise("twse_t86")
-    r = requests.get(T86_URL, params={"response": "json", "date": date_str, "selectType": "ALL"},
+    # 先.一〇三-1（2026-10-15）：selectType 由 ALL 改 ALLBUT0999（官方「全部(不含權證、牛熊證、可展延牛熊證)」）。
+    # ALL 含權證，自營商的權證避險部位把全市場合計撐到失真（10/15 自營商 −434 萬張，超過當日全市場成交量）。
+    r = requests.get(T86_URL, params={"response": "json", "date": date_str, "selectType": T86_SELECT_TYPE},
                       headers=headers, timeout=20)
     if r.status_code in (402, 403, 428, 429):
         _rate_limit_record_block("twse_t86", r.status_code, r.text[:200])
@@ -547,9 +558,14 @@ def fetch_institutional_aggregate(date_str: str) -> tuple[dict, dict | None]:
     i_foreign = _idx("外陸資買賣超股數(不含外資自營商)", "外資買賣超")
     i_trust = _idx("投信買賣超股數")
     i_total = _idx("三大法人買賣超股數合計", "三大法人買賣超股數")
+    # 先.一〇三-1：外資口徑統一「外陸資（不含外資自營商）＋外資自營商」，跟逐股 per_stock 與上櫃 TPEx 同口徑；
+    # 用完全比對，"自營商買賣超股數" 是它的子字串（2026-08-27 踩過）。
+    i_foreign_dealer_sum = fields.index("外資自營商買賣超股數") if "外資自營商買賣超股數" in fields else None
     foreign_sum = trust_sum = total_sum = 0.0
     for row in body["data"]:
         f = _num(row[i_foreign]) if i_foreign is not None else None
+        fd_sum = _num(row[i_foreign_dealer_sum]) if i_foreign_dealer_sum is not None else None
+        if fd_sum: foreign_sum += fd_sum
         t = _num(row[i_trust]) if i_trust is not None else None
         tot = _num(row[i_total]) if i_total is not None else None
         if f: foreign_sum += f
@@ -594,6 +610,7 @@ def fetch_institutional_aggregate(date_str: str) -> tuple[dict, dict | None]:
         "trust_net_lots": round(trust_sum / 1000, 1),
         "dealer_net_lots": round(dealer_sum / 1000, 1),
         "total_net_lots": round(total_sum / 1000, 1),
+        "scope": "上市，不含權證／牛熊證（T86 ALLBUT0999）；外資含外資自營商",
     }
 
 
@@ -732,6 +749,9 @@ def main():
         if inst is None:  # 今天可能還沒收盤定案，退回抓昨天
             prev_str = (now_tw - timedelta(days=1)).strftime("%Y%m%d")
             per_stock_institutional, inst = fetch_institutional_aggregate(prev_str)
+        if inst and _FMTQIK_VOLUME_LOTS.get(inst["date"]):
+            # 先.一〇三-1：附當日全市場成交張數；冒煙檢查各法人與合計的絕對值都要小於它
+            inst["market_volume_lots"] = _FMTQIK_VOLUME_LOTS[inst["date"]]
         out["institutional"] = inst
         # 「近5日」買賣超需要歷史，但這支腳本一次只抓一天（T86 反爬蟲風險，見模組
         # docstring）——用「讀取上次委進 repo 的 JSON、把今天併進去、去重、只留最近

@@ -5156,6 +5156,29 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { frErrs.push(`測試本身出錯：${e.message || e}`); }
   record("158. 資料新鮮度表 market.yml 每日項目讀 STATUS.json crons、讀不到才退回舊時刻，不再寫死 run:[6,10]（先.九十七-R8）", frErrs.length === 0, frErrs.join("; ") || frInfo);
 
+  // 160.【先.一〇三-1（2026-10-15）】三大法人全市場合計合理性：T86 改 ALLBUT0999（不含權證）、外資含外資自營商；
+  // institutional_history 每一筆有 market_volume_lots（FMTQIK 當日全市場成交張數）時，外資／投信／自營商／合計的絕對值都必須小於它；
+  // 最新一筆必須標 scope（新口徑）。
+  const instErrs = []; let instInfo = "";
+  try {
+    const fsm = await import("node:fs");
+    const mt = JSON.parse(fsm.readFileSync("data/market_tw.json", "utf8"));
+    const hist = mt.institutional_history || [];
+    let checked = 0;
+    for (const h of hist) {
+      if (!h.market_volume_lots) continue;
+      checked++;
+      for (const k of ["foreign_net_lots", "trust_net_lots", "dealer_net_lots", "total_net_lots"]) {
+        if (h[k] != null && Math.abs(h[k]) >= h.market_volume_lots) instErrs.push(`${h.date} ${k}=${h[k]} ≥ 全市場成交 ${h.market_volume_lots} 張`);
+      }
+    }
+    const last = mt.institutional || hist[hist.length - 1];
+    if (!last || !/ALLBUT0999/.test(last.scope || "")) instErrs.push("最新三大法人合計沒有標 ALLBUT0999 新口徑：" + JSON.stringify(last && last.scope));
+    if (checked === 0) instErrs.push("institutional_history 沒有任何一筆帶 market_volume_lots，無法做合理性檢查");
+    instInfo = `${checked}/${hist.length} 天有成交量可比對；最新 ${last && last.date} 合計 ${last && last.total_net_lots} 張／成交 ${last && last.market_volume_lots} 張`;
+  } catch (e) { instErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("160. 三大法人全市場合計排除權證、外資含外資自營商、各項絕對值小於當日全市場成交量（先.一〇三-1）", instErrs.length === 0, instErrs.join("; ") || instInfo);
+
   // 159.【研究室.五（2026-10-15）】個股「研究」分頁／選股頁「變化雷達」／自選股研究狀態點：
   // ①研究分頁有免責聲明 ②雷達頁有「不是買進訊號」那一行 ③research 節缺少時只顯示一行空狀態（尚未建檔｜原因｜下一步）
   // ④沒有「建置中」佔位字 ⑤雷達檔載入 < 1 秒（Resource Timing，同 measure_first_load.mjs 用瀏覽器實測時間的做法）
