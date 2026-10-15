@@ -10,7 +10,7 @@
       "purpose": "App 即時報價伺服器（聽 127.0.0.1:8001，對外靠 Tailscale Funnel）",
       "interval_min": 1,
       "artifact": "research/alpha_live_server_cycle.log",
-      "freshness": "mtime",
+      "freshness": "log_last_timestamp",
       "note": "純執行日誌，沒有資料層時間戳，只能看 mtime。真正的健康檢查是 /health。",
       "fault_history": {
         "count": 2,
@@ -30,7 +30,7 @@
       "purpose": "永豐 Shioaji 盤中逐筆常駐程式的啟動器",
       "interval_min": 2,
       "artifact": "research/shioaji_quotes_cycle.log",
-      "freshness": "mtime",
+      "freshness": "log_last_timestamp",
       "fault_history": {
         "count": 2,
         "last_fault_at": "2026-09-24T08:37:04.568732+08:00",
@@ -64,7 +64,7 @@
       "purpose": "美股報價（IBKR Gateway）",
       "interval_min": 5,
       "artifact": "research/ibkr_quotes_cycle.log",
-      "freshness": "mtime",
+      "freshness": "log_last_timestamp",
       "fault_history": {
         "count": 5,
         "last_fault_at": "2026-09-30T23:47:02.424912+08:00",
@@ -114,10 +114,10 @@
       "freshness": "jsonl_last_field",
       "field": "ts",
       "fault_history": {
-        "count": 18,
-        "last_fault_at": "2026-10-15T05:07:02.630287+08:00",
+        "count": 19,
+        "last_fault_at": "2026-10-15T22:07:02.272992+08:00",
         "fault_types": {
-          "stalled": 18
+          "stalled": 19
         },
         "removable": null,
         "event_log": [
@@ -138,7 +138,8 @@
           "2026-10-03T07:17:01.950033+08:00",
           "2026-10-05T17:22:02.111943+08:00",
           "2026-10-14T20:07:02.736941+08:00",
-          "2026-10-15T05:07:02.630287+08:00"
+          "2026-10-15T05:07:02.630287+08:00",
+          "2026-10-15T22:07:02.272992+08:00"
         ]
       }
     },
@@ -190,7 +191,7 @@
       "purpose": "開發任務佇列自走輪次",
       "interval_min": 15,
       "artifact": "research/dev_queue_cycle.log",
-      "freshness": "mtime",
+      "freshness": "log_last_timestamp",
       "fault_history": {
         "count": 2,
         "last_fault_at": "2026-09-24T09:02:02.716545+08:00",
@@ -209,7 +210,7 @@
       "purpose": "研究馬拉松自走輪次",
       "interval_min": 30,
       "artifact": "research/marathon_cycle.log",
-      "freshness": "mtime",
+      "freshness": "log_last_timestamp",
       "fault_history": {
         "count": 14,
         "last_fault_at": "2026-10-09T19:37:02.318684+08:00",
@@ -240,7 +241,7 @@
       "purpose": "假設佇列自走輪次",
       "interval_min": 30,
       "artifact": "research/hypothesis_queue_cycle.log",
-      "freshness": "mtime",
+      "freshness": "log_last_timestamp",
       "fault_history": {
         "count": 17,
         "last_fault_at": "2026-10-09T19:37:02.318684+08:00",
@@ -430,7 +431,7 @@
       "task": "AlphaPriceHistory",
       "purpose": "個股OHLCV價量歷史（market.yml，是sparklines的上游輸入——price_history不動sparklines就不會動）",
       "interval_min": 1440,
-      "artifact": "data/price_history.json",
+      "artifact": "data/price_history/_meta.json",
       "freshness": "json_field",
       "field": "meta.generated_at",
       "shift_profile": "market_yml",
@@ -473,15 +474,13 @@
       "missed_shift_threshold": 3,
       "note": "2026-09-16新增。quotes.yml實際排程是每10分鐘一次但集中在盤中/美股時段（UTC 0-5、8-23，週二~週六0-1時額外覆蓋），平日UTC 6-7時（台北14:00-16:00）刻意沒有排程（台股已收盤、美股未開盤的空窗）。舊制用寬鬆的interval_min=60（×stall_factor=3=180分鐘）容忍這個已知空窗。同日【班次數】裁示：改用shift_profile=quotes_tw_10min（只以台股盤中09:00-13:30、交易日曆判定的班次為單位，14:00-16:00空窗不在班次表內，天然不會誤報），連續錯過3班（30分鐘）即亮燈，比舊制180分鐘更敏感也不受假日日曆誤導。",
       "fault_history": {
-        "count": 69,
-        "last_fault_at": "2026-10-15T06:02:02.664951+08:00",
+        "count": 71,
+        "last_fault_at": "2026-10-16T02:12:01.883724+08:00",
         "fault_types": {
-          "stalled": 69
+          "stalled": 71
         },
         "removable": null,
         "event_log": [
-          "2026-09-26T02:22:01.766506+08:00",
-          "2026-09-28T09:22:02.021657+08:00",
           "2026-09-28T16:22:01.647205+08:00",
           "2026-09-29T22:17:02.668943+08:00",
           "2026-09-29T22:52:01.833838+08:00",
@@ -509,7 +508,9 @@
           "2026-10-08T20:22:02.265685+08:00",
           "2026-10-08T23:52:02.571495+08:00",
           "2026-10-15T05:07:02.630287+08:00",
-          "2026-10-15T06:02:02.664951+08:00"
+          "2026-10-15T06:02:02.664951+08:00",
+          "2026-10-15T22:07:02.272992+08:00",
+          "2026-10-16T02:12:01.883724+08:00"
         ]
       }
     },
@@ -524,18 +525,13 @@
       "missed_shift_threshold": 3,
       "note": "2026-09-16新增。news_events.yml排程是全天候每30分鐘一次（無平日/盤中限制），interval_min=30×stall_factor=3=90分鐘門檻。總司令原話點名這條workflow「Actions排程降級」曾經發生過（15%降級病史），列為雲端監控四條之一。同日【班次數】裁示：改用shift_profile=news_30min（shift_requires_trading_day=false，因排程本身全年無休不分平假日），連續錯過3班即亮燈——換算後門檻仍是90分鐘，與舊制數字相同，這條本來就沒有「假日誤報」的問題（cron不分平假日），改用班次計數只是統一判準表達方式，不是行為變更。",
       "fault_history": {
-        "count": 79,
-        "last_fault_at": "2026-10-15T05:07:02.630287+08:00",
+        "count": 84,
+        "last_fault_at": "2026-10-16T03:47:02.106632+08:00",
         "fault_types": {
-          "stalled": 79
+          "stalled": 84
         },
         "removable": null,
         "event_log": [
-          "2026-09-27T07:02:02.405361+08:00",
-          "2026-09-27T09:32:01.671727+08:00",
-          "2026-09-27T15:02:02.259797+08:00",
-          "2026-09-27T20:32:01.805262+08:00",
-          "2026-09-28T01:02:02.248036+08:00",
           "2026-09-28T05:02:01.665780+08:00",
           "2026-09-28T08:02:01.994335+08:00",
           "2026-09-28T10:32:02.201705+08:00",
@@ -560,7 +556,12 @@
           "2026-10-08T23:02:02.579653+08:00",
           "2026-10-09T05:02:02.000764+08:00",
           "2026-10-14T21:32:01.853727+08:00",
-          "2026-10-15T05:07:02.630287+08:00"
+          "2026-10-15T05:07:02.630287+08:00",
+          "2026-10-15T23:32:02.611159+08:00",
+          "2026-10-16T01:32:01.841933+08:00",
+          "2026-10-16T03:02:01.901852+08:00",
+          "2026-10-16T03:12:01.979416+08:00",
+          "2026-10-16T03:47:02.106632+08:00"
         ]
       }
     },
@@ -580,7 +581,7 @@
       "purpose": "處置／注意股旗標（先.五十一-3，scripts/run_disposal_flags.ps1 每日 18:30 → data/disposal_flags.json，App 個股頁紅標、AI 選股排除處置股）",
       "interval_min": 1440,
       "artifact": "research/data/disposal_flags_cycle.log",
-      "freshness": "mtime",
+      "freshness": "log_last_timestamp",
       "note": "2026-10-08 新增（DevQueue 20261008-183102）。看 launcher 日誌 mtime 而非 disposal_flags.json 的 generated_at：資料內容沒變時 build_disposal_flags.py 刻意不覆蓋檔案（避免每日空 commit），generated_at 不會前進，用它判停擺會誤報；launcher 每次執行都 append 日誌。"
     },
     {

@@ -23,6 +23,7 @@ mtime 只證明「檔案被寫過」，不證明「內容是新的」。
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -84,6 +85,9 @@ def _parse_ts(v) -> datetime | None:
     return dt.replace(tzinfo=TZ) if dt.tzinfo is None else dt
 
 
+_LOG_TS_RE = re.compile(r"(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}:\d{2})(?:\.\d+)?([+-]\d{2}:\d{2})?")
+
+
 def _dig(doc, path: str):
     cur = doc
     for part in path.split("."):
@@ -102,6 +106,23 @@ def _last_output(spec: dict, f: Path) -> tuple[datetime | None, str]:
         doc = json.loads(f.read_text(encoding="utf-8"))
         field = spec["field"]
         return _parse_ts(_dig(doc, field)), f"JSON 欄位 {field}"
+    if kind == "log_last_timestamp":
+        # 先.一〇三-7：cycle log 改讀 log 內最後一個時間戳。mtime 會被 git checkout／pull 改寫，
+        # 日誌一字未增也會看起來是新的；只讀檔尾 64KB，找不到時間戳才退回 mtime 並註明。
+        with f.open("rb") as fh:
+            fh.seek(0, 2)
+            size = fh.tell()
+            fh.seek(max(0, size - 65536))
+            tail = fh.read().decode("utf-8", errors="replace")
+        hits = _LOG_TS_RE.findall(tail)
+        best = None
+        for d, t, tz in hits:
+            dt = _parse_ts(f"{d}T{t}{tz}")
+            if dt and (best is None or dt > best):
+                best = dt
+        if best:
+            return best, "log 內最後時間戳"
+        return datetime.fromtimestamp(f.stat().st_mtime, TZ), "log 內找不到時間戳，退回檔案修改時間"
     if kind == "jsonl_last_field":
         lines = [ln for ln in f.read_text(encoding="utf-8").splitlines() if ln.strip()]
         if not lines:

@@ -38,6 +38,11 @@ TW_TZ = timezone(timedelta(hours=8))
 
 GITHUB_REPO = "jlove1314520/alpha-app"
 STALE_HOURS = {
+    # 先.一〇三-7：通用解析接手後，週／月頻檔案依排程頻率給門檻（避免每天都誤標 stale）
+    "data/us_financials.json": 192,  # us_financials.yml 每週六一次
+    "data/us_scores_v0.json": 192,  # 同上
+    "data/weekly_report.json": 192,  # 週報，每週一次
+    "data/rf_monthly.json": 840,  # 無風險利率月資料，約 35 天
     "data/quotes_tw.json": 24,  # 盤中才需要新鮮，這裡用寬鬆門檻，實際過期判斷交給App自己的診斷橫幅
     "data/quotes_us.json": 24,
     "data/market_tw.json": 24,
@@ -574,6 +579,67 @@ def status_from_age(generated_at: str | None, stale_hours: float) -> str:
 INTENTIONALLY_EMPTY = {"paper_trades.json", "company_info.json"}
 
 
+# 先.一〇三-7（2026-10-16）：通用日期解析。沒有專屬解析器的檔案原本一律 generated_at=None → "error"（77 檔誤報）。
+# 改成依序讀頂層與 meta／_meta 底下的時間欄位；只有日期（YYYY-MM-DD／YYYYMMDD）時視為台北當日 18:00（盤後資料的
+# 一般產生時段），避免把「資料日」當成凌晨 00:00 而提早半天判逾期。檔內完全沒有日期欄位的設定／對照表回報
+# status="no_date"（不是 error，也不冒充 ok）。
+GENERIC_TIME_KEYS = ("generated_at", "updated_at", "fetched_at", "computed_at", "built_at", "last_updated",
+                     "as_of", "asof", "data_date", "date")
+GENERIC_SKIP_STALE = {  # 設定檔／一次性對照表：內容不隨時間過期，不判新鮮度
+    "live_endpoints.json", "ui_glossary.json", "placeholder_allowlist.json", "company_official_domains_seed.json",
+}
+
+
+def _parse_generic_time(v) -> str | None:
+    if isinstance(v, (int, float)) and 19000101 <= v <= 21001231:
+        v = str(int(v))
+    if not isinstance(v, str):
+        return None
+    t = v.strip()
+    m = re.fullmatch(r"(\d{4})-?(\d{2})-?(\d{2})", t)
+    if m:
+        return datetime(int(m[1]), int(m[2]), int(m[3]), 18, 0, tzinfo=TW_TZ).isoformat()
+    try:
+        ts = datetime.fromisoformat(t.replace("Z", "+00:00").replace(" ", "T", 1))
+    except ValueError:
+        return None
+    if ts.tzinfo is None:
+        ts = ts.replace(tzinfo=TW_TZ)  # 本專案腳本寫的無時區時間都是台北時間
+    return ts.isoformat()
+
+
+def describe_generic(path: Path) -> dict:
+    try:
+        d = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as e:  # noqa: BLE001 — 單檔讀不到只標這一列，不中斷整份 STATUS
+        return {"generated_at": None, "records": None, "source": "通用解析：讀檔失敗", "detail": type(e).__name__}
+    records = None
+    found_key, found_val = None, None
+    if isinstance(d, list):
+        records = len(d)
+    elif isinstance(d, dict):
+        lists = [len(v) for v in d.values() if isinstance(v, (list, dict))]
+        records = max(lists) if lists else None
+        for scope_name in ("", "meta", "_meta", "metadata"):
+            scope = d if not scope_name else d.get(scope_name)
+            if not isinstance(scope, dict):
+                continue
+            for k in GENERIC_TIME_KEYS:
+                iso = _parse_generic_time(scope.get(k))
+                if iso:
+                    found_key, found_val = (f"{scope_name}.{k}" if scope_name else k), iso
+                    break
+            if found_val:
+                break
+    return {
+        "generated_at": found_val,
+        "records": records,
+        "source": f"通用解析（讀 {found_key}）" if found_key else "通用解析：檔內沒有日期欄位",
+        "detail": "",
+        "_no_date": found_val is None,
+    }
+
+
 def describe_scores(path: Path) -> dict:
     """scores.json（2026-08-27新增追蹤，使用者要求）——注意這個檔案在repo根目錄，
     不在data/底下。**2026-08-27（晚）新增雙管線**：`research/generate_scores_v2.py`
@@ -626,10 +692,15 @@ def build_data_files() -> list[dict]:
         if describer:
             info = describer(path)
         else:
-            info = {"generated_at": None, "records": None, "source": "未知（generate_status_json.py 沒有對應的解析器，需要補上）", "detail": ""}
+            info = describe_generic(path)
+        no_date = info.pop("_no_date", False)
         entry = {"path": rel, **info}
         if path.name in INTENTIONALLY_EMPTY:
             entry["status"] = "ok"
+        elif path.name in GENERIC_SKIP_STALE:
+            entry["status"] = "static"
+        elif no_date:
+            entry["status"] = "no_date"
         else:
             entry["status"] = status_from_age(info.get("generated_at"), STALE_HOURS.get(rel, 24))
         out.append(entry)

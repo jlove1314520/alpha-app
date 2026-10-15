@@ -2412,19 +2412,19 @@
   // 失敗只影響本視窗（各段各自 try/catch），不外溢。
   const METHOD_BOARDS={
     value:{title:'價值成長榜',list:'scores_list.json',weights:'research/weights_frozen.json',
-      inputs:['data/fundamentals.json','data/stock_detail.json','data/price_history.json','data/company_info.json'],
+      inputs:['data/fundamentals.json','data/stock_detail.json','data/price_history/','data/company_info.json'],
       plain:'想找「財報在成長、價格不算太貴、籌碼與走勢不差」的公司。估值是跟同產業比（同產業不足 8 檔就跟全市場比）。'},
     momentum:{title:'題材動能榜',list:'scores_momentum_list.json',weights:'research/weights_frozen_momentum.json',
-      inputs:['data/fundamentals.json','data/stock_detail.json','data/price_history.json','data/company_info.json','data/quotes_all_tw.json','data/market_tw.json'],
+      inputs:['data/fundamentals.json','data/stock_detail.json','data/price_history/','data/company_info.json','data/quotes_all_tw.json','data/market_tw.json'],
       plain:'想找「股價與成交量正在轉強、資金往那個族群流」的公司。財報只用來排除地雷，不加分；完全不看本益比，題材股本來就貴。'},
     future:{title:'未來性濾網',list:'scores_future_list.json',weights:'research/weights_frozen_future.json',
-      inputs:['data/stock_detail.json','data/company_info.json','data/price_history.json'],
+      inputs:['data/stock_detail.json','data/company_info.json','data/price_history/'],
       plain:'想找「法人持續買進、毛利率高又穩」的公司。目前只做得到「現在就能算」的部分，事件資料與 AI 質性判讀尚未實作。'},
   };
   // 美股但書原文（alpha-app/CLAUDE.md 七、資料原則「美股結論一律附存活者偏誤但書」現行文字，2026-10-14 先.九十四-4 口徑）。
   const US_SURVIVORSHIP_CAVEAT='存活者偏誤未完全修正：已下市股約 97%（抽樣 55／57）無價格來源。';
   const METHOD_INPUT_NAMES={'data/fundamentals.json':'本益比、殖利率、月營收','data/stock_detail.json':'財報、三大法人、融資融券',
-    'data/price_history.json':'每日收盤價','data/company_info.json':'公司名稱與產業別','data/quotes_all_tw.json':'今日收盤快照','data/market_tw.json':'大盤與類股'};
+    'data/price_history/':'每日收盤價','data/company_info.json':'公司名稱與產業別','data/quotes_all_tw.json':'今日收盤快照','data/market_tw.json':'大盤與類股'};
   const METHOD_META_CACHE={};
   let METHOD_STATUS_CACHE=null,METHOD_BOARD='value',METHOD_GEN=0;
   function _mEsc(t){return String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -4699,7 +4699,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-16.0412';
+  const APP_VERSION='2026-10-16.0420';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
