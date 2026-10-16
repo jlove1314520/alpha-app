@@ -2621,10 +2621,13 @@ B31/B32/B33。
 - **P1 analyst/catalyst 因子**：全市場沒有免費資料源，暫無解法。
 - **earnings_growth 的 PER 反推 EPS 備援**：需要 PER 歷史序列，目前
   `fundamentals.json` 只存最新一筆，尚未建置。
+  > ⚠️ 現況（2026-10-16 DevQueue 20261016-180101 核對，先.一〇三-15ai，只讀）：**仍未解**。`research/generate_scores_live.py` 第 25～29 行 docstring 仍寫「沒有PER反推EPS的備援」；`data/` 沒有任何 PER 歷史累積檔（`ls data | grep per` 零命中），研究端 `research/score_v2.py::_eps_yoy_derived_from_per()` 才有備援。要補需新增一份每日累積的 PER 歷史檔（資料流架構變更，依「提案先於執行」要先提案）；目前 earnings_growth 另有營收年增／毛利率／營益率三個子訊號，EPS 缺時不會整個因子落空（`research/live_factors.py` 第 74～78 行）。
 - **technical 因子用未還原權息的收盤價**：除權息當天前後 MA60 會有跳空
   失真，需要抓除權息事件表才能還原。
+  > ✅ 現況（2026-10-16 DevQueue 20261016-180101 核對，先.一〇三-15ai，只讀）：**已解決**——先.八十一-37（2026-10-13）起 `research/live_factors.py::technical()`（第 190～200 行）與 60 日漲幅改用 `_closes_adj()` 讀還原權息收盤 `adj_close`，該列沒有還原價才退回原始收盤；當時實測 2,945 檔中 235 檔 technical 分數改變。
 - **979 檔缺 Q1 基準的財報季度**：因缺同年較早季度資料無法安全還原成單季
   數字，目前跳過不 merge，需要更多歷史資料或額外 FinMind 呼叫才能補上。
+  > ⚠️ 現況（2026-10-16 DevQueue 20261016-180101 核對，先.一〇三-15ai，只讀）：**已大幅縮小但未歸零**——`data/stock_detail.json` meta `financials_skipped_no_baseline_count`＝**205**（原 979），計數來源 `.github/scripts/update_stock_financials.py` 第 607～656 行（缺同年較早季度就跳過、不硬湊單季）。剩餘 205 檔待 研究室.四 季報回補（`scripts/backfill_financials_display.py`，進行中）完成後再看能否再降。
 - **603 檔 industry 分類歧義**：FinMind `TaiwanStockInfo` 原始資料本身在
   同一天對同一檔股票有超過一種產業分類，`company_info.json` 誠實回傳
   None，需要更權威的產業分類來源或人工判斷才能解決。
