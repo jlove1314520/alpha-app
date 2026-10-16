@@ -43,7 +43,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(mq.addEventListener)mq.addEventListener('change',h);else if(mq.addListener)mq.addListener(h)}
 })();
 </script>
-<link rel="stylesheet" href="app.css?v=2026-10-16.0852">
+<link rel="stylesheet" href="app.css?v=2026-10-16.0904">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -120,7 +120,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       </div>
     </div>
 
-    <!-- 先.一〇四-4（2026-10-16）首頁順序：今日摘要 → 自選股 → 今日事件（＋我的持股事件）→ 跟 0050 比 → 我的資產／自動投資這一期（連上電腦時）→ 盤前日報（收合）→ 沒連線提示（頁尾小字） -->
+    <!-- 先.一〇四-4（2026-10-16）首頁順序：今日摘要 → 自選股 → 今日事件（＋自選股動態）→ 跟 0050 比 → 我的資產／自動投資這一期（連上電腦時）→ 盤前日報（收合）→ 沒連線提示（頁尾小字） -->
     <div class="card">
       <h3>今日摘要</h3>
       <!-- 先.一〇四-4：加權／櫃買／台指期／費半＋一句話（固定規則組字，不做判斷） -->
@@ -151,7 +151,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     這張是已發生事件/新聞的回顧流，範圍也不同（含台股）。無事件時整張卡隱藏
     （比照home-ai-card的既有做法），不畫空狀態佔位。 -->
     <div class="card" id="home-my-events-card" hidden>
-      <h3>我的持股事件</h3>
+      <h3>自選股動態</h3>
       <div id="my-holdings-events"></div>
     </div>
 
@@ -1560,6 +1560,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-16.0852"></script>
+<script src="app.js?v=2026-10-16.0904"></script>
 </body>
 </html>

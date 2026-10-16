@@ -2284,7 +2284,13 @@
     else{console.warn('[todayEvents:mine]',mine.reason);recordGlobalError('todayEvents:mine',mine.reason)}
     return rows;
   }
+  // 先.一〇五-2：今日事件已列出的重訊（代號|標題），「自選股動態」據此去重；TODAY_EV_READY 讓它等今日事件先算完
+  let TODAY_EV_KEYS=new Set(),_todayEvResolve=null;
+  const TODAY_EV_READY=new Promise(r=>{_todayEvResolve=r});
   async function loadTodayEvents(){
+    try{await _loadTodayEventsImpl()}finally{try{_todayEvResolve&&_todayEvResolve()}catch(e){console.warn('[TODAY_EV_READY]',e)}}
+  }
+  async function _loadTodayEventsImpl(){
     const el=document.getElementById('today-events');if(!el)return;
     try{
       const today=_evYmd(new Date());
@@ -2299,6 +2305,7 @@
         if(!(days>=0&&days<=21))return;
         rows.push({date:String(info.next_earnings_date).slice(0,10),kind:'美股財報',code,name:nameOf(code)||code,note:{pre:'盤前',post:'盤後'}[info.estimated_session]||'',mine:WL.includes(code)});
       });
+      TODAY_EV_KEYS=new Set(rows.filter(r=>r.kind==='重訊').map(r=>r.code+'|'+r.note));
       const card=document.getElementById('home-events-card');
       if(!rows.length){el.innerHTML='<div class="note">近期沒有自選股或全市場的除權息、法說、重訊與美股財報</div>';if(card)card.hidden=true;return}
       if(card)card.hidden=false;
@@ -2344,13 +2351,21 @@
     const nm=(n&&n!==code)?n:((evName&&evName[code])||'');
     return nm?`${String(nm).replace(/</g,'&lt;')} ${code}`:code;
   }
+  // 先.一〇五-2（2026-10-16）：「我的持股事件」改名「自選股動態」。範圍＝自選股＋真錢持股（先.八十一-11，不含研究策略／模擬持股）；
+  // 真錢持股與紙上持股（data/paper_1b.json、paper_3.json 的 weights_post）只用標記區分，不再跟自選股混稱「持股」。
+  // 預設 5 則、每檔最多 2 則、跟上面「今日事件」已列出的重訊去重，其餘收進「看全部 N 則」。
+  async function _paperHoldingCodes(){
+    const out=new Set();
+    const rs=await Promise.allSettled(['paper_1b','paper_3'].map(f=>fetch('data/'+f+'.json?t='+Math.floor(Date.now()/600000)).then(r=>r.ok?r.json():null)));
+    rs.forEach(x=>{if(x.status==='fulfilled'&&x.value&&x.value.weights_post)Object.entries(x.value.weights_post).forEach(([c,w])=>{if(w>0)out.add(String(c))});
+      else if(x.status==='rejected')console.warn('[paperHoldingCodes]',x.reason)});
+    return out;
+  }
   async function loadMyHoldingsEvents(){
     const card=document.getElementById('home-my-events-card'),el=document.getElementById('my-holdings-events');
     if(!el)return;
     try{
-      // 先.八十一-11：範圍＝自選股＋真錢持股（本機 /auto/ledger 去識別化帳本裡有成交的代號），不含研究策略／模擬持股。
-      // 真錢持股要連上電腦才讀得到；讀不到時只列自選股，並在說明寫明原因。
-      const codes=new Set(WL),realCodes=new Set();
+      const wl=new Set(WL.map(String)),realCodes=new Set();
       let realNote='';
       if(LIVE.configured&&LIVE.url){
         try{
@@ -2361,18 +2376,23 @@
           else{console.warn('[loadMyHoldingsEvents:ledger]',e);recordGlobalError('loadMyHoldingsEvents:ledger',e);realNote='讀取真錢帳本失敗，真錢持股暫未列入'}
         }
       }else realNote='未連上電腦，真錢持股暫未列入';
-      realCodes.forEach(c=>codes.add(c));
+      let paperCodes=new Set();
+      try{paperCodes=await _paperHoldingCodes()}catch(e){console.warn('[loadMyHoldingsEvents:paper]',e)}
+      // 範圍維持先.八十一-11：自選股＋真錢持股（不含研究策略／模擬持股）；紙上持股只用來標記（自選股剛好也是紙上持股時標「紙上持股」）
+      const codes=new Set([...wl,...realCodes]);
       if(!codes.size){card.hidden=true;return}
-      const [evDoc,newsDoc]=await Promise.all([loadEventsForCodes([...codes]),ensureNews(),ensureQuoteLite([...codes]).catch(e=>{console.warn('[loadMyHoldingsEvents:names]',e)})]);
+      const [evDoc,newsDoc]=await Promise.all([loadEventsForCodes([...codes]),ensureNews(),ensureQuoteLite([...codes]).catch(e=>{console.warn('[loadMyHoldingsEvents:names]',e)}),
+        Promise.race([TODAY_EV_READY,new Promise(r=>setTimeout(r,4000))])]);
       const items=[],evName={};
       (evDoc.events||[]).forEach(e=>{
         if(!codes.has(e.code))return;
         if(e.name)evName[e.code]=e.name;
+        if(TODAY_EV_KEYS.has(e.code+'|'+String(e.title||'').slice(0,40)))return;  // 今日事件已列過
         const ts=Date.parse(e.date);
         if(!isNaN(ts))items.push({ts,dateTxt:String(e.date).slice(5),code:e.code,title:e.title,kind:e.type||'事件',url:e.url});
       });
       (newsDoc.news||[]).forEach(n=>{
-        const ts=Date.parse(n.published);
+        const ts=Date.parse(n.published_iso||n.published);
         if(isNaN(ts))return;
         (n.codes||[]).forEach(c=>{
           if(!codes.has(c))return;
@@ -2380,24 +2400,31 @@
         });
       });
       items.sort((a,b)=>b.ts-a.ts);
-      const top=items.slice(0,20);
-      if(!top.length){card.hidden=true;return}
+      // 每檔最多 2 則（依時間新到舊挑）
+      const perCode={},picked=[];
+      for(const it of items){perCode[it.code]=(perCode[it.code]||0)+1;if(perCode[it.code]<=2)picked.push(it)}
+      if(!picked.length){card.hidden=true;return}
       card.hidden=false;
-      el.innerHTML=top.map(it=>{
+      const tag=c=>realCodes.has(c)?' <span style="font-size:9.5px;color:var(--gold)">真錢持股</span>'
+        :paperCodes.has(c)?' <span style="font-size:9.5px;color:var(--ink-3);border:1px solid var(--hairline);border-radius:4px;padding:0 3px">紙上持股</span>':'';
+      const rowHtml=it=>{
         const c=EVENT_TYPE_COLOR[it.kind]||'var(--ink-3)';
         const t=(it.title||'').replace(/</g,'&lt;');
         return `<div style="display:flex;gap:9px;align-items:flex-start;padding:6px 0;border-top:1px solid var(--hairline);cursor:pointer" onclick="openStock('${it.code}')">
           <span class="num" style="font-size:10px;color:var(--ink-4);min-width:32px;padding-top:2px">${it.dateTxt}</span>
           <span style="font-size:9.5px;font-weight:700;color:${c};border:1px solid ${c};border-radius:5px;padding:1px 5px;flex-shrink:0;margin-top:1px">${it.kind}</span>
-          <span style="flex:1;font-size:12px;color:var(--ink-2);line-height:1.5"><b style="color:var(--ink)">${_holdName(it.code,evName)}</b>${realCodes.has(it.code)?' <span style="font-size:9.5px;color:var(--gold)">真錢持股</span>':''}・${t}${it.kind==='法說會'?mopsIrLinkHtml({type:it.kind,code:it.code},true):''}</span>
+          <span style="flex:1;font-size:12px;color:var(--ink-2);line-height:1.5"><b style="color:var(--ink)">${_holdName(it.code,evName)}</b>${tag(it.code)} ${t}</span>
         </div>`;
-      }).join('')
+      };
+      const head=picked.slice(0,5),rest=picked.slice(5);
+      el.innerHTML=head.map(rowHtml).join('')
+        +(rest.length?`<details style="margin-top:4px"><summary class="note" style="cursor:pointer;margin:4px 0">看全部 ${picked.length} 則</summary>${rest.map(rowHtml).join('')}</details>`:'')
         // 先.一〇四-1：news.json 最新一則超過 2 天 → 黃色提示（不擋其他內容）
         +(newsDoc&&newsDoc.stale_warning?`<div class="note" style="margin-top:8px;color:var(--warn,#d4a72c)">⚠ 新聞來源可能停更：${String(newsDoc.stale_warning).replace(/</g,'&lt;')}</div>`:'')
-        +`<div class="note" data-ui-explain style="margin-top:8px">自選股 ${WL.length} 檔＋真錢持股 ${realCodes.size} 檔（不含研究策略／模擬持股）${realNote?'（'+realNote+'）':''}，共 ${items.length} 則事件新聞${items.length>20?'，只顯示最近20筆':''}。來源：data/events.json（MOPS重大訊息／TWSE月營收／除權息）＋data/news.json（僅已命中股票代號者，覆蓋率有限）。點一列跳個股頁。</div>`;
+        +`<div class="note" data-ui-explain style="margin-top:8px">自選股 ${wl.size} 檔＋真錢持股 ${realCodes.size} 檔（不含研究策略／模擬持股）${realNote?'（'+realNote+'）':''}；每檔最多 2 則，今日事件已列的重訊不重複。點一列跳個股頁。</div>`;
     }catch(e){
       console.warn('[loadMyHoldingsEvents]',e);recordGlobalError('loadMyHoldingsEvents',e);
-      el.innerHTML='<div class="note">載入失敗：'+e.message+'</div>';
+      el.innerHTML='<div class="note">載入失敗：'+_uiEsc(e.message)+'</div>';
       if(card)card.hidden=true;
     }
   }
@@ -4716,7 +4743,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-16.0852';
+  const APP_VERSION='2026-10-16.0904';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
