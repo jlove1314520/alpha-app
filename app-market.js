@@ -221,6 +221,15 @@
     const nets=history.map(h=>({date:h.date,net:unit==='amt'?h.total_net_amt:h.total_net_lots})).filter(n=>n.net!=null);
     const mx=Math.max(...nets.map(n=>Math.abs(n.net)))||1;
     el.innerHTML=nets.map((n,i)=>divBarHTML(n.date.slice(4,6)+'/'+n.date.slice(6,8),n.net,mx,i===nets.length-1?_instFmt(n.net,unit).replace(/ (張|億)$/,''):'')).join('');
+    // 先.一〇五-5：最新一根的數值標籤若跟相鄰柱子（含柱子所在欄位）重疊，就改放到圖表右上角
+    requestAnimationFrame(()=>{try{
+      const v=el.querySelector('.db-val');if(!v)return;
+      const vr=v.getBoundingClientRect(),cols=[...el.querySelectorAll('.db')];
+      const hit=cols.slice(0,-1).some(c=>{const b=c.querySelector('i.u,i.dn');if(!b)return false;const r=b.getBoundingClientRect();
+        return vr.left<r.right&&r.left<vr.right&&vr.top<r.bottom&&r.top<vr.bottom});
+      const wide=cols.length&&vr.width>cols[cols.length-1].getBoundingClientRect().width+2;
+      if(hit||wide){el.classList.add('val-corner');v.classList.add('at-corner')}else{el.classList.remove('val-corner')}
+    }catch(e){console.warn('[instBarLabel]',e)}});
     const todayNet=nets[nets.length-1].net;
     const te=document.getElementById('inst-today');
     te.textContent=_instFmt(todayNet,unit);te.style.color=todayNet>=0?'var(--up)':'var(--down)';

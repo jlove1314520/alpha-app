@@ -579,3 +579,8 @@ details.ui-more[open]>summary{color:var(--ink-2)}
 .rev-chart-amt .rc-yoy.up{color:var(--up)}
 .rev-chart-amt .rc-yoy.dn{color:var(--down)}
 #rev-chart-yoy[hidden]{display:none}
+
+/* 先.一〇五-5 法人買賣超最新一根標籤會撞到相鄰柱子時，改放圖表右上角 */
+.div-bars.val-corner{position:relative;padding-top:14px}
+.div-bars .db-val.at-corner{position:absolute;top:-2px!important;right:0;bottom:auto}
+.div-bars.val-corner .db.has-val{position:static}
