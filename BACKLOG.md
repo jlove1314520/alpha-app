@@ -2128,6 +2128,13 @@ FinMind的明確`retry_after`倒數更不透明，沒有官方公告的解除時
      美股找到官方結構化來源 SEC DERA Notes Data Sets（帶維度`ConcentrationRiskPercentage(1)`，
      2009起PIT），事前登記`research/B30_CUSTOMER_CONCENTRATION_SPEC.md`後測「高集中組」
      → 試驗 #434 **FAIL**（GATE_SEQUENCE第2關隨機控制組，百分位19.5）。台股第2點現狀不變。
+  > ⚠️ 現況（2026-10-16 DevQueue 20261016-160101 只讀核對，先.一〇三-15ab）：
+  > ①台股 `customer_concentration` 因子**仍未實作**——`research/generate_scores_future.py` 第 31／396 行、
+  > `generate_status_json.py` 第 1122 行、`research/generate_strategies_json.py` 第 416 行都照實標「未實作、無免費結構化來源」；
+  > 美股只有試驗用 `research/b30_customer_concentration_gate.py`（#434 FAIL，commit e24261d6c6），沒有進 App。
+  > ②`data/supply_chain.json` **不存在**；`ic.tpex.org.tw` **沒有併入 B19**，而且不能併：
+  > 該網域在 `research/net_guard.py::DOMAIN_BLOCKLIST`（使用條款明文禁止爬蟲，2026-09-08 查證，見 `docs/TPEX_INDUSTRY_CHAIN_GATE.md`），
+  > 所以上面第 1 點「改用 ic.tpex 併入 B19」這條路已被法遵封住，不是還沒做。供應鏈質性關係目前沒有合規的自動來源。
 
 **仍標「難/顆粒度不同」，如實揭露（2026-08-28登錄）**：
 - 美股「每日」三大法人/融資融券無免費對應；替代方案=SEC 13F（季度
@@ -2317,6 +2324,20 @@ B31/B32/B33。
      `loadStockInfo:fetch`錯誤，至少這幾次不是單純網路不穩，是這台機器
      的FinMind IP封鎖直接波及到App本身的正常運作路徑，等封鎖解除
      （retry_after約198秒）後重跑冒煙測試確認恢復正常。
+
+     **⚠️ 現況（2026-10-16 DevQueue 20261016-160101 只讀核對，先.一〇三-15aa）**：
+     「約 1,826 檔待回補」這個數字已過時，上面那條 FinMind 回補路徑實際上已被取代——
+     現在 price_history 走官方端點：每日 `.github/scripts/update_price_history.py`
+     （market.yml 第 146 行）＋缺日補齊 `scripts/backfill_price_history_gaps.py`
+     （先.八十-9／先.八十一-48／先.八十一-53，TWSE MI_INDEX＋TPEx otc，market.yml 第 155 行每班跑）。
+     證據：①`data/price_history/`（拆檔）共 2,960 個代號，2026-06-01 起 94 個交易日、每日中位 2,395.5 檔，
+     低於中位 90% 的只有 06-01～06-04（201～341 檔，＝每檔保留 90 筆的最舊邊界，先.八十一-53 已知現象，不是缺日）；
+     ②沿用舊 `research/backfill_price_history_gaps.py::target_codes()`（列數 <60 或最近窗有 `_has_calendar_gap()`）重算：
+     四碼普通股代號只剩 65 檔命中（45 檔在 price_history 內、多為新上市只有 1～49 筆，11 檔 90 筆卻有日曆缺口
+     ＝停牌舊代號，如 1538／2407／4130；20 檔根本不在 price_history＝已下市或興櫃）；其餘 16,450 筆命中是權證等
+     非個股代號（舊候選宇宙的 `_NON_STOCK_CODE_PATTERN` 沒擋到 stock_detail 裡的權證），不是待補缺口。
+     結論：舊 `research/backfill_price_history_gaps.py`（FinMind 版）**不再需要**，本條殘留待辦視為已被官方回補路徑取代；
+     未刪檔（刪除要先問），未改程式。
   2. B16回測時要對量價配合度/創新高的門檻參數（1.3倍/2.5倍/0.7/0.6/
      80百分位等）做±30%敏感度掃描，只有單點有效就判定為過擬合。
 
