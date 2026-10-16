@@ -1121,6 +1121,11 @@ beta（部位方向性曝險偽裝成選股優勢）③縮小候選池（在更�
 通常不維護「已下市證券」的歷史清單API，需要另外的資料源/人工整理），
 不是這輪能做的事，排入之後資料地基優先序。
 
+> **現況（2026-10-16 DevQueue 20261016-130101 核對，先.一〇三-15h）：「尚未開始」已過時，屬「部分做」。**
+> - **研究回測宇宙已含下市股**：`research/universe.py::universe()`＝FinMind `TaiwanStockInfo`（現存）＋`TaiwanStockDelisting`（下市事件登記，cutoff 2003-01-01），兩者重疊時下市優先（2026-09-18 修正）。本機快取實算（零 API 請求）：共 3,196 檔＝active 2,744＋delisted 452；`TaiwanStockDelisting` 原檔 723 筆（1995-09-23～2026-07-28）。另有上市／上櫃日截斷（查.二／查.三）與 `exam_2007_2014_data_gate2_survivorship.py` 存活者偏差強檢。
+> - **App 端 `data/listed_universe.json`** 是「現況掛牌追蹤」不是歷史宇宙：10/16 03:15 產（audit.yml 每日），active 2,144、inactive 0、suspended 10、suspected_halt 6；終止上市清單 `suspendListingCsvAndHtml` 265 列、近 365 天採用 4 檔。用途是擋已下市股進排行，不供回測。
+> - **還缺的幾塊（照實寫）**：①下市名單快取停在 2026-08-22（`research/data/raw/TaiwanStockDelisting__ALL__1990-01-01__latest.parquet`），07-28 之後的下市事件不在研究宇宙裡，要重抓才更新；②2003 年以前下市股不在範圍內（FinMind 價格覆蓋約 2003 起，DATA.md 已記）；③下市股財報補抓幾乎拿不到——`probe_delisted_fs_status.json`（09-30）41 檔只救回 2 檔、39 檔空回應；④來源是 FinMind（台灣資料商的整理），不是 TWSE／TPEx 官方逐年下市清單，官方 `suspendListingCsvAndHtml` 有 2002 年起清單但研究端尚未拿來交叉核對。
+
 ### 五、方向修正（登錄為優先序指引）
 
 姊妹專案實測「換因子/換排名取代動量」10次0/10，跟Alpha自己FUT軌#18-21
