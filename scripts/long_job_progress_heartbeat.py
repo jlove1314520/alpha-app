@@ -66,6 +66,12 @@ def _count(args) -> int | None:
 
 def _git(*a, timeout=120):
     # 一律指定 utf-8：git 輸出含中文時，Windows 預設 cp950 會丟 UnicodeDecodeError
+    try:  # 先.一〇三-15ag：改走 local_git_commit.run_git（逾時殺整棵行程樹、禁止互動式認證），匯入失敗退回原寫法（十二節）
+        sys.path.insert(0, str(ROOT / "scripts"))
+        from local_git_commit import run_git
+        return run_git(a, cwd=ROOT, timeout=timeout)
+    except ImportError:
+        pass
     return subprocess.run(["git", *a], cwd=ROOT, capture_output=True, text=True,
                           encoding="utf-8", errors="replace", timeout=timeout)
 

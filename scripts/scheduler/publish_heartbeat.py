@@ -44,6 +44,15 @@ def privacy_check(doc) -> str | None:
 
 
 def git(*a, env=None, check=True):
+    try:  # 先.一〇三-15ag：fetch／push 改走 local_git_commit.run_git（逾時殺整棵行程樹、禁止互動式認證），匯入失敗退回原寫法（十二節）
+        sys.path.insert(0, str(REPO / "scripts"))
+        from local_git_commit import run_git
+        r = run_git(a, cwd=REPO, timeout=60, env=env)
+        if check and r.returncode != 0:
+            raise subprocess.CalledProcessError(r.returncode, r.args, r.stdout, r.stderr)
+        return r
+    except ImportError:
+        pass
     return subprocess.run(["git", *a], cwd=REPO, env=env, capture_output=True, text=True, timeout=60, check=check)
 
 

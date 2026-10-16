@@ -31,11 +31,16 @@ GITDIR = ROOT / ".git"
 _GIT_ENV = {**os.environ, "GIT_TERMINAL_PROMPT": "0", "GCM_INTERACTIVE": "never"}
 
 
-def _g(*a, timeout=180):
-    p = subprocess.Popen(["git", *a], cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL,
-                         text=True, encoding="utf-8", errors="replace", env=_GIT_ENV)
+def run_git(args, cwd=None, timeout=180, env=None, input=None):
+    """先.一〇三-15ag：其他本機腳本共用的 git 呼叫（同 _g 的防卡死做法）。args 不含開頭的 "git"；
+    env 會疊在 _GIT_ENV 上；input 給 hash-object 這類要讀 stdin 的指令。逾時回 returncode=124，不拋例外。"""
+    a = list(args)
+    # cwd 預設在呼叫時才取 ROOT（不能寫成預設參數：自測會改 ROOT 指到暫存 repo，綁死在定義時就會落到真 repo）
+    p = subprocess.Popen(["git", *a], cwd=cwd if cwd is not None else ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                         stdin=subprocess.PIPE if input is not None else subprocess.DEVNULL,
+                         text=True, encoding="utf-8", errors="replace", env={**_GIT_ENV, **(env or {})})
     try:
-        out, err = p.communicate(timeout=timeout)
+        out, err = p.communicate(input=input, timeout=timeout)
     except subprocess.TimeoutExpired:
         if os.name == "nt":
             subprocess.run(["taskkill", "/F", "/T", "/PID", str(p.pid)], capture_output=True, timeout=30)
@@ -47,6 +52,10 @@ def _g(*a, timeout=180):
             out, err = "", ""
         return subprocess.CompletedProcess(p.args, 124, out or "", (err or "") + f"\n[local_git_commit] git {' '.join(a[:2])} 逾時 {timeout} 秒，已殺整棵行程樹")
     return subprocess.CompletedProcess(p.args, p.returncode, out, err)
+
+
+def _g(*a, timeout=180):
+    return run_git(a, timeout=timeout)
 
 
 def rebase_in_progress() -> bool:

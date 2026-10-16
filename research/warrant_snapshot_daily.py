@@ -156,6 +156,12 @@ def write_status(man: dict) -> bool:
 
 def commit_status() -> None:
     g = lambda *a: subprocess.run(["git", *a], cwd=REPO, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    try:  # 先.一〇三-15ag：git 改走 local_git_commit.run_git（逾時殺整棵行程樹、禁止互動式認證），匯入失敗退回原寫法（十二節）（原本沒有逾時，改為 180 秒）
+        sys.path.insert(0, str(REPO / "scripts"))
+        from local_git_commit import run_git
+        g = lambda *a: run_git(a, cwd=REPO, timeout=180)  # noqa: E731
+    except ImportError:
+        pass
     tok = None
     try:
         for _ in range(40):

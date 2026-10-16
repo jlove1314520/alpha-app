@@ -64,8 +64,17 @@ if hasattr(sys.stdout, "reconfigure"):
 
 
 def sh(args, cwd=ROOT, timeout=600, check=False):
-    r = subprocess.run(args, cwd=cwd, capture_output=True, text=True, encoding="utf-8",
-                       errors="replace", timeout=timeout)
+    r = None
+    if args and args[0] == "git":
+        try:  # 先.一〇三-15ag：git 改走 local_git_commit.run_git（逾時殺整棵行程樹、禁止互動式認證），匯入失敗退回原寫法（十二節）
+            sys.path.insert(0, str(ROOT / "scripts"))
+            from local_git_commit import run_git
+            r = run_git(args[1:], cwd=cwd, timeout=timeout)
+        except ImportError:
+            r = None
+    if r is None:
+        r = subprocess.run(args, cwd=cwd, capture_output=True, text=True, encoding="utf-8",
+                           errors="replace", timeout=timeout)
     if check and r.returncode:
         raise RuntimeError(f"{args[:3]} rc={r.returncode} {r.stderr[-300:]}")
     return r
