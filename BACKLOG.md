@@ -675,6 +675,7 @@ Claude Code自己的安全分類器擋下了（下單這個動作本身被歸類
 `index.html`的下單計畫UI（選標的/方向/張數→計畫卡→確認送出）**完全
 還沒開始做**，這輪只做到本機伺服器本身。
 > ⚠️ 現況（2026-10-16 DevQueue 20261016-130101 核對，先.一〇三-15p，只讀、未送單）：「修好的邏輯還沒重新完整驗證」**仍成立，找不到驗證證據**。`research/ibkr_order_server.py` 只把成交結果回在 HTTP 回應裡（第 274 行 `log` 欄），**沒有落地任何下單紀錄檔**；`research/data/auto_trading/*/orders.jsonl` 是台股 Shioaji 自動交易，IBKR 筆數 0；PROGRESS／BACKLOG 09-01 之後也沒有「BUY 回報 Filled」的記載。要驗證需要總司令在 paper 帳戶親自送一筆（CC 不得自行觸發下單）。另：伺服器不留下單紀錄本身違反四之二節「當作證據的紀錄必須落地」，是否補 append-only 紀錄檔要提案。（下單 UI 已於 09-02 上線，見上方 15i 現況。）
+> ⚠️ 更正（2026-10-17 DevQueue 20261017-030102，先.一〇八-5，只讀、未送單）：上一段「伺服器沒有落地任何下單紀錄檔」**是錯的**——`research/ibkr_order_server.py` 第 135 行 `_append_paper_trade()`（2404ff61bf 起就有）會 append-only 寫 `data/paper_order_log.json`。該檔 6 筆：21:49～21:50 四筆是**修正前**的伺服器寫的（attempt_id 16 碼、有 phase 欄；21:49 BUY 回報 Cancelled 正是那次誤判）；23:41 AAPL BUY／SELL 兩筆 Filled 是**另一支沒進 repo 的一次性測試腳本**寫的（attempt_id 12 碼、沒有 phase 欄、note「測試單，驗證ib_async下單管線」，commit 89af9d519d 只改了伺服器 17 行與 log，沒有新增腳本）。結論：那兩筆證明 `ib_async→Gateway→送單→成交` 路徑會動，**但不算 order_server 修正後邏輯的驗證**；「修好的成交狀態判斷仍未重新完整驗證」維持成立，要驗證仍需總司令在 paper 帳戶親自送一筆。
 
 **四、下單被Gateway拒絕的已知情境**：Read-Only API勾選時會回
 `ValidationError`（Warning 321），伺服器會回傳清楚的409錯誤說明原因，
