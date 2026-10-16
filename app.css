@@ -571,3 +571,11 @@ details.ui-more[open]>summary{color:var(--ink-2)}
 #picks-board-toggle.picks-board-wrap .mtg-opt{overflow:hidden;text-overflow:ellipsis;text-align:center}
 #picks-board-toggle{max-width:100%}
 #picks-head-row>div:first-child{min-width:0}
+
+/* 先.一〇五-4 月營收：年增率改柱子上方小字（正紅負綠，跟著漲跌色設定） */
+.rev-chart-amt{height:118px}
+.rev-chart-amt .rc-bar{justify-content:flex-end}
+.rev-chart-amt .rc-yoy{display:block;font-style:normal;font-size:7.2px;font-weight:700;letter-spacing:-.04em;white-space:nowrap;line-height:1.2;margin-bottom:1px;font-variant-numeric:tabular-nums}
+.rev-chart-amt .rc-yoy.up{color:var(--up)}
+.rev-chart-amt .rc-yoy.dn{color:var(--down)}
+#rev-chart-yoy[hidden]{display:none}

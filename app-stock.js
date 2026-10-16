@@ -575,17 +575,15 @@
     const amtVals=REV_ROWS.map(r=>r.revenue/1e8);const amtMax=Math.max(...amtVals)||1;
     // 先.一〇四-8：最新一根標金額；左上標本圖最高值當刻度
     const _yi=v=>v>=100?Math.round(v).toLocaleString('zh-TW'):v.toFixed(1);
-    amtEl.innerHTML=`<span class="rc-ymax">最高 ${_yi(amtMax)} 億</span>`+REV_ROWS.map((r,i)=>{
-      const last=i===REV_ROWS.length-1;
-      return `<div class="rc-bar" data-i="${i}">${last?`<b class="rc-val">${_yi(r.revenue/1e8)}億</b>`:''}<i style="height:${Math.max(6,r.revenue/1e8/amtMax*100).toFixed(0)}%"></i></div>`;
+    // 先.一〇五-4：年增率改成每根柱子上方的小字（正紅負綠，隨漲跌色設定），不再另畫一排年增率方塊
+    const _lastAmt=REV_ROWS[REV_ROWS.length-1].revenue/1e8;
+    // 最新值改寫在左上角（跟最高值同一行），不疊在最後一根柱子上方，免得跟旁邊的年增率小字撞在一起
+    amtEl.innerHTML=`<span class="rc-ymax">最高 ${_yi(amtMax)} 億 · 最新 <b style="color:var(--ink)">${_yi(_lastAmt)} 億</b></span>`+REV_ROWS.map((r,i)=>{
+      const last=false;
+      const yoyTxt=r.yoy==null?'':`<em class="rc-yoy ${r.yoy>=0?'up':'dn'}">${r.yoy>=0?'+':''}${r.yoy.toFixed(1)}%</em>`;
+      return `<div class="rc-bar" data-i="${i}">${yoyTxt}${last?`<b class="rc-val">${_yi(r.revenue/1e8)}億</b>`:''}<i style="height:${Math.max(6,r.revenue/1e8/amtMax*80).toFixed(0)}%"></i></div>`;
     }).join('');
-    const yoyVals=REV_ROWS.map(r=>r.yoy).filter(v=>v!=null);
-    const yoyAbsMax=Math.max(...yoyVals.map(Math.abs),1)||1;
-    yoyEl.innerHTML='<div class="rc-zero"></div>'+REV_ROWS.map((r,i)=>{
-      if(r.yoy==null)return `<div class="rc-bar" data-i="${i}"></div>`;
-      const h=Math.min(50,Math.abs(r.yoy)/yoyAbsMax*50);
-      return `<div class="rc-bar" data-i="${i}"><i class="${r.yoy>=0?'up':'dn'}" style="height:${h.toFixed(0)}%"></i></div>`;
-    }).join('');
+    if(yoyEl){yoyEl.innerHTML='';yoyEl.hidden=true}  // 先.一〇五-4：年增率方塊拿掉，改柱子上方小字
     lblEl.innerHTML=REV_ROWS.map(r=>`<span>${String(r.revenue_year).slice(2)}/${String(r.revenue_month).padStart(2,'0')}</span>`).join('');  // 先.一〇四-8：月份帶年份
     const rl=REV_ROWS[REV_ROWS.length-1];
     setTxt('rev-months-note',REV_ROWS.length>=13?'近 13 個月':`近 ${REV_ROWS.length} 個月（目前只有這些月份的資料，補齊中）`);  // 先.一〇四-8
