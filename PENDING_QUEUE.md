@@ -20213,7 +20213,7 @@ un-market-catchup.ps1 註解同步改心跳路徑（repo 外）。〕
   〔⚠️ 12:20 更正（DevQueue 20261016-120101，做 15e 盤點時發現）：上面「①主流題材 chips：app-picks.js 第 88 行仍 fm(…)，未遷移屬實」是錯的——那支 fetchIndustryFlow() 只是退回路徑；loadMainstreamIndustries()（約第 124～141 行）先讀 repo data/industry_flow.json（先.八十一-10），已遷移。STATUS／generate_status_json.py／BACKLOG 同一行已更正。教訓：只 grep 到 fm( 不代表是主來源，要看呼叫它的函式。〕
 - [x] **先.一〇三-15c [自走補入，來源：BACKLOG.md B27（約第 1980～1991 行）台股現金流量表／FCF] 只做來源查證、不抓不算：依七節台股原生來源優先，先查 TWSE／TPEx openapi swagger 有無現金流量表端點，再查 MOPS 公開資訊（注意 robots.txt）、FinMind TaiwanStockCashFlowsStatement 文件，三來源紀錄寫進 docs/DATA_SOURCE_MAP.md；結論可抓→另立抓取條目（先查 C:\alpha\CLAUDE.md 頻率上限）；不可抓→照實寫。心跳：本條改 - [x]**（DevQueue 可執行）
   〔2026-10-16 12:08～12:12 DevQueue 20261016-120101：查證早已在 常備.開發-7（10/11）做過並寫在 docs/DATA_SOURCE_MAP.md「現金流量表／FCF」節（TWSE swagger／TPEx swagger／MOPS t164sb04 反爬／FinMind），且 data/cash_flow.json 已產出、App 已讀——BACKLOG B27 的「尚未開始」是過時文字。本輪只複查兩份 swagger（各 1 次請求，143／225 路徑，現金流關鍵字 0 命中，結論不變），MOPS 不再打；DATA_SOURCE_MAP 補複查紀錄、B27 劃掉「尚未開始」補現況（含「目前每季手動、不在 Actions 排程」與原規格第 2 點的差異）。[自行裁量] 不另立抓取條目：檔案已存在；是否改成排程屬架構變更，要提案，不在本條範圍。〕
-- [ ] **先.一〇三-15d [自走補入，來源：本檔先.一〇三-15b 核對] 美股個股頁走勢圖仍以 FinMind USStockPrice（台灣資料商）為主，與 alpha-app/CLAUDE.md 七節 2026-09-08 裁示「禁止用台灣資料商作為美股宇宙或價格的主來源」不符：寫提案（候選：改以 repo us 日線檔〔_ensureUsDailyRepo／us_screener.json，目前只有收盤〕或 quotes_us 為主、FinMind 降為補充；需比對 repo 檔是否有足夠天數與日期軸），附影響與風險，等總司令核准再改**（互動視窗：做法有多種、要提案）
+- [ ] **先.一〇三-15d [自走補入，來源：本檔先.一〇三-15b 核對] 美股個股頁走勢圖仍以 FinMind USStockPrice（台灣資料商）為主，與 alpha-app/CLAUDE.md 七節 2026-09-08 裁示「禁止用台灣資料商作為美股宇宙或價格的主來源」不符：寫提案（候選：改以 repo us 日線檔〔_ensureUsDailyRepo／us_screener.json，目前只有收盤〕或 quotes_us 為主、FinMind 降為補充；需比對 repo 檔是否有足夠天數與日期軸），附影響與風險，等總司令核准再改**〔⚠️ 2026-10-17 先.一〇七-2：升為補件順序第 ① 類、排在下一項；裁示見檔尾【先.一〇七】〕（互動視窗：做法有多種、要提案）
   〔12:22 補記（先.一〇三-15e 盤點）：同一個問題另有一處——app-picks.js 第 671 行選股報告（美股）走勢也直接 fm('USStockPrice')、沒有 repo 優先；提案請一起涵蓋兩處，見 docs/CLIENT_SIDE_API_INVENTORY.md 第 5、6 列。〕
 - [x] **先.一〇三-15e [自走補入，來源：BACKLOG.md「架構紅線（2026-08-28使用者裁示）」第 1 條（約第 2087 行）] App 端 client-side 直打外部 API 盤點：掃 index.html 與 app-*.js 所有 fm(…)／fetch 外部網域的呼叫，逐條列「哪個面板、哪個端點、有無 repo 檔優先、FinMind 是主來源還是補充」，寫進 docs/CLIENT_SIDE_API_INVENTORY.md；只盤點不改 App 行為。違反紅線第 1 條（FinMind 為主來源）的每一條，另立一條遷移提案條目（互動視窗）。心跳：本條改 - [x]**（DevQueue 可執行）
   〔2026-10-16 12:16～12:23 DevQueue 20261016-120101：寫 docs/CLIENT_SIDE_API_INVENTORY.md。全 repo FinMind 只有 fm() 一個入口、6 處呼叫：台股 4 處（期貨籌碼、主流題材、twPxRepoFirst、營收圖月底價）都是 repo 為主、FinMind 補；美股 2 處（app-stock.js 第 679 行個股走勢圖、app-picks.js 第 671 行選股報告走勢）仍以 FinMind USStockPrice 為主＝違反紅線第 1 條與七節。其他外部網域只有圖表程式庫 CDN、字型、MOPS 使用者自點連結。[自行裁量] 不另立新條目：兩處美股是同一個問題，併進 15d（已補記）。順帶發現 15b 把主流題材判錯，已更正（見 15b 條目 12:20 補記）。〕
@@ -20355,3 +20355,20 @@ un-market-catchup.ps1 註解同步改心跳路徑（repo 外）。〕
 - [x] **先.一〇三-13b-C1 查 3324 毛利率季度：標出季度，超過 2 季標「資料較舊」（已修就標「已修」）**（DevQueue 可執行）〔2026-10-16 17:41 互動視窗完成：未修→已修：個股頁財務分頁毛利率／營益率原本只顯示 22.5%（3324 實為 2024Q4），改成「22.5%（2024Q4，資料較舊）」；落後法定應公布最新季（Q1 5/15、Q2 8/14、Q3 11/14、Q4 隔年 3/31，同 build_research.py）超過 2 季才加「資料較舊」，例 2330 顯示「67.7%（2026Q2）」。研究分頁原本就依 q_stale 不顯示舊季毛利率〕
 - [x] **先.一〇三-13b-C2 查報告頁是否下載整份 events_search：改讀 events_by_code 小檔（已修就標「已修」）**（DevQueue 可執行）〔2026-10-16 17:41 互動視窗完成：未修→已修：報告頁事件原本走 ensureEvents() 下載整份 events_search.json（1.24MB、壓縮後約 246KB），改讀 data/events_by_code/<代號>.json（2330 約 2.6KB）；不在 _index 的代號只讀索引拿資料時間；小檔失敗（非 404）才退回整份。冒煙新增 #163（新分頁量請求：0 次整份檔）〕
 - [x] **常規.補件順序 寫進 PENDING_QUEUE 檔頭第 3b 條**（互動視窗執行）〔2026-10-16 16:55 互動視窗完成：檔頭補件規則新增第 3b 條 ①資料缺口／數字錯→②使用者看得到的畫面問題→③研究室回補→④BACKLOG 文書核對，④每輪最多 3 項〕
+
+# 2026-10-17【先.一〇七：收尾三件】（總司令裁示原文，動工前先寫入；10/17 00:01 互動視窗收到）
+
+> 先.一〇七 收尾三件（2026-10-16 23:00 Cowork 讀）
+> 1. 先.一〇一-5（互動視窗）：只讀查 AlphaData 10/16 15:30 這一次的執行結果
+>    （Get-ScheduledTaskInfo 的 LastRunTime／LastTaskResult、run.log 結尾、alpha.db 當天資料有沒有入庫）。
+>    → 結果碼 0 而且資料有入庫：結案。根因寫「互動模式下主控台被中斷；改成 Password 登入方式後不再發生」，打 - [x]。
+>    → 還是 0xC000013A：寫進 PROGRESS，維持 - [ ]，再觀察 10/17。
+> 2. 先.一〇三-15d 升為第 ① 類，排在 DevQueue 下一項：美股個股頁走勢圖的資料來源改成 IBKR → quotes_us → repo 日線，
+>    FinMind 只在前面都拿不到時才用，畫面上要標出這次用的是哪個來源。冒煙加一項：NVDA 走勢圖在 FinMind 被擋時仍然畫得出來。
+> 3. 雲端補救觸發第一次真正啟動時（watchdog_dispatch_market.py 真的送出 workflow_dispatch），
+>    在 PROGRESS 記下觸發時間和那一次 run 的結果。不用特地去等。
+> 心跳：每項做完在 PENDING_QUEUE 標 - [x]，並在 PROGRESS_HEARTBEAT 加一行（ts 用系統時間）。
+
+**收件註記**：第 1 項沿用上面既有條目「先.一〇一-5」（本段為最新裁示，結案條件以本段為準）；第 2 項沿用「先.一〇三-15d」並升為補件順序第 ① 類（資料缺口／數字錯），互動視窗接著先.一〇一-5 直接做（同檔 app-stock.js，DevQueue 不取）；第 3 項另開一條、時間閘（等第一次真實觸發，不特地等）。
+
+- [ ] **先.一〇七-3 雲端補救觸發第一次真正送出 workflow_dispatch 時，PROGRESS 記觸發時間與該次 run 結果**（任一執行者；時間閘，不特地等）
