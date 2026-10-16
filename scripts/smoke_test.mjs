@@ -4303,7 +4303,10 @@ async function runSmokeTest(baseUrl, headless = true) {
         const starts = fmReq.map(u => (u.match(/start_date=(\d{4}-\d\d-\d\d)/) || [])[1]).filter(Boolean);
         if (!blockFm) {
           if (need === 0 && starts.length) mcErrs.push("repo 已涵蓋 8 個月仍向 FinMind 要日線");
-          if (starts.some(s => !/-01$/.test(s) || (Date.now() - Date.parse(s)) > 400 * 86400000)) mcErrs.push(`FinMind 起日不是最早缺月的 1 日：${starts.join(",")}`);
+          // 2026-10-16（DevQueue 20261016-140101）：先.一〇四-8 圖改 13 個月後，最早缺月本來就可能在 400 天前
+          // （例：10/16 時 2025-09-01＝410 天），舊的固定 400 天上限只在「沒送出請求」時才會過。改依圖上月數推上限。
+          const maxDays = ((m ? +m[2] : 8) + 1) * 31;
+          if (starts.some(s => !/-01$/.test(s) || (Date.now() - Date.parse(s)) > maxDays * 86400000)) mcErrs.push(`FinMind 起日不是最早缺月的 1 日：${starts.join(",")}`);
         } else if (need > 0 && !/補充失敗/.test(t)) mcErrs.push(`FinMind 失敗時沒寫原因：${t}`);
       } finally { await ctx.close(); }
     }
