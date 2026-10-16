@@ -4873,14 +4873,29 @@ async function runSmokeTest(baseUrl, headless = true) {
     if (!/非投資建議/.test(r.ct)) mtErrs.push("沒有非投資建議");
     const bad = (r.bt + r.ct).match(/推薦|必漲|必賺|穩賺|買點|賣點|目標價|強烈買/g);
     if (bad) mtErrs.push(`出現推介字眼：${[...new Set(bad)].join("、")}`);
+    // 先.一〇八-3：每個有權重的因子都要能展開「怎麼算／用哪份資料／多久更新／已知限制」，點開後內容要看得到。
+    const fx = await page.evaluate(() => {
+      const b = document.getElementById("method-board-body"), ds = [...b.querySelectorAll("details.method-factor")];
+      const d0 = ds[0]; if (d0) d0.open = true;
+      const txt = d0 ? d0.innerText : "";
+      if (d0) d0.open = false;
+      const missing = ds.filter(d => !["怎麼算：", "用哪份資料：", "多久更新：", "已知限制："].every(t => d.textContent.includes(t))).map(d => d.dataset.factor);
+      return { n: ds.length, missing, txt, plain: [...b.querySelectorAll("b.num")].filter(x => /%$/.test(x.textContent)).length };
+    });
+    if (fx.n === 0) mtErrs.push("價值成長榜因子沒有可展開的說明（先.一〇八-3）");
+    else if (fx.n !== fx.plain) mtErrs.push(`價值成長榜有權重的因子 ${fx.plain} 個，可展開說明只有 ${fx.n} 個（先.一〇八-3）`);
+    if (fx.missing.length) mtErrs.push(`因子說明缺欄位：${fx.missing.join("、")}`);
+    if (fx.n && !/怎麼算：.+[\s\S]*已知限制：.+/.test(fx.txt)) mtErrs.push("點開第一個因子後看不到說明文字");
     await page.evaluate(() => document.querySelector('#method-board-toggle .mtg-opt[data-board="momentum"]').click());
     await page.waitForFunction(() => /題材動能榜/.test(document.getElementById("method-board-body").textContent) && /因子權重/.test(document.getElementById("method-board-body").textContent), null, { timeout: 15000 });
     const mo = await page.evaluate(() => document.getElementById("method-board-body").textContent);
     if (!/初始設計值/.test(mo)) mtErrs.push("題材動能榜應說明權重是初始設計值");
+    const moFx = await page.evaluate(() => { const b = document.getElementById("method-board-body"); return { n: b.querySelectorAll("details.method-factor").length, w: [...b.querySelectorAll("b.num")].filter(x => /%$/.test(x.textContent)).length }; });
+    if (!moFx.n || moFx.n !== moFx.w) mtErrs.push(`題材動能榜有權重的因子 ${moFx.w} 個，可展開說明 ${moFx.n} 個（先.一〇八-3）`);
     await page.evaluate(() => closeMethodSheet());
     const closed = await page.evaluate(() => !document.getElementById("method-sheet").classList.contains("open"));
     if (!closed) mtErrs.push("關閉後視窗仍開著");
-    mtInfo = `價值榜內容 ${r.bt.length} 字、權重核對：${/已核對/.test(r.bt) ? "一致" : "未核對"}；動能榜切換正常`;
+    mtInfo = `價值榜內容 ${r.bt.length} 字、因子說明可展開 ${fx.n}/${fx.plain}、動能榜 ${moFx.n}/${moFx.w}、權重核對：${/已核對/.test(r.bt) ? "一致" : "未核對"}；動能榜切換正常`;
   } catch (e) { mtErrs.push(`測試本身出錯：${e.message || e}`); }
   record("148. 方法論說明頁：選股卡「怎麼算的？」開啟、算法／權重／資料日期／存活者偏誤但書／研究成績單連結齊全、切榜正常、無推介字眼（先.九十四-5g）", mtErrs.length === 0, mtErrs.join("; ") || mtInfo);
 

@@ -2459,6 +2459,39 @@
   const US_SURVIVORSHIP_CAVEAT='存活者偏誤未完全修正：已下市股約 97%（抽樣 55／57）無價格來源。';
   const METHOD_INPUT_NAMES={'data/fundamentals.json':'本益比、殖利率、月營收','data/stock_detail.json':'財報、三大法人、融資融券',
     'data/price_history/':'每日收盤價','data/company_info.json':'公司名稱與產業別','data/quotes_all_tw.json':'今日收盤快照','data/market_tw.json':'大盤與類股'};
+  // 先.一〇八-3（2026-10-17）：每個因子可展開的白話說明（怎麼算／用哪份資料／多久更新／已知限制）。
+  // 文字對照實際產生榜單的程式：價值成長榜 research/generate_scores_live.py＋research/live_factors.py（scores_list.json 的 engine_version＝scoring-live-json），
+  // 題材動能榜 research/generate_scores_momentum.py，未來性濾網 research/generate_scores_future.py；只是說明，不影響評分。
+  // 資料名稱沿用 METHOD_INPUT_NAMES 的白話名稱，前台不顯示原始檔路徑。
+  const METHOD_FACTOR_NOTES={
+    earnings_growth:{how:'最新一季跟去年同一季比：EPS 年增、營收年增、毛利率變化、營益率變化，四項有幾項算幾項取平均（年增率上下限 ±200%）。',src:'財報（每季）',freq:'每天盤後重算；財報本身一季才公布一次',bias:'財報公布本來就晚一到兩個月；最新一季落後現在超過兩季就不給分。'},
+    revenue_momentum:{how:'最新一個月營收的官方年增率；去年同月營收太小（低於 3,000 萬元）視為無效，上下限 ±200%。',src:'月營收',freq:'每月公布一次',bias:'只看單一個月，雜訊大；沒有依公司規模分層。'},
+    growth_quality:{how:'近 12 個月逐月營收年增率的平均（至少要 6 個月）；沒有官方年增率時，改用同月份配對算近 12 個月合計比去年同期。',src:'月營收',freq:'每月',bias:'只看營收成長，不是真正的長期複合成長率，也沒看毛利率趨勢；部分股票歷史月份有缺。'},
+    chips:{how:'三大法人近幾個交易日（最多 5 天）買賣超張數加總。',src:'三大法人',freq:'每天盤後',bias:'用張數、沒有除以股本，大型股天生占優；只看得到最近 5 天。'},
+    technical:{how:'四項平均：5／20／60 日均線排列、收盤價在近 60 日高低區間的位置、RSI（14 日）、近 5 日比近 20 日的平均成交值。股價用還原權息價。',src:'每日收盤價',freq:'每天盤後',bias:'資料不滿 60 天時，60 日均線那一項會缺。'},
+    valuation_adj:{how:'本益比、股價淨值比、PEG（本益比 ÷ EPS 年增）三項，各自跟同產業比名次（同產業不足 8 檔就跟全市場比），越便宜分數越高，再平均。',src:'本益比與淨值比、財報',freq:'本益比每天；EPS 年增每季',bias:'虧損股與 EPS 衰退股算不出 PEG，只剩另外兩項。'},
+    analyst:{how:'台股沒有免費的分析師評等資料，這一項其實看的是法人行為：外資、投信各自連續買或賣的天數，加上近期買超方向，三項平均。',src:'三大法人',freq:'每天盤後',bias:'只看得到最近 5 天，連續天數能分出的差別很小。'},
+    catalyst:{how:'近 30 天的公司事件加分：重大訊息、法說會、月營收公布、除權息、新聞依類型給不同權重，越新越重（7 天減半）。',src:'公司事件與新聞',freq:'約每 30 分鐘',bias:'只要有消息就加分，不分利多利空；「沒有事件」和「沒有資料」分不出來。'},
+    relative_strength:{how:'個股漲幅減去加權指數漲幅，取近 20 日與近 60 日兩段的平均。股價用還原權息價。',src:'每日收盤價、大盤與類股',freq:'每天盤後',bias:'同一天個股沒有價格就不給分。'},
+    volume_breakout:{how:'今天的成交值 ÷ 前 20 個交易日的平均成交值。',src:'每日收盤價（含成交值）',freq:'每天盤後',bias:'名稱叫量能，實際算的是成交「值」不是成交「量」；日期有缺口就不給分。'},
+    new_high_breakout:{how:'今天的收盤 ÷ 前 60 個交易日最高收盤，再減 1；創新高但量價不配合時分數打三折。',src:'每日收盤價',freq:'每天盤後',bias:'至少要連續 61 天資料；沒創新高時是離前高的距離（負值）。'},
+    volume_price_coordination:{how:'照幾條規則加減分：上漲有量、回檔量縮加分；價漲量縮、高檔爆量不漲、下跌放量扣分。',src:'每日收盤價（含成交量）',freq:'每天盤後',bias:'加減分的門檻是經驗值，沒有做過統計驗證。'},
+    chip_concentration:{how:'三大法人逐日買超加總，再依「最近連續買超幾天」放大。',src:'三大法人',freq:'每天盤後',bias:'用張數、沒有除以股本；只看得到最近 5 天。'},
+    group_breadth:{how:'同產業今天上漲家數的比例；如果漲幅幾乎都集中在前兩檔，會打折。產業至少要 3 檔。',src:'今日收盤快照、公司名稱與產業別',freq:'每天盤後',bias:'只看一天；同產業的股票這一項分數都一樣。'},
+    sector_capital_flow:{how:'產業成交值占全市場的比例：近 5 日平均減去再往前 15 日的平均，看資金是不是往這個產業移動。',src:'每日收盤價（含成交值）、公司名稱與產業別',freq:'每天盤後',bias:'至少要 20 天資料；同產業的股票這一項分數都一樣。'},
+    institutional_buying_streak:{how:'三大法人最近連續買超的天數 ÷ 看得到的天數（0～1）。',src:'三大法人',freq:'每天盤後',bias:'只看得到最近 5 天，分數只有幾種值，很容易同分。'},
+    institutional_ownership_pct:{how:'三大法人近幾天買超張數 ÷ 公司股數。',src:'三大法人、財報（股本）',freq:'法人每天；股本隨財報更新',bias:'股數是用股本除以每股面額 10 元估出來的近似值。'},
+    institutional_buying_concentration:{how:'外資買超 ÷ 三大法人買超合計；合計是賣超時不給分。',src:'三大法人',freq:'每天盤後',bias:'所謂集中度只看外資占多少，是簡化的定義。'},
+    gross_margin_level_stability:{how:'近 8 季毛利率的平均，再依波動打折（越穩定折得越少），至少要 3 季。',src:'財報（每季）',freq:'每季',bias:'天生偏向高毛利產業；只是議價能力的粗略代表，沒有驗證過。'},
+    capacity_utilization_proxy:{how:'近 4 季營收合計 ÷ 最新一期非流動資產，粗略看資產被用得多滿。',src:'財報（每季）',freq:'每季',bias:'只看現在的水準不是趨勢；非流動資產也包含商譽與長期投資，不等於廠房設備。'},
+  };
+  function _mFactorRow(k,label,w){
+    const n=METHOD_FACTOR_NOTES[k];
+    const head=`<span>${_mEsc(label)}</span><b class="num">${Math.round(w*100)}%</b>`;
+    if(!n)return `<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--hairline);padding:3px 0">${head}</div>`;
+    return `<details class="method-factor" data-factor="${_mEsc(k)}" style="border-bottom:1px solid var(--hairline);padding:3px 0"><summary style="display:flex;justify-content:space-between;cursor:pointer;list-style:none">${head}</summary>`
+      +`<div style="font-size:12px;color:var(--ink-3);padding:4px 0 2px;line-height:1.6"><div>怎麼算：${_mEsc(n.how)}</div><div>用哪份資料：${_mEsc(n.src)}</div><div>多久更新：${_mEsc(n.freq)}</div><div>已知限制：${_mEsc(n.bias)}</div></div></details>`;
+  }
   const METHOD_META_CACHE={};
   let METHOD_STATUS_CACHE=null,METHOD_BOARD='value',METHOD_GEN=0;
   function _mEsc(t){return String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -2517,7 +2550,7 @@
     let wHtml='<div>讀不到權重檔，無法列出權重。</div>';
     if(wf&&wf.weights){
       const ws=Object.entries(wf.weights).filter(([,w])=>w>0).sort((a,b)=>b[1]-a[1]);
-      wHtml=ws.map(([k,w])=>`<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--hairline);padding:3px 0"><span>${_mEsc(labels[k]||k)}</span><b class="num">${Math.round(w*100)}%</b></div>`).join('');
+      wHtml='<div style="font-size:12px;color:var(--ink-3);margin-bottom:2px">點一下因子名稱，看它怎麼算、用哪份資料、多久更新、有什麼限制。</div>'+ws.map(([k,w])=>_mFactorRow(k,labels[k]||k,w)).join('');
       const hashOk=m.weights_hash&&wf.weights_sha256?m.weights_hash===wf.weights_sha256:null;
       wHtml+=`<div style="margin-top:4px">${wf.dev_period?`權重凍結於 ${_mEsc(wf.frozen_at)}，只用 ${_mEsc(wf.dev_period.val_end)} 以前的研究期決定，之後不再依結果調整。`:`這組權重是初始設計值（${_mEsc(wf.frozen_at)} 定下），<b>不是</b>回測找出來的最佳值。`}`
         +(hashOk===true?' 已核對：今天榜單用的就是這組權重。':hashOk===false?' <span style="color:var(--caution)">⚠ 今天榜單記錄的權重版本與此檔不一致，以榜單為準。</span>':'')+'</div>';
@@ -4753,7 +4786,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-17.0230';
+  const APP_VERSION='2026-10-17.0329';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
