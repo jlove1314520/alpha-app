@@ -23,8 +23,10 @@ mopsov（robots.txt 全站 Disallow，不抓），官方 openapi 只給「每日
    不能只看狀態碼）。
 2. 欄位統一成同一組英文鍵（只改名、不改值，原始字串照存），加 `market`
    （TWSE／TPEx）與 `report_date`（民國轉西元 YYYYMMDD）。
-3. 併入 `data/insider_transfer_tw_history.json`：以「整筆內容」的雜湊去重，
+3. 併入 `data/insider_transfer_tw_history.json`：以「申報內容（不含姓名雜湊）」的雜湊去重，
    同一份申報隔天又出現在快照裡不會重複記。舊紀錄一律保留，不設上限。
+   （2026-10-16 先.一〇六-1：編號不再含 name_hash／transferee_hash，雜湊算法換了也不會把同一筆當新的；
+   見 `ID_FIELDS`。）
 4. 兩邊都失敗或都沒資料 → 不覆蓋既有檔、照實印原因；失敗原因寫進
    `meta.last_run.errors`（有既有檔時才寫）。
 
@@ -41,6 +43,10 @@ mopsov（robots.txt 全站 Disallow，不抓），官方 openapi 只給「每日
   `INSIDER_HASH_KEY`（由總司令本人建立，CC 不經手），沒有金鑰就無法拿候選姓名比對。
   **沒設金鑰時不寫姓名雜湊（存 null）**，不退回舊的固定前綴算法；`meta.hash_scheme` 標明用的是哪一種。
   10/16 以前的舊紀錄仍是 v1 固定前綴雜湊（無原文可重算），新舊雜湊不互通。
+- 2026-10-16 先.一〇六：每筆加 `hash_scheme`。依 git log 查證，10/16 05:43 班（run 38826167660，
+  commit a99e9f96ee）以前寫入的 70 筆是 v1 → 姓名雜湊清成 null、標 `v1-cleared`（舊算法可被比對）；
+  該班起寫入的標 `hmac-sha256-v2`。git 歷史不改寫（舊版本仍看得到 v1 雜湊）。
+  一次性清理腳本：`scripts/migrate_insider_hash_v1_clear.py`。
 
 用法：
     python .github/scripts/fetch_insider_transfer_tw.py           # 正式抓取
@@ -248,6 +254,7 @@ def normalize_rows(rows, market: str) -> tuple[list[dict], list[str]]:
         # 先.九十五-3：姓名、受讓人改雜湊，原文不落地
         for plain, hk in (("name", "name_hash"), ("transferee", "transferee_hash")):
             rec[hk] = person_hash(rec.pop(plain, None))
+        rec["hash_scheme"] = hash_scheme()  # 先.一〇六-2：每筆記下自己的雜湊方式
         rec["report_date"] = roc_to_compact(rec.get("report_date_roc") or "")
         if not rec.get("code"):
             warns.append(f"{market} 第{i}列沒有公司代號，略過")
@@ -259,6 +266,7 @@ def normalize_rows(rows, market: str) -> tuple[list[dict], list[str]]:
 
 HASH_PREFIX = "alpha-insider-transfer-v1|"  # 舊版（v1）前綴，只留供辨識舊紀錄，不再用來算新雜湊
 HASH_KEY_ENV = "INSIDER_HASH_KEY"
+V1_CLEARED_NOTE = "10/16 以前的姓名雜湊已清空（舊算法可被比對）；git 歷史不改寫。"  # 先.一〇六-3
 
 
 def hash_scheme() -> str:
@@ -276,16 +284,32 @@ def person_hash(v) -> str | None:
     return hmac.new(key.encode("utf-8"), str(v).strip().encode("utf-8"), hashlib.sha256).hexdigest()[:16]
 
 
+# 先.一〇六-1：編號只用申報內容，不含 name_hash／transferee_hash（也不含 hash_scheme、company、民國日期原字串）。
+# 雜湊算法一變，同一筆申報的編號仍相同，不會被當成新的一筆重複存。
+ID_FIELDS = (
+    "market", "report_date", "code", "role", "transfer_method",
+    "transfer_shares_on_market", "max_daily_intraday_shares",
+    "held_own", "held_trust", "planned_own", "planned_trust", "after_own", "after_trust",
+    "valid_period",
+)
+
+
 def record_id(rec: dict) -> str:
-    """整筆內容（不含 id 本身）的雜湊，用來去重。"""
-    body = {k: rec.get(k) for k in sorted(rec) if k != "id"}
+    """申報內容（ID_FIELDS，不含姓名雜湊）的雜湊，用來去重。"""
+    body = {k: rec.get(k) for k in ID_FIELDS}
     return hashlib.sha1(json.dumps(body, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()[:16]
 
 
 def merge(prior: dict | None, new_records: list[dict]) -> tuple[list[dict], int]:
-    """併入既有紀錄；回傳（全部紀錄, 新增筆數）。既有紀錄一律保留。"""
-    records = list((prior or {}).get("records") or [])
-    seen = {r.get("id") for r in records}
+    """併入既有紀錄；回傳（全部紀錄, 新增筆數）。既有紀錄一律保留（先到的那筆為準）。"""
+    records = []
+    seen: set[str] = set()
+    for r in (prior or {}).get("records") or []:
+        r = dict(r, id=record_id(r))  # 舊檔若還是舊編號規則，一律用新規則重算
+        if r["id"] in seen:
+            continue
+        records.append(r)
+        seen.add(r["id"])
     added = 0
     for r in new_records:
         if r["id"] in seen:
@@ -308,7 +332,7 @@ def build_doc(records: list[dict], last_run: dict) -> dict:
             "source": "TWSE openapi t187ap12_L ＋ TPEx openapi mopsfin_t187ap12_O（每日內部人持股轉讓事前申報，官方免金鑰）",
             "urls": {"TWSE": TWSE_URL, "TPEX": TPEX_URL},
             "note": ("只往前累積、不回補歷史（歷史在 mopsov，robots 禁止）；這是事前申報，不是實際成交；"
-                     "排程沒跑的那天會永久缺一天，見 report_dates。欄位只改名不改值。"),
+                     "排程沒跑的那天會永久缺一天，見 report_dates。欄位只改名不改值。" + V1_CLEARED_NOTE),
             "record_count": len(records),
             # 先.一〇三-19：本次新寫入紀錄的姓名雜湊方式；10/16 以前的舊紀錄是 v1 固定前綴 SHA-256，新舊不互通
             "hash_scheme": hash_scheme(),

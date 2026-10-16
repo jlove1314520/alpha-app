@@ -1,3 +1,14 @@
+## 2026-10-16 17:17（互動視窗）先.一〇六 內部人舊雜湊清空（1～4 全部 - [x]）
+
+等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證）。
+
+- 1 修 bug：`.github/scripts/fetch_insider_transfer_tw.py` 的 record_id() 改用 `ID_FIELDS`（market、report_date、code、role、transfer_method、8 個張數欄、valid_period），不含姓名雜湊；merge() 讀舊檔時一律用新規則重算 id。**改動前 74 筆 → 改動後 74 筆，重複 0**。
+- 2 hash_scheme 依 git log 查證（不是用猜的）：資料檔第一次出現在 a499c57e58（10/14，23 筆）、5ddb2467d7（10/15，47 筆）→ 都早於 HMAC 程式 5dd30bb118 → v1；a99e9f96ee（10/16 05:43 班，run 38826167660，07:52 才開跑，程式已含 HMAC）首次出現 4 筆 → hmac-sha256-v2。
+- 3 `scripts/migrate_insider_hash_v1_clear.py`（可重跑）：v1 70 筆雜湊→null、hash_scheme＝v1-cleared；其他欄位與 meta 逐欄比對不變；meta.note 加「10/16 以前的姓名雜湊已清空（舊算法可被比對）；git 歷史不改寫。」（程式固定寫入，下次排程不會蓋掉）。**v2 紀錄 4 筆**。
+- 4 selftest 新增換雜湊 id 不變／v1-cleared 雜湊為 null／重併筆數不變（另加 hash_scheme、meta.note 兩項），全部通過；冒煙 162/162 通過。
+- 不改寫 git 歷史（舊版本仍看得到 v1 雜湊），未碰 HMAC 金鑰、未讀 INSIDER_HASH_KEY。
+- ⚠️ [自行裁量] 已知限制：同一天、同公司、同身分、張數與期間完全相同的兩位申報人，在新編號下會被當成同一筆（姓名不再參與編號）；目前 74 筆無此情形。
+
 ## 2026-10-16 16:4x（DevQueue 20261016-160101）研究室.三 +125 檔＋先.一〇三-15aa／15ab／15af 只讀核對＋15ad 修 17 支卡死心跳行程＋15ag／15ah 防再犯
 
 等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未新增）

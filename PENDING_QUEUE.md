@@ -20314,10 +20314,10 @@ un-market-catchup.ps1 註解同步改心跳路徑（repo 外）。〕
 
 **分工**：先.一〇五 已完成，互動視窗接著直接做（DevQueue 不取，避免同檔衝突）。
 
-- [ ] **先.一〇六-1 record_id() 改用不含雜湊的欄位、全部重算 id、檢查重複（筆數不變）**（互動視窗執行；修 bug）
-- [ ] **先.一〇六-2 每筆加 hash_scheme（依各筆第一次出現的 commit，以 git log 查證 05:43 班前後）**（互動視窗執行）
-- [ ] **先.一〇六-3 v1 紀錄 name_hash／transferee_hash 清成 null、hash_scheme＝"v1-cleared"、meta.note 加註**（互動視窗執行；資料清理）
-- [ ] **先.一〇六-4 selftest 加三項（換雜湊 id 不變、v1-cleared 雜湊為 null、筆數不變）**（互動視窗執行）
+- [x] **先.一〇六-1 record_id() 改用不含雜湊的欄位、全部重算 id、檢查重複（筆數不變）**（互動視窗執行；修 bug）〔2026-10-16 17:17 互動視窗完成：record_id() 改用 ID_FIELDS（market、report_date、code、role、transfer_method、8 個張數欄、valid_period），不含 name_hash／transferee_hash；merge() 讀舊檔時一律用新規則重算 id。全部重算：改動前 74 筆、改動後 74 筆、新規則下重複 0 筆〕
+- [x] **先.一〇六-2 每筆加 hash_scheme（依各筆第一次出現的 commit，以 git log 查證 05:43 班前後）**（互動視窗執行）〔2026-10-16 17:17 互動視窗完成：依 git log 查證：資料檔歷次 commit a499c57e58（10/14 19:04，23 筆）、5ddb2467d7（10/15 08:12，47 筆）都早於 HMAC 程式 5dd30bb118（10/16 00:17）→ v1；a99e9f96ee（10/16 05:43 班，run 38826167660 schedule、07:52 才開跑，程式含 HMAC）首次出現 4 筆 → hmac-sha256-v2。新抓的紀錄每筆自帶 hash_scheme〕
+- [x] **先.一〇六-3 v1 紀錄 name_hash／transferee_hash 清成 null、hash_scheme＝"v1-cleared"、meta.note 加註**（互動視窗執行；資料清理）〔2026-10-16 17:17 互動視窗完成：scripts/migrate_insider_hash_v1_clear.py：v1 70 筆 name_hash／transferee_hash→null、hash_scheme＝v1-cleared；其他欄位與 meta 逐欄比對完全不變；meta.note 加註（程式也固定寫入，下次排程不會蓋掉）；可重跑（冪等）。git 歷史未改寫、未碰金鑰、未讀 INSIDER_HASH_KEY〕
+- [x] **先.一〇六-4 selftest 加三項（換雜湊 id 不變、v1-cleared 雜湊為 null、筆數不變）**（互動視窗執行）〔2026-10-16 17:17 互動視窗完成：selftest 新增：同一筆申報換雜湊後 id 不變、v1-cleared 雜湊為 null（新快照同一筆不覆蓋不另記）、換雜湊重併筆數不變；另加 hash_scheme 與 meta.note 兩項，全部通過。冒煙 162/162 通過〕
 
 # 2026-10-16【先.一〇六 重述＋先.一〇三-13b 解除阻塞＋常規.補件順序】（總司令裁示原文，動工前先寫入；16:55 互動視窗收到）
 

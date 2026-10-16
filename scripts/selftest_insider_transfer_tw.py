@@ -101,9 +101,24 @@ check(added3 == 1 and len(records3) == 3, "內容不同的申報另記一筆")
 records4, added4 = fit.merge({"records": records3}, [])
 check(added4 == 0 and len(records4) == 3, "這次沒資料時既有紀錄全部保留")
 
+# 先.一〇六-4：編號不含姓名雜湊；v1-cleared 雜湊為 null；換雜湊重併筆數不變
+_k = fit.record_id(tw[0])
+os.environ["INSIDER_HASH_KEY"] = "another-selftest-key"
+tw_rehash = fit.normalize_rows([TWSE_ROW], "TWSE")[0]
+os.environ["INSIDER_HASH_KEY"] = "selftest-only-not-a-real-key"
+check(tw_rehash[0]["name_hash"] != tw[0]["name_hash"] and tw_rehash[0]["id"] == _k, "同一筆申報換雜湊後 id 不變")
+cleared = dict(tw[0], name_hash=None, transferee_hash=None, hash_scheme="v1-cleared")
+recs_c, _ = fit.merge({"records": [cleared] + tp}, tw_rehash + tp)
+_c = [r for r in recs_c if r["code"] == "9999"]
+check(len(_c) == 1 and _c[0]["hash_scheme"] == "v1-cleared" and _c[0]["name_hash"] is None and _c[0]["transferee_hash"] is None,
+      "v1-cleared 的雜湊是 null（新快照同一筆不覆蓋、不另記）")
+check(len(recs_c) == 2, "換雜湊後重併筆數不變")
+check(tw[0]["hash_scheme"] == "hmac-sha256-v2", "新紀錄帶 hash_scheme")
+
 doc = fit.build_doc(records3, {"added": 1})
 check(doc["meta"]["report_dates"] == {"TWSE": ["20261013"], "TPEX": ["20261013"]}, "meta 日期清單正確")
 check(doc["meta"]["record_count"] == 3, "meta 筆數正確")
+check(fit.V1_CLEARED_NOTE in doc["meta"]["note"], "meta.note 含 v1 雜湊已清空說明")
 
 print(f"\n{'全部通過' if not fails else f'失敗 {len(fails)} 項'}")
 sys.exit(1 if fails else 0)
