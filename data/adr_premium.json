@@ -1,62 +1,62 @@
 {
-  "computed_at": "2026-10-16T17:23:24+00:00",
+  "computed_at": "2026-10-16T19:59:51+00:00",
   "source": "quotes_us.json × fx.json ÷ ADR比率，對 quotes_all_tw.json（台股盤後收盤）計算溢價（比率來源見各檔ADR_RATIOS/rows.source，三來源查證紀錄見本檔檔頭docstring）",
   "rows": {
     "TSM": {
       "tw_code": "2330",
       "ratio": 5,
       "source": "SEC EDGAR 20-F CIK 1046179；1 ADS＝5股普通股（1997年掛牌以來未變）",
-      "us_price": 412.81,
-      "us_quote_time": 1792171379,
+      "us_price": 413.1,
+      "us_quote_time": 1792180767,
       "tw_price": 2420.0,
       "tw_quote_date": "2026-10-16",
       "tw_price_kind": "台股盤後收盤（quotes_all_tw.json）",
       "fx_rate": 32.338,
       "fx_date": "2026-10-16",
-      "implied_tw_price": 2669.89,
-      "premium_pct": 10.326
+      "implied_tw_price": 2671.766,
+      "premium_pct": 10.404
     },
     "UMC": {
       "tw_code": "2303",
       "ratio": 5,
       "source": "UMC官方FAQ（umc.com/en/Html/faqs）+ SEC EDGAR 20-F CIK 1033767；1 ADS＝5股普通股",
-      "us_price": 20,
-      "us_quote_time": 1792171379,
+      "us_price": 19.81,
+      "us_quote_time": 1792180767,
       "tw_price": 133.0,
       "tw_quote_date": "2026-10-16",
       "tw_price_kind": "台股盤後收盤（quotes_all_tw.json）",
       "fx_rate": 32.338,
       "fx_date": "2026-10-16",
-      "implied_tw_price": 129.352,
-      "premium_pct": -2.743
+      "implied_tw_price": 128.123,
+      "premium_pct": -3.667
     },
     "ASX": {
       "tw_code": "3711",
       "ratio": 2,
       "source": "Nasdaq官方上市名稱 + SEC EDGAR CIK 1122411；1 ADS＝2股普通股",
-      "us_price": 39.89,
-      "us_quote_time": 1792171378,
+      "us_price": 39.53,
+      "us_quote_time": 1792180766,
       "tw_price": 671.0,
       "tw_quote_date": "2026-10-16",
       "tw_price_kind": "台股盤後收盤（quotes_all_tw.json）",
       "fx_rate": 32.338,
       "fx_date": "2026-10-16",
-      "implied_tw_price": 644.981,
-      "premium_pct": -3.878
+      "implied_tw_price": 639.161,
+      "premium_pct": -4.745
     },
     "CHT": {
       "tw_code": "2412",
       "ratio": 10,
       "source": "SEC EDGAR 20-F CIK 1132924；1 ADS＝10股普通股",
-      "us_price": 47.56,
-      "us_quote_time": 1792171234,
+      "us_price": 47.64,
+      "us_quote_time": 1792180765,
       "tw_price": 153.0,
       "tw_quote_date": "2026-10-16",
       "tw_price_kind": "台股盤後收盤（quotes_all_tw.json）",
       "fx_rate": 32.338,
       "fx_date": "2026-10-16",
-      "implied_tw_price": 153.8,
-      "premium_pct": 0.523
+      "implied_tw_price": 154.058,
+      "premium_pct": 0.692
     }
   },
   "errors": []
