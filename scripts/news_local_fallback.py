@@ -96,6 +96,38 @@ def shrink_check() -> str | None:
     return None
 
 
+SPLIT_STEP = ["scripts/split_events_by_code.py"]
+
+
+def _split_fetched_at() -> dict:
+    """events.json 與拆檔三檔（events_search／events_by_code/_index／ir_events）的 fetched_at；讀不到的記 None。"""
+    def fa(path, top=False):
+        try:
+            d = json.loads((ROOT / path).read_text(encoding="utf-8"))
+            return (d.get("top") or {}).get("fetched_at") if top else d.get("fetched_at")
+        except Exception:  # noqa: BLE001
+            return None
+    return {"events": fa("data/events.json"), "search": fa("data/events_search.json", top=True),
+            "index": fa("data/events_by_code/_index.json"), "ir": fa("data/ir_events.json")}
+
+
+def ensure_split_same_batch(env, run=None) -> str:
+    """先.一〇三-14x（2026-10-16）：別的排程 pull --autostash 期間，工作目錄裡本輪剛寫的 events.json 會暫時被收回 HEAD 版，
+    這時跑的拆檔會拆出舊班（10:35 實例：events.json 10:35 版提交了，_index 還是 08:49 版 → 冒煙 #142 三檔不同班）。
+    提交前比對 fetched_at，不同班就重跑一次拆檔。自身任何失敗只記警告、照常往下提交（十二節，fail open）。"""
+    try:
+        fa = _split_fetched_at()
+        if fa["events"] and fa["search"] == fa["index"] == fa["ir"] == fa["events"]:
+            return ""
+        run = run or (lambda: subprocess.run([sys.executable, *SPLIT_STEP], cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", env=env, timeout=600))
+        r = run()
+        fb = _split_fetched_at()
+        same = bool(fb["events"]) and fb["search"] == fb["index"] == fb["ir"] == fb["events"]
+        return f"拆檔與 events.json 不同班（{fa}）→ 重跑拆檔 exit={getattr(r, 'returncode', '?')}，{'已同班' if same else '仍不同班：' + str(fb)}"
+    except Exception as e:  # noqa: BLE001
+        return f"[warn] 同班檢查失敗（{type(e).__name__}: {e}），照常提交"
+
+
 def main() -> int:
     why = preflight_ok()
     if why:
@@ -127,6 +159,9 @@ def main() -> int:
         G._g("checkout", "-q", "HEAD", "--", *[p for p in OUTPUTS if G._g("ls-files", "--error-unmatch", p).returncode == 0])
         log(f"  雲端已在 {age2:.0f} 分鐘前更新，本機這輪作廢（產出檔還原）")
         return 0
+    same = ensure_split_same_batch(env)
+    if same:
+        log("  " + same)
     res = G.commit_paths(OUTPUTS, f"新聞與事件：本機補班更新（雲端排程 {'未知' if age is None else f'{age:.0f} 分鐘'}未觸發，先.八十-11）",
                          drop_on_conflict=True)
     log("  提交：" + res)
