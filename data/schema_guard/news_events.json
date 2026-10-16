@@ -1,7 +1,12 @@
 {
- "generated_at": "2026-10-16T10:06:15+08:00",
+ "generated_at": "2026-10-16T10:36:00+08:00",
  "label": "news_events",
- "checked": [],
+ "checked": [
+  "data/audit_report.json",
+  "data/events.json",
+  "data/news.json",
+  "data/quotes_ibkr.json"
+ ],
  "rejected": [],
  "guard_error": null,
  "note": "常備.開發-28：排程 commit 前驗證 App 會讀的 JSON；不過者還原上一版、不發布。generated_at 是「結果最後一次改變」的時間，不是每次執行時間。"
