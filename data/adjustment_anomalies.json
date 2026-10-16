@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-16T07:57:54.240957+08:00",
+ "generated_at": "2026-10-16T17:42:42.382208+08:00",
  "note": "research/adjust.py::adjusted_price_series()偵測到的單日|報酬|>11%還原價異常（新上市5日內除外），修.六第三點新增。只降級為警告，不影響任何回測/排程執行；由 market.yml 每次排程執行generate_status_json.py 時更新（先.六十-C9 起），非即時。",
  "n_warnings": 1953,
  "warnings": [
