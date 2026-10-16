@@ -18,6 +18,7 @@
 """
 from __future__ import annotations
 
+import ledger_verdict as _LV  # 先.一〇三-15：判定欄共用解析（同目錄 research/）
 import json
 import math
 import re
@@ -142,8 +143,14 @@ def parse() -> list[dict]:
         # 從右往左掃到備註欄就先比對到FAIL、根本沒掃到再往左一欄真正的
         # 判定欄，被誤判成FAIL。往後任何VIOLATES_SURVIVAL（天條一）等
         # 列都有同樣風險，一併修好，不只修IRREPRODUCIBLE這一個。
+        # 2026-10-16 先.一〇三-15：判定欄改用 research/ledger_verdict.py（以判定字「開頭」的欄，不是「含」判定字的欄）；
+        # 原本從右往左找「含」關鍵字的欄，備註散文提到別筆的 PASS／FAIL 就會誤判（10/16 逐列比對 96／448 列判錯，例 #445／#426／#29）。
+        # 找不到乾淨判定欄的舊列（判定寫成散文，例 #31）才退回下面原本的規則。
         verdict = "OTHER"
-        for cell in reversed(c[2:]):
+        _sv = _LV.strict_verdict(c[1:-1] if c and c[-1] == "" else c[1:])
+        if _sv is not None:
+            verdict = _sv
+        for cell in (reversed(c[2:]) if _sv is None else ()):
             # FRAMEWORK_CHECK_FAILED必須排在FRAMEWORK_CHECK前面檢查——後者是
             # 前者的字串子集，順序顛倒會把FRAMEWORK_CHECK_FAILED誤判成FRAMEWORK_CHECK。
             if "FRAMEWORK_CHECK_FAILED" in cell:
@@ -176,8 +183,10 @@ def parse() -> list[dict]:
         name = next((x for x in c[3:7]
                      if len(x) > 6 and not TRACK_RE.match(x)
                      and x.strip().lower() != "hypothesis_queue"), c[-2][:70])
+        # 先.一〇三-15：這一列引用的事前登記編號（「事前登記 #445」），用來把「事前登記＋結果」算成 1 筆
+        prereg_ref = sorted({int(m.group(1)) for m in re.finditer(r"事前登記\s*(?:列\s*)?#(\d+)", blob)} - {int(c[1])})
         rows.append({
-            "id": int(c[1]), "date": date, "track": track,
+            "id": int(c[1]), "date": date, "track": track, "prereg_ref": prereg_ref,
             "name": name[:70], "factor": _pick_factor(blob, name[:40]),
             "verdict": verdict, "verdict_raw": blob[-90:],
             "percentile": float(pm.group(1)) if pm else None,
@@ -185,6 +194,22 @@ def parse() -> list[dict]:
             "claims_correction": bool(re.search(r"校正|Bonferroni|FDR", blob)),
         })
     return rows
+
+
+def merged_prereg_pairs(rows: list[dict]) -> dict[int, int]:
+    """回傳 {事前登記列編號: 引用它的第一個結果列編號}（先.一〇三-15）。只合併「被編號更大的列引用」且本身是事前登記的列。"""
+    byid = {}
+    for r in rows:
+        byid.setdefault(r["id"], r)
+    out: dict[int, int] = {}
+    for r in sorted(rows, key=lambda x: x["id"]):
+        for pid in r.get("prereg_ref") or []:
+            p = byid.get(pid)
+            if p is None or pid >= r["id"] or pid in out:
+                continue
+            if p["verdict"] == "未結案" or re.search(r"prereg", p["name"], re.I):
+                out[pid] = r["id"]
+    return out
 
 
 def factor_concept(name: str) -> str:
@@ -217,6 +242,11 @@ def main() -> int:
     # alpha的資格」）。
     framework_check_rows = [r for r in rows if r["verdict"] in ("FRAMEWORK_CHECK", "FRAMEWORK_CHECK_FAILED")]
     rows = [r for r in rows if r["verdict"] not in ("FRAMEWORK_CHECK", "FRAMEWORK_CHECK_FAILED")]
+    # 2026-10-16 總司令裁示先.一〇三-15：「事前登記與結果算 1 筆」。事前登記列（判定未結案、或名稱含 prereg）
+    # 被後面的結果列以「事前登記 #編號」引用時，兩列是同一次試驗——只留結果列計入 N，事前登記列列出但不計入。
+    # 還沒有結果列的事前登記照舊計 1 筆（名額已佔用）。
+    merged_prereg = merged_prereg_pairs(rows)
+    rows = [r for r in rows if r["id"] not in merged_prereg]
 
     # ── N 口徑：全體與分軌 ────────────────────────────────────────────────
     n_all = len(rows)

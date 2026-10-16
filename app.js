@@ -2313,7 +2313,7 @@
       const cnt=k=>other.filter(r=>r.kind===k).length;
       const sumTxt=['除權息','法說','美股財報'].map(k=>cnt(k)?`${k} ${cnt(k)}`:'').filter(Boolean).join('、');
       el.innerHTML=(mineRows.length?mineRows.map(row).join(''):'<div class="note" style="margin:0 0 4px">自選股近期沒有事件</div>')
-        +(other.length?`<details style="margin-top:6px"><summary class="note" style="cursor:pointer;margin:0">全市場：${sumTxt}（點開看）</summary>${other.slice(0,40).map(row).join('')}${other.length>40?`<div class="note">另有 ${other.length-40} 筆未列出</div>`:''}</details>`:'')
+        +(other.length?`<details style="margin-top:6px"><summary class="note" style="cursor:pointer;margin:0">全市場：${sumTxt}（點開看）</summary>${['除權息','法說','美股財報'].map(k=>{const xs=other.filter(r=>r.kind===k);return xs.slice(0,15).map(row).join('')+(xs.length>15?`<div class="note">${k}另有 ${xs.length-15} 筆未列出</div>`:'')}).join('')}</details>`:'')
         +'<div class="note" style="margin-top:6px">除權息與法說為未來 7 天、重訊為自選股近 2 天、美股財報為 21 天內（追蹤清單）</div>';
     }catch(e){
       console.warn('[loadTodayEvents]',e);recordGlobalError('loadTodayEvents',e);
@@ -4716,7 +4716,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-16.0826';
+  const APP_VERSION='2026-10-16.0839';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

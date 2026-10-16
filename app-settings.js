@@ -229,7 +229,7 @@
     const q=((document.getElementById('trials-filter')||{}).value||'').trim().toLowerCase();
     const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
     const rows=_trialsData.rows.filter(r=>!q||(r.name+r.verdict+r.track+r.date).toLowerCase().includes(q)).slice(0,150);
-    box.innerHTML=rows.length?rows.map(r=>'<div style="border-bottom:1px solid rgba(var(--fg-rgb),.06);padding:4px 0"><b>#'+r.id+'</b>'+(r.dup_id?'<span style="color:var(--ink-3)">（帳本共用編號）</span>':'')+' '+esc(r.date)+' · '+esc(r.track)+'<br>'+esc(r.name)+' <span style="color:var(--ink-3)">→ '+esc(r.verdict)+'</span></div>').join(''):'<div class="note">沒有符合的紀錄</div>';
+    box.innerHTML=rows.length?rows.map(r=>'<div style="border-bottom:1px solid rgba(var(--fg-rgb),.06);padding:4px 0"><b>#'+esc(r.uid||r.id)+'</b>'+(r.dup_id?'<span style="color:var(--ink-3)">（帳本共用編號）</span>':'')+(r.merged_into?'<span style="color:var(--ink-3)">（事前登記，與 #'+esc(r.merged_into)+' 算 1 筆）</span>':'')+' '+esc(r.date)+' · '+esc(r.track)+'<br>'+esc(r.name)+' <span style="color:var(--ink-3)">→ '+esc(r.verdict)+'</span></div>').join(''):'<div class="note">沒有符合的紀錄</div>';
   }
   window.renderTrials=renderTrials;
 

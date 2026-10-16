@@ -38,6 +38,7 @@ import hashlib
 import json
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 from dataclasses import dataclass
@@ -184,6 +185,50 @@ def _clean(field: str, label: str) -> str:
     return " ".join(field.split()).replace("|", "\\|")
 
 
+def _repo_rel(path: str) -> str | None:
+    """絕對或相對路徑 → repo 內相對路徑（正斜線）；不在 repo 內回 None。"""
+    try:
+        p = Path(path).resolve()
+        return p.relative_to(ROOT.resolve()).as_posix()
+    except (ValueError, OSError):
+        return None
+
+
+def _bind_code_commit(code_paths: list[str] | None, strict: bool = True) -> dict:
+    """先.一〇三-15：找出這筆試驗程式的最後一次 commit，並確認沒有未 commit 的改動。
+
+    回傳 {"paths": {相對路徑: 短 SHA}}。strict=True 時：程式未 commit（新檔或有改動）一律 raise ValueError，
+    不寫任何檔（與其他登記驗證一致）；找不到呼叫端腳本又沒給 code_paths 也 raise。
+    """
+    paths = list(code_paths or [])
+    if not paths:
+        import inspect
+        here = Path(__file__).resolve()
+        for fr in inspect.stack()[1:]:  # 第一個不是本檔的 .py 就是呼叫端
+            f = Path(fr.filename)
+            if f.suffix == ".py" and f.exists() and f.resolve() != here:
+                paths = [str(f)]
+                break
+    rels = [r for r in (_repo_rel(p) for p in paths) if r]
+    if not rels:
+        if strict:
+            raise ValueError("登記被拒：找不到這筆試驗的程式（請給 code_paths），登記必須綁程式 commit（先.一〇三-15）")
+        return {"paths": {}}
+
+    def git(*a):
+        return subprocess.run(["git", *a], cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace")
+
+    out = {}
+    for rel in rels:
+        dirty = git("status", "--porcelain", "--", rel).stdout.strip()
+        sha = git("log", "-1", "--format=%h", "--", rel).stdout.strip()
+        if strict and (dirty or not sha):
+            why = "尚未加入 git" if not sha else "有未 commit 的改動"
+            raise ValueError(f"登記被拒：程式 `{rel}` {why}；先 commit 程式再登記，帳本才記得到跑出結果的版本（先.一〇三-15）")
+        out[rel] = sha or "未 commit"
+    return {"paths": out}
+
+
 def register_trial(
     *,
     track: str,
@@ -203,6 +248,7 @@ def register_trial(
     periods_per_year: int | None = None,
     failed_gates: list[str] | None = None,
     reverification: bool = False,
+    code_paths: list[str] | None = None,
     dry_run: bool = False,
 ) -> tuple[int, str]:
     """登記一筆試驗。回傳 (編號, 寫進帳本的那一列)。
@@ -304,9 +350,14 @@ def register_trial(
     if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", stamp):
         raise ValueError(f"登記被拒：日期格式錯誤 `{stamp}`")
 
+    # 先.一〇三-15（2026-10-16 總司令裁示）：登記一律綁程式 commit（照 #445「程式 …（27c52c2d4）」）。
+    # code_paths＝這筆試驗用到的程式；沒給就用呼叫 register_trial() 的那支腳本。程式有未 commit 的改動就拒絕登記
+    # ——帳本記的 commit 必須就是跑出這個結果的程式版本，否則事後無法重現。dry_run 只檢查不擋。
+    code_bind = _bind_code_commit(code_paths, strict=not dry_run)
     tid = next_trial_id(None if dry_run and not LEDGER.exists() else parse_ledger())
     gates_tag = f"，failed_gates={failed_gates}" if failed_gates is not None else ""
-    notes_full = f"{notes_c}（登記來源：`trial_registry.register_trial()`，{round_tag}{gates_tag}）"
+    code_tag = "，程式 " + "、".join(f"{p}（{c}）" for p, c in code_bind["paths"].items()) if code_bind["paths"] else ""
+    notes_full = f"{notes_c}（登記來源：`trial_registry.register_trial()`，{round_tag}{gates_tag}{code_tag}）"
     row = f"| {tid} | {stamp} | {track} | {name_c} | {design_c} | {result_c} | **{verdict}** | {notes_full} |"
 
     if dry_run:
@@ -327,6 +378,7 @@ def register_trial(
         "round": round_no, "round_note": round_note or None,
         "dsr_inputs": dsr_inputs,
         "failed_gates": failed_gates,
+        "code_commit": code_bind["paths"] or None,  # 先.一〇三-15：{程式路徑: 最後一次 commit}
         # 2026-10-11 先.六十七：既有榜單重新驗證（常備.開發-6／-36）結構化標記；只在 True 時寫，舊列格式不變
         **({"reverification": True} if reverification else {}),
         "registered_at": datetime.now(TZ).isoformat(timespec="seconds"),
