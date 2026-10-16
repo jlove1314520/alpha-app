@@ -1,3 +1,15 @@
+## 2026-10-16 18:4x（DevQueue 20261016-180101）研究室.三 +125 檔＋先.一〇三-12v 解除並驗收＋先.一〇三-15ai 只讀核對（補件 15aj）
+
+等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未新增）
+
+- **研究室.三（維持 - [ ]）**：`timeout 2280 python scripts/backfill_revenue_display.py --max 150`，18:02～18:39，AlphaFinMindWarmup 同時段執行中；每 25 檔斷點存檔，存到 125/150（125 檔全有資料、0 空、無 402）後被自設時限停下。累計 710/1,980、剩 1,270（data/revenue_backfill.json meta）。下一輪照跑同一指令。
+- **先.一〇三-12v（[!]→[x]，commit f316f95f8a）**：17:13 班雲端 market.yml 尚未排到（gh run list 最新仍 10/15 23:52Z），[自行裁量] 改以 10/16 07:52 雲端班與本機 17:37 補跑產出的檔案驗收：price_history/_meta.json 有 exright_official_backfill（added 7、fetched 46）；ex_dividend_events.json 有 TPEx exDailyQ 24 筆、reductions 有 TWTCAU／TWTB8U 各 1；market_us.json 四檔都有 intraday 欄位。
+- **先.一〇三-15ai（收工補件、[x]，commit 0a31270946）**：BACKLOG「已知限制」三條核對——technical 未還原權息已解（先.八十一-37）；缺 Q1 基準 979→205；PER 反推 EPS 備援仍未解 → 補 **先.一〇三-15aj** 提案項（互動視窗）。
+- 冒煙：第一次跑 #142 FAIL——本機新聞排程 18:05 正改寫 events.json／events_search.json／events_by_code，工作目錄中途狀態；寫完後三檔 fetched_at 一致，重跑 164/164 通過。
+- 佇列深度：`- [ ]` 14 項（≥12）；DevQueue 可執行只剩研究室.三、研究室.四 2 項（<6）。補件來源：BACKLOG「已知限制」節已用（15ai），其餘 BACKLOG 項先前 15a～15ah 已逐條核對；UX_REDESIGN_PROPOSAL 未做項都已做或待總司令裁示；先.八十 全檢 14 項全 [x]；DATA_GAP_PLAN 甲類已抓完（#49 等 PREREG，互動視窗）→ **來源已用盡**。
+- 本輪沒跑研究室.四：與研究室.三共用 FinMind 全域每分鐘節流，同時跑不會增加總量。
+- BLOCKED 維持：研究室.六-週跑（時間閘 10/19 週一）。
+
 ## 2026-10-16 17:41（互動視窗）先.一〇三-13b 前台術語／原始數字（A、B、C1、C2 全部 - [x]）＋常規.補件順序
 
 等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證）。
