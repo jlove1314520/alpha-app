@@ -191,6 +191,8 @@
       +`<div class="note" style="margin-top:2px">法人行為（描述性資訊，非預測訊號）。`
       +`資料日 ${m.date||'—'}。${missTxt}</div>`;
   }
+  // 先.一〇八-4（UX_AUDIT 不確定第 2 條）：成本線 #d4a84b 在淺色底對比只有 1.96；淺色改讀 --gold-line，深色維持原色不動外觀
+  function _costLineColor(){try{if(document.documentElement.getAttribute('data-theme')==='light'){return getComputedStyle(document.documentElement).getPropertyValue('--gold-line').trim()||'#a87a2e'}}catch(e){console.warn('成本線顏色讀取失敗，用預設色',e);if(typeof recordGlobalError==='function')recordGlobalError('成本線顏色',e)}return '#d4a84b'}
   function renderChipTrend(code,inst,px){
     const tbl=document.getElementById('chip-trend-table'),note=document.getElementById('chip-trend-note'),cost=document.getElementById('chip-cost-note');
     if(!tbl)return;
@@ -210,7 +212,7 @@
     hist.forEach(h=>{const f=h.foreign_lots;if(f==null)return;const c=closeByDate[_t86Date(h.date)];if(f>0&&c!=null){lots+=f;amt+=f*c;used++}});
     if(cost){
       if(lots>0){const est=amt/lots;cost.innerHTML=`外資估算成本：<b>${nf(est)}</b>（估算、非精確成本：以近 ${hist.length} 日中 ${used} 個外資淨買超日的淨買張數×當日收盤加權概算，不是逐筆成交成本；資料天數愈少愈不可靠）`;
-        try{if(STOCK_CHART.series&&STOCK_CHART.code===code){if(STOCK_CHART.costLine){try{STOCK_CHART.series.removePriceLine(STOCK_CHART.costLine)}catch(e){}}STOCK_CHART.costLine=STOCK_CHART.series.createPriceLine({price:est,color:'#d4a84b',lineWidth:1,lineStyle:2,axisLabelVisible:true,title:'外資估算成本'})}}catch(e){console.warn('[renderChipTrend:priceLine]',e)}
+        try{if(STOCK_CHART.series&&STOCK_CHART.code===code){if(STOCK_CHART.costLine){try{STOCK_CHART.series.removePriceLine(STOCK_CHART.costLine)}catch(e){}}STOCK_CHART.costLine=STOCK_CHART.series.createPriceLine({price:est,color:_costLineColor(),lineWidth:1,lineStyle:2,axisLabelVisible:true,title:'外資估算成本'})}}catch(e){console.warn('[renderChipTrend:priceLine]',e)}
       }else{cost.textContent='外資估算成本：—（近期沒有外資淨買超日，或無對應收盤價）'}
     }
   }

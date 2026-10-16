@@ -33,7 +33,7 @@
 ### 不確定、先列表不改
 1. **類股熱力圖**（app-market.js:134 `hexMix('#383835','#8f2f2f'／'#265244')`＋index.html:226/228 圖例色塊）：底色 #383835 是深灰，淺色頁面上整塊仍是深色磚，
    而且**紅漲綠跌寫死，選「國際慣例」也不會對調**（另一個獨立問題）。要改得重新設計淺色熱力圖配色（磚上文字色也要一起調），不是換 token 就好。
-2. **個股頁成本線** app-stock.js:195 `color:'#d4a84b'`（lightweight-charts 參數，不吃 CSS 變數）：淺色底上 1.96，偏淡；可改 `_cssVar('--gold-line', ...)`，
+2. ✅ **已修（2026-10-17 先.一〇八-4）**：新增 `_costLineColor()`，淺色讀 `--gold-line`（#a87a2e），深色維持 #d4a84b 不動外觀；實測 1101 籌碼→總覽，深色線色 #d4a84b、淺色 #a87a2e，截圖 `docs/screenshots/costline_20261017/`。以下為原文：**個股頁成本線** app-stock.js:195 `color:'#d4a84b'`（lightweight-charts 參數，不吃 CSS 變數）：淺色底上 1.96，偏淡；可改 `_cssVar('--gold-line', ...)`，
    但深色 --gold-line 是 #d8b070 ≠ #d4a84b，會動到深色外觀，所以留待決定。
 3. `index.html:537` 金色漸層 `#c9974a→#e9c98f`（裝飾圖示）：淺色底上偏淡但屬裝飾，未改。
 
