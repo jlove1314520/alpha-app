@@ -46,6 +46,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import requests
+import sec_http_guard  # noqa: F401,E402  先.一〇三-1b-3：記錄 sec.gov 回應狀態，403 → 黃色警告＋STATUS
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")

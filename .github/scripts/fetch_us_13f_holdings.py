@@ -54,6 +54,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
+import sec_http_guard  # noqa: F401,E402  先.一〇三-1b-3：記錄 sec.gov 回應狀態，403 → 黃色警告＋STATUS
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 OUT_PATH = REPO_ROOT / "data" / "us_13f_holdings.json"

@@ -44,7 +44,7 @@ jobs:
           # 寫報告失敗時檔案不存在，2>/dev/null || true 讓它不拖垮後面的 commit）。
           python scripts/data_schema_guard.py guard --report data/schema_guard/us_financials.json --label us_financials || true
           git add -- data/schema_guard/us_financials.json 2>/dev/null || true
-          git add -A data/us_financials.json data/us_scores_v0.json
+          git add -A data/us_financials.json data/us_scores_v0.json data/sec_access_status.json
           git diff --cached --quiet && { echo "無變動，略過 commit"; exit 0; } || git commit -m "自動更新美股財報（SEC XBRL companyfacts）$(date -u +'%Y-%m-%d %H:%M UTC')"
 
           for i in 1 2 3 4 5; do

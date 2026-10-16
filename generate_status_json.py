@@ -1281,6 +1281,23 @@ def build_local_pipeline_health() -> dict:
         }
 
 
+def build_sec_access() -> dict:
+    """先.一〇三-1b-3：讀 data/sec_access_status.json（.github/scripts/sec_http_guard.py 寫）。
+    最近一輪有 SEC 腳本回 403 → status=warn、message「疑似 User-Agent 被擋，請總司令設 ALPHA_UA_CONTACT」（黃色，不擋流程）。
+    讀不到只降級成 unknown（十二節）。"""
+    p = Path(__file__).resolve().parent / "data" / "sec_access_status.json"
+    try:
+        if not p.exists():
+            return {"status": "unknown", "message": "尚無紀錄（SEC 腳本下一輪執行後產生）"}
+        d = json.loads(p.read_text(encoding="utf-8"))
+        blocked = d.get("blocked_scripts") or []
+        return {"status": "warn" if blocked else "ok",
+                "message": d.get("warning") or "最近一輪 SEC 請求沒有 403",
+                "blocked_scripts": blocked, "generated_at": d.get("generated_at")}
+    except Exception as e:  # noqa: BLE001
+        return {"status": "unknown", "message": f"讀取失敗：{type(e).__name__}: {e}"}
+
+
 def main():
     payload = {
         "updated_at": datetime.now(TW_TZ).isoformat(),
@@ -1293,6 +1310,7 @@ def main():
         "app_data_sources": APP_DATA_SOURCES,
         "field_fallback_chains": FIELD_FALLBACK_CHAINS,
         "rate_limit_status": build_rate_limit_status(),
+        "sec_access": build_sec_access(),  # 先.一〇三-1b-3：SEC 回 403＝疑似 User-Agent 被擋
         "todo": TODO,
         "known_limitations": KNOWN_LIMITATIONS,
     }

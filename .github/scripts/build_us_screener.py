@@ -32,6 +32,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import requests
+import sec_http_guard  # noqa: F401,E402  先.一〇三-1b-3：記錄 sec.gov 回應狀態，403 → 黃色警告＋STATUS
 
 for _s in (sys.stdout, sys.stderr):
     try:
