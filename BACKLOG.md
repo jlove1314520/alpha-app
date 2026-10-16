@@ -598,6 +598,8 @@ Code安全分類器擋下（跟之前`AlphaHypothesisQueue`/`AlphaIbkrQuotes`
 ## ⚠ 2026-09-01（續）IBKR paper下單伺服器：本機HTTP伺服器建好、抓到並修好
 一個真實的成交狀態誤判bug——**App端UI尚未開始做，先報進度**
 
+> ⚠️ 現況（2026-10-16 先.一〇三-15i 核對，上一句已過時）：App 端 UI 已於 2026-09-02 上線——`app.js` 第 3453 行起「IBKR Paper 下單卡片」（買賣方向、市價／限價、數量、本機 token、`/submit_order` 打 `http://127.0.0.1:8793` 的 `research/ibkr_order_server.py`），入口是美股個股頁 `index.html` 第 869～870 行「模擬賣出／模擬買進」按鈕 → `openIbkrSheet()`（`app-stock.js` 第 935 行，開抽屜即查 `/health`、`/account_summary`）；按鈕文字標「（IBKR Paper）」。本次只讀程式碼、未送單。
+
 使用者要求「下單計畫」功能（AI只擬計畫、送單永遠使用者親按），且指定
 架構：App是純前端PWA沒辦法主動觸發本機程式，經`AskUserQuestion`確認後
 選定「本機輕量HTTP伺服器」方案。
