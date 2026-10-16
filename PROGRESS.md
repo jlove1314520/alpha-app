@@ -1,3 +1,16 @@
+## 2026-10-16 15:4x（DevQueue 20261016-150101）研究室.三 +100 檔＋先.一〇三-15r／15u～15y／15z／15ac／15ae 只讀核對＋補件 15aa／15ab／15ad／15ae／15af
+
+等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未新增）
+
+- **研究室.三**（本收工 commit）：月營收回補 +100 檔（全有資料、0 空、無 402），累計 460/1,979、剩 1,520；斷點在 data/revenue_backfill.json meta.done。AlphaFinMindWarmup 同時段佔走每分鐘約 9 次，所以 38 分鐘只跑 100 檔。維持 - [ ]。
+- **先.一〇三-15r**（`2a452f8abc`）：Shioaji 委託狀態有實測了——真錢 10/12 三張委託見 Filled／Submitted（Submitted 會停留整個盤中、13:40 結算時一張遲到成交）、模擬撤單演練見 PreSubmitted→Cancelled；PartFilled／Failed／Inactive 尚無實例。BACKLOG 已補（去識別化）。
+- **先.一〇三-15u～15y、15z、15ac**（`4bbab56492`）：BACKLOG 七段過時的「尚未開始」補現況——B18 已做（8-K 索引上線、#431 判 FAIL）；B31 仍無 AI 質性摘要；B32 卡 Reddit 憑證；B33 美股評等分布已上線、目標價待採購；B22 signal_ledger 286 筆但 T+5 尚 0 筆（約 10/20 起才有）；C4 picks_ledger 31 個交易日（差 29）；B24 PIT 回測已做完判不及格。[自行裁量] 七項同形狀、改同兩檔，合成一個 commit（沒照「一項一 commit」拆）。
+- **先.一〇三-15ae**（`d18a4048d4`）：B20 #433 規格已登記，但 qualitative_ledger.json 仍不存在（n=0），卡研判執行管道待選案。
+- **新發現（記成 15ad，未處理）**：本機有 17 個 `commit_local_heartbeats.py` 行程自 10/15 09:57～21:43 起沒結束（每個約 1MB；今天的心跳提交仍正常）。沒有自行砍行程，留給下一輪查卡在哪。
+- **補件**：開工時 `- [ ]` 14 項、DevQueue 可執行 3 項。收工後 `- [ ]` 17 項，DevQueue 可執行 6 項（研究室.三、研究室.四、15aa、15ab、15ad、15af），兩道門檻都達到。來源是 BACKLOG.md（行號寫在各條）；UX_REDESIGN_PROPOSAL、先.八十全檢、DATA_GAP_PLAN 甲類都已經沒有可做的項目。
+- **BLOCKED**：無新增。研究室.四本輪沒跑（跟研究室.三共用 FinMind 額度，額度又被 Warmup 佔走）。
+- **冒煙**：本輪 6 次。15:03 #162 頁面崩潰、15:16 #18「promise 被回收」，兩次都是瀏覽器層錯誤、出在不同項目，同樣的程式碼重跑都過；其餘 162 PASS／0 FAIL。
+
 ## 2026-10-16 14:4x（DevQueue 20261016-140101）先.一〇三-15n／15o／15q／15s／15t 完成＋研究室.三／.四 續跑＋冒煙 #128 修正＋補件 15q～15t
 
 等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未新增）
