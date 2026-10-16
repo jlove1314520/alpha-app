@@ -1,3 +1,13 @@
+## 2026-10-16 19:4x（DevQueue 20261016-190101）研究室.三 +150 檔；研究室.四被 FinMind 小時自保擋下
+
+等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未新增）
+
+- **研究室.三（維持 - [ ]）**：`timeout 2220 python scripts/backfill_revenue_display.py --max 150`，19:01～19:27 整批 150/150 跑完（150 檔全有資料、0 空、無 402，exit 0）。累計 860/1,980、剩 1,120（data/revenue_backfill.json meta.remaining）。本輪沒碰到 AlphaFinMindWarmup 搶額度，速度約前兩批的 1.5 倍。
+- **研究室.四（維持 - [ ]）**：19:28 `--max 300 --until 19:38`，腳本自保「FinMind 滾動 1 小時用量 568 ≥ 450」直接停，0 次請求，累計仍 217/1,979。[自行裁量] 不調高自保門檻（它是保護 FinMind 免費層每小時上限的守門員）。
+- 冒煙：`node scripts/smoke_test.mjs` exit 0，164/164 通過（總計 304 秒）。
+- 開工檢查：`- [!]` 項無到期解除（研究室.六-週跑時間閘 10/19）。稽核報告 local_task_health 的 AlphaQuotesTW 逾期（已知 GitHub cron 延遲，fault_history 75 次，有本機備援 先.八十二-4）與合規.三四支腳本（2026-09 已人工核對為 docstring 文件性質）都是已知項，未新增項目。
+- 佇列深度：`- [ ]` 14 項（≥12）；DevQueue 可執行仍只有研究室.三、研究室.四 2 項（<6）。四個補件來源 18:4x 輪剛核對過，之後只有 BACKLOG 被該輪 15ai 改過 → **來源已用盡**，不湊數。
+
 ## 2026-10-16 18:4x（DevQueue 20261016-180101）研究室.三 +125 檔＋先.一〇三-12v 解除並驗收＋先.一〇三-15ai 只讀核對（補件 15aj）
 
 等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未新增）
