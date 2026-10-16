@@ -38,6 +38,17 @@
 （實測非提權 `Access is denied`），**尚未執行故標 ⚠️**。
 B 類的 `claude` CLI 非互動驗證另立待辦，未開始。
 
+**現況核對（2026-10-16 14:1x DevQueue 20261016-140101，先.一〇三-15o，只讀
+`Get-ScheduledTask`，未改排程）**：A 類改走「不論登入與否都執行（存密碼）」
+路線（先.一〇二-2a，10/15 22:40 完成），不是 S4U：35 支 Alpha* 排程中
+**Password 6 支**（AlphaData／AlphaDevQueue／AlphaMarketCatchup／
+AlphaMarketCatchupLate／AlphaQuotesFallback／AlphaWarrantSnapshot）、
+**S4U 2 支**（AlphaConnectivity／AlphaTwsePublishProbe）、其餘 27 支仍
+Interactive（第二批＝先.一〇二-2b，等第一批觀察 3 個交易日＋總司令本人輸入
+密碼，未做）。B 類 claude CLI 非互動驗證：**已有實證**——AlphaDevQueue 以
+Password 身分 10/15 23:31 輪啟動 claude CLI 做完並 push（00:06 exit=0），本輪
+（14:01）同樣在該身分下執行中。
+
 冒煙測試：未跑。本輪未動 `index.html` 或任何 PWA 共用區塊。
 
 ## ✅ 2026-09-05（維運帽）馬拉松基礎設施修穩A~F：四條驗收全通過、挖礦已恢復
