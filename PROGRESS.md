@@ -5,6 +5,7 @@
 - **研究室.三（維持 - [ ]）**：`timeout 2100 python scripts/backfill_revenue_display.py --max 150`，23:01～23:27 整批 150/150 跑完（150 檔全有資料、0 空、log 無 402，exit 0）。累計 1,335/1,980、剩 645（data/revenue_backfill.json meta.remaining）。開工時查 data/rate_limit_state.json 的 finmind blocked_until 是 9/29 舊值，無封鎖。
 - **研究室.四（未跑）**：同一小時 FinMind 已被本批用掉 150 次，加上其他排程，腳本自保門檻 450 很可能擋下，且剩不到 20 分鐘收尾。[自行裁量]
 - 冒煙：23:28～23:3x `node scripts/smoke_test.mjs` exit 0，164/164 通過。
+- **git 卡在未完成合併（已處理）**：23:00:21 有某個排程 `git pull`（merge 模式）留下 .git/MERGE_HEAD，衝突已解但沒 commit，卡了 33 分鐘，期間任何排程的部分 commit 都會失敗（`cannot do a partial commit during a merge`）。核對暫存的 data/STATUS.json＝遠端 a9ff3b77ed 版本、JSON 有效後，[自行裁量] 以 `--no-edit` 完成該合併（be9336f735，訊息帶到 git 預設註解行，內容無誤，未改寫歷史），再單獨 commit 本輪檔案並 push（07c2b27bcf）。push 時 autostash 還原 data/by_code/_meta.json 衝突，採上游 23:04 較新版本，selftest_by_code 抽樣 64 檔 0 不一致。**是哪支排程用 merge 而非 rebase 拉取、且沒收尾，未查**（本輪時間不夠），下一輪可查。
 - 開工檢查：`- [!]` 阻塞項沒有到期的（研究室.六-週跑時間閘 10/19 週一；其餘等總司令或資料累積）。
 - 佇列深度：`- [ ]` 15 項（≥12）；DevQueue 可執行仍只有研究室.三、研究室.四 2 項（<6）。四個補件來源 22:00 之後 0 筆 commit（BACKLOG.md／docs/UX_REDESIGN_PROPOSAL.md／research/DATA_GAP_PLAN.md），先.八十 全檢全 [x] → **來源已用盡**，不湊數。
 
