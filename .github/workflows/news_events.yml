@@ -71,7 +71,7 @@ jobs:
           # 寫報告失敗時檔案不存在，2>/dev/null || true 讓它不拖垮後面的 commit）。
           python scripts/data_schema_guard.py guard --report data/schema_guard/news_events.json --label news_events || true
           git add -- data/schema_guard/news_events.json 2>/dev/null || true
-          git add data/news.json data/events.json data/events_by_code/ data/ir_events.json data/events_search.json data/news_urls.json data/news_evidence.json data/themes.json
+          git add data/news.json data/news_by_code/ data/events.json data/events_by_code/ data/ir_events.json data/events_search.json data/news_urls.json data/news_evidence.json data/themes.json
           if git diff --cached --quiet; then
             echo "沒有新的新聞或事件，不產生 commit"
           else

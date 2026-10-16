@@ -102,6 +102,16 @@ def block_events(today):
 
 
 def block_news():
+    # 先.一〇五-3：個股新聞則數改讀存檔索引（近 7 天），news.json 只是首頁最新小檔（約 2 天份）
+    try:
+        idx = _load("news_by_code/_index.json")
+        codes = idx.get("codes") or {}
+        if codes:
+            by7 = {c: v.get("d7", 0) for c, v in codes.items() if v.get("d7")}
+            return {"fetched_at": idx.get("generated_at"), "total": sum(by7.values()), "by_code": by7,
+                    "window": "近 7 天（data/news_by_code/_index.json）"}
+    except Exception as e:  # noqa: BLE001 -- 讀不到存檔就退回原本算法
+        print(f"::warning::news_by_code 索引讀取失敗，改用 news.json：{type(e).__name__}: {e}")
     d = _load("news.json")
     by_code = Counter()
     for n in d.get("news") or []:

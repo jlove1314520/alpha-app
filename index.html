@@ -43,7 +43,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(mq.addEventListener)mq.addEventListener('change',h);else if(mq.addListener)mq.addListener(h)}
 })();
 </script>
-<link rel="stylesheet" href="app.css?v=2026-10-16.0904">
+<link rel="stylesheet" href="app.css?v=2026-10-16.0917">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -827,6 +827,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div id="stock-events-list"><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div></div>
         <div class="note" style="margin-top:8px">來源：公開資訊觀測站、證交所；每 30 分鐘更新</div>
       </div>
+      <!-- 先.一〇五-3：個股新聞改讀存檔 data/news_by_code/<代號>.json（近 14 天；首頁的 news.json 只是最新小檔） -->
+      <div class="card" id="stock-news-card">
+        <h3>近期新聞</h3>
+        <div class="note" id="stock-news-count" style="margin:-4px 0 4px"></div>
+        <div id="stock-news-list"><div class="note">載入中…</div></div>
+      </div>
     </div>
 
     <!-- 2026-09-15（P0產品.三）技術型態分頁框架：MA/成交量開關疊加，型態辨識（頭肩頂、
@@ -1560,6 +1566,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-16.0904"></script>
+<script src="app.js?v=2026-10-16.0917"></script>
 </body>
 </html>

@@ -861,11 +861,34 @@
       // 容器是display:none，技術型態分頁的lightweight-charts在寬度0的容器建圖表會
       // 尺寸算錯，兩者都不適合跟其他分頁一樣在openStock()就直接畫。
       if(subs.includes('events'))_safeAsync('renderStockEventsTab',()=>renderStockEventsTab(currentCode));
+      if(subs.includes('events'))_safeAsync('renderStockNews',()=>renderStockNews(currentCode));  // 先.一〇五-3
       if(subs.includes('tech'))_safeAsync('renderTechChartTab',()=>renderTechChartTab(currentCode));
       if(subs.includes('research'))_safeAsync('renderStockResearchTab',()=>renderStockResearchTab(currentCode));
     });
   });
 
+  // 先.一〇五-3：個股新聞讀存檔 data/news_by_code/<代號>.json（近 14 天、只含有標到這檔代號的新聞）；
+  // 「近 7 天 N 則」也算這份存檔。沒有存檔＝近 14 天沒有點名這檔的新聞（不是錯誤）。
+  async function renderStockNews(code){
+    const box=document.getElementById('stock-news-list'),cnt=document.getElementById('stock-news-count');
+    if(!box)return;
+    box.innerHTML='<div class="note">載入中…</div>';if(cnt)cnt.textContent='';
+    try{
+      const r=await fetch('data/news_by_code/'+encodeURIComponent(code)+'.json?t='+Math.floor(Date.now()/600000));
+      if(currentCode!==code)return;
+      if(r.status===404){box.innerHTML='<div class="note">近 14 天沒有點名這檔的新聞（新聞只比對標題裡的代號與官方名稱，覆蓋率有限）</div>';if(cnt)cnt.textContent='近 7 天 0 則';return}
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const d=await r.json();if(currentCode!==code)return;
+      const rows=(d.news||[]),c7=new Date(Date.now()-7*86400000).toISOString();
+      const n7=rows.filter(x=>(x.published_iso||'')>=c7).length;
+      if(cnt)cnt.textContent=`近 7 天 ${n7} 則 · 近 14 天 ${rows.length} 則`;
+      const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+      const row=x=>`<div style="padding:6px 0;border-top:1px solid var(--hairline);font-size:12.5px;line-height:1.5"><span class="num" style="font-size:10px;color:var(--ink-4)">${esc(String(x.published_iso||'').slice(5,10).replace('-','/'))}</span> <a href="${esc(x.url)}" target="_blank" rel="noopener" style="color:var(--ink-2);text-decoration:none">${esc(x.title)}</a> <span style="font-size:10px;color:var(--ink-4)">${esc(x.source||'')}</span></div>`;
+      box.innerHTML=rows.slice(0,8).map(row).join('')
+        +(rows.length>8?`<details><summary class="note" style="cursor:pointer;margin:4px 0">看全部 ${rows.length} 則</summary>${rows.slice(8).map(row).join('')}</details>`:'')
+        +'<div class="note" style="margin-top:6px">只存標題與連結索引；點標題開原文</div>';
+    }catch(e){console.warn('[renderStockNews]',e);recordGlobalError('renderStockNews',e);box.innerHTML='<div class="note">讀不到新聞存檔（'+(e&&e.message||e)+'）</div>'}
+  }
   // ── 個股頁底部列（先.六十-A1，2026-10-10）──
   // 台股：唯讀說明（真錢只由本機 Bb-90 引擎執行，App 不提供手動下單）；
   // 美股：既有 IBKR 模擬（Paper）帳戶下單卡（research/ibkr_order_server.py）。

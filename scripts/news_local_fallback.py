@@ -39,7 +39,7 @@ STEPS = [
     (["scripts/build_themes.py"], False),
 ]
 EVENTS_WRITERS = {".github/scripts/fetch_news_events.py"}  # 會寫 events.json 的步驟；自測確認拆檔緊接在最後一個之後
-OUTPUTS = ["data/news.json", "data/events.json", "data/events_by_code", "data/ir_events.json", "data/events_search.json", "data/news_urls.json", "data/news_evidence.json",
+OUTPUTS = ["data/news.json", "data/news_by_code", "data/events.json", "data/events_by_code", "data/ir_events.json", "data/events_search.json", "data/news_urls.json", "data/news_evidence.json",
            "data/themes.json", "data/schema_guard/news_events.json"]
 
 

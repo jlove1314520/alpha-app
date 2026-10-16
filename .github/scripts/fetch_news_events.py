@@ -70,6 +70,14 @@ RSS_FEEDS = [
 ]
 KEEP_DAYS = 90          # 事件保留 90 天：個股頁只顯示近 30 日，多留一些供研究端用
 NEWS_STALE_DAYS = 2     # 先.一〇四-1：最新一則超過 2 天就黃色警告
+# 先.一〇五-3（2026-10-16）：兩個檔的分工——
+#   data/news.json           首頁／搜尋用的「最新新聞小檔」：只留最近 NEWS_KEEP 則，且整檔 ≤ NEWS_MAX_BYTES（約 150KB），一打開 App 就下載。
+#   data/news_by_code/<代號>.json  個股頁與「近 7 天」計數用的「存檔」：只收有標到個股的新聞，每檔保留最近 NEWS_ARCHIVE_DAYS 天，
+#                            點進個股頁才下載那一檔；_index.json 記每檔近 7 天／14 天則數。
+#   news.json 只留約 2 天份（RSS 一班 200 則左右），個股頁要看 2 週內新聞就讀存檔，不再受首頁小檔的則數上限影響。
+NEWS_MAX_BYTES = 150_000
+NEWS_ARCHIVE_DAYS = 14
+NEWS_ARCHIVE_DIR = DATA / "news_by_code"
 NEWS_KEEP = 300         # 新聞只留最近 300 則，避免檔案無限長大
 
 
@@ -469,6 +477,67 @@ def merge_keep(path: Path, key: str, new_rows: list[dict], id_fn, keep_days=None
     return out
 
 
+def archive_news_by_code(news: list[dict], now: datetime) -> None:
+    """先.一〇五-3：把有標到個股的新聞併進 data/news_by_code/<代號>.json（每檔保留最近 NEWS_ARCHIVE_DAYS 天、依網址去重、新到舊），
+    並重寫 _index.json（每檔近 7 天／14 天則數）。零額外請求，只用這一班已抓到的新聞＋既有存檔。"""
+    NEWS_ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
+    cutoff = (now - timedelta(days=NEWS_ARCHIVE_DAYS)).isoformat()
+    by_code: dict[str, list[dict]] = {}
+    for n in news:
+        for c in n.get("codes") or []:
+            by_code.setdefault(str(c), []).append(n)
+    touched = set()
+    for code, rows in by_code.items():
+        if not re.fullmatch(r"[0-9A-Za-z]{2,10}", code):
+            continue
+        p = NEWS_ARCHIVE_DIR / f"{code}.json"
+        old = []
+        if p.exists():
+            try:
+                old = json.loads(p.read_text(encoding="utf-8")).get("news") or []
+            except json.JSONDecodeError:
+                old = []
+        seen, merged = set(), []
+        for r in rows + old:
+            u = r.get("url")
+            if not u or u in seen:
+                continue
+            seen.add(u)
+            merged.append({"title": r.get("title"), "url": u, "source": r.get("source"),
+                           "published_iso": r.get("published_iso") or published_iso(r.get("published"))})
+        merged = [r for r in merged if (r.get("published_iso") or "") >= cutoff]
+        merged.sort(key=lambda r: r.get("published_iso") or "", reverse=True)
+        doc = {"code": code, "keep_days": NEWS_ARCHIVE_DAYS, "updated_at": now.isoformat(), "news": merged}
+        txt = json.dumps(doc, ensure_ascii=False, indent=1)
+        if not p.exists() or p.read_text(encoding="utf-8") != txt:
+            p.write_text(txt, encoding="utf-8")
+        touched.add(code)
+    # 索引：掃全部存檔（含這班沒新新聞的），過期的列順便清掉，空檔刪除
+    idx = {}
+    c7 = (now - timedelta(days=7)).isoformat()
+    for p in sorted(NEWS_ARCHIVE_DIR.glob("*.json")):
+        if p.name.startswith("_"):
+            continue
+        try:
+            d = json.loads(p.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        rows = [r for r in d.get("news") or [] if (r.get("published_iso") or "") >= cutoff]
+        if not rows:
+            p.unlink()
+            continue
+        if len(rows) != len(d.get("news") or []):
+            d["news"] = rows
+            p.write_text(json.dumps(d, ensure_ascii=False, indent=1), encoding="utf-8")
+        idx[p.stem] = {"d7": sum(1 for r in rows if (r.get("published_iso") or "") >= c7), "d14": len(rows),
+                       "latest": rows[0].get("published_iso")}
+    (NEWS_ARCHIVE_DIR / "_index.json").write_text(json.dumps({
+        "generated_at": now.isoformat(), "keep_days": NEWS_ARCHIVE_DAYS,
+        "note": "個股新聞存檔索引（先.一〇五-3）：d7＝近 7 天則數、d14＝近 14 天則數；只含有標到個股代號的新聞",
+        "codes": idx}, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"新聞存檔：本班更新 {len(touched)} 檔，存檔共 {len(idx)} 檔（近 {NEWS_ARCHIVE_DAYS} 天）")
+
+
 def main() -> int:
     s = session()
     now = datetime.now(TZ)
@@ -528,6 +597,22 @@ def main() -> int:
                               "依 CLAUDE.md 取得方式鐵律不採用"},
         "meta": nw_meta, "count": len(nw_out), "news": nw_out,
     }, ensure_ascii=False, indent=1), encoding="utf-8")
+
+    # 先.一〇五-3：news.json 整檔超過 150KB 就從最舊的開始砍（最新的優先保留）
+    try:
+        p = DATA / "news.json"
+        doc = json.loads(p.read_text(encoding="utf-8"))
+        while len(p.read_bytes()) > NEWS_MAX_BYTES and len(doc.get("news") or []) > 50:
+            doc["news"] = doc["news"][:int(len(doc["news"]) * 0.9)]
+            doc["count"] = len(doc["news"])
+            p.write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
+        nw_out = doc.get("news") or nw_out
+    except Exception as e:  # noqa: BLE001 -- 十二節：瘦身失敗只警告，不影響已寫好的檔
+        print(f"::warning::news.json 瘦身失敗：{type(e).__name__}: {e}")
+    try:
+        archive_news_by_code(nw_out, now)
+    except Exception as e:  # noqa: BLE001 -- 十二節：存檔失敗只警告，不影響 news.json／events.json
+        print(f"::warning::新聞存檔（news_by_code）失敗：{type(e).__name__}: {e}")
 
     print(f"\nevents.json {len(ev_out)} 筆（近 {KEEP_DAYS} 天）｜news.json {len(nw_out)} 則")
     by_type: dict[str, int] = {}
