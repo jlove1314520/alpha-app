@@ -16,6 +16,7 @@
 - **冒煙測試**：最後一次 10:23 起跑 `node scripts/smoke_test.mjs` exit 0「全部通過」。
 - **先.一〇三-14w 第 1 批（4／10，維持 - [ ]）**：4 支 .py（nightly_six_runner／warrant_snapshot_daily／long_job_progress_heartbeat／orphan_process_scan）改走 `local_git_commit.pull_autostash_safe()`；臨時 repo 重現套回衝突與模擬匯入失敗都驗過（主流程照跑）；冒煙 10:35 全過。尚餘 6 支 .ps1，下一輪續。[自行裁量] 匯入失敗退回原本 pull，而不是跳過 pull（保持原行為）。
 - **BLOCKED**：無新增。佇列補件：先.一〇三-14w（DevQueue 可執行）。
+- **收工佇列深度（10:36）**：`- [ ]` 11 項（門檻 12）、DevQueue 可執行 2 項（門檻 6），**兩個都未達標**。本輪只補了 14w；BACKLOG「🔄 進行中」為空、DATA_GAP_PLAN 甲類各列多已標「已抓完／已測」，剩 #47 處置股 2005 起歷史等列是否已有排程（run_disposal_flags.ps1）來不及在 45 分鐘上限內核對，**未補件，留給下一輪開工時先補**（不硬塞未核對的項目，避免重複）。
 
 ## 2026-10-16 09:43（互動視窗）先.一〇三 收尾（15、1b-3）＋先.一〇五 人因實測第二輪 7 項＋驗收
 
