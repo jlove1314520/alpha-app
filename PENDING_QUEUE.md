@@ -20190,7 +20190,7 @@ un-market-catchup.ps1 註解同步改心跳路徑（repo 外）。〕
 
 **第 4 點即刻生效（互動視窗 00:28 起）**：該三筆是 先.一〇三-16／18／19，ts 寫 00:45 是預估值，實際寫入約 00:17～00:20。心跳檔只增不改，在 PROGRESS 註明更正，不回頭改舊列。
 
-- [ ] **先.一〇三-1b-1 BFI82U 10/02～10/15 存 market_tw.institutional *_net_amt（億元）；首頁與籌碼總覽合計改億元、張數進「看細節」；個股維持張數**（DevQueue 可執行；請求前對照 C:\alpha\CLAUDE.md 頻率上限，TWSE rwd 同源間隔 ≥3 秒）
+- [x] **先.一〇三-1b-1 BFI82U 10/02～10/15 存 market_tw.institutional *_net_amt（億元）；首頁與籌碼總覽合計改億元、張數進「看細節」；個股維持張數**（DevQueue 可執行；請求前對照 C:\alpha\CLAUDE.md 頻率上限，TWSE rwd 同源間隔 ≥3 秒）〔2026-10-16 08:26 DevQueue 20261016-080101 完成：fetch_market_tw.py 新增 BFI82U（twse_rwd 節流），每班同一天併進 institutional＋history 的 foreign/trust/dealer/total_net_amt（億元，另有自營商自行買賣／避險分項、amt_scope 標「含權證、外資不含外資自營商」）；回補 10/02～10/15 9 天全到（10/15 合計 −3,691.0 億、外資 −3,025.6、投信 +292.8、自營 −958.2）。App：籌碼總覽與市場頁入口卡預設億元、盤勢解讀法人行改億元；張數逐日表收進「看細節」；[自行裁量] 保留先.一〇四-7 的張／億元切換；個股籌碼不動仍是張。[自行裁量]「首頁」解讀為市場頁（今日頁本來就沒有法人合計）。冒煙第 15 項因全市場事件 56 筆把注入的 AAPL 擠出前 40 筆而 FAIL（與本項無關），測試改為暫放 AAPL 進記憶體自選清單；修後全部通過〕
 - [ ] **先.一〇三-1b-2 BFI82U 對 T86 ALLBUT0999 逐日三方向正負號比對；自營商 10/13、10/15 前 10 大貢獻個股/ETF 寫 PROGRESS，真的就標「多為 ETF 避險」，bug 就修並重產**（DevQueue 可執行）
 - [ ] **先.一〇三-1b-3 SEC 系列腳本回 403 → 黃色警告＋STATUS 寫「疑似 User-Agent 被擋，請總司令設 ALPHA_UA_CONTACT」**（DevQueue 可執行）
 - [ ] **先.一〇三-14v [自走補入，來源：本檔先.一〇三-14／-17 完成紀錄「data/research*.json 等 market.yml 下一班重產」] market.yml 下一班跑完後驗收：data/research.json meta 有 coverage.with_holders_single_week、holders 有 single_week／gap_days；research_radar.json 名單是「量增創 60 日新高」不再有「帶量突破」；App 變化雷達資料日那行顯示涵蓋檔數；selftest_research 全 PASS。若沒換新→查 market.yml 那一步的 log，修好重跑**（DevQueue 可執行）

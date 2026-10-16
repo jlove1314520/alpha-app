@@ -182,7 +182,8 @@
   // 歷史是跨多次排程執行累積出來的，一開始可能只有 1-2 天，會隨時間增加到 5-10 天。
   // 先.一〇四-7：單位可切張／億元（億元讀 *_net_amt，來自先.一〇三-1b 的 BFI82U；還沒有就停用並說明）；
   // 最新一根標數值、數字一律千分位。
-  let INST_UNIT='lots';
+  // 先.一〇三-1b-1：合計預設億元（BFI82U 有金額時）；張數收進下方「看細節」，切換鈕保留。
+  let INST_UNIT=null;
   function setInstUnit(u){INST_UNIT=u;_safeAsync('loadInstTotal',loadInstTotal)}
   window.setInstUnit=setInstUnit;
   function _instFmt(v,unit){
@@ -191,13 +192,27 @@
     return unit==='amt'?sign+Math.abs(v).toLocaleString('zh-TW',{maximumFractionDigits:1,minimumFractionDigits:1})+' 億'
       :sign+Math.round(Math.abs(v)).toLocaleString('zh-TW')+' 張';
   }
+  // 先.一〇三-1b-1：「看細節」——逐日張數（T86 ALLBUT0999）＋最新一日金額分項（BFI82U）。兩者口徑不同，各標來源。
+  function _instDetailHTML(history){
+    const rows=history.slice().reverse();
+    const md=d=>String(d||'').slice(4,6)+'/'+String(d||'').slice(6,8);
+    const c=v=>`<td style="text-align:right;color:${v==null?'var(--ink-4)':(v>=0?'var(--up)':'var(--down)')}">${v==null?'—':_instFmt(v,'lots').replace(/ 張$/,'')}</td>`;
+    const tb=`<table style="width:100%;font-size:11px;border-collapse:collapse;margin-top:4px"><tr style="color:var(--ink-3)"><td>日期</td><td style="text-align:right">合計</td><td style="text-align:right">外資</td><td style="text-align:right">投信</td><td style="text-align:right">自營商</td></tr>`+
+      rows.map(h=>`<tr><td>${md(h.date)}</td>${c(h.total_net_lots)}${c(h.foreign_net_lots)}${c(h.trust_net_lots)}${c(h.dealer_net_lots)}</tr>`).join('')+'</table>';
+    const lastH=history[history.length-1],last=lastH&&lastH.total_net_amt!=null?lastH:null;
+    const amt=last?`<div style="margin-top:6px">${md(last.date)} 金額：外資 ${_instFmt(last.foreign_net_amt,'amt')}、投信 ${_instFmt(last.trust_net_amt,'amt')}、自營商 ${_instFmt(last.dealer_net_amt,'amt')}（自行買賣 ${_instFmt(last.dealer_self_net_amt,'amt')}、避險 ${_instFmt(last.dealer_hedge_net_amt,'amt')}）</div>`:'';
+    return `<details><summary style="cursor:pointer;font-size:11px;color:var(--accent)">看細節</summary>`+
+      `<div class="note" style="margin-top:4px">淨買賣張數（上市，不含權證／牛熊證；外資含外資自營商；來源：證交所 T86）</div>${tb}${amt}`+
+      (last?'<div class="note" style="margin-top:4px">金額口徑（BFI82U）含權證、外資不含外資自營商（已計入自營商），與張數口徑不同，兩者不能直接相除換算均價。</div>':'')+
+      '</details>';
+  }
   async function loadInstTotal(){
     const el=document.getElementById('inst-bars');if(!el)return;
     await loadMarketDataFiles();
     const history=(MARKET_TW_CACHE&&MARKET_TW_CACHE.institutional_history)||[];
     if(!history.length){el.innerHTML='<div class="note">查無資料</div>';return}
     const hasAmt=history.some(h=>h.total_net_amt!=null);
-    const unit=(INST_UNIT==='amt'&&hasAmt)?'amt':'lots';
+    const unit=((INST_UNIT||'amt')==='amt'&&hasAmt)?'amt':'lots';
     const sw=document.getElementById('inst-unit');
     if(sw){
       const chip=(k,lb,dis)=>`<span class="press" ${dis?'aria-disabled="true"':`onclick="setInstUnit('${k}')"`} style="padding:2px 9px;border-radius:12px;font-size:11px;border:1px solid ${unit===k?'var(--accent)':'var(--hairline)'};color:${dis?'var(--ink-4)':(unit===k?'var(--accent)':'var(--ink-3)')};${dis?'cursor:not-allowed':'cursor:pointer'}">${lb}</span>`;
@@ -210,7 +225,9 @@
     const te=document.getElementById('inst-today');
     te.textContent=_instFmt(todayNet,unit);te.style.color=todayNet>=0?'var(--up)':'var(--down)';
     const un=document.getElementById('inst-unit-note');
-    if(un)un.textContent=unit==='amt'?'單位：億元；來源：證交所三大法人買賣金額統計（BFI82U）':'單位：張（上市，不含權證）；來源：證交所 T86';
+    if(un)un.textContent=unit==='amt'?'單位：億元（上市，含權證；外資不含外資自營商）；來源：證交所三大法人買賣金額統計（BFI82U）':'單位：張（上市，不含權證）；來源：證交所 T86';
+    const dt=document.getElementById('inst-detail');
+    if(dt)dt.innerHTML=_instDetailHTML(history);
     document.getElementById('inst-datatime').textContent=fmtMarketDataTime(MARKET_TW_CACHE)+(history.length<5?`（累積中，目前${history.length}天）`:'');
     // 2026-09-02新增：市場頁「籌碼」精簡入口卡（#chips-entry-inst）跟這裡是
     // 同一份資料的兩種呈現，不重新fetch，直接複寫同樣的文字/顏色。
@@ -346,13 +363,14 @@
   }
   // 常備.開發-14（2026-10-11）盤勢解讀（規則版）：四行只把既有檔案的數字翻成白話——
   // ①大盤漲跌（market_tw.json taiex）②類股強弱前三（market_tw.json sectors 依漲跌幅排序，最強／最弱各三）
-  // ③法人合計（market_tw.json institutional_history 最新一日，單位張，同籌碼頁）
+  // ③法人合計（market_tw.json institutional_history 最新一日；有 BFI82U 金額報億元，否則張，同籌碼頁）
   // ④融資維持率水位（margin_maintenance.json，與籌碼頁同一套 marginVal／marginLevel 對齊籌碼K口徑與分級）。
   // 不下「偏多／偏空」結論；查不到的寫「查無」與查了哪個檔。
   function buildMarketReadLines({mkt,margin}){
     const out=[];
     const pct=x=>(x>=0?'+':'')+(+x).toFixed(2)+'%';
     const lots=x=>(x>=0?'買超 ':'賣超 ')+nf(Math.round(Math.abs(x)))+' 張';
+    const yi=x=>(x>=0?'買超 ':'賣超 ')+Math.abs(x).toLocaleString('zh-TW',{maximumFractionDigits:1,minimumFractionDigits:1})+' 億元';
     try{
       const t=mkt&&mkt.taiex;
       if(!t||t.close==null||t.change_pct==null)out.push('大盤：查無加權指數收盤（data/market_tw.json）');
@@ -372,7 +390,9 @@
       const h=((mkt&&mkt.institutional_history)||[]).slice(-1)[0];
       if(!h||h.total_net_lots==null)out.push('法人：查無三大法人全市場合計（data/market_tw.json institutional_history）');
       else{const d=String(h.date||'');const md=d.length===8?d.slice(4,6)+'/'+d.slice(6):d;
-        out.push(`法人（${md}）：三大法人合計${lots(h.total_net_lots)}（外資${lots(h.foreign_net_lots||0)}、投信${lots(h.trust_net_lots||0)}、自營商${lots(h.dealer_net_lots||0)}）`)}
+        // 先.一〇三-1b-1：有 BFI82U 金額就報億元（張數在籌碼總覽「看細節」）
+        if(h.total_net_amt!=null)out.push(`法人（${md}）：三大法人合計${yi(h.total_net_amt)}（外資${yi(h.foreign_net_amt||0)}、投信${yi(h.trust_net_amt||0)}、自營商${yi(h.dealer_net_amt||0)}）`);
+        else out.push(`法人（${md}）：三大法人合計${lots(h.total_net_lots)}（外資${lots(h.foreign_net_lots||0)}、投信${lots(h.trust_net_lots||0)}、自營商${lots(h.dealer_net_lots||0)}）`)}
     }catch(e){console.warn('[marketRead:inst]',e);recordGlobalError('marketRead:inst',e);out.push('法人：計算失敗（已記入診斷 log）')}
     try{
       const hs=Array.isArray(margin)?margin:[];

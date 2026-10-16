@@ -46,6 +46,10 @@ TPEX_INDEX_URL = "https://www.tpex.org.tw/openapi/v1/tpex_index"
 TAIFEX_FUT_URL = "https://openapi.taifex.com.tw/v1/DailyMarketReportFut"
 T86_URL = "https://www.twse.com.tw/rwd/zh/fund/T86"
 T86_SELECT_TYPE = "ALLBUT0999"  # 先.一〇三-1：排除權證、牛熊證、可展延牛熊證
+# 先.一〇三-1b-1（2026-10-16）：三大法人買賣「金額」統計表（官方，單位元），首頁/籌碼總覽合計改顯示億元。
+BFI82U_URL = "https://www.twse.com.tw/rwd/zh/fund/BFI82U"
+BFI82U_SCOPE = ("上市全部證券金額（BFI82U，含一般／零股／盤後定價／鉅額，含權證）；"
+                "外資＝外資及陸資（不含外資自營商），外資自營商已計入自營商（官方註記）")
 TSE_LIST_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"  # 上市公司基本資料（含金融股，不含ETF/權證）
 # 2026-08-27新增（P1-新，使用者要求補齊TPEx上櫃三大法人缺口）：TPEx官方對應
 # 端點，全市場單日快照（免金鑰，不像T86_URL有反爬蟲風險）。跟fundamentals.json
@@ -614,6 +618,57 @@ def fetch_institutional_aggregate(date_str: str) -> tuple[dict, dict | None]:
     }
 
 
+def fetch_institutional_amount(date_str: str) -> dict | None:
+    """先.一〇三-1b-1：TWSE BFI82U 三大法人買賣金額（單日，單位元→億元）。
+    節流共用 twse_rwd 來源名（同源間隔 ≥3 秒），402/403/428/429 標封鎖 2 小時不重試。
+    回傳 {"date", "*_net_amt"(億元)...}；當天沒資料（stat 不是 OK）回 None。
+    口徑跟 T86 ALLBUT0999 的張數不同（這裡含權證、外資不含外資自營商），scope 照實寫。"""
+    _rate_limit_wait_or_raise("twse_rwd")
+    r = requests.get(BFI82U_URL, params={"type": "day", "dayDate": date_str, "response": "json"},
+                     headers={"User-Agent": "Mozilla/5.0 (compatible; AlphaAppMarketFetcher/1.0)"}, timeout=20)
+    if r.status_code in (402, 403, 428, 429):
+        _rate_limit_record_block("twse_rwd", r.status_code, r.text[:200])
+        raise RuntimeError(f"BFI82U 回應HTTP {r.status_code}，已標記封鎖2小時：{r.text[:200]}")
+    r.raise_for_status()
+    body = r.json()  # 對無效請求回 HTML 時這裡會拋錯，由呼叫端記進 errors
+    if body.get("stat") != "OK" or not body.get("data") or body.get("date") != date_str:
+        return None
+    fields = body.get("fields") or []
+    if "單位名稱" not in fields or "買賣差額" not in fields:
+        raise RuntimeError(f"BFI82U 欄位跟預期不符：{fields}")
+    i_name, i_net = fields.index("單位名稱"), fields.index("買賣差額")
+    net = {(row[i_name] or "").strip(): _num(row[i_net]) for row in body["data"]}
+    need = ["自營商(自行買賣)", "自營商(避險)", "投信", "外資及陸資(不含外資自營商)", "合計"]
+    missing = [k for k in need if net.get(k) is None]
+    if missing:
+        raise RuntimeError(f"BFI82U 缺列：{missing}")
+    dealer = net["自營商(自行買賣)"] + net["自營商(避險)"]
+    foreign, trust, total = net["外資及陸資(不含外資自營商)"], net["投信"], net["合計"]
+    # 官方合計＝自營商＋投信＋外資（不含外資自營商）；對不上就不採用，寧可空著
+    if abs(dealer + trust + foreign - total) > 1000:
+        raise RuntimeError(f"BFI82U 合計對不上：{dealer}+{trust}+{foreign}≠{total}")
+    to_yi = lambda v: round(v / 1e8, 2)
+    return {
+        "date": date_str,
+        "foreign_net_amt": to_yi(foreign),
+        "trust_net_amt": to_yi(trust),
+        "dealer_net_amt": to_yi(dealer),
+        "dealer_self_net_amt": to_yi(net["自營商(自行買賣)"]),
+        "dealer_hedge_net_amt": to_yi(net["自營商(避險)"]),
+        "foreign_dealer_net_amt": to_yi(net.get("外資自營商") or 0.0),
+        "total_net_amt": to_yi(total),
+        "amt_unit": "億元",
+        "amt_scope": BFI82U_SCOPE,
+    }
+
+
+def merge_institutional_amount(entry: dict, amt: dict | None) -> dict:
+    """把 BFI82U 金額併進同一天的 institutional 條目（日期不同不併）。"""
+    if amt and entry.get("date") == amt.get("date"):
+        entry.update({k: v for k, v in amt.items() if k != "date"})
+    return entry
+
+
 def fetch_institutional_tpex(date_str: str) -> dict[str, dict]:
     """TPEx（上櫃）三大法人買賣超逐股資料，2026-08-27新增（使用者P1-新：
     「stock_detail法人資料僅1,083檔，但價量有2,823檔——缺口很可能是上櫃股票」，
@@ -752,6 +807,13 @@ def main():
         if inst and _FMTQIK_VOLUME_LOTS.get(inst["date"]):
             # 先.一〇三-1：附當日全市場成交張數；冒煙檢查各法人與合計的絕對值都要小於它
             inst["market_volume_lots"] = _FMTQIK_VOLUME_LOTS[inst["date"]]
+        if inst:
+            # 先.一〇三-1b-1：同一天的 BFI82U 金額（億元）；失敗只記 errors，不影響張數
+            try:
+                merge_institutional_amount(inst, fetch_institutional_amount(inst["date"]))
+            except Exception as e:
+                print(f"BFI82U 三大法人金額 失敗：{e}")
+                out["errors"].append(f"institutional_amount: {e}")
         out["institutional"] = inst
         # 「近5日」買賣超需要歷史，但這支腳本一次只抓一天（T86 反爬蟲風險，見模組
         # docstring）——用「讀取上次委進 repo 的 JSON、把今天併進去、去重、只留最近
@@ -764,6 +826,10 @@ def main():
             except Exception:
                 history = []
         if inst:
+            prior_same = next((h for h in history if h.get("date") == inst["date"]), None)
+            if prior_same and "total_net_amt" in prior_same and "total_net_amt" not in inst:
+                # 這班 BFI82U 沒抓到，沿用上一班同一天已存的金額（同一天官方數字不變）
+                inst.update({k: v for k, v in prior_same.items() if k.endswith("_amt") or k.startswith("amt_")})
             history = [h for h in history if h.get("date") != inst["date"]] + [inst]
             history.sort(key=lambda h: h["date"])
             history = history[-10:]

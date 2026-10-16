@@ -505,12 +505,16 @@ async function runSmokeTest(baseUrl, headless = true) {
       route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(freshEarnings) })
     );
     await page.evaluate(() => { EARNINGS_CALENDAR_CACHE = null; });
+    // 2026-10-16 DevQueue 20261016-080101：全市場事件超過 40 筆時，非自選的 AAPL 會被收在「另有 N 筆」裡
+    // （10/16 實測全市場 56 筆），測試變成看當天事件多寡。測試期間暫把 AAPL 放進記憶體自選清單（不存檔），測完移除。
+    const addedWl = await page.evaluate(() => { if (WL.includes("AAPL")) return false; WL.push("AAPL"); return true; });
     await page.evaluate(() => window.go("home"));
     await page.waitForTimeout(1200);
     const eventsHtml = await page.evaluate(() => {
       const el = document.getElementById("today-events");
       return el ? el.innerHTML : null;
     });
+    if (addedWl) await page.evaluate(() => { const i = WL.indexOf("AAPL"); if (i >= 0) WL.splice(i, 1); });
     if (eventsHtml === null) staleShellErrors.push("找不到#today-events元素");
     else if (!eventsHtml.includes("AAPL")) {
       staleShellErrors.push(`注入新鮮的earnings_calendar.json後，#today-events沒有顯示AAPL，可能卡在舊殼：${eventsHtml.slice(0, 200)}`);
@@ -757,6 +761,17 @@ async function runSmokeTest(baseUrl, headless = true) {
     const instBarsHtml = await page.evaluate(() => document.getElementById("inst-bars")?.innerHTML || "");
     if (!detailVisible) chipsEntryErrors.push("點籌碼入口卡後沒有正確導到scr-chips-market頁面");
     if (!instBarsHtml || instBarsHtml.includes("載入中")) chipsEntryErrors.push(`市場籌碼總覽頁的三大法人買賣超圖沒有畫出內容，innerHTML="${instBarsHtml.slice(0,100)}"`);
+    // 先.一〇三-1b-1：真實檔有 BFI82U 金額 → 今日數字報億元、張數收在「看細節」
+    const instAmt = await page.evaluate(() => {
+      const h = (window.MARKET_TW_CACHE || (typeof MARKET_TW_CACHE !== "undefined" ? MARKET_TW_CACHE : null) || {}).institutional_history || [];
+      const d = document.getElementById("inst-detail");
+      return { hasAmt: h.some(x => x.total_net_amt != null), today: document.getElementById("inst-today")?.textContent || "",
+        detailSummary: d?.querySelector("details > summary")?.textContent || "", detailText: d?.textContent || "",
+        detailRows: d ? d.querySelectorAll("table tr").length - 1 : 0, histLen: h.length };
+    });
+    if (instAmt.hasAmt && !/億$/.test(instAmt.today)) chipsEntryErrors.push(`有金額資料時籌碼總覽今日應報億元，拿到"${instAmt.today}"`);
+    if (instAmt.detailSummary !== "看細節" || !/淨買賣張數/.test(instAmt.detailText) || instAmt.detailRows !== instAmt.histLen)
+      chipsEntryErrors.push(`籌碼總覽「看細節」張數明細不完整：summary="${instAmt.detailSummary}"，列數 ${instAmt.detailRows}／${instAmt.histLen} 天`);
     await page.evaluate(() => window.go("market"));
   } catch (e) {
     chipsEntryErrors.push(`測試本身出錯：${e.message || e}`);
@@ -2509,6 +2524,7 @@ async function runSmokeTest(baseUrl, headless = true) {
         { date: "2026-10-10", data_incomplete: true, ratio_pct: null }];
       o.mk = buildMarketReadLines({ mkt, margin });
       o.mkEmpty = buildMarketReadLines({ mkt: null, margin: null });
+      o.mkAmt = buildMarketReadLines({ mkt: { institutional_history: [{ date: "20261015", total_net_lots: -5, total_net_amt: -3690.96, foreign_net_amt: -3025.55, trust_net_amt: 292.83, dealer_net_amt: -958.23 }] }, margin: null });
       const saved = currentCode;
       try {
         currentCode = "2330"; await renderRevenueRead("2330");
@@ -2534,6 +2550,9 @@ async function runSmokeTest(baseUrl, headless = true) {
       "融資維持率：158.4%（注意", "資料日 2026-10-08", "較前一筆-6.6 個百分點", "最新一筆資料不完整，改列上一筆有效值"])
       if (!mk.includes(k)) readErrors.push(`盤勢合成資料缺「${k}」：${mk.slice(0, 300)}`);
     if (r.mk.length !== 4) readErrors.push(`盤勢應 4 行，實際 ${r.mk.length}`);
+    // 先.一〇三-1b-1：有 BFI82U 金額時合計改報億元
+    if (!r.mkAmt.join(" / ").includes("法人（10/15）：三大法人合計賣超 3,691.0 億元（外資賣超 3,025.6 億元、投信買超 292.8 億元、自營商賣超 958.2 億元）"))
+      readErrors.push(`有金額時法人合計應報億元：${r.mkAmt.join(" / ").slice(0, 300)}`);
     if (r.mkEmpty.length !== 4 || !r.mkEmpty.every((t) => t.includes("查無"))) readErrors.push(`盤勢全空應四行查無：${JSON.stringify(r.mkEmpty)}`);
     if (r.realLi !== 3) readErrors.push(`2330 營收解讀應 3 段，實際 ${r.realLi}：${r.real.slice(0, 120)}`);
     if (!r.real.includes("規則摘要，非 AI 判斷")) readErrors.push("營收解讀缺「規則摘要，非 AI 判斷」標示");
