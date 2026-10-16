@@ -6,6 +6,16 @@
 - 2 先.一〇三-15d 完成：美股走勢圖 IBKR → quotes_us → repo 日線 → FinMind（最後）。[自行裁量] IBKR／quotes_us 沒有有日期的日線歷史，K 線本體用新增的 repo 日線檔 data/us_daily/<代號>.json（253 檔、約 22 日，build_us_screener.py 同批次零額外請求、market.yml git add 已加），quotes_us 補最新一根；repo 沒這檔才畫 quotes_us 20 日收盤線。畫面標來源；冒煙 #165 擋 FinMind 時 NVDA 仍畫得出、0 次 FinMind 請求；165/165 通過。截圖 research/ux_shots_105/nvda_chart_107.png。
 - 3 雲端補救觸發：截至 10/17 00:20 尚未真正送出過 workflow_dispatch（10/16 17:57 那次 watchdog 執行時，本機 17:43 已補好當天 market_tw，條件不成立、正確地沒觸發）。維持 - [ ]，等第一次真實觸發再記。
 
+## 2026-10-17 00:4x（DevQueue 20261017-000102）研究室.三 +50 檔（累計 1,385/1,980）
+
+等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未新增）
+
+- **研究室.三（維持 - [ ]）**：`timeout 2100 python scripts/backfill_revenue_display.py --max 150`，00:01～00:36，每 25 檔斷點，存到 50/150（50 檔全有資料、0 空、log 無 402）後被自設時限停下（exit 124）。累計 1,385/1,980、剩 595（data/revenue_backfill.json meta.remaining）。慢的原因同 20:01 那輪：23:01 那批 150 次仍在 FinMind 滾動一小時窗內。開工時 finmind blocked_until 是 9/29 舊值，無封鎖。
+- **研究室.四（未跑）**：同一小時 FinMind 額度已被佔，腳本自保門檻 450 很可能擋下，且已到收尾時間。[自行裁量]
+- 冒煙：00:37～00:42 `node scripts/smoke_test.mjs` exit 0，165/165 通過。
+- 開工檢查：`- [!]` 阻塞項沒有到期的（研究室.六-週跑時間閘 10/19 週一；其餘等總司令或資料累積）。
+- 佇列深度：`- [ ]` 16 項（≥12）；DevQueue 可執行仍只有研究室.三、研究室.四 2 項（<6）。四個補件來源 23:00 之後 0 筆 commit（BACKLOG.md／docs/UX_REDESIGN_PROPOSAL.md／research/DATA_GAP_PLAN.md），先.八十 全檢全 [x] → **來源已用盡**，不湊數。
+
 ## 2026-10-16 23:3x（DevQueue 20261016-230102）研究室.三 +150 檔（累計 1,335/1,980）
 
 等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未新增）
