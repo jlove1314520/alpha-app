@@ -98,8 +98,17 @@ def main() -> int:
         else:
             n_empty += 1
         done.add(code)
-        if i % 50 == 0:
+        if i % 25 == 0:
+            # 2026-10-16（DevQueue 20261016-130101）：每 25 檔先存一次斷點——原本只在結尾寫檔，
+            # 被外層時間上限砍掉時整輪進度全丟（本輪實際發生：跑到 50/120 被砍、檔案沒更新）
+            _write(codes, done, stocks, n_ok, n_empty, f"進行中（{i}/{len(todo)}）")
             print(f"  {i}/{len(todo)}", flush=True)
+    remaining = _write(codes, done, stocks, n_ok, n_empty, stop)
+    print(f"本輪有資料 {n_ok}、空 {n_empty}；累計有資料 {len(stocks)} 檔；剩 {remaining} 檔" + (f"；{stop}" if stop else ""))
+    return 0
+
+
+def _write(codes, done, stocks, n_ok, n_empty, stop) -> int:
     remaining = len([c for c in codes if c not in done])
     meta = {"source": "FinMind TaiwanStockMonthRevenue（逐檔帶 data_id；不帶 data_id 的全市場查詢免費層被拒）",
             "generated_at": datetime.now(TW).isoformat(timespec="seconds"),
@@ -109,9 +118,10 @@ def main() -> int:
             "done": sorted(done), "n_with_rows": len(stocks), "remaining": remaining,
             "last_run": {"fetched": n_ok, "empty": n_empty, "stopped": stop},
             "note": "研究室.三（先.一百）；非投資建議。"}
-    OUT.write_text(json.dumps({"meta": meta, "stocks": stocks}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    print(f"本輪有資料 {n_ok}、空 {n_empty}；累計有資料 {len(stocks)} 檔；剩 {remaining} 檔" + (f"；{stop}" if stop else ""))
-    return 0
+    tmp = OUT.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps({"meta": meta, "stocks": stocks}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    tmp.replace(OUT)  # 先寫暫存檔再換名，寫到一半被砍也不會留下半截 JSON
+    return remaining
 
 
 if __name__ == "__main__":
