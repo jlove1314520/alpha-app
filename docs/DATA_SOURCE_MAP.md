@@ -206,6 +206,8 @@ robots.txt 是目前能取得的最明確意思表示。
 `scripts/build_cash_flow_json.py` 只讀本機快取、零網路請求，每季手動跑一次 → `data/cash_flow.json`（TTM）。
 金融業（例：2880）FinMind 現金流量表格式不同，目前不在輸出內，App 顯示原因。
 
+2026-10-16 複查（先.一〇三-15c，DevQueue 20261016-120101）：重新下載 TWSE swagger（`openapi.twse.com.tw/v1/swagger.json`，143 路徑）與 TPEx swagger（`www.tpex.org.tw/openapi/swagger.json`，225 路徑），各 1 次請求、間隔 4 秒，全文搜「現金流｜cash flow｜CashFlow｜t164sb04」皆 0 命中，結論不變。MOPS 依 `C:\alpha\CLAUDE.md`「MOPS 法說會」節（mopsov robots.txt 全站 Disallow）與上方第 3 點，本次不再打。未另立抓取條目：`data/cash_flow.json`（10/11 產生、1,797 檔）已存在、App `app-stock.js` 已讀它。
+
 ## 🔴 走不通：Stooq（已下市美股價格）
 
 **查證日：2026-09-08。詳見 `docs/US_PRICE_SOURCES.md`。**

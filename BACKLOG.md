@@ -1988,7 +1988,8 @@ FinMind的明確`retry_after`倒數更不透明，沒有官方公告的解除時
   2. 季資料，一季抓一次、硬快取；一律走GitHub Actions排程→產出repo
      JSON，App只讀JSON，不client-side直接打FinMind。
   3. 納入`rate_limit_status`斷路器登記，source key沿用既有`"finmind"`。
-  尚未開始。
+  ~~尚未開始。~~
+  ⚠️ 現況（2026-10-16 先.一〇三-15c 核對）：常備.開發-7（2026-10-11）已做——`scripts/build_cash_flow_json.py` 讀 FinMind 本機研究快取（零網路請求）→ `data/cash_flow.json`（TTM，1,797 檔，金融業不在內），App `app-stock.js` 讀此檔；官方來源三來源查證見 `docs/DATA_SOURCE_MAP.md`「現金流量表／FCF」節（10/16 複查兩份 swagger 仍 0 命中）。與上面第 2 點不同之處：目前是**每季手動跑、不在 GitHub Actions 排程**，照實記錄，是否要進排程待另案。
 
 - **B28：期貨三大法人部位（脫離client-side直打，改走Actions排程）**
   （2026-08-28登錄，只登錄規格不執行）：
