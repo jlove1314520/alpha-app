@@ -2403,7 +2403,7 @@ async function runSmokeTest(baseUrl, headless = true) {
           first_batch_done: true, pnl: { as_of: "2026-10-14", week_start: "2026-10-12", total: 500, total_pct: 0.5, week: 500 },
           perf: { bench: "0050", start: "2026-10-12", as_of: "2026-10-14", nav_pct: 2.1, bench_pct: 1.4, note: "含手續費（牌告 0.1425% 不打折、每筆最低 1 元）、未含稅",
             points: [{ date: "2026-10-12", nav: 0.9986, bench: 0.9986, cost: 100142 }, { date: "2026-10-13", nav: 1.01, bench: 1.005, cost: 100142 }, { date: "2026-10-14", nav: 1.021, bench: 1.014, cost: 100142 }] } };
-        await loadJournalLedger(); o.has = el().textContent; o.lines = el().querySelectorAll("svg polyline").length;
+        await loadJournalLedger(); o.has = el().textContent; o.gapCls = (el().querySelector(".journal-gap") || {}).className || null; o.lines = el().querySelectorAll("svg polyline").length;
         o.pts = [...el().querySelectorAll("svg polyline")].map((p) => p.getAttribute("points").split(" ").length);
         lg = { ...lg, perf: { error: "price_history 缺白名單標的收盤價，無法畫績效對照" } };
         await loadJournalLedger(); o.err = el().textContent;
@@ -2414,12 +2414,15 @@ async function runSmokeTest(baseUrl, headless = true) {
     });
     if (!r.none.includes("尚無部位")) perfErrors.push(`無成交應顯示「尚無部位」：${r.none.slice(0, 80)}`);
     if (r.lines !== 2 || r.pts.some((n) => n !== 3)) perfErrors.push(`有成交應畫 2 條各 3 點的折線，實際 ${r.lines} 條 ${JSON.stringify(r.pts)}`);
-    for (const k of ["+2.1%", "+1.4%", "+0.7 個百分點", "0050 全持有", "含手續費、未含稅", "3 個交易日"])
+    for (const k of ["+2.1%", "+1.4%", "領先 0.7 個百分點", "0050 全持有", "含手續費、未含稅", "3 個交易日"])
       if (!r.has.includes(k)) perfErrors.push(`有成交畫面缺「${k}」：${r.has.slice(0, 160)}`);
+    // 先.一〇八-2：差距欄是贏輸不是漲跌，不得帶 pos／neg（同 147）
+    if (r.gapCls == null) perfErrors.push("找不到差距欄 .journal-gap");
+    else if (/(pos|neg)/.test(r.gapCls)) perfErrors.push(`差距欄仍帶漲跌色 class：${r.gapCls}`);
     if (!r.err.includes("缺白名單")) perfErrors.push(`perf error 應顯示原因：${r.err.slice(0, 80)}`);
     if (!r.off.includes("尚未連線")) perfErrors.push(`未連線應顯示說明：${r.off.slice(0, 80)}`);
   } catch (e) { perfErrors.push(`測試本身出錯：${e.message || e}`); }
-  record("72. 日誌頁真錢績效對照（無成交「尚無部位」；有成交兩條折線＋報酬差距＋「含手續費、未含稅」；perf 錯誤顯示原因；未連線說明）", perfErrors.length === 0, perfErrors.join("; "));
+  record("72. 日誌頁真錢績效對照（無成交「尚無部位」；有成交兩條折線＋報酬差距＋「含手續費、未含稅」；perf 錯誤顯示原因；未連線說明；差距欄中性色＋領先／落後，先.一〇八-2）", perfErrors.length === 0, perfErrors.join("; "));
 
   // 86.【2026-10-11 常備.開發-23】日誌頁盤後復盤：用假的 /auto/ledger（替換 liveFetch，不連網、不下單）驗——
   // review=null 顯示「尚無復盤」；有復盤時列出成交率／加權滑價／逐筆滑價／零股驗證／偏離／下期；review.error 顯示原因；

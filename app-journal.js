@@ -141,11 +141,12 @@
     const esc=_autoEsc,pf=d&&d.perf;
     if(!d||!d.first_batch_done||!pf){el.innerHTML='<b>尚無部位</b>（首批成交後自動出現累計淨值與同期 0050 全持有對照）';return}
     if(pf.error||!Array.isArray(pf.points)||!pf.points.length){el.textContent='無法畫績效對照：'+(pf.error||'伺服器未回傳序列');return}
+    // 先.一〇八-2：差距是「贏輸」不是「漲跌」，改中性色＋領先／落後（同 app.js _scVs，UX 提案①）
     const pc=v=>(v>0?'+':'')+v+'%',cls=v=>v>=0?'pos':'neg',diff=Math.round((pf.nav_pct-pf.bench_pct)*100)/100;
     el.innerHTML=journalPerfSvg(pf.points)+
       '<div style="display:flex;gap:14px;font-size:12px;margin-top:4px"><span><span style="color:var(--accent)">━</span> Bb-90 自動交易 <b class="'+cls(pf.nav_pct)+'">'+pc(pf.nav_pct)+'</b></span>'+
       '<span><span style="color:var(--ink-3)">━</span> 同期 0050 全持有 <b class="'+cls(pf.bench_pct)+'">'+pc(pf.bench_pct)+'</b></span></div>'+
-      '<div style="margin-top:4px;font-size:12px">差距：<b class="'+cls(diff)+'">'+(diff>0?'+':'')+diff+' 個百分點</b>（'+esc(pf.start)+' 起至 '+esc(pf.as_of)+'，'+pf.points.length+' 個交易日）</div>'+
+      '<div style="margin-top:4px;font-size:12px">跟 0050 差多少：<b class="journal-gap" style="color:var(--ink)">'+(Math.abs(diff)<0.005?'持平 0 個百分點':(diff>0?'領先 ':'落後 ')+Math.abs(diff)+' 個百分點')+'</b>（'+esc(pf.start)+' 起至 '+esc(pf.as_of)+'，'+pf.points.length+' 個交易日）</div>'+
       '<div style="margin-top:6px;font-size:10px;color:var(--ink-4)"><b>含手續費、未含稅</b>。'+esc(pf.note||'')+'；累計淨值＝持股市值÷累計投入。唯讀；非投資建議</div>';
   }
   // 常備.開發-23：盤後復盤（/auto/ledger 的 review＝伺服器讀 LIVE/review_YYYYMMDD.json，13:40 結算後自動產出）。這裡只畫。
