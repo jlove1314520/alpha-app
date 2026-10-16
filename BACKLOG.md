@@ -2000,7 +2000,7 @@ FinMind的明確`retry_after`倒數更不透明，沒有官方公告的解除時
      跟B28不衝突：B28是先把「現有FinMind來源」遷進Actions排程這個較快
      達成的中繼站，TAIFEX原生端點仍是更長期的目標。
   2. 日資料但全市場一次呼叫、量小，納入節流/斷路器登記。
-  尚未開始。
+  ✅ 已完成（2026-10-16 先.一〇三-15a 核對）：先.八十一-10 已改走 TAIFEX 官方 OpenAPI（`.github/scripts/fetch_futures_institutional.py` → `data/futures_institutional.json`，`market.yml` 每日三班），App `app-market.js` `loadFutInst()` 以 repo 檔為主、讀不到才退回 FinMind；STATUS.json 的「未遷移」舊文字同日更正。
 
 - **✅ B29：美股財報/FCF因子管線（2026-09-02完成後端+前端UI）**：
   1. yfinance提供`.financials`/`.balance_sheet`/`.cashflow`（損益表/

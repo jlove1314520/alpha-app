@@ -1022,7 +1022,7 @@ APP_DATA_SOURCES = [
     {"panel": "市場頁·類股表現(熱力圖)", "source": "data/market_tw.json（sectors，TWSE MI_INDEX 27類）"},
     {"panel": "市場頁·三大法人買賣超(全市場)", "source": "data/market_tw.json（institutional_history，TWSE T86加總）"},
     {"panel": "市場頁·主流題材chips", "source": "FinMind TaiwanStockPrice（8大產業指數Trading_money，仍為舊版本邏輯，未遷移）"},
-    {"panel": "市場頁·期貨籌碼", "source": "FinMind TaiwanFuturesInstitutionalInvestors（TX，未遷移；大盤期貨價格本身已在market_tw.json）"},
+    {"panel": "市場頁·期貨籌碼", "source": "data/futures_institutional.json（TAIFEX 官方三大法人-區分各期貨契約，.github/scripts/fetch_futures_institutional.py 每日三班；先.八十一-10 已遷移）；讀不到才退回 FinMind TaiwanFuturesInstitutionalInvestors（client-side 備援）"},
     {"panel": "個股頁·總覽·走勢圖", "source": "FinMind TaiwanStockPrice / USStockPrice（未遷移）"},
     {"panel": "個股頁·總覽·PER/PBR/殖利率/月營收YoY", "source": "data/fundamentals.json"},
     {"panel": "個股頁·營收·月營收圖", "source": "data/fundamentals.json"},

@@ -1403,7 +1403,7 @@
     },
     {
       "panel": "市場頁·期貨籌碼",
-      "source": "FinMind TaiwanFuturesInstitutionalInvestors（TX，未遷移；大盤期貨價格本身已在market_tw.json）"
+      "source": "data/futures_institutional.json（TAIFEX 官方三大法人-區分各期貨契約，.github/scripts/fetch_futures_institutional.py 每日三班；先.八十一-10 已遷移）；讀不到才退回 FinMind TaiwanFuturesInstitutionalInvestors（client-side 備援）"
     },
     {
       "panel": "個股頁·總覽·走勢圖",
