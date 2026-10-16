@@ -13,6 +13,7 @@ detached HEAD、push 全失敗。現在：①開始前若 repo 已在 rebase 中
 """
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 import sys
@@ -23,8 +24,29 @@ LOCK = ROOT / "research" / "git_op_lock.py"
 GITDIR = ROOT / ".git"
 
 
+# 先.一〇三-15ad（2026-10-16）：10/15 09:57～21:43 有 17 支心跳提交卡死不結束。根因：`git push` 叫起
+# `git-credential-manager get` 等隱藏的瀏覽器登入視窗；subprocess.run 逾時只殺 git 本身，孫行程
+# （git remote-https／credential-manager）還握著輸出管線，communicate() 就永遠等下去。
+# 修法：①環境變數禁止任何互動式認證（拿不到憑證就直接失敗，不等視窗）；②逾時用 taskkill /T 殺整棵行程樹。
+_GIT_ENV = {**os.environ, "GIT_TERMINAL_PROMPT": "0", "GCM_INTERACTIVE": "never"}
+
+
 def _g(*a, timeout=180):
-    return subprocess.run(["git", *a], cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout)
+    p = subprocess.Popen(["git", *a], cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL,
+                         text=True, encoding="utf-8", errors="replace", env=_GIT_ENV)
+    try:
+        out, err = p.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        if os.name == "nt":
+            subprocess.run(["taskkill", "/F", "/T", "/PID", str(p.pid)], capture_output=True, timeout=30)
+        else:
+            p.kill()
+        try:
+            out, err = p.communicate(timeout=10)
+        except subprocess.TimeoutExpired:
+            out, err = "", ""
+        return subprocess.CompletedProcess(p.args, 124, out or "", (err or "") + f"\n[local_git_commit] git {' '.join(a[:2])} 逾時 {timeout} 秒，已殺整棵行程樹")
+    return subprocess.CompletedProcess(p.args, p.returncode, out, err)
 
 
 def rebase_in_progress() -> bool:
