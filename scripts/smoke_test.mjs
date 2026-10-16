@@ -5347,6 +5347,33 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("161. 只捲 #main：各頁 main.scrollWidth ≤ clientWidth、關閉面板 display:none、跳卡片後導覽列仍在底部（先.一〇三-6）", scrErrs.length === 0, scrErrs.join("; ") || scrInfo);
   record("159. 研究分頁免責聲明／雷達「不是買進訊號」／缺 research 一行空狀態／無「建置中」／雷達檔 <1 秒／自選股狀態點（研究室.五）", rlabErrs.length === 0, rlabErrs.join("; ") || rlabInfo);
 
+  // 162.【2026-10-16 先.一〇五-1】K 線函式庫載不到（擋掉 cdn.jsdelivr.net）時，個股頁 10 秒內要退回收盤折線＋「K 線圖暫時載不到」，
+  // 不得停在骨架畫面（原本 onerror 後不重畫；另加 8 秒逾時當失敗）。
+  const lwcErrs = [];
+  let lwcInfo = "";
+  try {
+    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+    await ctx.route(/cdn\.jsdelivr\.net/, (route) => route.abort());
+    const p3 = await ctx.newPage();
+    const pe = [];
+    p3.on("pageerror", (e) => pe.push(String(e)));
+    try {
+      await p3.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+      await p3.waitForFunction(() => typeof openStock === "function", null, { timeout: 20000 });
+      const t0 = Date.now();
+      await p3.evaluate(() => openStock("2330"));
+      const ok = await p3.waitForFunction(() => {
+        const el = document.getElementById("trend-chart");
+        return !!el && /K 線圖暫時載不到/.test(el.textContent || "") && !!el.querySelector("svg") && !el.querySelector(".skel-block");
+      }, null, { timeout: 10000 }).then(() => true).catch(() => false);
+      const st = await p3.evaluate(() => { const el = document.getElementById("trend-chart"); return { txt: (el && el.textContent || "").slice(0, 60), skel: !!(el && el.querySelector(".skel-block")), svg: !!(el && el.querySelector("svg")) }; });
+      if (!ok) lwcErrs.push(`擋 CDN 後 10 秒內沒退回折線：${JSON.stringify(st)}`);
+      if (pe.length) lwcErrs.push(`pageerror：${pe.slice(0, 2).join(" | ")}`);
+      lwcInfo = `擋 CDN 後 ${((Date.now() - t0) / 1000).toFixed(1)} 秒顯示退回折線（${st.txt}）`;
+    } finally { await ctx.close(); }
+  } catch (e) { lwcErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("162. K 線函式庫載不到時 10 秒內退回收盤折線＋「K 線圖暫時載不到」、不停在骨架（先.一〇五-1）", lwcErrs.length === 0, lwcErrs.join("; ") || lwcInfo);
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];

@@ -934,16 +934,23 @@
   // 改成第一次要畫K線時才載入；載入完成前先畫既有SVG折線，載好後由呼叫端重畫一次。
   // 載入失敗（離線/CDN故障）就維持SVG折線，跟以前「函式庫載不到」的退回行為相同。
   const LWC_SRC='https://cdn.jsdelivr.net/npm/lightweight-charts@5.2.1/dist/lightweight-charts.standalone.production.js';
-  let LWC_LOADING=null;
+  let LWC_LOADING=null,LWC_FAILED_AT=0;
+  // 先.一〇五-1（2026-10-16）：載入失敗（onerror）或 8 秒還沒載好＝失敗；失敗後 60 秒內不再重試（直接畫退回折線），
+  // 避免「失敗→重畫→又去載→又失敗」打轉，也避免停在骨架畫面。
+  const LWC_TIMEOUT_MS=8000,LWC_RETRY_MS=60000;
+  function lwcRecentlyFailed(){return LWC_FAILED_AT&&Date.now()-LWC_FAILED_AT<LWC_RETRY_MS}
   function ensureLwc(){
     if(lwcAvailable())return Promise.resolve(true);
+    if(lwcRecentlyFailed())return Promise.resolve(false);
     if(!LWC_LOADING){
       LWC_LOADING=new Promise(res=>{
+        let done=false;const fin=ok=>{if(done)return;done=true;clearTimeout(t);res(ok)};
+        const t=setTimeout(()=>{console.warn('[ensureLwc] 圖表函式庫 8 秒未載完，當成失敗、改畫折線');fin(false)},LWC_TIMEOUT_MS);
         const sc=document.createElement('script');sc.src=LWC_SRC;sc.async=true;
-        sc.onload=()=>res(lwcAvailable());
-        sc.onerror=e=>{console.warn('[ensureLwc] 圖表函式庫載入失敗，維持SVG折線',e);res(false)};
+        sc.onload=()=>fin(lwcAvailable());
+        sc.onerror=e=>{console.warn('[ensureLwc] 圖表函式庫載入失敗，改畫折線',e);fin(false)};
         document.head.appendChild(sc);
-      }).then(ok=>{if(!ok)LWC_LOADING=null;return ok});
+      }).then(ok=>{LWC_LOADING=null;if(!ok)LWC_FAILED_AT=Date.now();return ok});
     }
     return LWC_LOADING;
   }
@@ -972,7 +979,9 @@
       // 先.一〇四-11：載入中＝骨架畫面（不顯示函式庫名稱）；載入失敗才退回簡易折線並白話說明
       el.innerHTML=LWC_LOADING?'<div class="skel-block" style="height:220px;width:100%" aria-label="K 線載入中"></div>'
         :trendChart(closes,v=>(us?'$':'')+nf(v))+'<div class="note" style="font-size:10px">K 線圖暫時載不到（可能離線），先顯示收盤折線</div>';
-      lwcP.then(ok=>{if(ok&&STOCK_CHART.code===code&&document.getElementById('trend-chart')===el)renderStockChart(code,rows,us)})
+      // 先.一〇五-1：成功或失敗都重畫一次（失敗時 lwcRecentlyFailed() 為真，會直接畫退回折線、不再停在骨架）
+      const _wasLoading=!!LWC_LOADING;  // 只有「剛才畫的是骨架」才需要重畫；已知失敗時畫的就是折線，不重畫（避免無限重畫）
+      lwcP.then(ok=>{if(_wasLoading&&STOCK_CHART.code===code&&document.getElementById('trend-chart')===el)renderStockChart(code,rows,us)})
         .catch(e=>{console.warn('[renderStockChart:ensureLwc]',e);recordGlobalError('renderStockChart:ensureLwc',e)});
       return;
     }
