@@ -1,3 +1,19 @@
+## 2026-10-16 16:4x（DevQueue 20261016-160101）研究室.三 +125 檔＋先.一〇三-15aa／15ab／15af 只讀核對＋15ad 修 17 支卡死心跳行程＋15ag／15ah 防再犯
+
+等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未新增）
+
+- **研究室.三**（本收工 commit）：月營收回補 +125 檔（全有資料、0 空、無 402），累計 585/1,979、剩 1,395；斷點在 data/revenue_backfill.json meta.done。維持 - [ ]，下一輪照跑同一指令。
+- **先.一〇三-15ad**（`1e9a3541e4`）：17 支卡死的 `commit_local_heartbeats.py` 根因找到——每支底下都留著 `git push → git remote-https → git-credential-manager get`（10/15 那段 PAT 沒生效，GCM 在等看不到的登入視窗）；`subprocess.run(timeout=180)` 逾時只殺 git 本身，孫行程握著輸出管線，Python 永遠等。`scripts/local_git_commit.py` 改成禁止互動式認證（`GIT_TERMINAL_PROMPT=0`、`GCM_INTERACTIVE=never`）＋逾時 `taskkill /F /T` 殺整棵樹。證據：`!sleep 40` 別名、timeout=3 → 新版 3.9 秒回 124，舊寫法同條件卡到被外層 20 秒砍掉；Get-CimInstance 清前 python 17／git 系 85／wrapper powershell 17 支，清後 0／0。16:17 真排程 AlphaConnectivity 心跳已用新版 commit＋push 成功（`ffd50e7b0f`）。
+- **先.一〇三-15ag**（`12db2163a8`）[自走補入＋本輪做完]：抽出 `run_git()`，另外 6 支本機腳本（long_job_progress_heartbeat、orphan_process_scan、market_local_catchup、scheduler/publish_heartbeat、nightly_six_runner、warrant_snapshot_daily〔原本完全沒逾時〕）的 git 呼叫改走它，匯入失敗退回原寫法。shioaji_quotes（常駐服務）、auto_rebalance_bb90（真錢）沒動。selftest_local_heartbeats 12/12、selftest_market_catchup 6/6。
+  ⚠️ **過程踩雷照實記**：run_git 第一版把 `cwd=ROOT` 寫成預設參數，自測把 ROOT 換成暫存 repo 後 git 指令其實落在真 repo（自測 ④ 因此 1 項 FAIL）。查 reflog 與 stash：沒有任何新的 commit／reset／stash，唯一動作是 `git add f.json` 找不到檔而失敗。改成呼叫時才取 ROOT 後 12/12。
+- **先.一〇三-15ah**（`6d61f60e76`）[自走補入＋本輪做完]：`orphan_process_scan.py` 加 `stuck_git`——git／credential-manager／心跳提交 python 跑超過 2 小時就列出＋推播（同一組一天一次），不含命令列、不結束程序。selftest_orphan_stuck_git 5/5；實跑寫出 stuck_git=[]。
+- **先.一〇三-15aa／15ab**（`2684b4fb5e`）：B23「約 1,826 檔待回補」已過時，price_history 改走官方端點補缺日，6/1 起每日中位 2,395.5 檔，舊 FinMind 回補程式不再需要（未刪檔）；B30 customer_concentration 仍未實作，ic.tpex.org.tw 在 net_guard 黑名單（條款禁爬），「併入 B19」這條路已被法遵封住。
+- **先.一〇三-15af**（本收工 commit）：B21 Reddit 仍未開始，repo 零程式／零資料；B19 已不是阻塞，真正的卡點是要總司令本人的 Reddit 帳號註冊 OAuth app，加上條款還沒查證（白名單第 2、6 條）。
+- [自行裁量] 15aa／15ab 兩項只讀核對共用一個 commit（同樣改 BACKLOG／PENDING_QUEUE 兩個檔，拆不開）；15ad 的佇列標記也放在那個 commit。
+- **補件**：開工時 `- [ ]` 17 項（DevQueue 可執行 6）。收工時 `- [ ]` 13 項（≥12），DevQueue 可執行 2 項（研究室.三、研究室.四），低於 6。本輪從 15ad 根因延伸補了 15ag／15ah 兩項，也在本輪做完。四個指定來源都查過，**已用盡**：BACKLOG「尚未開始」與已知限制段都已補過現況；UX 提案中性用語已生效（by_code 舊字樣 grep 0 筆）；先.八十全檢節全部 [x]／[~]（互動視窗）；DATA_GAP_PLAN 甲類只剩 #49（等 PREREG）、#39（先法遵）。所以沒有硬湊。
+- **BLOCKED**：本輪無新增。研究室.四沒跑（跟研究室.三共用 FinMind 每分鐘 10 次額度，同時跑不會變快）。
+- **冒煙**：本輪 4 次（16:1x、16:22、16:28、16:4x 收工前），每次 162 項 PASS／0 FAIL。
+
 ## 2026-10-16 15:4x（DevQueue 20261016-150101）研究室.三 +100 檔＋先.一〇三-15r／15u～15y／15z／15ac／15ae 只讀核對＋補件 15aa／15ab／15ad／15ae／15af
 
 等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未新增）
