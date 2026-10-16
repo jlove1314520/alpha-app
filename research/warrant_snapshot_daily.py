@@ -27,6 +27,17 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
+
+
+def _pull_autostash_safe() -> None:
+    """先.一〇三-14w：pull --autostash 套回失敗時取回別人未提交的檔（scripts/local_git_commit.py）；匯入失敗退回原本的 pull（十二節）。"""
+    try:
+        sys.path.insert(0, str(REPO / "scripts"))
+        import local_git_commit as _lgc  # noqa: E402
+        _lgc.pull_autostash_safe()
+    except Exception as e:  # noqa: BLE001
+        print(f"[autostash 取回] 警告：{type(e).__name__}: {e}，退回一般 pull", file=sys.stderr)
+        subprocess.run(["git", "pull", "-q", "--rebase", "--autostash"], cwd=REPO, capture_output=True, timeout=180)
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 TPE = timezone(timedelta(hours=8))
@@ -169,7 +180,7 @@ def commit_status() -> None:
             if p.returncode == 0:
                 log("push 成功")
                 return
-            g("pull", "-q", "--rebase", "--autostash")
+            _pull_autostash_safe()
         log("push 失敗 3 次，commit 留在本機，下次一起送")
     except Exception as e:  # noqa: BLE001
         log(f"提交失敗（{type(e).__name__}: {e}）")

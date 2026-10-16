@@ -33,6 +33,17 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 ROOT = Path(__file__).resolve().parent.parent
+
+
+def _pull_autostash_safe() -> None:
+    """先.一〇三-14w：pull --autostash 套回失敗時取回別人未提交的檔（scripts/local_git_commit.py）；匯入失敗退回原本的 pull（十二節）。"""
+    try:
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import local_git_commit as _lgc  # noqa: E402
+        _lgc.pull_autostash_safe()
+    except Exception as e:  # noqa: BLE001
+        print(f"[autostash 取回] 警告：{type(e).__name__}: {e}，退回一般 pull", file=sys.stderr)
+        subprocess.run(["git", "pull", "-q", "--rebase", "--autostash"], cwd=ROOT, capture_output=True, timeout=180)
 HB = ROOT / "research" / "PROGRESS_HEARTBEAT.jsonl"
 HB_REL = "research/PROGRESS_HEARTBEAT.jsonl"
 LOCK_PY = ROOT / "research" / "git_op_lock.py"
@@ -75,7 +86,7 @@ def _commit_push(msg: str) -> str:
         c = _git("commit", "-o", HB_REL, "-m", msg)
         if c.returncode != 0:
             return f"commit 無變更或失敗：{(c.stdout + c.stderr).strip()[:120]}"
-        _git("pull", "--rebase", "--autostash", timeout=180)
+        _pull_autostash_safe()
         p = _git("push", timeout=180)
         return "已 push" if p.returncode == 0 else f"push 失敗：{(p.stdout + p.stderr).strip()[:120]}"
     except Exception as e:  # noqa: BLE001

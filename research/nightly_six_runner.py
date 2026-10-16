@@ -25,6 +25,17 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
+
+
+def _pull_autostash_safe() -> None:
+    """先.一〇三-14w：pull --autostash 套回失敗時取回別人未提交的檔（scripts/local_git_commit.py）；匯入失敗退回原本的 pull（十二節）。"""
+    try:
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import local_git_commit as _lgc  # noqa: E402
+        _lgc.pull_autostash_safe()
+    except Exception as e:  # noqa: BLE001
+        print(f"[autostash 取回] 警告：{type(e).__name__}: {e}，退回一般 pull", file=sys.stderr)
+        subprocess.run(["git", "pull", "-q", "--rebase", "--autostash"], cwd=ROOT, capture_output=True, timeout=180)
 sys.path.insert(0, str(HERE))
 TZ = timezone(timedelta(hours=8))
 STATE = HERE / ".nightly6_state.json"
@@ -160,7 +171,7 @@ def _commit(paths: list[str], msg: str) -> str:
         c = g("commit", "-o", *paths, "-m", msg)
         if c.returncode != 0:
             return "commit 無變更或失敗"
-        g("pull", "--rebase", "--autostash")
+        _pull_autostash_safe()
         return "已 push" if g("push").returncode == 0 else "push 失敗"
     finally:
         if got:

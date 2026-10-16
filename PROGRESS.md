@@ -14,6 +14,7 @@
   - 未修：其餘 10 處自己呼叫 `pull --autostash` 的腳本，已補入 先.一〇三-14w。
 - **事件精簡版／索引重新拆檔（6524833aba）**：用目前 events.json（08:49）跑 split_events_by_code.py（零外部請求），三檔 fetched_at 一致。
 - **冒煙測試**：最後一次 10:23 起跑 `node scripts/smoke_test.mjs` exit 0「全部通過」。
+- **先.一〇三-14w 第 1 批（4／10，維持 - [ ]）**：4 支 .py（nightly_six_runner／warrant_snapshot_daily／long_job_progress_heartbeat／orphan_process_scan）改走 `local_git_commit.pull_autostash_safe()`；臨時 repo 重現套回衝突與模擬匯入失敗都驗過（主流程照跑）；冒煙 10:35 全過。尚餘 6 支 .ps1，下一輪續。[自行裁量] 匯入失敗退回原本 pull，而不是跳過 pull（保持原行為）。
 - **BLOCKED**：無新增。佇列補件：先.一〇三-14w（DevQueue 可執行）。
 
 ## 2026-10-16 09:43（互動視窗）先.一〇三 收尾（15、1b-3）＋先.一〇五 人因實測第二輪 7 項＋驗收

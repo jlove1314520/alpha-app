@@ -63,6 +63,14 @@ def _restore_failed_autostash(stash_before: str) -> str:
         return ""
 
 
+def pull_autostash_safe(timeout=180):
+    """先.一〇三-14w：給自己呼叫 `pull --rebase --autostash` 的其他排程用；套回失敗時一樣取回別人未提交的檔。"""
+    before = _g("rev-parse", "-q", "--verify", "refs/stash").stdout.strip()
+    r = _g("pull", "-q", "--rebase", "--autostash", timeout=timeout)
+    _restore_failed_autostash(before)
+    return r
+
+
 def commit_paths(paths: list[str], msg: str, drop_on_conflict: bool = False) -> str:
     if rebase_in_progress():
         return "repo 正在 rebase 中（別的程序留下的），本輪不動，留給人工或下一輪"
