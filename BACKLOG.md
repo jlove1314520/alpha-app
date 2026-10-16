@@ -1828,6 +1828,7 @@ a) **跨process共用的速率限制+斷路器**——新增`data/rate_limit_sta
      這8支是2026-08-27晚實際會打TWSE/TPEx/FinMind的腳本全部。**尚未套用**：
      `fetch_earnings_calendar.py`（yfinance，不在使用者這輪指定的
      TWSE/TPEx/FinMind範圍內，故意不動）。
+     > ⚠️ 現況（2026-10-16 DevQueue 20261016-140101 核對，先.一〇三-15t，只讀）：**仍未套用**——`.github/scripts/fetch_earnings_calendar.py` 沒有 rate_limit_state、快取或請求間隔；固定 6 檔（NVDA／AAPL／MSFT／TSM／GOOGL／AMZN）各打 `get_calendar()`＋`get_earnings_dates(limit=4)`，每班約 12 次 Yahoo 請求、`market.yml` 每日 3 班＝約 36 次/日，步驟 `continue-on-error: true`（失敗不擋管線）。yfinance／Yahoo 未公布上限（見 C:/alpha/CLAUDE.md「美股篩選資料源」）。[自行裁量] 量很小且失敗已隔離，本輪不另立提案；若日後擴大檔數或見 429，再提「請求間隔 ≥1 秒＋同日快取」。
 
 b) **已抓過的資料走本地快取，同一資料當日不重複請求**——這條規則本來就是
    `research/finmind_client.py`既有的parquet快取設計（`_fetch()`命中快取
