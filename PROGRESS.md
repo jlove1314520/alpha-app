@@ -1,3 +1,15 @@
+## 2026-10-17 03:4x（DevQueue 20261017-030102）研究室.三 +150 檔（累計 1,810/1,980）＋先.一〇八-3／-5 完成＋補件 2 條
+
+等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未新增）
+
+- **研究室.三（維持 - [ ]）**：`timeout 2100 python scripts/backfill_revenue_display.py --max 150`，03:01～03:31，150/150 整批跑完（150 檔全有資料、0 空、log 無 402，exit 0）；`data/revenue_backfill.json` meta：done 1,810、n_with_rows 1,809、remaining 170。下一輪照跑同一指令，約再 1～2 批。commit 9d8fe28992。
+- **先.一〇八-5（[x]，只讀、未送單）**：`data/paper_order_log.json` 09-01 23:41 AAPL BUY／SELL 兩筆 Filled **不是** `ibkr_order_server.py` 寫的——attempt_id 12 碼（伺服器 `secrets.token_hex(8)`＝16 碼）、沒有 phase 欄、note 不同；那支一次性測試腳本沒進 repo（commit 89af9d519d 只改伺服器 17 行＋log）。同檔 21:49～21:50 四筆才是伺服器寫的，但在修正 commit 2404ff61bf（21:56）之前。結論：證明 ib_async→Gateway→成交路徑會動，但「修正後成交判斷仍未完整驗證」維持成立，仍需總司令親自送一筆 paper 單。順手更正 15p 的錯誤敘述「伺服器沒有落地任何下單紀錄檔」（BACKLOG 補一行更正）。commit 4494b23a45（rebase 後 8f2f70d574）。
+- **先.一〇八-3（[x]）**：方法論視窗權重表每個因子可點開，顯示「怎麼算／用哪份資料／多久更新／已知限制」（`app.js` `METHOD_FACTOR_NOTES`＋`_mFactorRow()`，三榜 20 個因子），評分邏輯沒動。文字對照實際產生榜單的程式（價值榜是 `generate_scores_live.py`＋`live_factors.py`，scores_list.json engine_version＝scoring-live-json）；由 Explore 子代理逐行讀並附行號，我抽查 4 個因子與程式一致。冒煙 #148 加檢查：價值 8/8、動能 7/7 個因子都可展開且四欄齊全。[自行裁量] 資料名稱用白話名稱、不顯示原始檔路徑（沿用同函式既有規則）。第一版 analyst 說明含「目標價」被 #148 推介字眼檢查擋下，改寫措辭，沒有放寬測試。限制：未看 393 寬展開版面（已補件先.一〇八-7）。commit f59b1c0781。
+- **研究室.四（未跑）**：本批同一小時已用掉約 150 次 FinMind，且已到收尾時間。[自行裁量]
+- **補件**：DevQueue 可執行只剩 2 項（<6）。四個來源逐條核對，**來源已用盡**，只補得出先.一〇八-6（下市名單快取重抓，BACKLOG 第 1166 行①）、先.一〇八-7（方法論因子展開 393×852 截圖驗證）兩條；DevQueue 可執行補到 4 項，未達 6，照實記。`- [ ]` 共 16 項（≥12）。
+- 冒煙：每項 commit 前各跑一次，166／166、166／166、166／166 通過（03:3x 最後一次 exit 0）。
+- 開工檢查：`- [!]` 阻塞項沒有到期的（研究室.六-週跑時間閘 10/19 週一）；FinMind blocked_until 是 09-29 的舊值，未封鎖。
+
 ## 2026-10-17 02:4x（DevQueue 20261017-020101）研究室.三 +150 檔（累計 1,660/1,980）＋先.一〇八-1／-2／-4 完成＋補件 5 條
 
 等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未新增）
