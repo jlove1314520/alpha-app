@@ -2002,7 +2002,7 @@ FinMind的明確`retry_after`倒數更不透明，沒有官方公告的解除時
      達成的中繼站，TAIFEX原生端點仍是更長期的目標。
   2. 日資料但全市場一次呼叫、量小，納入節流/斷路器登記。
   ✅ 已完成（2026-10-16 先.一〇三-15a 核對）：先.八十一-10 已改走 TAIFEX 官方 OpenAPI（`.github/scripts/fetch_futures_institutional.py` → `data/futures_institutional.json`，`market.yml` 每日三班），App `app-market.js` `loadFutInst()` 以 repo 檔為主、讀不到才退回 FinMind；STATUS.json 的「未遷移」舊文字同日更正。
-  現況（2026-10-16 先.一〇三-15b 核對，STATUS app_data_sources 同段另兩條）：①市場頁主流題材 chips 仍由 `app-picks.js` `fetchIndustryFlow()` client-side 打 FinMind `TaiwanStockPrice`（8 大產業指數），「未遷移」屬實、照實保留；②個股頁走勢圖台股已是 repo `price_history` 為主、FinMind 補（`twPxRepoFirst()`），美股仍以 FinMind `USStockPrice` 為主（與七節美股原生源裁示不符，提案另立先.一〇三-15d）。
+  現況（2026-10-16 先.一〇三-15b 核對，STATUS app_data_sources 同段另兩條）：①市場頁主流題材 chips ~~仍由 FinMind 為主、「未遷移」屬實~~（⚠️ 15b 判錯，15e 更正）：`app-picks.js` `loadMainstreamIndustries()` 先讀 repo `data/industry_flow.json`（先.八十一-10），讀不到才退回 `fetchIndustryFlow()` 打 FinMind 8 大產業指數，已遷移；②個股頁走勢圖台股已是 repo `price_history` 為主、FinMind 補（`twPxRepoFirst()`），美股仍以 FinMind `USStockPrice` 為主（與七節美股原生源裁示不符，提案另立先.一〇三-15d）。
 
 - **✅ B29：美股財報/FCF因子管線（2026-09-02完成後端+前端UI）**：
   1. yfinance提供`.financials`/`.balance_sheet`/`.cashflow`（損益表/

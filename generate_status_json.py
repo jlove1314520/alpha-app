@@ -1021,7 +1021,7 @@ APP_DATA_SOURCES = [
     {"panel": "市場頁·大盤指數（含sparkline）", "source": "data/market_tw.json + data/market_us.json"},
     {"panel": "市場頁·類股表現(熱力圖)", "source": "data/market_tw.json（sectors，TWSE MI_INDEX 27類）"},
     {"panel": "市場頁·三大法人買賣超(全市場)", "source": "data/market_tw.json（institutional_history，TWSE T86加總）"},
-    {"panel": "市場頁·主流題材chips", "source": "FinMind TaiwanStockPrice（8大產業指數Trading_money，仍為舊版本邏輯，未遷移；2026-10-16 先.一〇三-15b 核對：app-picks.js fetchIndustryFlow 仍在用，屬實）"},
+    {"panel": "市場頁·主流題材chips", "source": "repo data/industry_flow.json（scripts/build_industry_flow.py：price_history 成交值依產業加總，market.yml 排程）為主；讀不到才退回 FinMind TaiwanStockPrice 8 大產業指數（先.八十一-10，2026-10-16 先.一〇三-15e 更正）"},
     {"panel": "市場頁·期貨籌碼", "source": "data/futures_institutional.json（TAIFEX 官方三大法人-區分各期貨契約，.github/scripts/fetch_futures_institutional.py 每日三班；先.八十一-10 已遷移）；讀不到才退回 FinMind TaiwanFuturesInstitutionalInvestors（client-side 備援）"},
     {"panel": "個股頁·總覽·走勢圖", "source": "台股：repo price_history（證交所／櫃買每日收盤）為主、FinMind TaiwanStockPrice 補（先.八十一-10）；美股：仍以 FinMind USStockPrice 為主、quotes_us 近 20 日收盤補（未遷移，見先.一〇三-15d）"},
     {"panel": "個股頁·總覽·PER/PBR/殖利率/月營收YoY", "source": "data/fundamentals.json"},
