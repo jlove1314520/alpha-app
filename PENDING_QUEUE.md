@@ -20372,3 +20372,11 @@ un-market-catchup.ps1 註解同步改心跳路徑（repo 外）。〕
 **收件註記**：第 1 項沿用上面既有條目「先.一〇一-5」（本段為最新裁示，結案條件以本段為準）；第 2 項沿用「先.一〇三-15d」並升為補件順序第 ① 類（資料缺口／數字錯），互動視窗接著先.一〇一-5 直接做（同檔 app-stock.js，DevQueue 不取）；第 3 項另開一條、時間閘（等第一次真實觸發，不特地等）。
 
 - [ ] **先.一〇七-3 雲端補救觸發第一次真正送出 workflow_dispatch 時，PROGRESS 記觸發時間與該次 run 結果**（任一執行者；時間閘，不特地等）
+
+# 2026-10-17 02:1x DevQueue 20261017-020101 收工前自動補件（先.九十五-8：DevQueue 可執行只剩 3 項＜6）
+來源核對：③先.八十全檢修正 1～14 全 [x]、④DATA_GAP_PLAN 甲類已做完 → 本批只來自 ① BACKLOG 與 ② UX 提案。
+
+- [ ] **先.一〇八-1 [自走補入，來源：BACKLOG.md「架構紅線第 1 條」→ docs/CLIENT_SIDE_API_INVENTORY.md 第 26 列 ❌＋本檔先.一〇三-15e「併進 15d」但 15d（第 20216 行）只改 app-stock.js] 選股報告美股價格改 repo 日線優先：app-picks.js 約第 672 行 `usCode?fm('USStockPrice',…)` 改成先讀 data/us_daily/<代號>.json，讀不到才打 FinMind，畫面標本次來源；us_daily 每檔約 22 根，low60 不足 60 根顯示「—」；冒煙加一項「擋 FinMind 時 NVDA 報告仍算得出」；同步更新 CLIENT_SIDE_API_INVENTORY.md 與 DATA.md**（DevQueue 可執行）
+- [ ] **先.一〇八-2 [自走補入，來源：docs/UX_REDESIGN_PROPOSAL.md ①「顏色語意衝突」→ 先.九十四-5f 只改 app.js] 日誌頁「Bb-90 vs 0050 差距」（app-journal.js 約第 148 行 cls(diff) 漲跌色）改中性色＋「領先／落後」，照 app.js `_scVs()` 寫法；冒煙納入**（DevQueue 可執行）
+- [ ] **先.一〇八-3 [自走補入，來源：docs/UX_REDESIGN_PROPOSAL.md ⑤ 方法論頁「正式版建議：每個分數一段怎麼算／輸入資料／更新頻率／已知偏誤」] 方法論視窗（app.js renderMethodBoard 約第 2518 行權重表）每個因子可展開一句白話：怎麼算、用哪個 data 檔、更新頻率、已知偏誤；文字對照 research/live_factors.py，不改評分邏輯**（DevQueue 可執行）
+- [ ] **先.一〇八-4 [自走補入，來源：docs/UX_AUDIT.md 第 36～37 行「不確定、先列表不改」第 2 條（淺色底對比 1.96）] 個股頁外資估算成本線 app-stock.js 約第 213 行寫死 `#d4a84b` 改讀 CSS 變數（淺色用 --gold-line，深色維持原色）；附 393×852 淺／深色截圖，UX_AUDIT 該條標已修**（DevQueue 可執行）
