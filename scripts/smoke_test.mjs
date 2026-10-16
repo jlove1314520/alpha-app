@@ -5479,6 +5479,46 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { usChErrs.push(`測試本身出錯：${e.message || e}`); }
   record("165. 美股走勢圖 FinMind 被擋仍畫得出（repo 日線→quotes_us 退回）、標出來源、不打 FinMind（先.一〇七-2）", usChErrs.length === 0, usChErrs.join("; ") || usChInfo);
 
+  // 166.【2026-10-17 先.一〇八-1】選股報告美股價格改 repo 日線優先：(a) 擋掉 FinMind，usPxRepoFirst('NVDA') 由 data/us_daily 取得 ≥2 根、
+  // 標 _src＝repo、0 次 FinMind 請求；(b) us_daily 回 404 時才退到 FinMind（_src＝finmind，且真的嘗試打了 FinMind）。
+  const pxRfErrs = [];
+  let pxRfInfo = "";
+  try {
+    for (const variant of ["repo", "finmind"]) {
+      const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+      const fmReq = [];
+      await ctx.route(/api\.finmindtrade\.com/, (route) => { fmReq.push(route.request().url()); return route.abort(); });
+      if (variant === "finmind") await ctx.route(/\/data\/us_daily\/NVDA\.json/, (route) => route.fulfill({ status: 404, body: "" }));
+      const p6 = await ctx.newPage();
+      const pe = [];
+      p6.on("pageerror", (e) => pe.push(String(e)));
+      try {
+        await p6.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+        await p6.waitForFunction(() => typeof loadAppModule === "function", null, { timeout: 20000 });
+        fmReq.length = 0;
+        const r = await p6.evaluate(async () => {
+          await loadAppModule("picks");
+          if (typeof window.usPxRepoFirst !== "function") return { err: "usPxRepoFirst 未定義" };
+          try { const px = await window.usPxRepoFirst("NVDA"); return { src: px._src, n: px.length, note: px._srcNote || "", close: px.length ? px[px.length - 1].Close : null }; }
+          catch (e) { return { threw: String(e && e.message || e) }; }
+        });
+        if (r.err) pxRfErrs.push(`${variant}：${r.err}`);
+        else if (variant === "repo") {
+          if (r.src !== "repo" || !(r.n >= 2) || typeof r.close !== "number") pxRfErrs.push(`repo：應由本站日線取得 ≥2 根，實際 ${JSON.stringify(r)}`);
+          if (!/本站日線/.test(r.note || "")) pxRfErrs.push(`repo：來源說明沒標本站日線：${r.note}`);
+          if (fmReq.length) pxRfErrs.push(`repo：本站日線有資料卻打了 ${fmReq.length} 次 FinMind`);
+          pxRfInfo += `repo：${r.n} 根、${r.note}；`;
+        } else {
+          if (!fmReq.length) pxRfErrs.push("finmind：本站日線 404 時應退到 FinMind，卻沒有打");
+          if (r.src && r.src !== "finmind") pxRfErrs.push(`finmind：來源應為 finmind，實際 ${r.src}`);
+          pxRfInfo += `404 退回：FinMind 請求 ${fmReq.length} 次（測試中被擋，${r.threw ? "拋錯由報告頁既有錯誤處理接手" : "回 " + r.n + " 筆"}）；`;
+        }
+        if (pe.length) pxRfErrs.push(`${variant}：pageerror ${pe.slice(0, 2).join(" | ")}`);
+      } finally { await ctx.close(); }
+    }
+  } catch (e) { pxRfErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("166. 選股報告美股價格 repo 日線優先：FinMind 被擋仍取得 NVDA 日線、標來源、不打 FinMind；本站 404 才退 FinMind（先.一〇八-1）", pxRfErrs.length === 0, pxRfErrs.join("; ") || pxRfInfo);
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];

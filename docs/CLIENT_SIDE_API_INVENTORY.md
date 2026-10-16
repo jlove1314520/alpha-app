@@ -23,7 +23,7 @@
 | 3 | `app.js` 第 2189 行 `twPxRepoFirst()` | 個股頁走勢圖（台股）、選股報告（台股） | `TaiwanStockPrice` | 是：`by_code` 小檔的 `price`（repo price_history） | 補充（repo 少於 2 筆才用） | ✅ |
 | 4 | `app-stock.js` 第 560 行 `loadRevenueChart()` | 個股頁·營收圖的月底股價 | `TaiwanStockPrice` | 是：`by_code` 的 `monthly_close`（先.八十一-22） | 補充（只補缺的月份） | ✅ |
 | 5 | `app-stock.js` 第 679 行 `openStock()` 美股分支 | 個股頁·總覽·走勢圖（美股） | `USStockPrice` | **否**：先打 FinMind，失敗才退回 `quotes_us` 近 20 日收盤 | **主來源** | ❌ 紅線第 1 條＋七節美股原生源 |
-| 6 | `app-picks.js` 第 671 行 選股報告 | 選股報告·走勢（美股） | `USStockPrice` | **否**（台股走 `twPxRepoFirst`，美股直接 FinMind） | **主來源** | ❌ 同上 |
+| 6 | `app-picks.js` 第 671 行 選股報告 | 選股報告·走勢（美股） | `USStockPrice` | **是**（2026-10-17 先.一〇八-1：美股改 `usPxRepoFirst`，先讀 `data/us_daily/<代號>.json`，讀不到才打 FinMind；分批計畫說明列標本次來源） | 補充（本站日線讀不到時） | ✅ 已改（冒煙 #166） |
 
 結論：台股 4 處都已是「repo 為主、FinMind 補」；**美股 2 處仍以 FinMind（台灣資料商）為主來源**。
 第 5 列已有提案條目 先.一〇三-15d；第 6 列與第 5 列是同一個問題（同一個 dataset、同一種退回邏輯缺口），

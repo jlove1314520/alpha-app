@@ -577,6 +577,25 @@
     // 階梯照顯示，把判斷權留給使用者，這裡只負責把風險講得夠醒目。
     host.innerHTML=`⚠ 追高風險提醒：${flags.join('；')}。下方回檔價位參考照常顯示，只是價位換算，不代表進出場時點。`;
   }
+  // 先.一〇八-1（BACKLOG 架構紅線第 1 條／CLIENT_SIDE_API_INVENTORY 第 26 列）：選股報告美股價格改 repo 日線優先
+  // （data/us_daily/<代號>.json，build_us_screener.py 同一批 yfinance 已收盤日線，約 22 根），讀不到才打 FinMind。
+  // 回傳 FinMind USStockPrice 同形狀的列（Close／High／Low），陣列上掛 _src（'repo'｜'finmind'）與 _srcNote 供畫面標來源。
+  async function usPxRepoFirst(code,fmStart){
+    try{
+      const r=await fetch('data/us_daily/'+encodeURIComponent(code)+'.json?t='+Math.floor(Date.now()/600000));
+      if(r.ok){
+        const d=await r.json();
+        if(d&&Array.isArray(d.bars)&&d.bars.length>=2){
+          const out=d.bars.map(b=>({date:b[0],Open:b[1],High:b[2],Low:b[3],Close:b[4],Volume:b[5]}));
+          out._src='repo';out._srcNote=`本站日線（yfinance 已收盤，至 ${String(out[out.length-1].date).slice(5).replace('-','/')}，${out.length} 根）`;
+          return out;
+        }
+      }else if(r.status!==404)throw new Error('HTTP '+r.status);
+    }catch(e){console.warn('[usPxRepoFirst:repo]',e);recordGlobalError('usPxRepoFirst:repo',e)}
+    const px=await fm('USStockPrice',code,fmStart||_d(70));
+    px._src='finmind';px._srcNote='FinMind 美股日線（本站日線讀不到時的補充來源）';
+    return px;
+  }
   async function renderReport(){
     const row=REPORT_CACHE;
     if(!row)return;
@@ -668,8 +687,8 @@
     try{
       const usCode=isUS(row.code);
       // 常備.開發-20（先.六十七）：首頁不再整份載入 sparklines／quotes_all_tw，防線二的真值要自己備妥這一檔的小檔
-      // 先.八十一-10：台股改讀 repo（by_code 近 60 日價）為主、FinMind 補充；美股照舊
-      const [pxS]=await Promise.allSettled([usCode?fm('USStockPrice',row.code,_d(70)):twPxRepoFirst(row.code,_d(70)),ensureQuoteLite([row.code])]);
+      // 先.八十一-10：台股改讀 repo（by_code 近 60 日價）為主、FinMind 補充；先.一〇八-1：美股也改 repo 日線優先
+      const [pxS]=await Promise.allSettled([usCode?usPxRepoFirst(row.code,_d(70)):twPxRepoFirst(row.code,_d(70)),ensureQuoteLite([row.code])]);
       if(pxS.status==='rejected')throw pxS.reason;
       const px=pxS.value;
       // 防線一：await 期間使用者已經切到別檔，這批結果作廢（不作廢就會把這一檔的
@@ -682,6 +701,10 @@
       const last=closes[closes.length-1];
       const low20=Math.min(...closes.slice(-20));
       const low60=Math.min(...closes.slice(-60));
+      // 先.一〇八-1：美股本站日線只有約 22 根，不足 60 根時「60 日低點」顯示「—」，不拿 22 日低點冒充
+      const low60Txt=closes.length>=60?nf(low60.toFixed(2)):`—（只有 ${closes.length} 根日線）`;
+      const pxSrcTxt=px._srcNote?`價格來源：${px._srcNote}。`:(px._src==='repo'?'價格來源：本站日線。':px._src==='finmind'?'價格來源：FinMind（本站日線讀不到時的補充來源）。':'');
+      window.__picksPxSource=px._src||'';  // 冒煙 #166 用
       // 防線二：跟全 App 唯一真值比對，差超過 ±30% 就不顯示任何數字。
       const sane=priceSanityFailure(row.code,last,'分批資金配置範例');
       if(sane){
@@ -749,7 +772,7 @@
       ENTRY_PLAN_CACHE={code:row.code,name:row.name,tranches};
       planEl.innerHTML=
         (EXTREME_MOVE_ACTIVE?`<div class="note" style="margin-bottom:10px;color:var(--warn);border:1px solid rgba(250,178,25,.35);border-radius:9px;padding:8px 10px"><b>⚠ 追高風險高</b>：${extremeMoveFlags(row).join('；')}。階梯照常顯示，判斷權在你。</div>`:'')+
-        `<div class="note" style="margin-bottom:12px">⚠️ 技術層級分批規則（價位取自這一檔自己的均線／前波低點／ATR，非估值預測、非投資建議，僅為資金配置範例）。近期支撐參考：20 日低點 ${nf(low20.toFixed(2))}、60 日低點 ${nf(low60.toFixed(2))}、近 20 日最高 ${nf(swingHigh.toFixed(2))}。</div>`+
+        `<div class="note" style="margin-bottom:12px">⚠️ 技術層級分批規則（價位取自這一檔自己的均線／前波低點／ATR，非估值預測、非投資建議，僅為資金配置範例）。近期支撐參考：20 日低點 ${nf(low20.toFixed(2))}、60 日低點 ${low60Txt}、近 20 日最高 ${nf(swingHigh.toFixed(2))}。${pxSrcTxt}</div>`+
         `<div style="display:flex;flex-direction:column;gap:10px">`+
         tranches.map((t,i)=>`<div style="display:flex;align-items:center;gap:12px">
           <span class="num" style="width:22px;height:22px;border-radius:50%;background:rgba(216,176,112,.15);color:var(--gold-on-tint);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</span>
