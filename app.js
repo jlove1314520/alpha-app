@@ -4083,6 +4083,9 @@
       if(dot){
         dot.hidden=!top||onHome||top.sev<1;  // 凍結中（sev 0）是狀態說明不是告警，其他頁不亮點
         if(top)dot.style.background=HUB_SEV_COLOR[top.sev];
+        // 先.一〇五-6：點貼在台股膠囊左邊（容器寬度跟著較寬的美股膠囊，不能用固定位置）
+        try{const tw=document.getElementById('mkt-tw'),ms=dot.parentElement;if(tw&&ms&&!dot.hidden){const a=tw.getBoundingClientRect(),b=ms.getBoundingClientRect();
+          dot.style.left=Math.round(a.left-b.left-14)+'px';dot.style.top=Math.round(a.top-b.top+a.height/2-5)+'px'}}catch(e){console.warn('[hub dot pos]',e)}
         dot.title=top?top.txt:'';
       }
       if(!top||!onHome){hub.hidden=true;return}
@@ -4743,7 +4746,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-16.0930';
+  const APP_VERSION='2026-10-16.0937';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

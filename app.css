@@ -584,3 +584,7 @@ details.ui-more[open]>summary{color:var(--ink-2)}
 .div-bars.val-corner{position:relative;padding-top:14px}
 .div-bars .db-val.at-corner{position:absolute;top:-2px!important;right:0;bottom:auto}
 .div-bars.val-corner .db.has-val{position:static}
+
+/* 先.一〇五-6 非今日頁告警點：貼在台股膠囊左側，不另佔一行 */
+.mkt-state{position:relative}
+#alert-hub-dot{position:absolute;left:-16px;top:9px;width:10px;height:10px}

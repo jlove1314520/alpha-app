@@ -290,7 +290,8 @@
       ?`<div class="note" id="margin-calib" style="margin-top:2px">對齊籌碼K（${calib.mode==='linear'&&typeof calib.alpha==='number'&&typeof calib.beta==='number'
           ?`線性換算＝本站 × ${calib.beta} ${calib.alpha<0?'−':'＋'} ${Math.abs(calib.alpha)}`
           :`係數 ${k}${calib.mode==='segmented'?'，依水位分段校準':''}`}，近 ${calib.n_points!=null?calib.n_points:calib.n_days} 日最大誤差 ${calib.max_err_pp!=null?calib.max_err_pp:'?'} pp）</div>`
-        +(calib.warn?`<div class="note" id="margin-calib-warn" style="color:var(--warn);margin-top:2px">⚠ 校準待更新：有讀數誤差超過 ${calib.warn_pp!=null?calib.warn_pp:0.5} pp，數字僅供參考</div>`:'')
+        // 先.一〇五-7：誤差警語合併成一行（原本「校準值…誤差最大…」與「校準待更新…」兩行）；校準值留在這一行，仍不隱藏數字（先.五十三-A）
+        +(calib.warn?`<div class="note" id="margin-calib-warn" style="color:var(--warn);margin-top:2px">⚠ 校準待更新：讀數誤差最大 ±${calib.max_err_pp!=null?calib.max_err_pp:'?'} pp（門檻 ${calib.warn_pp!=null?calib.warn_pp:0.5} pp），校準值 ${(()=>{const v=marginVal(history[history.length-1]);return v!=null?v.toFixed(1)+'%':'—'})()} 僅供參考</div>`:'')
       :'<div class="note" style="color:var(--warn)">校準檔讀取失敗，以下為本站算法原值</div>';
     const raw=h=>h&&h.ratio_pct_ck!=null&&h.ratio_pct!=null?`<div class="note" id="margin-raw" style="color:var(--ink-4);margin-top:2px">本站原值 ${h.ratio_pct.toFixed(1)}%</div>`:'';
     const fmt=h=>{const v=marginVal(h);return v!=null?v.toFixed(1)+'%':'—'};
@@ -303,7 +304,7 @@
       const _v=marginVal(last),_err=calib&&typeof calib.max_err_pp==='number'?calib.max_err_pp:null;
       const _fuzzy=_v!=null&&_err!=null&&(calib.warn||_err>(calib.warn_pp!=null?calib.warn_pp:0.5));
       const mainTxt=_fuzzy?`約 ${Math.floor(_v-_err)}–${Math.ceil(_v+_err)}%`:fmt(last);
-      sumEl.innerHTML=`<div style="padding:6px 0 10px"><div id="margin-main" data-fuzzy="${_fuzzy?1:0}" title="${_fuzzy?'校準值 '+fmt(last)+'，誤差最大 ±'+_err+' pp':''}" style="font-size:${_fuzzy?22:28}px;font-weight:700;color:${lv?lv.c:'var(--ink)'}">${mainTxt}</div>${_fuzzy?`<div class="note" id="margin-ck-val" style="margin-top:0">校準值 ${fmt(last)}（誤差最大 ±${_err} pp，數字僅供參考）</div>`:''}<div class="note">${lv?lv.l+' · ':''}資料日 ${marginDataDay(last)}</div>${calHead}${raw(last)}</div>`;
+      sumEl.innerHTML=`<div style="padding:6px 0 10px"><div id="margin-main" data-fuzzy="${_fuzzy?1:0}" title="${_fuzzy?'校準值 '+fmt(last)+'，誤差最大 ±'+_err+' pp':''}" style="font-size:${_fuzzy?22:28}px;font-weight:700;color:${lv?lv.c:'var(--ink)'}">${mainTxt}</div>${_fuzzy&&!(calib&&calib.warn)?`<div class="note" id="margin-ck-val" style="margin-top:0">校準值 ${fmt(last)}（誤差最大 ±${_err} pp，數字僅供參考）</div>`:''}<div class="note">${lv?lv.l+' · ':''}資料日 ${marginDataDay(last)}</div>${calHead}${raw(last)}</div>`;
     }
     let chartHtml=marginChart(valid);
     try{
