@@ -433,6 +433,18 @@ Playwright手動驗證debug開關預設隱藏/點5下後正確顯示+今日事�
 清單，已在session內部完成但沒有另外寫成獨立文件）、二.2剩下的B29美股
 財報yfinance因子管線（工作量較大，派給獨立agent處理中）。
 
+**現況核對（2026-10-16 14:0x DevQueue 20261016-140101，先.一〇三-15n）**：
+- 二.2 B29：**已做，且已換源**。`data/us_financials.json` 現由
+  `.github/scripts/fetch_us_financials_sec.py`（SEC EDGAR XBRL companyfacts，
+  官方免金鑰）產生，`.github/workflows/us_financials.yml` 每週六台北 10:17
+  排程；檔內 `generated_at`＝2026-10-11T02:14:43+08:00、`covered_count`＝253、
+  `errors` 10 筆（2026-10-11 常備.開發-16 取代原 6 檔 yfinance 快照）。
+  個股頁「財報」分頁美股分支已接上（本檔 2026-09-02 B29 UI 條目）。
+- 二.1 完整掃描清單：**沒有獨立文件**（docs/ 無對應檔；PENDING_QUEUE 二.1
+  條目自述「未另存獨立文件」）。現況 `index.html` 只剩 1 處「建置中/尚未實作/
+  尚無評分/尚未接上」字樣（第 519 行，是說明已取代該占位的註解），舊清單已無
+  補寫價值，不另補。
+
 ---
 
 ## ⚠ 2026-09-01（續）Shioaji台股paper下單伺服器：程式建好+login驗證通過，
