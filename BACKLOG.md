@@ -2418,6 +2418,7 @@ B31/B32/B33。
   逐字稿關鍵詞）。**依賴B19（訊號台帳骨架）跟`docs/Alpha_新聞與供應鏈
   連動_設計小抄.md`既有規格（`news_fetch.py`/`supply_chain.json`/
   `news.json`，2026-08-23已設計但尚未實作）先完成，才能有事件資料可用。**
+  > ⚠️ 現況（2026-10-16 DevQueue 20261016-130101 核對，先.一〇三-15l）：「已設計但尚未實作」部分過時。**已做**：`data/news.json`（news_events.yml 跑 `.github/scripts/fetch_news_events.py`＋`fetch_news_sitemap.py`＋`news_body_extract.py`，中央社／Yahoo／經濟日報 5 個 RSS）；台股重大訊息進 `data/events.json`（`split_events_by_code.py` 拆檔）；美股 8-K 進 `data/us_events.json`（market.yml）；設計小抄第三節割韭菜偵測已在 B19 `build_signal_ledger.py` 實作（run_before／pre_vol_spike）；題材比對改走 `scripts/build_themes.py` 句型規則（「打入…供應鏈」）。**沒做**：設計小抄第二節 `data/supply_chain.json`（美股 hub→台股連動、帶 confidence 的關係圖）不存在，App 端也沒有「美股消息點亮相關台股」；小抄第五節 news.json 的 importance 計分格式未逐欄核對。
 
   **使用者這輪明確指定優先順序：SEC 8-K優先**（原話：「它不限流且是
   第一手」）——SEC EDGAR是美國官方申報系統，免金鑰、有明確的公平使用
@@ -2508,6 +2509,7 @@ B31/B32/B33。
      零或負者降權或剔除。校準要版本化並記錄理由與樣本數。
   尚未開始，是這批新指示裡最核心、風險也最高的一塊（涉及「不得事後補建」
   這條鐵律，實作要非常小心避免踩到）。
+  > ⚠️ 現況（2026-10-16 DevQueue 20261016-130101 核對，先.一〇三-15k）：上面「尚未開始」已過時——2026-10-11（常備.開發-因子類-B19）上線。規格 `research/B19_SIGNAL_LEDGER_SPEC.md`（事前登記 adeb12243）；`.github/scripts/build_signal_ledger.py` 建檔、`update_signal_ledger_returns.py` 回填，market.yml 每班（第 214～221 行）。`data/signal_ledger.json`：286 筆、最後建檔 10/16 07:57、最後回填 10/15 21:56。逐點：①分層 L1／L3 已做（L2 公司自述、L4 社群未接）；②交叉驗證已做 L1/L2 對應與獨立 L3 來源，**「自有資料佐證」欄位 own_data＝not_implemented**；③已反映偵測已做（run_before 5 日 >15%、pre_vol_spike 2 倍、reflected 欄）；④「不得事後補建」靠兩道防線：只收 4 日內事件（FRESH_DAYS）＋ID 已存在整筆跳過、回填只填 null 欄位；⑤校準迴圈＝B22，未做（依賴樣本累積，佇列「常備.開發-因子類-B22」阻塞中）。
 
 - **B21：Reddit社群訊號抓取（合規）**（2026-08-27登錄，依賴B19訊號管線
   骨架先完成）：
@@ -2572,3 +2574,4 @@ B31/B32/B33。
   實作」——未來若接 IBKR 下單，延長時段（盤前/盤後）下單需要帶這個旗標，
   目前完全沒有下單串接（見 CLAUDE.md 安全紅線：自動下單只做介面/下單計畫，
   絕不串接真實下單 API），這條純粹是記錄給未來參考。
+  > ⚠️ 現況（2026-10-16 DevQueue 20261016-130101 核對，先.一〇三-15m，只讀程式碼、未送單）：仍未實作。IBKR paper 下單伺服器 `research/ibkr_order_server.py` 第 240～242 行只建 `MarketOrder`／`LimitOrder(action, qty, limit_price)`，沒有設 `outsideRth`，全檔 0 處；IBKR 預設 outsideRth＝False，所以盤前／盤後送出的單會掛著等正規時段（TIF 由 Gateway 預置為 DAY，見同檔第 245 行註解）。另：上面「絕不串接真實下單 API」已被 CLAUDE.md 八節 2026-10-06 自動交易規則更正取代。
