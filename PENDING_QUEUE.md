@@ -21,6 +21,7 @@
 2. **阻塞≠停止**：某一項標`- [!]`BLOCKED後，同一輪要立刻換下一項
    繼續做，不是結束整輪；每輪開工時要檢查已BLOCKED項目的解除條件，
    解除就轉回`- [ ]`。
+3b. ⚠️ **【常規.補件順序】（2026-10-16 總司令裁示，取代原本不分順序的做法）**：DevQueue 自動補件時依這個優先順序排：① 資料缺口／數字錯 → ② 使用者看得到的畫面問題 → ③ 研究室回補 → ④ BACKLOG 文書核對。④ 類每輪最多補 3 項，不得占滿佇列。
 3. ⚠️ **補件來源與時機已更新（2026-10-14【先.九十五】8）**：DevQueue 每輪收工時，`- [ ]` <12 或 DevQueue 可執行 <6 就自動補件，來源依序 BACKLOG.md → docs/UX_REDESIGN_PROPOSAL.md → Cowork 全檢報告（本檔「先.八十　全檢修正」節）→ DATA_GAP_PLAN 甲類，每條寫來源；不得用小事湊數、不得補新的 alpha 試驗。下面原文的補件來源清單已過時，保留供稽核。
    **佇列深度下限12項（2026-09-19總司令裁示【裁示】五，原本5項太淺，一補
    完馬上又見底，實測消化速度約5條/40分鐘）**：**真正能動手做的`- [ ]`項目**
@@ -20259,7 +20260,7 @@ un-market-catchup.ps1 註解同步改心跳路徑（repo 外）。〕
 - [x] **先.一〇三-15p [自走補入，DevQueue 20261016-130101 收工補件，來源：BACKLOG.md 約第 635 行「IBKR 成交狀態誤判修好後，還沒有機會重新跑一次完整驗證」] 只讀既有紀錄核對：IBKR paper 下單伺服器之後的成交紀錄／log 是否已有「Filled 正確回報」的實例；有→補證據；沒有→照實寫「仍未驗證」。不送單、不改下單行為。心跳：本條改 - [x]**（DevQueue 可執行）
   〔2026-10-16 13:3x DevQueue 20261016-130101：仍未驗證（照實寫）。證據：ibkr_order_server.py 不落地下單紀錄（結果只在 HTTP 回應第 274 行）；auto_trading orders.jsonl 是 Shioaji、IBKR 0 筆；PROGRESS／BACKLOG 09-01 後無 Filled 回報記載。要驗證需總司令在 paper 帳戶親自送一筆。[自行裁量] 「伺服器補 append-only 下單紀錄」屬新變更，不在本條範圍，記在 BACKLOG 待提案。只讀、未送單、不改下單行為。〕
 - [!] **先.一〇三-12v [自走補入，來源：PROGRESS.md 2026-10-16 07:32 段「⚠️ 未驗證：market.yml 尚未實跑」（先.一〇三-10a／10c／12）] 今天 17:13 班 market.yml 跑完後驗收：price_history meta 有 exright_official_backfill、ex_dividend_events.json 出現 source＝TPEx exDailyQ 事件與 reductions 的分割／面額事件、market_us.json 每檔有 intraday 欄位；任一沒有→查 log 修 bug 重跑**（DevQueue 可執行）　**⛔ 自走中止（2026-10-16 11:25）**：要等今天 17:13 班 market.yml 跑完才能驗收；預計 17:40 後解除（下一輪開工檢查 market.yml 最新 run 時間）
-- [!] **先.一〇三-13b [自走補入，來源：先.一〇三-13 完成紀錄] 前台工程術語清單、「原始數字」兩點照全檢報告改** BLOCKED：claude/Alpha_全檢報告_2026-10-15.md 本機找不到（C:\alpha、使用者目錄往下 5 層），解除條件：總司令把報告放到 C:\alpha\claude\（DevQueue 可執行）
+- [x] **先.一〇三-13b [自走補入，來源：先.一〇三-13 完成紀錄] 前台工程術語清單、「原始數字」兩點照全檢報告改** BLOCKED：claude/Alpha_全檢報告_2026-10-15.md 本機找不到（C:\alpha、使用者目錄往下 5 層），解除條件：總司令把報告放到 C:\alpha\claude\（DevQueue 可執行）〔2026-10-16 解除阻塞：總司令提供清單，改拆 13b-A／B／C1／C2，見檔尾【先.一〇六 重述＋先.一〇三-13b 解除阻塞】〕
 - [x] **先.一〇三-1b-4 PROGRESS_HEARTBEAT ts 一律用寫入當下系統時間**（互動視窗 00:28 起執行；以後所有心跳由程式取 `datetime.now()` 寫入，不手填時間）
 
 # 2026-10-16【先.一〇五：人因實測第二輪】（總司令裁示原文，動工前先寫入；08:13 互動視窗收到）
@@ -20317,3 +20318,37 @@ un-market-catchup.ps1 註解同步改心跳路徑（repo 外）。〕
 - [ ] **先.一〇六-2 每筆加 hash_scheme（依各筆第一次出現的 commit，以 git log 查證 05:43 班前後）**（互動視窗執行）
 - [ ] **先.一〇六-3 v1 紀錄 name_hash／transferee_hash 清成 null、hash_scheme＝"v1-cleared"、meta.note 加註**（互動視窗執行；資料清理）
 - [ ] **先.一〇六-4 selftest 加三項（換雜湊 id 不變、v1-cleared 雜湊為 null、筆數不變）**（互動視窗執行）
+
+# 2026-10-16【先.一〇六 重述＋先.一〇三-13b 解除阻塞＋常規.補件順序】（總司令裁示原文，動工前先寫入；16:55 互動視窗收到）
+
+> 先.一〇六 內部人舊雜湊清空（2026-10-16 總司令裁示：依 Cowork 建議清）（DevQueue 可執行；修 bug＋資料清理）
+> 1. [先修 bug] fetch_insider_transfer_tw.py 的 record_id() 不要再用 name_hash／transferee_hash，
+>    改用 market、report_date、code、role、transfer_method、各張數欄、valid_period。所有紀錄重算 id 並去重
+>    （目前 74 筆、0 重複，改完筆數不能變）。
+> 2. 每筆紀錄加 hash_scheme 欄位：10/16 05:43 那一班之前的標 "v1"，之後的標 "hmac-sha256-v2"（用 git log 查每筆第一次出現的 commit，不要用猜的）。
+> 3. v1 紀錄的 name_hash／transferee_hash 改成 null，hash_scheme 改 "v1-cleared"，其他欄位一律不動。
+>    meta.note 加一句：「10/16 以前的姓名雜湊已清空（舊算法可被比對）；git 歷史不改寫。」
+> 4. selftest 加三項：同一筆申報換雜湊後 id 不變、v1-cleared 的雜湊是 null、筆數不變。不改寫 git 歷史，不讀 INSIDER_HASH_KEY 的值。
+>
+> 先.一〇三-13b 解除阻塞（全檢報告在 Claude 專案裡，不在本機；需要的清單如下）（DevQueue 可執行）
+> A. 前台工程術語，改成白話或收進「說明」裡：Tailscale Funnel、Access Client、#435／#436 等試驗編號、holdout、DSR、
+>    天條一、先.九十一-1 等佇列編號、lightweight-charts、「上櫃解析待修」、「非逐筆tick」、美股 SIC 英文產業名
+>    （改成中文對照，對不到的保留英文並加「（英文產業分類）」）。
+>    引用研究結論的文字照 data-ui-cite 規則保留原文。
+> B. 原始數字：報告頁「技術型態指標 0.021」這類沒有單位的原始小數，改成 0～10 分，或改成白話描述。
+> C. 順手查兩項，已經修好的就標「已修」：
+>    ① 3324 毛利率 22.5% 其實是 2024Q4，卻當成現況顯示 → 標出季度，超過 2 季的標「資料較舊」。
+>    ② 報告頁只顯示一檔卻下載整份 events_search（246KB）→ 改讀 events_by_code 小檔。
+>
+> 常規.補件順序（寫進 PENDING_QUEUE 檔頭的補件規則，取代原本不分順序的做法）
+> DevQueue 自動補件時依這個優先順序排：① 資料缺口／數字錯 → ② 使用者看得到的畫面問題 → ③ 研究室回補 → ④ BACKLOG 文書核對。
+> ④ 類每輪最多補 3 項，不得占滿佇列。
+> 心跳：每項做完在 PENDING_QUEUE 標 - [x]，並在 PROGRESS_HEARTBEAT 加一行（ts 用系統時間）。
+
+**收件註記**：先.一〇六 與 16:54 寫入的那條同一件事（本段為重述版），沿用上面 先.一〇六-1～4 的待辦，不另開。常規.補件順序已寫進檔頭第 3b 條。先.一〇三-13b 依本段清單改為 13b-A／B／C1／C2（原 `- [!]` 那行轉為參照本段）。順序：互動視窗先做完先.一〇六，再做 13b。
+
+- [ ] **先.一〇三-13b-A 前台工程術語改白話或收進「說明」（Tailscale Funnel、Access Client、試驗編號、holdout、DSR、天條一、佇列編號、lightweight-charts、「上櫃解析待修」、「非逐筆tick」、美股 SIC 中文對照）；研究引用照 data-ui-cite 保留原文**（DevQueue 可執行）
+- [ ] **先.一〇三-13b-B 報告頁無單位原始小數（技術型態指標 0.021 類）改 0～10 分或白話**（DevQueue 可執行）
+- [ ] **先.一〇三-13b-C1 查 3324 毛利率季度：標出季度，超過 2 季標「資料較舊」（已修就標「已修」）**（DevQueue 可執行）
+- [ ] **先.一〇三-13b-C2 查報告頁是否下載整份 events_search：改讀 events_by_code 小檔（已修就標「已修」）**（DevQueue 可執行）
+- [x] **常規.補件順序 寫進 PENDING_QUEUE 檔頭第 3b 條**（互動視窗執行）〔2026-10-16 16:55 互動視窗完成：檔頭補件規則新增第 3b 條 ①資料缺口／數字錯→②使用者看得到的畫面問題→③研究室回補→④BACKLOG 文書核對，④每輪最多 3 項〕
