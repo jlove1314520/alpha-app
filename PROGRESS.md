@@ -1,3 +1,21 @@
+## 2026-10-16 11:40（DevQueue 20261016-110101）先.一〇三-14w 完成＋14x 拆檔同班檢查＋15a／15b STATUS 來源文字核對
+
+等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未新增）
+
+- **先.一〇三-14w ✅（7d76848599）**
+  - 做了什麼：local_git_commit.py 加 `pull` 子命令（0＝成功、1＝失敗已 abort 並取回、其他＝自身失敗）；6 支 .ps1（supply_watchlist／weekly_report／snapshot_moea_pit／disposal_flags／rf_monthly／paper_supply_v2）改呼叫它，python 起不來或退出碼非 0／1 退回原本 `git pull --rebase --autostash`。
+  - 證據：臨時 bare repo 刻意製造套回衝突——①只本機改的檔取回、雙方都改的取遠端版、無衝突標記、push 成功；②pull 本身衝突→3 次 abort、無殘留 rebase、別人未提交的檔原樣在；③python 起不來→退回原本 pull、主流程跑完。6 支 PowerShell Parser 0 錯誤。冒煙 11:19 全過。
+  - [自行裁量] .ps1 註解用英文 ASCII：原檔全 ASCII、無 BOM，PowerShell 5.1 用 cp950 讀，加中文有解析風險。
+  - 10:37 那則「取回規則選錯邊」查證：stash@{0}（10:35:22）內**沒有** _index.json，不是選錯邊；是 autostash 期間 events.json 暫時被收回 HEAD 版、同時跑的拆檔讀到舊檔 → 另立 14x。
+- **先.一〇三-14x ✅（060c82702a，實戰觸發未驗到）**
+  - 做了什麼：news_local_fallback.py 提交前比對 events.json 與拆檔三檔 fetched_at，不同班就重跑一次拆檔（零外部請求）；自身失敗只回警告、照常提交（十二節）。
+  - 證據：selftest_news_fallback_order.py 加 ④～⑥（刻意不同班、守門員自己拋例外），6 項全 PASS；冒煙 11:25 全過。⚠️ 真實補班撞到 autostash 時還沒觸發過，看 research/news_local_fallback.log 有沒有出現「拆檔與 events.json 不同班」。
+- **先.一〇三-15a ✅（本輪 commit）**：B28 期貨籌碼其實已在先.八十一-10 改走 TAIFEX 官方（app-market.js loadFutInst() repo 檔為主、FinMind 備援），STATUS.json 還寫「未遷移」→ generate_status_json.py 與 STATUS.json 同一行更正，BACKLOG B28 標 ✅。冒煙 11:34 全過。
+- **先.一〇三-15b**：主流題材 chips 仍用 FinMind（屬實不動）；個股走勢圖台股已 repo 為主（舊文字過時，已更正），美股仍以 FinMind USStockPrice 為主（屬實）。⚠️ **未提交**：改完後冒煙 11:40 #18 FAIL（測試本身出錯：page.evaluate promise was garbage collected，疑似偶發），收尾時間不夠重跑，依規則不 commit，改動已還原、條目維持 `- [ ]`，下一輪重改重測。
+  - 新發現：美股走勢圖以台灣資料商為主，與七節 2026-09-08 裁示不符 → 立 15d（互動視窗、要提案，做法有多種）。
+- **BLOCKED**：先.一〇三-12v 要等今天 17:13 班 market.yml，預計 17:40 後解除。
+- **佇列深度**：收工前 `- [ ]` 9 項 → 從 BACKLOG.md（B27／B28）補 3 條（15a／15b／15c）＋本輪新發現 14x／15d；完成 14x／15a 後剩 12 項（含 15b、15c、15d）（未達 12）。補件來源檢查：先.八十 全檢修正節已全數完成；DATA_GAP_PLAN 甲類唯一待抓的 #47 已完成（先.八十六-1a）；UX_REDESIGN_PROPOSAL 剩下的是已知缺口註記、不是工作項；BACKLOG 其餘「尚未開始」多半是社群／AI 研判類，要總司令先核准提案，本輪時間不夠逐條核對，留給下一輪。
+
 ## 2026-10-16 10:30（DevQueue 20261016-100101）先.一〇三-14v 研究層驗收（本機重產）＋修 autostash 吃掉別人未提交檔＋事件三檔重新拆檔
 
 等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未新增）
