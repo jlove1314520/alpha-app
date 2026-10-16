@@ -496,6 +496,18 @@ request body完全沒有「要不要模擬」這個欄位可以傳②帳戶ID白
 結束等待」的邏輯，但**目前沒有Shioaji本身的實測證據**顯示也有IBKR那種
 非終止性中途狀態問題，這個保守假設要等真的送過測試單才能確認是否必要。
 
+**現況補記（2026-10-16 DevQueue 20261016-150101，先.一〇三-15r，只讀帳本，去識別化）**：
+已有實測證據，觀察到的券商狀態只有 `PreSubmitted`／`Submitted`／`Filled`／`Cancelled`，
+**尚未出現過 `PartFilled`、`Failed`、`Inactive`**。
+- 真錢（`research/data/auto_trading/LIVE/orders.jsonl`，2026-10-12 首次真實下單，模式 LIVE_WITH_VETO）：
+  3 張委託；09:40 查詢 1 張 `Filled`（全數成交）、2 張 `Submitted`（0 成交，記 OPEN）；
+  13:40 盤後結算時其中 1 張轉 `Filled`（遲到成交）、1 張仍 `Submitted` 0 成交 → 記 EXPIRED 等隔日重排。
+  → 證實 `Submitted` 是會停留整個盤中的非終止狀態，「只有 Filled 才提早結束等待＋盤後 --settle 再查一次」的保守設計是必要的。
+  10/08 兩筆 REJECT 是送單前屏障擋下（沒有送到券商）。
+- 模擬環境：撤單演練（`research/data/auto_trading_drill/cancel_test.jsonl`，2026-10-06）掛單後 `PreSubmitted` → 撤單後 `Cancelled`，0 成交，PASS；
+  `research/data/auto_trading/SIMULATION/orders.jsonl`（10/07）同樣只見 `Filled`／`Submitted`。
+- 部分成交（`PartFilled`）至今沒有實例：程式的處理路徑（PARTIAL＋盤後 EXPIRED 記餘額）仍**未經實測**。
+
 **過程中修掉一個小bug**：伺服器啟動時的一行print用了⚠emoji，在
 Windows終端機cp950編碼下`UnicodeEncodeError`直接讓伺服器啟動失敗，
 已移除emoji改用純文字。
