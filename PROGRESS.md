@@ -1,3 +1,21 @@
+## 2026-10-16 10:30（DevQueue 20261016-100101）先.一〇三-14v 研究層驗收（本機重產）＋修 autostash 吃掉別人未提交檔＋事件三檔重新拆檔
+
+等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未新增）
+
+- **先.一〇三-14v ✅（0f74b1dfec）**
+  - 做了什麼：07:57 那班 market.yml 只拉到先.一〇三-14（07:49），沒拉到 -17（07:55）→ research.json 新欄位都有，但雷達還是「帶量突破」。下一班 17:13 太晚，[自行裁量] 在本機照 market.yml 同三步重產（build_research → selftest_research → build_by_code＋selftest_by_code，零外部請求）。
+  - 證據：selftest_research 11 項全 PASS；by_code 一致性抽樣 64 檔不一致 0；research*.json／by_code 內「帶量突破」0 處，雷達名單有「量增創 60 日新高」；App 393×852 實測雷達資料日那行顯示「涵蓋 1980 檔（流動性門檻以上 767）：近3月營收年增 1942、營收季增 270、季報最新 1203、外資完整 1085、集保單週 0 檔」。
+  - 集保單週 0 檔：集保缺週（09/24→10/08 相隔 14 天），每檔都有 reason，屬誠實結果。
+  - 照實記錄：0f74b1dfec 是先在本機 commit（防再被吃掉）再跑冒煙，但 10:15 盤中報價本機備援 push 時把它一起推上去了，早於我那次冒煙結果；那次冒煙 #132／#142 FAIL（原因是下面的事件檔，不是研究層），修好後重跑全過。
+- **修 scripts/local_git_commit.py（926d7fcbea，純 bug 修復）**
+  - 事故：10:05:20 盤中報價本機備援 commit 後 `pull --rebase --autostash`，把新聞補班剛寫好的 events.json／news.json 和我第一次重產的研究檔一起收進 stash@{0}，套回失敗（exit 0、無聲）。結果新聞補班 10:06 只提交到衍生檔 → 整份 events.json 08:49、精簡版／索引 10:05（冒煙 #132／#142 FAIL）。
+  - 修法：pull 前後比對 refs/stash，多了新的 autostash → 遠端沒動到的檔從 stash 取回、遠端有更新的檔改回遠端版（清掉衝突標記）；stash 不刪（不可逆，留人工）；rebase --abort 後也檢查一次；自身失敗只印警告（十二節）。
+  - 證據：臨時 bare repo 重現（x 本機與遠端都改、y 只本機改）→ 修後 y＝本機版、x＝遠端版、無衝突標記、stash 保留；沒有新 autostash 時不動作。
+  - 未修：其餘 10 處自己呼叫 `pull --autostash` 的腳本，已補入 先.一〇三-14w。
+- **事件精簡版／索引重新拆檔（6524833aba）**：用目前 events.json（08:49）跑 split_events_by_code.py（零外部請求），三檔 fetched_at 一致。
+- **冒煙測試**：最後一次 10:23 起跑 `node scripts/smoke_test.mjs` exit 0「全部通過」。
+- **BLOCKED**：無新增。佇列補件：先.一〇三-14w（DevQueue 可執行）。
+
 ## 2026-10-16 09:43（互動視窗）先.一〇三 收尾（15、1b-3）＋先.一〇五 人因實測第二輪 7 項＋驗收
 
 等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證）。
