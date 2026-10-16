@@ -38,7 +38,11 @@ if ($LASTEXITCODE -ne 0) {
 
 $pushed = $false
 for ($i = 1; $i -le 3; $i++) {
-    git pull --rebase --autostash --quiet 2>&1 | Out-Null
+    # ruling xian.103-14w: if autostash fails to re-apply, recover other jobs' uncommitted files (scripts/local_git_commit.py pull: 0=ok, 1=failed and aborted);
+    # any other exit code (or python not starting) falls back to the plain pull (section 12: a guard failing must not stop the main flow)
+    $pullRc = 2
+    try { & $pythonExe scripts\local_git_commit.py pull 2>&1 | Out-Null; $pullRc = $LASTEXITCODE } catch { $pullRc = 2 }
+    if ($pullRc -ne 0 -and $pullRc -ne 1) { git pull --rebase --autostash --quiet 2>&1 | Out-Null }
     if ($LASTEXITCODE -ne 0) {
         git rebase --abort 2>&1 | Out-Null
         Add-Content -Path $logPath -Value "pull --rebase failed (attempt $i), aborted rebase" -Encoding utf8

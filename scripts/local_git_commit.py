@@ -71,6 +71,18 @@ def pull_autostash_safe(timeout=180):
     return r
 
 
+def pull_or_abort(timeout=180) -> int:
+    """先.一〇三-14w 第 2 批：給 .ps1 用的 `python scripts/local_git_commit.py pull`。
+    pull 成功回 0；失敗（或停在 rebase 中）就 abort，abort 套回 autostash 失敗一樣取回，回 1。"""
+    before = _g("rev-parse", "-q", "--verify", "refs/stash").stdout.strip()
+    r = pull_autostash_safe(timeout=timeout)
+    if r.returncode == 0 and not rebase_in_progress():
+        return 0
+    _g("rebase", "--abort")
+    _restore_failed_autostash(before)
+    return 1
+
+
 def commit_paths(paths: list[str], msg: str, drop_on_conflict: bool = False) -> str:
     if rebase_in_progress():
         return "repo 正在 rebase 中（別的程序留下的），本輪不動，留給人工或下一輪"
@@ -130,3 +142,15 @@ def last_commit_age_min(path: str) -> float | None:
     r = _g("log", "-1", "--format=%ct", "--", path, timeout=60)
     s = (r.stdout or "").strip()
     return (time.time() - int(s)) / 60 if s.isdigit() else None
+
+
+if __name__ == "__main__":
+    # .ps1 呼叫：python scripts/local_git_commit.py pull → 0＝成功、1＝pull 失敗已 abort；其他退出碼（含 python 起不來）由 .ps1 退回原本的 git pull（十二節）
+    if sys.argv[1:2] == ["pull"]:
+        try:
+            sys.exit(pull_or_abort())
+        except Exception as e:  # noqa: BLE001
+            print(f"[local_git_commit] 警告：pull 取回流程失敗（{type(e).__name__}: {e}）", file=sys.stderr)
+            sys.exit(2)
+    print("用法：python scripts/local_git_commit.py pull", file=sys.stderr)
+    sys.exit(2)
