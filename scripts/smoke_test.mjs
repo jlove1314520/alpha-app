@@ -1109,7 +1109,8 @@ async function runSmokeTest(baseUrl, headless = true) {
     if (r.liveProblems.includes("自選股台股報價")) consistencyErrors.push("Shioaji即時源新鮮且SSE連線中，橫幅仍報「自選股台股報價 資料過舊」");
     if (!r.offlineProblems.includes("自選股台股報價")) consistencyErrors.push("即時源也沒有時，橫幅應該要報台股報價過舊，防線被拆掉了");
     if (!/即時串流連線中/.test(r.pollText) || /近即時輪詢/.test(r.pollText)) consistencyErrors.push(`SSE連線中的輪詢文案不對：「${r.pollText}」`);
-    if (!/近即時輪詢/.test(r.offlinePollText)) consistencyErrors.push(`離線時輪詢文案應回到近即時輪詢：「${r.offlinePollText}」`);
+    // 先.一〇三-13b-A：離線輪詢文案「近即時輪詢，非逐筆tick」改白話「約每15秒自動更新（不是逐筆即時成交）」
+    if (!/約每15秒自動更新/.test(r.offlinePollText) || /即時串流連線中/.test(r.offlinePollText)) consistencyErrors.push(`離線時輪詢文案應回到每15秒輪詢：「${r.offlinePollText}」`);
   } catch (e) {
     consistencyErrors.push(`測試本身出錯：${e.message || e}`);
   }
@@ -5377,6 +5378,70 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { lwcErrs.push(`測試本身出錯：${e.message || e}`); }
   record("162. K 線函式庫載不到時 10 秒內退回收盤折線＋「K 線圖暫時載不到」、不停在骨架（先.一〇五-1）", lwcErrs.length === 0, lwcErrs.join("; ") || lwcInfo);
 
+  // 163.【2026-10-16 先.一〇三-13b-C2】報告頁只顯示一檔，事件要讀 data/events_by_code/<代號>.json 小檔，
+  // 不得下載整份 data/events_search.json（約 1.2MB）。用新分頁量網路請求（主頁面前面的測試可能已經載過整份檔）。
+  const repEvErrs = [];
+  let repEvInfo = "";
+  try {
+    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+    const p4 = await ctx.newPage();
+    const reqs = [];
+    p4.on("request", (r) => { const u = r.url(); if (/events_search\.json|\/events\.json|events_by_code\//.test(u)) reqs.push(u.replace(/^.*\/data\//, "").replace(/\?.*$/, "")); });
+    try {
+      await p4.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+      await p4.waitForFunction(() => typeof go === "function", null, { timeout: 20000 });
+      await p4.evaluate(() => go("picks"));  // 選股頁程式是切過去才載入（showReport／currentPicksCache 之後才有）
+      await p4.waitForFunction(() => typeof showReport === "function" && typeof currentPicksCache === "function" && (() => { const c = currentPicksCache(); return !!(c && c.stocks && c.stocks.length); })(), null, { timeout: 25000 });
+      reqs.length = 0;
+      const code = await p4.evaluate(() => { const c = currentPicksCache().stocks; const r = c.find((x) => x.code === "2330") || c[0]; showReport(r.code); return r.code; });
+      await p4.waitForFunction(() => !!window.__reportEventsSource && !!(document.getElementById("report-events") || {}).textContent, null, { timeout: 15000 }).catch(() => {});
+      const src = await p4.evaluate(() => window.__reportEventsSource);
+      if (reqs.some((u) => /events_search\.json|^events\.json/.test(u))) repEvErrs.push(`報告頁仍下載整份事件檔：${reqs.join(", ")}`);
+      if (!["by_code", "none"].includes(src)) repEvErrs.push(`事件來源＝${src || "（未載入）"}，應為 by_code／none`);
+      repEvInfo = `${code} 報告頁事件來源 ${src}；請求 ${reqs.join(", ") || "（無）"}`;
+    } finally { await ctx.close(); }
+  } catch (e) { repEvErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("163. 報告頁事件讀單檔小檔、不下載整份 events_search.json（先.一〇三-13b-C2）", repEvErrs.length === 0, repEvErrs.join("; ") || repEvInfo);
+
+  // 164.【2026-10-16 先.一〇三-13b-A】前台看得到的文字不得出現全檢報告列的工程術語（data-ui-cite 引用、data-ui-advanced 進階區除外；
+  // 進階區的連線說明另外直接改了原文）。逐頁切換後掃 #app 內可見文字節點。另驗用詞守門的改寫規則本身。
+  const j13bErrs = [];
+  let j13bInfo = "";
+  try {
+    const JARGON = "Tailscale|Access Client|\bholdout\b|\bDSR\b|天條一|(?:^|[^優首事預領原率搶爭祖起])先[.．][一二三四五六七八九十〇]+|常備\.開發|lightweight-charts|上櫃解析待修|非逐筆\s*tick";
+    const pages = ["home", "market", "chips-market", "picks", "trade", "journal", "settings"];
+    const found = [];
+    for (const scr of pages) {
+      await page.evaluate((x) => go(x), scr);
+      await page.waitForTimeout(900);
+      const hit = await page.evaluate((src) => {
+        const re = new RegExp(src, "i"), out = [];
+        const s = document.querySelector(".screen.active"); if (!s) return out;
+        const w = document.createTreeWalker(s, NodeFilter.SHOW_TEXT);
+        for (let n = w.nextNode(); n; n = w.nextNode()) {
+          const el = n.parentElement; if (!el || /^(SCRIPT|STYLE)$/.test(el.tagName) || el.closest("[data-ui-cite],[data-ui-advanced]")) continue;
+          if (el.checkVisibility && !el.checkVisibility() && !el.closest("details")) continue;
+          const m = (n.nodeValue || "").match(re); if (m) out.push(`${m[0]}⟵${n.nodeValue.trim().slice(0, 40)}`);
+        }
+        return out;
+      }, JARGON);
+      hit.forEach((h) => found.push(`${scr}:${h}`));
+    }
+    // 進階區連線說明（守門不改寫，直接改原文）：不得再出現 Tailscale Funnel／Access Client
+    const adv = await page.evaluate(() => { const b = document.getElementById("scr-settings"); if (!b) return -1;
+      const c = b.cloneNode(true); c.querySelectorAll("details.ui-info").forEach((d) => d.remove());  // 「ⓘ 說明」裡刻意保留技術名稱
+      return (c.textContent.match(/Access Client|已自動連上：Tailscale/g) || []).length; });
+    if (adv > 0) found.push(`settings 進階區仍有 ${adv} 處 Access Client／Tailscale 原文`);
+    const ex = await page.evaluate(() => [uiPlain("違反天條一（最大回撤超過 50%）"), uiPlain("通過但 DSR 算不出（先.九十一-1）"), uiPlain("近20日有 18 日外資欄位缺值（上櫃解析待修）"), uiPlain("優先.一 不改")]);
+    if (ex[0] !== "違反生存底線（最大回撤超過 50%）") found.push(`天條一改寫錯：${ex[0]}`);
+    if (ex[1] !== "通過但運氣校正後夏普值算不出") found.push(`DSR／佇列編號改寫錯：${ex[1]}`);
+    if (!/上櫃外資資料缺漏/.test(ex[2])) found.push(`上櫃解析待修改寫錯：${ex[2]}`);
+    if (ex[3] !== "優先.一 不改") found.push(`佇列編號規則誤傷一般用字：${ex[3]}`);
+    if (found.length) j13bErrs.push(found.slice(0, 6).join("；"));
+    j13bInfo = `${pages.length} 頁可見文字無工程術語；改寫規則 4 例正確`;
+  } catch (e) { j13bErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("164. 前台可見文字無全檢報告列的工程術語（Tailscale／Access Client／holdout／DSR／天條一／佇列編號／元件名／上櫃解析待修／非逐筆tick）（先.一〇三-13b-A）", j13bErrs.length === 0, j13bErrs.join("; ") || j13bInfo);
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -5405,7 +5470,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144/146/147/148/151/152/157/158/161新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144/146/147/148/151/152/157/158/161/164新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

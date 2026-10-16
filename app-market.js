@@ -509,6 +509,31 @@
       try{const r=await fetch('data/adr_premium.json?t='+Date.now());if(r.ok)ADR_PREMIUM_CACHE=await r.json()}catch(e){console.warn('[loadUsSicAdrFiles:adr]',e);recordGlobalError('loadUsSicAdrFiles:adr',e)}
     }
   }
+  // 先.一〇三-13b-A：SEC SIC 英文產業名 → 中文對照（以 4 碼 SIC 代碼對，常見大型股產業）；對不到的保留英文並標「（英文產業分類）」
+  const US_SIC_ZH={
+    '1311':'原油與天然氣開採','1381':'油氣鑽探','2000':'食品','2080':'飲料','2086':'瓶裝與罐裝飲料','2111':'香菸',
+    '2834':'製藥','2835':'體外診斷試劑','2836':'生物製品','2844':'化妝品與個人護理','2860':'工業有機化學品','2911':'石油煉製',
+    '3011':'輪胎','3312':'鋼鐵','3334':'原鋁','3523':'農業機械','3531':'營建機械','3559':'特殊工業機械（含半導體設備）',
+    '3570':'電腦與辦公設備','3571':'電腦','3572':'電腦儲存裝置','3576':'電腦網路設備','3577':'電腦周邊設備',
+    '3580':'冷凍與服務業機械','3585':'空調與冷凍設備','3600':'電子與電機設備','3612':'電力變壓器','3630':'家用電器',
+    '3661':'電話與電報設備','3663':'無線電與電視廣播通訊設備','3669':'通訊設備','3672':'印刷電路板','3674':'半導體及相關元件',
+    '3677':'電子線圈與變壓器','3678':'電子連接器','3679':'電子零組件','3711':'汽車與車體','3714':'汽車零組件',
+    '3721':'飛機','3724':'飛機引擎','3728':'飛機零組件','3760':'導彈與太空載具','3812':'導航與航太系統',
+    '3825':'電子量測儀器','3826':'實驗室分析儀器','3841':'外科與醫療器材','3842':'骨科與外科用品','3845':'電子醫療儀器',
+    '3861':'攝影設備','4011':'鐵路運輸','4512':'定期航空運輸','4513':'航空快遞','4813':'電信（非無線）','4812':'行動通訊',
+    '4841':'有線與付費電視','4899':'通訊服務','4911':'電力公用事業','4931':'電力與其他公用事業','4991':'熱電共生',
+    '5045':'電腦與周邊批發','5122':'藥品批發','5311':'百貨公司','5331':'量販店','5399':'綜合零售','5411':'超市',
+    '5812':'餐飲','5912':'藥局','5961':'網路與型錄零售','6021':'國家商業銀行','6022':'州立商業銀行','6035':'儲蓄機構',
+    '6141':'個人信貸','6153':'短期商業信貸','6199':'金融服務','6211':'證券經紀與承銷','6282':'投資顧問','6311':'壽險',
+    '6324':'醫療保險','6331':'產物與意外險','6411':'保險經紀與代理','6500':'不動產','6798':'不動產投資信託（REIT）',
+    '7370':'電腦程式與資料處理服務','7371':'電腦程式設計服務','7372':'套裝軟體','7373':'電腦系統整合','7374':'資料處理與網路服務',
+    '7389':'商業服務','7812':'影視製作','7990':'休閒娛樂服務','8000':'醫療服務','8062':'醫院','8071':'醫學檢驗',
+    '8731':'商業研究實驗室','8741':'管理服務','3944':'遊戲與玩具','3949':'運動用品','2300':'成衣','3021':'橡膠與塑膠鞋',
+  };
+  function usSicZh(info){
+    if(!info||!info.sic_description)return null;
+    return US_SIC_ZH[String(info.sic||'')]||`${info.sic_description}（英文產業分類）`;
+  }
   function usSectorRowHtml(ticker,sicInfo,quote){
     // 2026-09-10：優先用SEC EDGAR自己回傳的entity_name（跟SIC同一個CIK來源，
     // 短且乾淨）；STOCKNAME_US（FinMind USStockInfo）少數ADR名稱會夾帶完整
@@ -516,7 +541,7 @@
     // representing Two Common Shares)」），沒有SIC資料時才退回nameOf()。
     const nm=(sicInfo&&sicInfo.entity_name)||nameOf(ticker);
     const label=nm&&nm!==ticker?`${ticker}（${nm}）`:ticker;
-    const sector=sicInfo&&sicInfo.sic_description?`${sicInfo.sic_description}（SIC ${sicInfo.sic}）`:'尚無SIC資料（排程抓取中或該檔查無對映）';
+    const sector=sicInfo&&sicInfo.sic_description?usSicZh(sicInfo):'尚無產業分類（排程抓取中或該檔查無對映）';
     if(!quote||quote.price==null)return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${sector}</span></div><div class="px"><b>—</b><span>查無報價</span></div></div>`;
     const pct=quote.change_pct;const cls=pct==null?'':(pct>=0?'pos':'neg');
     const pctTxt=pct==null?'—':`${pct>=0?'+':''}${pct.toFixed(2)}%`;
@@ -529,11 +554,11 @@
     const sicMap=(US_SIC_CACHE&&US_SIC_CACHE.tickers)||{};
     const quotes=(INTRADAY_US&&INTRADAY_US.quotes)||{};
     const tickers=Array.from(new Set([...Object.keys(sicMap),...Object.keys(quotes)]));
-    if(!tickers.length){el.innerHTML='<div class="note">尚無資料（SEC SIC 對映與美股報價都還沒抓到）</div>';document.getElementById('us-sector-datatime').textContent='';return}
+    if(!tickers.length){el.innerHTML='<div class="note">尚無資料（美股產業分類與報價都還沒抓到）</div>';document.getElementById('us-sector-datatime').textContent='';return}
     // 同產業（SIC說明）排在一起，查無SIC的排最後
     const rows=tickers.map(tk=>({tk,sic:sicMap[tk],q:quotes[tk]}))
       .sort((a,b)=>{
-        const sa=(a.sic&&a.sic.sic_description)||'￿',sb=(b.sic&&b.sic.sic_description)||'￿';
+        const sa=usSicZh(a.sic)||'￿',sb=usSicZh(b.sic)||'￿';
         return sa===sb?a.tk.localeCompare(b.tk):sa.localeCompare(sb);
       });
     el.innerHTML=rows.map(r=>usSectorRowHtml(r.tk,r.sic,r.q)).join('');

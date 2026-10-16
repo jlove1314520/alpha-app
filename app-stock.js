@@ -481,6 +481,12 @@
     if(!CASH_FLOW_CACHE){const r=await fetch('data/cash_flow.json?t='+Date.now());if(!r.ok)throw new Error('HTTP '+r.status);CASH_FLOW_CACHE=await r.json()}
     return CASH_FLOW_CACHE;
   }
+  // 先.一〇三-13b-C1：依法定期限推算「應已公布」的最新季（同 scripts/build_research.py expected_latest_quarter）：
+  // Q1 5/15、Q2 8/14、Q3 11/14、Q4 隔年 3/31（台北日期）
+  function expectedLatestQuarterTW(now){
+    const t=new Date(now.getTime()+8*3600e3),y=t.getUTCFullYear(),md=(t.getUTCMonth()+1)*100+t.getUTCDate();
+    if(md>=1114)return [y,3];if(md>=814)return [y,2];if(md>=515)return [y,1];if(md>=331)return [y-1,4];return [y-1,3];
+  }
   async function loadFinancials(code){
     const detail=await loadStockDetail(code);
     if(currentCode!==code)return; // 使用者已切到別檔股票，這份資料作廢
@@ -493,8 +499,13 @@
         ||'<div class="note">查無財報 EPS</div>';
     }else{document.getElementById('eps-bars').innerHTML='<div class="note">查無財報 EPS</div>'}
     const last=fin.length?fin[fin.length-1]:null;
-    setTxt('fin-gross',last&&last.gross_margin_pct!=null?last.gross_margin_pct.toFixed(1)+'%':'—');
-    setTxt('fin-op',last&&last.op_margin_pct!=null?last.op_margin_pct.toFixed(1)+'%':'—');
+    // 先.一〇三-13b-C1：毛利率／營益率標出是哪一季；比「依法定期限應已公布的最新季」落後超過 2 季，加註「資料較舊」
+    // （例：3324 停在 2024Q4，原本 22.5% 看起來像現況）
+    const _qTag=(y,q)=>{const e=expectedLatestQuarterTW(new Date()),lag=(e[0]*4+e[1])-(y*4+q);
+      return `（${y}Q${q}${lag>2?'，資料較舊':''}）`};
+    const _lq=last?_qTag(last.year,last.quarter):'';
+    setTxt('fin-gross',last&&last.gross_margin_pct!=null?last.gross_margin_pct.toFixed(1)+'%'+_lq:'—');
+    setTxt('fin-op',last&&last.op_margin_pct!=null?last.op_margin_pct.toFixed(1)+'%'+_lq:'—');
     const roe=detail.financials&&detail.financials.roe_ttm_pct;
     if(roe!=null){const re=document.getElementById('fin-roe');re.textContent=(roe>=0?'+':'')+roe.toFixed(1)+'%';re.className=roe>=0?'pos':'neg'}
     else{setTxt('fin-roe','—')}
@@ -519,8 +530,9 @@
     const srcTxt=src?((/_O_|mopsfin/.test(src)?'TPEx官方 ':'TWSE官方 ')+src+'（'+(F.industry_format||'上市一般業')+'）'):'';
     const lcNewer=lc&&(!last||lc.year*4+lc.quarter>last.year*4+last.quarter);
     if(lcNewer&&!last){
-      setTxt('fin-gross',lc.gross_cum!=null&&lc.revenue_cum?(lc.gross_cum/lc.revenue_cum*100).toFixed(1)+'%（累計）':'—');
-      setTxt('fin-op',lc.op_cum!=null&&lc.revenue_cum?(lc.op_cum/lc.revenue_cum*100).toFixed(1)+'%（累計）':'—');
+      const _cq=_qTag(lc.year,lc.quarter).replace('（',`（前 ${lc.quarter} 季累計，`);
+      setTxt('fin-gross',lc.gross_cum!=null&&lc.revenue_cum?(lc.gross_cum/lc.revenue_cum*100).toFixed(1)+'%'+_cq:'—');
+      setTxt('fin-op',lc.op_cum!=null&&lc.revenue_cum?(lc.op_cum/lc.revenue_cum*100).toFixed(1)+'%'+_cq:'—');
     }
     const lcTxt=lcNewer?` · 最新官方累計 ${lc.year} 前${lc.quarter}季：${lc.revenue_cum!=null?'營收 '+(lc.revenue_cum/1e8).toFixed(1)+' 億、':''}EPS ${lc.eps_cum!=null?lc.eps_cum.toFixed(2):'—'}（累計數，非單季）${last?`；單季序列停在 ${last.year}Q${last.quarter}，下一季起以累計差分補上`:''}`:'';
     if(last||lc)setTxt('fin-note',`來源：${srcTxt}${last?` · 單季 ${last.year}Q${last.quarter}`:''}${lcTxt}；${fcfNote}`);

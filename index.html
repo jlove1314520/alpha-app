@@ -43,7 +43,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(mq.addEventListener)mq.addEventListener('change',h);else if(mq.addListener)mq.addListener(h)}
 })();
 </script>
-<link rel="stylesheet" href="app.css?v=2026-10-16.0943">
+<link rel="stylesheet" href="app.css?v=2026-10-16.1741">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -335,7 +335,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <h3>美股類股</h3>
         <div id="us-sector-rows"><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div></div>
         <div class="note" id="us-sector-datatime"></div>
-        <div class="note">類股來源：SEC EDGAR company_tickers.json + submissions（官方SIC產業分類，免金鑰），GitHub Actions 排程抓取；股價同美股即時報價（Finnhub）</div>
+        <div class="note">類股來源：美國證管會（SEC）官方產業分類，已翻成中文；對不到中文的保留英文並標「英文產業分類」。每日雲端排程更新；股價同美股即時報價（Finnhub）</div>
       </div>
 
       <!-- 先.七十二-B7（2026-10-11）：比較少看的卡收進「更多」（卡片 id 與載入函式不變，只是預設收合） -->
@@ -1093,9 +1093,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
            但需要知道「為什麼區網位址不能用了」與「哪個網址在哪裡能用」。 -->
       <div class="note" style="margin-top:10px;padding:8px 10px;background:rgba(var(--fg-rgb),.03);border-radius:8px;line-height:1.6">
         <b style="color:var(--ink-2)">目前架構</b><br>
-        伺服器只聽 <span class="num">127.0.0.1</span>（本機），對外由 <b>Tailscale Funnel</b> 轉進來。<br>
+        伺服器只聽 <span class="num">127.0.0.1</span>（本機），對外由<b>安全通道</b>轉進來。<br>
         <b style="color:var(--ink-2)">區網直連已停用</b>——<span class="num">192.168.x.x:8001</span> 這類位址在任何網路下都連不到，那是舊版用法。<br>
         請填 <span class="num">ts.net</span> 網址（<b>不用加 port</b>），它在<b>家中 WiFi、公司 WiFi、行動網路都能用</b>。
+        <details class="ui-info" style="margin-top:4px"><summary>ⓘ 說明</summary><div class="ui-info-body">技術名稱：安全通道＝Tailscale Funnel；存取閘道帳號／密碼＝Cloudflare Access 服務權杖（Access Client Id／Secret）。</div></details>
       </div>
       <!-- 2026-09-06（CF.3）Cloudflare Access 服務權杖，兩欄都是選填。
       區網直連或還沒接 Access 時留空即可，留空就完全不會送這兩個標頭。
@@ -1103,11 +1104,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       github.io → live.<網域> 的跨站 cookie，服務權杖是純標頭、沒有這個問題。
       詳見 docs/cloudflare_tunnel_setup.md。 -->
       <div class="setting-row" style="margin-top:8px">
-        <span>Access Client Id<br><span style="font-size:10px;color:var(--ink-4)">選填，走 Cloudflare Access 才要</span></span>
+        <span>存取閘道帳號<br><span style="font-size:10px;color:var(--ink-4)">選填，使用存取閘道時才要填</span></span>
         <div class="setting-input"><input id="set-cf-access-id" type="text" placeholder="留空＝不使用" style="width:170px;text-align:right" onchange="saveLiveConfig()"></div>
       </div>
       <div class="setting-row" style="margin-top:8px">
-        <span>Access Client Secret</span>
+        <span>存取閘道密碼</span>
         <div class="setting-input"><input id="set-cf-access-secret" type="password" placeholder="留空＝不使用" style="width:170px;text-align:right" onchange="saveLiveConfig()"></div>
       </div>
     </div>
@@ -1565,6 +1566,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-16.0943"></script>
+<script src="app.js?v=2026-10-16.1741"></script>
 </body>
 </html>

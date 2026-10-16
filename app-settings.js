@@ -500,7 +500,7 @@
     const _legacy=legacyLiveUrlReason(LIVE.url);
     if(_legacy){
       LIVE.lastError=(_legacy==='private'?'舊版區網位址':'網址帶了 :8001（舊版區網用法）')
-        +'，伺服器已改走 Tailscale。請改填 ts.net 網址（不需加 port）。'
+        +'，伺服器已改走安全通道。請改填 ts.net 網址（不需加 port）。'
         +'區網直連已停用，此位址在任何網路下都連不到——不是網路問題。';
       toast('舊版區網位址，請改填 ts.net 網址（不需加 port）');
       renderLiveStatus();   // 這會一併畫出設定頁的引導方塊與「清除舊網址」按鈕

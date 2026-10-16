@@ -251,7 +251,7 @@
         el.innerHTML=`<div class="card" style="text-align:center;padding:28px 16px">
           <div style="font-size:32px;margin-bottom:10px">📋</div>
           <div style="font-weight:700;margin-bottom:6px">目前無上架策略，等待驗證通過</div>
-          <div class="note">只有通過馬拉松完整驗證（含 holdout 解鎖）的策略才會上架這裡。研究進度見 research/MARATHON_STATE.md；上架規格見 research/PAPER_TRADING_ARCHITECTURE.md。</div>
+          <div class="note">只有通過完整驗證（含最後一段保留驗證資料的測試）的策略才會上架這裡。研究進度看「策略監控台」分頁。</div>
         </div>`;
         return;
       }

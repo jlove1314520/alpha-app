@@ -652,7 +652,8 @@
     // unhandledrejection，冒煙測試check#6新增的最終錯誤檢查才抓到）。
     if(f.chips&&f.chips.raw.inst_net_pct_of_20d_trading_value!=null)fact('三大法人近20日買超',f.chips.raw.inst_net_pct_of_20d_trading_value,v=>fmtPct(v));
     else if(f.chips)fact('三大法人買賣超（累積張數）',f.chips.raw.inst_net_lots_available_days,v=>fmtN(v,0,' 張'));
-    if(f.technical)fact('技術型態指標',f.technical.raw.ma60_breakout_x_volume_index,v=>fmtN(v,3));
+    // 先.一〇三-13b-B：原本顯示沒有單位的原始小數（例 0.021），改成 0～10 分（同排行的因子分數，5 分＝中性）
+    if(f.technical)fact('技術型態（0～10 分，5＝中性）',f.technical.score,v=>fmtN(v,1)+' 分');
     itHtml+='</div>';
     document.getElementById('report-industry-tech').innerHTML=itHtml;
     });
@@ -920,9 +921,31 @@
       +'<div class="note" data-ui-keep style="margin-top:4px">同產業樣本 <b>'+n+'</b> 檔</div>'
       +disclaimer;
   }
+  // 先.一〇三-13b-C2：報告頁只顯示一檔，改讀 data/events_by_code/<代號>.json 小檔（約數 KB），
+  // 不再下載整份 events_search.json（約 1.2MB、壓縮後約 246KB）。不在 _index 清單的代號＝目前沒有事件，
+  // 只讀索引拿資料時間；小檔讀取失敗（不是 404）才退回整份檔。
+  window.__reportEventsSource='';  // 冒煙 #163 用：最近一次報告頁事件的來源（by_code／none／full）
+  async function reportEventsFor(code){
+    const t=Math.floor(Date.now()/60000),c=String(code);
+    try{
+      const idx=await eventsIndex();
+      if(idx&&!idx.has(c)){
+        const r=await fetch('data/events_by_code/_index.json?t='+t);const ix=r.ok?await r.json():{};
+        window.__reportEventsSource='none';return {events:[],fetched_at:ix.fetched_at};
+      }
+      const r=await fetch('data/events_by_code/'+encodeURIComponent(c)+'.json?t='+t);
+      if(r.status===404){window.__reportEventsSource='none';return {events:[]}}
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const d=await r.json();window.__reportEventsSource='by_code';
+      return {events:Array.isArray(d.events)?d.events:[],fetched_at:d.fetched_at};
+    }catch(e){
+      console.warn('[reportEventsFor] 小檔讀取失敗，退回整份事件檔',e);recordGlobalError('reportEventsFor',e);
+      window.__reportEventsSource='full';return ensureEvents();
+    }
+  }
   async function renderReportEvents(row){
     const host=document.getElementById('report-events');if(!host)return;
-    const d=await ensureEvents();
+    const d=await reportEventsFor(row.code);
     const code=row.code;
     const mine=recentEventsFor(d,code,30);
 

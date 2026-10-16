@@ -63,6 +63,13 @@
     [/\brepo\s*檔/g,'本站資料檔'],[/\brepo\s*名單/g,'本站名單'],[/\brepo\b/g,'本站'],
     [/[（(]\s*#\d{3}(?:\s*[／/、,，]\s*#\d{3})*\s*[）)]/g,''],[/[，,、]?\s*#\d{3}\b/g,''],
     [/data\/[\w./-]+\.json/g,'資料檔'],[/research\/[\w./-]+\.py/g,'程式'],
+    // 先.一〇三-13b-A（2026-10-16，全檢報告前台術語清單）：連線／研究／佇列編號／元件名改白話
+    [/Tailscale\s*Funnel/g,'安全通道'],[/Tailscale/g,'安全通道'],[/Access Client\s*Id/g,'存取閘道帳號'],[/Access Client\s*Secret/g,'存取閘道密碼'],
+    [/[（(]\s*DSR\s*[）)]/g,''],[/\s*\bDSR\b\s*/g,'運氣校正後夏普值'],[/\s*\bholdout\b\s*/gi,'保留驗證資料'],[/天條一/g,'生存底線'],
+    [/[（(]\s*(?:先|研究室|常備\.開發)[.．][一二三四五六七八九十〇百\d]+(?:[-－][0-9A-Za-z一-龥]+)*\s*[）)]/g,''],
+    [/(^|[^優首事預領原率搶爭祖起])(?:先|研究室)[.．][一二三四五六七八九十〇百]+(?:[-－][0-9A-Za-z]+)*\s*/g,'$1'],[/常備\.開發-?\d*\s*/g,''],
+    [/lightweight-charts/gi,'K 線圖元件'],[/[（(]\s*上櫃解析待修\s*[）)]/g,'（上櫃外資資料缺漏，修復中）'],[/上櫃解析待修/g,'上櫃外資資料缺漏，修復中'],
+    [/近即時輪詢，?\s*非逐筆\s*tick/gi,'不是逐筆即時成交'],[/非逐筆\s*tick/gi,'不是逐筆即時成交'],
     [/（\s*[／/、，]*\s*）/g,''],[/\(\s*\)/g,'']
   ];
   function uiPlain(s){
@@ -1007,7 +1014,7 @@
     }
     if(!twActive&&!usActive)return '已收盤，暫停自動更新';
     const which=twActive&&usActive?'台美股皆':(twActive?'台股':'美股');
-    return `🔄 ${which}在交易時段，約每15秒自動更新（近即時輪詢，非逐筆tick）`;
+    return `🔄 ${which}在交易時段，約每15秒自動更新（不是逐筆即時成交）`;
   }
   // 每個tick都會更新這兩個誠實揭露文字（不管待會要不要真的去fetch），讓
   // 使用者一眼看到目前是不是在自動更新中，跟下面「要不要真的打網路」分開判斷。
@@ -3774,9 +3781,9 @@
     }
     if(DISCOVERY.running){box.textContent='正在自動尋找可用的伺服器…';return}
     if(!DISCOVERY.at){box.textContent='尚未執行自動發現。';return}
-    const tried=DISCOVERY.tried.map(t=>(t.ok?'✓ ':'✗ ')+t.label).join('　');
+    const tried=DISCOVERY.tried.map(t=>(t.ok?'✓ ':'✗ ')+uiPlain(t.label)).join('　');  // 先.一〇三-13b-A：端點名稱改白話（進階區守門不改寫，這裡自己套）
     if(DISCOVERY.picked){
-      box.innerHTML='<b style="color:var(--up)">已自動連上：'+DISCOVERY.picked.label+'</b>'
+      box.innerHTML='<b style="color:var(--up)">已自動連上：'+uiPlain(DISCOVERY.picked.label)+'</b>'
         +'（耗時 '+DISCOVERY.tookMs+' ms）<br>'
         +'<span style="color:var(--ink-4)">候選：'+tried+'</span><br>'
         +'<span style="color:var(--ink-4)">你不需要手動填網址。日後端點變更由 data/live_endpoints.json 統一更新，裝置端不用動。</span>';
@@ -3818,7 +3825,7 @@
     box.style.display='';
     box.innerHTML='<div style="border:1px solid var(--gold);border-radius:8px;padding:9px 10px;background:rgba(212,168,75,.08)">'
       +'<div style="font-size:12px;color:var(--ink-2);line-height:1.6">'
-      +'⚠ '+what+'，伺服器已改走 <b>Tailscale</b>，'
+      +'⚠ '+what+'，伺服器已改走<b>安全通道</b>，'
       +'請改填 <span class="num">ts.net</span> 網址（<b>不需加 port</b>）。'
       +'<br><span style="color:var(--ink-4)">這個位址在任何網路下都連不到，'
       +'所以測試連線只會一直逾時——不是網路問題，是網址過期了。</span></div>'
@@ -4746,7 +4753,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-16.0943';
+  const APP_VERSION='2026-10-16.1741';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

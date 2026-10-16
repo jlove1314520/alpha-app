@@ -230,7 +230,7 @@ def inst_metrics(series, dates):
     last10, last20 = ds[-10:], ds[-20:]
     out["foreign_missing_days"] = sum(1 for d in ds[-20:] if not series[d] or series[d][0] is None)
     if out["foreign_missing_days"]:
-        out["reason"] = f"近20日有 {out['foreign_missing_days']} 日外資欄位缺值（上櫃解析待修）"
+        out["reason"] = f"近20日有 {out['foreign_missing_days']} 日外資欄位缺值（上櫃外資資料缺漏，修復中）"
 
     def g(d, i):
         v = series[d][i] if len(series[d]) > i else None
