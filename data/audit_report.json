@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-10-16T23:00:02.040944+08:00",
- "duration_sec": 15.7,
+ "generated_at": "2026-10-17T02:51:29.755378+08:00",
+ "duration_sec": 4.5,
  "reference": {
   "twse": {
    "ok": true,
@@ -41,9 +41,9 @@
  "total_violations": 595,
  "by_check": {
   "a_price_source": {
-   "checked": 3922,
+   "checked": 3921,
    "violations": 0,
-   "unverifiable": 4510,
+   "unverifiable": 4511,
    "note": ""
   },
   "a2_not_in_official": {
@@ -83,7 +83,7 @@
    "note": ""
   },
   "f_null_as_number": {
-   "checked": 126,
+   "checked": 125,
    "violations": 0,
    "unverifiable": 0,
    "note": ""
@@ -6565,7 +6565,7 @@
   "note": "由 scripts/check_external_connectivity.py 每 5 分鐘更新。產出檔停擺依據修改時間判定；connectivity_alerts 額外納入internet/tailscale/ibkr_gateway 這類「行程活著但連不上」的連續失敗告警（2026-09-15新增，此前只印在log沒亮燈，IBKR斷線6天才被發現就是這個缺口）。"
  },
  "self_check": {
-  "checked_at": "2026-10-16T03:15:03.756684+08:00",
+  "checked_at": "2026-10-17T02:51:13.991652+08:00",
   "ok": true,
   "checks": [
    {
@@ -6587,7 +6587,7 @@
   "note": "audit.yml 每次執行最前面跑，確認後面幾支腳本要用到的 import/常數撈得到——2026-09-10~17 因 data_audit.py 誤刪 TWSE_COMPANY 導致build_listed_universe.py 連續一週 ImportError 全滅，但audit_report.json 本身完全沒有任何紀錄，只能靠 gh run list 才查得到，這個欄位就是補這個盲點。"
  },
  "domain_blocklist_scan": {
-  "checked_at": "2026-10-16T03:15:03.756684+08:00",
+  "checked_at": "2026-10-17T02:51:13.991652+08:00",
   "domains": [
    "mopsov.twse.com.tw",
    "doc.twse.com.tw",
@@ -6969,7 +6969,7 @@
   "note": "2026-09-20合規.三：掃repo全部.py找黑名單網域硬寫字串（黑名單來源research/net_guard.py::DOMAIN_BLOCKLIST）。unguarded=True代表該檔案提到黑名單網域卻沒有`import net_guard`，是最可能重演2026-09-19 mopsov違規事件的檔案，由check_external_connectivity.py轉成local_task_health告警。"
  },
  "queue_depth_sync": {
-  "checked_at": "2026-10-16T03:15:03.756684+08:00",
+  "checked_at": "2026-10-17T02:51:13.991652+08:00",
   "ok": true,
   "detail": {
    "ok": true,
@@ -6979,7 +6979,7 @@
   "note": "2026-09-20【Q4前視與#23無法重現】四：確認兩份*_CONTINUATION_PROMPT.txt跟research/queue_depth_config.py（單一事實來源）仍然一致，避免重演2026-09-19門檻更正只同步部分位置、連續5輪沒觸發補件規則的問題。"
  },
  "reproducibility_check": {
-  "checked_at": "2026-10-16T03:15:03.756684+08:00",
+  "checked_at": "2026-10-17T02:51:13.991652+08:00",
   "ok": false,
   "detail": {
    "ok": false,
