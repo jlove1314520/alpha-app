@@ -31,6 +31,38 @@ def rebase_in_progress() -> bool:
     return (GITDIR / "rebase-merge").exists() or (GITDIR / "rebase-apply").exists()
 
 
+def _restore_failed_autostash(stash_before: str) -> str:
+    """先.一〇三-14v（2026-10-16 事故）：pull --autostash 套回失敗時，git 把「別的排程／互動視窗」尚未 commit 的修改
+    整包留在 stash（`Your changes are safe in the stash`，exit 0），工作目錄留下衝突標記或被清回 HEAD。10:05 新聞補班就這樣
+    吃掉 DevQueue 剛重產的 research*.json 與 by_code。
+
+    這裡偵測 refs/stash 換了新的 autostash，就逐檔取回：只取回「遠端這次沒動到」的檔（stash 基底版＝目前 HEAD 版），
+    遠端有更新的檔保留遠端版（那正是套回衝突的原因，舊的機器產出以遠端為準）。stash 本身不刪（不可逆，留給人工）。
+    自身任何失敗只回傳原因字串（十二節）。"""
+    try:
+        after = _g("rev-parse", "-q", "--verify", "refs/stash").stdout.strip()
+        if not after or after == stash_before:
+            return ""
+        if "autostash" not in _g("log", "-1", "--format=%gs", "-g", "refs/stash").stdout:
+            return ""
+        names = [n for n in _g("stash", "show", "--name-only", after).stdout.splitlines() if n.strip()]
+        back, kept = [], []
+        for n in names:
+            if _g("diff", "--quiet", f"{after}^1", "HEAD", "--", n).returncode == 0:
+                if _g("checkout", "-q", after, "--", n).returncode == 0:
+                    _g("reset", "-q", "--", n)
+                    back.append(n)
+                    continue
+            kept.append(n)
+            _g("checkout", "-q", "HEAD", "--", n)  # 套回失敗會留衝突標記（UU），改回遠端版；本機版仍在 stash
+        msg = f"autostash 套回失敗：已取回 {len(back)} 檔、遠端較新保留遠端版 {len(kept)} 檔（{', '.join(kept)[:200]}）；stash 未刪"
+        print(f"[local_git_commit] {msg}", file=sys.stderr)
+        return msg
+    except Exception as e:  # noqa: BLE001
+        print(f"[local_git_commit] 警告：autostash 取回失敗（{type(e).__name__}: {e}），stash 仍保留", file=sys.stderr)
+        return ""
+
+
 def commit_paths(paths: list[str], msg: str, drop_on_conflict: bool = False) -> str:
     if rebase_in_progress():
         return "repo 正在 rebase 中（別的程序留下的），本輪不動，留給人工或下一輪"
@@ -53,9 +85,12 @@ def commit_paths(paths: list[str], msg: str, drop_on_conflict: bool = False) -> 
         if c.returncode != 0:
             return "commit 失敗：" + (c.stderr or c.stdout)[-200:]
         mine = _g("rev-parse", "HEAD").stdout.strip()
+        stash_before = _g("rev-parse", "-q", "--verify", "refs/stash").stdout.strip()
         pl = _g("pull", "-q", "--rebase", "--autostash")
+        _restore_failed_autostash(stash_before)
         if pl.returncode != 0 or rebase_in_progress():
             _g("rebase", "--abort")
+            _restore_failed_autostash(stash_before)  # abort 時才套回 autostash，套回失敗一樣要取回
             if drop_on_conflict and _g("rev-parse", "HEAD").stdout.strip() == mine:
                 _g("reset", "-q", "--soft", "HEAD~1")
                 _g("reset", "-q", "--", *existing)
