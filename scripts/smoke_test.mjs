@@ -5442,6 +5442,40 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { j13bErrs.push(`測試本身出錯：${e.message || e}`); }
   record("164. 前台可見文字無全檢報告列的工程術語（Tailscale／Access Client／holdout／DSR／天條一／佇列編號／元件名／上櫃解析待修／非逐筆tick）（先.一〇三-13b-A）", j13bErrs.length === 0, j13bErrs.join("; ") || j13bInfo);
 
+  // 165.【2026-10-17 先.一〇七-2／先.一〇三-15d】美股走勢圖來源改 IBKR → quotes_us → repo 日線，FinMind 只在前面都拿不到時才用：
+  // (a) 擋掉 FinMind，NVDA 走勢圖仍畫得出來（repo 日線 K 棒）、畫面標「repo 日線」、全程 0 次 FinMind 請求；
+  // (b) 再讓 data/us_daily/NVDA.json 回 404，退到 quotes_us 20 日收盤（畫收盤線、標 quotes_us），仍不打 FinMind。
+  const usChErrs = [];
+  let usChInfo = "";
+  try {
+    for (const variant of ["repo", "quotes_us"]) {
+      const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+      const fmReq = [];
+      await ctx.route(/api\.finmindtrade\.com/, (route) => { fmReq.push(route.request().url()); return route.abort(); });
+      if (variant === "quotes_us") await ctx.route(/\/data\/us_daily\/NVDA\.json/, (route) => route.fulfill({ status: 404, body: "" }));
+      const p5 = await ctx.newPage();
+      const pe = [];
+      p5.on("pageerror", (e) => pe.push(String(e)));
+      try {
+        await p5.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+        await p5.waitForFunction(() => typeof openStock === "function", null, { timeout: 20000 });
+        fmReq.length = 0;
+        await p5.evaluate(() => openStock("NVDA"));
+        await p5.waitForFunction(() => !!window.__usChartSource, null, { timeout: 15000 }).catch(() => {});
+        await p5.waitForFunction(() => { const el = document.getElementById("trend-chart"); return !!el && !!el.querySelector("canvas, svg") && !el.querySelector(".skel-block"); }, null, { timeout: 15000 }).catch(() => {});
+        const st = await p5.evaluate(() => ({ src: window.__usChartSource, note: (document.getElementById("trend-note") || {}).textContent || "",
+          drawn: !!(document.getElementById("trend-chart") || { querySelector: () => null }).querySelector("canvas, svg") }));
+        if (st.src !== variant) usChErrs.push(`${variant}：來源＝${st.src || "（未載入）"}`);
+        if (!st.drawn) usChErrs.push(`${variant}：FinMind 被擋時 NVDA 走勢圖沒畫出來`);
+        if (!new RegExp(variant === "repo" ? "走勢圖：(?:repo|本站) ?日線" : "走勢圖：quotes_us").test(st.note)) usChErrs.push(`${variant}：畫面沒標來源：「${st.note.slice(0, 80)}」`);
+        if (fmReq.length) usChErrs.push(`${variant}：前面來源有資料卻打了 ${fmReq.length} 次 FinMind`);
+        if (pe.length) usChErrs.push(`${variant}：pageerror ${pe.slice(0, 2).join(" | ")}`);
+        usChInfo += `${variant}：${st.note.replace(/^.*走勢圖：/, "").slice(0, 46)}；`;
+      } finally { await ctx.close(); }
+    }
+  } catch (e) { usChErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("165. 美股走勢圖 FinMind 被擋仍畫得出（repo 日線→quotes_us 退回）、標出來源、不打 FinMind（先.一〇七-2）", usChErrs.length === 0, usChErrs.join("; ") || usChInfo);
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];

@@ -668,6 +668,55 @@
               note:`來源：FinMind USStockPrice（補充，${last.date} 日線收盤，非當下報價）`}}
     return null;
   }
+  // 先.一〇三-15d／先.一〇七-2（2026-10-17 總司令裁示）：美股走勢圖來源 IBKR → quotes_us → repo 日線，FinMind 只在前面都拿不到時才用，
+  // 畫面標出這次用的來源。[自行裁量] IBKR 與 quotes_us 都沒有「有日期的日線歷史」（IBKR 只有當下報價、quotes_us 只有 20 個無日期收盤），
+  // 所以 K 線本體用 repo 日線（data/us_daily/<代號>.json，yfinance 已收盤開高低收），最新一根依序看 IBKR（沒有開高低，只更新頁首現價）
+  // → quotes_us（有當日開高低收，比 repo 新才補上）；repo 沒有這檔才用 quotes_us 的 20 個收盤（日期依美股交易日曆回推，只畫收盤線）；
+  // 都沒有才打 FinMind。
+  function _nyDateOf(ms){const z=_zonedParts(new Date(ms),'America/New_York');return `${z.y}-${String(z.m).padStart(2,'0')}-${String(z.d).padStart(2,'0')}`}
+  function _usPrevTradingDays(last,n){
+    const out=[];let d=new Date(last+'T12:00:00Z');
+    for(let guard=0;out.length<n&&guard<n*3+20;guard++){
+      const s=d.toISOString().slice(0,10),wd=d.getUTCDay();
+      if(wd!==0&&wd!==6&&!US_HOLIDAYS.has(s))out.unshift(s);
+      d=new Date(d.getTime()-864e5);
+    }
+    return out.length===n?out:null;
+  }
+  window.__usChartSource='';  // 冒煙 #165 用：最近一次美股走勢圖用的來源（repo／quotes_us／finmind／none）
+  async function usChartRows(code){
+    let repo=null;
+    try{
+      const r=await fetch('data/us_daily/'+encodeURIComponent(code)+'.json?t='+Math.floor(Date.now()/600000));
+      if(r.ok)repo=await r.json();else if(r.status!==404)throw new Error('HTTP '+r.status);
+    }catch(e){console.warn('[usChartRows:repo]',e);recordGlobalError('usChartRows:repo',e)}
+    try{if(!INTRADAY_US&&typeof loadIntradayQuotes==='function')await loadIntradayQuotes()}catch(e){console.warn('[usChartRows:quotes_us]',e)}
+    const q=_usQuotesFileRow(code),qDate=q&&q.quote_time?_nyDateOf(q.quote_time*1000):null;
+    if(repo&&Array.isArray(repo.bars)&&repo.bars.length>=2){
+      const rows=repo.bars.map(b=>({date:b[0],Open:b[1],High:b[2],Low:b[3],Close:b[4],Volume:b[5]}));
+      const lastD=rows[rows.length-1].date;let tail='';
+      if(q&&qDate&&qDate>lastD&&[q.open,q.high,q.low,q.price].every(v=>typeof v==='number'&&isFinite(v))){
+        rows.push({date:qDate,Open:q.open,High:q.high,Low:q.low,Close:q.price,Volume:null});
+        tail=`；最新一根 ${qDate.slice(5).replace('-','/')}＝quotes_us 排程報價（Finnhub）`;
+      }
+      window.__usChartSource='repo';
+      return {rows,src:`repo 日線（yfinance 已收盤，至 ${lastD.slice(5).replace('-','/')}）${tail}`};
+    }
+    if(q&&Array.isArray(q.sparkline)&&q.sparkline.length>=2&&qDate){
+      const dates=_usPrevTradingDays(qDate,q.sparkline.length);
+      if(dates){
+        window.__usChartSource='quotes_us';
+        return {rows:q.sparkline.map((c,i)=>({date:dates[i],Open:c,High:c,Low:c,Close:c,_closeOnly:true})),
+                src:`quotes_us 近 ${q.sparkline.length} 日收盤（Finnhub；日期依美股交易日曆回推，只有收盤）`};
+      }
+    }
+    try{
+      const px=await fm('USStockPrice',code,_d(35));
+      if(Array.isArray(px)&&px.length){window.__usChartSource='finmind';return {rows:px,fm:true,src:'FinMind USStockPrice（台灣資料商，補充：前面三個來源都沒有這檔）'}}
+    }catch(e){console.warn('[usChartRows:FinMind]',e);recordGlobalError('usChartRows:FinMind',e)}
+    window.__usChartSource='none';
+    return {rows:[],src:''};
+  }
   async function openStock(code){
     if(typeof code!=='string')code=currentCode;
     currentCode=code;
@@ -687,11 +736,12 @@
     document.getElementById('stock-reason-card').innerHTML=skeletonHtml(4);  // 2026-09-15 P0產品.二/四，避免殘留上一檔的選股理由
     if(us){
       // 先.一〇三-12：現價退回鏈 IBKR → quotes_us（排程檔，不論新鮮度，標時間）→ repo 日線（us_screener.json 收盤，標日期）
-      // → FinMind 只當最後補充；走勢圖仍優先用 FinMind 有日期的日線，FinMind 失敗才退回 quotes_us 近 20 日收盤。
-      const [pxS]=await Promise.allSettled([fm('USStockPrice',code,_d(35)),ensureIbkrQuotes(),_ensureUsDailyRepo()]);
+      // → FinMind 只當最後補充。先.一〇七-2：走勢圖也改成同一個順序（usChartRows），FinMind 只在前面都拿不到時才打。
+      const [,,chS]=await Promise.allSettled([ensureIbkrQuotes(),_ensureUsDailyRepo(),usChartRows(code)]);
       if(currentCode!==code)return;  // 2026-09-06：await 期間已切到別檔，作廢
-      const px=(pxS.status==='fulfilled'&&Array.isArray(pxS.value))?pxS.value:[];
-      if(pxS.status==='rejected'){console.warn('[openStock:USStockPrice]',pxS.reason);recordGlobalError('openStock:USStockPrice',pxS.reason)}
+      const ch=(chS.status==='fulfilled'&&chS.value)||{rows:[],src:''};
+      if(chS.status==='rejected'){console.warn('[openStock:usChartRows]',chS.reason);recordGlobalError('openStock:usChartRows',chS.reason)}
+      const px=ch.fm?ch.rows:[];
       const hq=usHeadQuote(code,px);
       if(hq){
         const chg=hq.change,pct=hq.change_pct;
@@ -699,13 +749,10 @@
         const pe=document.getElementById('sh-price');pe.textContent='$'+nf(hq.price);pe.className=cls;
         const ce=document.getElementById('sh-chg');
         ce.textContent=(chg==null&&pct==null)?'—':`${chg!=null?((chg>=0?'+':'')+(+chg).toFixed(2)):''}${pct!=null?`（${pct>=0?'+':''}${(+pct).toFixed(2)}%）`:''}`;ce.className=cls;
-        setTxt('trend-note',hq.note);
-      }else{setTxt('sh-price','—');setTxt('sh-chg',fmEmptyMsg('查無此代號'))}
-      if(px.length)renderStockChart(code,px,true);
-      else{const spk=_usQuotesFileRow(code);
-        document.getElementById('trend-chart').innerHTML=(spk&&Array.isArray(spk.sparkline)&&spk.sparkline.length>=2)
-          ?'<div class="note">FinMind 日線取不到；近 '+spk.sparkline.length+' 個交易日收盤（quotes_us 排程檔，無日期軸）：</div>'+spark(spk.sparkline,spk.sparkline[spk.sparkline.length-1]>=spk.sparkline[0])
-          :'<div class="note">'+fmEmptyMsg('查無資料')+'</div>'}
+        setTxt('trend-note',hq.note+(ch.src?'；走勢圖：'+ch.src:''));
+      }else{setTxt('sh-price','—');setTxt('sh-chg',fmEmptyMsg('查無此代號'));if(ch.src)setTxt('trend-note','走勢圖：'+ch.src)}
+      if(ch.rows.length)renderStockChart(code,ch.rows,true);
+      else document.getElementById('trend-chart').innerHTML='<div class="note">'+fmEmptyMsg('查無資料')+'（repo 日線、quotes_us、FinMind 都沒有這檔）</div>';
       ['kn-per','kn-pbr','kn-yield','kn-yoy','kn-turnover','kn-vol-mult'].forEach(id=>setTxt(id,'—'));
       setTxt('kn-liquidity-flag','');
       REV_ROWS=[];
@@ -1029,7 +1076,11 @@
       timeScale:{borderVisible:false,timeVisible:STOCK_CHART.mode==='intraday',secondsVisible:false},
       handleScroll:{vertTouchDrag:false}});
     const up=_cssVar('--up','#ff5257'),down=_cssVar('--down','#24c98a');
-    const series=chart.addSeries(LWC.CandlestickSeries,{upColor:up,downColor:down,borderVisible:false,wickUpColor:up,wickDownColor:down});
+    // 先.一〇七-2：只有收盤的來源（quotes_us 20 日收盤）畫收盤線，不把收盤假裝成開高低收畫 K 棒
+    const closeOnly=!!(rows&&rows.length&&rows[0]._closeOnly);
+    if(closeOnly)STOCK_CHART.daily=STOCK_CHART.daily.map(x=>({time:x.time,value:x.close,close:x.close}));
+    const series=closeOnly?chart.addSeries(LWC.LineSeries,{color:_cssVar('--accent','#d4a84b'),lineWidth:2})
+      :chart.addSeries(LWC.CandlestickSeries,{upColor:up,downColor:down,borderVisible:false,wickUpColor:up,wickDownColor:down});
     STOCK_CHART.chart=chart;STOCK_CHART.series=series;
     // 2026-09-06（實測.三.2）盤中 K 線畫兩條漲跌停虛線。
     // 這是 K 線圖上最有用的一條參考線：看得到今天離鎖住還有多遠，比只看一個數字直觀。
@@ -1139,7 +1190,7 @@
     renderTechChips();
     if(TECH_CHART.chart&&TECH_CHART.code===code)return;  // 同一檔已經畫過，切回這個分頁不用重建
     const us=isUS(code);
-    const rows=(STOCK_CHART.code===code?STOCK_CHART.rawRows:[])||[];
+    const rows=((STOCK_CHART.code===code?STOCK_CHART.rawRows:[])||[]).filter(r=>!r._closeOnly);  // 先.一〇七-2：只有收盤的來源不畫技術指標
     const daily=rows.map(r=>us
       ?{time:r.date,open:r.Open,high:r.High,low:r.Low,close:r.Close,volume:r.Volume}
       :{time:r.date,open:r.open,high:r.max,low:r.min,close:r.close,volume:r.Trading_Volume})

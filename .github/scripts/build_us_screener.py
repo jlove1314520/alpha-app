@@ -43,6 +43,9 @@ for _s in (sys.stdout, sys.stderr):
 ROOT = Path(__file__).resolve().parents[2]
 FIN_PATH = ROOT / "data" / "us_financials.json"
 OUT_PATH = ROOT / "data" / "us_screener.json"
+# 先.一〇三-15d／先.一〇七-2：個股頁走勢圖的「repo 日線」來源。同一次 yfinance 批次的已收盤日線（開高低收量），
+# 每檔一個小檔，點進個股頁才下載；不另外發請求。
+DAILY_DIR = ROOT / "data" / "us_daily"
 TW_TZ = timezone(timedelta(hours=8))
 ET = ZoneInfo("America/New_York")
 SEC_HEADERS = {"User-Agent": "AlphaApp-USFinancials " + (os.environ.get("ALPHA_UA_CONTACT") or "contact@alpha-app-project.example")}
@@ -101,8 +104,8 @@ def fetch_shares(ciks: set[int], today: date) -> tuple[dict, dict]:
     return best, meta
 
 
-def fetch_bars(tickers: list[str], now_et: datetime):
-    """yfinance 一次批次。回傳 (df_close, df_volume, dropped_partial_date)。"""
+def fetch_bars(tickers: list[str], now_et: datetime, ohl_out: dict | None = None):
+    """yfinance 一次批次。回傳 (df_close, df_volume, dropped_partial_date)。ohl_out 有給時另外放 Open／High／Low（同樣捨棄未收盤那天）。"""
     import yfinance as yf  # noqa: PLC0415
     to_yf = {t: t.replace(".", "-") for t in tickers}  # yfinance 類股用「-」（BRK.B→BRK-B）；名冊本來就是 BRK-B 的不變
     back = {v: k for k, v in to_yf.items()}
@@ -110,6 +113,11 @@ def fetch_bars(tickers: list[str], now_et: datetime):
     close, vol = df["Close"].copy(), df["Volume"].copy()
     close.columns = [back.get(c, c) for c in close.columns]
     vol.columns = [back.get(c, c) for c in vol.columns]
+    if ohl_out is not None:
+        for k in ("Open", "High", "Low"):
+            x = df[k].copy()
+            x.columns = [back.get(c, c) for c in x.columns]
+            ohl_out[k] = x
     dropped = None
     if len(close.index):
         last = close.index[-1].date()
@@ -117,7 +125,39 @@ def fetch_bars(tickers: list[str], now_et: datetime):
         if last >= now_et.date() and not session_closed:
             dropped = str(last)
             close, vol = close.iloc[:-1], vol.iloc[:-1]
+            if ohl_out is not None:
+                for k in list(ohl_out):
+                    ohl_out[k] = ohl_out[k].iloc[:-1]
     return close, vol, dropped
+
+
+def write_daily_files(tickers: list[str], close, vol, ohl: dict, as_of: str) -> int:
+    """先.一〇三-15d：每檔寫 data/us_daily/<代號>.json（bars＝[日期, 開, 高, 低, 收, 量]）。
+    任何一檔缺開高低收就略過那一天；整段失敗只警告（十二節），不影響 us_screener.json。"""
+    try:
+        DAILY_DIR.mkdir(parents=True, exist_ok=True)
+        n = 0
+        for t in tickers:
+            if t not in close:
+                continue
+            bars = []
+            for idx in close[t].dropna().index:
+                vals = [_num(ohl[k][t].get(idx)) if k in ohl and t in ohl[k] else None for k in ("Open", "High", "Low")]
+                c = _num(close[t].get(idx))
+                if c is None or any(v is None for v in vals):
+                    continue
+                v = _num(vol[t].get(idx)) if t in vol else None
+                bars.append([str(idx.date()), *(round(x, 4) for x in vals), round(c, 4), int(v) if v is not None else None])
+            if len(bars) < 2:
+                continue
+            doc = {"code": t, "as_of": as_of, "source": "yfinance download(period=1mo) 已收盤日線（未還原）；build_us_screener.py 同一次批次",
+                   "fields": ["date", "open", "high", "low", "close", "volume"], "bars": bars}
+            (DAILY_DIR / f"{t}.json").write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+            n += 1
+        return n
+    except Exception as e:  # noqa: BLE001
+        print(f"::warning::us_daily 個股日線檔寫入失敗（不影響 us_screener.json）：{type(e).__name__}: {e}")
+        return 0
 
 
 def main() -> int:
@@ -128,8 +168,9 @@ def main() -> int:
         return 1
     tickers = sorted(fin.keys())
     now_et = datetime.now(ET)
+    ohl: dict = {}
     try:
-        close, vol, dropped = fetch_bars(tickers, now_et)
+        close, vol, dropped = fetch_bars(tickers, now_et, ohl)
     except Exception as e:  # noqa: BLE001
         print(f"[error] yfinance 批次下載失敗：{type(e).__name__}: {e}；不覆蓋既有輸出")
         return 1
@@ -217,6 +258,8 @@ def main() -> int:
     tmp = OUT_PATH.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     tmp.replace(OUT_PATH)
+    n_daily = write_daily_files(tickers, close, vol, ohl, as_of)
+    print(f"us_daily: {n_daily} 檔個股日線檔")
     print(f"us_screener: {len(stocks)} 檔、有收盤 {priced}、有市值 {with_cap}、資料日 {as_of}"
           f"{'（捨棄盤中未收盤 ' + dropped + '）' if dropped else ''}")
     return 0
