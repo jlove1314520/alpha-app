@@ -85,6 +85,7 @@ sparkline要下一交易日盤中才看得到真資料。
 （含新增25）、Playwright端到端通過。✅ 乙.6 總司令手機實測2026-09-04 09:38通過（App顯示
 「即時連線中 · poll-diff-2s」；cloudflared服務／防火牆／AlphaLiveServer常駐皆就緒）。偏差：lightweight-charts
 cdnjs未收錄，改jsdelivr釘死5.2.1。未做：美股IBKR 1分K（501，等確認連線衝突）。
+> ⚠️ 現況（2026-10-16 DevQueue 20261016-140101 核對，先.一〇三-15q，只讀）：「等確認連線衝突」已查證完——先.八十一-29（`docs/IBKR_1MIN_KBAR_FEASIBILITY.md` 第四節）10/13 實測不同 clientId 不衝突，但 paper 帳戶拿到的是**延遲約 15 分鐘**的 1 分K；App／`/live/kbars` 美股仍維持誠實 501，是否實作（只能標延遲、要即時需付費訂閱）待該文件第五節交總司令審閱。
 
 ## ✅ 2026-09-04凌晨（維運帽）P0三收尾：quotes.yml整天0次落地的根因＋監控補洞
 
@@ -739,6 +740,7 @@ pull --no-rebase→push，全部成功）。**排除掉一個真的踩到的坑*
 自己的安全分類器擋下（不是Windows權限問題，是這個工具本身的防護，
 跟稍早建`AlphaHypothesisQueue`那次一樣），已請使用者自己用`schtasks
 /Create`指令建立（見對話紀錄），使用者尚未確認是否已建立/多久跑一次。
+> ⚠️ 現況（2026-10-16 14:2x DevQueue 20261016-140101 核對，先.一〇三-15s，只讀 Get-ScheduledTask）：**已建立**——`AlphaIbkrQuotes` 每 5 分鐘＋登入觸發（上次 14:21 rc=0），`AlphaIbkrGateway` 每 15 分鐘＋登入觸發（上次 14:09 rc=0）；`data/quotes_ibkr.json` 本機最後寫入 2026-10-16 14:21。每週日 ET 01:00 仍需人工登入 Gateway（見 C:lpha\CLAUDE.md）。
 
 **四、`generate_status_json.py`**：新增`describe_quotes_ibkr()`解析器
 避免落到generic fallback被誤判成error，`quotes_ibkr.json`的過期門檻
