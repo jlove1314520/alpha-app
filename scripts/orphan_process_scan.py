@@ -76,6 +76,44 @@ def _commit_push(msg: str) -> str:
                 pass
 
 
+STUCK_HOURS = 2
+_STUCK_NAMES = {"git.exe", "git-remote-https.exe", "git-credential-manager.exe"}
+
+
+def classify_stuck_git(rows: list[dict], now: datetime, hours: float = STUCK_HOURS) -> list[dict]:
+    """先.一〇三-15ah：挑出「跑超過 hours 小時」的 git 系行程與心跳提交 python（10/15 有 17 支卡 30 小時沒人發現，
+    見先.一〇三-15ad）。rows＝Get-CimInstance 的 Name／ProcessId／CommandLine／Start（本機時間 ISO）。
+    只回 PID、名稱、啟動時間、已跑幾小時、種類，不回命令列；只列出，不結束任何程序。"""
+    out = []
+    for r in rows or []:
+        name = (r.get("Name") or "").lower()
+        cmd = r.get("CommandLine") or ""
+        if name in _STUCK_NAMES:
+            kind = "credential-manager" if "credential" in name or "credential-manager" in cmd else ("push" if " push" in cmd or "remote-https" in cmd else "git")
+        elif name.startswith("python") and ("commit_local_heartbeats" in cmd or "local_git_commit" in cmd):
+            kind = "heartbeat-python"
+        else:
+            continue
+        try:
+            started = datetime.fromisoformat(r.get("Start")).replace(tzinfo=now.tzinfo)
+        except (TypeError, ValueError):
+            continue
+        age = (now - started).total_seconds() / 3600
+        if age >= hours:
+            out.append({"pid": r.get("ProcessId"), "name": name, "kind": kind, "started": r.get("Start"), "age_hours": round(age, 1)})
+    return sorted(out, key=lambda x: x["pid"] or 0)
+
+
+def find_stuck_git(now: datetime) -> list[dict]:
+    if sys.platform != "win32":
+        return []
+    ps = ("Get-CimInstance Win32_Process | Where-Object { $_.Name -match '^(git|git-remote-https|git-credential-manager|python[0-9.]*)[.]exe$' } | "
+          "Select-Object Name,ProcessId,CommandLine,@{n='Start';e={$_.CreationDate.ToString('yyyy-MM-ddTHH:mm:ss')}} | ConvertTo-Json -Compress")
+    out = subprocess.run(["powershell", "-NoProfile", "-Command", ps], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60).stdout.strip()
+    rows = json.loads(out) if out else []
+    return classify_stuck_git([rows] if isinstance(rows, dict) else rows, now)
+
+
 def main(commit: bool = True, notify=None) -> int:
     import mem_guard
     now = datetime.now(TZ)
@@ -84,12 +122,20 @@ def main(commit: bool = True, notify=None) -> int:
            "total_private_mb": sum(o["private_mb"] for o in orphans), "orphans": orphans,
            "note": "父行程已不存在的 python multiprocessing 工作行程；巡檢只列出與告警，不會自動結束（要結束須總司令核准）",
            "source": "scripts/orphan_process_scan.py（AlphaOrphanScan 每日 03:00）"}
+    try:  # 先.一〇三-15ah：卡住的 git／心跳提交行程；量測失敗只降級（十二節）
+        stuck = find_stuck_git(now)
+    except Exception as e:  # noqa: BLE001
+        print(f"WARN 卡住 git 行程量測失敗（{type(e).__name__}），本輪略過")
+        stuck = []
+    doc["stuck_git"] = stuck
+    doc["stuck_git_note"] = f"跑超過 {STUCK_HOURS} 小時的 git／git-credential-manager／心跳提交 python；只列出，不自動結束"
     old = {}
     try:
         old = json.loads(OUT.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         pass
-    changed = sorted(o["pid"] for o in old.get("orphans", [])) != sorted(o["pid"] for o in orphans) or "checked_at" not in old
+    changed = (sorted(o["pid"] for o in old.get("orphans", [])) != sorted(o["pid"] for o in orphans) or "checked_at" not in old
+               or sorted(o["pid"] for o in old.get("stuck_git", [])) != sorted(o["pid"] for o in stuck))
     OUT.write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"孤兒 python worker：{len(orphans)} 支，合計私有記憶體約 {doc['total_private_mb']}MB" +
           ("" if not orphans else "：" + "、".join(f"PID {o['pid']}（父 {o['parent_pid']}，{o['started']} 起）" for o in orphans)))
@@ -107,7 +153,25 @@ def main(commit: bool = True, notify=None) -> int:
                 else:
                     import web_push
                     web_push.send("孤兒程序告警", body, kind="orphan")
-                PUSH_STATE.write_text(json.dumps({"key": key, "date": now.date().isoformat()}), encoding="utf-8")
+                PUSH_STATE.write_text(json.dumps({**st, "key": key, "date": now.date().isoformat()}), encoding="utf-8")
+            except Exception as e:  # noqa: BLE001
+                print(f"WARN 推播失敗（{type(e).__name__}）")
+    if stuck:
+        print(f"卡住的 git／心跳提交行程：{len(stuck)} 支（最久 {max(o['age_hours'] for o in stuck)} 小時）")
+        key = "git:" + hashlib.sha1(",".join(str(o["pid"]) for o in stuck).encode()).hexdigest()[:12]
+        try:
+            st = json.loads(PUSH_STATE.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            st = {}
+        if st.get("git_key") != key or st.get("git_date") != now.date().isoformat():
+            body = f"有 {len(stuck)} 支 git／心跳提交行程跑超過 {STUCK_HOURS} 小時（可能卡在認證視窗）；未自動結束，請決定是否清除"
+            try:
+                if notify:
+                    notify("git 行程卡住", body)
+                else:
+                    import web_push
+                    web_push.send("git 行程卡住", body, kind="orphan")
+                PUSH_STATE.write_text(json.dumps({**st, "git_key": key, "git_date": now.date().isoformat()}), encoding="utf-8")
             except Exception as e:  # noqa: BLE001
                 print(f"WARN 推播失敗（{type(e).__name__}）")
     if commit and changed:

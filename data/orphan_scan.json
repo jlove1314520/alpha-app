@@ -1,8 +1,10 @@
 {
- "checked_at": "2026-10-11T14:24:10+08:00",
+ "checked_at": "2026-10-16T16:23:25+08:00",
  "count": 0,
  "total_private_mb": 0,
  "orphans": [],
  "note": "父行程已不存在的 python multiprocessing 工作行程；巡檢只列出與告警，不會自動結束（要結束須總司令核准）",
- "source": "scripts/orphan_process_scan.py（AlphaOrphanScan 每日 03:00）"
+ "source": "scripts/orphan_process_scan.py（AlphaOrphanScan 每日 03:00）",
+ "stuck_git": [],
+ "stuck_git_note": "跑超過 2 小時的 git／git-credential-manager／心跳提交 python；只列出，不自動結束"
 }
