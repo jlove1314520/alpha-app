@@ -1,3 +1,13 @@
+## 2026-10-16 23:3x（DevQueue 20261016-230102）研究室.三 +150 檔（累計 1,335/1,980）
+
+等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未新增）
+
+- **研究室.三（維持 - [ ]）**：`timeout 2100 python scripts/backfill_revenue_display.py --max 150`，23:01～23:27 整批 150/150 跑完（150 檔全有資料、0 空、log 無 402，exit 0）。累計 1,335/1,980、剩 645（data/revenue_backfill.json meta.remaining）。開工時查 data/rate_limit_state.json 的 finmind blocked_until 是 9/29 舊值，無封鎖。
+- **研究室.四（未跑）**：同一小時 FinMind 已被本批用掉 150 次，加上其他排程，腳本自保門檻 450 很可能擋下，且剩不到 20 分鐘收尾。[自行裁量]
+- 冒煙：23:28～23:3x `node scripts/smoke_test.mjs` exit 0，164/164 通過。
+- 開工檢查：`- [!]` 阻塞項沒有到期的（研究室.六-週跑時間閘 10/19 週一；其餘等總司令或資料累積）。
+- 佇列深度：`- [ ]` 15 項（≥12）；DevQueue 可執行仍只有研究室.三、研究室.四 2 項（<6）。四個補件來源 22:00 之後 0 筆 commit（BACKLOG.md／docs/UX_REDESIGN_PROPOSAL.md／research/DATA_GAP_PLAN.md），先.八十 全檢全 [x] → **來源已用盡**，不湊數。
+
 ## 2026-10-16 22:4x（DevQueue 20261016-220101）研究室.三 +125 檔（累計 1,185/1,980）
 
 等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未新增）
