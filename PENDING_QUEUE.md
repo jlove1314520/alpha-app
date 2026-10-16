@@ -20294,3 +20294,26 @@ un-market-catchup.ps1 註解同步改心跳路徑（repo 外）。〕
 - [x] **先.一〇五-6 非今日頁頂部黃點移到台股／美股膠囊旁，不另佔一行**（互動視窗執行）〔2026-10-16 09:37 互動視窗完成：非今日頁告警點 #alert-hub-dot 改絕對定位、貼在台股膠囊左邊 4px、垂直置中（依台股膠囊實際位置計算，容器寬度跟著較寬的美股膠囊），不再另佔一行；實測頁首高度不變（87.9px），截圖 research/ux_shots_104/r2_dot_market.png〕
 - [x] **先.一〇五-7 融資維持率誤差警語合併一行**（互動視窗執行）〔2026-10-16 09:37 互動視窗完成：融資維持率：原本「校準值…（誤差最大…）」與「⚠ 校準待更新…」兩行警語合併成一行「⚠ 校準待更新：讀數誤差最大 ±2.06 pp（門檻 0.5 pp），校準值 158.6% 僅供參考」；校準方法說明行與本站原值照舊（smoke #58 仍過：數字不隱藏）。深淺色截圖 research/ux_shots_104/r2_margin_*.png。冒煙全部通過〕
 - [x] **先.一〇五-驗收 393×852 深淺色重拍今日、個股 2330（擋 CDN）、籌碼總覽、月營收；冒煙全部通過**（互動視窗執行）〔2026-10-16 09:43 互動視窗完成：393×852 深／淺色重拍：今日（第一塊 y=170、自選股動態）、個股 2330 擋 CDN（0.1～0.2 秒退回折線）、籌碼總覽（法人標籤右上角、融資警語 1 行）、月營收 1513（13 根、13 個年增率小字、0 重疊）；0 pageerror；冒煙全部通過。截圖 research/ux_shots_105/（含 metrics.json），量測腳本 scripts/ux_shots_105.mjs；PROGRESS 已記〕
+
+# 2026-10-16【先.一〇六：內部人舊雜湊清空】（總司令裁示原文，動工前先寫入；16:54 互動視窗收到）
+
+> 先.一〇六 內部人舊雜湊清空（2026-10-16 總司令裁示：依 Cowork 建議清）（DevQueue 可執行；修 bug＋資料清理）
+> 排在先.一〇五 之後做。
+> 1. [先修 bug] .github/scripts/fetch_insider_transfer_tw.py 的 record_id() 不要再拿 name_hash／transferee_hash 算編號，
+>    改用不含雜湊的欄位（market、report_date、code、role、transfer_method、各張數欄、valid_period）。
+>    不然雜湊算法一變，同一筆申報就會被當成新的一筆重複存進去。
+>    改完後所有紀錄重算 id，並檢查有沒有重複（目前 74 筆、0 重複，改完筆數不能變）。
+> 2. 每筆紀錄加 hash_scheme 欄位。10/16 05:43 那一班之前寫進去的紀錄標 "v1"，之後的標 "hmac-sha256-v2"。
+>    依據是各筆紀錄第一次出現的 commit，請用 git log 查證，不要用猜的。
+> 3. 標成 v1 的紀錄，name_hash 和 transferee_hash 改成 null，hash_scheme 改成 "v1-cleared"。其他欄位一律不動。
+>    meta.note 加一句：「10/16 以前的姓名雜湊已清空（舊算法可被比對）；git 歷史不改寫。」
+> 4. selftest_insider_transfer_tw.py 加三項測試：同一筆申報換雜湊後 id 不變、v1-cleared 的雜湊是 null、筆數不變。
+> 5. 不改寫 git 歷史，不動 HMAC 金鑰，不讀 INSIDER_HASH_KEY 的值。
+> 心跳：PENDING_QUEUE 標 - [x]，並在 PROGRESS_HEARTBEAT 加一行（ts 用系統時間），寫上改動前後的筆數和 v2 紀錄的筆數。
+
+**分工**：先.一〇五 已完成，互動視窗接著直接做（DevQueue 不取，避免同檔衝突）。
+
+- [ ] **先.一〇六-1 record_id() 改用不含雜湊的欄位、全部重算 id、檢查重複（筆數不變）**（互動視窗執行；修 bug）
+- [ ] **先.一〇六-2 每筆加 hash_scheme（依各筆第一次出現的 commit，以 git log 查證 05:43 班前後）**（互動視窗執行）
+- [ ] **先.一〇六-3 v1 紀錄 name_hash／transferee_hash 清成 null、hash_scheme＝"v1-cleared"、meta.note 加註**（互動視窗執行；資料清理）
+- [ ] **先.一〇六-4 selftest 加三項（換雜湊 id 不變、v1-cleared 雜湊為 null、筆數不變）**（互動視窗執行）
