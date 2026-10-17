@@ -159,7 +159,7 @@ adapter（等總司令確認資金所在）」。以下僅登記＋估時，未�
    過濾）＋籌碼集中度模組（集保TDCC OpenAPI大戶週變化＋TWSE OpenAPI外資/借券/
    當沖）；Phase 3 paper下單走隧道（Cloudflare Access保護），真實下單永遠只在
    本機且使用者親按。**先不做，等乙全部完成後再排。**
-   ⚠️ 現況（2026-10-17 核對，先.一〇九-18）：部分做——新聞／重大訊息管線已有（`data/news.json`、`data/events.json`、`data/ir_events.json`），外資／借券／融資券已接（`accumulate_foreign_holding.py`、`accumulate_securities_lending_sell.py`、`accumulate_margin_by_stock.py`）；集保 TDCC 大戶週變化未進排程（只有 `research/holding_shares_per_probe.py` 探測）。Phase 3 下單規則已被 CLAUDE.md 八節 2026-10-06 自動交易更正取代。
+   ⚠️ 現況（2026-10-17 核對，先.一〇九-18）：部分做——新聞／重大訊息管線已有（`data/news.json`、`data/events.json`、`data/ir_events.json`），外資／借券／融資券已接（`accumulate_foreign_holding.py`、`accumulate_securities_lending_sell.py`、`accumulate_margin_by_stock.py`）；集保 TDCC 千張大戶週變化**已做**（源頭一.2a，PENDING_QUEUE 第 8884 行：`scripts/fetch_tdcc_holders.py` 每週抓 TDCC 官方 opendata → `data/holders.json`；漏週根因見先.一〇九-15）。〔先.一〇九-23 更正：本條初版誤寫「未進排程」，因當時只查 `.github/scripts/` 漏查 `scripts/`〕Phase 3 下單規則已被 CLAUDE.md 八節 2026-10-06 自動交易更正取代。
 5. **`/live/stream`改成真正tick回呼觸發推送**（使用者2026-09-03深夜補充指令二）：
    目前是每2秒輪詢比對再送（回應已標`mode:"poll-diff-2s"`），之後要讓
    `shioaji_quotes.py`收到一筆tick就直接餵SSE，需要兩個行程合併或改用行程間
@@ -188,7 +188,7 @@ un-alpha-live-server-cycle.ps1`
    兩者都要掛`market.yml`步驟（PAT無workflow scope，留working tree）。本機對FinMind
    曾被IP封鎖，(a)只能在Actions上實測。(c)均價試算目前只有外資版、以收盤價概算，
    等逐日資料累積到≥20日再評估是否有意義。
-   ⚠️ 現況（2026-10-17 核對，先.一〇九-18）：(b) 借券賣出已做——`app-stock.js` 第 345 行起讀 TWSE TWT93U／TPEx tpex_short_sell（`accumulate_securities_lending_sell.py`）；(a) 千張大戶週變化未做（無 `fetch_holding_dispersion.py`、無 `data/holding_dispersion.json`），只有 `research/holding_shares_per_probe.py`；(c) 未再評估。
+   ⚠️ 現況（2026-10-17 核對，先.一〇九-18）：(b) 借券賣出已做——`app-stock.js` 第 345 行起讀 TWSE TWT93U／TPEx tpex_short_sell（`accumulate_securities_lending_sell.py`）；(a) 千張大戶週變化**已做**、改走 TDCC 官方源而非 FinMind（`scripts/fetch_tdcc_holders.py` → `data/holders.json`，源頭一.2a；檔名與原規格的 `holding_dispersion` 不同）〔先.一〇九-23 更正：初版誤寫未做〕；(c) 未再評估。
 10. **籌碼分點層——卡付費資料源，待使用者決定**（使用者2026-09-02指令二）：券商分點
     進出、關鍵分點、特定券商（秘密買賣超）、分點均價，免費拿不到（FinMind分點是
     sponsor付費／永豐Shioaji無分點／TWSE狂爬會觸封鎖＋ToS灰色，2026-09-02已探勘證實
