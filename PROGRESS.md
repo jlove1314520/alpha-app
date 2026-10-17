@@ -1,3 +1,17 @@
+## 2026-10-17 18:0x（DevQueue 20261017-173102）研究室.四第 12 批＋先.一〇九-18、-19、-21、-23 完成＋收工補件
+
+等待總司令審閱：4 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24；先.一〇九-13 研究室.四改讀 warmup 快取提案，自 10-17 11:2x；先.一〇九-12 權證舊拆檔刪不刪，自 10-17 10:3x；先.一〇九-15 AlphaTdccHolders 改每日 09:00 跑（提案），自 10-17 16:4x）。本輪未新增。
+
+- **研究室.四（維持 - [ ]）**：17:31～18:05 背景每分鐘重試迴圈 `--max 300 --until 18:05`，59 檔全有資料、0 空、log 無 402；17:59 起碰腳本自保「滾動 1 小時 451 ≥ 450」（AlphaFinMindWarmup 同時每分鐘約 10 次），停在 1737（第 60 檔）。累計有資料 1,134、剩 845（data/financials_backfill.json meta）。下一輪照跑同指令。
+- **⚠️ 事故（已修）**：17:4x 推送先.一〇九-18 時用 `git pull --rebase --autostash`，迴圈剛好在寫 data/rate_limit_state.json，autostash 還原衝突 → 計數檔退回 HEAD 版、FinMind 滾動計數少約 150 次（有超量風險）。處理：在 `research/finmind_client.py` 的跨行程鎖內把暫存版 calls_by_minute 逐桶取大值併回（34 桶，併回後滾動 1 小時 341）；其他暫存的機器檔逐一還原（IBKR 三檔已被排程重寫成較新版本，不覆蓋）；stash drop。全程 log 無 402。[自行裁量] 迴圈執行中不再用 --autostash pull。
+- **先.一〇九-18 ✅**：BACKLOG 09-15／09-04 兩段 16 條各加「⚠️ 現況」行（檔名／行號／佇列編號），只加註不刪原文。⚠️ 初版有一處錯：把千張大戶週變化寫成「未做」（只查 `.github/scripts/` 漏查 `scripts/`），同輪已更正（見先.一〇九-23）。
+- **先.一〇九-19 ✅**：BACKLOG B35（Funnel 直連 SSE tick-push 部分達成、雲端中繼未做）、🔄 B24 標頭過時、B25 對照組百分位仍留白、B29 第 7 點過時（us_financials.yml 每週六；UI 文字 app-stock.js 第 94～95 行已改）、P1 analyst（美股有 us_analyst_reco.json 只顯示、台股無）。
+- **先.一〇九-21 ✅（本輪補件、本輪做完）**：09-04 workflow 改動逐行核對：fetch＋rebase、commit 前重跑 generate_status_json 都在；重試次數／等待已改為後續設計；唯一缺口是 `timeout-minutes`，未改 workflow（另補先.一〇九-26 寫提案）。
+- **先.一〇九-23 ✅（結案、不需提案）**：補件前提錯誤——千張大戶已由源頭一.2a 做完（`scripts/fetch_tdcc_holders.py` → `data/holders.json`）；BACKLOG 兩條註記已更正。
+- **收工補件**：補 7 條（先.一〇九-21～27，來源 ① BACKLOG，各條寫明行號），其中 21、23 本輪已結；收工時 `- [ ]` 20 項、DevQueue 可執行 6 項（門檻 12／6，達標）。
+- **BLOCKED**：無新增。
+- **冒煙**：17:39、17:4x、17:53、17:5x 四次 `node scripts/smoke_test.mjs` 皆 166/166、exit 0；收尾見下方本批 commit 前那次。
+
 ## 2026-10-17 17:1x（DevQueue 20261017-163102）研究室.四第 11 批＋補交第 10 批＋先.一〇九-15、-16 完成
 
 等待總司令審閱：4 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24；先.一〇九-13 研究室.四改讀 warmup 快取提案，自 11:2x；先.一〇九-12 權證舊拆檔刪不刪，自 10:3x；**新增** 先.一〇九-15 AlphaTdccHolders 改每日 09:00 跑（提案），自 16:4x）。
