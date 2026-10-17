@@ -8,6 +8,7 @@
 - **收工補件**：`- [ ]` 15 項（≥12）；DevQueue 可執行 1 項（時間閘）<6。05:00 之後 BACKLOG／UX_REDESIGN_PROPOSAL／DATA_GAP_PLAN／PENDING_QUEUE 無新 commit，四個來源前幾輪已確認用盡 → **來源已用盡，不補**。
 - **BLOCKED**：無新增。
 - **冒煙**：05:31～05:36 166/166、exit 0（本輪只改本文件）。
+- **⚠️ 之後再跑冒煙兩次各 165/166（照實補記）**：05:47 #25、05:52 #93，都是「測試本身出錯：page.evaluate: Resulting promise was garbage collected」（框架層，非斷言失敗；每次失敗項不同）。上面那個 PROGRESS commit 是在 05:36 全過那次之後做的。這個偶發錯誤 PROGRESS 已記過至少 5 次但佇列沒有條目 → 新增 **先.一〇九-40**（DevQueue 可執行）：疑似 smoke_test.mjs 34 處 evaluate 直接回傳 async openStock 的 promise；本輪剩不到 20 分鐘，不夠改完再連跑 3 次驗證，留給下一輪。[自行裁量] 只記錄不動手，避免時間到被砍留下半改的測試檔。
 
 ## 2026-10-18 05:0x（DevQueue 20261018-050102）無可做項（全為時間閘／互動視窗）
 
