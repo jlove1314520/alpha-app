@@ -70,6 +70,7 @@ STALE_HOURS = {
     "data/customs_trade.json": 72,  # 跟us_sic.json同一批market.yml排程產生，月頻統計、門檻沿用同批其他源頭二.3項目（源頭二.3第9名，2026-09-15新增）
     "data/industrial_production.json": 72,  # 跟us_sic.json同一批market.yml排程產生，月頻統計、門檻沿用同批其他源頭二.3項目（源頭二.3第10名，2026-09-15新增）
     "data/cash_flow.json": 2400,  # 先.一〇九-4：每季手動更新（約 100 天），排程提案在先.一〇三-15g
+    "data/dependency_status.json": 192,  # 先.一〇九-7：AlphaDepCheck 每週一 08:00（scripts/run_dep_check.py 跑完即 commit）
 }
 
 
