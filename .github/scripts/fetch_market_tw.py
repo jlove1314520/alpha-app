@@ -499,6 +499,38 @@ def fetch_taifex_contracts() -> dict[str, dict]:
 
 TX_HISTORY_PATH = REPO_ROOT / "data" / "tx_futures_history.json"
 TX_HISTORY_KEEP = 60
+TRADING_CALENDAR_PATH = REPO_ROOT / "data" / "trading_calendar.json"
+
+
+def tx_history_missing_dates(dates: list[str], closed: set[str]) -> list[str]:
+    """2026-10-17 先.一〇九-1：第一筆到最後一筆之間，週一～五且不在休市日清單、卻沒有資料的日子。
+    最後一筆之後不算缺（TAIFEX DailyMarketReportFut 固定落後約一個交易日，見 PROGRESS 2026-10-17）。"""
+    from datetime import date as _date
+    ds = sorted(set(dates))
+    if len(ds) < 2:
+        return []
+    have = set(ds)
+    cur, end = _date.fromisoformat(ds[0]), _date.fromisoformat(ds[-1])
+    out = []
+    while cur < end:
+        k = cur.isoformat()
+        if cur.weekday() < 5 and k not in closed and k not in have:
+            out.append(k)
+        cur += timedelta(days=1)
+    return out
+
+
+def _tw_closed_days() -> set[str] | None:
+    """讀 data/trading_calendar.json 的台股休市日（含臨時休市）；讀不到回 None（缺日檢查就略過，不擋累積）。"""
+    try:
+        cal = json.loads(TRADING_CALENDAR_PATH.read_text(encoding="utf-8")).get("tw") or {}
+        out: set[str] = set()
+        for y in cal.values():
+            out |= set(y.get("closed") or []) | set(y.get("unscheduled_closed") or [])
+        return out
+    except Exception as e:  # noqa: BLE001
+        print(f"[warn] 交易日曆讀取失敗，台指期缺日檢查略過：{type(e).__name__}: {e}")
+        return None
 
 
 def update_tx_history(tx: dict | None) -> dict | None:
@@ -520,6 +552,10 @@ def update_tx_history(tx: dict | None) -> dict | None:
         keep = [rows[k] for k in sorted(rows)][-TX_HISTORY_KEEP:]
         doc = {"source": "TAIFEX openapi DailyMarketReportFut（每次排程累積當日近月日盤收盤）",
                "note": "近月連續序列，未做轉倉調整", "rows": keep}
+        closed = _tw_closed_days()
+        if closed is not None:
+            doc["meta"] = {"missing_dates": tx_history_missing_dates([r["date"] for r in keep], closed),
+                           "missing_rule": "第一筆到最後一筆之間的交易日（data/trading_calendar.json）沒有資料；最後一筆之後不算"}
         TX_HISTORY_PATH.write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
         return doc
     except Exception as e:  # noqa: BLE001
