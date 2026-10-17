@@ -154,6 +154,7 @@
   3. 官方 API：`t187ap11_L` 董監事持股餘額明細＝當月快照，同樣無歷史。
   4. repo：`HYPOTHESIS_QUEUE.md` 第 4422～4460 行（2026-09-06）：猜 MOPS `t05st07`／`t34sc01`／`t108sb01` 都被拒；MOPS `stapap1` 可查任意歷史年月，但在 mopsov（`docs/FIRST_HAND_SOURCES.md` 第 211～230 行）。
 - **前向累積選項**：每日 2 個 openapi 端點各 1 次，合規；要開始累積需另立交辦。
+  - ⚠️ 上一行「要開始累積需另立交辦」已過時（2026-10-17 先.一〇九-20 更正）：`market.yml` 的 `.github/scripts/fetch_insider_transfer_tw.py` 已每日抓 TWSE `t187ap12_L`／TPEx `mopsfin_t187ap12_O`，前向累積到 `data/insider_transfer_tw_history.json`；meta.report_dates 目前上市 20261013～20261016（4 天）、上櫃 20261013～20261015（3 天）。只往前累積、不回補（歷史在 mopsov，robots 禁止）。
 
 ### 2.11 #44 景氣對策信號（當時發布版）
 - **分類**：**丙**。
