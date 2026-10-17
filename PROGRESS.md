@@ -1,3 +1,17 @@
+## 2026-10-17 10:4x（DevQueue 20261017-100102）研究室.四 +135 檔（累計 544/1,979）＋先.一〇九-2、-4、-5、-6、-7 完成＋解開卡 11 小時的稽核排程
+
+等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未變動）
+
+- **研究室.四（維持 - [ ]）**：本批 135 檔全有資料、0 空、無 402；累計有資料 544、剩 1,435，停在 6114。10:13 碰到每小時 450 上限（09:25～10:12 每分鐘約 10 次，有本輪以外的呼叫，另開先.一〇九-10 查是誰），改成每分鐘重試一次的迴圈等額度釋出（腳本到上限就不送請求）。
+- **先.一〇九-2 ✅**：stock_detail.json 權證來源是 fetch_market_tw.py 的上櫃法人合併段（上櫃端點沒過濾權證）。fetch_market_tw／update_margin_maintenance 跳過 `^0[3-8]\d{4}$`，並移出只有法人資料的舊權證項目；split_stock_detail.py 不再輸出權證拆檔。代號 19,071→3,410、權證 0，檔案 13.9MB→8.1MB；2330 的財報／法人／融資都還在。既有 15,661 個權證拆檔**沒有刪**，要不要刪等總司令裁示（先.一〇九-12）。fetch_market_tw.py 本機沒實跑，下一班 market.yml 的 log 才會看到「跳過權證」——未驗證。commit 484faf04a2。
+- **先.一〇九-4 ✅**：週期檔／快照檔改門檻或標 static，本機 stale 12→2。4 檔疑似過期查出根因：①supply_watchlist：AlphaDataAudit 10/16 23:00 那班 `git pull --no-rebase` 需要合併、在隱藏視窗開 vim 等訊息，卡了 11 小時，連帶 supply_watchlist 沒跑、今晚那班也會被擋。[自行裁量] 合併狀態檔早已不存在，判定純卡死，結束該行程樹；supply_watchlist 隨即跑完並 push（7ee6382369）。②factory_stability：本機有寫但沒人 commit。③dependency_status：週頻檔吃到 24 小時門檻。④warrant_backup_status：10/16 下載時連線中斷，漏一天快照（補不回）。commit 894daf302b。
+- **先.一〇九-5 ✅**：不帶 `--no-edit` 的 `git pull --no-rebase` 共 4 處（AlphaDataAudit、AlphaTdccHolders 排程，IBKR／Shioaji 報價啟動器），全部補上。⚠️ 改 AlphaDataAudit 時第一次出錯，排程一度只剩動作 2；已用原指令重建兩個動作，讀回確認只差 `--no-edit`、觸發器不變。今晚 23:00 那班有沒有跑完——未驗證。commit d026f42df4（變更在 repo 外，commit 只有紀錄）。
+- **先.一〇九-6 ✅**：連通性心跳提交多收 factory_stability.json／_history.jsonl；10:22 那班心跳 commit 837e19babc 已含 factory_stability.json（驗證過）。commit 9d36980c72。
+- **先.一〇九-7 ✅（程式已改）**：dependency_status 門檻改 192 小時；10/12 那班沒提交是因為當時排程還是舊版（新版 10/13 才上線）。10/19 驗收另開時間閘（先.一〇九-7驗收）。commit 666a91420a。
+- **收工補件**：`- [ ]` 18 項；DevQueue 可執行 5 項（未達 6）。四個來源沿用 03:3x 盤點「已用盡」，[自行裁量] 改從本輪查證看到的異常補 3 條 DevQueue 項（-9 supply log 斷尾、-10 FinMind 額度被誰吃掉、-11 孤兒 bash 行程），另加 1 條互動視窗項（-12 刪權證拆檔，待裁示）。
+- **沒做完**：先.一〇九-8（權證快照連線中斷重試）時間不夠，下一輪做。
+- **冒煙**：10:09、10:24、10:29 三次 `node scripts/smoke_test.mjs` 都是 166/166 通過；收尾那次結果寫在本 commit 訊息。
+
 ## 2026-10-17 09:4x（DevQueue 20261017-090102）研究室.四 +67 檔（累計 409/1,979）＋先.一〇八-6、先.一〇九-1、先.一〇九-3 完成＋補件 4 條
 
 等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未變動）
