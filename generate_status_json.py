@@ -70,7 +70,12 @@ STALE_HOURS = {
     "data/customs_trade.json": 72,  # 跟us_sic.json同一批market.yml排程產生，月頻統計、門檻沿用同批其他源頭二.3項目（源頭二.3第9名，2026-09-15新增）
     "data/industrial_production.json": 72,  # 跟us_sic.json同一批market.yml排程產生，月頻統計、門檻沿用同批其他源頭二.3項目（源頭二.3第10名，2026-09-15新增）
     "data/cash_flow.json": 2400,  # 先.一〇九-4：每季手動更新（約 100 天），排程提案在先.一〇三-15g
-    "data/dependency_status.json": 192,  # 先.一〇九-7：AlphaDepCheck 每週一 08:00（scripts/run_dep_check.py 跑完即 commit）
+    "data/dependency_status.json": 192,
+    # 先.一〇九-31：原本 no_date，補認時間欄位後依更新頻率給門檻
+    "data/signal_ledger.json": 72,  # market.yml 每班重建（meta.last_build_at），3 天沒重建才算過期
+    "data/monthly_close.json": 96,  # 讀 meta.last_trading_day（視為當日 18:00），跨週末＋1 天緩衝；長假會誤報
+    "data/tx_futures_history.json": 96,  # 讀 rows 最後一筆交易日，同上
+    "data/orphan_scan.json": 48,  # AlphaOrphanScan 每日 03:00（checked_at）  # 先.一〇九-7：AlphaDepCheck 每週一 08:00（scripts/run_dep_check.py 跑完即 commit）
 }
 
 
@@ -586,7 +591,10 @@ INTENTIONALLY_EMPTY = {"paper_trades.json", "company_info.json"}
 # 一般產生時段），避免把「資料日」當成凌晨 00:00 而提早半天判逾期。檔內完全沒有日期欄位的設定／對照表回報
 # status="no_date"（不是 error，也不冒充 ok）。
 GENERIC_TIME_KEYS = ("generated_at", "updated_at", "fetched_at", "computed_at", "built_at", "last_updated",
-                     "as_of", "asof", "data_date", "date")
+                     "as_of", "asof", "data_date", "date",
+                     # 先.一〇九-31（2026-10-17）：signal_ledger（meta.last_build_at）、monthly_close（meta.last_trading_day）、
+                     # orphan_scan（checked_at）原本不認 → no_date，停了看不出來；排在最後，不改既有檔案的判讀順序
+                     "last_build_at", "last_trading_day", "checked_at")
 GENERIC_SKIP_STALE = {  # 設定檔／一次性對照表：內容不隨時間過期，不判新鮮度
     "live_endpoints.json", "ui_glossary.json", "placeholder_allowlist.json", "company_official_domains_seed.json",
     # 先.一〇九-4（2026-10-17）：事件觸發／研究快照／草稿，沒有固定更新頻率，日期只代表內容最後一次變動
@@ -638,6 +646,12 @@ def describe_generic(path: Path) -> dict:
                     break
             if found_val:
                 break
+        # 先.一〇九-31：累積式序列（例：tx_futures_history.json）沒有頂層日期，改讀 rows 最後一筆的 date
+        rows = d.get("rows")
+        if not found_val and isinstance(rows, list) and rows and isinstance(rows[-1], dict):
+            iso = _parse_generic_time(rows[-1].get("date"))
+            if iso:
+                found_key, found_val = "rows[-1].date", iso
     return {
         "generated_at": found_val,
         "records": records,
