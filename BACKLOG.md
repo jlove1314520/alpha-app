@@ -111,6 +111,7 @@ adapter（等總司令確認資金所在）」。以下僅登記＋估時，未�
    結果寫入面板。**風險**：yfinance批次查詢頻率上限未查證（見CLAUDE.md「搜尋
    紀律：三來源查證」，動工前需先查）；IBKR Scanner是否受paper帳戶限制未知，
    需先用`ibkr_quotes.py`既有連線實測一次再估準確工時。
+   ⚠️ 現況（2026-10-17 核對，先.一〇九-18）：已做——`.github/scripts/build_us_screener.py`→`data/us_screener.json`（market.yml 每日 3 班，第 410 行 git add），yfinance 頻率上限查證與 IBKR Scanner 實測（paper 各回 50 筆、只能本機跑、不採用）見 C:\alpha\CLAUDE.md「美股篩選資料源（先.八十一-33）」。
 2. **【P1】ADR溢價**（美股ADR價格 vs 台股原股換算價的溢價率）。估時：
    4～6小時。範圍：需要ADR對應的換股比例（通常固定，需查證來源，可能要人工
    維護一份少量對照表，如台積電ADR:原股=1:5）、ADR即時價（IBKR或yfinance）、
@@ -118,11 +119,13 @@ adapter（等總司令確認資金所在）」。以下僅登記＋估時，未�
    四項合成溢價率＝`(ADR價×匯率/換股比例)/原股價-1`。**風險**：換股比例目前
    沒有現成資料源，需先查證是否有API或只能人工維護少量清單（台股有ADR的公司
    本來就不多，人工維護可能是務實做法）。
+   ⚠️ 現況（2026-10-17 核對，先.一〇九-18）：已做——`.github/scripts/compute_adr_premium.py`→`data/adr_premium.json`（computed_at 2026-10-17T04:15Z，4 檔）。
 3. **【P1】法說會列表＋MOPS簡報PDF連結**（Phase 2財報管線一併規劃，非獨立
    小工）。估時：本身1工作日（6～8小時，僅列表+PDF連結，不含PDF內容解析）；
    若要進一步解析PDF內容（OCR/文字擷取財務簡報重點），屬於另一個量級的工作，
    估時另計、待Phase 2規劃階段再評估。來源：MOPS公開資訊觀測站法說會日程
    （需查證是否有結構化API或只能解析HTML頁面）。
+   ⚠️ 現況（2026-10-17 核對，先.一〇九-18）：列表＋連結已做——先.八十一-20（PENDING_QUEUE 第 19344 行）：`data/ir_events.json` 由重大訊息切出；MOPS robots.txt 全站 Disallow，不抓簡報 PDF（C:\alpha\CLAUDE.md「MOPS 法說會」節）。PDF 解析仍未做。
 4. **【P1，待查證是否可行】群益下單adapter**（等總司令確認資金所在）。
    **現況已知**：`C:\alpha\CLAUDE.md`「重要決策與原因」已記載「群益/國泰台股
    目前沒有合適的下單API」——這是先前查證過的結論，不是本輪新估。**估時分兩
@@ -131,6 +134,7 @@ adapter（等總司令確認資金所在）」。以下僅登記＋估時，未�
    (b) 若確認無官方API可用，本項無法做，需總司令決定改用永豐（Shioaji，
    已有現成介接）或其他券商，屬於資金/帳戶配置決策，不是工程問題，本估時
    不含此決策後續的實作工時。
+   ⚠️ 現況（2026-10-17 核對，先.一〇九-18）：暫緩——已併入 PENDING_QUEUE 第 16697 行 `- [!] 群益API(合併)`（2026-09-29【驗.八】一），待總司令裁示。
 
 ---
 
@@ -143,21 +147,27 @@ adapter（等總司令確認資金所在）」。以下僅登記＋估時，未�
    屬於評分管線變更，依「提案先於執行」先提案：建議在三支generate_scores_*.py
    的宇宙建構處統一套`_is_stock_code()`同款過濾，並回頭確認price_history/
    fundamentals裡權證列的來源（疑似TPEx tpex_mainboard_quotes含權證）。
+   ⚠️ 現況（2026-10-17 核對，先.一〇九-18）：已解——`scores.json`／`scores_momentum.json`／`scores_future.json` 現為 1,966／1,979／1,977 列，六碼純數字代號 0 筆（本輪 python 讀檔實測）。
 2. **`AlphaData`排程**（alpha-data每日抓取）2026-09-03 15:30結束碼=1（失敗），
    本輪沒展開查，下次維運輪查log。
+   ⚠️ 現況（2026-10-17 核對，先.一〇九-18）：已核對——先.八十一-27（PENDING_QUEUE 第 19351 行）本機 Alpha* 排程 34 支 LastTaskResult 全 0x0、產出落地。
 3. **`data/margin_maintenance.json`在09-03 market.yml成功的那次run沒更新**（最後
    一筆仍是07:29那次），設定頁資料新鮮度卡片已標紅；下次維運輪看該run的
    `update_margin_maintenance.py`步驟輸出。
+   ⚠️ 現況（2026-10-17 核對，先.一〇九-18）：已核對——先.一〇九-4（PENDING_QUEUE 第 20395 行）STATUS 過期門檻修正；`data/margin_maintenance.json` 本機檔 2026-10-17 08:06 仍在更新。
 4. **丙（總司令裁示，分期）**：Phase 2 新聞管線（MOPS/EDGAR/RSS標題連結＋割韭菜
    過濾）＋籌碼集中度模組（集保TDCC OpenAPI大戶週變化＋TWSE OpenAPI外資/借券/
    當沖）；Phase 3 paper下單走隧道（Cloudflare Access保護），真實下單永遠只在
    本機且使用者親按。**先不做，等乙全部完成後再排。**
+   ⚠️ 現況（2026-10-17 核對，先.一〇九-18）：部分做——新聞／重大訊息管線已有（`data/news.json`、`data/events.json`、`data/ir_events.json`），外資／借券／融資券已接（`accumulate_foreign_holding.py`、`accumulate_securities_lending_sell.py`、`accumulate_margin_by_stock.py`）；集保 TDCC 大戶週變化未進排程（只有 `research/holding_shares_per_probe.py` 探測）。Phase 3 下單規則已被 CLAUDE.md 八節 2026-10-06 自動交易更正取代。
 5. **`/live/stream`改成真正tick回呼觸發推送**（使用者2026-09-03深夜補充指令二）：
    目前是每2秒輪詢比對再送（回應已標`mode:"poll-diff-2s"`），之後要讓
    `shioaji_quotes.py`收到一筆tick就直接餵SSE，需要兩個行程合併或改用行程間
    佇列，這才是真正秒級；使用者說「不用現在做」。
+   ⚠️ 現況（2026-10-17 核對，先.一〇九-18）：已做——`research/alpha_live_server.py` 第 15 行起註明 2026-09-04 零.2 起為真逐筆推送 `mode:"tick-push"`，無新鮮 tick 才退回 `poll-diff-2s`（第 1850 行 `stream_mode`）。
 6. **`.github/workflows/quotes.yml`/`market.yml`待補commit**：改動內容見PROGRESS.md
    2026-09-04條目，需有workflow scope的PAT。
+   ⚠️ 現況（2026-10-17 核對，先.一〇九-18）：`.github/workflows/quotes.yml` 之後已有多次 commit（如 196d2694ae、857a7d40de），本輪 `git status` 無 `.github/` 未提交改動；09-04 那批改動內容是否逐字進版未逐行比對。
 7. ✅ **`alpha_live_server.py`掛常駐排程**（2026-09-04上午完成）：`C:\alpha
 un-alpha-live-server-cycle.ps1`
    （PID檔＋port 8001 LISTENING雙重判斷的啟動器，UTF-8 BOM）＋`run-alpha-live-server-hidden.vbs`，
@@ -165,8 +175,10 @@ un-alpha-live-server-cycle.ps1`
    `AlphaLiveServerBoot`（/SC ONSTART）需要系統管理員才能建，指令已交總司令；沒建也沒關係，
    每5分鐘那條開機後最多5分鐘會把它拉起來。cloudflared服務已由總司令裝好（Running/Automatic）、
    防火牆規則「Alpha Live 8001」（Private）已加。
+   ⚠️ 現況（2026-10-17 核對，先.一〇九-18）：已完成（原文已標 ✅）。
 8. ~~**美股IBKR 1分K**~~ **【不做，2026-10-14 總司令裁示 先.九十一-3】只拿得到延遲約 15 分鐘的資料（paper 帳戶實測，見 docs/IBKR_1MIN_KBAR_FEASIBILITY.md），對盤中走勢線沒有意義；個股頁維持誠實 501。** 原文：需先查證`reqHistoricalData()`與`ibkr_quotes.py`現有短命連線是否
    衝突（或改成常駐訂閱後用tick聚合，跟台股同一套），確認前維持501。
+   ⚠️ 現況（2026-10-17 核對，先.一〇九-18）：不做（原文已標，先.九十一-3）。
 9. **籌碼分頁免費層第二單位（需提案核准）**：(a)股權分散／千張大戶持股比例週變化
    ——FinMind `TaiwanStockHoldingSharesPer`（週資料），建議新增`.github/scripts/
    fetch_holding_dispersion.py`只抓自選股＋三榜前100名、一週一次、寫`data/holding_
@@ -175,17 +187,21 @@ un-alpha-live-server-cycle.ps1`
    兩者都要掛`market.yml`步驟（PAT無workflow scope，留working tree）。本機對FinMind
    曾被IP封鎖，(a)只能在Actions上實測。(c)均價試算目前只有外資版、以收盤價概算，
    等逐日資料累積到≥20日再評估是否有意義。
+   ⚠️ 現況（2026-10-17 核對，先.一〇九-18）：(b) 借券賣出已做——`app-stock.js` 第 345 行起讀 TWSE TWT93U／TPEx tpex_short_sell（`accumulate_securities_lending_sell.py`）；(a) 千張大戶週變化未做（無 `fetch_holding_dispersion.py`、無 `data/holding_dispersion.json`），只有 `research/holding_shares_per_probe.py`；(c) 未再評估。
 10. **籌碼分點層——卡付費資料源，待使用者決定**（使用者2026-09-02指令二）：券商分點
     進出、關鍵分點、特定券商（秘密買賣超）、分點均價，免費拿不到（FinMind分點是
     sponsor付費／永豐Shioaji無分點／TWSE狂爬會觸封鎖＋ToS灰色，2026-09-02已探勘證實
     掛驗證碼不可行）。可行選項：付費FinMind sponsor或富果分點API。**不得為了有畫面
     而用非分點資料假裝成分點。**
+   ⚠️ 現況（2026-10-17 核對，先.一〇九-18）：仍卡付費資料源，未採購（CLAUDE.md 七節「取得方式鐵律」：分點進出待採購）。
 11. **籌碼類訊號驗證紀律（寫進設計）**：分點/主力/法人籌碼屬擁擠且爭議方法，未來要走
     `signal_ledger`校準「能否預測扣成本後報酬」；App已固定顯示「非投資建議、跟大戶
     不等於獲利、大戶也可能出貨」（`#chip-disclaimer`）。
+   ⚠️ 現況（2026-10-17 核對，先.一〇九-18）：免責文字在 `index.html` 第 739 行 `#chip-disclaimer`；籌碼類訊號未走 signal_ledger 校準。
 12. **`ibkr_quotes.py`沒有任何Windows排程任務**（2026-09-04查明，quotes_ibkr.json停在
     09-02 23:25的真正原因）：要不要建`AlphaIbkrQuotes`（需IB Gateway常開、美股盤中
     每N分鐘）由總司令決定；`run-ibkr-quotes-cycle.ps1`已改成盤中不commit。
+   ⚠️ 現況（2026-10-17 核對，先.一〇九-18）：已建——先.一〇三-15s（PENDING_QUEUE 第 20243 行）：AlphaIbkrQuotes 每 5 分＋登入觸發、AlphaIbkrGateway 每 15 分，2026-10-16 14:21 rc=0。
 
 ---
 
