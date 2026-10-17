@@ -1,3 +1,24 @@
+## 2026-10-17 08:4x（DevQueue 20261017-080102）研究室.四 +75 檔（累計 342/1,979）
+
+等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未變動）
+
+- **上一輪未提交的第 5 批**：開工重跑 `node scripts/smoke_test.mjs` 166 項全 PASS、exit 0，補 commit `931e341281`（data/financials_backfill.json）。
+- **push 時撞到其他排程同時提交**：`git pull --rebase --autostash` 還原暫存時衝突，工作目錄的 PENDING_QUEUE／PROGRESS／log 一度只剩 HEAD 版；已從 stash@{0} 以 `git apply --3way` 救回（connectivity_check.log 衝突取 HEAD 版，log 檔）。stash@{0}～{2} 保留未刪（刪除不可逆，留給總司令／下一輪判斷）。
+- **研究室.四（維持 - [ ]）**：第 6 批 75 檔全有資料、0 空、無 402；累計有資料 342、剩 1,637，斷點 4533。第一段被工具背景 10 分鐘上限砍掉，約十來次請求未存檔白費。[自行裁量] 下一輪改用背景執行＋長 timeout。
+- **冒煙**：收尾 `node scripts/smoke_test.mjs` 166 項全 PASS、exit 0（08:41）。
+- **收工補件**：本輪沒有時間重算佇列深度與補件（上一輪 07:1x 已查四個來源、來源已用盡），照實寫「本輪未重算」。
+
+## 2026-10-17 07:1x（DevQueue 20261017-063102）研究室.三完成（1,980/1,980）＋先.一〇八-7 完成＋研究室.四 +51 檔
+
+等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未變動）
+
+- **上一輪未提交的第 16 批**：開工重跑 `node scripts/smoke_test.mjs` 166 項 PASS、exit 0，補 commit（回補檔、PENDING_QUEUE／PROGRESS 補記）。
+- **研究室.三 ✅（- [x]）**：第 17 批 `--max 95` 95/95 全有資料、0 空、無 402 → remaining 0（done 1,980、有資料 1,979）。驗收：`build_research.py` 後 coverage.with_rev3_qoq 1,199→**1,965**（門檻 ≥1,800）；`selftest_research.py` 11 項全 PASS；冒煙第一次 165/166（#131 by_code 一致性 16 處不一致，因 research.json 剛重建、小檔未重產），`build_by_code.py` 重產 815 檔後 166 項 PASS、exit 0。[自行裁量] research.json 與 data/by_code/ 同一個 commit 提交。排程裡 market.yml 本來就是 build_research→build_by_code 順序，只有手動跑會出現這個空窗，不另開項目。
+- **先.一〇八-7 ✅（- [x]）**：Playwright 393×852 淺色／深色展開價值成長榜第一個因子（財報成長 18%），量測同列、單行、無溢出、pageerror 0，目視截圖正常；`docs/screenshots/method_factor_20261017/`。未跑版，不改程式。
+- **研究室.四（維持 - [ ]）**：`--max 300 --until 07:08`，51 檔全有資料、0 空、無 402，停在 3685；累計 268/1,980，剩 1,712。
+- **收工補件**：`- [ ]` 14 項（≥12）；DevQueue 可執行約 3 項（<6）。四個來源逐一查過：① BACKLOG 未完成項多數已被先.一〇三-15 系列核對並排入或標待條件；② UX_REDESIGN_PROPOSAL 用語走查 10 列已由先.九十七-3 全部實作、⑦ 剩待總司令裁示；③ 先.八十全檢節無未完成項；④ DATA_GAP_PLAN 甲類唯一待抓 #47 已由先.八十六-1a 完成，其餘需先寫 PREREG 或先過法遵。**來源已用盡，本輪不補**。
+- **⚠️ 研究室.四第 5 批未 commit（照實寫）**：07:08 收尾冒煙 165/166，#93 報「測試本身出錯：page.evaluate: Resulting promise was garbage collected」（測試框架層，不是斷言失敗；本輪前兩次冒煙同一項都 PASS），但沒全過、且已無時間重跑，依規則不提交。data/financials_backfill.json 與本段、PENDING_QUEUE 補記留在工作目錄，下一輪先重跑冒煙、全過再 commit。
+
 ## 2026-10-17 04:4x（DevQueue 20261017-040102）研究室.三 +75 檔（累計 1,885/1,980，未 commit）
 
 等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未變動）
