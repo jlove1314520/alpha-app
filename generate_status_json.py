@@ -74,7 +74,7 @@ STALE_HOURS = {
     # 先.一〇九-31：原本 no_date，補認時間欄位後依更新頻率給門檻
     "data/signal_ledger.json": 72,  # market.yml 每班重建（meta.last_build_at），3 天沒重建才算過期
     "data/monthly_close.json": 96,  # 讀 meta.last_trading_day（視為當日 18:00），跨週末＋1 天緩衝；長假會誤報
-    "data/tx_futures_history.json": 96,  # 讀 rows 最後一筆交易日，同上
+    "data/tx_futures_history.json": 120,  # 讀 rows 最後一筆交易日；TAIFEX 結構性落後一個交易日（先.一〇九-1），週四資料要撐到下週一 17:43 班，約 96 小時，再加 1 天緩衝
     "data/orphan_scan.json": 48,  # AlphaOrphanScan 每日 03:00（checked_at）  # 先.一〇九-7：AlphaDepCheck 每週一 08:00（scripts/run_dep_check.py 跑完即 commit）
 }
 
