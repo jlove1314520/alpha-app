@@ -771,7 +771,7 @@ pull --no-rebase→push，全部成功）。**排除掉一個真的踩到的坑*
 自己的安全分類器擋下（不是Windows權限問題，是這個工具本身的防護，
 跟稍早建`AlphaHypothesisQueue`那次一樣），已請使用者自己用`schtasks
 /Create`指令建立（見對話紀錄），使用者尚未確認是否已建立/多久跑一次。
-> ⚠️ 現況（2026-10-16 14:2x DevQueue 20261016-140101 核對，先.一〇三-15s，只讀 Get-ScheduledTask）：**已建立**——`AlphaIbkrQuotes` 每 5 分鐘＋登入觸發（上次 14:21 rc=0），`AlphaIbkrGateway` 每 15 分鐘＋登入觸發（上次 14:09 rc=0）；`data/quotes_ibkr.json` 本機最後寫入 2026-10-16 14:21。每週日 ET 01:00 仍需人工登入 Gateway（見 C:lpha\CLAUDE.md）。
+> ⚠️ 現況（2026-10-16 14:2x DevQueue 20261016-140101 核對，先.一〇三-15s，只讀 Get-ScheduledTask）：**已建立**——`AlphaIbkrQuotes` 每 5 分鐘＋登入觸發（上次 14:21 rc=0），`AlphaIbkrGateway` 每 15 分鐘＋登入觸發（上次 14:09 rc=0）；`data/quotes_ibkr.json` 本機最後寫入 2026-10-16 14:21。每週日 ET 01:00 仍需人工登入 Gateway（見 C:\alpha\CLAUDE.md）。
 
 **四、`generate_status_json.py`**：新增`describe_quotes_ibkr()`解析器
 避免落到generic fallback被誤判成error，`quotes_ibkr.json`的過期門檻
