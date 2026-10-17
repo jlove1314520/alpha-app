@@ -148,6 +148,9 @@
   // 官方28類產業分類，見 fetch_market_tw.py），不再逐類呼叫 FinMind。
   async function loadHeatmap(){
     const el=document.getElementById('heat-grid');if(!el)return;
+    // 先.一〇九-36：圖例色塊原本寫死紅漲綠跌（深色值），改用跟磚塊同一支 heatColor()，漲跌慣例／深淺色切換時一起換；自身失敗只警告
+    try{const u=document.getElementById('heat-lg-up'),d=document.getElementById('heat-lg-down');if(u)u.style.background=heatColor(3);if(d)d.style.background=heatColor(-3)}
+    catch(e){console.warn('[heat legend]',e);recordGlobalError('heatLegend',e)}
     await loadMarketDataFiles();
     let sectors=(MARKET_TW_CACHE&&MARKET_TW_CACHE.sectors)||[];
     // 2026-09-04四修.二：連上即時且/live/indices有37類股→用即時漲跌幅（依名稱對應），標「Shioaji 即時」；

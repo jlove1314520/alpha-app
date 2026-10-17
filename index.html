@@ -43,7 +43,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(mq.addEventListener)mq.addEventListener('change',h);else if(mq.addListener)mq.addListener(h)}
 })();
 </script>
-<link rel="stylesheet" href="app.css?v=2026-10-17.1115">
+<link rel="stylesheet" href="app.css?v=2026-10-17.2144">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -233,9 +233,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <h3>類股漲跌</h3>
         <div class="heat" id="heat-grid"><div class="skel-block" style="height:140px"></div></div>
         <div class="legend">
-          <div class="li"><span class="sw" style="background:#8f2f2f"></span>漲</div>
+          <div class="li"><span class="sw" id="heat-lg-up" style="background:#8f2f2f"></span>漲</div>
           <div class="li"><span class="sw" style="background:var(--line-mid)"></span>平</div>
-          <div class="li"><span class="sw" style="background:#265244"></span>跌</div>
+          <div class="li"><span class="sw" id="heat-lg-down" style="background:#265244"></span>跌</div>
         </div>
         <div class="note" id="heat-datatime"></div>
         <div class="note">來源：證交所產業指數</div>
@@ -1566,6 +1566,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-17.1115"></script>
+<script src="app.js?v=2026-10-17.2144"></script>
 </body>
 </html>
