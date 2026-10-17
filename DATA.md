@@ -44,6 +44,13 @@ Stooq 免費 key（需人工過 CAPTCHA）。兩者都需要總司令親自領�
 
 597 檔缺季報資料（稽核.二未結案）。
 
+## 🟢 台股研究宇宙的下市名單（2026-10-17 先.一〇八-6）
+
+- `research/universe.py::universe()`＝FinMind `TaiwanStockInfo`（現存）＋`TaiwanStockDelisting`（下市事件登記，cutoff 2003-01-01），重疊時下市優先。
+- 下市名單是本機快取 `research/data/raw/TaiwanStockDelisting__ALL__1990-01-01__latest.parquet`（不進 repo），**不會自己更新**；2026-10-17 重抓一次：727 筆、最新下市日 2026-10-16（前一版 723 筆、停在 07-28）。
+- 重抓後 universe()：active 2,740＋delisted 456＝3,196（前一版 2,744＋452）。
+- 原生市場：FinMind 是台灣資料商整理的台股資料，台股適用；但不是官方逐年下市清單，官方 `suspendListingCsvAndHtml` 尚未拿來交叉核對。
+
 ## 🟢 美股個股走勢圖的來源順序（2026-10-17 先.一〇七-2／先.一〇三-15d）
 
 | 順序 | 來源 | 原生市場／為何可信 | 在走勢圖裡的角色 |
