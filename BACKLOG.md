@@ -168,6 +168,7 @@ adapter（等總司令確認資金所在）」。以下僅登記＋估時，未�
 6. **`.github/workflows/quotes.yml`/`market.yml`待補commit**：改動內容見PROGRESS.md
    2026-09-04條目，需有workflow scope的PAT。
    ⚠️ 現況（2026-10-17 核對，先.一〇九-18）：`.github/workflows/quotes.yml` 之後已有多次 commit（如 196d2694ae、857a7d40de），本輪 `git status` 無 `.github/` 未提交改動；09-04 那批改動內容是否逐字進版未逐行比對。
+   ⚠️ 逐行核對（2026-10-17 DevQueue 20261017-173102，先.一〇九-21）：對照 PROGRESS.md 第 14658～14660 行列的四項——①push 前先 fetch＋rebase：**有**（quotes.yml 第 98～121 行、market.yml 第 420～430 行，另加 先.九-二 rebase 前收殘留）；②失敗等 30 秒、重試 10 次：**已改成**重試 5 次、每次等 3～8 秒隨機（quotes.yml 第 112、122 行；market.yml 第 420、431 行），是之後的設計變更、非漏 commit；③`timeout-minutes` 15／120：**兩支現行檔都沒有**（grep 零命中）；④market.yml commit 前重跑 generate_status_json.py：**有**（第 365 行）。缺口只剩③，補不補屬 workflow 變更，依「提案先於執行」另提，本輪未改。
 7. ✅ **`alpha_live_server.py`掛常駐排程**（2026-09-04上午完成）：`C:\alpha
 un-alpha-live-server-cycle.ps1`
    （PID檔＋port 8001 LISTENING雙重判斷的啟動器，UTF-8 BOM）＋`run-alpha-live-server-hidden.vbs`，
