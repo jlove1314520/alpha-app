@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-10-16T18:30:02+08:00",
+  "generated_at": "2026-10-17T18:30:02+08:00",
   "errors": [],
   "supplemented": {},
   "primary": "shioaji",
@@ -16,7 +16,7 @@
   },
   "expired_dropped": 0,
   "counts": {
-   "disposal": 21,
+   "disposal": 16,
    "notice": 37
   },
   "note": "處置股＝交易所公告分盤撮合（每 N 分鐘撮合一次）與預收款券；注意股＝當日公布注意交易資訊。App 個股頁紅標、AI 選股候選排除處置期間內個股。非投資建議。"
@@ -132,17 +132,6 @@
    "exchange": "OTC",
    "source": "shioaji_punish"
   },
-  "5475": {
-   "start": "2026-10-12",
-   "end": "2026-10-16",
-   "announced": "2026-10-08",
-   "interval": "2分鐘",
-   "unit_limit": 10.0,
-   "total_limit": 30.0,
-   "reason": "最近30個營業日內有12個營業日達本中心「公布注意交易資訊」標準。",
-   "exchange": "OTC",
-   "source": "shioaji_punish"
-  },
   "6213": {
    "start": "2026-10-08",
    "end": "2026-10-19",
@@ -154,28 +143,6 @@
    "exchange": "TSE",
    "source": "shioaji_punish"
   },
-  "6672": {
-   "start": "2026-10-12",
-   "end": "2026-10-16",
-   "announced": "2026-10-08",
-   "interval": "2分鐘",
-   "unit_limit": null,
-   "total_limit": null,
-   "reason": "該有價證券之交易，連續三個營業日達本公司「公布注意交易資訊」標準，且該股票於最近三十個營業日內曾發布處置交易資訊。",
-   "exchange": "TSE",
-   "source": "shioaji_punish"
-  },
-  "6708": {
-   "start": "2026-10-12",
-   "end": "2026-10-16",
-   "announced": "2026-10-08",
-   "interval": "2分鐘",
-   "unit_limit": null,
-   "total_limit": null,
-   "reason": "連續3個營業日達本中心「公布注意交易資訊」標準，且最近30個營業日內曾發布處置。",
-   "exchange": "OTC",
-   "source": "shioaji_punish"
-  },
   "7772": {
    "start": "2026-10-14",
    "end": "2026-10-20",
@@ -184,28 +151,6 @@
    "unit_limit": null,
    "total_limit": null,
    "reason": "連續3個營業日達本中心「公布注意交易資訊」標準，且最近30個營業日內曾發布處置。",
-   "exchange": "OTC",
-   "source": "shioaji_punish"
-  },
-  "8021": {
-   "start": "2026-10-12",
-   "end": "2026-10-16",
-   "announced": "2026-10-08",
-   "interval": "2分鐘",
-   "unit_limit": null,
-   "total_limit": null,
-   "reason": "該有價證券之交易，連續五個營業日達本公司「公布注意交易資訊」標準，且該股票於最近三十個營業日內曾發布處置交易資訊。",
-   "exchange": "TSE",
-   "source": "shioaji_punish"
-  },
-  "80212": {
-   "start": "2026-10-12",
-   "end": "2026-10-16",
-   "announced": "2026-10-08",
-   "interval": "2分鐘",
-   "unit_limit": null,
-   "total_limit": null,
-   "reason": "該轉換公司債之標的證券上市股票尖點科技股份有限公司(代號：8021)經臺灣證券交易所股份有限公司發布第二次處置  * 處置起訖期間： 自115年10月12日起5個營業日(115年10月12日至115年10月16日)，如遇： (1)有價證券最後交易日在處置期間，僅處置至其最後交易日； (2)休市、有價證券停止買賣、全日暫停交易，則順延執行。",
    "exchange": "OTC",
    "source": "shioaji_punish"
   },
