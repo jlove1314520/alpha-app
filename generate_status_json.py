@@ -69,6 +69,7 @@ STALE_HOURS = {
     "data/bls_macro.json": 72,  # 跟us_sic.json同一批market.yml排程產生，月頻統計、門檻沿用同批其他源頭二.3項目（源頭二.3第8名，2026-09-15新增）
     "data/customs_trade.json": 72,  # 跟us_sic.json同一批market.yml排程產生，月頻統計、門檻沿用同批其他源頭二.3項目（源頭二.3第9名，2026-09-15新增）
     "data/industrial_production.json": 72,  # 跟us_sic.json同一批market.yml排程產生，月頻統計、門檻沿用同批其他源頭二.3項目（源頭二.3第10名，2026-09-15新增）
+    "data/cash_flow.json": 2400,  # 先.一〇九-4：每季手動更新（約 100 天），排程提案在先.一〇三-15g
 }
 
 
@@ -587,6 +588,11 @@ GENERIC_TIME_KEYS = ("generated_at", "updated_at", "fetched_at", "computed_at", 
                      "as_of", "asof", "data_date", "date")
 GENERIC_SKIP_STALE = {  # 設定檔／一次性對照表：內容不隨時間過期，不判新鮮度
     "live_endpoints.json", "ui_glossary.json", "placeholder_allowlist.json", "company_official_domains_seed.json",
+    # 先.一〇九-4（2026-10-17）：事件觸發／研究快照／草稿，沒有固定更新頻率，日期只代表內容最後一次變動
+    "margin_ratio_calibration.json",  # 事件觸發（重新校準才寫）
+    "strategy_history.json",  # market.yml 每班跑，但內容沒變不重寫（.github/scripts/build_strategy_history.py）
+    "strategy_monthly_returns.json", "strategy_monthly_returns_leftjoin.json",  # 研究快照，手動重跑才寫
+    "theme_official_site_evidence_draft.json", "company_product_evidence.json",  # 草稿，人工整理才更新
 }
 
 
