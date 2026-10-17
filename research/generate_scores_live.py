@@ -25,8 +25,12 @@ parquet 快取（gitignored，只存在互動 session 本機），GitHub Actions
   2026-08-27已回補歷史，多數常見股票應該有）。**沒有PER反推EPS的備援**——
   那個備援（`score_v2.py::_eps_yoy_derived_from_per()`）需要「約一年前的PER
   快照」，但 `fundamentals.json` 的 `ratios` 只存「最新一筆」，沒有retained
-  歷史序列，這條路目前在JSON-only路徑走不通（要日後另外開一份PER歷史累積
-  檔才能補，目前誠實留白，不是忘記做）。**2026-08-27修正（使用者P1抽查抓到
+  歷史序列，這條路目前在JSON-only路徑走不通。**現況（2026-10-17 先.一〇九-30
+  更正）**：PER歷史累積檔已經有了——`data/pe_snapshot/<資料日>.json`
+  （`scripts/build_pe_snapshot.py`，market.yml 每班，2026-10-12 起每日累積），
+  但依【先.八十二】6 裁示⑤「只累積、不進評分」，本腳本刻意不讀；要等累積滿
+  約一年且總司令裁示後才接（提案見 `research/AWAITING_REVIEW.md` 先.一〇九-22）。
+  目前誠實留白，不是忘記做。**2026-08-27修正（使用者P1抽查抓到
   真bug）**：去年同季EPS若非正值（虧損基期），YoY%視為不適用、回傳None，
   不套用「(now-prior)/abs(prior)」這種基期趨近零時會爆出失真巨大百分比的
   算法（實測：2344曾算出+1962%，其實是虧轉盈，不是真的成長19倍）；基期為
