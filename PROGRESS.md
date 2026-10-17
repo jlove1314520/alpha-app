@@ -8,6 +8,7 @@
 - **收工補件**：`- [ ]` 18 項（≥12）；DevQueue 可執行 4 項（<6），四個來源前幾輪已確認用盡 → **來源已用盡，不補**。
 - **BLOCKED**：無新增。
 - **冒煙**：02:55～03:00 跑 166/166、exit 0（迴圈仍在寫 financials_backfill.json 時跑的；本輪只動該資料檔）。
+- **⚠️ git 事故（已收拾）**：03:00:12 某支排程的 `git pull --rebase --autostash` 停在半路（rebase-merge 還在、無 git 行程、待 pick 孤兒程序巡檢 799483261d），我 03:06 的 commit 落在那個暫態 HEAD 上、pull 失敗。處理：`git rebase --quit`（autostash 自動存成新 stash，不刪）→ cherry-pick 799483261d → main 指到結果 → push（origin/main＝48fb16faea，含本批與巡檢 commit，沒有遺失）。stash 裡只有 by_code/_meta.json、DEV_QUEUE_PROMPT.txt、dev_queue_cycle.log 三個機器檔在工作目錄沒有更新版，已從 stash 還原；其餘工作目錄都是較新版。**stash 清單未 drop**（stash@{0}～ 都是 autostash，要清理請總司令或互動視窗判斷）。根因未查（是哪支排程、為什麼停住），[自行裁量] 本輪沒時間查，留給下一輪：讀 03:00 前後各排程 log 找誰跑了 pull --rebase。
 
 ## 2026-10-18 02:1x（DevQueue 20261018-013102）研究室.四第 20 批
 
