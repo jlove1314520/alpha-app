@@ -4924,9 +4924,20 @@ async function runSmokeTest(baseUrl, headless = true) {
     if (!/天沒備份/.test(b)) wbErrs.push(`(b) 10 天前備份應警告：${b}`);
     if (!/排程可能沒跑/.test(b)) wbErrs.push(`(b) 6 天前快照應警告：${b}`);
     if (/正常/.test(b)) wbErrs.push("(b) 有警告時不得顯示正常");
+    // (c) 先.一〇九-8：快照與備份都正常，但 2 天前有 last_failure → 要標「快照失敗沒存」且不得顯示正常；失敗已過 10 天則不再警告。
+    const d2 = new Date(Date.now() + 8 * 3600 * 1000 - 2 * 86400000).toISOString().slice(0, 10);
+    fixture = { last_snapshot_date: today, snapshot_days: 3, snapshot_mb: 10.5, last_backup_at: new Date().toISOString(), backed_up_days: 3,
+      last_failure: { date: d2, exit: 1, reason: "ConnectionResetError 10054 <x>" } };
+    const c = await page.evaluate(async () => { await loadWarrantBackup(); return document.getElementById("warrant-backup-summary").innerHTML; });
+    if (!c.includes(d2 + " 快照失敗沒存")) wbErrs.push(`(c) 2 天前失敗應警告：${c}`);
+    if (/正常/.test(c)) wbErrs.push("(c) 有漏抓時不得顯示正常");
+    if (c.includes("<x>")) wbErrs.push("(c) 失敗原因未跳脫 HTML");
+    fixture.last_failure.date = new Date(Date.now() - 10 * 86400000).toISOString().slice(0, 10);
+    const c2 = await page.evaluate(async () => { await loadWarrantBackup(); return document.getElementById("warrant-backup-summary").innerText; });
+    if (/快照失敗/.test(c2) || !/正常/.test(c2)) wbErrs.push(`(c) 10 天前的失敗不應再警告：${c2}`);
     await page.unroute("**/data/warrant_backup_status.json**");
   } catch (e) { wbErrs.push(`測試本身出錯：${e.message || e}`); }
-  record("149. 設定頁「權證快照備份」卡：天數／最後備份時間、備份逾 8 天與快照逾 4 天要警告（先.九十五-2）", wbErrs.length === 0, wbErrs.join("; "));
+  record("149. 設定頁「權證快照備份」卡：天數／最後備份時間、備份逾 8 天與快照逾 4 天要警告（先.九十五-2）、7 天內快照失敗要警告（先.一〇九-8）", wbErrs.length === 0, wbErrs.join("; "));
 
   // 150.【2026-10-14 先.九十五-4】淺色模式：預設跟隨系統；設定頁三選一（跟隨系統／淺色／深色）切換後 data-theme、
   // 頁面底色、theme-color 都要跟著變；跟隨系統時手機切淺／深色要即時反映；最後還原成原本偏好與深色系統。

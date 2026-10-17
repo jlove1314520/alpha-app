@@ -764,6 +764,10 @@
       const warn=[];
       if(bAge==null)warn.push('還沒有備份過');else if(bAge>8)warn.push('已 '+Math.floor(bAge)+' 天沒備份');
       if(sAge==null)warn.push('還沒有快照');else if(sAge>4)warn.push('最後快照是 '+Math.floor(sAge)+' 天前，排程可能沒跑或電腦沒開');
+      // 先.一〇九-8：快照失敗（限流／驗證不過／重試後仍斷線）由 warrant_snapshot_daily.py 記 last_failure；權證快照只能當天抓、補不回，7 天內的漏抓都要標出來。
+      const lf=d.last_failure,fAge=lf&&lf.date?days(lf.date+'T17:30:00+08:00'):null;
+      const escW=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+      if(fAge!=null&&fAge<=7)warn.push(escW(lf.date)+' 快照失敗沒存（補不回）：'+escW(String(lf.reason||'原因未記').slice(0,80)));
       sum.innerHTML=`快照 <b>${nf(d.snapshot_days||0)}</b> 天（最後 ${d.last_snapshot_date||'—'}，共 ${d.snapshot_mb!=null?d.snapshot_mb:'—'} MB）｜已備份 <b>${nf(d.backed_up_days||0)}</b> 天`
         +(warn.length?` ｜ <b style="color:var(--warn)">${warn.join('；')}</b>`:' ｜ <b>✓ 正常</b>');  // 不用漲跌色（台股慣例 --up 是紅色，會誤讀）
       if(tm)tm.textContent=d.last_backup_at?fmtTzMMDDHHMM(new Date(d.last_backup_at),'Asia/Taipei'):'尚未備份';

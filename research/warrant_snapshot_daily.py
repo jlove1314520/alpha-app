@@ -69,20 +69,24 @@ def is_trading_day(d: datetime) -> tuple[bool, str]:
     return True, "交易日"
 
 
-def run_snapshot(day: str) -> int | None:
+def run_snapshot(day: str) -> tuple[int | None, str]:
+    """回傳 (exit code, 失敗原因摘要)；成功或已存在時原因為空字串。"""
     if (SNAP_ROOT / day / "meta.json").exists():
         log(f"{day} 快照已存在，不重跑")
-        return 0
+        return 0, ""
     try:
         r = subprocess.run([sys.executable, str(HERE / "warrant_snapshot.py"), "--date", day], cwd=REPO,
                            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=1800)
-        log(f"warrant_snapshot.py exit={r.returncode} " + (r.stdout.strip().splitlines() or [""])[-1][:300])
+        last_out = (r.stdout.strip().splitlines() or [""])[-1][:300]
+        log(f"warrant_snapshot.py exit={r.returncode} " + last_out)
+        last_err = ""
         if r.returncode != 0 and r.stderr.strip():
-            log("stderr: " + r.stderr.strip().splitlines()[-1][:300])
-        return r.returncode
+            last_err = r.stderr.strip().splitlines()[-1][:300]
+            log("stderr: " + last_err)
+        return r.returncode, ("" if r.returncode == 0 else (last_err or last_out or "（無輸出）"))
     except Exception as e:  # noqa: BLE001
         log(f"快照執行失敗（{type(e).__name__}: {e}）")
-        return None
+        return None, f"{type(e).__name__}: {e}"[:300]
 
 
 def _days() -> list[str]:
@@ -129,7 +133,8 @@ def weekly_backup(force: bool) -> dict:
     return man
 
 
-def write_status(man: dict) -> bool:
+def write_status(man: dict, failure: dict | None = None) -> bool:
+    """failure＝本次快照失敗紀錄（先.一〇九-8：設定頁要看得到漏抓）；沒有就沿用舊檔的 last_failure。"""
     days = _days()
     size = sum(f.stat().st_size for d in days for f in (SNAP_ROOT / d).iterdir() if f.is_file())
     last = man["backups"][-1] if man.get("backups") else None
@@ -143,8 +148,11 @@ def write_status(man: dict) -> bool:
     old = None
     try:
         old = json.loads(STATUS.read_text(encoding="utf-8")) if STATUS.exists() else None
-    except Exception:  # noqa: BLE001
-        pass
+    except Exception as e:  # noqa: BLE001
+        log(f"舊狀態檔讀不回來（{type(e).__name__}），照新內容重寫")
+    lf = failure or (old or {}).get("last_failure")
+    if lf:
+        st["last_failure"] = lf
     if old and {k: v for k, v in old.items() if k != "generated_at"} == st:
         log("狀態沒變，不重寫")
         return False
@@ -203,10 +211,15 @@ def main() -> int:
     now = datetime.now(TPE)
     ok, why = is_trading_day(now)
     log(f"{now:%Y-%m-%d}：{why}")
+    failure = None
     if ok:
-        run_snapshot(now.strftime("%Y-%m-%d"))
+        day = now.strftime("%Y-%m-%d")
+        rc, why_fail = run_snapshot(day)
+        if rc != 0:  # 2＝限流封鎖、3＝官方回應驗證不過、1／None＝其他錯誤（含重試後仍連線中斷）
+            failure = {"date": day, "exit": rc, "reason": why_fail,
+                       "at": datetime.now(TPE).isoformat(timespec="seconds")}
     man = weekly_backup(a.force_backup)
-    if write_status(man) and not a.no_commit:
+    if write_status(man, failure) and not a.no_commit:
         commit_status()
     return 0
 

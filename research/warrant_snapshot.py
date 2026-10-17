@@ -82,6 +82,27 @@ class Blocked(RuntimeError):
     pass
 
 
+RETRY_WAIT_SEC = 60
+
+
+def _get_once_retry(requests, wait_or_raise, src: str, name: str, url: str, params, sleep=None):
+    """先.一〇九-8：10/16 tpex 檔下載到一半 ConnectionResetError 10054，整天快照沒存（權證快照只能當天抓）。
+    只對「連線中斷類」（ConnectionError／ChunkedEncodingError，含連線逾時）等 60 秒重試一次；
+    HTTP 狀態碼（含 402/403/428/429 限流）不在這裡重試——回應照常交回呼叫端判斷，不違反「額度用完不重試」。
+    重試前照樣走節流（wait_or_raise），第二次再斷就把例外往外丟（main 照舊 exit 1）。"""
+    import time
+    exc = (requests.exceptions.ConnectionError, requests.exceptions.ChunkedEncodingError)
+    for attempt in (1, 2):
+        wait_or_raise(src)
+        try:
+            return requests.get(url, params=params, timeout=120, headers={"User-Agent": "Mozilla/5.0"})
+        except exc as e:
+            if attempt == 2:
+                raise
+            print(f"  {name}: 連線中斷（{type(e).__name__}），{RETRY_WAIT_SEC} 秒後重試一次", flush=True)
+            (sleep or time.sleep)(RETRY_WAIT_SEC)
+
+
 def fetch_all(date: str, raw_dir: Path) -> dict:
     """發 7 次請求，原始回應 gzip 存 raw_dir（解析失敗時可重跑解析、不必重抓）。回傳 {名稱: 解出的 JSON}。"""
     import requests
@@ -94,8 +115,7 @@ def fetch_all(date: str, raw_dir: Path) -> dict:
         if f.exists():  # 同一天重跑不重抓
             out[name] = json.loads(gzip.decompress(f.read_bytes()).decode("utf-8"))
             continue
-        _rate_limit_wait_or_raise(src)
-        r = requests.get(url, params=pf(date), timeout=120, headers={"User-Agent": "Mozilla/5.0"})
+        r = _get_once_retry(requests, _rate_limit_wait_or_raise, src, name, url, pf(date))
         if r.status_code in BLOCK:
             _rate_limit_record_block(src, r.status_code, name)
             raise Blocked(f"{name} HTTP {r.status_code}，{src} 封鎖 2 小時，本輪停止")
