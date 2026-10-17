@@ -2022,6 +2022,7 @@ FinMind的明確`retry_after`倒數更不透明，沒有官方公告的解除時
   可能漏掉「緩跌盤跌」這種空頭型態。詳細數字/方法/限制見
   `research/B24_RESULTS.md`、`research/data/b25_regime_report_value_
   board.csv`、`research/b25_regime_report.py`。
+  > ⚠️ 現況（2026-10-17 DevQueue 20261017-173102 核對，先.一〇九-19，只讀）：**隨機對照組百分位欄仍留白**——`research/B24_RESULTS.md` 第 226 行「B25 分情境績效報告」節、第 249 行仍寫留白原因（100 次 draws 未存逐日序列、重產需數小時），本輪未找到後續補算；題材動能／未來性兩板仍無 PIT 回測引擎。待做：若要補，需重跑對照組並存逐日序列（屬驗證帽工作量，未排入佇列）。
 
 - **✅ B26：B24報告慣例補強（2026-09-02發現已隨B24-500完成，補記狀態）**：
   1. 報告新增欄位：調整後Sharpe（原值×0.5與×0.7兩欄，標示「實盤預期
@@ -2114,6 +2115,7 @@ FinMind的明確`retry_after`倒數更不透明，沒有官方公告的解除時
      完成，UI留給下一輪接手。**尚未掛GitHub Actions排程**——`data/
      us_financials.json`目前是2026-09-02手動跑出的一次性快照，不會
      自動更新，UI已誠實揭露這一點（見下一條）。
+   > ⚠️ 現況（2026-10-17 DevQueue 20261017-173102 核對，先.一〇九-19，只讀）：第 7 點「尚未掛排程」已過時：`.github/workflows/us_financials.yml` 每週六台北 10:17（cron `17 2 * * 6`）跑 `.github/scripts/fetch_us_financials_sec.py`（SEC companyfacts）＋`build_us_scores_v0.py`，`data/us_financials.json` 會自動更新（C:\alpha\CLAUDE.md SEC EDGAR 節：每週約 263 個請求）。UI 的「一次性快照」揭露文字本輪未核對是否已改。
   8. **2026-09-02（續）：個股頁「財報」分頁UI完成**。`index.html`新增
      `loadUsFinancials(code)`（讀`data/us_financials.json`，跟
      `loadFundamentals`/`loadStockDetail`同一套快取模式）+
@@ -2467,6 +2469,7 @@ B31/B32/B33。
   不要在使用者不知情的狀況下夜間就把時間/API配額燒在這上面。這輪的
   30-random-draws背景任務讓它自然跑完（不特地中止，數字還是留作記錄，
   但務必附上以上這整段警語，不能被誤讀成定論）。
+  > ⚠️ 現況（2026-10-17 DevQueue 20261017-173102 核對，先.一〇九-19，只讀）：標頭「🔄 開工中」已過時：B24-500 已跑完並判不及格（本檔「## ❌ 2026-08-29 B24-500正式全樣本回測（跑完，不及格，如實記錄）」節，約第 1214 行；結果 `research/B24_RESULTS.md`，程式 `research/run_value_board_v2_pit_backtest.py` 皆存在）。不改標頭原文，以本註記為準。
 
 - **B16（P0）：價值成長榜+題材動能榜+未來性濾網都必須各自回測驗證**
   （2026-08-27提升為P0；2026-08-27【驗證帽】本輪查證進度：**已確認前置
@@ -2572,6 +2575,7 @@ B31/B32/B33。
      ——只登記這個未來方向，不寫任何程式碼、不選定任何雲端服務商、
      不申請任何雲端帳號/金鑰。
   尚未開始，等待使用者核准提案後才動工。
+  > ⚠️ 現況（2026-10-17 DevQueue 20261017-173102 核對，先.一〇九-19，只讀）：**部分已用另一條路達成，原規格的「雲端中繼」未做**。手機現在經 Tailscale Funnel 直連本機 `research/alpha_live_server.py`（`data/live_endpoints.json` 已啟用端點 `alpha-pc.tail4c7616.ts.net`，App 啟動自動探測，見 CLAUDE.md 四之一節「端點變更只改一個檔案」），`/live/stream` SSE 有新鮮 tick 時為 `mode:"tick-push"`（`alpha_live_server.py` 第 15 行、第 1850 行 `stream_mode`），已繞開 git push＋Pages CDN 慢鏈路；限制：依賴家用 PC 開機與 Funnel，非雲端常駐。原第 2 點雲端 websocket／資料庫、雲端帳號金鑰皆未申請。本輪未逐行比對當初是否走過提案核准程序（PENDING_QUEUE 第 6451、6461 行有 Funnel 相關裁示）。
 
 - **B19：訊號管線骨架（依market-signal-vetting方法）**（2026-08-27登錄，
   P0後次順位，`未來性濾網(a)`完成後開始）：
@@ -2636,6 +2640,7 @@ B31/B32/B33。
 ## ⚠️ 尚未驗收 / 已知限制
 
 - **P1 analyst/catalyst 因子**：全市場沒有免費資料源，暫無解法。
+  > ⚠️ 現況（2026-10-17 DevQueue 20261017-173102 核對，先.一〇九-19，只讀）：**美股部分解除、台股仍無**。美股：`.github/scripts/fetch_us_analyst_reco.py`（Finnhub `/stock/recommendation` 評等分佈）→ `data/us_analyst_reco.json`（generated_at 2026-10-16T17:23Z），目標價端點 Finnhub 標 Premium 不打（C:\alpha\CLAUDE.md Finnhub 節；另見本檔 B33 先.一〇三-15w 註記）；尚未當成評分因子（只顯示）。台股：無合規免費的分析師評等／目標價來源，催化劑只有重大訊息事件（`data/events.json`、`data/ir_events.json`），未做成因子。
 - **earnings_growth 的 PER 反推 EPS 備援**：需要 PER 歷史序列，目前
   `fundamentals.json` 只存最新一筆，尚未建置。
   > ⚠️ 現況（2026-10-16 DevQueue 20261016-180101 核對，先.一〇三-15ai，只讀）：**仍未解**。`research/generate_scores_live.py` 第 25～29 行 docstring 仍寫「沒有PER反推EPS的備援」；`data/` 沒有任何 PER 歷史累積檔（`ls data | grep per` 零命中），研究端 `research/score_v2.py::_eps_yoy_derived_from_per()` 才有備援。要補需新增一份每日累積的 PER 歷史檔（資料流架構變更，依「提案先於執行」要先提案）；目前 earnings_growth 另有營收年增／毛利率／營益率三個子訊號，EPS 缺時不會整個因子落空（`research/live_factors.py` 第 74～78 行）。
