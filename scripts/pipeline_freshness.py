@@ -123,6 +123,15 @@ def _last_output(spec: dict, f: Path) -> tuple[datetime | None, str]:
         if best:
             return best, "log 內最後時間戳"
         return datetime.fromtimestamp(f.stat().st_mtime, TZ), "log 內找不到時間戳，退回檔案修改時間"
+    if kind == "dir_latest_json_field":
+        # 先.一〇九-29：每日一檔的目錄（例 data/pe_snapshot/<資料日>.json），取檔名排序最後一個 *.json 讀欄位。
+        # 例外交給 evaluate() 的單條 try，只標 unknown、不影響其他條。
+        files = sorted(f.glob(spec.get("glob", "*.json")))
+        if not files:
+            return None, "目錄內沒有符合的檔案"
+        doc = json.loads(files[-1].read_text(encoding="utf-8"))
+        field = spec["field"]
+        return _parse_ts(_dig(doc, field)), f"目錄最新檔 {files[-1].name} 的 {field}"
     if kind == "jsonl_last_field":
         lines = [ln for ln in f.read_text(encoding="utf-8").splitlines() if ln.strip()]
         if not lines:
