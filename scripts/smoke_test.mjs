@@ -691,7 +691,7 @@ async function runSmokeTest(baseUrl, headless = true) {
     await page.evaluate(() => window.closeIbkrSheet());
 
     // 先.六十-A1：台股假下單抽屜已移除；台股個股頁不得出現 IBKR 下單鈕（分工鐵律：IBKR 下單卡只給美股）
-    await page.evaluate(() => window.openStock("2330"));
+    await page.evaluate(() => Promise.race([window.openStock("2330"), new Promise((r) => setTimeout(r, 15000))]));
     await page.waitForTimeout(300);
     const twIbkrBtnShown = await page.evaluate(() => { const b = document.getElementById("buy-cta-us-buy"); return !!b && getComputedStyle(b).display !== "none"; });
     if (twIbkrBtnShown) ibkrUiErrors.push("台股個股頁竟然顯示 IBKR 下單鈕（分工鐵律破功）");
@@ -965,7 +965,7 @@ async function runSmokeTest(baseUrl, headless = true) {
       if (route.request().url().includes("TaiwanStockPrice")) route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ msg: "success", status: 200, data: fakeRows }) });
       else route.continue();
     });
-    await page.evaluate(() => window.openStock("2330"));
+    await page.evaluate(() => Promise.race([window.openStock("2330"), new Promise((r) => setTimeout(r, 15000))]));
     await page.waitForFunction(() => { const el = document.getElementById("trend-chart"); return el && (el.querySelector("canvas") || el.querySelector("svg polyline")); }, null, { timeout: 15000 }).catch(() => {});
     const ch = await page.evaluate(() => { const el = document.getElementById("trend-chart"); return { canvas: !!el.querySelector("canvas"), svg: !!el.querySelector("svg polyline"), text: (el.textContent || "").slice(0, 80), lwc: typeof LightweightCharts !== "undefined" }; });
     if (!ch.canvas && !ch.svg) liveUiErrors.push(`個股頁走勢圖沒有畫出canvas也沒有SVG折線（lightweight-charts載入=${ch.lwc}，內容「${ch.text}」）`);
@@ -1011,7 +1011,7 @@ async function runSmokeTest(baseUrl, headless = true) {
       { date: "20261014", foreign_lots: -1290.1, trust_lots: -216.0, dealer_lots: -92.4 },
       { date: "20261015", foreign_lots: null, trust_lots: 538.0, dealer_lots: -416.2 }] } };
     await page.route("**/data/stock_detail/5347.json*", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fixture) }));
-    await page.evaluate(() => window.openStock("5347"));
+    await page.evaluate(() => Promise.race([window.openStock("5347"), new Promise((r) => setTimeout(r, 15000))]));
     await page.evaluate(() => { document.querySelector('#stock-tabs button[data-sub="chip"]')?.click(); });
     await page.waitForFunction(() => { const t = document.getElementById("chip-note")?.textContent || ""; return /TPEx|櫃買中心/.test(t) && /資料不全/.test(t); }, null, { timeout: 15000 }).catch(() => {});
     const n = await page.evaluate(() => ({
@@ -3137,7 +3137,7 @@ async function runSmokeTest(baseUrl, headless = true) {
     if (JSON.stringify(ia.stockTabs) !== JSON.stringify(["總覽", "籌碼", "財務", "事件", "研究"])) iaErrs.push(`個股頁分頁應為總覽／籌碼／財務／事件／研究：${ia.stockTabs}`);
     if (ia.more.some(m => !m || m.open || m.n < 1)) iaErrs.push(`市場頁「更多」應存在、預設收合且有卡：${JSON.stringify(ia.more)}`);
     // 個股頁「財務」分頁同時顯示營收與財報
-    await page.evaluate(() => openStock("2330"));
+    await page.evaluate(() => Promise.race([window.openStock("2330"), new Promise((r) => setTimeout(r, 15000))]));
     await page.waitForTimeout(800);
     const fin = await page.evaluate(() => {
       document.querySelector('#stock-tabs button[data-sub="fin"]').click();
@@ -5282,7 +5282,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   // ＋自選股狀態點：review→紅、tags→藍、其他不顯示。
   const rlabErrs = []; let rlabInfo = "";
   try {
-    await page.evaluate(() => window.openStock("2330"));
+    await page.evaluate(() => Promise.race([window.openStock("2330"), new Promise((r) => setTimeout(r, 15000))]));
     await page.waitForTimeout(300);
     await page.evaluate(() => document.querySelector('#stock-tabs button[data-sub="research"]').click());
     await page.waitForFunction(() => { const b = document.getElementById("stock-research-body"); return b && /近3月營收年增|尚未建檔/.test(b.textContent); }, null, { timeout: 10000 });
@@ -5295,7 +5295,7 @@ async function runSmokeTest(baseUrl, headless = true) {
     if (!a.dVis || !/不是買賣訊號/.test(a.dTxt)) rlabErrs.push("① 研究分頁沒有可見的免責聲明：" + a.dTxt);
     if (!/近3月營收年增/.test(a.bTxt)) rlabErrs.push("2330 研究分頁沒有營收列：" + a.bTxt.slice(0, 80));
     // ③ 不在研究室名冊的代號（0050 是 ETF）→ 只顯示一行空狀態
-    await page.evaluate(() => window.openStock("0050"));
+    await page.evaluate(() => Promise.race([window.openStock("0050"), new Promise((r) => setTimeout(r, 15000))]));
     await page.waitForTimeout(300);
     await page.evaluate(() => document.querySelector('#stock-tabs button[data-sub="research"]').click());
     await page.waitForFunction(() => { const b = document.getElementById("stock-research-body"); return b && /尚未建檔|近3月營收年增/.test(b.textContent); }, null, { timeout: 10000 });
