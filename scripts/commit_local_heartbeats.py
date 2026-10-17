@@ -22,7 +22,11 @@ import local_git_commit as G  # noqa: E402
 # 實際間隔約 65 分鐘，會在 DevQueue 剛好沒提交的空檔誤報。
 THROTTLE_MIN = 30
 SETS = {
-    "connectivity": (["research/external_connectivity.jsonl", "research/connectivity_check.log"], "對外連通性監測心跳（AlphaConnectivity，每 30 分鐘提交一次）"),
+    # 先.一〇九-6（2026-10-17）：check_external_connectivity.py 每輪也重寫 data/factory_stability.json／_history.jsonl，
+    # 原本不在清單裡，repo 版停在 10/14，雲端讀到過期；兩檔只有本機這支寫（.github 無寫入者）。
+    "connectivity": (["research/external_connectivity.jsonl", "research/connectivity_check.log",
+                      "data/factory_stability.json", "data/factory_stability_history.jsonl"],
+                     "對外連通性監測心跳（AlphaConnectivity，每 30 分鐘提交一次）"),
     "probe": (["research/twse_publish_probe.jsonl", "research/twse_probe.log"], "TWSE 發布時間探測心跳（AlphaTwsePublishProbe）"),
 }
 
