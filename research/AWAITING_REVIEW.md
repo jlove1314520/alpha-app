@@ -19,7 +19,7 @@
 - 2026-10-07 先.四十五-三 S3-C6 紙上追蹤裁示 → 總司令【先.四十七】裁示：先做樣本外單發、開紙.三前進式紙上追蹤、寫槓桿安全方案草案（結案）。
 - N=0時「等待中」表格留表頭但清空列，不得整份刪除本檔案。
 
-## 等待中（目前：7件）
+## 等待中（目前：8件）
 
 | 項目 | 完成時間 | 等待審閱內容 | 等待時長 |
 |---|---|---|---|
@@ -30,6 +30,7 @@
 | 先.一〇九-22 PER 反推 EPS 備援的讀取端（提案） | 2026-10-17 18:4x | 每日 PER 累積其實已有（`data/pe_snapshot/`，先.八十二-6，10/12 起，一年約 12.7MB、零額外請求），缺的是讀取端。建議：現在不動；2027-10 起 `generate_scores_live.py` 讀一年前快照當 earnings_growth 第二順位備援（需解除裁示⑤「只累積、不進評分」）；另請互動視窗把 pe_snapshot 加進 holdout 守門。詳見 PENDING_QUEUE 該條。請總司令核准或駁回。 | 0 小時 |
 | 先.一〇九-24 B25 隨機對照組百分位補算（工作量估算＋提案） | 2026-10-17 18:5x | 零 FinMind 請求（用既有 497MB 因子快取），但 100 次 draws×兩期約 7 小時，超過 DevQueue 一輪。建議：新寫可斷點續跑的對照組腳本，夜間背景分 2～3 晚跑完；不建議降到 20 次。不是新試驗、不碰 holdout。請總司令核准或駁回。 | 0 小時 |
 | 先.一〇九-26 quotes.yml／market.yml 補 job 層 timeout-minutes（提案） | 2026-10-17 19:0x | 近 30 次耗時 quotes 最長 1.6 分、market 最長 8.5 分；現行預設 360 分鐘，兩支共用 concurrency 佇列，一支卡死會讓另一支停更最多 6 小時。建議 quotes 10 分、market 30 分。改 workflow 屬架構變更，請總司令核准或駁回。 | 0 小時 |
+| 先.一〇九-32 STATUS.json 檔案新鮮度清單（data_files）只在 market.yml 重產（提案） | 2026-10-17 20:5x | **前提更正**：每 30 分鐘的「心跳」不是本機，是雲端 `local_schedule_watchdog.yml`（:23／:53）呼叫 `scripts/check_local_schedule_heartbeat.py`，它已經 import `generate_status_json` 重算 schedule_health 並把頂層 `updated_at` 改成現在時間，**唯獨 data_files 不重算**——所以頂層看起來 30 分鐘內剛更新、清單卻可能是好幾班前的（實例：supply_watchlist 列為 10/03 stale）。**甲（建議）**：`_refresh_top_level()` 同一個 try/except 裡加 `doc['data_files']=_g.build_data_files()`，另寫 `data_files_checked_at`；零外部請求（只讀雲端 checkout 的 repo 檔），本機實測 112 檔 1.4 秒；衝突面不變——這支本來就每 30 分鐘寫 STATUS.json、commit 前 `git pull --rebase --autostash`，只是多改一個欄位（watchdog 不在 `repo-push-main` concurrency group，這是既有狀況，非本提案新增）；重算失敗沿用十二節降級保留舊值。**乙**：只在 App 新鮮度卡標出清單產生時間（需先新增 `data_files_checked_at` 欄位，market.yml 寫），清單本身仍會落後到下一班 market.yml、週末最多約 2 天。甲解決根因、乙只是揭露；甲改 workflow 呼叫的腳本（不改 workflow 檔、不改排程頻率），屬「提案先於執行」，待核准。 | 0 |
 
 ## 等前置條件（不需總司令動作，不計入等待中）
 
