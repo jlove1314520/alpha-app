@@ -2643,6 +2643,7 @@ B31/B32/B33。
 
 - **P1 analyst/catalyst 因子**：全市場沒有免費資料源，暫無解法。
   > ⚠️ 現況（2026-10-17 DevQueue 20261017-173102 核對，先.一〇九-19，只讀）：**美股部分解除、台股仍無**。美股：`.github/scripts/fetch_us_analyst_reco.py`（Finnhub `/stock/recommendation` 評等分佈）→ `data/us_analyst_reco.json`（generated_at 2026-10-16T17:23Z），目標價端點 Finnhub 標 Premium 不打（C:\alpha\CLAUDE.md Finnhub 節；另見本檔 B33 先.一〇三-15w 註記）；尚未當成評分因子（只顯示）。台股：無合規免費的分析師評等／目標價來源，催化劑只有重大訊息事件（`data/events.json`、`data/ir_events.json`），未做成因子。
+  > ⚠️ 顯示端已核對（2026-10-17 DevQueue 20261017-193102，先.一〇九-27，只讀、未改程式）：`app-stock.js` 第 1354～1374 行 `buildAnalystRadarHtml()` 卡片首行已標「第三方資料｜券商評等原文分類，非本 App 判斷｜來源：Finnhub 免費層，抓取時間 YYYY-MM-DD」與評等期別；「非投資建議」依先.七十二-A2（冒煙 #91）只在頁尾一處（`index.html` 第 1452 行 data-ui-footer-disclaimer），卡片內刻意不重複。三項皆齊，不需修。
 - **earnings_growth 的 PER 反推 EPS 備援**：需要 PER 歷史序列，目前
   `fundamentals.json` 只存最新一筆，尚未建置。
   > ⚠️ 現況（2026-10-16 DevQueue 20261016-180101 核對，先.一〇三-15ai，只讀）：**仍未解**。`research/generate_scores_live.py` 第 25～29 行 docstring 仍寫「沒有PER反推EPS的備援」；`data/` 沒有任何 PER 歷史累積檔（`ls data | grep per` 零命中），研究端 `research/score_v2.py::_eps_yoy_derived_from_per()` 才有備援。要補需新增一份每日累積的 PER 歷史檔（資料流架構變更，依「提案先於執行」要先提案）；目前 earnings_growth 另有營收年增／毛利率／營益率三個子訊號，EPS 缺時不會整個因子落空（`research/live_factors.py` 第 74～78 行）。
