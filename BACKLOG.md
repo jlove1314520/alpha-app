@@ -2115,7 +2115,7 @@ FinMind的明確`retry_after`倒數更不透明，沒有官方公告的解除時
      完成，UI留給下一輪接手。**尚未掛GitHub Actions排程**——`data/
      us_financials.json`目前是2026-09-02手動跑出的一次性快照，不會
      自動更新，UI已誠實揭露這一點（見下一條）。
-   > ⚠️ 現況（2026-10-17 DevQueue 20261017-173102 核對，先.一〇九-19，只讀）：第 7 點「尚未掛排程」已過時：`.github/workflows/us_financials.yml` 每週六台北 10:17（cron `17 2 * * 6`）跑 `.github/scripts/fetch_us_financials_sec.py`（SEC companyfacts）＋`build_us_scores_v0.py`，`data/us_financials.json` 會自動更新（C:\alpha\CLAUDE.md SEC EDGAR 節：每週約 263 個請求）。UI 的「一次性快照」揭露文字本輪未核對是否已改。
+   > ⚠️ 現況（2026-10-17 DevQueue 20261017-173102 核對，先.一〇九-19，只讀）：第 7 點「尚未掛排程」已過時：`.github/workflows/us_financials.yml` 每週六台北 10:17（cron `17 2 * * 6`）跑 `.github/scripts/fetch_us_financials_sec.py`（SEC companyfacts）＋`build_us_scores_v0.py`，`data/us_financials.json` 會自動更新（C:\alpha\CLAUDE.md SEC EDGAR 節：每週約 263 個請求）。UI 揭露文字已改：`app-stock.js` 第 94～95 行註明「SEC XBRL companyfacts 每週排程（us_financials.yml）」。
   8. **2026-09-02（續）：個股頁「財報」分頁UI完成**。`index.html`新增
      `loadUsFinancials(code)`（讀`data/us_financials.json`，跟
      `loadFundamentals`/`loadStockDetail`同一套快取模式）+
