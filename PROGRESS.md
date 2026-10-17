@@ -1,3 +1,16 @@
+## 2026-10-17 21:1x（DevQueue 20261017-203102）研究室.四第 15 批＋先.一〇九-31、-32、-35、-37 完成＋收工補件 3 條
+
+等待總司令審閱：8 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24；先.一〇九-13 研究室.四改讀 warmup 快取提案，自 10-17 11:2x；先.一〇九-12 權證舊拆檔要不要刪，自 10-17 10:3x；先.一〇九-15 AlphaTdccHolders 改時間提案，自 10-17 16:4x；先.一〇九-22 PER 反推 EPS 讀取端提案，自 10-17 18:4x；先.一〇九-24 B25 對照組百分位補算估算，自 10-17 18:5x；先.一〇九-26 workflow timeout-minutes 提案，自 10-17 19:0x；**新增** 先.一〇九-32 STATUS data_files 由雲端心跳重算提案，自 10-17 20:5x）
+
+- **研究室.四（維持 - [ ]）**：20:31～21:05 背景每分鐘重試迴圈 `--max 300 --until 21:05`；第一次 6 檔後碰腳本自保 450，20:33 起第二次跑到時限 95 檔；合計 101 檔全有資料、0 空、log 無 402，停在 3018（第 96 檔）；累計有資料 1,440、剩 539。迴圈執行中未 pull，收尾才 pull／push。
+- **先.一〇九-31 ✅（純 bug）**：`generate_status_json.py`（在 repo 根目錄）通用解析補認 last_build_at／last_trading_day／checked_at（排最後，不改既有判讀順序）＋rows 最後一筆 date；新舊版 build_data_files() 比對只有 signal_ledger／monthly_close／orphan_scan／tx_futures_history 由 no_date→ok，其餘不變。commit 4739db660f。
+- **先.一〇九-32 ✅（提案）**：前提更正——每 30 分鐘心跳是雲端 local_schedule_watchdog.yml，已刷新頂層 updated_at 但不重算 data_files；建議甲：心跳順手 build_data_files()（零請求、本機 1.4 秒），進 AWAITING_REVIEW。commit ec472d5bb3。
+- **先.一〇九-35 ✅（前提不成立）**：台指期缺 10/16 是 TAIFEX 結構性落後一個交易日（先.一〇九-1 已證），非漏寫。[自行裁量] 順手把 -31 給 tx_futures_history 的門檻 96→120 小時，避免週一 17:43 班前誤報 stale。commit 7d60766723。
+- **先.一〇九-37 ✅（只量不改）**：深色主題 22 token×3 底色 WCAG 對比寫進 docs/UX_AUDIT.md；--ink-4、--up-deep（＝--status-bad）、--critical、--caution 在 --surface-3 不到 4.5，列建議值，未改 CSS。commit 3616644b52。
+- **收工補件**：補 3 條（-35 來源 BACKLOG 第 154 行＋本輪觀察；-36 熱力圖漲跌色不跟慣例對調，來源 docs/UX_AUDIT.md／UX_REDESIGN_PROPOSAL 第 163 行；-37 深色對比，來源 UX_REDESIGN_PROPOSAL 第 58 行），其中 -35、-37 本輪已做完。收工時 `- [ ]` 17 項（≥12）；DevQueue 可執行 4 項（研究室.四、先.一〇七-3、-28〔時間閘 10/20〕、-36），**低於 6**：BACKLOG／UX 提案／先.八十全檢／DATA_GAP_PLAN 甲類本輪與前幾輪都已掃過，剩下的不是需核准（深色 4 token 改值、淺色熱力圖重新設計）就是湊數類，照實寫「來源近乎用盡」。
+- **BLOCKED**：無新增。先.一〇九-11驗收仍等 10/18 03:30 時間閘。
+- 冒煙：每項 commit 前各跑一次，4 次皆 166/166；收尾再跑一次見本 commit。
+
 ## 2026-10-17 20:1x（DevQueue 20261017-193102）研究室.四第 14 批＋先.一〇九-27、-29、-30、-33、-34 完成＋收工補件 4 條
 
 等待總司令審閱：7 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24；先.一〇九-13 研究室.四改讀 warmup 快取提案，自 10-17 11:2x；先.一〇九-12 權證舊拆檔要不要刪，自 10-17 10:3x；先.一〇九-15 AlphaTdccHolders 改時間提案，自 10-17 16:4x；先.一〇九-22 PER 反推 EPS 讀取端提案、先.一〇九-24 B25 對照組補算提案、先.一〇九-26 workflow timeout 提案，皆自 10-17 18:4x～19:0x）。本輪未新增。
