@@ -8,7 +8,8 @@
 //
 // 用法：`node scripts/smoke_test.mjs`（預設打 http://localhost:8792，需要先
 // 在repo根目錄另開一個終端機跑 `python -m http.server 8792`；也可以用
-// --url 指定別的位址）。每次commit前務必先跑一次，任一項FAIL就不要commit，
+// --url 指定別的位址）。2026-10-17 先.一〇九-14 起改用 `python scripts/ensure_smoke_server.py`
+// 啟動伺服器（8792 已有人在聽就沿用，不會再多開一組孤兒 http.server）。每次commit前務必先跑一次，任一項FAIL就不要commit，
 // 先修好（使用者原話）。
 //
 // 檢查項目（逐條對應使用者規格，跟 smoke_test.py 完全一致）：
