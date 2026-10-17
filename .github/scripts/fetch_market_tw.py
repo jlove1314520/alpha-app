@@ -30,6 +30,7 @@ from __future__ import annotations
 import os
 import contextlib
 import json
+import re
 import sys
 import time
 import requests
@@ -38,6 +39,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+# 先.一〇九-2：上市櫃權證代號＝03～08 開頭 6 位數（00 開頭 ETF、91 開頭 TDR 不算）
+WARRANT_CODE_RE = re.compile(r"^0[3-8]\d{4}$")
 OUT_PATH = REPO_ROOT / "data" / "market_tw.json"
 TW_TZ = timezone(timedelta(hours=8))
 
@@ -916,7 +919,19 @@ def main():
         # 這樣setdefault也可以放心新增entry（不會混進ETF/權證）。
         tse_codes = load_tse_company_codes()
         matched = 0
+        # 先.一〇九-2（2026-10-17）：TPEx tpex_3insti_daily_trading 含權證，
+        # 03～08 開頭 6 位數一律跳過（00 開頭 ETF、91 開頭 TDR 保留）；
+        # 既有只剩 institutional 一個 key 的權證項目同步移出（App 不用、
+        # 個股頁拆檔另由 split_stock_detail.py 處理）。
+        pruned = [c for c, v in stocks.items()
+                  if WARRANT_CODE_RE.match(str(c)) and isinstance(v, dict) and set(v) <= {"institutional"}]
+        for c in pruned:
+            del stocks[c]
+        skipped_warrants = 0
         for code, row in per_stock_institutional.items():
+            if WARRANT_CODE_RE.match(str(code)):
+                skipped_warrants += 1
+                continue
             # 2026-08-27修正：tse_codes只涵蓋TWSE上市，TPEx上櫃代碼本來就不在
             # 裡面——原本這條filter會把所有TPEx代碼一併濾掉，等於補了資料源
             # 卻在merge這一步自己擋掉。改成：TWSE來源的代碼仍用官方上市清單
@@ -937,12 +952,13 @@ def main():
         detail.setdefault("meta", {})["institutional_source"] = (
             "TWSE T86（同一次呼叫，跟market_tw.json共用，不額外打；只保留官方上市公司"
             "清單(t187ap03_L)內的代碼，濾掉ETF/權證等非股票證券)+TPEx "
-            "tpex_3insti_daily_trading（2026-08-27新增，上櫃股票，此端點未做"
-            "ETF/權證過濾，是已知限制）"
+            "tpex_3insti_daily_trading（2026-08-27新增，上櫃股票；2026-10-17 起"
+            "跳過 03～08 開頭 6 位數權證，ETF 仍保留）"
         )
         detail_path.write_text(json.dumps(detail, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
         print(f"併入 {detail_path}：TWSE+TPEx回應共{len(per_stock_institutional)}筆證券"
-              f"（TPEx {len(tpex_institutional_codes)}筆），合併 {matched} 檔")
+              f"（TPEx {len(tpex_institutional_codes)}筆），合併 {matched} 檔；"
+              f"跳過權證 {skipped_warrants} 筆、移出既有權證 {len(pruned)} 檔")
 
     # 全部主要區塊都失敗才視為故障；任何一塊成功就算這輪有價值，不要因為 T86
     # 反爬蟲封鎖這種已知風險就讓整支腳本 exit 1 拖累其他已經抓到的資料被 commit。

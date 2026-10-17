@@ -31,6 +31,9 @@ SRC = ROOT / "data" / "stock_detail.json"
 OUT_DIR = ROOT / "data" / "stock_detail"
 EPS_OUT = ROOT / "data" / "stock_detail_eps.json"
 CODE_RE = re.compile(r"^[0-9A-Za-z]{2,10}$")  # 代號直接當檔名，只收英數字，避免路徑字元
+# 先.一〇九-2（2026-10-17）：03～08 開頭 6 位數權證不輸出拆檔（00 開頭 ETF、91 開頭 TDR 保留）；
+# 既有權證拆檔照上面「不刪除舊檔」規則只列數量，刪不刪由總司令決定。
+WARRANT_CODE_RE = re.compile(r"^0[3-8]\d{4}$")
 
 
 def _dump(obj) -> str:
@@ -56,11 +59,14 @@ def main() -> int:
         print("! stock_detail.json 沒有 stocks，中止（不寫出任何檔案）")
         return 0
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    written = skipped = bad = 0
+    written = skipped = bad = warrants = 0
     eps = {}
     for code, st in stocks.items():
         if not CODE_RE.match(str(code)) or not isinstance(st, dict):
             bad += 1
+            continue
+        if WARRANT_CODE_RE.match(str(code)):
+            warrants += 1
             continue
         if _write_if_changed(OUT_DIR / f"{code}.json", _dump(st)):
             written += 1
@@ -81,7 +87,13 @@ def main() -> int:
         "stocks": eps,
     }
     _write_if_changed(EPS_OUT, _dump(eps_doc))
-    print(f"stock_detail 拆檔：{len(stocks)} 檔，重寫 {written}、未變 {skipped}、略過非法代號 {bad}；EPS 摘要 {len(eps)} 檔")
+    try:
+        orphan_warrants = sum(1 for f in OUT_DIR.glob("*.json") if WARRANT_CODE_RE.match(f.stem))
+    except Exception as e:  # 只是統計，失敗不影響拆檔（十二節）
+        print(f"! 統計既有權證拆檔失敗：{e}")
+        orphan_warrants = -1
+    print(f"stock_detail 拆檔：{len(stocks)} 檔，重寫 {written}、未變 {skipped}、略過非法代號 {bad}、"
+          f"略過權證 {warrants}；EPS 摘要 {len(eps)} 檔；既有權證拆檔 {orphan_warrants} 個（未刪）")
     return 0
 
 

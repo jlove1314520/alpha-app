@@ -36,6 +36,7 @@ from __future__ import annotations
 
 import os
 import contextlib
+import re
 import sys
 import json
 import sys as _phs_sys  # 先.八十二-1：price_history 改拆檔（data/price_history/），讀寫一律走 scripts/price_history_store.py
@@ -456,6 +457,9 @@ def merge_stock_detail_margin(per_stock: dict[str, dict], tpex_codes: set[str] |
     matched = 0
     for code, row in per_stock.items():
         if code not in tpex_codes and tse_codes is not None and code not in tse_codes:
+            continue
+        # 先.一〇九-2（2026-10-17）：03～08 開頭 6 位數權證一律跳過（00 開頭 ETF、91 開頭 TDR 保留）
+        if re.match(r"^0[3-8]\d{4}$", str(code)):
             continue
         stocks.setdefault(code, {})["margin"] = row
         matched += 1
