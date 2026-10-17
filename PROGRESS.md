@@ -1,3 +1,15 @@
+## 2026-10-17 09:4x（DevQueue 20261017-090102）研究室.四 +67 檔（累計 409/1,979）＋先.一〇八-6、先.一〇九-1、先.一〇九-3 完成＋補件 4 條
+
+等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未變動）
+
+- **研究室.四（維持 - [ ]）**：09:01 先跑被腳本自保擋下（FinMind 滾動 1 小時 450 ≥ 450，上一輪用量還在窗內，0 次請求）；等額度釋出，09:11～09:36 背景跑 `--max 300 --until 09:36`，67 檔全有資料、0 空、無 402，停在 4977；累計 409、剩 1,570。
+- **先.一〇八-6 ✅**：FinMind `TaiwanStockDelisting` 重抓 1 次，723→727 筆（舊檔實際停在 07-28），新增 2867 三商壽、5371 中光電、8183 精星、8908 欣雄；`universe()` active 2,740＋delisted 456。BACKLOG 第 1166 行①、DATA.md 新節。commit `07a4c00454`。
+- **先.一〇九-3 ✅（程式已改，STATUS.json 未驗證）**：`generate_status_json.py` TODO 刪 7 條已解決項（20→13），已知限制 4 句改寫，逐條附證據在 PENDING_QUEUE。[自行裁量] 本機不重跑（main 會打約 20 次 GitHub API、STATUS.json 由 market.yml 重產），下一班 market.yml 後確認 todo＝13 條。commit `7548c4b502`。
+- **先.一〇九-1 ✅**：git log 最近 14 班證實台指期 data_date 固定比大盤晚一個交易日（TAIFEX 發布時點，不是漏抓），tx_futures_history 無缺日；`fetch_market_tw.py` 加 `meta.missing_dates`（日曆讀不到只警告），新增 `scripts/selftest_tx_futures_history.py` PASS。commit `df801a74a4`。
+- **先.一〇七-3（維持 - [ ]，時間閘）**：`gh run list --workflow=market.yml --event workflow_dispatch` 最近一次是 08-28，雲端補救觸發自上線後還沒真正送出過。
+- **收工補件**：開工時 DevQueue 可執行只剩 2 項（研究室.四、先.一〇七-3），DATA_GAP_PLAN 甲類已用盡、UX 提案與先.八十全檢節無未做項；從 BACKLOG 與先.八十-8 後續補 4 條（先.一〇九-1～4），本輪做掉 2 條。收工時 `- [ ]` 13 項（≥12）；DevQueue 可執行 4 項（研究室.四、先.一〇七-3、先.一〇九-2、-4），低於 6，四個來源本輪已查過、剩餘候選只有「fetch_earnings_calendar 同日快取」一條（前一輪判價值低），照實寫「來源近乎用盡」。
+- **冒煙**：三次 `node scripts/smoke_test.mjs` 全部通過（09:12、09:20、09:25）、收尾 09:42 第四次也全部通過。
+
 ## 2026-10-17 08:4x（DevQueue 20261017-080102）研究室.四 +75 檔（累計 342/1,979）
 
 等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，自 2026-10-14 23:24 起，見 research/AWAITING_REVIEW.md；本輪未變動）
