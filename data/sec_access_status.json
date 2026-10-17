@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-17T07:56:20+08:00",
+ "generated_at": "2026-10-17T15:03:41+08:00",
  "note": "SEC（sec.gov／data.sec.gov）各腳本最近一輪的回應狀態碼；最近一輪有 403＝疑似 User-Agent 被擋（先.一〇三-1b-3）",
  "blocked_scripts": [],
  "warning": null,
@@ -27,6 +27,16 @@
    "last_run_at": "2026-10-17T07:56:08+08:00",
    "status_counts": {
     "200": 9
+   },
+   "last_403_at": null,
+   "last_run_403": false,
+   "ua_contact_set": false
+  },
+  "fetch_us_financials_sec.py": {
+   "last_run_at": "2026-10-17T15:03:41+08:00",
+   "status_counts": {
+    "200": 263,
+    "404": 1
    },
    "last_403_at": null,
    "last_run_403": false,
