@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-18T02:36:41.273432+08:00",
+  "updated_at": "2026-10-18T05:04:35.775407+08:00",
   "latest_commit": "99a889e",
   "data_files": [
     {
@@ -940,7 +940,7 @@
     }
   ],
   "schedule_health": {
-    "checked_at": "2026-10-18T02:36:41+08:00",
+    "checked_at": "2026-10-18T05:04:35+08:00",
     "any_overdue": false,
     "overdue_names": [],
     "known_simplification": "不扣台美股國定假日：假日當天的盤中規則會誤判overdue（跟fetch_quotes_tw.py同一個既有簡化）",
@@ -1350,8 +1350,8 @@
     ],
     "note": "本機排程管線的新鮮度。判定看的是**產出檔內部的資料時間戳**（能取得的話），不是檔案修改時間——mtime 新鮮不代表資料新鮮，alpha.db 就是 mtime 天天更新但資料停在 2026-08-21。這份與 data/audit_report.json 的 local_task_health、scripts/pipeline_inventory.py 讀同一份登錄檔。",
     "status": "ok",
-    "status_checked_at": "2026-10-17T18:36:41.273432+00:00",
-    "status_age_hours": 18.6
+    "status_checked_at": "2026-10-17T21:04:35.775407+00:00",
+    "status_age_hours": 21.1
   },
   "adjustment_anomaly_warnings": {
     "n_warnings": 1953,
@@ -1779,38 +1779,38 @@
   "any_overdue": false,
   "updated_by": "scripts/check_local_schedule_heartbeat.py（local_schedule_watchdog.yml 每 30 分鐘）",
   "local_schedule_heartbeat": {
-    "checked_at": "2026-10-17T18:36:41.094070+00:00",
+    "checked_at": "2026-10-17T21:04:35.648692+00:00",
     "stall_threshold_minutes": 60,
     "track_stall_threshold_minutes": 360,
     "tracks": {
       "devqueue": {
-        "last_commit_sha": "162234e905382d4168814a918a986c1da03662c0",
-        "last_commit_at": "2026-10-17T18:16:10+00:00",
-        "minutes_since": 20.5,
+        "last_commit_sha": "04bab2d338014ca6e8066c5f50394e8a61cd7ab3",
+        "last_commit_at": "2026-10-17T20:38:42+00:00",
+        "minutes_since": 25.9,
         "track_stalled": false
       },
       "marathon": {
         "last_commit_sha": "ced1d59ce822cc5a71de4eb0a14f44db91820a9c",
         "last_commit_at": "2026-10-17T16:06:03+00:00",
-        "minutes_since": 150.6,
+        "minutes_since": 298.5,
         "track_stalled": false
       },
       "hypothesis_queue": {
         "last_commit_sha": "5631bdc7176994730d1b1f6f04820dac86a52a0a",
         "last_commit_at": "2026-10-17T16:06:37+00:00",
-        "minutes_since": 150.1,
+        "minutes_since": 298.0,
         "track_stalled": false
       },
       "connectivity": {
-        "last_commit_sha": "e39b95d1f29881579d3e53f77033200ebb4a54a3",
-        "last_commit_at": "2026-10-17T18:12:13+00:00",
-        "minutes_since": 24.5,
+        "last_commit_sha": "1aa7af672c829b2022f7de43fb4f569ed5eb5e96",
+        "last_commit_at": "2026-10-17T20:42:12+00:00",
+        "minutes_since": 22.4,
         "track_stalled": false
       },
       "market_catchup": {
         "last_commit_sha": "084b43d24a5cf9bc260d49477f0fe674895f85e0",
         "last_commit_at": "2026-10-15T13:59:59+00:00",
-        "minutes_since": 3156.7,
+        "minutes_since": 3304.6,
         "track_stalled": false
       }
     },
@@ -1822,10 +1822,10 @@
           "status": "OK",
           "last_reason": "OK",
           "last_detail": "OK/0",
-          "last_cycle_id": "20261018-013102",
-          "last_attempt_at": "2026-10-18T02:16:10+08:00",
-          "last_ok_at": "2026-10-18T02:16:10+08:00",
-          "hours_since_last_attempt": 0.34
+          "last_cycle_id": "20261018-043102",
+          "last_attempt_at": "2026-10-18T04:38:41+08:00",
+          "last_ok_at": "2026-10-18T04:38:41+08:00",
+          "hours_since_last_attempt": 0.43
         },
         "marathon": {
           "status": "OK",
@@ -1834,7 +1834,7 @@
           "last_cycle_id": "20261018-000501",
           "last_attempt_at": "2026-10-18T00:06:02+08:00",
           "last_ok_at": "2026-10-18T00:06:02+08:00",
-          "hours_since_last_attempt": 2.51
+          "hours_since_last_attempt": 4.98
         },
         "hypothesis_queue": {
           "status": "OK",
@@ -1843,29 +1843,29 @@
           "last_cycle_id": "2026-10-18 00:06:35",
           "last_attempt_at": "2026-10-18T00:06:35+08:00",
           "last_ok_at": "2026-10-18T00:06:35+08:00",
-          "hours_since_last_attempt": 2.5
+          "hours_since_last_attempt": 4.97
         }
       },
-      "checked_at": "2026-10-17T18:36:41.094070+00:00"
+      "checked_at": "2026-10-17T21:04:35.648692+00:00"
     },
     "ibkr_quotes": {
       "last_commit_sha": "fe7743ff6cdad78a015bc62b1af5d3679db552fe",
       "last_commit_at": "2026-10-17T00:01:37+00:00",
-      "minutes_since": 1115.1,
+      "minutes_since": 1263.0,
       "file_fetched_at": "2026-10-17T08:01:36.545865+08:00",
-      "file_minutes_since": 1115.1,
+      "file_minutes_since": 1263.0,
       "note": "只記錄不判定停擺——盤外時段與IBKR Gateway每週人工登入空窗都會讓這個數字變大，那是預期行為不是故障，見本檔案docstring。2026-10-01【先.六-三】起IBKR排程盤中最多每30分鐘才commit一次（commit洪水修法），所以minutes_since在盤中落在30分鐘內是正常；file_fetched_at是已commit的quotes_ibkr.json內的抓取時間，同樣只記錄、不得拿來當停擺判定（停擺判定只看三軌）"
     },
     "stalled": false,
     "track_stalled": [],
     "judged_by": "any_of_local_heartbeats",
-    "stall_minutes": 20.5,
+    "stall_minutes": 22.4,
     "note": "本機排程最後活動時間；2026-09-27【乾.三主體第八點】裁示改為「DevQueue／Marathon／Hypothesis-queue三軌任一有新鮮心跳（≤60分鐘）即視為本機整體存活」（取代原本只看DevQueue單一訊號的版本，因為DevQueue的既有碰撞防護機制在互動視窗長時間編輯檔案時會正確YIELD但不留心跳，容易誤判——詳見PENDING_QUEUE.md查.一條目的根因分析）。個別軌道超過360分鐘另外標記track_stalled警告，不影響本機整體存活的判定，但值得單獨留意。偵測放在雲端是因為本機push被卡住時無法自己通知任何人。"
   },
   "orphan_processes": {
     "count": 0,
     "total_private_mb": 0,
-    "checked_at": "2026-10-17T03:00:02+08:00",
+    "checked_at": "2026-10-18T03:00:02+08:00",
     "warning": false
   }
 }
