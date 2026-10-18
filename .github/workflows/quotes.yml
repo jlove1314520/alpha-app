@@ -52,6 +52,9 @@ concurrency:
 jobs:
   fetch-quotes:
     runs-on: ubuntu-latest
+    # 先.一一〇-6（2026-10-18 總司令核准 先.一〇九-26）：近 30 次最長 1.6 分；預設 360 分鐘會讓卡死的 run 佔住
+    # concurrency group repo-push-main 最多 6 小時，逾時改判 failure、下一班照常跑
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 

@@ -20476,7 +20476,7 @@ un-ibkr-quotes-cycle.ps1 第 174 行、run-shioaji-quotes-cycle.ps1 第 110 行�
 - [x] **先.一一〇-3 AlphaTdccHolders 改每日 09:00（已存的週自動略過），原觸發設定先備份**（互動視窗執行）〔2026-10-18 10:23 互動視窗完成：AlphaTdccHolders 觸發由每週五 20:00 改每日 09:00（Set-ScheduledTask，登入方式 Interactive 不需密碼，動作不變；下次 10/19 09:00）；原觸發先匯出 C:\alpha\task_trigger_backup\AlphaTdccHolders_20261018_before.xml（不進公開 repo）。fetch_tdcc_holders.py 加 _already_built：這週快照早已存且 holders.json 已含就不重產（避免每天只因 generated_at 變動而 commit），離線測試：既有週 0 次重產、新週 1 次。C:\alpha\CLAUDE.md 頻率清單補 TDCC 一節〕
 - [x] **先.一一〇-4 data/pe_snapshot/ 加進 holdout 守門（讀取端不動，2027-10 另提案）**（互動視窗執行；十三節保護檔）〔2026-10-18 10:24 互動視窗完成：research/validation/holdout.py DISPLAY_ONLY_DATA_FILES 加 "pe_snapshot/"（互動視窗改，十三節保護檔）；research/generate_scores_live.py docstring 原本寫出完整資料夾名（只是說明、不讀檔），改成不寫全名以免守門誤報；scripts/selftest_display_only_files.py 2/2 通過，假程式讀 data/pe_snapshot/… 會被抓到。讀取端（earnings_growth 備援）未動，2027-10 另提案〕
 - [ ] **先.一一〇-5 B25 隨機對照組可斷點續跑腳本，夜間背景分 2～3 晚跑完 100 draws（不碰 holdout、不登記新試驗）**（互動視窗寫腳本與排程；跑由排程）
-- [ ] **先.一一〇-6 quotes.yml timeout-minutes: 10、market.yml timeout-minutes: 30**（互動視窗執行）
+- [x] **先.一一〇-6 quotes.yml timeout-minutes: 10、market.yml timeout-minutes: 30**（互動視窗執行）〔2026-10-18 10:25 互動視窗完成：quotes.yml（fetch-quotes）加 timeout-minutes: 10、market.yml（fetch-market）加 timeout-minutes: 30，job 層，YAML 解析確認；逾時判 failure、下一班照常跑〕
 - [ ] **先.一一〇-7 雲端心跳順便重算 STATUS.json data_files（甲案）**（互動視窗執行）
 - [ ] **先.一一〇-8 深色主題 4 個 token 改建議值＋前後逐像素比對＋冒煙＋截圖路徑**（互動視窗執行）
 - [ ] **先.一一〇-9 新聞 importance v0（權重表照草案）＋每區塊顯示最高 5 則、其餘「看全部 N 則」＋events.json 官方重大訊息納入（5～9 分）**（互動視窗執行）

@@ -46,6 +46,8 @@ concurrency:
 jobs:
   fetch-market:
     runs-on: ubuntu-latest
+    # 先.一一〇-6（2026-10-18 總司令核准 先.一〇九-26）：近 30 次最長 8.5 分；逾時改判 failure、下一班照常跑
+    timeout-minutes: 30
     # 先.一〇三-16：User-Agent 聯絡信箱改讀這個（選填 GitHub Secret）；沒設時腳本用專案佔位信箱，不再寫死個人 email
     env:
       ALPHA_UA_CONTACT: ${{ secrets.ALPHA_UA_CONTACT }}
