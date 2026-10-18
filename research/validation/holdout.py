@@ -68,6 +68,9 @@ ALLOWED_HOLDOUT_READERS = frozenset({
 DISPLAY_ONLY_DATA_FILES = frozenset({
     "revenue_backfill.json",     # 研究室.三：月營收 2024-12～2026-06 回補
     "financials_backfill.json",  # 研究室.四：季報 2025Q1～2026Q2 回補
+    # 2026-10-18 先.一一〇-4（總司令核准 先.一〇九-22 的研究端隔離）：每日本益比快照資料夾，2026-10-12 起每日累積、
+    # 全部落在 holdout 期間；研究端回測／檢定不得讀。App／Live 讀取端（earnings_growth 備援）現在不動，2027-10 另提案。
+    "pe_snapshot/",
 })
 
 
