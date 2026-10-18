@@ -20517,3 +20517,39 @@ un-ibkr-quotes-cycle.ps1 第 174 行、run-shioaji-quotes-cycle.ps1 第 110 行�
 - [x] **先.一一二-4b openStock 直接入口名稱顯示「3324 3324」→ 顯示公司名**（互動視窗執行；修 bug）〔2026-10-18 11:27 互動視窗完成：根因：個股頁刻意不等整份名稱清單（_NO_NAMES_MODS），直接 openStock('3324') 時 nameOf 只回代號；quote_lite 小檔載完後沒重設頁首。修：載完後 setTxt('sh-name',nameOf(code))，3324 顯示「雙鴻」（冒煙 #169）〕
 - [x] **先.一一二-4c 頂部膠囊日期（台股 10/15、美股 10/14）與選股 10/17 不一致、主流題材 sector_flow 落後三天：查來源檔／SW 快取，是 bug 就修＋冒煙**（互動視窗執行；修 bug）〔2026-10-18 11:27 互動視窗完成：查證：頂部膠囊讀 data/quotes_tw.json／quotes_us.json，標籤原本用 fetched_at 日期；①週末排程也會更新檔（quotes_tw 10/17 週六 12:15），會顯示「已收盤(10/17)」這種非交易日；②SW 對 data/*.json 先回上次存檔、背景更新，收到 DATA_UPDATED 只重畫頁面、膠囊報價要等 2 分鐘輪詢 → 剛開 App 時停在上次存的 10/15、10/14。主流題材（industry_flow）同屬 SW 舊存檔，repo 資料日其實是 10/16（10/17 週六本來就沒有新資料，market.yml 週五三班都有跑）。修：膠囊改顯示「最後交易日」（lastSessionMD：當地日期不是交易日或未到開盤時間就往前找，台股 TW_HOLIDAYS／美股 US_HOLIDAYS）；收到 quotes 檔 DATA_UPDATED 立刻重抓。冒煙 #169 驗週六→10/16、週五開盤前→10/15〕
 - [x] **先.一一二-5 用詞照 UI_GLOSSARY；冒煙導覽列位置／分頁數斷言更新；驗收 393×852 深淺色截圖**（互動視窗執行）〔2026-10-18 11:27 互動視窗完成：用詞照 UI_GLOSSARY（研究室三塊標題 ≤8 字、無檔案路徑；熱度卡移除重複「非投資建議」）；UI_GLOSSARY.md／data/ui_glossary.json 補 先.一〇三-13b 禁用詞與先.一一二 導覽用詞；ux_copy_audit 加研究室頁（合計 0 處）。冒煙：TABS 加 lab、#85 日誌／設定改新入口、新增 #169，169/169 通過。驗收截圖 research/ux_shots_112/（home_nav、home_lab_entry、lab_top／lab_radar／lab_heat、trade_journal、settings_gear、update_banner × dark／light＋metrics.json，本機不進 repo），0 pageerror〕
+
+# 2026-10-18【先.一一三 🔴 10/17 台股資料三層備援全失效＋PREREG 審閱裁示】（總司令裁示原文，動工前先寫入；10/18 14:08 互動視窗收到）
+
+> 先.一一三 🔴 10/17 台股資料三層備援全失效（最優先，互動視窗）＋ PREREG 審閱裁示（2026-10-18 Cowork 審、總司令同意）
+> A. 今天先補資料（互動視窗，現在做）：
+>    1. 手動跑 scripts/market_local_catchup.py（允許週日執行，或用參數略過時間窗），補 10/17。
+>       確認 market_tw data_date=2026-10-17、price_history 有 10/17、融資維持率有 10/17、by_code 重產；寫進 market_local_catchup.jsonl 並 push。
+>    2. 查三層各自為什麼沒動，各寫一段根因進 PROGRESS（只讀查證，有證據再修）：
+>       a. 本機 AlphaMarketCatchup 17:30／AlphaMarketCatchupLate 19:30：用 Get-ScheduledTaskInfo 查 LastRunTime／LastTaskResult、看工作排程器歷程、
+>          看啟動檔 log。10/16 還正常，10/17 完全沒有紀錄——要查 10/16 16:13～16:22 的 run_git 改動、10/17 的任何改動、交易日判斷，有沒有讓它沒啟動，或啟動就靜默結束。
+>       b. 雲端 local_schedule_watchdog.yml 的 watchdog_dispatch_market.py：10/17 17:45～23:59 這段有沒有跑、為什麼沒觸發 market.yml
+>          （是 workflow 本身沒被排到，還是判斷邏輯認為已經落地或不是交易日）。
+>       c. 雲端 market.yml 17:13：10/17 有沒有任何 run。
+>    3. 修好之後加一道防線：每個交易日 20:30，本機和雲端各檢查一次——market_tw 不是今天，就發 App 紅色橫幅加 GitHub 失敗推播
+>       （訊息寫「今日台股資料未進來，三層備援都沒補到」）。守門員自己失敗只能降級成警告。
+>    4. 週一 10/19 收盤後驗收：三層至少一層在 19:30 前補到，寫進 PROGRESS。
+> B. PREREG 審閱裁示（變形方向 8 名）：
+>    - 放行 V2、V4、V5：每份補「成本模型」一節（research/validation/costs.py 1×，另報 2×／3×；V5 另加漲跌停無法成交、
+>      近 20 日均成交值門檻）；V4、V5 在已知限制寫明存活者偏誤的方向（V5 會偏好）。補完後登記、各跑一次，N +3。
+>    - 退回 V1：先查 2007～2014 台股含下市股價格的時點宇宙能不能取得（FinMind 下市股、data/listed_universe.json last_seen），
+>      能取得就改用那個宇宙重寫，不能就維持退回；補天條一一節。
+>    - 退回 V7：改用 ALFRED 首次公布值（官方免費），訊號在公布日之後才能用；補完再送審。
+>    - 擱置 V3、V6、V8：寫進 shortlist 文件，標「擱置＋原因」，不登記。
+> 心跳：每項 PENDING_QUEUE 標 - [x]、PROGRESS_HEARTBEAT 加一行（ts 用系統時間）；AWAITING 裡這 8 份依結果移到已結案。
+
+**收件註記**：互動視窗動工前先核對前提「10/17 是台股交易日」（10/17 為週六；先.一一二-4c 調查時判為非交易日），核對結果寫在 先.一一三-A0。
+
+- [ ] **先.一一三-A0 核對 10/17 是否為台股交易日（官方日曆／當日官方行情各查一次）**（互動視窗執行）
+- [ ] **先.一一三-A1 手動補 10/17 台股資料（market_local_catchup.py），驗 market_tw／price_history／融資維持率／by_code，寫 jsonl 並 push**（互動視窗執行；A0 確認是交易日才做）
+- [ ] **先.一一三-A2 三層（本機 catchup 17:30／19:30、雲端 watchdog dispatch、雲端 market.yml 17:13）10/17 各自為何沒動：根因寫進 PROGRESS**（互動視窗執行；只讀查證）
+- [ ] **先.一一三-A3 每個交易日 20:30 本機與雲端各檢查 market_tw 是否今天，否則 App 紅色橫幅＋GitHub 失敗推播「今日台股資料未進來，三層備援都沒補到」；守門員失敗只降級警告**（互動視窗執行）
+- [ ] **先.一一三-A4 週一 10/19 收盤後驗收：三層至少一層 19:30 前補到，寫進 PROGRESS**（互動視窗執行；時間閘 10/19 19:30 後）
+- [ ] **先.一一三-B1 V2／V4／V5 補「成本模型」一節（V5 加漲跌停無法成交、近 20 日均成交值門檻）、V4／V5 寫明存活者偏誤方向；補完登記、各跑一次（N＋3）**（互動視窗執行）
+- [ ] **先.一一三-B2 V1 退回：查 2007～2014 含下市股時點宇宙能否取得，能就改宇宙重寫、補天條一一節，不能維持退回**（互動視窗執行）
+- [ ] **先.一一三-B3 V7 退回：改 ALFRED 首次公布值、公布日之後才可用，補完再送審**（互動視窗執行）
+- [ ] **先.一一三-B4 V3／V6／V8 擱置：shortlist 標「擱置＋原因」，不登記；AWAITING 這批依結果移已結案**（互動視窗執行）
