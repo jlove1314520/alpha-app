@@ -37,12 +37,19 @@ ALARM_PATH = ROOT / "data" / "tw_data_alarm.json"
 MESSAGE = "今日台股資料未進來，三層備援都沒補到"
 
 
+CAL_NOTE = {"note": ""}  # 先.一一四-1：當年官方日曆未公布時，告警文字附註（假日可能誤報）
+
+
 def is_trading_day(d) -> bool:
+    """官方交易日曆（data/trading_calendar.json，來源 TWSE holidaySchedule＋臨時停市）。週末一律非交易日；
+    當年官方日曆尚未公布（published 不是 true）時照週一～五判斷，並在告警文字附註，不假裝已核對官方日曆。"""
     if d.weekday() >= 5:
         return False
     try:
         cal = json.loads((ROOT / "data" / "trading_calendar.json").read_text(encoding="utf-8"))
         y = (cal.get("tw") or {}).get(str(d.year)) or {}
+        if y.get("published") is not True:
+            CAL_NOTE["note"] = f"（{d.year} 年官方交易日曆尚未公布，暫照週一～五判斷，國定假日可能誤報）"
         return d.isoformat() not in (set(y.get("closed") or []) | set(y.get("unscheduled_closed") or []))
     except Exception as e:  # noqa: BLE001 —— 讀不到日曆照平日判斷（多報一次無害，漏報才有害）
         print(f"::warning::trading_calendar 讀取失敗，照平日判斷：{type(e).__name__}: {e}")
@@ -70,7 +77,7 @@ def decide(now: datetime, data_date: str | None) -> tuple[bool, str]:
         return False, f"{today} 非交易日"
     if data_date == today.isoformat():
         return False, f"market_tw 已落地（data_date={data_date}）"
-    return True, f"{MESSAGE}（market_tw data_date={data_date}，今天 {today}）"
+    return True, f"{MESSAGE}（market_tw data_date={data_date}，今天 {today}）{CAL_NOTE['note']}"
 
 
 def write_alarm(now: datetime, alarm: bool, why: str, data_date: str | None, layer: str) -> bool:
