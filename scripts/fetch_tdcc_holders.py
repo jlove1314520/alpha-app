@@ -84,6 +84,20 @@ def fetch_raw() -> str | None:
     return text
 
 
+def _snapshot_exists(text: str) -> bool:
+    """這份回應的資料日期是不是早就存過（只看檔案在不在，不寫檔）。"""
+    try:
+        reader = csv.reader(io.StringIO(text))
+        next(reader)  # 跳過表頭（同 _save_snapshot）
+        dates: dict[str, int] = defaultdict(int)
+        for row in reader:
+            if len(row) >= 6:
+                dates[row[0].strip()] += 1
+        return bool(dates) and (TDCC_DIR / f"{max(dates, key=dates.get)}.csv").exists()
+    except Exception:  # noqa: BLE001
+        return False
+
+
 def _save_snapshot(text: str) -> str | None:
     """存進 research/data/tdcc/，回傳本次資料日期（存了新檔或本來就有才回傳；否則 None）。"""
     reader = csv.reader(io.StringIO(text))
@@ -226,7 +240,7 @@ def build_holders_json() -> int:
             "generated_at": datetime.now(TZ).isoformat(),
             "source": "TDCC 集保結算所 集保股權分散表（官方免費，免金鑰，getOD.ashx?id=1-5）",
             "url": URL,
-            "update_cadence": "官方每週更新一次；本管線排程於每週五 20:00 呼叫一次",
+            "update_cadence": "官方每週更新一次；本管線排程每日 09:00 呼叫一次（2026-10-18 先.一一〇-3，原每週五 20:00），同一週已存就略過",
             "weeks_accumulated": len(dates),
             "dates_available": dates,
             "big_holder_definition": "持股分級 15 級（1,000,001股以上，業界慣稱「千張大戶」，"
@@ -236,7 +250,7 @@ def build_holders_json() -> int:
                 "TDCC 未提供歷史查詢端點，只能往前累積，無法回補過去週別"
                 "（2026-09-10 查證：官方端點文件與 opendata.tdcc.com.tw 首頁均未列出歷史版本查詢功能）",
                 "第一週沒有週變化與連續增減週數（history 不足 2 筆時皆為 null/0）",
-                "呼叫時間（週五 20:00）不保證 TDCC 當週已發布新資料，"
+                "每日 09:00 呼叫不保證 TDCC 當週已發布新資料，"
                 "若偵測到與既有檔案同一資料日期，本次不會重複寫入或誤植假週別",
             ],
             "integrity_check_failed_rows": integrity_bad,
@@ -249,12 +263,28 @@ def build_holders_json() -> int:
     return 0
 
 
+def _already_built(report_date: str | None) -> bool:
+    """先.一一〇-3：排程改每日 09:00 後，同一週會被抓很多次。這週的快照早就存過、而且 holders.json 已經含這一週，
+    就不重產 holders.json（只有 generated_at 會變，重產只會每天多一個沒有內容變化的 commit）。讀不到舊檔一律當沒建過。"""
+    if not report_date:
+        return False
+    try:
+        meta = json.loads(OUT.read_text(encoding="utf-8")).get("meta") or {}
+        return report_date in (meta.get("dates_available") or [])
+    except Exception:  # noqa: BLE001 —— 舊檔壞掉或不存在就照常重產
+        return False
+
+
 def main() -> int:
     text = fetch_raw()
     if text is None:
         print("本次抓取失敗，改用既有累積快照重建 holders.json（若有的話）")
     else:
-        _save_snapshot(text)
+        existed = _snapshot_exists(text)
+        report_date = _save_snapshot(text)
+        if existed and _already_built(report_date):
+            print(f"  {report_date} 這一週已存且 holders.json 已含，本次略過（不重產、不 commit）")
+            return 0
     return build_holders_json()
 
 
