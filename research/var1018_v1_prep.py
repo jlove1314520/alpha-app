@@ -140,9 +140,31 @@ def main(argv=None) -> int:
     if not stopped:
         st.update(coverage(cands, dead))
     st["finished_at"] = datetime.now(TZ).isoformat(timespec="seconds")
+    st["n_price_cached"] = sum(cached("TaiwanStockPrice", c) for c in cands)
     STATUS.write_text(json.dumps(st, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
+    try:
+        update_shortlist(st)
+    except Exception as e:  # noqa: BLE001 —— 進度回報失敗只警告（十二節）
+        print(f"[警告] shortlist §6 進度更新失敗：{type(e).__name__}: {e}")
     print(json.dumps({k: v for k, v in st.items() if k != "per_year_in_market"}, ensure_ascii=False))
     return 0
+
+
+SHORTLIST = Path(__file__).parent / "VARIANT_SHORTLIST_2026-10-18.md"
+
+
+def update_shortlist(st: dict) -> None:
+    """先.一一五-3：每批補完更新 shortlist §6 的 V1 那一列（已補檔數／候選數；補完後加每年在市檔數、母體與下市股涵蓋率）。"""
+    s = SHORTLIST.read_text(encoding="utf-8")
+    lines = s.split("\n")
+    i = next(k for k, l in enumerate(lines) if l.startswith("| V1 | 2007～2014 台股價格"))
+    msg = (f"V1 時點宇宙補資料（先.一一四-3c／先.一一五-3，{st['finished_at'][:16].replace('T', ' ')} 更新）：已補價格 {st.get('n_price_cached')}／{st.get('n_candidates')} 檔候選；"
+           + (f"本批停在：{st['stopped']}" if st.get("stopped") else
+              f"**補完**：t0 母體 {st.get('n_universe_t0')} 檔、母體涵蓋率 {st.get('universe_coverage'):.1%}、下市股涵蓋率 {st.get('delisted_coverage'):.1%}"
+              f"（期間下市 {st.get('n_delisted_period_total')} 檔中在 t0 母體 {st.get('n_delisted_in_universe')} 檔）；每年在市檔數 {st.get('per_year_in_market')}；"
+              f"{'≥95%，可登記單發' if st.get('ready_to_register') else '未達 95%，停下回報、不登記'}"))
+    lines[i] = f"| V1 | 2007～2014 台股價格（時點宇宙，FinMind 補 2006 起） | {msg} |"
+    SHORTLIST.write_text("\n".join(lines), encoding="utf-8")
 
 
 def coverage(cands: list[str], dead: set[str]) -> dict:
