@@ -716,7 +716,7 @@
           <thead><tr><th style="text-align:left;font-weight:500;color:var(--ink-4);padding:4px 2px">產業</th><th ${th}>檔數</th><th ${th}>營收年增中位數</th><th ${th}>營收成長家數比</th><th ${th}>20日漲跌中位數</th></tr></thead>
           <tbody>${rows.map(x=>`<tr style="border-top:1px solid var(--hairline)"><td style="padding:4px 2px;color:var(--ink-2)">${esc(x.industry)}</td><td ${td}>${esc(x.n)}</td><td ${td}><span class="${cls(x.median_rev3_yoy)}">${pct(x.median_rev3_yoy)}</span></td><td ${td}>${x.share_rev_up==null?'—':(x.share_rev_up*100).toFixed(0)+'%'}</td><td ${td}><span class="${cls(x.median_ret20)}">${pct(x.median_ret20)}</span></td></tr>`).join('')}</tbody></table></div>`
         :'<div class="note">目前沒有產業營收熱度資料</div>';
-      document.getElementById('industry-heat-datatime').textContent=`資料日 ${esc(meta.asof||'—')}；營收年增＝近 3 個月營收合計比去年同期；成長家數比＝該產業近 3 月營收年增 >0 的家數比例。${meta.disclaimer||'變化排序未經回測，不是買賣訊號；非投資建議。'}`;
+      document.getElementById('industry-heat-datatime').textContent=`資料日 ${esc(meta.asof||'—')}；營收年增＝近 3 個月營收合計比去年同期；成長家數比＝該產業近 3 月營收年增 >0 的家數比例。規則未經回測，不是買賣訊號。`;  // 先.一一二-2c：搬到研究室後常駐顯示；「非投資建議」只留頁尾一處（UI_GLOSSARY 規則 6）
     }catch(e){
       console.warn('[loadIndustryHeat]',e);recordGlobalError('loadIndustryHeat',e);
       el.innerHTML='<div class="note">產業營收熱度載入失敗（'+String(e&&e.message||e).replace(/[&<>]/g,'')+'）</div>';

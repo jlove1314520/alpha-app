@@ -241,11 +241,12 @@
   function applySupplyMode(){
     const sc=document.getElementById('scr-picks');if(sc)sc.classList.toggle('supply-mode',!!SUPPLY_VIEW);
     const card=document.getElementById('picks-supply-card');if(card)card.style.display=SUPPLY_VIEW==='supply'?'':'none';
-    const rc=document.getElementById('picks-radar-card');if(rc)rc.style.display=SUPPLY_VIEW==='radar'?'':'none';
+    // 先.一一二-2b：變化雷達卡已搬到研究室，選股頁不再控制它的顯示
   }
   // 研究室.五-2：SUPPLY_VIEW 由布林改成 false｜'supply'｜'radar'（兩種都是「非排行榜」檢視，隱藏 .picks-lb-only）
   function switchSupplyView(kind){
-    kind=kind==='radar'?'radar':'supply';
+    if(kind==='radar'){go('lab');return}  // 先.一一二-2b：變化雷達搬到研究室（舊呼叫照舊導過去）
+    kind='supply';
     if(SUPPLY_VIEW===kind)return;
     SUPPLY_VIEW=kind;
     renderPicksBoardToggle();applySupplyMode();
@@ -291,7 +292,7 @@
       +`<div style="display:flex;justify-content:space-between;gap:8px"><b style="font-size:13.5px">${esc(r.name||'')} ${esc(r.code)}</b><span class="note" style="margin:0">${esc(r.industry||'')}</span></div>`
       +`<div class="note" style="margin:3px 0 0">${(r.tags||[]).map(esc).join('・')}</div>`
       +`<div class="num" style="display:flex;gap:14px;margin-top:3px;font-size:12px;color:var(--ink-2)"><span>近3月營收年增 ${pc(r.rev3_yoy)}</span><span>20日漲跌 ${pc(r.ret20)}</span></div></div>`).join('')
-      +`<div class="note" style="margin-top:6px">共 ${rows.length} 檔，點一列看個股「研究」分頁同一份資料。</div>`;
+      +`<div class="note" style="margin-top:6px">${((m.list_totals||{})[RADAR_LIST]||0)>rows.length?`符合 ${m.list_totals[RADAR_LIST]} 檔，列前 ${rows.length} 檔`:`共 ${rows.length} 檔`}，點一列看個股「研究」分頁同一份資料。</div>`;
   }
   async function hydrateSupply(forceReload){
     const listEl=document.getElementById('supply-list');if(!listEl)return;
@@ -381,7 +382,7 @@
     const mk=(id)=>`<span class="mtg-opt press${(!SUPPLY_VIEW&&PICKS_BOARD===id)?' on':''}" style="flex:1;text-align:center" onclick="switchPicksBoard('${id}')">${BOARD_CONFIG[id].title}</span>`;
     el.innerHTML=Object.keys(BOARD_CONFIG).map(mk).join('')
       +`<span class="mtg-opt press${SUPPLY_VIEW==='supply'?' on':''}" style="flex:1;text-align:center" onclick="switchSupplyView('supply')">供給觀察</span>`
-      +`<span class="mtg-opt press${SUPPLY_VIEW==='radar'?' on':''}" style="flex:1;text-align:center" onclick="switchSupplyView('radar')">變化雷達</span>`;
+;  // 先.一一二-2b：「變化雷達」入口拿掉（搬到研究室）
   }
   // 沒有公司名稱（null/缺欄位）時退回只顯示代號，不要顯示 "null"/"undefined" 這種假名稱。
   function pickLabel(r){

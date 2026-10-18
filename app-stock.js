@@ -801,6 +801,7 @@
     // 常備.開發-20（先.六十七）：只抓這一檔的小檔（data/quote_lite），不再為一檔下載整份 sparklines／quotes_all_tw
     await Promise.allSettled([ensureQuoteLite([code]),ensureListedUniverse()]);
     if(currentCode!==code)return;
+    setTxt('sh-name',nameOf(code));  // 先.一一二-4b：直接入口開個股頁時名稱清單還沒載，quote_lite 補到名稱後重設（原本顯示「3324 3324」）
     const [px,fund,inst]=await Promise.all([
       twPxRepoFirst(code,_d(35)),loadFundamentals(code),instNet(code),ensureSinopacQuotes()]);  // 先.八十一-10：repo 為主、FinMind 補充
     const pxSrcTxt=px._src==='repo'

@@ -65,7 +65,7 @@ import { launchGuarded } from "./pw_guard.mjs";
 import os from "node:os";
 import path from "node:path";
 
-const TABS = ["home", "market", "picks", "trade", "journal", "settings"];
+const TABS = ["home", "market", "picks", "trade", "journal", "settings", "lab"];  // 先.一一二：加研究室（日誌／設定仍可用 go() 進入）
 
 // 跟 smoke_test.py 的 PANEL_IDS 保持一致。
 const PANEL_IDS = [
@@ -2910,7 +2910,8 @@ async function runSmokeTest(baseUrl, headless = true) {
     if (loaded.length) lzErrors.push(`首頁就載入了分頁程式：${loaded.join("、")}`);
     const steps = [["market", "scr-market", "hydrateMarket"], ["picks", "scr-picks", "hydratePicks"], ["trade", "scr-trade", "onTradeInit"], ["journal", "scr-journal", "renderJournalChips"], ["settings", "scr-settings", "hydrateSettings"]];
     for (const [scr, id, fn] of steps) {
-      await lp.click(`#nav button[data-scr="${scr}"]`);
+      // 先.一一二-1：日誌改成交易頁子分頁、設定改右上齒輪；其餘仍點底部導覽
+      await lp.click(scr === "journal" ? '#trade-tabs button[data-sub="journal"]' : scr === "settings" ? "#hdr-settings" : `#nav button[data-scr="${scr}"]`);
       await lp.waitForTimeout(1500);
       const st = await lp.evaluate(([id, fn]) => ({ active: document.getElementById(id).classList.contains("active"), real: typeof window[fn] === "function" && !window[fn]._lazyStub }), [id, fn]);
       if (!loaded.includes(scr)) lzErrors.push(`點「${scr}」沒有載入 app-${scr}.js`);
@@ -3102,7 +3103,7 @@ async function runSmokeTest(baseUrl, headless = true) {
       const out = { order, offlineLine: vis("home-offline-line"), money: vis("home-money-card"), exec: vis("home-exec-card"),
         liveConfigured: !!(window.LIVE && LIVE.configured && LIVE.url) };
       // 設定頁兩層
-      document.querySelector('nav#nav button[data-scr="settings"]').click();
+      document.querySelector('#hdr-settings').click();
       const advCards = [...document.querySelectorAll("#scr-settings [data-ui-advanced]")];
       // 先.一〇四：沒設定連線時「真錢帳戶」卡刻意 hidden（首屏卡數），不算在「應顯示的常用卡」裡
       const commonCards = [...document.querySelectorAll("#scr-settings > .card:not([data-ui-advanced])")].filter(e => !e.hidden);
@@ -4340,7 +4341,7 @@ async function runSmokeTest(baseUrl, headless = true) {
     try {
       const p = await ctx.newPage();
       await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
-      await p.evaluate(() => { const b = document.querySelector('nav#nav button[data-scr="settings"]'); if (b) b.click(); });
+      await p.evaluate(() => { const b = document.querySelector('#hdr-settings'); if (b) b.click(); });
       await p.waitForFunction(() => /個套件|最新版|讀不到/.test((document.getElementById("dep-summary") || {}).textContent || ""), null, { timeout: 20000 }).catch(() => null);
       const r = await p.evaluate(() => ({ s: (document.getElementById("dep-summary") || {}).textContent || "", n: document.querySelectorAll("#dep-list .f").length }));
       const d = JSON.parse((await import("node:fs")).readFileSync("data/dependency_status.json", "utf8"));
@@ -5606,6 +5607,72 @@ async function runSmokeTest(baseUrl, headless = true) {
     }
   } catch (e) { impErrs.push(`測試本身出錯：${e.message || e}`); }
   record("168. 新聞／事件依重要度先列 5 則、其餘看全部 N 則、同分新到舊、無分數照時間（先.一一〇-9）", impErrs.length === 0, impErrs.join("; ") || impInfo);
+
+  // 169.【2026-10-18 先.一一二】導覽列重整＋研究室：底部固定 5 分頁（今日｜市場｜選股｜研究室｜交易）；日誌是交易頁子分頁（底部亮交易）；
+  // 設定在右上齒輪；研究室三塊（深度研究卡／變化雷達／產業營收熱度）都在研究室、選股頁與市場頁不再有；首頁研究室入口一行；
+  // 新版橫幅 padding-top 含 safe-area；膠囊「已收盤」日期用最後交易日（週六資料→週五）；直接 openStock 名稱不是代號。
+  const navErrs = [];
+  let navInfo = "";
+  try {
+    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+    const p7 = await ctx.newPage();
+    const pe = [];
+    p7.on("pageerror", (e) => pe.push(String(e)));
+    try {
+      await p7.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+      await p7.waitForFunction(() => typeof go === "function" && typeof openStock === "function", null, { timeout: 20000 });
+      const a = await p7.evaluate(() => ({ nav: [...document.querySelectorAll("#nav button[data-scr]")].map((b) => b.dataset.scr + ":" + b.textContent.trim()),
+        gear: !!document.querySelector(".mkt-state #hdr-settings"), banner: (document.getElementById("new-version-banner") || {}).getAttribute?.("style") || "",
+        sat: typeof lastSessionMD === "function" ? [lastSessionMD(Date.parse("2026-10-17T04:15:06Z"), "Asia/Taipei", 540, TW_HOLIDAYS), lastSessionMD(Date.parse("2026-10-16T00:30:00Z"), "Asia/Taipei", 540, TW_HOLIDAYS),
+               lastSessionMD(Date.parse("2026-10-17T04:15:09Z"), "America/New_York", 570, US_HOLIDAYS), lastSessionMD(Date.parse("2026-10-16T08:00:00Z"), "Asia/Taipei", 540, TW_HOLIDAYS)] : null }));
+      if (a.nav.join("|") !== "home:今日|market:市場|picks:選股|lab:研究室|trade:交易") navErrs.push(`底部導覽 ${a.nav.join("|")}`);
+      if (!a.gear) navErrs.push("右上沒有設定齒輪");
+      if (!/env\(safe-area-inset-top\)/.test(a.banner)) navErrs.push("新版橫幅沒有 safe-area padding");
+      if (!a.sat || a.sat.join(",") !== "10/16,10/15,10/16,10/16") navErrs.push(`膠囊日期 ${a.sat}（應 週六→10/16、週五開盤前→10/15、美東週六→10/16、週五盤後→10/16）`);
+      // 交易→日誌、右上齒輪
+      await p7.evaluate(() => go("trade"));
+      await p7.waitForFunction(() => typeof window.onTradeInit === "function" && !window.onTradeInit._lazyStub, null, { timeout: 15000 }).catch(() => {});
+      await p7.click('#trade-tabs button[data-sub="journal"]');
+      await p7.waitForTimeout(800);
+      const j = await p7.evaluate(() => ({ active: document.getElementById("scr-journal").classList.contains("active"),
+        navOn: (document.querySelector("#nav button.on") || {}).dataset?.scr, tabs: !!document.querySelector("#scr-journal #journal-trade-tabs button.on") }));
+      if (!j.active || j.navOn !== "trade" || !j.tabs) navErrs.push(`交易→日誌：${JSON.stringify(j)}`);
+      await p7.click("#hdr-settings");
+      await p7.waitForTimeout(600);
+      if (!(await p7.evaluate(() => document.getElementById("scr-settings").classList.contains("active") && document.getElementById("hdr-settings").classList.contains("on"))))
+        navErrs.push("點齒輪沒有開設定頁");
+      // 研究室
+      await p7.click('#nav button[data-scr="lab"]');
+      await p7.waitForFunction(() => document.querySelectorAll("#lab-deep-list .lab-deep").length > 0 && document.querySelectorAll("#scr-lab #radar-list .press").length > 0
+        && /\d/.test((document.getElementById("industry-heat-rows") || {}).textContent || ""), null, { timeout: 20000 }).catch(() => {});
+      const l = await p7.evaluate(() => {
+        const lab = document.getElementById("scr-lab");
+        const order = ["lab-top-line", "lab-deep-card", "picks-radar-card", "lab-heat-card", "lab-disclaimer"].map((id) => { const e = document.getElementById(id); return e && lab.contains(e) ? Math.round(e.getBoundingClientRect().top) : null; });
+        return { order, deep: document.querySelectorAll("#lab-deep-list .lab-deep").length, chips: document.querySelectorAll("#lab-deep-list .lab-chip").length,
+          radar: document.querySelectorAll("#scr-lab #radar-list .press").length, heatInLab: !!lab.querySelector("#industry-heat-rows"),
+          radarInPicks: !!document.querySelector("#scr-picks #picks-radar-card"), heatInMarket: !!document.querySelector("#scr-market #industry-heat-rows"),
+          link: !!document.querySelector("#scr-market #market-heat-link"), pickRadarOpt: /變化雷達/.test((document.getElementById("picks-board-toggle") || {}).textContent || "") };
+      });
+      if (l.order.some((v) => v == null) || l.order.some((v, i) => i && v < l.order[i - 1])) navErrs.push(`研究室順序 ${l.order.join(",")}`);
+      if (!l.deep || !l.chips) navErrs.push(`深度研究卡 ${l.deep}、晶片 ${l.chips}`);
+      if (!l.radar || !l.heatInLab) navErrs.push(`研究室雷達 ${l.radar} 列、熱度在研究室 ${l.heatInLab}`);
+      if (l.radarInPicks || l.heatInMarket || !l.link) navErrs.push(`選股頁仍有雷達 ${l.radarInPicks}、市場頁仍有熱度 ${l.heatInMarket}、市場頁連結 ${l.link}`);
+      // 首頁入口
+      await p7.evaluate(() => go("home"));
+      await p7.waitForFunction(() => { const e = document.getElementById("home-lab-line"); return e && !e.hidden; }, null, { timeout: 15000 }).catch(() => {});
+      const hl = await p7.evaluate(() => { const e = document.getElementById("home-lab-line"), ev = document.getElementById("home-events-card");
+        return { txt: e && !e.hidden ? e.textContent : "", after: !!(e && ev && (ev.compareDocumentPosition(e) & Node.DOCUMENT_POSITION_FOLLOWING)) }; });
+      if (!/^研究室：今天 \d+ 檔有新變化 →$/.test(hl.txt) || !hl.after) navErrs.push(`首頁研究室入口「${hl.txt}」在今日事件之後 ${hl.after}`);
+      // 直接 openStock 的名稱
+      await p7.evaluate(() => openStock("3324"));
+      await p7.waitForFunction(() => (document.getElementById("sh-name") || {}).textContent !== "3324", null, { timeout: 15000 }).catch(() => {});
+      const nm = await p7.evaluate(() => (document.getElementById("sh-name") || {}).textContent);
+      if (nm === "3324" || !nm) navErrs.push(`openStock('3324') 名稱顯示「${nm}」`);
+      if (pe.length) navErrs.push(`pageerror ${pe.slice(0, 2).join(" | ")}`);
+      navInfo = `導覽 5 分頁、日誌在交易、齒輪開設定、研究室 深度 ${l.deep} 卡／雷達 ${l.radar} 列／熱度、首頁「${hl.txt}」、3324＝${nm}、膠囊週六→10/16`;
+    } finally { await ctx.close(); }
+  } catch (e) { navErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("169. 導覽列 5 分頁＋日誌在交易＋右上設定＋研究室三塊＋首頁入口＋橫幅 safe-area＋膠囊最後交易日＋直接開個股名稱（先.一一二）", navErrs.length === 0, navErrs.join("; ") || navInfo);
 
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。

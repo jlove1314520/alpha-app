@@ -529,6 +529,22 @@ def main():
             errors.append(f"{code}: {type(e).__name__}: {e}")
 
     # L3 深度
+    # 先.一一二-2a（2026-10-18）：研究室卡片要標「內容停在 MM/DD」（超過 14 天沒更新）。內容日＝設定檔 content_updated 欄位
+    # （改設定時一併更新）；完整 git 歷史在時（本機），再跟該檔最後 commit 日取較新的。雲端是淺層 checkout，git 日期＝當班 HEAD，
+    # 會讓所有檔看起來都是今天，所以淺層時不用 git 日期。
+    def _content_updated(path: Path, cfg: dict) -> str | None:
+        vals = [cfg.get("content_updated")] if cfg.get("content_updated") else []
+        try:
+            import subprocess
+            shallow = subprocess.run(["git", "rev-parse", "--is-shallow-repository"], cwd=ROOT, capture_output=True, text=True, timeout=20).stdout.strip()
+            if shallow == "false":
+                g = subprocess.run(["git", "log", "-1", "--format=%cs", "--", str(path)], cwd=ROOT, capture_output=True, text=True, timeout=20).stdout.strip()
+                if g:
+                    vals.append(g)
+        except Exception:  # noqa: BLE001 —— 查不到 git 就只用欄位
+            pass
+        return max(vals) if vals else None
+
     deep_list = []
     for f in sorted((LAB / "config").glob("*.json")) if (LAB / "config").exists() else []:
         code = f.stem
@@ -541,13 +557,16 @@ def main():
             stocks[code]["deep"] = lab_deep(code, cfg, l1, cut_rv(merged_revenue(fund.get(code), code)), asof.year)
             d = stocks[code]["deep"]
             deep_list.append({"code": code, "name": stocks[code]["name"], "headline": d["headline"], "position": d["scenario"]["position"],
-                              "counts": d["thesis"]["counts"], "next": (d["next_checkpoints"] or [None])[0], "doc_url": d.get("doc_url")})
+                              "counts": d["thesis"]["counts"], "next": (d["next_checkpoints"] or [None])[0], "doc_url": d.get("doc_url"),
+                              "content_updated": _content_updated(f, cfg), "data_asof": asof.isoformat()})
         except Exception as e:  # noqa: BLE001
             errors.append(f"深度 {code}: {type(e).__name__}: {e}")
             traceback.print_exc()
 
     # L2 雷達
     liq = [c for c, s in stocks.items() if s["liquid"]]
+
+    list_totals = {}  # 先.一一二-3：每張名單截斷前的總檔數（首頁「研究室：今天 N 檔有新變化」用；名單本身最多 30／50 檔）
 
     def top(pred, key, n=30, rev=True):
         xs = [c for c in liq if pred(stocks[c])]
@@ -557,18 +576,23 @@ def main():
                  "rev3_yoy": stocks[c]["rev"].get("rev3_yoy"), "gm_qoq_pp": stocks[c]["q"].get("gm_qoq_pp"),
                  "ret20": stocks[c]["px"].get("ret20"), "close": stocks[c]["px"].get("close")} for c in xs]
 
-    lists = {
-        "綜合變化": top(lambda s: s["change_score"] >= 2, lambda s: s["change_score"] * 1e12 + (s["px"].get("turnover20") or 0), 50),
-        "營收加速": top(lambda s: "營收加速" in s["change_tags"], lambda s: (s["rev"]["rev3_yoy"] or 0) - (s["rev"]["rev3_yoy_prev"] or 0)),
-        "營收創新高": top(lambda s: "營收創新高" in s["change_tags"], lambda s: s["rev"].get("rev3_yoy")),
-        "毛利率跳升": top(lambda s: "毛利率跳升" in s["change_tags"], lambda s: s["q"].get("gm_qoq_pp")),
-        "營收轉弱": top(lambda s: "營收轉弱" in s["change_tags"], lambda s: -((s["rev"]["rev3_yoy"] or 0) - (s["rev"]["rev3_yoy_prev"] or 0))),
-        "法說將至": top(lambda s: "法說將至" in s["change_tags"], lambda s: s["px"].get("turnover20")),
-        "量增創 60 日新高": top(lambda s: "量增創 60 日新高" in s["change_tags"], lambda s: s["px"].get("vol5_20")),
-        "創高量縮": top(lambda s: "創高量縮" in s["change_tags"], lambda s: s["px"].get("ret20")),
-        "法人背離": top(lambda s: "法人背離" in s["change_tags"], lambda s: abs(s["px"].get("ret20") or 0)),
-        "重大訊息": top(lambda s: "重大訊息" in s["change_tags"], lambda s: s["px"].get("turnover20")),
-    }
+    specs = [  # (名單, 條件, 排序鍵[, 最多幾檔])
+        ("綜合變化", lambda s: s["change_score"] >= 2, lambda s: s["change_score"] * 1e12 + (s["px"].get("turnover20") or 0), 50),
+        ("營收加速", lambda s: "營收加速" in s["change_tags"], lambda s: (s["rev"]["rev3_yoy"] or 0) - (s["rev"]["rev3_yoy_prev"] or 0)),
+        ("營收創新高", lambda s: "營收創新高" in s["change_tags"], lambda s: s["rev"].get("rev3_yoy")),
+        ("毛利率跳升", lambda s: "毛利率跳升" in s["change_tags"], lambda s: s["q"].get("gm_qoq_pp")),
+        ("營收轉弱", lambda s: "營收轉弱" in s["change_tags"], lambda s: -((s["rev"]["rev3_yoy"] or 0) - (s["rev"]["rev3_yoy_prev"] or 0))),
+        ("法說將至", lambda s: "法說將至" in s["change_tags"], lambda s: s["px"].get("turnover20")),
+        ("量增創 60 日新高", lambda s: "量增創 60 日新高" in s["change_tags"], lambda s: s["px"].get("vol5_20")),
+        ("創高量縮", lambda s: "創高量縮" in s["change_tags"], lambda s: s["px"].get("ret20")),
+        ("法人背離", lambda s: "法人背離" in s["change_tags"], lambda s: abs(s["px"].get("ret20") or 0)),
+        ("重大訊息", lambda s: "重大訊息" in s["change_tags"], lambda s: s["px"].get("turnover20")),
+    ]
+    lists = {}
+    for spec in specs:
+        name, pred, key = spec[0], spec[1], spec[2]
+        lists[name] = top(pred, key, *spec[3:])
+        list_totals[name] = sum(1 for c in liq if pred(stocks[c]))
     # 產業營收熱度（全宇宙、不設流動性門檻）
     ind = {}
     for c, s in stocks.items():
@@ -597,7 +621,7 @@ def main():
     meta = {"schema": SCHEMA, "generated_at": now.isoformat(timespec="seconds"), "asof": asof.isoformat(), "disclaimer": DISCLAIMER,
             "source": "repo 內既有檔（price_history/fundamentals/stock_detail/institutional_history/events/holders/company_info/listed_universe，若有 revenue_backfill／financials_backfill 一併合併）＋research/lab；零外部請求",
             "asof_cut": "價量／月營收（次月10日公告期限）／季報（法定期限）／法人／集保／本益比皆截到 asof，事件只用 asof 以前公告的" if asof_arg else "未指定 --asof：用最新資料",
-            "rules": RULE_TEXT, "liquidity_min_turnover20": LIQ_MIN_TURNOVER, "coverage": cov, "errors": errors[:200], "n_errors": len(errors),
+            "rules": RULE_TEXT, "liquidity_min_turnover20": LIQ_MIN_TURNOVER, "coverage": cov, "list_totals": list_totals, "errors": errors[:200], "n_errors": len(errors),
             "not_a_factor": "凍結.二：本檔欄位不得進 scores*.json 或當選股權重"}
     (OUT / "research.json").write_text(json.dumps({"meta": meta, "stocks": stocks}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     # 研究室.五-4：自選股列研究狀態點（全宇宙、不設流動性門檻）。review＝有深度研究且論點指標有「需檢討」；

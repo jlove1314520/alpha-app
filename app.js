@@ -119,6 +119,9 @@
       try{
         const d=ev.data||{};if(d.type!=='DATA_UPDATED')return;
         window.__alphaMemDrop&&window.__alphaMemDrop(d.path);
+        // 先.一一二-4c：頂部膠囊讀的報價檔被背景更新時立刻重抓（原本要等 2 分鐘輪詢，剛開 App 時膠囊會停在上次存的舊日期）
+        if(/\/data\/quotes_(tw|us|ibkr|sinopac)\.json$/.test(String(d.path||''))&&typeof loadIntradayQuotes==='function')
+          loadIntradayQuotes().catch(e2=>{console.warn('[sw DATA_UPDATED:quotes]',e2)});
         clearTimeout(_uiDataRefreshT);
         _uiDataRefreshT=setTimeout(()=>{window.__ALPHA_STALE=null;window.dispatchEvent(new Event('alpha-stale-data'));if(typeof uiRefreshCurrent==='function')uiRefreshCurrent()},1200);
       }catch(e){console.warn('[sw DATA_UPDATED]',e)}
@@ -308,7 +311,7 @@
   window.addEventListener('unhandledrejection',e=>{recordGlobalError('unhandledrejection',e.reason)});
 
   // ── 導覽 ──
-  const scrs = {home:'scr-home',market:'scr-market','chips-market':'scr-chips-market',picks:'scr-picks',report:'scr-report',trade:'scr-trade',journal:'scr-journal',stock:'scr-stock',settings:'scr-settings'};
+  const scrs = {home:'scr-home',market:'scr-market','chips-market':'scr-chips-market',picks:'scr-picks',report:'scr-report',trade:'scr-trade',journal:'scr-journal',stock:'scr-stock',settings:'scr-settings',lab:'scr-lab'};
   // 2026-08-27新增（使用者定位的「改A壞B」根因之一）：任一分頁的載入/渲染函式
   // 失敗，不能連累其他分頁或導覽本身——sync函式包try/catch，async函式的promise
   // 要接.catch()（try/catch接不住async函式await之後才發生的rejection）。錯誤
@@ -358,7 +361,10 @@
     CURRENT_TAB=name;
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     document.getElementById(scrs[name]).classList.add('active');
-    document.querySelectorAll('#nav button[data-scr]').forEach(b=>b.classList.toggle('on', b.dataset.scr===name));
+    // 先.一一二-1：底部導覽只剩 今日｜市場｜選股｜研究室｜交易；「日誌」是交易頁子分頁（亮交易）、「設定」在右上齒輪
+    const navKey=({journal:'trade'})[name]||name;
+    document.querySelectorAll('#nav button[data-scr]').forEach(b=>b.classList.toggle('on', b.dataset.scr===navKey));
+    const gear=document.getElementById('hdr-settings');if(gear)gear.classList.toggle('on',name==='settings');
     document.getElementById('main').scrollTo(0,0);
     if(name==='home')_safeAsync('hydrateHome',hydrateHome);
     if(name==='market')_safeAsync('hydrateMarket',hydrateMarket);
@@ -368,6 +374,60 @@
     if(name==='journal'){_safeSync('renderJournalChips',renderJournalChips);_safeAsync('loadWeeklyBrief',loadWeeklyBrief);_safeAsync('loadSysWeekly',loadSysWeekly);_safeAsync('loadJournalLedger',loadJournalLedger);_safeAsync('loadResearchScorecard',loadResearchScorecard)}
     if(name==='report')_safeSync('renderReport',renderReport);
     if(name==='settings')_safeSync('hydrateSettings',hydrateSettings);
+    if(name==='lab')_safeAsync('hydrateLab',hydrateLab);
+  }
+  // 先.一一二-1：日誌頁頂部那排交易子分頁——點了回交易頁並切到該子分頁（交易頁程式是點到才載入，等載好再點）
+  function journalToTrade(sub){
+    go('trade');
+    Promise.resolve(loadAppModule('trade')).then(()=>{const b=document.querySelector(`#trade-tabs button[data-sub="${sub}"]`);if(b)b.click()})
+      .catch(e=>{console.warn('[journalToTrade]',e);recordGlobalError('journalToTrade',e)});
+  }
+  // ══════ 先.一一二-2（2026-10-18）研究室分頁：a 深度研究／b 變化雷達／c 產業營收熱度 ══════
+  // 三塊都讀 data/research_radar.json（scripts/build_research.py，零外部請求）；雷達與熱度沿用選股頁／市場頁原本的函式（點到才載入）。
+  const LAB_STALE_DAYS=14;
+  function _labMD(x){return x?`${+String(x).slice(5,7)}/${+String(x).slice(8,10)}`:'—'}
+  async function _labRadarDoc(){
+    const r=await fetch('data/research_radar.json?t='+Math.floor(Date.now()/600000));
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return r.json();
+  }
+  async function _labDeep(){
+    const el=document.getElementById('lab-deep-list');if(!el)return;
+    const d=await _labRadarDoc(),deep=d.deep||[],m=d.meta||{};
+    const meta=document.getElementById('lab-deep-meta');
+    if(!deep.length){el.innerHTML='<div class="note">目前沒有深度研究的股票</div>';if(meta)meta.textContent='';return}
+    const today=_evYmd(new Date()),esc=_uiEsc;
+    el.innerHTML=deep.map(x=>{
+      const c=x.counts||{},nx=x.next||null;
+      const age=x.content_updated?(Date.parse(today+'T00:00:00+08:00')-Date.parse(x.content_updated+'T00:00:00+08:00'))/864e5:null;
+      const stale=age!=null&&age>LAB_STALE_DAYS;
+      const chip=(t,n,col)=>`<span class="lab-chip" style="border-color:${col};color:${col}">${t} ${n||0}</span>`;
+      return `<div class="lab-deep press" data-code="${esc(x.code)}" onclick="openStockResearch('${esc(x.code)}')">`
+        +`<div class="lab-deep-hd"><b>${esc(x.name||x.code)}</b><span class="num">${esc(x.code)}</span>${stale?`<span class="lab-stale">內容停在 ${_labMD(x.content_updated)}</span>`:''}</div>`
+        +`<div class="lab-deep-hl">${esc(x.headline||'')}</div>`
+        +`<div class="lab-chips">${chip('支持',c.support,'var(--good)')}${chip('中性',c.neutral,'var(--ink-3)')}${chip('轉弱',c.review,'var(--caution)')}${c.no_data?chip('沒資料',c.no_data,'var(--ink-4)'):''}</div>`
+        +`<div class="note" style="margin:4px 0 0">下一個檢查日 ${nx?_labMD(nx.date)+' '+esc(nx.item||''):'—'} · 資料更新 ${_labMD(x.data_asof||m.asof)}${x.content_updated?' · 內容 '+_labMD(x.content_updated):''}</div></div>`;
+    }).join('');
+    if(meta)meta.textContent=`共 ${deep.length} 檔，點卡片看「研究」分頁；超過 ${LAB_STALE_DAYS} 天沒更新標「內容停在」`;
+  }
+  // 點深度研究卡：開個股頁並切到「研究」分頁（個股頁程式點到才載入）
+  function openStockResearch(code){
+    Promise.resolve(loadAppModule('stock')).then(()=>{
+      openStock(code);
+      const b=document.querySelector('#stock-tabs button[data-sub="research"]');if(b)b.click();
+    }).catch(e=>{console.warn('[openStockResearch]',e);recordGlobalError('openStockResearch',e)});
+  }
+  async function hydrateLab(){
+    const labels=['labDeep','labRadar','labHeat'];
+    const rs=await Promise.allSettled([_labDeep(),_lazyCall('picks','hydrateRadar',[false]),_lazyCall('market','loadIndustryHeat',[])]);
+    rs.forEach((r,i)=>{if(r.status==='rejected'){console.warn('['+labels[i]+']',r.reason);recordGlobalError(labels[i],r.reason)}});
+  }
+  // 先.一一二-3：首頁「研究室：今天 N 檔有新變化 →」（N＝變化雷達「綜合變化」符合條件的檔數；名單本身只列前 50）
+  async function loadHomeLabLine(){
+    const el=document.getElementById('home-lab-line');if(!el)return;
+    const d=await _labRadarDoc(),m=d.meta||{};
+    const tot=(m.list_totals||{})['綜合變化'],n=tot!=null?tot:((d.lists||{})['綜合變化']||[]).length;
+    el.textContent=`研究室：今天 ${n} 檔有新變化 →`;el.hidden=false;
   }
   document.querySelectorAll('#nav button[data-scr]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.scr)));
 
@@ -789,6 +849,16 @@
   // 「時鐘停了/算錯」。改回.tm=zonedNow(tz).hhmmss.slice(0,5)，一律顯示
   // 該市場「現在時間」，每秒隨setInterval(updateClocks,1000)更新；資料
   // 新鮮度改用label文字（「延遲N分」/「已收盤(M/D)」）表達，不再疊在時間欄位上。
+  // 先.一一二-4c（2026-10-18）：膠囊「已收盤(M/D)」原本直接用資料檔 fetched_at 的日期——週末排程也會更新檔案，
+  // 週六就顯示「已收盤(10/17)」（那天沒開盤）；開盤前的夜間更新也會先顯示成當天。改成：fetched_at 換成當地日期，
+  // 那天不是交易日、或還沒到開盤時間，就往前找最近一個交易日。
+  function lastSessionMD(fetchedMs,tz,openMin,holidays){
+    const p=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(fetchedMs)).map(x=>[x.type,x.value]));
+    let d=new Date(`${p.year}-${p.month}-${p.day}T12:00:00Z`);
+    const isTd=x=>{const wd=x.getUTCDay(),s=x.toISOString().slice(0,10);return wd!==0&&wd!==6&&!holidays.has(s)};
+    if(!isTd(d)||(+p.hour)*60+(+p.minute)<openMin){d=new Date(d.getTime()-864e5);for(let i=0;i<15&&!isTd(d);i++)d=new Date(d.getTime()-864e5)}
+    return `${d.getUTCMonth()+1}/${d.getUTCDate()}`;
+  }
   function mktPill(elId,tz,openMin,closeMin,intradayGetter){
     const el=document.getElementById(elId);if(!el)return;
     const dotEl=el.querySelector('.dot'),bEl=el.querySelector('b'),tmEl=el.querySelector('.tm');
@@ -804,7 +874,7 @@
     else{const d=new Date(data.fetched_at);
       if(open&&age<=INTRADAY_STALE_MIN){label='延遲'+Math.max(1,Math.round(age))+'分';dot='var(--good)'}
       else if(open){label='資料延遲';dot='var(--warn)'}
-      else{label='已收盤('+fmtTzMD(d,tz)+')';dot='var(--ink-3)'}}
+      else{label='已收盤('+lastSessionMD(d.getTime(),tz,openMin,elId==='mkt-us'?US_HOLIDAYS:TW_HOLIDAYS)+')';dot='var(--ink-3)'}}
     dotEl.style.background=dot;
     bEl.textContent=label;
     // 2026-08-28 P0-a 根治：.tm=該市場現在時間(每秒更新的時鐘)，非 fetched_at。
@@ -837,7 +907,7 @@
     if(session==='pre'||session==='post'){label=session==='pre'?'盤前':'盤後';dot='var(--warn)';}
     else if(session==='closed'){
       if(age==null){label=(navigator.onLine===false||INTRADAY_NET_OFF.us)?'離線':'無資料';dot='var(--ink-3)'}
-      else{label='已收盤('+fmtTzMD(new Date(data.fetched_at),'America/New_York')+')';dot='var(--ink-3)'}}
+      else{label='已收盤('+lastSessionMD(new Date(data.fetched_at).getTime(),'America/New_York',9*60+30,US_HOLIDAYS)+')';dot='var(--ink-3)'}}
     else{
       if(age==null){label=(navigator.onLine===false||INTRADAY_NET_OFF.us)?'離線':'無資料';dot='var(--ink-3)'}
       else if(age<=INTRADAY_STALE_MIN){label='延遲'+Math.max(1,Math.round(age))+'分';dot='var(--good)'}
@@ -1963,6 +2033,7 @@
     if(runId!==HYDRATE_HOME_SEQ)return;
     _safeAsync('loadHomeIndex',loadHomeIndex);
     _safeAsync('loadTodayEvents',loadTodayEvents);
+    _safeAsync('loadHomeLabLine',loadHomeLabLine);  // 先.一一二-3
     _safeAsync('loadHomeBrief',loadHomeBrief);  // 常備.開發-2 盤前日報（規則摘要）
     uiLazyHome('loadMyHoldingsEvents',loadMyHoldingsEvents);  // 2026-09-15 開發佇列自走；先.八十一-7 捲到才載
     _safeAsync('loadAutoTrading',loadAutoTrading);
@@ -4787,7 +4858,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-18.1043';
+  const APP_VERSION='2026-10-18.1127';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

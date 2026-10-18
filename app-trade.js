@@ -72,6 +72,7 @@
   // ── 交易頁子分頁（機器人／策略，2026-08-25 新增，不佔用底部導覽）──
   document.querySelectorAll('#trade-tabs button').forEach(b=>{
     b.addEventListener('click',()=>{
+      if(b.dataset.sub==='journal'){go('journal');return}  // 先.一一二-1：日誌併入交易頁成為子分頁，內容仍在日誌頁
       document.querySelectorAll('#trade-tabs button').forEach(x=>x.classList.remove('on'));
       b.classList.add('on');
       document.getElementById('trade-sub-bots').classList.remove('active');

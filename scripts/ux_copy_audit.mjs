@@ -9,7 +9,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-export const SCREENS = ["home", "market", "picks", "trade", "journal", "settings"];
+export const SCREENS = ["home", "market", "picks", "lab", "trade", "journal", "settings"];  // 先.一一二：加研究室
 
 export function loadGlossary() {
   return JSON.parse(fs.readFileSync(path.join(ROOT, "data", "ui_glossary.json"), "utf8"));
