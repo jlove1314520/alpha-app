@@ -40,7 +40,7 @@ def main(argv: list[str]) -> int:
                 track=s["track"], name=s["name"], design=s["design"],
                 result="未跑（事前登記：參數一次定死、只跑一次）", verdict="未結案",
                 notes=f"先.一一三-B1（2026-10-18 總司令裁示放行）；PREREG {s['doc']}；程式 {s['script']}；計入 N＋1（與結果列合併）",
-                no_stats_reason="事前登記列，尚未執行",
+                no_stats_reason="事前登記列，尚未執行", round_note="互動視窗單發（先.一一三-B1），不屬任何馬拉松輪次",
                 code_paths=[s["script"], "research/var1018_twdata.py", s["doc"]] if k != "V2" else [s["script"], s["doc"]],
             )
             print(k, "事前登記 #", tid)
@@ -62,7 +62,7 @@ def main(argv: list[str]) -> int:
         tid, row = register_trial(
             track=s["track"], name=s["name"].replace("_prereg", ""), design=s["design"], result=summ, verdict=v,
             notes=f"事前登記 #{pre}；先.一一三-B1 單發結果；結果檔 research/data/var1018_{k.lower()}_result.json；PREREG {s['doc']}",
-            no_stats_reason="單發檢定（日曆效應／IC／事件），不是可部署策略的 Sharpe 報告",
+            no_stats_reason="單發檢定（日曆效應／IC／事件），不是可部署策略的 Sharpe 報告", round_note="互動視窗單發（先.一一三-B1），不屬任何馬拉松輪次",
             failed_gates=None if v == "PASS" else [v],
             code_paths=[s["script"]],
         )
