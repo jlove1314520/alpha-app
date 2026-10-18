@@ -43,7 +43,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(mq.addEventListener)mq.addEventListener('change',h);else if(mq.addListener)mq.addListener(h)}
 })();
 </script>
-<link rel="stylesheet" href="app.css?v=2026-10-18.1139">
+<link rel="stylesheet" href="app.css?v=2026-10-18.1418">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -66,6 +66,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <!-- 先.一〇四-2：橫幅總管，一行（最嚴重一則＋還有 N 則），只在今日頁出現；點了展開下面原本的橫幅 -->
   <div id="alert-hub" hidden role="button" onclick="hubToggle()"></div>
   <div id="auto-banner" style="display:none;background:rgba(220,38,38,.14);border-bottom:1px solid rgba(220,38,38,.4);color:#ef4444;font-size:12px;font-weight:600;padding:8px 16px;line-height:1.5"></div>
+  <!-- 先.一一三-A3：交易日 20:30 後台股當日資料還沒進來（market_tw data_date 不是今天）→ 紅色橫幅（進橫幅總管，最嚴重等級） -->
+  <div id="tw-data-banner" style="display:none;background:rgba(220,38,38,.14);border-bottom:1px solid rgba(220,38,38,.4);color:#ef4444;font-size:12px;font-weight:600;padding:8px 16px;line-height:1.5"></div>
   <div id="diag-banner" style="display:none;background:rgba(250,178,25,.1);border-bottom:1px solid rgba(250,178,25,.25);color:var(--warn);font-size:11px;padding:8px 16px;line-height:1.5"></div>
   <!-- 2026-10-05（先.十四-一）：本機 Claude 登入過期／額度用盡／連續3小時無實際執行
        的紅色橫幅，獨立於上面的診斷橫幅（那個是給JS錯誤用的黃色、可摺疊）——這個
@@ -1592,6 +1594,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-18.1139"></script>
+<script src="app.js?v=2026-10-18.1418"></script>
 </body>
 </html>

@@ -5684,6 +5684,31 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { cdErrs.push(`測試本身出錯：${e.message || e}`); }
   record("170. 首頁收盤日標籤以資料日為準、不被抓檔時間蓋掉（先.一一二 驗收順手修）", cdErrs.length === 0, cdErrs.join("; "));
 
+  // 171.【2026-10-18 先.一一三-A3】交易日 20:30 後台股當日資料沒進來 → 紅色橫幅「今日台股資料未進來，三層備援都沒補到」；
+  // 資料已是今天、或週末 → 不亮。用假時鐘＋攔 market_tw.json 回指定 data_date 驗三種情境。
+  const tdErrs = [];
+  let tdInfo = "";
+  try {
+    const cases = [["2026-10-19T12:35:00Z", "2026-10-16", true], ["2026-10-19T12:35:00Z", "2026-10-19", false], ["2026-10-17T13:00:00Z", "2026-10-16", false], ["2026-10-19T12:00:00Z", "2026-10-16", false]];
+    for (const [t, dd, want] of cases) {
+      const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+      await ctx.route(/data\/market_tw\.json/, async (route) => { const r = await route.fetch(); const j = await r.json(); j.data_date = dd; await route.fulfill({ response: r, json: j }); });
+      const p8 = await ctx.newPage();
+      try {
+        await p8.clock.install({ time: new Date(t) });
+        await p8.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+        await p8.clock.runFor(3000);
+        await p8.waitForFunction(() => typeof checkTwDataBanner === "function", null, { timeout: 15000 });
+        await p8.evaluate(() => checkTwDataBanner());
+        const st = await p8.evaluate(() => { const e = document.getElementById("tw-data-banner"); return { on: !!e && e.style.display === "block", txt: e ? e.textContent : "" }; });
+        if (st.on !== want) tdErrs.push(`${t}＋data_date ${dd}：橫幅 ${st.on ? "亮" : "沒亮"}（應${want ? "亮" : "不亮"}）`);
+        if (want && !/今日台股資料未進來，三層備援都沒補到/.test(st.txt)) tdErrs.push(`橫幅文字不對：${st.txt.slice(0, 40)}`);
+      } finally { await ctx.close(); }
+    }
+    tdInfo = "週一 20:35 資料停 10/16 亮；資料是今天、週六、20:00 前都不亮";
+  } catch (e) { tdErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("171. 交易日 20:30 後台股資料沒進來亮紅色橫幅、其他情境不亮（先.一一三-A3）", tdErrs.length === 0, tdErrs.join("; ") || tdInfo);
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];

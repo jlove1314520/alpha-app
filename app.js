@@ -4158,7 +4158,7 @@
   //   其他頁＝橫幅全收起，只在頂部膠囊旁亮一個色點（點了回今日頁並展開）。
   // 同一原因（電腦／心跳／離線）只算一次。總管自己出錯只 console.warn，不影響原橫幅（十二節：寧可漏抓不可癱瘓）。
   const HUB_SRC=[
-    {id:'auto-banner',sev:3},{id:'claude-auth-banner',sev:3},{id:'paper-tracking-banner',sev:3},
+    {id:'auto-banner',sev:3},{id:'tw-data-banner',sev:3},{id:'claude-auth-banner',sev:3},{id:'paper-tracking-banner',sev:3},
     {id:'diag-banner',sev:2},{id:'error-log',sev:1}];
   const HUB_SEV_COLOR={3:'var(--critical)',2:'var(--warn)',1:'var(--serious)',0:'var(--ink-3)'};
   let HUB_OPEN=false;
@@ -4184,6 +4184,20 @@
       if(!cur||sev>cur.sev)byKey.set(k,{id:s.id,sev,txt});
     }
     return [...byKey.values()].sort((a,b)=>b.sev-a.sev);
+  }
+  async function checkTwDataBanner(){
+    const el=document.getElementById('tw-data-banner');if(!el)return;
+    const hide=()=>{if(el.style.display!=='none'){el.style.display='none';el.innerHTML='';try{hubRefresh()}catch(e){console.warn('[checkTwDataBanner:hub]',e)}}};
+    const now=new Date(),z=_zonedParts(now,'Asia/Taipei'),today=_ymd(z);
+    if(!isTradingDay(now,'Asia/Taipei',TW_HOLIDAYS)||z.h*60+z.mi<20*60+30)return hide();
+    const r=await fetch('data/market_tw.json?t='+Date.now(),{cache:'no-store'});
+    if(!r.ok)throw new Error('market_tw HTTP '+r.status);
+    const dd=(await r.json()).data_date||'';
+    if(dd===today)return hide();
+    el.innerHTML='<div class="ui-ban-sit" data-ui-keep>今日台股資料未進來，三層備援都沒補到</div>'
+      +`<div style="font-weight:400">最新台股資料日 ${dd?+dd.slice(5,7)+'/'+(+dd.slice(8,10)):'不明'}；今天的數字暫時是前一個交易日的</div>`;
+    el.style.display='block';
+    try{hubRefresh()}catch(e){console.warn('[checkTwDataBanner:hub]',e)}
   }
   function hubRefresh(){
     try{
@@ -4860,7 +4874,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-18.1139';
+  const APP_VERSION='2026-10-18.1418';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
@@ -5027,6 +5041,10 @@
   // 2026-10-05（先.十四-一）：本機 Claude 登入過期／額度／停擺的紅色橫幅要在首頁
   // 一載入就評估，不是等使用者點進設定頁（見 renderClaudeAuthBanner 的註解）。
   _safeAsync('loadClaudeAuthBanner',loadClaudeAuthBanner);
+  // 先.一一三-A3：交易日 20:30 後台股當日資料沒進來就亮紅色橫幅。App 自己用 market_tw＋交易日曆判斷（不只靠
+  // data/tw_data_alarm.json），而且用 no-store 繞過 SW 舊存檔，免得手機上的舊資料誤報。每 10 分鐘重查一次。
+  _safeAsync('checkTwDataBanner',checkTwDataBanner);
+  try{setInterval(()=>{checkTwDataBanner().catch(e=>{console.warn('[checkTwDataBanner:interval]',e)})},10*60*1000)}catch(e){console.warn('[checkTwDataBanner:setup]',e)}
   _safeAsync('loadPaperTrackingBanner',loadPaperTrackingBanner);
   // 2026-09-03深夜（乙.4）：讀即時伺服器設定並嘗試連線；沒設定/連不上就維持冷資料路徑並標「離線」。
   _safeSync('loadLiveConfig',loadLiveConfig);

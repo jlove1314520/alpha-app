@@ -1,0 +1,62 @@
+name: 台股當日資料落地檢查（20:30）
+
+# 先.一一三-A3（2026-10-18 總司令裁示）：每個交易日 20:30 後檢查 data/market_tw.json 的 data_date 是不是今天；
+# 不是 → 寫 data/tw_data_alarm.json（App 紅色橫幅）＋ job 紅燈（GitHub email／手機 App 的 Actions 失敗推播），
+# 訊息「今日台股資料未進來，三層備援都沒補到」。判斷邏輯見 scripts/check_tw_data_landed.py。
+# 本機 AlphaTwDataCheck 20:30 也會檢查一次，告警時用 workflow_dispatch 叫這支（雲端排程常被延後或跳過）。
+# 守門員自身失敗只降級成警告（十二節）：腳本例外一律 exit 0；只有「真的告警」才 exit 1。
+# 本 workflow 新增會改寫 data/tw_data_alarm.json 的排程步驟，已列在下方 git add（十節）。
+
+on:
+  schedule:
+    # 先.九 三：避開整點／半點尖峰。台北 20:33 與 21:13（UTC 12:33／13:13），週一～五；非交易日由腳本依交易日曆跳過
+    - cron: "33 12 * * 1-5"
+    - cron: "13 13 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "觸發原因（本機 20:30 檢查告警時帶 local_20_30）"
+        required: false
+        default: manual
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 檢查今日台股資料是否落地
+        id: landed
+        continue-on-error: true
+        run: python scripts/check_tw_data_landed.py --layer cloud
+
+      - name: Commit 告警檔
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- data/tw_data_alarm.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "告警檔沒有變化，不產生 commit"
+          else
+            git commit -m "台股當日資料檢查（先.一一三-A3）：更新 data/tw_data_alarm.json"
+            git stash push --include-untracked -m ci-leftovers || true
+            for i in 1 2 3 4 5; do
+              git pull --rebase --autostash && git push && break
+              sleep 10
+            done
+          fi
+
+      - name: 告警就讓這個 job 顯示紅燈（觸發 GitHub 失敗推播）
+        if: steps.landed.outcome == 'failure'
+        run: |
+          echo "::error::今日台股資料未進來，三層備援都沒補到（詳見 data/tw_data_alarm.json）"
+          exit 1
