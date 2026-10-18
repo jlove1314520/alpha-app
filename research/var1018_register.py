@@ -30,18 +30,23 @@ SPECS = {
     "V5": dict(track="TW", name="var1018_v5_january_reversal_tw_prereg", script="research/var1018_v5_january_reversal.py",
                doc="docs/PREREG_DRAFT_VAR1018_V5_january_reversal_tw.md",
                design="墓園變形方向 V5（#66 稅損 1 月反轉換市場）：台股全市場 2011～2024 的 14 個 1 月單發；1～10 月最差 20% 隔年 1 月，扣成本 1×、漲跌停無法成交、20 日均成交值≥3,000 萬；隨機抽同數量 N＝500；超額>0、百分位≥90、兩半>0；天條一用 1 月策略回撤"),
+    "V7": dict(track="US", name="var1018_v7_us_unemployment_spx_prereg", script="research/var1018_v7_us_unemployment.py",
+               doc="docs/PREREG_DRAFT_VAR1018_V7_us_unemployment_spx.md",
+               design="墓園變形方向 V7（#80 失業率反向、換市場）：ALFRED UNRATE 首次公布值年增→S&P 未來 20 日報酬 1991～2024 單發；首次公布日下一個交易日起可用；Pearson／Spearman>0、circular-shift null N＝500 百分位≥90、兩半>0；天條一用連續曝險投組回撤"),
 }
 
 
 def main(argv: list[str]) -> int:
     if argv[:1] == ["prereg"]:
-        for k, s in SPECS.items():
+        keys = argv[1:] or ["V2", "V4", "V5"]
+        for k in keys:
+            s = SPECS[k]
             tid, row = register_trial(
                 track=s["track"], name=s["name"], design=s["design"],
                 result="未跑（事前登記：參數一次定死、只跑一次）", verdict="未結案",
                 notes=f"先.一一三-B1（2026-10-18 總司令裁示放行）；PREREG {s['doc']}；程式 {s['script']}；計入 N＋1（與結果列合併）",
                 no_stats_reason="事前登記列，尚未執行", round_note="互動視窗單發（先.一一三-B1），不屬任何馬拉松輪次",
-                code_paths=[s["script"], "research/var1018_twdata.py", s["doc"]] if k != "V2" else [s["script"], s["doc"]],
+                code_paths=[s["script"], "research/var1018_twdata.py", s["doc"]] if k in ("V4", "V5") else [s["script"], s["doc"]],
             )
             print(k, "事前登記 #", tid)
         return 0
@@ -56,6 +61,9 @@ def main(argv: list[str]) -> int:
         elif k == "V4":
             summ = (f"{res['n_periods']} 期、平均 IC {res['mean_ic']:+.4f}、null 百分位 {res['null_percentile']:.1f}、兩半 "
                     f"{res['half_mean_ic']}；前 20% 終值 {res['top20_final_equity']}；天條一 {res['survival_segments']}")
+        elif k == "V7":
+            summ = (f"n={res['n']}、Pearson {res['pearson']:+.4f}、Spearman {res['spearman']:+.4f}、circular-shift 百分位 "
+                    f"{res['circular_shift_null']['percentile']:.1f}、兩半 {res['halves']}；曝險投組 CAGR {res['exposure_portfolio_cagr_pct']}（買進持有 {res['buy_hold_cagr_pct']}%）；天條一 {res['survival_segments']}")
         else:
             summ = (f"{res['n_januaries']} 個 1 月、平均超額（淨 1×）{res['mean_excess_net_1x']:+.4f}、null 百分位 {res['null_percentile']:.1f}、兩半 "
                     f"{res['half_mean_excess']}；1 月策略 MDD {res['january_only_strategy_mdd_pct_1x']}%")
