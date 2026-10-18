@@ -20595,7 +20595,8 @@ un-ibkr-quotes-cycle.ps1 第 174 行、run-shioaji-quotes-cycle.ps1 第 110 行�
 **收件註記**：第 1 項取代先.一一四-4 的「排在 V1 後面」；第 4 項與先.一一三-A4 同一件事，一起驗收；第 3 項接手先.一一四-3c 的進度回報格式。
 
 - [x] **先.一一五-1 V7 抓 ALFRED UNRATE 首次公布值（1 次請求）、登記並單發；結果寫進 shortlist 與墓園／候選紀錄**（互動視窗執行）〔2026-10-18 22:22 互動視窗完成：ALFRED UNRATE 首次公布值（output_type=4，1 次請求、799 個月份）→ V7 程式先 commit → 事前登記 #453 → 單發 → 結果 #454 **VIOLATES_SURVIVAL**（連續曝險投組全期回撤 −62.3%；主檢定也沒過：Pearson +0.040、circular-shift 百分位 64.6、兩半方向相反）；寫入墓園與 shortlist §9；N 433→434。先.一一四-4 同步完成〕
-- [ ] **先.一一五-2 V1 資料補齊期間暫停 AlphaFinMindWarmup P3 保鮮層（P1／P2 照跑），V1 補完或 10/23 先到者自動恢復；暫停／恢復時間記 PROGRESS**（互動視窗執行）
+- [x] **先.一一五-2 V1 資料補齊期間暫停 AlphaFinMindWarmup P3 保鮮層（P1／P2 照跑），V1 補完或 10/23 先到者自動恢復；暫停／恢復時間記 PROGRESS**（互動視窗執行）〔2026-10-18 22:24 互動視窗完成：AlphaFinMindWarmup P3 保鮮層暫停（旗標 research/data/finmind_warmup_p3_pause.json，P1／P2 照跑、不動其他排程）；V1 資料補完或 10/23 23:59:59 先到者自動恢復並寫心跳；暫停時間已記 PROGRESS，恢復時間由 先.一一五-2r 補記〕
+- [ ] **先.一一五-2r AlphaFinMindWarmup P3 自動恢復後，把恢復時間（research/data/finmind_warmup_p3_pause.json 的 resumed_at／resume_reason，或 PROGRESS_HEARTBEAT source＝finmind_warmup 那行）寫進 PROGRESS**（DevQueue 可執行；時間閘：恢復後）
 - [ ] **先.一一五-3 V1 每批補完在 shortlist §6 更新進度（已補檔數／候選數、每年在市檔數、下市股涵蓋率）；≥95% 才登記單發**（DevQueue 可執行：補資料與更新進度；登記單發互動視窗）
 - [ ] **先.一一五-4 10/19 收盤後驗收：20:30 落地檢查有跑且「已落地」；19:30 前三層至少一層補到 10/19**（互動視窗執行；時間閘 10/19 20:40 後）
 - [ ] **先.一一五-5 10/20 收盤後：第一批排程滿 3 個交易日沒問題，就照先.一〇二-2b 準備第二批清單與切換步驟，等總司令本人輸入密碼（CC 不讀不記）**（互動視窗執行；時間閘 10/20 收盤後）

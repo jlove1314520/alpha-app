@@ -1,3 +1,10 @@
+## 2026-10-18 22:24（互動視窗）先.一一五-1／-2：V7 單發 VIOLATES_SURVIVAL；AlphaFinMindWarmup P3 保鮮層暫停
+
+等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證）。
+
+- **-1 V7**：ALFRED UNRATE 首次公布值（1 次請求、799 個月份）→ 事前登記 #453 → 單發 → 結果 #454 **VIOLATES_SURVIVAL**：連續曝險投組全期回撤 −62.3%（買進持有 −56.8%）；主檢定也沒過（Pearson +0.040、circular-shift 百分位 64.6、兩半方向相反）。已入墓園；N 433→434。
+- **-2 P3 暫停**：**暫停時間 2026-10-18T22:23:34+08:00**。做法：旗標檔 research/data/finmind_warmup_p3_pause.json（本機、不進 repo），research/finmind_warmup.py 的 P3 區塊看到旗標就略過（P1／P2 照跑、其他排程不動）；**V1 資料補完（research/data/var1018_v1_prep_status.json 出現涵蓋率結果）或 2026-10-23 23:59:59 先到者自動恢復**，恢復時旗標寫 resumed_at、PROGRESS_HEARTBEAT 加一行（source＝finmind_warmup）。可逆：刪旗標即恢復。已用暫存路徑測過三種情境（10/22 仍暫停、10/24 自動恢復、V1 補完自動恢復）。恢復時間待寫入本檔（先.一一五-2r）。
+
 ## 2026-10-18 21:4x（DevQueue 20261018-210101）先.一〇九-28 時間閘未到；先.一一四-3c V1 資料備妥第 6 批（30 次 FinMind）；冒煙 171/0
 
 等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，10/14 23:24 起，約 3.9 天；清單見 research/AWAITING_REVIEW.md）

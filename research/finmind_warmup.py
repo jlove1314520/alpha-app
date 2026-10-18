@@ -263,6 +263,10 @@ def gen_tasks(src, uni_codes, now, sc, mem):
         if t:
             yield t
     # P3 保鮮：缺目標季的財報檔
+    # 先.一一五-2（2026-10-18 總司令裁示）：V1 資料補齊期間暫停 P3（P1／P2 照跑），把 FinMind 額度讓給 V1；
+    # V1 資料補完或 10/23 先到者自動恢復（見 _p3_paused）。
+    if _p3_paused(now):
+        return
     tp = target_period(now)
     age_h = STMT_FRESH_IN_WINDOW_H if in_window else STMT_FRESH_PRE_WINDOW_H
     cutoff = time.time() - age_h * 3600
@@ -275,6 +279,41 @@ def gen_tasks(src, uni_codes, now, sc, mem):
             t = emit("P3-stale", ds, c, pv2.STMT_START)
             if t:
                 yield t
+
+
+P3_PAUSE_PATH = DATA / "finmind_warmup_p3_pause.json"
+V1_PREP_STATUS = DATA / "var1018_v1_prep_status.json"
+HEARTBEAT = HERE / "PROGRESS_HEARTBEAT.jsonl"
+
+
+def _p3_paused(now) -> bool:
+    """暫停旗標存在且未恢復時：V1 資料已補完（prep 狀態檔已有涵蓋率結果）或時間過了 until → 自動恢復
+    （旗標寫 resumed_at／resume_reason，心跳檔加一行），否則回 True＝本輪略過 P3。任何讀寫失敗一律當沒暫停（十二節）。"""
+    try:
+        if not P3_PAUSE_PATH.exists():
+            return False
+        f = json.loads(P3_PAUSE_PATH.read_text(encoding="utf-8"))
+        if f.get("resumed_at"):
+            return False
+        until = datetime.fromisoformat(f["until"])
+        done = False
+        if V1_PREP_STATUS.exists():
+            st = json.loads(V1_PREP_STATUS.read_text(encoding="utf-8"))
+            done = "n_universe_t0" in st and not st.get("stopped")
+        if done or now >= until:
+            why = "V1 資料補完" if done else f"已到 {f['until'][:10]}"
+            f.update({"resumed_at": now.isoformat(timespec="seconds"), "resume_reason": why})
+            P3_PAUSE_PATH.write_text(json.dumps(f, ensure_ascii=False, indent=1), encoding="utf-8")
+            with open(HEARTBEAT, "a", encoding="utf-8", newline="") as h:
+                h.write(json.dumps({"ts": now.isoformat(timespec="seconds"), "source": "finmind_warmup", "item": "先.一一五-2",
+                                    "summary": f"AlphaFinMindWarmup P3 保鮮層自動恢復（{why}）"}, ensure_ascii=False) + "\n")
+            print(f"[P3] 保鮮層自動恢復：{why}", flush=True)
+            return False
+        print(f"[P3] 保鮮層暫停中（先.一一五-2，至 V1 資料補完或 {f['until'][:10]}）", flush=True)
+        return True
+    except Exception as e:  # noqa: BLE001
+        print(f"[警告] P3 暫停旗標讀取失敗，照常跑 P3：{type(e).__name__}: {e}", flush=True)
+        return False
 
 
 def _backoff_ok(mem, key, now_ts):
