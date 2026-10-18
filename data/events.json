@@ -1,13 +1,13 @@
 {
- "fetched_at": "2026-10-19T04:52:40.546753+08:00",
+ "fetched_at": "2026-10-19T06:05:03.369322+08:00",
  "source": "TWSE/TPEx 重大訊息＋TWSE 月營收＋既有除權息檔（全部官方端點）",
  "keep_days": 90,
  "importance_version": "v0（2026-10-18 先.一一〇-9）",
  "meta": {
   "twse_mops": {
    "ok": true,
-   "rows": 5,
-   "kept": 5
+   "rows": 4,
+   "kept": 4
   },
   "tpex_mops": {
    "ok": true,
@@ -25,7 +25,7 @@
    "note": "沿用既有排程產物，未額外請求"
   }
  },
- "count": 7247,
+ "count": 7251,
  "events": [
   {
    "code": "020036",
@@ -440,7 +440,7 @@
   {
    "code": "2072",
    "name": "世紀風電",
-   "date": "2026-10-17",
+   "date": "2026-10-18",
    "type": "其他",
    "title": "公告本公司名稱由「世紀離岸風電設備股份有限公司」更名 為「世紀能源設備股份有限公司」，公告期間：115年8月26日至 115年11月25日。",
    "source": "TWSE 重大訊息",
@@ -450,7 +450,7 @@
   {
    "code": "6949",
    "name": "沛爾生醫*-創",
-   "date": "2026-10-17",
+   "date": "2026-10-18",
    "type": "其他",
    "title": "公告本公司股票面額由「新台幣10元」變更為「新台幣0.5元」， 公告期間：115年08月06日至115年11月05日。",
    "source": "TWSE 重大訊息",
@@ -458,31 +458,21 @@
    "importance": 5
   },
   {
-   "code": "7799",
-   "name": "禾榮科",
-   "date": "2026-10-17",
-   "type": "其他",
-   "title": "本公司與GE Precision Healthcare LLC簽署合作協議",
+   "code": "3701",
+   "name": "大眾控",
+   "date": "2026-10-18",
+   "type": "重大訂單",
+   "title": "代子公司 PRO3C (Malaysia) Sdn. Bhd. 公告與Cape EMS Berhad 簽署策略合作備忘錄（MOA）",
    "source": "TWSE 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
+   "importance": 9
   },
   {
-   "code": "3432",
-   "name": "台端",
-   "date": "2026-10-17",
+   "code": "3701",
+   "name": "大眾控",
+   "date": "2026-10-18",
    "type": "其他",
-   "title": "依臺灣證券交易所股份有限公司臺證上一字第1121801204 號函辦理",
-   "source": "TWSE 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
-   "code": "7722",
-   "name": "LINEPAY",
-   "date": "2026-10-17",
-   "type": "其他",
-   "title": "澄清媒體報導",
+   "title": "代子公司 PRO3C (Malaysia) Sdn. Bhd.公告與 Cape EMS Berhad 簽署RCPS協議",
    "source": "TWSE 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01",
    "importance": 5
@@ -14640,6 +14630,56 @@
    "data_ym": "2026-09",
    "date_basis": "首次出現在 TWSE 月營收彙總表的日期（官方未提供逐家公告日；實際公告日不晚於此日）",
    "importance": 6
+  },
+  {
+   "code": "2072",
+   "name": "世紀風電",
+   "date": "2026-10-17",
+   "type": "其他",
+   "title": "公告本公司名稱由「世紀離岸風電設備股份有限公司」更名 為「世紀能源設備股份有限公司」，公告期間：115年8月26日至 115年11月25日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "6949",
+   "name": "沛爾生醫*-創",
+   "date": "2026-10-17",
+   "type": "其他",
+   "title": "公告本公司股票面額由「新台幣10元」變更為「新台幣0.5元」， 公告期間：115年08月06日至115年11月05日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "7799",
+   "name": "禾榮科",
+   "date": "2026-10-17",
+   "type": "其他",
+   "title": "本公司與GE Precision Healthcare LLC簽署合作協議",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "3432",
+   "name": "台端",
+   "date": "2026-10-17",
+   "type": "其他",
+   "title": "依臺灣證券交易所股份有限公司臺證上一字第1121801204 號函辦理",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "7722",
+   "name": "LINEPAY",
+   "date": "2026-10-17",
+   "type": "其他",
+   "title": "澄清媒體報導",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
   },
   {
    "code": "00936",
