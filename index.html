@@ -43,7 +43,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(mq.addEventListener)mq.addEventListener('change',h);else if(mq.addListener)mq.addListener(h)}
 })();
 </script>
-<link rel="stylesheet" href="app.css?v=2026-10-18.1418">
+<link rel="stylesheet" href="app.css?v=2026-10-18.2246">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -966,6 +966,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     的前向紙上追蹤成績，不是回測。資料100%來自data/picks_ledger.json，這裡不寫死
     任何數字；沒有足夠樣本就誠實標「樣本還太少，需累積」，不得補假數字湊版面。 -->
     <div class="subscreen" id="trade-sub-picks">
+      <!-- 先.一一六-4：三條非 ETF 研究線進度（讀 data/non_etf_research_lines.json，不寫死） -->
+      <div class="note" id="nonetf-lines" data-ui-keep style="margin:0 0 10px">非 ETF 研究線：載入中…</div>
       <div class="note" style="text-align:center;background:rgba(250,178,25,.08);border:1px solid rgba(250,178,25,.25);border-radius:10px;padding:8px;margin-bottom:12px;color:var(--warn)">⚠ 模擬追蹤，只算已經過去的交易日</div>
       <div id="picks-report-list"><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div></div>
     </div>
@@ -1594,6 +1596,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-18.1418"></script>
+<script src="app.js?v=2026-10-18.2246"></script>
 </body>
 </html>

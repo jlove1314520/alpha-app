@@ -602,6 +602,8 @@ GENERIC_SKIP_STALE = {  # 設定檔／一次性對照表：內容不隨時間過
     "strategy_history.json",  # market.yml 每班跑，但內容沒變不重寫（.github/scripts/build_strategy_history.py）
     "strategy_monthly_returns.json", "strategy_monthly_returns_leftjoin.json",  # 研究快照，手動重跑才寫
     "theme_official_site_evidence_draft.json", "company_product_evidence.json",  # 草稿，人工整理才更新
+    "non_etf_research_lines.json",  # 先.一一六-4：研究線進度，進度變動時人工更新
+    "tw_data_alarm.json",  # 先.一一三-A3：只在告警／解除時寫
 }
 
 

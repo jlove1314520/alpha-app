@@ -83,7 +83,7 @@
       if(b.dataset.sub==='strategy'){loadStrategies();loadPaper7030();}
       if(b.dataset.sub==='monitor')loadStrategyMonitor();
       if(b.dataset.sub==='bots')_safeAsync('loadTradeBots',loadTradeBots);
-      if(b.dataset.sub==='picks')loadPicksReportCard();
+      if(b.dataset.sub==='picks'){loadPicksReportCard();_safeAsync('loadNonEtfLines',loadNonEtfLines)}
     });
   });
   // 2026-08-25 新增：策略紙上前測系統。目前沒有任何策略通過完整驗證(含holdout解鎖)，
@@ -501,4 +501,17 @@
       console.warn('[loadPicksReportCard]',e);recordGlobalError('loadPicksReportCard',e);
       el.innerHTML='<div class="note">載入失敗：'+e.message+'</div>';
     }
+  }
+
+  // 先.一一六-4（2026-10-18）：排序成績單頂部一行——三條非 ETF 研究線的進度與預計結果時間（讀小狀態檔，不寫死）
+  async function loadNonEtfLines(){
+    const el=document.getElementById('nonetf-lines');if(!el)return;
+    try{
+      const r=await fetch('data/non_etf_research_lines.json?t='+Math.floor(Date.now()/600000));
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const d=await r.json(),ls=d.lines||[],esc=_autoEsc;
+      el.innerHTML=`<b>非 ETF 研究線</b>：${ls.map(x=>`${esc(x.name)}（${esc(x.short||'')}）`).join('／')}`
+        +`<details class="ui-info" style="margin-top:4px"><summary>ⓘ 說明</summary><div class="ui-info-body">${ls.map(x=>`<div style="margin:3px 0"><b>${esc(x.name)}</b>：${esc(x.status||'')}；預計 ${esc(x.eta||'—')}</div>`).join('')}`
+        +`<div class="note" style="margin-top:4px">更新 ${esc(String(d.updated_at||'').slice(5,16).replace('T',' '))}</div></div></details>`;
+    }catch(e){console.warn('[loadNonEtfLines]',e);recordGlobalError('loadNonEtfLines',e);el.textContent='非 ETF 研究線：進度檔讀不到'}
   }

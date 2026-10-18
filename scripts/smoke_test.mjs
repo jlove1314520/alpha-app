@@ -5692,7 +5692,10 @@ async function runSmokeTest(baseUrl, headless = true) {
     const cases = [["2026-10-19T12:35:00Z", "2026-10-16", true], ["2026-10-19T12:35:00Z", "2026-10-19", false], ["2026-10-17T13:00:00Z", "2026-10-16", false], ["2026-10-19T12:00:00Z", "2026-10-16", false]];
     for (const [t, dd, want] of cases) {
       const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
-      await ctx.route(/data\/market_tw\.json/, async (route) => { const r = await route.fetch(); const j = await r.json(); j.data_date = dd; await route.fulfill({ response: r, json: j }); });
+      await ctx.route(/data\/market_tw\.json/, async (route) => {
+        try { const r = await route.fetch(); const j = await r.json(); j.data_date = dd; await route.fulfill({ response: r, json: j }); }
+        catch (e) { /* context 已關閉時的殘留請求，忽略（避免未接住的 Promise 讓瀏覽器整個關掉） */ }
+      });
       const p8 = await ctx.newPage();
       try {
         await p8.clock.install({ time: new Date(t) });
@@ -5703,11 +5706,27 @@ async function runSmokeTest(baseUrl, headless = true) {
         const st = await p8.evaluate(() => { const e = document.getElementById("tw-data-banner"); return { on: !!e && e.style.display === "block", txt: e ? e.textContent : "" }; });
         if (st.on !== want) tdErrs.push(`${t}＋data_date ${dd}：橫幅 ${st.on ? "亮" : "沒亮"}（應${want ? "亮" : "不亮"}）`);
         if (want && !/今日台股資料未進來，三層備援都沒補到/.test(st.txt)) tdErrs.push(`橫幅文字不對：${st.txt.slice(0, 40)}`);
-      } finally { await ctx.close(); }
+      } finally { await ctx.unrouteAll({ behavior: "ignoreErrors" }).catch(() => {}); await ctx.close(); }
     }
     tdInfo = "週一 20:35 資料停 10/16 亮；資料是今天、週六、20:00 前都不亮";
   } catch (e) { tdErrs.push(`測試本身出錯：${e.message || e}`); }
   record("171. 交易日 20:30 後台股資料沒進來亮紅色橫幅、其他情境不亮（先.一一三-A3）", tdErrs.length === 0, tdErrs.join("; ") || tdInfo);
+
+  // 172.【2026-10-18 先.一一六-4】交易頁「排序成績單」頂部一行：三條非 ETF 研究線進度（讀 data/non_etf_research_lines.json，不寫死）。
+  const neErrs = [];
+  let neInfo = "";
+  try {
+    await page.evaluate(() => go("trade"));
+    await page.waitForFunction(() => typeof window.onTradeInit === "function" && !window.onTradeInit._lazyStub, null, { timeout: 15000 }).catch(() => {});
+    await page.click('#trade-tabs button[data-sub="picks"]');
+    await page.waitForFunction(() => /個股低換手/.test((document.getElementById("nonetf-lines") || {}).textContent || ""), null, { timeout: 10000 }).catch(() => {});
+    const t = await page.evaluate(() => (document.getElementById("nonetf-lines") || {}).textContent || "");
+    const j = JSON.parse((await import("node:fs")).readFileSync("data/non_etf_research_lines.json", "utf8"));
+    for (const x of j.lines) if (!t.includes(x.name) || !t.includes(x.eta)) neErrs.push(`缺「${x.name}」或其預計時間`);
+    neInfo = t.slice(0, 60);
+    await page.click('#trade-tabs button[data-sub="bots"]').catch(() => {});
+  } catch (e) { neErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("172. 交易頁排序成績單頂部顯示三條非 ETF 研究線進度（讀狀態檔）（先.一一六-4）", neErrs.length === 0, neErrs.join("; ") || neInfo);
 
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
