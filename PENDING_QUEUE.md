@@ -20477,7 +20477,7 @@ un-ibkr-quotes-cycle.ps1 第 174 行、run-shioaji-quotes-cycle.ps1 第 110 行�
 - [x] **先.一一〇-4 data/pe_snapshot/ 加進 holdout 守門（讀取端不動，2027-10 另提案）**（互動視窗執行；十三節保護檔）〔2026-10-18 10:24 互動視窗完成：research/validation/holdout.py DISPLAY_ONLY_DATA_FILES 加 "pe_snapshot/"（互動視窗改，十三節保護檔）；research/generate_scores_live.py docstring 原本寫出完整資料夾名（只是說明、不讀檔），改成不寫全名以免守門誤報；scripts/selftest_display_only_files.py 2/2 通過，假程式讀 data/pe_snapshot/… 會被抓到。讀取端（earnings_growth 備援）未動，2027-10 另提案〕
 - [ ] **先.一一〇-5 B25 隨機對照組可斷點續跑腳本，夜間背景分 2～3 晚跑完 100 draws（不碰 holdout、不登記新試驗）**（互動視窗寫腳本與排程；跑由排程）
 - [x] **先.一一〇-6 quotes.yml timeout-minutes: 10、market.yml timeout-minutes: 30**（互動視窗執行）〔2026-10-18 10:25 互動視窗完成：quotes.yml（fetch-quotes）加 timeout-minutes: 10、market.yml（fetch-market）加 timeout-minutes: 30，job 層，YAML 解析確認；逾時判 failure、下一班照常跑〕
-- [ ] **先.一一〇-7 雲端心跳順便重算 STATUS.json data_files（甲案）**（互動視窗執行）
+- [x] **先.一一〇-7 雲端心跳順便重算 STATUS.json data_files（甲案）**（互動視窗執行）〔2026-10-18 10:26 互動視窗完成：scripts/check_local_schedule_heartbeat.py _refresh_top_level 加重算 data_files（generate_status_json.build_data_files，只讀 repo 資料檔、不連網）＋data_files_checked_at；獨立 try，失敗只警告保留舊值（十二節）。本機記憶體內實測 1.7 秒、112 檔（未寫 STATUS）；STATUS.json 已在 watchdog 的 git add 清單，未新增寫檔路徑〕
 - [ ] **先.一一〇-8 深色主題 4 個 token 改建議值＋前後逐像素比對＋冒煙＋截圖路徑**（互動視窗執行）
 - [ ] **先.一一〇-9 新聞 importance v0（權重表照草案）＋每區塊顯示最高 5 則、其餘「看全部 N 則」＋events.json 官方重大訊息納入（5～9 分）**（互動視窗執行）
 - [ ] **先.一一一-1 馬拉松／假說佇列補件來源加入 GRAVEYARD_AUTOPSY.md 第 6 節（跨市場候選表＋6.1 變形方向表）；「舊佇列沒有新的」不得當停下理由**（互動視窗執行）

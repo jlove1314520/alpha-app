@@ -369,6 +369,16 @@ def _refresh_top_level(doc: dict, now: datetime) -> None:
         doc["any_overdue"] = bool(sh.get("any_overdue"))
     except Exception as e:  # noqa: BLE001
         print(f"::warning::schedule_health 重算失敗，保留舊值：{type(e).__name__}: {e}")
+    # 先.一一〇-7（2026-10-18 總司令核准 先.一〇九-32 甲案）：順便重算檔案新鮮度清單 data_files（只讀 repo 內資料檔、不連網，
+    # 本機實測約 1.4 秒）。原本只有 market.yml 會重產，週末會落後兩天以上。失敗只警告、保留舊值（十二節）。
+    try:
+        if str(REPO_ROOT) not in sys.path:
+            sys.path.insert(0, str(REPO_ROOT))
+        import generate_status_json as _g2
+        doc["data_files"] = _g2.build_data_files()
+        doc["data_files_checked_at"] = now.astimezone(timezone(timedelta(hours=8))).isoformat()
+    except Exception as e:  # noqa: BLE001
+        print(f"::warning::data_files 重算失敗，保留舊值：{type(e).__name__}: {e}")
     # 先.七十一-2：本機孤兒程序巡檢（scripts/orphan_process_scan.py 寫 data/orphan_scan.json）併進頂層；讀不到只降級
     try:
         o = json.loads((REPO_ROOT / "data" / "orphan_scan.json").read_text(encoding="utf-8"))
