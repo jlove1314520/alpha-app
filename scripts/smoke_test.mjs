@@ -5674,6 +5674,16 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { navErrs.push(`測試本身出錯：${e.message || e}`); }
   record("169. 導覽列 5 分頁＋日誌在交易＋右上設定＋研究室三塊＋首頁入口＋橫幅 safe-area＋膠囊最後交易日＋直接開個股名稱（先.一一二）", navErrs.length === 0, navErrs.join("; ") || navInfo);
 
+  // 170.【2026-10-18 先.一一二 驗收順手修】首頁「X日收盤（MM-DD）」：有 data_date 時不得被 fetched_at 蓋掉（10/16 收盤、10/17 早上抓檔曾顯示 10-17）。
+  const cdErrs = [];
+  try {
+    const r = await page.evaluate(() => typeof twCloseDateLabel === "function"
+      ? [twCloseDateLabel({ data_date: "2026-10-16", fetched_at: "2026-10-16T23:54:44+00:00" }), twCloseDateLabel({ taiex: { date: "20261016" }, fetched_at: "2026-10-16T23:54:44+00:00" })] : null);
+    if (!r) cdErrs.push("twCloseDateLabel 未載入");
+    else r.forEach((x, i) => { if (!/（10-16）/.test(x)) cdErrs.push(`例 ${i + 1}：${x}`); });
+  } catch (e) { cdErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("170. 首頁收盤日標籤以資料日為準、不被抓檔時間蓋掉（先.一一二 驗收順手修）", cdErrs.length === 0, cdErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];

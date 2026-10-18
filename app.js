@@ -2922,7 +2922,9 @@
     if(dd&&/^\d{4}-\d{2}-\d{2}$/.test(dd))d=new Date(`${dd}T14:00:00+08:00`);
     const raw=twCache&&((twCache.tpex&&twCache.tpex.date)||(twCache.taiex&&twCache.taiex.date));
     if(!d&&raw&&/^\d{8}$/.test(raw))d=new Date(`${raw.slice(0,4)}-${raw.slice(4,6)}-${raw.slice(6,8)}T14:00:00+08:00`);
-    else if(twCache&&twCache.fetched_at)d=new Date(twCache.fetched_at);
+    // 先.一一二 驗收順手修（2026-10-18）：原本這行接在上一個 if 的 else，data_date 已經設好 d 時也會被 fetched_at 蓋掉
+    // （10/16 收盤、10/17 07:54 抓檔 → 顯示「昨日收盤（10-17）」），改成只在前面都沒有日期時才用 fetched_at
+    if(!d&&twCache&&twCache.fetched_at)d=new Date(twCache.fetched_at);
     if(!d||isNaN(d))return '收盤（日期不明）'+stale;
     const z=_zonedParts(d,'Asia/Taipei'),n=_zonedParts(new Date(),'Asia/Taipei');
     const md=String(z.m).padStart(2,'0')+'-'+String(z.d).padStart(2,'0');
@@ -4858,7 +4860,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-18.1127';
+  const APP_VERSION='2026-10-18.1139';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

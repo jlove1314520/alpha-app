@@ -1,3 +1,29 @@
+## 2026-10-18 11:39（互動視窗）先.一一〇 審閱裁示 9 項＋先.一一一 研究補件來源（1～3）＋先.一一二 研究室與導覽列重整（全部 - [x]）
+
+等待總司令審閱：2 件（先.九十八-3 Telegram 新裝置登入驗證；先.一一一-3 墓園變形方向 8 份 PREREG 草稿一批）。
+
+**先.一一〇**（AWAITING 等待中 10 → 1 件後，加先.一一一-3 變 2 件）
+- -1 先.一〇九-13 駁回結案。
+- -2 `git rm` data/stock_detail/ 權證舊拆檔（0[3-8] 開頭 6 位數）**15,661 個、2.82MB**：刪除前 **19,071 個／7.11MB** → 刪除後 **3,410 個／4.29MB**（＝stock_detail.json 3,410 檔）。英文字尾的 03～08 開頭檔（789 個，例 03006T）不在核准範圍、未動。冒煙通過。
+- -3 AlphaTdccHolders 每週五 20:00 → **每日 09:00**（下次 10/19 09:00）；原觸發備份 `C:\alpha\task_trigger_backup\AlphaTdccHolders_20261018_before.xml`；fetch_tdcc_holders.py 同一週已存就不重產 holders.json。
+- -4 holdout.py DISPLAY_ONLY 加 `pe_snapshot/`（讀取端不動）。
+- -5 `research/b25_random_control_regime.py`（可斷點續跑）＋排程 AlphaB25Control 每晚 00:30、300 分鐘；已完成 1／200。⚠️ 試跑發現現行引擎真實策略 TRAIN／VAL +141.31%／+217.32%，與 B24（+71.79%／+97.71%）及 B25 舊表不同（情境天數一致，為 9 月下旬引擎／成本修正所致）；真實與隨機都用現行引擎，彼此可比，結果檔註明不得混比舊表。不碰 holdout、不登記新試驗。
+- -6 quotes.yml timeout-minutes 10、market.yml 30。
+- -7 雲端心跳順便重算 STATUS.json data_files（112 檔、1.7 秒）。
+- -8 深色 5 個 token 改值，對比全 ≥4.5；逐像素比對截圖 research/ux_shots/css_tokens/before_110_8／after_110_8。
+- -9 新聞／官方事件 importance v0（.github/scripts/news_importance.py），各區塊依分數先列 5 則、其餘「看全部 N 則」。
+
+**先.一一一**
+- -1 馬拉松／假說佇列 prompt 與 protocol 加「補件來源④」：GRAVEYARD_AUTOPSY 第 6 節＋6.1；舊佇列見底不得當停下理由。
+- -2 `research/VARIANT_SHORTLIST_2026-10-18.md`：前 8 名 V1～V8（N＋8），備取 #62。子代理初篩、互動視窗程式核對資料範圍與原試驗數字。
+- -3 8 份 PREREG 草稿 `docs/PREREG_DRAFT_VAR1018_V1～V8`，一批進 AWAITING_REVIEW；核准前不登記、不回測。-4（備資料）待 DevQueue。
+
+**先.一一二**
+- 底部導覽 今日｜市場｜選股｜研究室｜交易；日誌成交易子分頁；設定改右上齒輪（App 原本沒有記住分頁／深連結，go('journal')／go('settings') 照常）。
+- 研究室：深度研究卡（4 檔，content_updated 超過 14 天標「內容停在」）＋變化雷達（自選股頁→研究室）＋產業營收熱度（市場頁→研究室）；首頁「研究室：今天 549 檔有新變化 →」（[自行裁量] 用符合條件總數，名單列前 50）。
+- 修 bug：新版橫幅加 safe-area（手機實測待總司令）；openStock 直接入口名稱（3324→雙鴻）；頂部膠囊改顯示最後交易日（週末抓檔不再顯示非交易日）＋SW 背景更新 quotes 檔立刻重抓（手機看到 10/15、10/14 的原因是 SW 舊存檔＋2 分鐘才重抓，repo 實際是 10/16、10/17 為週六）；**順手修** 首頁「昨日收盤（10-17）」——data_date 被 fetched_at 蓋掉的 else 分支錯誤，改後顯示「前次收盤（10-16）」。
+- 冒煙 #169、#170 新增，170/170 通過；文案稽核 0 處；驗收截圖 research/ux_shots_112/（深淺色，本機）。
+
 ## 2026-10-18 10:0x（DevQueue 20261018-100102）無可做項（時間閘／互動視窗）
 
 等待總司令審閱：10 件（與上一輪相同，未新增；清單見 research/AWAITING_REVIEW.md）
