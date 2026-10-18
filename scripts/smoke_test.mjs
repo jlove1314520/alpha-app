@@ -5546,6 +5546,39 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { pxRfErrs.push(`測試本身出錯：${e.message || e}`); }
   record("166. 選股報告美股價格 repo 日線優先：FinMind 被擋仍取得 NVDA 日線、標來源、不打 FinMind；本站 404 才退 FinMind（先.一〇八-1）", pxRfErrs.length === 0, pxRfErrs.join("; ") || pxRfInfo);
 
+  // 167.【2026-10-18 先.一一〇-8（先.一〇九-39 核准）】深色主題 --ink-4／--up-deep／--status-bad／--critical／--caution 改值後，
+  // 對深色四種底色（--page／#121110／--surface-2／--surface-3）對比都要 ≥4.5（WCAG AA）；淺色這 5 個值不得被連帶改到。
+  const ctErrs = [];
+  let ctInfo = "";
+  try {
+    const KEYS = ["--ink-4", "--up-deep", "--status-bad", "--critical", "--caution"];
+    const LIGHT = { "--ink-4": "#736c61", "--up-deep": "#b81d22", "--critical": "#b52a2a", "--caution": "#b0362d" };
+    for (const theme of ["dark", "light"]) {
+      const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block", colorScheme: theme });
+      const p6 = await ctx.newPage();
+      try {
+        await p6.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+        const r = await p6.evaluate((keys) => {
+          const cs = getComputedStyle(document.documentElement), g = (k) => cs.getPropertyValue(k).trim();
+          const toRgb = (c) => { const d = document.createElement("div"); d.style.color = c; document.body.appendChild(d); const m = getComputedStyle(d).color.match(/\d+(\.\d+)?/g).map(Number); d.remove(); return m.slice(0, 3); };
+          const lum = (rgb) => { const c = rgb.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+          const cr = (a, b) => { const x = lum(toRgb(a)), y = lum(toRgb(b)); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+          const bgs = [g("--page"), "#121110", g("--surface-2"), g("--surface-3")];
+          return { theme: document.documentElement.getAttribute("data-theme") || "", vals: Object.fromEntries(keys.map((k) => [k, g(k)])),
+                   min: Object.fromEntries(keys.map((k) => [k, Math.min(...bgs.map((b) => cr(g(k), b)))])) };
+        }, KEYS);
+        if (theme === "dark") {
+          for (const k of KEYS) if (!(r.min[k] >= 4.5)) ctErrs.push(`深色 ${k}=${r.vals[k]} 最低對比 ${r.min[k].toFixed(2)} < 4.5`);
+          ctInfo += `深色最低對比 ${KEYS.map((k) => k.replace("--", "") + " " + r.min[k].toFixed(2)).join("、")}；`;
+        } else {
+          for (const [k, v] of Object.entries(LIGHT)) if (r.vals[k].toLowerCase() !== v) ctErrs.push(`淺色 ${k} 被改成 ${r.vals[k]}（應維持 ${v}）`);
+          ctInfo += `淺色 4 值未變`;
+        }
+      } finally { await ctx.close(); }
+    }
+  } catch (e) { ctErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("167. 深色主題 5 個文字色對深色底對比 ≥4.5、淺色值不受影響（先.一一〇-8）", ctErrs.length === 0, ctErrs.join("; ") || ctInfo);
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];

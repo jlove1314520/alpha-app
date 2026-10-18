@@ -3,26 +3,28 @@
      其餘元件（.card/.pill/.row/.btn...）本來就吃 CSS 變數，改這裡大部分
      視覺就會跟著換，不用逐一改每條規則——只有少數地方（強調色需要漸層、
      按鈕文字對比）另外處理，見下面對應註解。 */
+  /* 先.一一〇-8（2026-10-18 總司令核准 先.一〇九-39）：深色 --ink-4／--up-deep／--status-bad／--critical／--caution 改值補到 WCAG 4.5:1
+     （原 #7d766a／#e6383f／#e6383f／#d03b3b／#c9524a）；淺色不變 */
   :root{
     color-scheme: dark;
     --page:#0b0a09;
     --card-grad:linear-gradient(160deg,#17150f,#121110);
     --surface:var(--card-grad); --surface-2:#17150f; --surface-3:#221c15;
-    --ink:#f5f3ee; --ink-2:#c9c4ba; --ink-3:#8a857b; --ink-4:#7d766a;
+    --ink:#f5f3ee; --ink-2:#c9c4ba; --ink-3:#8a857b; --ink-4:#8a8479;
     --hairline:rgba(var(--fg-rgb),.07); --grid:#2c2c2a;
     --gold:#e9c98f; --gold-deep:#c9974a; --gold-line:#d8b070;
     --gold-grad:linear-gradient(135deg,#e9c98f,#c9974a);
     --accent:#d8b070; --accent-deep:#c9974a;
-    --up:#ff5257; --up-deep:#e6383f;      /* 台股慣例：紅=漲 */
+    --up:#ff5257; --up-deep:#e94e54;      /* 台股慣例：紅=漲 */
     --down:#24c98a; --down-deep:#1aa876;  /* 綠=跌 */
     --up-on-tint:var(--up); --down-on-tint:var(--down); --gold-on-tint:var(--gold); /* 先.九十六-R2：淡色底上的漲跌字（深色＝本色，淺色改 deep） */
-    --warn:#fab219; --good:#0ca30c; --serious:#ec835a; --critical:#d03b3b;
-    --status-ok:#1aa876; --status-bad:#e6383f; /* 先.九十六-R3：即時連線狀態字（原本 app.js 寫死，深色值不變；淺色改 --good／--critical） */
+    --warn:#fab219; --good:#0ca30c; --serious:#ec835a; --critical:#d85c5c;
+    --status-ok:#1aa876; --status-bad:#e94e54; /* 先.九十六-R3：即時連線狀態字（原本 app.js 寫死，深色值不變；淺色改 --good／--critical） */
     --violet:#9085e9; --yellow:#c98500;
     --nav-h:64px;
     /* 先.九十五-4 淺色模式：下面這些在深色模式的值＝原本寫死的顏色（深色外觀不變），淺色組另外覆寫 */
     --fg-rgb:255,255,255;                 /* 細線／淡底：rgba(var(--fg-rgb),.05) */
-    --caution:#c9524a; --note-gold:#c9a35a; /* 「未經回測」警語、資料完整度提醒 */
+    --caution:#cf655e; --note-gold:#c9a35a; /* 「未經回測」警語、資料完整度提醒 */
     --glass:rgba(20,17,13,.72); --glass-strong:rgba(12,11,10,.92); --ai-tail:rgba(20,19,15,.6);
     --line-mid:#383835; --line-zero:#46443f; --opt-ink:#9c9488; --dot-off:#6b6b66; --killer-ink:#ff9d9d;
     /* 先.九十四-5i：字級／間距／圓角 token（數值＝原本寫死的值，只換寫法不改外觀；

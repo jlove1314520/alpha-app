@@ -20478,7 +20478,7 @@ un-ibkr-quotes-cycle.ps1 第 174 行、run-shioaji-quotes-cycle.ps1 第 110 行�
 - [ ] **先.一一〇-5 B25 隨機對照組可斷點續跑腳本，夜間背景分 2～3 晚跑完 100 draws（不碰 holdout、不登記新試驗）**（互動視窗寫腳本與排程；跑由排程）
 - [x] **先.一一〇-6 quotes.yml timeout-minutes: 10、market.yml timeout-minutes: 30**（互動視窗執行）〔2026-10-18 10:25 互動視窗完成：quotes.yml（fetch-quotes）加 timeout-minutes: 10、market.yml（fetch-market）加 timeout-minutes: 30，job 層，YAML 解析確認；逾時判 failure、下一班照常跑〕
 - [x] **先.一一〇-7 雲端心跳順便重算 STATUS.json data_files（甲案）**（互動視窗執行）〔2026-10-18 10:26 互動視窗完成：scripts/check_local_schedule_heartbeat.py _refresh_top_level 加重算 data_files（generate_status_json.build_data_files，只讀 repo 資料檔、不連網）＋data_files_checked_at；獨立 try，失敗只警告保留舊值（十二節）。本機記憶體內實測 1.7 秒、112 檔（未寫 STATUS）；STATUS.json 已在 watchdog 的 git add 清單，未新增寫檔路徑〕
-- [ ] **先.一一〇-8 深色主題 4 個 token 改建議值＋前後逐像素比對＋冒煙＋截圖路徑**（互動視窗執行）
+- [x] **先.一一〇-8 深色主題 4 個 token 改建議值＋前後逐像素比對＋冒煙＋截圖路徑**（互動視窗執行）〔2026-10-18 10:33 互動視窗完成：app.css 深色 :root 5 個值照建議改（--ink-4 #7d766a→#8a8479、--up-deep／--status-bad #e6383f→#e94e54、--critical #d03b3b→#d85c5c、--caution #c9524a→#cf655e），淺色不動。逐像素比對（scripts/css_token_shots.mjs，393×852，6 頁×深淺）：深色每頁 1,698～6,810 個像素改變（只有文字色）；淺色 0～88 個，同版重拍也在同區域（頂部時鐘膠囊、設定頁一小塊）出現差異＝截圖雜訊，非本次改動。截圖：research/ux_shots/css_tokens/before_110_8／after_110_8／after2_110_8（本機、不進 repo）。對比：深色四種底色最低 ink-4 4.54、up-deep 4.56、status-bad 4.56、critical 4.50、caution 4.56（原最低 3.51）。冒煙新增 #167，167/167 通過〕
 - [ ] **先.一一〇-9 新聞 importance v0（權重表照草案）＋每區塊顯示最高 5 則、其餘「看全部 N 則」＋events.json 官方重大訊息納入（5～9 分）**（互動視窗執行）
 - [ ] **先.一一一-1 馬拉松／假說佇列補件來源加入 GRAVEYARD_AUTOPSY.md 第 6 節（跨市場候選表＋6.1 變形方向表）；「舊佇列沒有新的」不得當停下理由**（互動視窗執行）
 - [ ] **先.一一一-2 從 6.1 篩選（只讀不回測）→ research/VARIANT_SHORTLIST_2026-10-18.md 前 8 名（機制／資料／驗證段／N 增量）**（互動視窗執行）
