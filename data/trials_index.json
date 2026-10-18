@@ -1,9 +1,9 @@
 {
- "generated_at": "2026-10-16T23:58:02+00:00",
+ "generated_at": "2026-10-18T06:53:07+00:00",
  "source": "research/TRIALS_LEDGER.md",
  "disclaimer": "研究紀錄，非投資建議",
- "count": 430,
- "rows_listed": 448,
+ "count": 433,
+ "rows_listed": 454,
  "count_rule": "count＝總 N（與 TRIALS_LEDGER.md 開頭「目前累積總數」、SELECTION_BIAS_LEDGER.md 同一個數字；框架驗證列列出但不計入；事前登記被結果列引用時兩列算 1 筆，事前登記列 counted=false、merged_into=結果列）",
  "dup_ids": [
   94,
@@ -26,9 +26,66 @@
   "439": 440,
   "441": 442,
   "443": 444,
-  "445": 446
+  "445": 446,
+  "447": 450,
+  "448": 451,
+  "449": 452
  },
  "rows": [
+  {
+   "id": 452,
+   "date": "2026-10-18",
+   "track": "TW",
+   "name": "var1018_v5_january_reversal_tw",
+   "verdict": "FAIL",
+   "uid": "452"
+  },
+  {
+   "id": 451,
+   "date": "2026-10-18",
+   "track": "TW",
+   "name": "var1018_v4_short_margin_reversed_tw2007",
+   "verdict": "ABANDONED",
+   "uid": "451"
+  },
+  {
+   "id": 450,
+   "date": "2026-10-18",
+   "track": "US",
+   "name": "var1018_v2_turn_of_month_spx_taiex1990",
+   "verdict": "PASS",
+   "uid": "450"
+  },
+  {
+   "id": 449,
+   "date": "2026-10-18",
+   "track": "TW",
+   "name": "var1018_v5_january_reversal_tw_prereg",
+   "verdict": "未結案",
+   "counted": false,
+   "merged_into": 452,
+   "uid": "449"
+  },
+  {
+   "id": 448,
+   "date": "2026-10-18",
+   "track": "TW",
+   "name": "var1018_v4_short_margin_reversed_tw2007_prereg",
+   "verdict": "未結案",
+   "counted": false,
+   "merged_into": 451,
+   "uid": "448"
+  },
+  {
+   "id": 447,
+   "date": "2026-10-18",
+   "track": "US",
+   "name": "var1018_v2_turn_of_month_spx_taiex1990_prereg",
+   "verdict": "未結案",
+   "counted": false,
+   "merged_into": 450,
+   "uid": "447"
+  },
   {
    "id": 446,
    "date": "2026-10-15",
