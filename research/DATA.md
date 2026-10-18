@@ -400,6 +400,8 @@ curl ".../data?dataset=TaiwanStockMonthRevenue&data_id=2330&start_date=2025-06-0
 
 **✅ 已處理（2026-08-22）：** `research/pit.py` 的 `month_revenue_pit()` 實作了這個優先序：`create_time` 有值就用真的（標 `pit_source='real'`），沒有就退回「營收所屬月份的次月 10 日」規則（標 `pit_source='assumed'`）。用 2330 實測：2026-03 營收之後的列全部是 `real`（`create_time` 直接對應 FinMind 記錄的公告時間，例如 2026-04 營收 `create_time=2026-05-08`，跟法規「次月 10 日前」一致但更精確）；再往前的列全部正確退回 `assumed` 並標上規則算出的日期。
 
+> ⚠️ **更正（2026-10-18 先.一一六-1a 查證）**：上面「更早的月份 `create_time` 是空字串」不完全正確——本機 1990 起的月營收快取裡，2005～2012 年約 5% 的列 `create_time` 有值，但值是 2026-05-19 這類 FinMind **重新抓取的日期**（與營收月差 4,900～7,000 天）。`month_revenue_pit()` 會把它當真實公告日，結果那些列的 pit_date 落在 2026、等於被丟掉（不造成前視偏誤，但漏資料）。任何用到 2012 年以前月營收的研究，要先加規則「`create_time` 晚於營收月 60 天以上就改用次月 10 日」；`research/pit.py` 屬十三節保護檔，修改待互動視窗另案（見 docs/PREREG_DRAFT_REVSURPRISE_LOWTURNOVER.md）。
+
 ---
 
 ## 4. 三顆地雷的處理狀態（2026-08-22 更新）
