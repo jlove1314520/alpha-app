@@ -1,0 +1,154 @@
+{
+ "content_updated": "2026-10-18",
+ "name": "眾達-KY",
+ "tier": "A",
+ "headline": "9 月營收 2.32 億元、年增 126%，前 9 月 10.52 億元；Q2 毛利率 23.1% 但本業仍虧 0.38 億元，CPO／ELSFP 量產時程未確認。",
+ "thesis": {
+  "statement": "博通 51.2T CPO 量產帶動 ELSFP 外部雷射模組（每台 CPO 可用 32 顆），加上 400G/800G 光模組，營收與毛利率結構性上移。",
+  "confirmed_by_user": false
+ },
+ "indicators": [
+  {
+   "id": "rev3_yoy",
+   "group": "公司營運",
+   "label": "近3月營收年增",
+   "kind": "rev3_yoy",
+   "support_if": [
+    ">=",
+    0.5
+   ],
+   "review_if": [
+    "<",
+    0.0
+   ],
+   "update_from": "每月10日月營收"
+  },
+  {
+   "id": "rev3_qoq",
+   "group": "公司營運",
+   "label": "近3月營收 vs 前3月",
+   "kind": "rev3_qoq",
+   "support_if": [
+    ">=",
+    0.0
+   ],
+   "review_if": [
+    "<",
+    -0.15
+   ],
+   "update_from": "每月10日月營收"
+  },
+  {
+   "id": "gm",
+   "group": "公司營運",
+   "label": "最近一季毛利率",
+   "kind": "gm",
+   "support_if": [
+    ">=",
+    0.25
+   ],
+   "review_if": [
+    "<",
+    0.2
+   ],
+   "update_from": "季報"
+  },
+  {
+   "id": "elsfp",
+   "group": "產業需求",
+   "label": "ELSFP／CPO 量產",
+   "kind": "manual",
+   "status": "neutral",
+   "detail": "與博通 51.2T CPO 完成技術交付、量產準備中，未見正式量產公告",
+   "asof": "2026-03-25",
+   "source": "MoneyDJ（Yahoo 轉載）",
+   "support_text": "公司確認 ELSFP 量產出貨",
+   "review_text": "博通 CPO 遞延",
+   "update_from": "法說、月營收"
+  },
+  {
+   "id": "op",
+   "group": "公司營運",
+   "label": "本業是否轉盈",
+   "kind": "manual",
+   "status": "review",
+   "detail": "Q2 營收 2.22 億元、毛利率 23.1%，營業損失 0.38 億元，獲利靠業外",
+   "asof": "2026-08-20",
+   "source": "經濟日報",
+   "support_text": "Q3 營業利益轉正",
+   "review_text": "本業續虧",
+   "update_from": "季報"
+  }
+ ],
+ "scenario": {
+  "target_year": 2027,
+  "base": {
+   "year": 2026,
+   "assumed_monthly": 240000000
+  },
+  "tax": 0.2,
+  "assumption_owner": "Cowork 週更新 2026-10-18，待使用者確認",
+  "scenarios": {
+   "保守": {
+    "growth": 0.1,
+    "gm": 0.22,
+    "opex": 0.18,
+    "pe": [
+     25,
+     35
+    ],
+    "basis": "CPO 遞延，僅傳統光模組與 FC"
+   },
+   "基準": {
+    "growth": 0.5,
+    "gm": 0.26,
+    "opex": 0.15,
+    "pe": [
+     35,
+     50
+    ],
+    "basis": "ELSFP 隨博通 CPO 量產"
+   },
+   "樂觀": {
+    "growth": 0.9,
+    "gm": 0.3,
+    "opex": 0.13,
+    "pe": [
+     45,
+     60
+    ],
+    "basis": "CPO 放量＋1.6T 出貨"
+   }
+  },
+  "must_deliver": [
+   "ELSFP 正式量產公告",
+   "毛利率 ≥26%",
+   "本業轉盈"
+  ]
+ },
+ "shares_fallback": 80200000,
+ "next_checkpoints": [
+  {
+   "date": "2026-11-10",
+   "item": "10 月營收"
+  },
+  {
+   "date": "2026-11-14",
+   "item": "Q3 財報：本業是否轉盈"
+  }
+ ],
+ "known_gaps": [
+  "L1 季報停在 2024Q4、股數缺，暫用實收資本 8.02 億元推 8,020 萬股",
+  "2026/9 現金增資後股數未納入",
+  "2026 年尚無法說紀錄，最近一次為 2025/12/09",
+  "上半年獲利主要來自業外，情境 EPS 不含業外"
+ ],
+ "sources": [
+  "https://news.cnyes.com/news/id/6628391",
+  "https://money.udn.com/money/story/5710/9704344",
+  "https://vocus.cc/article/69d9c93cfd89780001e12a04",
+  "https://www.moneyweekly.com.tw/ArticleData/Info/Article/215069",
+  "https://tw.stock.yahoo.com/news/%E7%9C%BE%E9%81%94-ky%E6%8E%A8cpo-elsfp%E9%87%8F%E7%94%A2-%E7%A0%94%E7%99%BC%E9%8E%96%E5%AE%9A%E9%AB%98%E9%A0%BB-%E4%BD%8E%E5%8A%9F%E8%80%97%E6%87%89%E7%94%A8-022500062.html"
+ ],
+ "doc_url": null
+}

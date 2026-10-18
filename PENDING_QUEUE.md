@@ -20632,7 +20632,7 @@ un-ibkr-quotes-cycle.ps1 第 174 行、run-shioaji-quotes-cycle.ps1 第 110 行�
 
 > 研究室.六 本週新建 3661、4977、1303 深度檔（research/lab/config 與 guidance 各 3 個新檔）。請跑 python3 scripts/build_research.py 與 scripts/selftest_research.py，全 PASS 後一併 commit。
 
-- [ ] **研究室.六 跑 build_research.py＋selftest_research.py，全 PASS 後連同 3661／4977／1303 的 config／guidance 一併 commit**（互動視窗執行）
+- [x] **研究室.六 跑 build_research.py＋selftest_research.py，全 PASS 後連同 3661／4977／1303 的 config／guidance 一併 commit**（互動視窗執行）〔2026-10-18 23:48 互動視窗完成：build_research.py：research.json 1,980 檔、深度 7 檔（新增 1303 南亞／3661 世芯-KY／4977 眾達-KY）、錯誤 0；selftest_research.py 11 項全部 PASS；build_by_code.py 重產小檔（1,980 檔內容有變）；冒煙 172/172 通過。6 個新檔（config／guidance 各 3）與重產資料一併 commit〕
 
 # 2026-10-18【先.一一八 非 ETF 研究線審閱裁示】（總司令裁示原文，動工前先寫入；10/18 23:36 互動視窗收到）
 

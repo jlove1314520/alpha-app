@@ -1,0 +1,152 @@
+{
+ "content_updated": "2026-10-18",
+ "name": "南亞",
+ "tier": "A",
+ "headline": "Q3 自結營收 956 億元、EPS 4.90 元，前三季 EPS 10.07 元；電子材料今年累計漲價 50–100%，但獲利大頭來自南亞科等轉投資。",
+ "thesis": {
+  "statement": "AI 伺服器帶動玻纖布、銅箔、CCL 供不應求並連續漲價，電子材料占營收過半，改變本業獲利結構。",
+  "confirmed_by_user": false
+ },
+ "indicators": [
+  {
+   "id": "rev3_yoy",
+   "group": "公司營運",
+   "label": "近3月營收年增",
+   "kind": "rev3_yoy",
+   "support_if": [
+    ">=",
+    0.2
+   ],
+   "review_if": [
+    "<",
+    0.0
+   ],
+   "update_from": "每月10日月營收"
+  },
+  {
+   "id": "rev3_qoq",
+   "group": "公司營運",
+   "label": "近3月營收 vs 前3月",
+   "kind": "rev3_qoq",
+   "support_if": [
+    ">=",
+    0.0
+   ],
+   "review_if": [
+    "<",
+    -0.1
+   ],
+   "update_from": "每月10日月營收"
+  },
+  {
+   "id": "gm",
+   "group": "公司營運",
+   "label": "最近一季毛利率",
+   "kind": "gm",
+   "support_if": [
+    ">=",
+    0.18
+   ],
+   "review_if": [
+    "<",
+    0.12
+   ],
+   "update_from": "季報"
+  },
+  {
+   "id": "price",
+   "group": "產業需求",
+   "label": "電子材料漲價",
+   "kind": "manual",
+   "status": "support",
+   "detail": "今年累計漲 50–100%，9 月 CCL 等多項產品再漲（市場估 5–10%）",
+   "asof": "2026-08-14",
+   "source": "經濟日報",
+   "support_text": "Q4 續漲",
+   "review_text": "漲價停止或回跌",
+   "update_from": "法說、新聞"
+  },
+  {
+   "id": "glass",
+   "group": "產業需求",
+   "label": "玻纖布供需",
+   "kind": "manual",
+   "status": "support",
+   "detail": "建滔今年第 8 次漲價、2116 以下規格漲 15%，薄布缺貨更嚴重",
+   "asof": "2026-10-14",
+   "source": "經濟日報",
+   "support_text": "缺貨延續至 2027",
+   "review_text": "同業擴產後缺口收斂",
+   "update_from": "新聞、同業公告"
+  }
+ ],
+ "scenario": {
+  "target_year": 2027,
+  "base": {
+   "year": 2026,
+   "assumed_monthly": 34000000000
+  },
+  "tax": 0.2,
+  "assumption_owner": "Cowork 週更新 2026-10-18，待使用者確認",
+  "scenarios": {
+   "保守": {
+    "growth": -0.05,
+    "gm": 0.17,
+    "opex": 0.055,
+    "pe": [
+     15,
+     22
+    ],
+    "basis": "漲價停止、化工聚酯續弱"
+   },
+   "基準": {
+    "growth": 0.1,
+    "gm": 0.22,
+    "opex": 0.055,
+    "pe": [
+     18,
+     25
+    ],
+    "basis": "電子材料價量持穩、高階 CCL 量產"
+   },
+   "樂觀": {
+    "growth": 0.2,
+    "gm": 0.26,
+    "opex": 0.05,
+    "pe": [
+     22,
+     30
+    ],
+    "basis": "M9/M10 CCL 與特殊玻纖紗放量"
+   }
+  },
+  "must_deliver": [
+   "電子材料營收占比 ≥55%",
+   "本業營業利益率 ≥18%",
+   "M9 CCL 通過終端認證量產"
+  ]
+ },
+ "next_checkpoints": [
+  {
+   "date": "2026-11-10",
+   "item": "10 月營收"
+  },
+  {
+   "date": "2026-11-14",
+   "item": "Q3 財報：本業 vs 轉投資拆分"
+  }
+ ],
+ "known_gaps": [
+  "情境 EPS 只算本業，未含南亞科、台塑化等權益法收益（上半年約 337.5 億元），會大幅低估實際 EPS",
+  "2026/09/24 法說內容未取得，僅有 5/26 法說",
+  "各事業部營收金額未揭露"
+ ],
+ "sources": [
+  "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E5%8D%97%E4%BA%9E2026%E5%B9%B4%E7%AC%AC3%E5%AD%A3%E8%87%AA%E7%B5%90%E5%90%88%E4%BD%B5%E6%90%8D%E7%9B%8A-054436598.html",
+  "https://finance.biggo.com.tw/quote/1303.TW/earnings-call/TW_1303.TW_2026-05-26",
+  "https://udn.com/vote2026/story/7252/9692627",
+  "https://udn.com/news/story/7252/9813900",
+  "https://poorstock.com/earningcall/1303"
+ ],
+ "doc_url": null
+}

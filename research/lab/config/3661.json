@@ -1,0 +1,156 @@
+{
+ "content_updated": "2026-10-18",
+ "name": "世芯-KY",
+ "tier": "A",
+ "headline": "9 月營收 99.79 億元、年增 496%，前 9 月 378.78 億元；3 奈米 AI 加速器 6 月起放量，但 Turnkey 比重升、毛利率恐回落至約 20%。",
+ "thesis": {
+  "statement": "北美 CSP 的 3 奈米 AI 加速器（Trainium 3）2026 下半年放量帶動營收倍增，2 奈米專案 2028 年接棒。",
+  "confirmed_by_user": false
+ },
+ "indicators": [
+  {
+   "id": "rev3_yoy",
+   "group": "公司營運",
+   "label": "近3月營收年增",
+   "kind": "rev3_yoy",
+   "support_if": [
+    ">=",
+    0.5
+   ],
+   "review_if": [
+    "<",
+    0.0
+   ],
+   "update_from": "每月10日月營收"
+  },
+  {
+   "id": "rev3_qoq",
+   "group": "公司營運",
+   "label": "近3月營收 vs 前3月",
+   "kind": "rev3_qoq",
+   "support_if": [
+    ">=",
+    0.0
+   ],
+   "review_if": [
+    "<",
+    -0.15
+   ],
+   "update_from": "每月10日月營收"
+  },
+  {
+   "id": "gm",
+   "group": "公司營運",
+   "label": "最近一季毛利率",
+   "kind": "gm",
+   "support_if": [
+    ">=",
+    0.22
+   ],
+   "review_if": [
+    "<",
+    0.15
+   ],
+   "update_from": "季報"
+  },
+  {
+   "id": "n3",
+   "group": "產業需求",
+   "label": "3 奈米 AI 加速器放量",
+   "kind": "manual",
+   "status": "support",
+   "detail": "Q2 營收 2.417 億美元季增 82.6%；5 月底量產、6 月出貨；9 月營收 99.79 億元",
+   "asof": "2026-10-12",
+   "source": "法說（vocus 摘要）＋TechNews 月營收",
+   "support_text": "Q4 營收續創高",
+   "review_text": "月營收連續下滑",
+   "update_from": "月營收、法說"
+  },
+  {
+   "id": "n2",
+   "group": "產業需求",
+   "label": "2 奈米加速器 tape-out",
+   "kind": "manual",
+   "status": "neutral",
+   "detail": "預計 2026 年底完成 tape-out，2028 年開始貢獻",
+   "asof": "2026-05-08",
+   "source": "財報狗 Q1 法說 memo",
+   "support_text": "如期 tape-out",
+   "review_text": "延後至 2027",
+   "update_from": "法說"
+  }
+ ],
+ "scenario": {
+  "target_year": 2027,
+  "base": {
+   "year": 2026,
+   "assumed_monthly": 10000000000
+  },
+  "tax": 0.2,
+  "assumption_owner": "Cowork 週更新 2026-10-18，待使用者確認",
+  "scenarios": {
+   "保守": {
+    "growth": 0.0,
+    "gm": 0.2,
+    "opex": 0.06,
+    "pe": [
+     20,
+     28
+    ],
+    "basis": "N3 放量後持平、Turnkey 稀釋毛利"
+   },
+   "基準": {
+    "growth": 0.25,
+    "gm": 0.23,
+    "opex": 0.06,
+    "pe": [
+     25,
+     35
+    ],
+    "basis": "N3 全年貢獻＋網通案量產"
+   },
+   "樂觀": {
+    "growth": 0.5,
+    "gm": 0.26,
+    "opex": 0.055,
+    "pe": [
+     30,
+     40
+    ],
+    "basis": "第二客戶放量、N2 進度提前"
+   }
+  },
+  "must_deliver": [
+   "2027 營收年增 ≥25%",
+   "毛利率守住 ≥22%",
+   "N2 於 2026 年底前 tape-out"
+  ]
+ },
+ "next_checkpoints": [
+  {
+   "date": "2026-11-10",
+   "item": "10 月營收"
+  },
+  {
+   "date": "2026-11-14",
+   "item": "Q3 財報（法說日期待公告）"
+  },
+  {
+   "date": "2026-12-31",
+   "item": "N2 tape-out 是否如期"
+  }
+ ],
+ "known_gaps": [
+  "Q2 毛利率與 Q3 單季財報未取得（Q3 預期 Turnkey 稀釋）",
+  "2026/08/14 法說全文付費，僅取得摘要",
+  "稅率用 20% 估，實際可能較低",
+  "單一客戶集中度高"
+ ],
+ "sources": [
+  "https://vocus.cc/article/6a83f23dfd897800010ffc48",
+  "https://tw.fiisual.com/blog/post/2026/Alchip-2026-q1-earnings-call-memo",
+  "https://stock.ltn.com.tw/article/2qsputjzbcv5",
+  "https://finance.technews.tw/2026/10/12/alchip-3661-202609-financial-report/"
+ ],
+ "doc_url": null
+}
