@@ -1,3 +1,16 @@
+## 2026-10-18 17:3x（DevQueue 20261018-170101）先.一〇九-28 時間閘未到；先.一一四-3c V1 資料備妥第 3 批（78 次 FinMind，撞 402 額度上限）
+
+等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，10/14 23:24 起，約 3.8 天；清單見 research/AWAITING_REVIEW.md）
+
+- **先.一〇九-28（權威清單取到的項目）**：時間閘 2026-10-20 起，今天 10/18 未到，維持 `- [ ]`。
+- **先.一一四-3c（DevQueue 可執行）**：17:01～17:23 跑 `python research/var1018_v1_prep.py --max-fetch 80`，新抓 78 次後 FinMind 回 HTTP 402「Requests reach the upper limit」；共用節流器把 finmind 封鎖 2 小時（約 19:23 解除），腳本依「資料源禮儀」拒發請求、正常結束（exit 0），停止原因寫進 `research/data/var1018_v1_prep_status.json`。快取 192→270 個；三批合計約 268 次、尚餘約 2,530 次。
+  - `[自行裁量]`：之後每輪改 `--max-fetch 60`、與前一批隔至少 1 小時；19:23 前的輪次重跑只會被節流器擋下（零請求）。
+  - 觀察：FinMind 免 token 額度實測比 C:lpha\CLAUDE.md「約每小時數百次」緊——約 1 小時 50 分內 268 次就到上限。未改任何頻率上限文件（屬提案範疇）。
+- **冒煙**：17:2x `node scripts/smoke_test.mjs` exit 0，171 PASS／0 FAIL。
+- **`- [!]` 阻塞項複查**：先.一〇九-7驗收（10/19 08:30）、研究室.六-週跑（週一）、金流一.4（資料累積）都未到，沒有轉回 `- [ ]`。
+- **收工補件**：`- [ ]` 17 項（≥12）；DevQueue 可執行 2 項（-3c、先.一〇九-28 時間閘）<6。16:55 之後 BACKLOG／UX_REDESIGN_PROPOSAL／DATA_GAP_PLAN 沒有新 commit，PENDING_QUEUE 唯一新 commit 是上一輪自己的 aeb1d7658e → **來源已用盡，不補**。
+- **BLOCKED**：無新增（FinMind 冷卻 2 小時由節流器自動處理，不標 `- [!]`）。
+
 ## 2026-10-18 16:3x（DevQueue 20261018-163101）先.一〇九-28 時間閘未到；先.一一四-3c V1 資料備妥第 2 批（80 次 FinMind）
 
 等待總司令審閱：1 件（先.九十八-3 Telegram 新裝置登入驗證，10/14 23:24 起，約 3.7 天；清單見 research/AWAITING_REVIEW.md）
