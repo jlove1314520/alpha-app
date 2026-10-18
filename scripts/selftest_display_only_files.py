@@ -15,6 +15,11 @@ if hasattr(sys.stdout, "reconfigure"):
 from validation.holdout import DISPLAY_ONLY_DATA_FILES  # noqa: E402
 
 SELF = (ROOT / "research" / "validation" / "holdout.py").resolve()
+# 單獨列名放行（每一筆都要有裁示或 [自行裁量] 出處；只放行列出的檔名，不放寬守門本身）
+ALLOW = {
+    # 先.一一八-2b [自行裁量]：模擬 G 前向紙上追蹤只拿回補檔補官方營收缺月（2024-12～2025-04）當 SUE 分母；判定只看 2027 起報酬
+    "research/paper_7_revsurprise_tracker.py": {"revenue_backfill.json"},
+}
 
 
 def hits(text: str) -> list[str]:
@@ -31,6 +36,7 @@ for p in sorted((ROOT / "research").rglob("*.py")):
         h = hits(p.read_text(encoding="utf-8", errors="replace"))
     except OSError:
         continue
+    h = [n for n in h if n not in ALLOW.get(p.relative_to(ROOT).as_posix(), set())]
     if h:
         bad.append(f"{p.relative_to(ROOT)}：{','.join(h)}")
 res.append((f"research/ 底下沒有程式引用 App 顯示用回補檔（{len(DISPLAY_ONLY_DATA_FILES)} 個檔名）" + ("" if not bad else "；" + "；".join(bad[:5])), not bad))

@@ -1413,10 +1413,10 @@
   // 先.七十三（2026-10-11）：「全部疊加」排第一且為預設；其後 自動投資、模擬 A～F（先.九十一-1 加 F）、選股榜單。內部 id 不變。
   let SC_DATA=null,SC_LIVE=null,SC_LIVE_ERR='',SC_TAB='all',SC_BOARD='value';
   const SC_TABS=[['all','全部疊加'],['live','自動投資'],['paper_1','模擬 A'],['paper_3','模擬 B'],['paper_4','模擬 C'],
-    ['paper_1b','模擬 D'],['paper_2','模擬 E'],['paper_5','模擬 F'],['boards','選股榜單']];
+    ['paper_1b','模擬 D'],['paper_2','模擬 E'],['paper_5','模擬 F'],['paper_7','模擬 G'],['boards','選股榜單']];
   const SC_BOARDS=[['value','估值'],['momentum','動能'],['future','未來']];
   // 每條線固定顏色（疊圖與單線圖一致）；0050 固定灰色
-  const SC_COLOR_BY={live_bb90:'#2f81f7',paper_1:'#d4a017',paper_3:'#3fb950',paper_4:'#db61a2',paper_1b:'#f0883e',paper_2:'#a371f7',paper_5:'#79c0ff',
+  const SC_COLOR_BY={live_bb90:'#2f81f7',paper_1:'#d4a017',paper_3:'#3fb950',paper_4:'#db61a2',paper_1b:'#f0883e',paper_2:'#a371f7',paper_5:'#79c0ff',paper_7:'#ff9bce',
     board_value:'#56d4dd',board_momentum:'#e5534b',board_future:'#b5d334'};
   const SC_BENCH_COLOR='#8b8b8b';
   const scColor=id=>SC_COLOR_BY[id]||'#9e9e9e';
@@ -4874,7 +4874,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-18.2246';
+  const APP_VERSION='2026-10-19.0023';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

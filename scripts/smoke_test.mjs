@@ -2992,7 +2992,7 @@ async function runSmokeTest(baseUrl, headless = true) {
     else {
       if (ui.title !== "跟 0050 比") uiErrs.push(`標題是「${ui.title}」`);
       if (ui.old) uiErrs.push("舊「我們 vs 0050」卡仍在");
-      if (ui.tabs.length !== 9) uiErrs.push(`分頁數 ${ui.tabs.length}（應為 9；先.九十一-1 加模擬 F）`);
+      if (ui.tabs.length !== 10) uiErrs.push(`分頁數 ${ui.tabs.length}（應為 10；先.九十一-1 加模擬 F、先.一一八-2c 加模擬 G）`);
       for (const t of ui.tabs) if (t.len < 10) uiErrs.push(`分頁 ${t.t} 內容空白`);
       if (!ui.correction) uiErrs.push("選股榜單分頁沒有更正註記");
       if (ui.positioning !== "守回檔的策略大漲時會落後 0050，這是設計；看滿 60 個交易日與最大跌幅") uiErrs.push(`卡頂定位句不符：「${ui.positioning}」`);
@@ -5727,6 +5727,36 @@ async function runSmokeTest(baseUrl, headless = true) {
     await page.click('#trade-tabs button[data-sub="bots"]').catch(() => {});
   } catch (e) { neErrs.push(`測試本身出錯：${e.message || e}`); }
   record("172. 交易頁排序成績單頂部顯示三條非 ETF 研究線進度（讀狀態檔）（先.一一六-4）", neErrs.length === 0, neErrs.join("; ") || neInfo);
+
+  // 173.【2026-10-18 先.一一八-2c】策略監控台有模擬 G 卡片（與 A～F 並列，讀曲線檔），點開看持股明細：
+  // ① 真實檔（尚未開始）→ 顯示不倒填原因；② 換成假的「已開始」摘要 → 列出每檔持股（名次／權重／營收月份）。
+  const pgErrs = [];
+  let pgInfo = "";
+  try {
+    await page.evaluate(() => go("trade"));
+    await page.waitForFunction(() => typeof window.onTradeInit === "function" && !window.onTradeInit._lazyStub, null, { timeout: 15000 }).catch(() => {});
+    await page.click('#trade-tabs button[data-sub="monitor"]');
+    await page.evaluate(() => loadStrategyMonitor());
+    const ids = await page.evaluate(() => [...document.querySelectorAll("#strategy-monitor-list [data-sid]")].map(x => x.getAttribute("data-sid")));
+    for (const id of ["paper_1", "paper_3", "paper_4", "paper_1b", "paper_2", "paper_5", "paper_7"]) if (!ids.includes(id)) pgErrs.push(`監控台缺 ${id}`);
+    await page.click('#strategy-monitor-list [data-sid="paper_7"]');
+    await page.waitForFunction(() => /不倒填|還沒有持股|讀不到/.test((document.querySelector('#strategy-monitor-list [data-sid="paper_7"] [data-holdings-src]') || {}).textContent || ""), null, { timeout: 8000 }).catch(() => {});
+    const t1 = await page.evaluate(() => (document.querySelector('#strategy-monitor-list [data-sid="paper_7"] [data-holdings-src]') || {}).textContent || "");
+    if (!/持股明細/.test(t1) || !/不倒填|還沒有持股/.test(t1)) pgErrs.push(`未開始時持股區文字不對：${t1.slice(0, 60)}`);
+    const fake = { started: true, last_rebalance: "2027-01-04", next_rebalance_month: "2027-04", last_entered: ["1101", "2330"], last_exited: [],
+      holdings: [{ code: "2330", name: "台積電", weight_pct: 50, rank_at_rebalance: 1, rev_month: "2026-11", since: "2027-01-04" },
+                 { code: "1101", name: "台泥", weight_pct: 50, rank_at_rebalance: 2, rev_month: "2026-11", since: "2027-01-04" }] };
+    await page.route("**/data/paper_7.json*", r => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fake) }).catch(() => {}));
+    await page.evaluate(() => loadStrategyMonitor());
+    await page.click('#strategy-monitor-list [data-sid="paper_7"]');
+    await page.waitForFunction(() => /台積電/.test((document.querySelector('#strategy-monitor-list [data-sid="paper_7"] [data-holdings-src]') || {}).textContent || ""), null, { timeout: 8000 }).catch(() => {});
+    const t2 = await page.evaluate(() => (document.querySelector('#strategy-monitor-list [data-sid="paper_7"] [data-holdings-src]') || {}).textContent || "");
+    for (const k of ["台積電", "台泥", "50.0%", "2026/11", "共 2 檔"]) if (!t2.includes(k)) pgErrs.push(`已開始時持股明細缺「${k}」`);
+    pgInfo = `監控台 ${ids.length} 張；` + t2.slice(0, 50);
+    await page.unrouteAll({ behavior: "ignoreErrors" }).catch(() => {});
+    await page.click('#trade-tabs button[data-sub="bots"]').catch(() => {});
+  } catch (e) { pgErrs.push(`測試本身出錯：${e.message || e}`); await page.unrouteAll({ behavior: "ignoreErrors" }).catch(() => {}); }
+  record("173. 策略監控台有模擬 G 卡片，點開看持股明細（未開始寫原因、已開始列每檔）（先.一一八-2c）", pgErrs.length === 0, pgErrs.join("; ") || pgInfo);
 
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。

@@ -371,6 +371,24 @@
   function toggleStrategyDetail(id){
     const el=document.getElementById(id);if(!el)return;
     el.style.display=el.style.display==='none'?'':'none';
+    if(el.style.display!=='none')el.querySelectorAll('[data-holdings-src]:not([data-loaded])').forEach(h=>{_safeAsync('loadPaperHoldings',()=>loadPaperHoldings(h))});
+  }
+  // 先.一一八-2c（2026-10-18）：模擬 G 卡片點開看持股明細（讀曲線檔指定的摘要檔 holdings；不寫死、未開始照實寫原因）
+  async function loadPaperHoldings(el){
+    el.setAttribute('data-loaded','1');
+    const esc=_autoEsc;
+    try{
+      const r=await fetch(el.getAttribute('data-holdings-src')+'?t='+Math.floor(Date.now()/60000));
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const j=await r.json(),hs=j.holdings||[];
+      const head=`<div style="font-size:11px;font-weight:600;color:var(--ink-2);margin:10px 0 4px">持股明細</div>`;
+      if(!j.started||!hs.length){el.innerHTML=head+`<div class="note">${esc(j.why_not_started||'還沒有持股')}</div>`;return}
+      el.innerHTML=head+`<div class="note" style="margin-bottom:4px">上次再平衡 ${esc(j.last_rebalance||'—')} · 下次 ${esc(j.next_rebalance_month||'—')} · 共 ${hs.length} 檔（點股票看個股）</div>`
+        +hs.map(h=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--hairline);font-size:12px;cursor:pointer" onclick="event.stopPropagation();openStock('${String(h.code||'').replace(/[^0-9A-Za-z]/g,'')}')">`
+          +`<span>${h.rank_at_rebalance!=null?esc(h.rank_at_rebalance)+'. ':''}${esc(h.name||'')} <span class="note">${esc(h.code)}</span></span>`
+          +`<span class="note" style="margin:0;text-align:right">${h.weight_pct!=null?Number(h.weight_pct).toFixed(1)+'%':'—'} · 營收 ${esc(String(h.rev_month||'—').replace('-','/'))} · ${esc(String(h.since||'').slice(5).replace('-','/'))} 起</span></div>`).join('')
+        +((j.last_entered||[]).length||(j.last_exited||[]).length?`<div class="note" style="margin-top:4px">這次新進 ${(j.last_entered||[]).length} 檔、出場 ${(j.last_exited||[]).length} 檔</div>`:'');
+    }catch(e){console.warn('[loadPaperHoldings]',e);recordGlobalError('loadPaperHoldings',e);el.innerHTML='<div class="note">持股明細讀不到：'+esc(e.message)+'</div>'}
   }
   // 先.八十-6（2026-10-12）：策略監控台改讀 data/strategy_curves.json（與首頁「跟 0050 比」同一份、同一套名稱與口徑），
   // 停用 data/strategy_performance.json（舊前向紙上績效，與紙上追蹤口徑不一致）。名稱照檔內 label（UI_GLOSSARY 定案名），
@@ -394,6 +412,7 @@
       <div class="note">判定：${_autoEsc(m.verdict||'—')}（資料到 ${_autoEsc(l.as_of||'—')}）</div>
       <div class="note" data-ui-explain style="margin-top:4px">${_autoEsc(l.note||'')}</div>`
       :`<div class="note">${_autoEsc(l.why||l.note||'尚未開始')}</div>`;
+    const hold=l.holdings_file?`<div data-holdings-src="${_autoEsc(l.holdings_file)}" onclick="event.stopPropagation()"><div class="note" style="margin-top:8px">持股明細載入中…</div></div>`:'';
     return `<div class="card press" data-sid="${String(l.id||'').replace(/[^\w.-]/g,'')}" style="cursor:pointer" onclick="toggleStrategyDetail('${cardId}')">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
         <div style="flex:1;min-width:0">
@@ -405,7 +424,7 @@
           ${sparkHtml}
         </div>
       </div>
-      <div id="${cardId}" style="display:none;margin-top:12px;border-top:1px solid var(--hairline);padding-top:12px">${det}</div>
+      <div id="${cardId}" style="display:none;margin-top:12px;border-top:1px solid var(--hairline);padding-top:12px">${det}${hold}</div>
     </div>`;
   }
   async function loadStrategyMonitor(){

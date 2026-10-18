@@ -51,9 +51,10 @@ CORRECTION = "10/11 更正：舊算法重複計算，數字放大約 5 倍；10/
 # 先.七十-5（2026-10-11 總司令裁示）：每條線的「設計目標」。裁示沒有指定的線（紙.一b、紙.二）標「未標示」，不自行推定。
 # 先.七十二-A4：前台改白話（守回撤（天條一）→守住回檔；贏大盤＋守回撤→贏大盤也守回檔）；內部代號只留在 id。
 GOALS = {"live_bb90": "守住回檔", "paper_1": "守住回檔", "paper_3": "守住回檔",
-         "paper_4": "贏大盤也守回檔", "paper_5": "賺波動溢價（只是研究）", "board_value": "選股研究", "board_momentum": "選股研究", "board_future": "選股研究"}
+         "paper_4": "贏大盤也守回檔", "paper_5": "賺波動溢價（只是研究）", "paper_7": "選股研究（低換手）", "board_value": "選股研究", "board_momentum": "選股研究", "board_future": "選股研究"}
 # 先.七十五-5：尚未開始的模擬寫明原因（卡片「X 月 X 日開始」下方顯示）
-PLANNED_WHY = {"paper_2": "選股資料還在預熱", "paper_5": "11 月起用當月真實資料開始記，不倒填"}
+PLANNED_WHY = {"paper_2": "選股資料還在預熱", "paper_5": "11 月起用當月真實資料開始記，不倒填",
+               "paper_7": "2027 年第一個交易日起每季再平衡，不倒填；2027 行事曆未公布，1/4 為預估"}
 POSITIONING = "守回檔的策略大漲時會落後 0050，這是設計；看滿 60 個交易日與最大跌幅"
 
 
@@ -345,15 +346,19 @@ def paper_lines(px: Px) -> list:
         ("paper_3", "模擬 B 景氣閘門", RDATA / "paper_3_log.jsonl", "values_post", None, "2026-10-08"),
         ("paper_4", "模擬 C 加速", RDATA / "paper_4_log.jsonl", "values_post", "R1-C", "2026-10-08"),
         ("paper_5", "模擬 F 賣波動", RDATA / "paper_5_log.jsonl", "nav_log", None, "2026-11-02"),  # 先.九十一-1：#444 紙上追蹤，11 月起不倒填
+        ("paper_7", "模擬 G 個股低換手（營收驚喜）", RDATA / "paper_7_log.jsonl", "values_post", None, "2027-01-04"),  # 先.一一八-2：2027 第一個交易日起每季再平衡，不倒填
     ]
     # 先.八十-7（2026-10-12）：模擬 C（R1 信用利差閘門）是看過 2025–26 樣本外結果之後才設計的，前台必須標明
-    design_note = {"paper_4": "看過 2025–26 結果後才設計", "paper_5": "學界已知現象、只是研究"}
+    design_note = {"paper_4": "看過 2025–26 結果後才設計", "paper_5": "學界已知現象、只是研究",
+                   "paper_7": "營收驚喜這個指標最近一次重驗沒通過、只是研究"}  # 先.一一八-2：PREREG 已知限制
     # 先.八十一-5（2026-10-13 總司令裁示①）：信用利差閘門 1990–2003 殺測失敗（#435/#436）——繼續紙上追蹤，但不再是真錢候選
     candidacy = {"paper_5": "不提請真錢：試驗 #444 通過但 DSR 算不出、年化約 4.6%、每組名目約數百萬元（先.九十一-1）", "paper_3": "閘門殺測失敗（#435/#436），不再是真錢候選", "paper_4": "閘門殺測失敗（#435/#436），不再是真錢候選"}
     # 先.八十一-16（2026-10-13 總司令裁示）：模擬 B／C／D 的建倉日是 10/11 事後決定、用 10/08 收盤倒填，照實標明；
     # 之後一律禁止事後倒填建倉日（research/MARATHON_PROTOCOL.md §9）
     backdated = {k: "建倉日 10/08 是 10/11 事後決定、用 10/08 收盤倒填（之後新策略一律禁止事後倒填建倉日）"
                  for k in ("paper_1b", "paper_3", "paper_4")}
+    # 先.一一八-2c：策略監控台點開看持股明細（App 另讀這個檔；未開始的線也帶，點開寫不倒填原因）
+    holdings_file = {"paper_7": "data/paper_7.json"}
     for id_, label, path, vk, book, planned in specs:
         evs = _jsonl(path)
         if book:
@@ -367,7 +372,8 @@ def paper_lines(px: Px) -> list:
             why = PLANNED_WHY.get(id_, "")
             out.append(_placeholder(id_, label, "paper", "模擬中", planned, f"{planned[5:].replace('-', '/')} 開始" + (f"（{why}）" if why else ""),
                                     extra={k: v for k, v in (("why", why), ("design_note", design_note.get(id_)),
-                                                             ("candidacy", candidacy.get(id_))) if v} or None))
+                                                             ("candidacy", candidacy.get(id_)),
+                                                             ("holdings_file", holdings_file.get(id_))) if v} or None))
             continue
         note = "依每天還原權息收盤估算；現金與定存按一個月定存利率計息；建倉已扣手續費"
         if vk == "nav_log":
@@ -385,6 +391,8 @@ def paper_lines(px: Px) -> list:
             ln["candidacy"] = candidacy[id_]
         if backdated.get(id_):
             ln["inception_note"] = backdated[id_]
+        if holdings_file.get(id_):
+            ln["holdings_file"] = holdings_file[id_]
         out.append(ln)
     return out
 
