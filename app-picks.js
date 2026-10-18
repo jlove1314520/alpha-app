@@ -993,6 +993,6 @@
       return;
     }
     host.innerHTML=factsHtml
-      +'<div style="display:flex;flex-direction:column;gap:9px">'+eventsRowsHtml(mine,12)+'</div>'
-      +`<div class="note" style="margin-top:8px">近 30 日共 ${mine.length} 筆${mine.length>12?'，只顯示最近 12 筆':''}。資料來源：MOPS 重大訊息／TWSE 月營收／除權息，只存索引不存全文，點標題看原文。</div>`;
+      +'<div style="display:flex;flex-direction:column;gap:9px">'+eventsTopHtml(mine)+'</div>'
+      +`<div class="note" style="margin-top:8px">近 30 日共 ${mine.length} 筆，依重要度排序、先列 ${Math.min(mine.length,IMP_TOP_N)} 筆。資料來源：MOPS 重大訊息／TWSE 月營收／除權息，只存索引不存全文，點標題看原文。</div>`;
   }

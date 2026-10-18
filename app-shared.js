@@ -431,6 +431,19 @@
     return (d.events||[]).filter(e=>e.code===code&&String(e.date)>=cutoff)
       .sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   }
+  // 先.一一〇-9（2026-10-18 總司令裁示）：每個區塊顯示重要度（importance 0～10，權重表 v0 見 .github/scripts/news_importance.py）
+  // 最高的 5 則，其餘收進「看全部 N 則」；不用固定門檻收合。同分新到舊。舊資料沒有 importance（還沒重產的快取、
+  // 搜尋精簡版還原的整份事件）就只照時間排——是降級不是錯誤。
+  const IMP_TOP_N=5;
+  function byImportance(list,timeKey){
+    return [...list].sort((a,b)=>((b.importance??-1)-(a.importance??-1))||(String(timeKey(b)).localeCompare(String(timeKey(a)))));
+  }
+  function topWithRestHtml(list,rowFn,n=IMP_TOP_N){
+    const head=list.slice(0,n),rest=list.slice(n);
+    return head.map(rowFn).join('')
+      +(rest.length?`<details class="imp-rest" style="margin-top:4px"><summary class="note" style="cursor:pointer;margin:4px 0">看全部 ${list.length} 則</summary><div style="display:flex;flex-direction:column;gap:9px">${rest.map(rowFn).join('')}</div></details>`:'');
+  }
+  function eventsTopHtml(mine){return topWithRestHtml(byImportance(mine,e=>e.date),e=>eventsRowsHtml([e],1))}
   function eventsRowsHtml(mine,limit){
     return mine.slice(0,limit).map(e=>{
       const c=EVENT_TYPE_COLOR[e.type]||'var(--ink-3)';

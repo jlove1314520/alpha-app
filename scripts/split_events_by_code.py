@@ -47,13 +47,15 @@ def _write_if_changed(path: Path, text: str) -> bool:
 
 
 BASE_KEYS = ("code", "name", "date", "type", "title", "source", "url")
+SEARCH_SKIP_KEYS = ("importance",)
 
 
 def _srow(e: dict, names: dict, ti: dict, ui: dict, si: dict) -> list:
     """精簡列：[code, date, 類型索引, title, 網址索引, 來源索引, 名稱(0＝用預設), 其他欄位{}]，後兩欄沒必要就省略。"""
     r = [e.get("code"), e.get("date"), ti[str(e.get("type") or "")], e.get("title"), ui[str(e.get("url") or "")], si[str(e.get("source") or "")]]
     # 其他欄位的浮點數取到小數 4 位（目前只有月營收的 yoy_pct，App 沒有讀這個欄位；標題裡的年增率是原字串，不受影響）
-    extra = {k: (round(v, 4) if isinstance(v, float) else v) for k, v in e.items() if k not in BASE_KEYS}
+    # 先.一一〇-9：importance 只給 events_by_code（個股頁／報告頁排序用），搜尋用的精簡版不帶，免得每列都多一欄
+    extra = {k: (round(v, 4) if isinstance(v, float) else v) for k, v in e.items() if k not in BASE_KEYS and k not in SEARCH_SKIP_KEYS}
     nm = e.get("name")
     if extra or nm != names.get(str(e.get("code"))):
         r.append(0 if nm == names.get(str(e.get("code"))) else nm)

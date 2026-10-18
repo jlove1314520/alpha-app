@@ -2396,18 +2396,19 @@
         if(e.name)evName[e.code]=e.name;
         if(TODAY_EV_KEYS.has(e.code+'|'+String(e.title||'').slice(0,40)))return;  // 今日事件已列過
         const ts=Date.parse(e.date);
-        if(!isNaN(ts))items.push({ts,dateTxt:String(e.date).slice(5),code:e.code,title:e.title,kind:e.type||'事件',url:e.url});
+        if(!isNaN(ts))items.push({ts,dateTxt:String(e.date).slice(5),code:e.code,title:e.title,kind:e.type||'事件',url:e.url,importance:e.importance});
       });
       (newsDoc.news||[]).forEach(n=>{
         const ts=Date.parse(n.published_iso||n.published);
         if(isNaN(ts))return;
         (n.codes||[]).forEach(c=>{
           if(!codes.has(c))return;
-          items.push({ts,dateTxt:new Date(ts).toISOString().slice(5,10),code:c,title:n.title,kind:'新聞',url:n.url});
+          items.push({ts,dateTxt:new Date(ts).toISOString().slice(5,10),code:c,title:n.title,kind:'新聞',url:n.url,importance:n.importance});
         });
       });
-      items.sort((a,b)=>b.ts-a.ts);
-      // 每檔最多 2 則（依時間新到舊挑）
+      // 先.一一〇-9：依重要度高到低（同分新到舊）排，再套每檔最多 2 則
+      items.sort((a,b)=>((b.importance??-1)-(a.importance??-1))||(b.ts-a.ts));
+      // 每檔最多 2 則（依上面的順序挑）
       const perCode={},picked=[];
       for(const it of items){perCode[it.code]=(perCode[it.code]||0)+1;if(perCode[it.code]<=2)picked.push(it)}
       if(!picked.length){card.hidden=true;return}
@@ -2428,7 +2429,7 @@
         +(rest.length?`<details style="margin-top:4px"><summary class="note" style="cursor:pointer;margin:4px 0">看全部 ${picked.length} 則</summary>${rest.map(rowHtml).join('')}</details>`:'')
         // 先.一〇四-1：news.json 最新一則超過 2 天 → 黃色提示（不擋其他內容）
         +(newsDoc&&newsDoc.stale_warning?`<div class="note" style="margin-top:8px;color:var(--warn,#d4a72c)">⚠ 新聞來源可能停更：${String(newsDoc.stale_warning).replace(/</g,'&lt;')}</div>`:'')
-        +`<div class="note" data-ui-explain style="margin-top:8px">自選股 ${wl.size} 檔＋真錢持股 ${realCodes.size} 檔（不含研究策略／模擬持股）${realNote?'（'+realNote+'）':''}；每檔最多 2 則，今日事件已列的重訊不重複。點一列跳個股頁。</div>`;
+        +`<div class="note" data-ui-explain style="margin-top:8px">自選股 ${wl.size} 檔＋真錢持股 ${realCodes.size} 檔（不含研究策略／模擬持股）${realNote?'（'+realNote+'）':''}；依重要度排序（0～10 分，同分新到舊）、每檔最多 2 則，今日事件已列的重訊不重複。點一列跳個股頁。</div>`;
     }catch(e){
       console.warn('[loadMyHoldingsEvents]',e);recordGlobalError('loadMyHoldingsEvents',e);
       el.innerHTML='<div class="note">載入失敗：'+_uiEsc(e.message)+'</div>';
@@ -4786,7 +4787,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-18.1033';
+  const APP_VERSION='2026-10-18.1043';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

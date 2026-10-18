@@ -943,9 +943,9 @@
       if(cnt)cnt.textContent=`近 7 天 ${n7} 則 · 近 14 天 ${rows.length} 則`;
       const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
       const row=x=>`<div style="padding:6px 0;border-top:1px solid var(--hairline);font-size:12.5px;line-height:1.5"><span class="num" style="font-size:10px;color:var(--ink-4)">${esc(String(x.published_iso||'').slice(5,10).replace('-','/'))}</span> <a href="${esc(x.url)}" target="_blank" rel="noopener" style="color:var(--ink-2);text-decoration:none">${esc(x.title)}</a> <span style="font-size:10px;color:var(--ink-4)">${esc(x.source||'')}</span></div>`;
-      box.innerHTML=rows.slice(0,8).map(row).join('')
-        +(rows.length>8?`<details><summary class="note" style="cursor:pointer;margin:4px 0">看全部 ${rows.length} 則</summary>${rows.slice(8).map(row).join('')}</details>`:'')
-        +'<div class="note" style="margin-top:6px">只存標題與連結索引；點標題開原文</div>';
+      // 先.一一〇-9：依重要度排序，先列 5 則、其餘「看全部 N 則」
+      box.innerHTML=topWithRestHtml(byImportance(rows,x=>x.published_iso||''),row)
+        +'<div class="note" style="margin-top:6px">依重要度排序（同分新到舊）；只存標題與連結索引，點標題開原文</div>';
     }catch(e){console.warn('[renderStockNews]',e);recordGlobalError('renderStockNews',e);box.innerHTML='<div class="note">讀不到新聞存檔（'+(e&&e.message||e)+'）</div>'}
   }
   // ── 個股頁底部列（先.六十-A1，2026-10-10）──
@@ -1459,7 +1459,7 @@
       if(!ec)why.push('財報日：此代號不在財報行事曆追蹤清單（fetch_earnings_calendar.py）');
       else if(!rows.some(r=>r.type==='財報日'))why.push('財報日：行事曆尚無下一次日期');
       const foot='<div class="note" style="margin-top:8px">來源：SEC EDGAR Form 8-K（只存索引，點標題看原文）'+(d.fetched_at?'，'+fmtTzMMDDHHMM(new Date(d.fetched_at),'Asia/Taipei'):'')+'；財報日為 yfinance 推估，公司可能改期。'+(why.length?'<br>'+why.map(_autoEsc).join('；'):'')+'</div>';
-      host.innerHTML=(rows.length?'<div style="display:flex;flex-direction:column;gap:9px">'+eventsRowsHtml(rows,15)+'</div>':'<div class="note">近 90 天無可顯示的美股事件</div>')+foot;
+      host.innerHTML=(rows.length?'<div style="display:flex;flex-direction:column;gap:9px">'+eventsTopHtml(rows)+'</div>':'<div class="note">近 90 天無可顯示的美股事件</div>')+foot;
     }catch(e){console.warn('[renderUsEventsTab]',e);recordGlobalError('renderUsEventsTab',e);host.innerHTML='<div class="note">美股事件載入失敗（'+_autoEsc(e&&e.message||e)+'）</div>'}
   }
   // 個股頁「事件」分頁（P0產品.三框架）：跟上面研究報告頁的事件卡是同一份資料，
@@ -1593,6 +1593,6 @@
         +(d.fetched_at?`（資料時間 ${fmtTzMMDDHHMM(new Date(d.fetched_at),'Asia/Taipei')}）`:'')+'</div>';
       return;
     }
-    host.innerHTML='<div style="display:flex;flex-direction:column;gap:9px">'+eventsRowsHtml(mine,20)+'</div>'
-      +`<div class="note" style="margin-top:8px">近 30 日共 ${mine.length} 筆${mine.length>20?'，只顯示最近 20 筆':''}。資料來源：MOPS 重大訊息／TWSE 月營收／除權息，只存索引不存全文，點標題看原文。</div>`;
+    host.innerHTML='<div style="display:flex;flex-direction:column;gap:9px">'+eventsTopHtml(mine)+'</div>'
+      +`<div class="note" style="margin-top:8px">近 30 日共 ${mine.length} 筆，依重要度排序、先列 ${Math.min(mine.length,IMP_TOP_N)} 筆。資料來源：MOPS 重大訊息／TWSE 月營收／除權息，只存索引不存全文，點標題看原文。</div>`;
   }

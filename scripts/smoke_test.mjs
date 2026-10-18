@@ -5579,6 +5579,34 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { ctErrs.push(`測試本身出錯：${e.message || e}`); }
   record("167. 深色主題 5 個文字色對深色底對比 ≥4.5、淺色值不受影響（先.一一〇-8）", ctErrs.length === 0, ctErrs.join("; ") || ctInfo);
 
+  // 168.【2026-10-18 先.一一〇-9】新聞／事件依重要度排序：每個區塊先列分數最高的 5 則、其餘收進「看全部 N 則」（不用固定門檻收合）；
+  // 同分新到舊；沒有 importance 的舊資料照時間排、不報錯。用合成資料直接驗共用函式（不靠當天真實資料）。
+  const impErrs = [];
+  let impInfo = "";
+  try {
+    const r = await page.evaluate(() => {
+      if (typeof eventsTopHtml !== "function" || typeof byImportance !== "function") return { err: "eventsTopHtml／byImportance 未載入" };
+      const ev = [[5, "10-01", "除權息A"], [9, "10-02", "併購B"], [6, "10-03", "月營收C"], [9, "10-04", "併購D"], [7, "10-05", "法說E"],
+                  [8, "10-06", "財務F"], [5, "10-07", "人事G"], [6, "10-08", "月營收H"]].map(([i, d, t]) => ({ importance: i, date: "2026-" + d, type: "其他", title: t, code: "2330" }));
+      const box = document.createElement("div"); box.innerHTML = eventsTopHtml(ev);
+      const det = box.querySelector("details");
+      const headTitles = [...box.children].filter((x) => x.tagName !== "DETAILS").map((x) => x.textContent.replace(/\s+/g, " ").match(/[A-Z]$|[^\s]+[A-H]/)?.[0] || x.textContent.trim().slice(-4));
+      const old = byImportance([{ date: "2026-10-01" }, { date: "2026-10-03" }, { date: "2026-10-02" }], (x) => x.date).map((x) => x.date.slice(-2));
+      return { heads: headTitles, nHead: [...box.children].filter((x) => x.tagName !== "DETAILS").length,
+               sum: det ? det.querySelector("summary").textContent : "", nRest: det ? det.querySelectorAll("a, span[style*='flex:1']").length : 0, old };
+    });
+    if (r.err) impErrs.push(r.err);
+    else {
+      if (r.nHead !== 5) impErrs.push(`先列應 5 則，實際 ${r.nHead}`);
+      const want = ["併購D", "併購B", "財務F", "法說E", "月營收H"];
+      if (JSON.stringify(r.heads) !== JSON.stringify(want)) impErrs.push(`前 5 則順序 ${r.heads.join("、")}，應為 ${want.join("、")}`);
+      if (!/看全部 8 則/.test(r.sum)) impErrs.push(`收合列文字「${r.sum}」應為「看全部 8 則」`);
+      if (r.old.join(",") !== "03,02,01") impErrs.push(`沒有 importance 時應照時間新到舊：${r.old.join(",")}`);
+      impInfo = `前 5：${r.heads.join("、")}；${r.sum}；無分數照時間排`;
+    }
+  } catch (e) { impErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("168. 新聞／事件依重要度先列 5 則、其餘看全部 N 則、同分新到舊、無分數照時間（先.一一〇-9）", impErrs.length === 0, impErrs.join("; ") || impInfo);
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];

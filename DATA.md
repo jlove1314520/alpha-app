@@ -72,6 +72,7 @@ Stooq 免費 key（需人工過 CAPTCHA）。兩者都需要總司令親自領�
 | `data/news_by_code/<代號>.json` | 個股頁「事件」分頁的「近期新聞」 | 存檔：只收標題有點名該代號的新聞，每檔保留最近 14 天，依網址去重 | 每檔幾 KB，點進個股頁才下載 |
 | `data/news_by_code/_index.json` | 盤前日報的個股新聞則數（「近 7 天」） | 每檔近 7 天（`d7`）／近 14 天（`d14`）則數 | 小 |
 
+- 重要度 `importance`（0～10，2026-10-18 先.一一〇-9，權重表 v0 見 `.github/scripts/news_importance.py`）：news.json／news_by_code／events.json／events_by_code 每則都有；搜尋用的 events_search.json 不帶。App 各新聞／事件區塊依分數先列 5 則、其餘「看全部 N 則」。
 - 兩者都由 `.github/scripts/fetch_news_events.py` 同一班產生（news_events.yml 每 30 分鐘、本機 `scripts/news_local_fallback.py` 補班），零額外請求。
 - 個股新聞只比對標題裡的代號與官方名稱（`news_matcher`），覆蓋率有限；存檔沒有某檔＝近 14 天沒有點名它的新聞，不是錯誤。
 - 10/01～10/11、10/14 的新聞在先.一〇四-1 修好排序前就被擠掉，存檔也補不回。

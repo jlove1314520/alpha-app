@@ -43,6 +43,9 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.ssl_ import create_urllib3_context
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from news_importance import VERSION as IMPORTANCE_VERSION, event_importance, news_importance  # noqa: E402  先.一一〇-9
+
 ROOT = Path(__file__).resolve().parent.parent.parent
 DATA = ROOT / "data"
 TZ = timezone(timedelta(hours=8))
@@ -504,7 +507,9 @@ def archive_news_by_code(news: list[dict], now: datetime) -> None:
                 continue
             seen.add(u)
             merged.append({"title": r.get("title"), "url": u, "source": r.get("source"),
-                           "published_iso": r.get("published_iso") or published_iso(r.get("published"))})
+                           "published_iso": r.get("published_iso") or published_iso(r.get("published")),
+                           # 先.一一〇-9：存檔裡每則都有點名這檔，代號加分一定成立
+                           "importance": news_importance({"title": r.get("title"), "codes": [code]})})
         merged = [r for r in merged if (r.get("published_iso") or "") >= cutoff]
         merged.sort(key=lambda r: r.get("published_iso") or "", reverse=True)
         doc = {"code": code, "keep_days": NEWS_ARCHIVE_DAYS, "updated_at": now.isoformat(), "news": merged}
@@ -565,11 +570,17 @@ def main() -> int:
     ev_out = finalize_events(ev_out)
     nw_out = merge_keep(DATA / "news.json", "news", news,
                         lambda r: r.get("url"), cap=NEWS_KEEP)
+    # 先.一一〇-9：重要度 0～10（權重表 v0 見 news_importance.py）；每班全部重算，舊列也補上
+    for e in ev_out:
+        e["importance"] = event_importance(e)
+    for n in nw_out:
+        n["importance"] = news_importance(n)
 
     (DATA / "events.json").write_text(json.dumps({
         "fetched_at": now.isoformat(),
         "source": "TWSE/TPEx 重大訊息＋TWSE 月營收＋既有除權息檔（全部官方端點）",
-        "keep_days": KEEP_DAYS, "meta": ev_meta, "count": len(ev_out), "events": ev_out,
+        "keep_days": KEEP_DAYS, "importance_version": IMPORTANCE_VERSION,
+        "meta": ev_meta, "count": len(ev_out), "events": ev_out,
     }, ensure_ascii=False, indent=1), encoding="utf-8")
 
     # 先.一〇四-1 監測：最新一則超過 NEWS_STALE_DAYS 天 → 黃色警告（只標記與印 ::warning::，不擋流程、不中止寫檔）
@@ -595,6 +606,7 @@ def main() -> int:
         "source": "中央社財經 RSS＋Yahoo股市 RSS（只存索引不存全文）",
         "not_used": {"鉅亨網": "公開 RSS 兩個路徑皆 404，唯一可通的是站台後端 API，"
                               "依 CLAUDE.md 取得方式鐵律不採用"},
+        "importance_version": IMPORTANCE_VERSION,
         "meta": nw_meta, "count": len(nw_out), "news": nw_out,
     }, ensure_ascii=False, indent=1), encoding="utf-8")
 
