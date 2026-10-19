@@ -2,8 +2,8 @@
  "meta": {
   "created_at": "2026-10-11T14:17:33.521387+08:00",
   "schema_note": "B19 前瞻訊號台帳（非回測）：每筆在事件發生後 4 日內事前寫入，寫入後內容不可修改；entry_close 為寫入日之後第一個交易日收盤（避免前視）；returns.t5/t20/t60 由 update_signal_ledger_returns.py 只回填 null 欄位。status=待驗證線索 者不得影響任何評分。規格 research/B19_SIGNAL_LEDGER_SPEC.md。非投資建議。",
-  "last_build_at": "2026-10-20T00:31:05.830478+08:00",
-  "total_signals": 534,
+  "last_build_at": "2026-10-20T01:14:58.493915+08:00",
+  "total_signals": 537,
   "source": ".github/scripts/build_signal_ledger.py（讀 events.json L1＋news.json L3＋price_history.json）",
   "last_returns_backfill_at": "2026-10-19T17:38:20.686725+08:00"
  },
@@ -18766,6 +18766,112 @@
    "anchor_trade_date": "2026-10-19",
    "weight": 1.0,
    "ref_close": 20.95,
+   "ref_close_date": "2026-10-19",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "9006a7016ddcf3b3",
+   "recorded_at": "2026-10-20T01:14:58.493915+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9824802",
+   "type": "媒體報導",
+   "code": "2027",
+   "event_date": "2026-10-20",
+   "title": "IFA 2027將擴大機器人展區",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.057,
+   "pre_vol_spike": 1.661,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-19",
+   "weight": 1.0,
+   "ref_close": 51.0,
+   "ref_close_date": "2026-10-19",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "91964bb5322f376d",
+   "recorded_at": "2026-10-20T01:14:58.493915+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/11074/9824641",
+   "type": "媒體報導",
+   "code": "6898",
+   "event_date": "2026-10-19",
+   "title": "程曦資訊申購 中籤率0.6% 23日上櫃...承銷價60元",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.1348,
+   "pre_vol_spike": 4.421,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-09-24",
+   "weight": 0.5,
+   "ref_close": null,
+   "ref_close_date": null,
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "40ffd5904a6890e7",
+   "recorded_at": "2026-10-20T01:14:58.493915+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9824806",
+   "type": "媒體報導",
+   "code": "3045",
+   "event_date": "2026-10-19",
+   "title": "台灣大搶進品牌電商",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0741,
+   "pre_vol_spike": 2.185,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-19",
+   "weight": 0.5,
+   "ref_close": 130.5,
    "ref_close_date": "2026-10-19",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
    "entry_close": null,
