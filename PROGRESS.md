@@ -1,3 +1,19 @@
+## 2026-10-20 07:5x（互動視窗）先.一一九 收尾四件：1～3 完成，4 已準備、等 10/20 收盤後；冒煙 173/0
+
+等待總司令審閱：0 件
+
+- **先.一一九-1**：AWAITING「先.九十八-3 Telegram 新裝置登入驗證」移到已結案（總司令確認 10/14 後沒有再跳通知），排程照常；等待中 0 件。commit 860078128c。
+- **先.一一九-2**：模擬 G（#456）開始前修訂（帳本不存在、未觀察任何結果）：初次建倉 2026-11-02（同模擬 F）、之後每季 2／5／8／11 月第一個交易日再平衡；判定順延約 2028-11；其他參數不動。
+  PREREG 加「修訂紀錄」一節；`research/paper_7_revsurprise_tracker.py`、`build_strategy_curves.py`、`data/non_etf_research_lines.json` 跟著改。營收缺月影響範圍改為 2026-11、2027-02、2027-05 三次。冒煙 173/0。commit b3d4295d1f。
+- **先.一一九-3**：`scripts/check_tw_data_landed.py` 本機（AlphaTwDataCheck）每次執行都在 `research/tw_data_check.jsonl` 加一行（時間、是否交易日、market_tw 資料日、結果、原因）並連同告警檔 commit；
+  路徑符合 `dev_queue_runner.py::MACHINE_WRITTEN`（十節）；雲端層不寫。補記 10/19 20:30：交易日、data_date＝2026-10-19、正常（依排程 LastRunTime／LastTaskResult 0 與 log 最後一行）。寫檔失敗只警告（實測）。commit 151a43ac86。
+- **先.一一九-4（BLOCKED，時間閘 10/20 收盤後）**：新增 `scripts/check_password_batch1.py`（只讀）。10/16、10/19 結果：6 支每次都有啟動並跑到自己的程式；問題只有
+  ①10/16 權證快照缺（櫃買 16MB 檔被對方切斷連線，官方只給當天、補不回）②10/16 AlphaData 一處 FinMind 402 ③10/19 04:14～10/20 04:01 DevQueue 每輪 6 秒結束＝claude **每週用量上限**（429 usage_limit_reached，04:00 重置後恢復）——都不是登入身分問題。
+  第二批清單與步驟寫在 `docs/TASK_PASSWORD_BATCH2_PLAN.md`：A 組資料／研究 20 支＋B 組常駐服務 3 支（第二批）、C 組真錢自動投資 5 支（建議第三批）、AlphaIbkrGateway 維持登入才跑（GUI）。
+  **與裁示數字不同**：實際寫死 Store 版 python 的啟動檔是 **11 支**（不是 9 支）；兩個 python 套件版本相同，只缺 `telethon`（Telegram 讀取器）。改啟動檔、裝 telethon、改完試跑，都排在 10/20 收盤核對後，盤中不動常駐服務與自動投資。
+- **下一步**：10/20 19:30 後跑 `python scripts/check_password_batch1.py 2026-10-16 2026-10-19 2026-10-20` → 改 11 支啟動檔＋裝 telethon＋試跑 → 請總司令本人執行第 2 批並在 Windows 視窗輸入密碼。
+- **BLOCKED**：先.一一九-4（時間閘）。
+
 ## 2026-10-20 07:01～07:4x（DevQueue 20261020-070102）先.一一四-3c／先.一一五-3 V1 價格補抓第 18～19 批
 
 等待總司令審閱：0 件（互動視窗 07:36 commit 860078128c 已把先.九十八-3 結案，research/AWAITING_REVIEW.md 等待中 0 列）
