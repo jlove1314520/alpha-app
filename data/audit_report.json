@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-10-19T23:00:02.242593+08:00",
- "duration_sec": 18.4,
+ "generated_at": "2026-10-20T04:38:28.462052+08:00",
+ "duration_sec": 4.6,
  "reference": {
   "twse": {
    "ok": true,
@@ -84,7 +84,7 @@
    "note": ""
   },
   "f_null_as_number": {
-   "checked": 129,
+   "checked": 128,
    "violations": 0,
    "unverifiable": 0,
    "note": ""
@@ -239,22 +239,22 @@
   },
   {
    "check": "e_pe",
+   "code": "6241",
+   "name": "鑫永洋",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 26.02,
+   "official": 22.5,
+   "diff_pct": 13.51,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
    "code": "7610",
    "name": "聯友金屬-創",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 47.16,
    "official": 41.04,
    "diff_pct": 12.98,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "6241",
-   "name": "鑫永洋",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 26.02,
-   "official": 22.7,
-   "diff_pct": 12.74,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -4195,8 +4195,8 @@
    "name": "鑫永洋",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
    "ours": 26.02,
-   "official": 22.7,
-   "diff_pct": 12.74,
+   "official": 22.5,
+   "diff_pct": 13.51,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -6613,7 +6613,7 @@
   "note": "由 scripts/check_external_connectivity.py 每 5 分鐘更新。產出檔停擺依據修改時間判定；connectivity_alerts 額外納入internet/tailscale/ibkr_gateway 這類「行程活著但連不上」的連續失敗告警（2026-09-15新增，此前只印在log沒亮燈，IBKR斷線6天才被發現就是這個缺口）。"
  },
  "self_check": {
-  "checked_at": "2026-10-17T02:51:13.991652+08:00",
+  "checked_at": "2026-10-20T04:38:13.825042+08:00",
   "ok": true,
   "checks": [
    {
@@ -6635,7 +6635,7 @@
   "note": "audit.yml 每次執行最前面跑，確認後面幾支腳本要用到的 import/常數撈得到——2026-09-10~17 因 data_audit.py 誤刪 TWSE_COMPANY 導致build_listed_universe.py 連續一週 ImportError 全滅，但audit_report.json 本身完全沒有任何紀錄，只能靠 gh run list 才查得到，這個欄位就是補這個盲點。"
  },
  "domain_blocklist_scan": {
-  "checked_at": "2026-10-17T02:51:13.991652+08:00",
+  "checked_at": "2026-10-20T04:38:13.825042+08:00",
   "domains": [
    "mopsov.twse.com.tw",
    "doc.twse.com.tw",
@@ -7017,7 +7017,7 @@
   "note": "2026-09-20合規.三：掃repo全部.py找黑名單網域硬寫字串（黑名單來源research/net_guard.py::DOMAIN_BLOCKLIST）。unguarded=True代表該檔案提到黑名單網域卻沒有`import net_guard`，是最可能重演2026-09-19 mopsov違規事件的檔案，由check_external_connectivity.py轉成local_task_health告警。"
  },
  "queue_depth_sync": {
-  "checked_at": "2026-10-17T02:51:13.991652+08:00",
+  "checked_at": "2026-10-20T04:38:13.825042+08:00",
   "ok": true,
   "detail": {
    "ok": true,
@@ -7027,15 +7027,15 @@
   "note": "2026-09-20【Q4前視與#23無法重現】四：確認兩份*_CONTINUATION_PROMPT.txt跟research/queue_depth_config.py（單一事實來源）仍然一致，避免重演2026-09-19門檻更正只同步部分位置、連續5輪沒觸發補件規則的問題。"
  },
  "reproducibility_check": {
-  "checked_at": "2026-10-17T02:51:13.991652+08:00",
+  "checked_at": "2026-10-20T04:38:13.825042+08:00",
   "ok": false,
   "detail": {
    "ok": false,
-   "n_checked": 214,
+   "n_checked": 221,
    "by_status_count": {
-    "IMPORT_ERROR": 191,
+    "IMPORT_ERROR": 197,
     "FILE_NOT_FOUND": 11,
-    "OK": 12
+    "OK": 13
    },
    "broken": [
     {
@@ -7831,6 +7831,12 @@
      "detail": "ModuleNotFoundError: No module named 'numpy'"
     },
     {
+     "module": "paper_7_revsurprise_tracker",
+     "status": "IMPORT_ERROR",
+     "note": "真的壞了，需要修——這正是#23那種dangling import的同類問題",
+     "detail": "ModuleNotFoundError: No module named 'numpy'"
+    },
+    {
      "module": "pead_portfolio_v1",
      "status": "IMPORT_ERROR",
      "note": "真的壞了，需要修——這正是#23那種dangling import的同類問題",
@@ -8144,6 +8150,36 @@
     },
     {
      "module": "us_universe_dispersion_check",
+     "status": "IMPORT_ERROR",
+     "note": "真的壞了，需要修——這正是#23那種dangling import的同類問題",
+     "detail": "ModuleNotFoundError: No module named 'numpy'"
+    },
+    {
+     "module": "var1018_twdata",
+     "status": "IMPORT_ERROR",
+     "note": "真的壞了，需要修——這正是#23那種dangling import的同類問題",
+     "detail": "ModuleNotFoundError: No module named 'numpy'"
+    },
+    {
+     "module": "var1018_v2_turn_of_month",
+     "status": "IMPORT_ERROR",
+     "note": "真的壞了，需要修——這正是#23那種dangling import的同類問題",
+     "detail": "ModuleNotFoundError: No module named 'numpy'"
+    },
+    {
+     "module": "var1018_v4_short_margin_reversed",
+     "status": "IMPORT_ERROR",
+     "note": "真的壞了，需要修——這正是#23那種dangling import的同類問題",
+     "detail": "ModuleNotFoundError: No module named 'numpy'"
+    },
+    {
+     "module": "var1018_v5_january_reversal",
+     "status": "IMPORT_ERROR",
+     "note": "真的壞了，需要修——這正是#23那種dangling import的同類問題",
+     "detail": "ModuleNotFoundError: No module named 'numpy'"
+    },
+    {
+     "module": "var1018_v7_us_unemployment",
      "status": "IMPORT_ERROR",
      "note": "真的壞了，需要修——這正是#23那種dangling import的同類問題",
      "detail": "ModuleNotFoundError: No module named 'numpy'"
