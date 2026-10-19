@@ -54,7 +54,7 @@ GOALS = {"live_bb90": "守住回檔", "paper_1": "守住回檔", "paper_3": "守
          "paper_4": "贏大盤也守回檔", "paper_5": "賺波動溢價（只是研究）", "paper_7": "選股研究（低換手）", "board_value": "選股研究", "board_momentum": "選股研究", "board_future": "選股研究"}
 # 先.七十五-5：尚未開始的模擬寫明原因（卡片「X 月 X 日開始」下方顯示）
 PLANNED_WHY = {"paper_2": "選股資料還在預熱", "paper_5": "11 月起用當月真實資料開始記，不倒填",
-               "paper_7": "2027 年第一個交易日起每季再平衡，不倒填；2027 行事曆未公布，1/4 為預估"}
+               "paper_7": "11 月起跟模擬 F 同一天建倉、之後每季再平衡，不倒填"}
 POSITIONING = "守回檔的策略大漲時會落後 0050，這是設計；看滿 60 個交易日與最大跌幅"
 
 
@@ -346,7 +346,7 @@ def paper_lines(px: Px) -> list:
         ("paper_3", "模擬 B 景氣閘門", RDATA / "paper_3_log.jsonl", "values_post", None, "2026-10-08"),
         ("paper_4", "模擬 C 加速", RDATA / "paper_4_log.jsonl", "values_post", "R1-C", "2026-10-08"),
         ("paper_5", "模擬 F 賣波動", RDATA / "paper_5_log.jsonl", "nav_log", None, "2026-11-02"),  # 先.九十一-1：#444 紙上追蹤，11 月起不倒填
-        ("paper_7", "模擬 G 個股低換手（營收驚喜）", RDATA / "paper_7_log.jsonl", "values_post", None, "2027-01-04"),  # 先.一一八-2：2027 第一個交易日起每季再平衡，不倒填
+        ("paper_7", "模擬 G 個股低換手（營收驚喜）", RDATA / "paper_7_log.jsonl", "values_post", None, "2026-11-02"),  # 先.一一九-2：改與模擬 F 同日建倉（原 2027-01）；起每季再平衡，不倒填
     ]
     # 先.八十-7（2026-10-12）：模擬 C（R1 信用利差閘門）是看過 2025–26 樣本外結果之後才設計的，前台必須標明
     design_note = {"paper_4": "看過 2025–26 結果後才設計", "paper_5": "學界已知現象、只是研究",

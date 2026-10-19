@@ -2,12 +2,13 @@
 """模擬 G（紙.七）：個股低換手（營收驚喜）前進式紙上追蹤（先.一一八-2，2026-10-18 總司令裁示採甲）。
 
 規則照 `docs/PREREG_paper_g_revsurprise.md`（參數一次定死，不調參、不倒填）：
-- 每季（1、4、7、10 月）第一個有收盤資料的執行日再平衡；最早 2027-01（登記日之後第一個季度再平衡日）。
+- 初次建倉 2026-11-02 起第一個有收盤資料的執行日（同模擬 F）；之後每季（2、5、8、11 月）第一個有收盤資料的執行日再平衡
+  （2026-10-20 先.一一九-2 開始前修訂，原為 2027-01 起、1／4／7／10 月）。
 - 宇宙：當天在市（data/listed_universe.json active）的上市＋上櫃普通股（4 碼、非 0 開頭、排除 91 開頭存託憑證），
   近 20 個交易日平均成交值 ≥ 3,000 萬元，且當天有收盤價。
 - 因子：f_revenue_surprise 定義不變（research/factors.py `_revenue_surprise_sue`）：
   YoY＝(營收−去年同月)÷|去年同月|；SUE＝本月 YoY ÷ 含本月在內近 12 個 YoY 的樣本標準差；用每檔最近一個已公布月份，
-  且該月不得早於再平衡月往前第 2 個月（例：1 月再平衡最舊只能用 11 月營收）。
+  且該月不得早於再平衡月往前第 2 個月（例：11 月再平衡最舊只能用 9 月營收）。
 - 組合：排名前 20 進場、跌出前 60 出場（或失去資格即出場）、空位由未持有的最高名次補滿 20 檔；每次再平衡全部回到等權。
 - 成本：research/backtest/engine.py `buy_leg_rate`／`sell_leg_rate`（costs.py 1×、手續費不打折、證交稅 0.3%），依實際換手收。
 資料全部讀 repo 既有檔（data/fundamentals.json 每日官方累積的 26 個月營收、data/price_history/），**零額外外部請求**。
@@ -36,8 +37,8 @@ from backtest.engine import BacktestConfig, buy_leg_rate, sell_leg_rate  # noqa:
 TW = timezone(timedelta(hours=8))
 LOG = ROOT / "research" / "data" / "paper_7_log.jsonl"
 OUT = ROOT / "data" / "paper_7.json"
-START_NOT_BEFORE = "2027-01-01"
-REBAL_MONTHS = (1, 4, 7, 10)
+START_NOT_BEFORE = "2026-11-02"  # 先.一一九-2（開始前修訂，未觀察任何結果）：原 2027-01-01
+REBAL_MONTHS = (2, 5, 8, 11)    # 先.一一九-2：原 (1, 4, 7, 10)
 TOP_N, EXIT_RANK = 20, 60
 MIN_TURNOVER = 30_000_000.0
 LIQ_DAYS = 20
@@ -140,9 +141,9 @@ def latest_date(px: Px) -> str | None:
 
 def load_gap_fill() -> dict:
     """[自行裁量]（先.一一八-2b）：data/fundamentals.json 的 26 個月營收在 2024-12～2025-04 有缺口（2026-08-27 起始種子的範圍問題），
-    2027-01／04 兩次再平衡算 SUE 分母會缺月份；只拿 App 顯示用回補檔（FinMind，2024-12～2026-06，與官方重疊 756 個月全部一致）補缺月。
-    這是前向追蹤的輸入（判定只看 2027 起的報酬），不是對 holdout 期間做回測或檢定；
-    守門自測（scripts/selftest_display_only_files.py）對本檔單獨列名放行。總司令可推翻（替代：改 2027-07 起跑、不讀回補檔）。"""
+    2026-11、2027-02、2027-05 三次再平衡算 SUE 分母會缺月份；只拿 App 顯示用回補檔（FinMind，2024-12～2026-06，與官方重疊 756 個月全部一致）補缺月。
+    這是前向追蹤的輸入（判定只看 2026-11 起的報酬），不是對 holdout 期間做回測或檢定；
+    守門自測（scripts/selftest_display_only_files.py）對本檔單獨列名放行。總司令可推翻（替代：改 2027-08 起跑、不讀回補檔）。"""
     return ((_load(ROOT / "data" / "revenue_backfill.json", {}) or {}).get("stocks")) or {}
 
 
@@ -262,7 +263,7 @@ def step(today: str | None = None) -> dict:
     if not day:
         raise RuntimeError("price_history 讀不到任何收盤資料")
     if (today or day) < START_NOT_BEFORE:
-        write_summary(px, log, {"why_not_started": f"{START_NOT_BEFORE[:7]} 第一個交易日起從當季真實資料開始，不倒填"})
+        write_summary(px, log, {"why_not_started": f"{START_NOT_BEFORE[5:].replace('-', '/')} 起跟模擬 F 同一天建倉、之後每季（2、5、8、11 月）再平衡，不倒填"})
         return {"state": "NOT_STARTED", "day": day}
     quarter_key = day[:7]
     done = any(e["date"][:7] == quarter_key for e in log)
