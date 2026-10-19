@@ -1,13 +1,13 @@
 {
- "generated_at": "2026-10-13T10:14:12.764251+08:00",
+ "generated_at": "2026-10-19T08:00:05.414282+08:00",
  "source": "PyPI 官方 JSON API",
  "policy": "只回報不自動升級；升級須照 CLAUDE.md 七之二 四步驗證",
- "behind_count": 6,
+ "behind_count": 7,
  "packages": [
   {
    "package": "certifi",
    "pinned": "2026.6.17",
-   "latest": "2026.7.22",
+   "latest": "2026.10.18",
    "behind": true,
    "error": null
   },
@@ -21,7 +21,7 @@
   {
    "package": "fastapi",
    "pinned": "0.141.1",
-   "latest": "0.143.0",
+   "latest": "0.146.0",
    "behind": true,
    "error": null
   },
@@ -35,8 +35,8 @@
   {
    "package": "py-vapid",
    "pinned": "1.9.4",
-   "latest": "1.9.4",
-   "behind": false,
+   "latest": "1.9.6",
+   "behind": true,
    "error": null
   },
   {
@@ -70,7 +70,7 @@
   {
    "package": "starlette",
    "pinned": "1.6.0",
-   "latest": "1.7.0",
+   "latest": "1.9.0",
    "behind": true,
    "error": null
   },
