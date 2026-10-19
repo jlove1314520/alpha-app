@@ -9,7 +9,7 @@
 - **先.一一五-2r**：P3 暫停檔 until 2026-10-23、還沒有 resumed_at，略過。
 - **`- [!]` 阻塞項複查**：先.一〇七-3 仍未解除（`gh run list --workflow=market.yml --event=workflow_dispatch` 最新一筆仍是 2026-08-28）；研究室.六-週跑 下次是 10/26 週一；其餘維持原阻塞原因。
 - **冒煙測試**：04:0x～04:1x `node scripts/smoke_test.mjs` exit 0，173 項全過、0 FAIL（先.一〇九-28 commit 前跑）。後面兩個 commit 只改 PENDING_QUEUE／shortlist／PROGRESS 文件，沒動 App 檔案，沿用這次結果 [自行裁量]。
-- **收工補件**：補入前 DevQueue 可執行只有 3 項（runner `item_class()` 計算）。docs/UX_REDESIGN_PROPOSAL.md 沒有未做的 App 項目；research/DATA_GAP_PLAN.md 甲類已經全部抓完；全檢報告節沒有新的可做項。從 BACKLOG 09-04 待辦 11「其餘進場日 T+5 尚未到期」補了 **先.一二〇-1／-2／-3**（10/14、10/15～16、10/19 各進場日的 T+5 回填核對，時間閘 10/22、10/24、10/27）。補完 `- [ ]` 22 項（≥12）、DevQueue 可執行 6 項（≥6）。
+- **收工補件**：補入前 DevQueue 可執行只有 3 項（runner `item_class()` 計算）。docs/UX_REDESIGN_PROPOSAL.md 沒有未做的 App 項目；research/DATA_GAP_PLAN.md 甲類已經全部抓完；全檢報告節沒有新的可做項。從 BACKLOG 09-04 待辦 11「其餘進場日 T+5 尚未到期」補了 **先.一二〇-1／-2／-3**（10/14、10/15～16、10/19 各進場日的 T+5 回填核對，時間閘 10/22、10/24、10/27）。補完 `- [ ]` 23 項（≥12）、DevQueue 可執行 6 項（≥6）。
 - **BLOCKED**：無新增。
 
 ## 2026-10-19 03:31～03:4x（DevQueue 20261019-033101）先.一一四-3c／先.一一五-3 V1 價格補抓第 12 批
