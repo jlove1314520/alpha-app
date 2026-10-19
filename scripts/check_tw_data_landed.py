@@ -34,6 +34,9 @@ ROOT = Path(__file__).resolve().parent.parent
 TW = timezone(timedelta(hours=8))
 CHECK_HM = (20, 30)
 ALARM_PATH = ROOT / "data" / "tw_data_alarm.json"
+# 先.一一九-3：本機（AlphaTwDataCheck）每次執行都 append 一行（不論有沒有告警），隨告警檔一起 commit；
+# 路徑符合 dev_queue_runner.MACHINE_WRITTEN 的 research/*.jsonl（十節），雲端層不寫。
+RUN_LOG_PATH = ROOT / "research" / "tw_data_check.jsonl"
 MESSAGE = "今日台股資料未進來，三層備援都沒補到"
 
 
@@ -99,10 +102,26 @@ def write_alarm(now: datetime, alarm: bool, why: str, data_date: str | None, lay
     return True
 
 
-def local_push_and_dispatch(alarm: bool) -> None:
+def append_run_log(now: datetime, alarm: bool, why: str, data_date: str | None) -> None:
+    """先.一一九-3：每次執行一行；自己失敗只警告（十二節）。"""
+    try:
+        try:
+            trading = is_trading_day(now.date())
+        except Exception:  # noqa: BLE001
+            trading = None
+        rec = {"ts": now.isoformat(timespec="seconds"), "date": now.date().isoformat(), "trading_day": trading,
+               "market_tw_data_date": data_date, "result": "告警" if alarm else "正常", "reason": why}
+        with RUN_LOG_PATH.open("a", encoding="utf-8", newline="\n") as f:
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    except Exception as e:  # noqa: BLE001
+        print(f"::warning::寫 tw_data_check.jsonl 失敗（不影響檢查）：{type(e).__name__}: {e}")
+
+
+def local_push_and_dispatch(alarm: bool, changed: bool = True) -> None:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     import local_git_commit as G  # noqa: PLC0415
-    print(G.commit_paths(["data/tw_data_alarm.json"], "台股當日資料檢查（先.一一三-A3）：" + ("告警" if alarm else "解除")))
+    msg = "台股當日資料檢查（先.一一三-A3）：" + (("告警" if alarm else "解除") if changed else "執行紀錄")
+    print(G.commit_paths(["data/tw_data_alarm.json", "research/tw_data_check.jsonl"], msg))
     if alarm:
         r = subprocess.run(["gh", "workflow", "run", "tw_data_landed_check.yml", "-f", "reason=local_20_30"],
                            cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
@@ -120,8 +139,9 @@ def main(argv=None) -> int:
         alarm, why = decide(now, data_date)
         print(f"check_tw_data_landed（{a.layer}）：{'告警' if alarm else '正常'}（{why}）")
         changed = write_alarm(now, alarm, why, data_date, a.layer)
-        if a.layer == "local" and (changed or alarm):
-            local_push_and_dispatch(alarm)
+        if a.layer == "local":  # 先.一一九-3：本機每次都記一行並 commit（原本只在告警／解除時 commit）
+            append_run_log(now, alarm, why, data_date)
+            local_push_and_dispatch(alarm, changed)
         if alarm and a.layer == "cloud":
             print(f"::error::{MESSAGE}（market_tw data_date={data_date}）")
             return 1
