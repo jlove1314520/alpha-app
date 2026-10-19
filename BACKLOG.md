@@ -200,6 +200,7 @@ un-alpha-live-server-cycle.ps1`
     不等於獲利、大戶也可能出貨」（`#chip-disclaimer`）。
    ⚠️ 現況（2026-10-17 核對，先.一〇九-18）：免責文字在 `index.html` 第 739 行 `#chip-disclaimer`；籌碼類訊號未走 signal_ledger 校準。
    ⚠️ 逐項核對（2026-10-17 DevQueue 20261017-183102，先.一〇九-25，只讀）：`data/signal_ledger.json` 423 筆，type 只有事件類（媒體報導 182／增減資 80／併購 66／法說會 62／財務 17／處分資產 10／訴訟 3／重大訂單 3），來源全是重大訊息與新聞，**沒有任何法人／融資券／借券籌碼類訊號**。T+5／T+20／T+60 回填機制已有（`.github/scripts/update_signal_ledger_returns.py`，最後 10/16 17:38），但目前 423 筆全為 null——不是故障：最早進場日 10/12，T+5 最快 10/19 才到；另 236 筆進場日未定（202 筆 10/16 寫入、31 筆 10/17 寫入，進場＝下一交易日 10/19；10 筆價格序列不足）。要接入籌碼類需動（只列不改）：①`.github/scripts/build_signal_ledger.py` 新增讀 `data/institutional_history.json`／`margin_by_stock_history.json`／`short_lending_available_history.json`／`securities_lending_sell_history.json` 產生事件，觸發門檻要事前寫死；②`research/B19_SIGNAL_LEDGER_SPEC.md` 增訂籌碼類事件定義與「扣成本後報酬」口徑；③`data/signal_status.json` 與 `index.html` 籌碼面板標「校準中」；④market.yml 已在 git add 清單（signal_ledger.json），不需改。屬新設計，要做需另提案。
+   ✅ 回填已驗證（2026-10-20 DevQueue 20261020-040102，先.一〇九-28，只讀）：進場日 2026-10-12 共 **71 筆 returns.t5 全數已回填**（71/71，exit_date 皆 2026-10-19＝進場後第 5 個交易日，filled_at 2026-10-19 17:38，excess_vs_taiex_pct 71 筆皆有值；報酬 −32.08%～+46.57%、平均 −2.55%）。抽查 2221／3354／6924 三檔，entry_close 與 t5 出場價都和 data/price_history 10/12、10/19 收盤一致。其餘進場日（10/14 49 筆、10/15 38、10/16 29、10/19 217）T+5 尚未到期；133 筆進場日未定。
 12. **`ibkr_quotes.py`沒有任何Windows排程任務**（2026-09-04查明，quotes_ibkr.json停在
     09-02 23:25的真正原因）：要不要建`AlphaIbkrQuotes`（需IB Gateway常開、美股盤中
     每N分鐘）由總司令決定；`run-ibkr-quotes-cycle.ps1`已改成盤中不commit。
