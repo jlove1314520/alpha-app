@@ -1,7 +1,7 @@
 {
   "meta": {
     "engine_version": "scoring-future-v1",
-    "generated_at": "2026-10-20T17:37:26.125726+08:00",
+    "generated_at": "2026-10-20T22:21:34.311633+08:00",
     "data_asof": "2026-10-20",
     "market": "TW",
     "universe_size": 1977,
@@ -3218,12 +3218,12 @@
           "reason": "可觀察天數中有 20% 是連續買超，居全市場前 35%。"
         },
         "institutional_ownership_pct": {
-          "score": 8.7,
-          "percentile": 0.87,
+          "score": 8.6,
+          "percentile": 0.86,
           "raw": {
             "value": 0.0029
           },
-          "reason": "三大法人買超累積張數約當股本的 +0.290%，居全市場前 13%。"
+          "reason": "三大法人買超累積張數約當股本的 +0.290%，居全市場前 14%。"
         },
         "institutional_buying_concentration": {
           "score": 4.3,
@@ -4439,12 +4439,12 @@
           "reason": "可觀察天數中有 100% 是連續買超，居全市場前 9%。"
         },
         "institutional_ownership_pct": {
-          "score": 8.9,
-          "percentile": 0.89,
+          "score": 8.8,
+          "percentile": 0.88,
           "raw": {
             "value": 0.0034
           },
-          "reason": "三大法人買超累積張數約當股本的 +0.337%，居全市場前 11%。"
+          "reason": "三大法人買超累積張數約當股本的 +0.337%，居全市場前 12%。"
         },
         "institutional_buying_concentration": {
           "score": 3.6,
@@ -4973,12 +4973,12 @@
           "reason": "可觀察天數中有 80% 是連續買超，居全市場前 18%。"
         },
         "institutional_ownership_pct": {
-          "score": 9.2,
-          "percentile": 0.92,
+          "score": 9.1,
+          "percentile": 0.91,
           "raw": {
             "value": 0.0044
           },
-          "reason": "三大法人買超累積張數約當股本的 +0.441%，居全市場前 8%。"
+          "reason": "三大法人買超累積張數約當股本的 +0.441%，居全市場前 9%。"
         },
         "institutional_buying_concentration": {
           "score": 4.2,
@@ -8817,12 +8817,12 @@
           "reason": "可觀察天數中有 20% 是連續買超，居全市場前 35%。"
         },
         "institutional_ownership_pct": {
-          "score": 9.5,
-          "percentile": 0.95,
+          "score": 9.4,
+          "percentile": 0.94,
           "raw": {
             "value": 0.0059
           },
-          "reason": "三大法人買超累積張數約當股本的 +0.593%，居全市場前 5%。"
+          "reason": "三大法人買超累積張數約當股本的 +0.593%，居全市場前 6%。"
         },
         "institutional_buying_concentration": {
           "score": 6.8,
@@ -10005,12 +10005,12 @@
           "reason": "可觀察天數中有 20% 是連續買超，居全市場前 35%。"
         },
         "institutional_ownership_pct": {
-          "score": 9.4,
-          "percentile": 0.94,
+          "score": 9.3,
+          "percentile": 0.93,
           "raw": {
             "value": 0.0053
           },
-          "reason": "三大法人買超累積張數約當股本的 +0.533%，居全市場前 6%。"
+          "reason": "三大法人買超累積張數約當股本的 +0.533%，居全市場前 7%。"
         },
         "institutional_buying_concentration": {
           "score": 5.0,
@@ -10119,12 +10119,12 @@
           "reason": "可觀察天數中有 20% 是連續買超，居全市場前 35%。"
         },
         "institutional_ownership_pct": {
-          "score": 9.1,
-          "percentile": 0.91,
+          "score": 9.0,
+          "percentile": 0.9,
           "raw": {
             "value": 0.0041
           },
-          "reason": "三大法人買超累積張數約當股本的 +0.411%，居全市場前 9%。"
+          "reason": "三大法人買超累積張數約當股本的 +0.411%，居全市場前 10%。"
         },
         "institutional_buying_concentration": {
           "score": 3.2,
@@ -12952,20 +12952,20 @@
           "reason": "可觀察天數中有 40% 是連續買超，居全市場前 25%。"
         },
         "institutional_ownership_pct": {
-          "score": 9.1,
-          "percentile": 0.91,
+          "score": 9.2,
+          "percentile": 0.92,
           "raw": {
-            "value": 0.0044
+            "value": 0.0046
           },
-          "reason": "三大法人買超累積張數約當股本的 +0.438%，居全市場前 9%。"
+          "reason": "三大法人買超累積張數約當股本的 +0.460%，居全市場前 8%。"
         },
         "institutional_buying_concentration": {
           "score": 3.1,
           "percentile": 0.31,
           "raw": {
-            "value": 0.3507
+            "value": 0.3336
           },
-          "reason": "外資佔三大法人買超總量的 35%，居全市場前 69%。"
+          "reason": "外資佔三大法人買超總量的 33%，居全市場前 69%。"
         },
         "gross_margin_level_stability": {
           "score": 3.9,
@@ -13826,10 +13826,54 @@
       "news_warning": null
     },
     {
+      "code": "7856",
+      "name": "漢測",
+      "industry": "半導體業",
+      "rank": 263,
+      "total_score": 6.3,
+      "coverage": 0.55,
+      "missing_factors": [
+        "gross_margin_level_stability",
+        "capacity_utilization_proxy"
+      ],
+      "liquidity_20d": 2131079444.4444,
+      "no_recent_trade_reason": null,
+      "data_asof": "2026-10-20",
+      "factors": {
+        "institutional_buying_streak": {
+          "score": 8.2,
+          "percentile": 0.82,
+          "raw": {
+            "value": 0.8
+          },
+          "reason": "可觀察天數中有 80% 是連續買超，居全市場前 18%。"
+        },
+        "institutional_ownership_pct": {
+          "score": 8.9,
+          "percentile": 0.89,
+          "raw": {
+            "value": 0.0034
+          },
+          "reason": "三大法人買超累積張數約當股本的 +0.344%，居全市場前 11%。"
+        },
+        "institutional_buying_concentration": {
+          "score": 0.3,
+          "percentile": 0.03,
+          "raw": {
+            "value": -0.1774
+          },
+          "reason": "外資佔三大法人買超總量的 -18%，居全市場前 97%。"
+        }
+      },
+      "flags": [],
+      "qualitative_notes": null,
+      "news_warning": null
+    },
+    {
       "code": "8415",
       "name": "大國鋼",
       "industry": "鋼鐵工業",
-      "rank": 263,
+      "rank": 264,
       "total_score": 6.3,
       "coverage": 1.0,
       "missing_factors": [],
@@ -13886,7 +13930,7 @@
       "code": "9921",
       "name": "巨大",
       "industry": "運動休閒",
-      "rank": 264,
+      "rank": 265,
       "total_score": 6.3,
       "coverage": 1.0,
       "missing_factors": [],
@@ -13903,12 +13947,12 @@
           "reason": "可觀察天數中有 0% 是連續買超，居全市場前 72%。"
         },
         "institutional_ownership_pct": {
-          "score": 9.0,
-          "percentile": 0.9,
+          "score": 8.9,
+          "percentile": 0.89,
           "raw": {
             "value": 0.0037
           },
-          "reason": "三大法人買超累積張數約當股本的 +0.370%，居全市場前 10%。"
+          "reason": "三大法人買超累積張數約當股本的 +0.370%，居全市場前 11%。"
         },
         "institutional_buying_concentration": {
           "score": 8.9,
@@ -13943,7 +13987,7 @@
       "code": "1795",
       "name": "美時",
       "industry": "生技醫療",
-      "rank": 265,
+      "rank": 266,
       "total_score": 6.2,
       "coverage": 1.0,
       "missing_factors": [],
@@ -14000,7 +14044,7 @@
       "code": "2328",
       "name": "廣宇",
       "industry": "電子零組件業",
-      "rank": 266,
+      "rank": 267,
       "total_score": 6.2,
       "coverage": 1.0,
       "missing_factors": [],
@@ -14057,7 +14101,7 @@
       "code": "2634",
       "name": "漢翔",
       "industry": "航運業",
-      "rank": 267,
+      "rank": 268,
       "total_score": 6.2,
       "coverage": 1.0,
       "missing_factors": [],
@@ -14114,7 +14158,7 @@
       "code": "3312",
       "name": "弘憶股",
       "industry": "電子通路業",
-      "rank": 268,
+      "rank": 269,
       "total_score": 6.2,
       "coverage": 1.0,
       "missing_factors": [],
@@ -14171,7 +14215,7 @@
       "code": "3675",
       "name": "德微",
       "industry": "半導體業",
-      "rank": 269,
+      "rank": 270,
       "total_score": 6.2,
       "coverage": 1.0,
       "missing_factors": [],
@@ -14228,7 +14272,7 @@
       "code": "4114",
       "name": "健喬",
       "industry": "生技醫療",
-      "rank": 270,
+      "rank": 271,
       "total_score": 6.2,
       "coverage": 1.0,
       "missing_factors": [],
@@ -14285,7 +14329,7 @@
       "code": "4123",
       "name": "晟德",
       "industry": "生技醫療",
-      "rank": 271,
+      "rank": 272,
       "total_score": 6.2,
       "coverage": 1.0,
       "missing_factors": [],
@@ -14342,7 +14386,7 @@
       "code": "5521",
       "name": "工信",
       "industry": "建材營造",
-      "rank": 272,
+      "rank": 273,
       "total_score": 6.2,
       "coverage": 1.0,
       "missing_factors": [],
@@ -14389,63 +14433,6 @@
             "value": 9642.2946
           },
           "reason": "近4季營收合計/最新一期非流動資產比值 9642.29，居全市場前 5%（產能利用率代理，非精確固定資產週轉率）。"
-        }
-      },
-      "flags": [],
-      "qualitative_notes": null,
-      "news_warning": null
-    },
-    {
-      "code": "6187",
-      "name": "萬潤",
-      "industry": "半導體業",
-      "rank": 273,
-      "total_score": 6.2,
-      "coverage": 1.0,
-      "missing_factors": [],
-      "liquidity_20d": 4158509000.0,
-      "no_recent_trade_reason": null,
-      "data_asof": "2026-10-20",
-      "factors": {
-        "institutional_buying_streak": {
-          "score": 2.8,
-          "percentile": 0.28,
-          "raw": {
-            "value": 0.0
-          },
-          "reason": "可觀察天數中有 0% 是連續買超，居全市場前 72%。"
-        },
-        "institutional_ownership_pct": {
-          "score": 8.5,
-          "percentile": 0.85,
-          "raw": {
-            "value": 0.0025
-          },
-          "reason": "三大法人買超累積張數約當股本的 +0.251%，居全市場前 15%。"
-        },
-        "institutional_buying_concentration": {
-          "score": 9.5,
-          "percentile": 0.95,
-          "raw": {
-            "value": 1.3594
-          },
-          "reason": "外資佔三大法人買超總量的 136%，居全市場前 5%。"
-        },
-        "gross_margin_level_stability": {
-          "score": 6.5,
-          "percentile": 0.65,
-          "raw": {
-            "value": 7.63
-          },
-          "reason": "近8季毛利率水準×穩定度綜合指標 7.6，居全市場前 35%（供應鏈議價力代理，非嚴謹驗證）。"
-        },
-        "capacity_utilization_proxy": {
-          "score": 4.0,
-          "percentile": 0.4,
-          "raw": {
-            "value": 1034.7995
-          },
-          "reason": "近4季營收合計/最新一期非流動資產比值 1034.80，居全市場前 60%（產能利用率代理，非精確固定資產週轉率）。"
         }
       },
       "flags": [],
@@ -14701,20 +14688,20 @@
           "reason": "可觀察天數中有 0% 是連續買超，居全市場前 72%。"
         },
         "institutional_ownership_pct": {
-          "score": 6.1,
-          "percentile": 0.61,
+          "score": 6.0,
+          "percentile": 0.6,
           "raw": {
             "value": 0.0002
           },
-          "reason": "三大法人買超累積張數約當股本的 +0.025%，居全市場前 39%。"
+          "reason": "三大法人買超累積張數約當股本的 +0.023%，居全市場前 40%。"
         },
         "institutional_buying_concentration": {
           "score": 3.0,
           "percentile": 0.3,
           "raw": {
-            "value": 0.1667
+            "value": 0.1796
           },
-          "reason": "外資佔三大法人買超總量的 17%，居全市場前 70%。"
+          "reason": "外資佔三大法人買超總量的 18%，居全市場前 70%。"
         },
         "gross_margin_level_stability": {
           "score": 9.9,
@@ -15010,10 +14997,67 @@
       "news_warning": null
     },
     {
+      "code": "3605",
+      "name": "宏致",
+      "industry": "電子零組件業",
+      "rank": 284,
+      "total_score": 6.1,
+      "coverage": 1.0,
+      "missing_factors": [],
+      "liquidity_20d": 3630069932.0,
+      "no_recent_trade_reason": null,
+      "data_asof": "2026-10-20",
+      "factors": {
+        "institutional_buying_streak": {
+          "score": 2.8,
+          "percentile": 0.28,
+          "raw": {
+            "value": 0.0
+          },
+          "reason": "可觀察天數中有 0% 是連續買超，居全市場前 72%。"
+        },
+        "institutional_ownership_pct": {
+          "score": 9.6,
+          "percentile": 0.96,
+          "raw": {
+            "value": 0.0079
+          },
+          "reason": "三大法人買超累積張數約當股本的 +0.789%，居全市場前 4%。"
+        },
+        "institutional_buying_concentration": {
+          "score": 0.1,
+          "percentile": 0.01,
+          "raw": {
+            "value": -1.1234
+          },
+          "reason": "外資佔三大法人買超總量的 -112%，居全市場前 99%。"
+        },
+        "gross_margin_level_stability": {
+          "score": 9.0,
+          "percentile": 0.9,
+          "raw": {
+            "value": 14.6889
+          },
+          "reason": "近8季毛利率水準×穩定度綜合指標 14.7，居全市場前 10%（供應鏈議價力代理，非嚴謹驗證）。"
+        },
+        "capacity_utilization_proxy": {
+          "score": 5.7,
+          "percentile": 0.57,
+          "raw": {
+            "value": 1526.8383
+          },
+          "reason": "近4季營收合計/最新一期非流動資產比值 1526.84，居全市場前 43%（產能利用率代理，非精確固定資產週轉率）。"
+        }
+      },
+      "flags": [],
+      "qualitative_notes": null,
+      "news_warning": null
+    },
+    {
       "code": "5269",
       "name": "祥碩",
       "industry": "半導體業",
-      "rank": 284,
+      "rank": 285,
       "total_score": 6.1,
       "coverage": 1.0,
       "missing_factors": [],
@@ -15070,7 +15114,7 @@
       "code": "6143",
       "name": "振曜",
       "industry": "通信網路業",
-      "rank": 285,
+      "rank": 286,
       "total_score": 6.1,
       "coverage": 0.55,
       "missing_factors": [
@@ -15111,10 +15155,67 @@
       "news_warning": null
     },
     {
+      "code": "6187",
+      "name": "萬潤",
+      "industry": "半導體業",
+      "rank": 287,
+      "total_score": 6.1,
+      "coverage": 1.0,
+      "missing_factors": [],
+      "liquidity_20d": 4158509000.0,
+      "no_recent_trade_reason": null,
+      "data_asof": "2026-10-20",
+      "factors": {
+        "institutional_buying_streak": {
+          "score": 2.8,
+          "percentile": 0.28,
+          "raw": {
+            "value": 0.0
+          },
+          "reason": "可觀察天數中有 0% 是連續買超，居全市場前 72%。"
+        },
+        "institutional_ownership_pct": {
+          "score": 7.6,
+          "percentile": 0.76,
+          "raw": {
+            "value": 0.0011
+          },
+          "reason": "三大法人買超累積張數約當股本的 +0.115%，居全市場前 24%。"
+        },
+        "institutional_buying_concentration": {
+          "score": 9.8,
+          "percentile": 0.98,
+          "raw": {
+            "value": 2.9743
+          },
+          "reason": "外資佔三大法人買超總量的 297%，居全市場前 2%。"
+        },
+        "gross_margin_level_stability": {
+          "score": 6.5,
+          "percentile": 0.65,
+          "raw": {
+            "value": 7.63
+          },
+          "reason": "近8季毛利率水準×穩定度綜合指標 7.6，居全市場前 35%（供應鏈議價力代理，非嚴謹驗證）。"
+        },
+        "capacity_utilization_proxy": {
+          "score": 4.0,
+          "percentile": 0.4,
+          "raw": {
+            "value": 1034.7995
+          },
+          "reason": "近4季營收合計/最新一期非流動資產比值 1034.80，居全市場前 60%（產能利用率代理，非精確固定資產週轉率）。"
+        }
+      },
+      "flags": [],
+      "qualitative_notes": null,
+      "news_warning": null
+    },
+    {
       "code": "6412",
       "name": "群電",
       "industry": "電子零組件業",
-      "rank": 286,
+      "rank": 288,
       "total_score": 6.1,
       "coverage": 1.0,
       "missing_factors": [],
@@ -15171,7 +15272,7 @@
       "code": "7711",
       "name": "永擎",
       "industry": "電腦及週邊設備業",
-      "rank": 287,
+      "rank": 289,
       "total_score": 6.1,
       "coverage": 0.35,
       "missing_factors": [
@@ -15208,7 +15309,7 @@
       "code": "2010",
       "name": "春源",
       "industry": "鋼鐵工業",
-      "rank": 288,
+      "rank": 290,
       "total_score": 6.0,
       "coverage": 1.0,
       "missing_factors": [],
@@ -15265,7 +15366,7 @@
       "code": "2317",
       "name": "鴻海",
       "industry": "其他電子業",
-      "rank": 289,
+      "rank": 291,
       "total_score": 6.0,
       "coverage": 1.0,
       "missing_factors": [],
@@ -15322,7 +15423,7 @@
       "code": "2355",
       "name": "敬鵬",
       "industry": "電子零組件業",
-      "rank": 290,
+      "rank": 292,
       "total_score": 6.0,
       "coverage": 1.0,
       "missing_factors": [],
@@ -15379,7 +15480,7 @@
       "code": "2458",
       "name": "義隆",
       "industry": "半導體業",
-      "rank": 291,
+      "rank": 293,
       "total_score": 6.0,
       "coverage": 1.0,
       "missing_factors": [],
@@ -15436,7 +15537,7 @@
       "code": "2498",
       "name": "宏達電",
       "industry": "通信網路業",
-      "rank": 292,
+      "rank": 294,
       "total_score": 6.0,
       "coverage": 1.0,
       "missing_factors": [],
@@ -15493,7 +15594,7 @@
       "code": "2520",
       "name": "冠德",
       "industry": "建材營造",
-      "rank": 293,
+      "rank": 295,
       "total_score": 6.0,
       "coverage": 1.0,
       "missing_factors": [],
@@ -15550,7 +15651,7 @@
       "code": "3430",
       "name": "奇鈦科",
       "industry": "化學工業",
-      "rank": 294,
+      "rank": 296,
       "total_score": 6.0,
       "coverage": 0.85,
       "missing_factors": [
@@ -15601,7 +15702,7 @@
       "code": "4770",
       "name": "上品",
       "industry": "化學工業",
-      "rank": 295,
+      "rank": 297,
       "total_score": 6.0,
       "coverage": 1.0,
       "missing_factors": [],
@@ -15658,7 +15759,7 @@
       "code": "6425",
       "name": "易發",
       "industry": "電機機械",
-      "rank": 296,
+      "rank": 298,
       "total_score": 6.0,
       "coverage": 1.0,
       "missing_factors": [],
@@ -15715,7 +15816,7 @@
       "code": "6446",
       "name": "藥華藥",
       "industry": "生技醫療",
-      "rank": 297,
+      "rank": 299,
       "total_score": 6.0,
       "coverage": 1.0,
       "missing_factors": [],
@@ -15772,7 +15873,7 @@
       "code": "6499",
       "name": "益安",
       "industry": "生技醫療",
-      "rank": 298,
+      "rank": 300,
       "total_score": 6.0,
       "coverage": 0.55,
       "missing_factors": [
@@ -15816,7 +15917,7 @@
       "code": "6805",
       "name": "富世達",
       "industry": "電子零組件業",
-      "rank": 299,
+      "rank": 301,
       "total_score": 6.0,
       "coverage": 1.0,
       "missing_factors": [],
@@ -15873,7 +15974,7 @@
       "code": "6903",
       "name": "巨漢",
       "industry": "其他電子業",
-      "rank": 300,
+      "rank": 302,
       "total_score": 6.0,
       "coverage": 1.0,
       "missing_factors": [],
@@ -15930,7 +16031,7 @@
       "code": "8016",
       "name": "矽創",
       "industry": "半導體業",
-      "rank": 301,
+      "rank": 303,
       "total_score": 6.0,
       "coverage": 1.0,
       "missing_factors": [],
@@ -15987,7 +16088,7 @@
       "code": "9933",
       "name": "中鼎",
       "industry": "其他",
-      "rank": 302,
+      "rank": 304,
       "total_score": 6.0,
       "coverage": 1.0,
       "missing_factors": [],
@@ -16044,7 +16145,7 @@
       "code": "9939",
       "name": "宏全",
       "industry": "其他",
-      "rank": 303,
+      "rank": 305,
       "total_score": 6.0,
       "coverage": 1.0,
       "missing_factors": [],
@@ -16101,7 +16202,7 @@
       "code": "9945",
       "name": "潤泰新",
       "industry": "其他",
-      "rank": 304,
+      "rank": 306,
       "total_score": 6.0,
       "coverage": 1.0,
       "missing_factors": [],
@@ -16158,7 +16259,7 @@
       "code": "1102",
       "name": "亞泥",
       "industry": "水泥工業",
-      "rank": 305,
+      "rank": 307,
       "total_score": 5.9,
       "coverage": 1.0,
       "missing_factors": [],
@@ -16215,7 +16316,7 @@
       "code": "1590",
       "name": "亞德客-KY",
       "industry": "電機機械",
-      "rank": 306,
+      "rank": 308,
       "total_score": 5.9,
       "coverage": 0.85,
       "missing_factors": [
@@ -16266,7 +16367,7 @@
       "code": "2204",
       "name": "中華",
       "industry": "汽車工業",
-      "rank": 307,
+      "rank": 309,
       "total_score": 5.9,
       "coverage": 1.0,
       "missing_factors": [],
@@ -16323,7 +16424,7 @@
       "code": "2455",
       "name": "全新",
       "industry": "通信網路業",
-      "rank": 308,
+      "rank": 310,
       "total_score": 5.9,
       "coverage": 0.5,
       "missing_factors": [
@@ -16360,7 +16461,7 @@
       "code": "3010",
       "name": "華立",
       "industry": "電子通路業",
-      "rank": 309,
+      "rank": 311,
       "total_score": 5.9,
       "coverage": 1.0,
       "missing_factors": [],
@@ -16417,7 +16518,7 @@
       "code": "3033",
       "name": "威健",
       "industry": "電子通路業",
-      "rank": 310,
+      "rank": 312,
       "total_score": 5.9,
       "coverage": 0.35,
       "missing_factors": [
@@ -16454,7 +16555,7 @@
       "code": "3467",
       "name": "台灣精材",
       "industry": "半導體業",
-      "rank": 311,
+      "rank": 313,
       "total_score": 5.9,
       "coverage": 0.55,
       "missing_factors": [
@@ -16498,7 +16599,7 @@
       "code": "3577",
       "name": "泓格",
       "industry": "電腦及週邊設備業",
-      "rank": 312,
+      "rank": 314,
       "total_score": 5.9,
       "coverage": 0.85,
       "missing_factors": [
@@ -16546,67 +16647,10 @@
       "news_warning": null
     },
     {
-      "code": "3605",
-      "name": "宏致",
-      "industry": "電子零組件業",
-      "rank": 313,
-      "total_score": 5.9,
-      "coverage": 1.0,
-      "missing_factors": [],
-      "liquidity_20d": 3630069932.0,
-      "no_recent_trade_reason": null,
-      "data_asof": "2026-10-20",
-      "factors": {
-        "institutional_buying_streak": {
-          "score": 2.8,
-          "percentile": 0.28,
-          "raw": {
-            "value": 0.0
-          },
-          "reason": "可觀察天數中有 0% 是連續買超，居全市場前 72%。"
-        },
-        "institutional_ownership_pct": {
-          "score": 8.8,
-          "percentile": 0.88,
-          "raw": {
-            "value": 0.0032
-          },
-          "reason": "三大法人買超累積張數約當股本的 +0.319%，居全市場前 12%。"
-        },
-        "institutional_buying_concentration": {
-          "score": 0.1,
-          "percentile": 0.01,
-          "raw": {
-            "value": -2.7799
-          },
-          "reason": "外資佔三大法人買超總量的 -278%，居全市場前 99%。"
-        },
-        "gross_margin_level_stability": {
-          "score": 9.0,
-          "percentile": 0.9,
-          "raw": {
-            "value": 14.6889
-          },
-          "reason": "近8季毛利率水準×穩定度綜合指標 14.7，居全市場前 10%（供應鏈議價力代理，非嚴謹驗證）。"
-        },
-        "capacity_utilization_proxy": {
-          "score": 5.7,
-          "percentile": 0.57,
-          "raw": {
-            "value": 1526.8383
-          },
-          "reason": "近4季營收合計/最新一期非流動資產比值 1526.84，居全市場前 43%（產能利用率代理，非精確固定資產週轉率）。"
-        }
-      },
-      "flags": [],
-      "qualitative_notes": null,
-      "news_warning": null
-    },
-    {
       "code": "3702",
       "name": "大聯大",
       "industry": "電子通路業",
-      "rank": 314,
+      "rank": 315,
       "total_score": 5.9,
       "coverage": 1.0,
       "missing_factors": [],
@@ -16663,7 +16707,7 @@
       "code": "6510",
       "name": "精測",
       "industry": "半導體業",
-      "rank": 315,
+      "rank": 316,
       "total_score": 5.9,
       "coverage": 0.85,
       "missing_factors": [
@@ -16714,7 +16758,7 @@
       "code": "6579",
       "name": "研揚",
       "industry": "電腦及週邊設備業",
-      "rank": 316,
+      "rank": 317,
       "total_score": 5.9,
       "coverage": 0.85,
       "missing_factors": [
@@ -16765,7 +16809,7 @@
       "code": "6695",
       "name": "芯鼎",
       "industry": "半導體業",
-      "rank": 317,
+      "rank": 318,
       "total_score": 5.9,
       "coverage": 0.85,
       "missing_factors": [
@@ -16806,50 +16850,6 @@
             "value": 2112.1845
           },
           "reason": "近4季營收合計/最新一期非流動資產比值 2112.18，居全市場前 32%（產能利用率代理，非精確固定資產週轉率）。"
-        }
-      },
-      "flags": [],
-      "qualitative_notes": null,
-      "news_warning": null
-    },
-    {
-      "code": "7856",
-      "name": "漢測",
-      "industry": "半導體業",
-      "rank": 318,
-      "total_score": 5.9,
-      "coverage": 0.55,
-      "missing_factors": [
-        "gross_margin_level_stability",
-        "capacity_utilization_proxy"
-      ],
-      "liquidity_20d": 2131079444.4444,
-      "no_recent_trade_reason": null,
-      "data_asof": "2026-10-20",
-      "factors": {
-        "institutional_buying_streak": {
-          "score": 8.2,
-          "percentile": 0.82,
-          "raw": {
-            "value": 0.8
-          },
-          "reason": "可觀察天數中有 80% 是連續買超，居全市場前 18%。"
-        },
-        "institutional_ownership_pct": {
-          "score": 8.0,
-          "percentile": 0.8,
-          "raw": {
-            "value": 0.0017
-          },
-          "reason": "三大法人買超累積張數約當股本的 +0.171%，居全市場前 20%。"
-        },
-        "institutional_buying_concentration": {
-          "score": 0.2,
-          "percentile": 0.02,
-          "raw": {
-            "value": -0.3562
-          },
-          "reason": "外資佔三大法人買超總量的 -36%，居全市場前 98%。"
         }
       },
       "flags": [],
@@ -17548,9 +17548,9 @@
           "score": 0.8,
           "percentile": 0.08,
           "raw": {
-            "value": -0.0051
+            "value": -0.005
           },
-          "reason": "三大法人買超累積張數約當股本的 -0.506%，居全市場前 92%。"
+          "reason": "三大法人買超累積張數約當股本的 -0.504%，居全市場前 92%。"
         },
         "gross_margin_level_stability": {
           "score": 9.8,
@@ -21330,12 +21330,12 @@
           "reason": "可觀察天數中有 80% 是連續買超，居全市場前 18%。"
         },
         "institutional_ownership_pct": {
-          "score": 9.3,
-          "percentile": 0.93,
+          "score": 9.2,
+          "percentile": 0.92,
           "raw": {
             "value": 0.0049
           },
-          "reason": "三大法人買超累積張數約當股本的 +0.489%，居全市場前 7%。"
+          "reason": "三大法人買超累積張數約當股本的 +0.489%，居全市場前 8%。"
         },
         "institutional_buying_concentration": {
           "score": 7.6,
@@ -21475,12 +21475,12 @@
           "reason": "可觀察天數中有 0% 是連續買超，居全市場前 72%。"
         },
         "institutional_ownership_pct": {
-          "score": 8.8,
-          "percentile": 0.88,
+          "score": 8.7,
+          "percentile": 0.87,
           "raw": {
             "value": 0.003
           },
-          "reason": "三大法人買超累積張數約當股本的 +0.305%，居全市場前 12%。"
+          "reason": "三大法人買超累積張數約當股本的 +0.305%，居全市場前 13%。"
         },
         "institutional_buying_concentration": {
           "score": 8.5,
@@ -21883,9 +21883,9 @@
           "score": 0.7,
           "percentile": 0.07,
           "raw": {
-            "value": -0.0061
+            "value": -0.0059
           },
-          "reason": "三大法人買超累積張數約當股本的 -0.607%，居全市場前 93%。"
+          "reason": "三大法人買超累積張數約當股本的 -0.587%，居全市場前 93%。"
         },
         "gross_margin_level_stability": {
           "score": 9.5,
@@ -21986,12 +21986,12 @@
           "reason": "可觀察天數中有 20% 是連續買超，居全市場前 35%。"
         },
         "institutional_ownership_pct": {
-          "score": 7.7,
-          "percentile": 0.77,
+          "score": 7.8,
+          "percentile": 0.78,
           "raw": {
             "value": 0.0013
           },
-          "reason": "三大法人買超累積張數約當股本的 +0.133%，居全市場前 23%。"
+          "reason": "三大法人買超累積張數約當股本的 +0.133%，居全市場前 22%。"
         },
         "institutional_buying_concentration": {
           "score": 7.4,
@@ -22043,12 +22043,12 @@
           "reason": "可觀察天數中有 0% 是連續買超，居全市場前 72%。"
         },
         "institutional_ownership_pct": {
-          "score": 7.9,
-          "percentile": 0.79,
+          "score": 8.0,
+          "percentile": 0.8,
           "raw": {
             "value": 0.0016
           },
-          "reason": "三大法人買超累積張數約當股本的 +0.158%，居全市場前 21%。"
+          "reason": "三大法人買超累積張數約當股本的 +0.158%，居全市場前 20%。"
         },
         "institutional_buying_concentration": {
           "score": 3.6,
@@ -23525,13 +23525,13 @@
           "raw": {
             "value": 0.0086
           },
-          "reason": "三大法人買超累積張數約當股本的 +0.856%，居全市場前 4%。"
+          "reason": "三大法人買超累積張數約當股本的 +0.862%，居全市場前 4%。"
         },
         "institutional_buying_concentration": {
           "score": 3.4,
           "percentile": 0.34,
           "raw": {
-            "value": 0.7002
+            "value": 0.6961
           },
           "reason": "外資佔三大法人買超總量的 70%，居全市場前 66%。"
         },
@@ -24890,12 +24890,12 @@
           "reason": "可觀察天數中有 20% 是連續買超，居全市場前 35%。"
         },
         "institutional_ownership_pct": {
-          "score": 8.6,
-          "percentile": 0.86,
+          "score": 8.5,
+          "percentile": 0.85,
           "raw": {
             "value": 0.0027
           },
-          "reason": "三大法人買超累積張數約當股本的 +0.274%，居全市場前 14%。"
+          "reason": "三大法人買超累積張數約當股本的 +0.274%，居全市場前 15%。"
         },
         "institutional_buying_concentration": {
           "score": 3.2,
@@ -24954,7 +24954,7 @@
           "raw": {
             "value": -0.0069
           },
-          "reason": "三大法人買超累積張數約當股本的 -0.687%，居全市場前 94%。"
+          "reason": "三大法人買超累積張數約當股本的 -0.694%，居全市場前 94%。"
         },
         "gross_margin_level_stability": {
           "score": 8.3,
@@ -26377,9 +26377,9 @@
           "score": 0.7,
           "percentile": 0.07,
           "raw": {
-            "value": -0.0059
+            "value": -0.0058
           },
-          "reason": "三大法人買超累積張數約當股本的 -0.591%，居全市場前 93%。"
+          "reason": "三大法人買超累積張數約當股本的 -0.580%，居全市場前 93%。"
         },
         "gross_margin_level_stability": {
           "score": 4.1,
@@ -26931,12 +26931,12 @@
           "reason": "可觀察天數中有 60% 是連續買超，居全市場前 20%。"
         },
         "institutional_ownership_pct": {
-          "score": 9.2,
-          "percentile": 0.92,
+          "score": 9.1,
+          "percentile": 0.91,
           "raw": {
             "value": 0.0044
           },
-          "reason": "三大法人買超累積張數約當股本的 +0.443%，居全市場前 8%。"
+          "reason": "三大法人買超累積張數約當股本的 +0.443%，居全市場前 9%。"
         },
         "institutional_buying_concentration": {
           "score": 3.0,
@@ -28592,61 +28592,10 @@
       "news_warning": null
     },
     {
-      "code": "3450",
-      "name": "聯鈞",
-      "industry": "半導體業",
-      "rank": 545,
-      "total_score": 4.6,
-      "coverage": 0.85,
-      "missing_factors": [
-        "institutional_buying_concentration"
-      ],
-      "liquidity_20d": 4163394749.6,
-      "no_recent_trade_reason": null,
-      "data_asof": "2026-10-20",
-      "factors": {
-        "institutional_buying_streak": {
-          "score": 7.5,
-          "percentile": 0.75,
-          "raw": {
-            "value": 0.4
-          },
-          "reason": "可觀察天數中有 40% 是連續買超，居全市場前 25%。"
-        },
-        "institutional_ownership_pct": {
-          "score": 0.2,
-          "percentile": 0.02,
-          "raw": {
-            "value": -0.0142
-          },
-          "reason": "三大法人買超累積張數約當股本的 -1.419%，居全市場前 98%。"
-        },
-        "gross_margin_level_stability": {
-          "score": 5.1,
-          "percentile": 0.51,
-          "raw": {
-            "value": 5.5133
-          },
-          "reason": "近8季毛利率水準×穩定度綜合指標 5.5，居全市場前 49%（供應鏈議價力代理，非嚴謹驗證）。"
-        },
-        "capacity_utilization_proxy": {
-          "score": 5.4,
-          "percentile": 0.54,
-          "raw": {
-            "value": 1429.1172
-          },
-          "reason": "近4季營收合計/最新一期非流動資產比值 1429.12，居全市場前 46%（產能利用率代理，非精確固定資產週轉率）。"
-        }
-      },
-      "flags": [],
-      "qualitative_notes": null,
-      "news_warning": null
-    },
-    {
       "code": "4147",
       "name": "中裕",
       "industry": "生技醫療",
-      "rank": 546,
+      "rank": 545,
       "total_score": 4.6,
       "coverage": 1.0,
       "missing_factors": [],
@@ -28703,7 +28652,7 @@
       "code": "4303",
       "name": "信立",
       "industry": "塑膠工業",
-      "rank": 547,
+      "rank": 546,
       "total_score": 4.6,
       "coverage": 1.0,
       "missing_factors": [],
@@ -28760,7 +28709,7 @@
       "code": "4979",
       "name": "華星光",
       "industry": "通信網路業",
-      "rank": 548,
+      "rank": 547,
       "total_score": 4.6,
       "coverage": 0.85,
       "missing_factors": [
@@ -28811,7 +28760,7 @@
       "code": "5284",
       "name": "jpp-KY",
       "industry": "其他",
-      "rank": 549,
+      "rank": 548,
       "total_score": 4.6,
       "coverage": 0.85,
       "missing_factors": [
@@ -28862,7 +28811,7 @@
       "code": "5536",
       "name": "聖暉*",
       "industry": "其他電子業",
-      "rank": 550,
+      "rank": 549,
       "total_score": 4.6,
       "coverage": 0.85,
       "missing_factors": [
@@ -28913,7 +28862,7 @@
       "code": "6269",
       "name": "台郡",
       "industry": "電子零組件業",
-      "rank": 551,
+      "rank": 550,
       "total_score": 4.6,
       "coverage": 1.0,
       "missing_factors": [],
@@ -28970,7 +28919,7 @@
       "code": "6589",
       "name": "台康生技",
       "industry": "生技醫療",
-      "rank": 552,
+      "rank": 551,
       "total_score": 4.6,
       "coverage": 1.0,
       "missing_factors": [],
@@ -29027,7 +28976,7 @@
       "code": "6869",
       "name": "雲豹能源",
       "industry": "綠能環保",
-      "rank": 553,
+      "rank": 552,
       "total_score": 4.6,
       "coverage": 0.35,
       "missing_factors": [
@@ -29064,7 +29013,7 @@
       "code": "8438",
       "name": "昶昕",
       "industry": "綠能環保",
-      "rank": 554,
+      "rank": 553,
       "total_score": 4.6,
       "coverage": 0.85,
       "missing_factors": [
@@ -29115,7 +29064,7 @@
       "code": "2101",
       "name": "南港",
       "industry": "橡膠工業",
-      "rank": 555,
+      "rank": 554,
       "total_score": 4.5,
       "coverage": 1.0,
       "missing_factors": [],
@@ -29172,7 +29121,7 @@
       "code": "2404",
       "name": "漢唐",
       "industry": "其他電子業",
-      "rank": 556,
+      "rank": 555,
       "total_score": 4.5,
       "coverage": 0.85,
       "missing_factors": [
@@ -29223,7 +29172,7 @@
       "code": "2474",
       "name": "可成",
       "industry": "其他電子業",
-      "rank": 557,
+      "rank": 556,
       "total_score": 4.5,
       "coverage": 1.0,
       "missing_factors": [],
@@ -29280,7 +29229,7 @@
       "code": "2891",
       "name": "中信金",
       "industry": "金融保險",
-      "rank": 558,
+      "rank": 557,
       "total_score": 4.5,
       "coverage": 0.55,
       "missing_factors": [
@@ -29324,7 +29273,7 @@
       "code": "3680",
       "name": "家登",
       "industry": "半導體業",
-      "rank": 559,
+      "rank": 558,
       "total_score": 4.5,
       "coverage": 0.85,
       "missing_factors": [
@@ -29375,7 +29324,7 @@
       "code": "4707",
       "name": "磐亞",
       "industry": "化學工業",
-      "rank": 560,
+      "rank": 559,
       "total_score": 4.5,
       "coverage": 1.0,
       "missing_factors": [],
@@ -29432,7 +29381,7 @@
       "code": "4714",
       "name": "永捷",
       "industry": "化學工業",
-      "rank": 561,
+      "rank": 560,
       "total_score": 4.5,
       "coverage": 1.0,
       "missing_factors": [],
@@ -29489,7 +29438,7 @@
       "code": "6462",
       "name": "神盾",
       "industry": "半導體業",
-      "rank": 562,
+      "rank": 561,
       "total_score": 4.5,
       "coverage": 0.85,
       "missing_factors": [
@@ -29540,7 +29489,7 @@
       "code": "8112",
       "name": "至上",
       "industry": "電子通路業",
-      "rank": 563,
+      "rank": 562,
       "total_score": 4.5,
       "coverage": 0.85,
       "missing_factors": [
@@ -29591,7 +29540,7 @@
       "code": "1597",
       "name": "直得",
       "industry": "電機機械",
-      "rank": 564,
+      "rank": 563,
       "total_score": 4.4,
       "coverage": 0.85,
       "missing_factors": [
@@ -29642,7 +29591,7 @@
       "code": "1608",
       "name": "華榮",
       "industry": "電器電纜",
-      "rank": 565,
+      "rank": 564,
       "total_score": 4.4,
       "coverage": 1.0,
       "missing_factors": [],
@@ -29699,7 +29648,7 @@
       "code": "2338",
       "name": "光罩",
       "industry": "半導體業",
-      "rank": 566,
+      "rank": 565,
       "total_score": 4.4,
       "coverage": 1.0,
       "missing_factors": [],
@@ -29756,7 +29705,7 @@
       "code": "2351",
       "name": "順德",
       "industry": "半導體業",
-      "rank": 567,
+      "rank": 566,
       "total_score": 4.4,
       "coverage": 1.0,
       "missing_factors": [],
@@ -29813,7 +29762,7 @@
       "code": "2388",
       "name": "威盛",
       "industry": "半導體業",
-      "rank": 568,
+      "rank": 567,
       "total_score": 4.4,
       "coverage": 0.85,
       "missing_factors": [
@@ -29864,7 +29813,7 @@
       "code": "2485",
       "name": "兆赫",
       "industry": "通信網路業",
-      "rank": 569,
+      "rank": 568,
       "total_score": 4.4,
       "coverage": 1.0,
       "missing_factors": [],
@@ -29921,7 +29870,7 @@
       "code": "2609",
       "name": "陽明",
       "industry": "航運業",
-      "rank": 570,
+      "rank": 569,
       "total_score": 4.4,
       "coverage": 1.0,
       "missing_factors": [],
@@ -29978,7 +29927,7 @@
       "code": "3094",
       "name": "聯傑",
       "industry": "半導體業",
-      "rank": 571,
+      "rank": 570,
       "total_score": 4.4,
       "coverage": 0.85,
       "missing_factors": [
@@ -30029,7 +29978,7 @@
       "code": "4174",
       "name": "浩鼎",
       "industry": "生技醫療",
-      "rank": 572,
+      "rank": 571,
       "total_score": 4.4,
       "coverage": 1.0,
       "missing_factors": [],
@@ -30086,7 +30035,7 @@
       "code": "4743",
       "name": "合一",
       "industry": "生技醫療",
-      "rank": 573,
+      "rank": 572,
       "total_score": 4.4,
       "coverage": 1.0,
       "missing_factors": [],
@@ -30143,7 +30092,7 @@
       "code": "4903",
       "name": "聯光通",
       "industry": "通信網路業",
-      "rank": 574,
+      "rank": 573,
       "total_score": 4.4,
       "coverage": 1.0,
       "missing_factors": [],
@@ -30200,7 +30149,7 @@
       "code": "5392",
       "name": "能率",
       "industry": "光電業",
-      "rank": 575,
+      "rank": 574,
       "total_score": 4.4,
       "coverage": 0.85,
       "missing_factors": [
@@ -30251,7 +30200,7 @@
       "code": "6168",
       "name": "宏齊",
       "industry": "光電業",
-      "rank": 576,
+      "rank": 575,
       "total_score": 4.4,
       "coverage": 0.85,
       "missing_factors": [
@@ -30302,7 +30251,7 @@
       "code": "8091",
       "name": "翔名",
       "industry": "半導體業",
-      "rank": 577,
+      "rank": 576,
       "total_score": 4.4,
       "coverage": 0.85,
       "missing_factors": [
@@ -30353,7 +30302,7 @@
       "code": "1503",
       "name": "士電",
       "industry": "電機機械",
-      "rank": 578,
+      "rank": 577,
       "total_score": 4.3,
       "coverage": 0.85,
       "missing_factors": [
@@ -30404,7 +30353,7 @@
       "code": "1528",
       "name": "恩德",
       "industry": "電機機械",
-      "rank": 579,
+      "rank": 578,
       "total_score": 4.3,
       "coverage": 0.85,
       "missing_factors": [
@@ -30455,7 +30404,7 @@
       "code": "1615",
       "name": "大山",
       "industry": "電器電纜",
-      "rank": 580,
+      "rank": 579,
       "total_score": 4.3,
       "coverage": 0.85,
       "missing_factors": [
@@ -30506,7 +30455,7 @@
       "code": "2033",
       "name": "佳大",
       "industry": "鋼鐵工業",
-      "rank": 581,
+      "rank": 580,
       "total_score": 4.3,
       "coverage": 0.65,
       "missing_factors": [
@@ -30550,7 +30499,7 @@
       "code": "2236",
       "name": "百達-KY",
       "industry": "汽車工業",
-      "rank": 582,
+      "rank": 581,
       "total_score": 4.3,
       "coverage": 0.5,
       "missing_factors": [
@@ -30587,7 +30536,7 @@
       "code": "2359",
       "name": "所羅門",
       "industry": "其他電子業",
-      "rank": 583,
+      "rank": 582,
       "total_score": 4.3,
       "coverage": 0.85,
       "missing_factors": [
@@ -30638,7 +30587,7 @@
       "code": "3049",
       "name": "精金",
       "industry": "光電業",
-      "rank": 584,
+      "rank": 583,
       "total_score": 4.3,
       "coverage": 1.0,
       "missing_factors": [],
@@ -30695,7 +30644,7 @@
       "code": "3485",
       "name": "敘豐",
       "industry": "電子零組件業",
-      "rank": 585,
+      "rank": 584,
       "total_score": 4.3,
       "coverage": 0.85,
       "missing_factors": [
@@ -30746,7 +30695,7 @@
       "code": "4721",
       "name": "美琪瑪",
       "industry": "化學工業",
-      "rank": 586,
+      "rank": 585,
       "total_score": 4.3,
       "coverage": 0.85,
       "missing_factors": [
@@ -30797,7 +30746,7 @@
       "code": "6221",
       "name": "晉泰",
       "industry": "資訊服務業",
-      "rank": 587,
+      "rank": 586,
       "total_score": 4.3,
       "coverage": 0.85,
       "missing_factors": [
@@ -30848,7 +30797,7 @@
       "code": "6225",
       "name": "天瀚",
       "industry": "光電業",
-      "rank": 588,
+      "rank": 587,
       "total_score": 4.3,
       "coverage": 1.0,
       "missing_factors": [],
@@ -30905,7 +30854,7 @@
       "code": "6282",
       "name": "康舒",
       "industry": "電子零組件業",
-      "rank": 589,
+      "rank": 588,
       "total_score": 4.3,
       "coverage": 0.85,
       "missing_factors": [
@@ -30956,7 +30905,7 @@
       "code": "6485",
       "name": "點序",
       "industry": "半導體業",
-      "rank": 590,
+      "rank": 589,
       "total_score": 4.3,
       "coverage": 0.85,
       "missing_factors": [
@@ -31007,7 +30956,7 @@
       "code": "6548",
       "name": "長科*",
       "industry": "半導體業",
-      "rank": 591,
+      "rank": 590,
       "total_score": 4.3,
       "coverage": 0.85,
       "missing_factors": [
@@ -31058,7 +31007,7 @@
       "code": "6715",
       "name": "嘉基",
       "industry": "電子零組件業",
-      "rank": 592,
+      "rank": 591,
       "total_score": 4.3,
       "coverage": 1.0,
       "missing_factors": [],
@@ -31115,7 +31064,7 @@
       "code": "1215",
       "name": "卜蜂",
       "industry": "食品工業",
-      "rank": 593,
+      "rank": 592,
       "total_score": 4.2,
       "coverage": 0.85,
       "missing_factors": [
@@ -31166,7 +31115,7 @@
       "code": "1309",
       "name": "台達化",
       "industry": "塑膠工業",
-      "rank": 594,
+      "rank": 593,
       "total_score": 4.2,
       "coverage": 0.85,
       "missing_factors": [
@@ -31217,7 +31166,7 @@
       "code": "1455",
       "name": "集盛",
       "industry": "紡織纖維",
-      "rank": 595,
+      "rank": 594,
       "total_score": 4.2,
       "coverage": 1.0,
       "missing_factors": [],
@@ -31274,7 +31223,7 @@
       "code": "1708",
       "name": "東鹼",
       "industry": "化學工業",
-      "rank": 596,
+      "rank": 595,
       "total_score": 4.2,
       "coverage": 0.85,
       "missing_factors": [
@@ -31325,7 +31274,7 @@
       "code": "1785",
       "name": "光洋科",
       "industry": "其他電子業",
-      "rank": 597,
+      "rank": 596,
       "total_score": 4.2,
       "coverage": 0.85,
       "missing_factors": [
@@ -31376,7 +31325,7 @@
       "code": "2221",
       "name": "大甲",
       "industry": "其他",
-      "rank": 598,
+      "rank": 597,
       "total_score": 4.2,
       "coverage": 0.4,
       "missing_factors": [
@@ -31413,7 +31362,7 @@
       "code": "2327",
       "name": "國巨*",
       "industry": "電子零組件業",
-      "rank": 599,
+      "rank": 598,
       "total_score": 4.2,
       "coverage": 0.85,
       "missing_factors": [
@@ -31464,7 +31413,7 @@
       "code": "3008",
       "name": "大立光",
       "industry": "光電業",
-      "rank": 600,
+      "rank": 599,
       "total_score": 4.2,
       "coverage": 0.85,
       "missing_factors": [
@@ -31515,7 +31464,7 @@
       "code": "3535",
       "name": "晶彩科",
       "industry": "光電業",
-      "rank": 601,
+      "rank": 600,
       "total_score": 4.2,
       "coverage": 0.85,
       "missing_factors": [
@@ -31566,7 +31515,7 @@
       "code": "5299",
       "name": "杰力",
       "industry": "半導體業",
-      "rank": 602,
+      "rank": 601,
       "total_score": 4.2,
       "coverage": 0.85,
       "missing_factors": [
@@ -31617,7 +31566,7 @@
       "code": "6706",
       "name": "惠特",
       "industry": "光電業",
-      "rank": 603,
+      "rank": 602,
       "total_score": 4.2,
       "coverage": 1.0,
       "missing_factors": [],
@@ -31674,7 +31623,7 @@
       "code": "1714",
       "name": "和桐",
       "industry": "化學工業",
-      "rank": 604,
+      "rank": 603,
       "total_score": 4.1,
       "coverage": 0.85,
       "missing_factors": [
@@ -31725,7 +31674,7 @@
       "code": "2451",
       "name": "創見",
       "industry": "半導體業",
-      "rank": 605,
+      "rank": 604,
       "total_score": 4.1,
       "coverage": 1.0,
       "missing_factors": [],
@@ -31782,7 +31731,7 @@
       "code": "3028",
       "name": "增你強",
       "industry": "電子通路業",
-      "rank": 606,
+      "rank": 605,
       "total_score": 4.1,
       "coverage": 0.85,
       "missing_factors": [
@@ -31833,7 +31782,7 @@
       "code": "3624",
       "name": "光頡",
       "industry": "電子零組件業",
-      "rank": 607,
+      "rank": 606,
       "total_score": 4.1,
       "coverage": 0.85,
       "missing_factors": [
@@ -31884,7 +31833,7 @@
       "code": "3691",
       "name": "碩禾",
       "industry": "光電業",
-      "rank": 608,
+      "rank": 607,
       "total_score": 4.1,
       "coverage": 1.0,
       "missing_factors": [],
@@ -31941,7 +31890,7 @@
       "code": "6196",
       "name": "帆宣",
       "industry": "其他電子業",
-      "rank": 609,
+      "rank": 608,
       "total_score": 4.1,
       "coverage": 0.85,
       "missing_factors": [
@@ -31992,7 +31941,7 @@
       "code": "6505",
       "name": "台塑化",
       "industry": "油電燃氣業",
-      "rank": 610,
+      "rank": 609,
       "total_score": 4.1,
       "coverage": 0.85,
       "missing_factors": [
@@ -32043,7 +31992,7 @@
       "code": "8105",
       "name": "凌巨",
       "industry": "光電業",
-      "rank": 611,
+      "rank": 610,
       "total_score": 4.1,
       "coverage": 0.85,
       "missing_factors": [
@@ -32094,7 +32043,7 @@
       "code": "1305",
       "name": "華夏",
       "industry": "塑膠工業",
-      "rank": 612,
+      "rank": 611,
       "total_score": 4.0,
       "coverage": 1.0,
       "missing_factors": [],
@@ -32151,7 +32100,7 @@
       "code": "1440",
       "name": "南紡",
       "industry": "紡織纖維",
-      "rank": 613,
+      "rank": 612,
       "total_score": 4.0,
       "coverage": 1.0,
       "missing_factors": [],
@@ -32208,7 +32157,7 @@
       "code": "1560",
       "name": "中砂",
       "industry": "電機機械",
-      "rank": 614,
+      "rank": 613,
       "total_score": 4.0,
       "coverage": 0.85,
       "missing_factors": [
@@ -32230,9 +32179,9 @@
           "score": 0.5,
           "percentile": 0.05,
           "raw": {
-            "value": -0.0079
+            "value": -0.0072
           },
-          "reason": "三大法人買超累積張數約當股本的 -0.790%，居全市場前 95%。"
+          "reason": "三大法人買超累積張數約當股本的 -0.724%，居全市場前 95%。"
         },
         "gross_margin_level_stability": {
           "score": 6.9,
@@ -32259,7 +32208,7 @@
       "code": "1815",
       "name": "富喬",
       "industry": "電子零組件業",
-      "rank": 615,
+      "rank": 614,
       "total_score": 4.0,
       "coverage": 1.0,
       "missing_factors": [],
@@ -32316,7 +32265,7 @@
       "code": "2014",
       "name": "中鴻",
       "industry": "鋼鐵工業",
-      "rank": 616,
+      "rank": 615,
       "total_score": 4.0,
       "coverage": 1.0,
       "missing_factors": [],
@@ -32373,7 +32322,7 @@
       "code": "2465",
       "name": "麗臺",
       "industry": "電腦及週邊設備業",
-      "rank": 617,
+      "rank": 616,
       "total_score": 4.0,
       "coverage": 0.85,
       "missing_factors": [
@@ -32424,7 +32373,7 @@
       "code": "2646",
       "name": "星宇航空",
       "industry": "航運業",
-      "rank": 618,
+      "rank": 617,
       "total_score": 4.0,
       "coverage": 0.65,
       "missing_factors": [
@@ -32468,7 +32417,7 @@
       "code": "3583",
       "name": "辛耘",
       "industry": "半導體業",
-      "rank": 619,
+      "rank": 618,
       "total_score": 4.0,
       "coverage": 0.85,
       "missing_factors": [
@@ -32519,7 +32468,7 @@
       "code": "3709",
       "name": "鑫聯大投控",
       "industry": "電腦及週邊設備業",
-      "rank": 620,
+      "rank": 619,
       "total_score": 4.0,
       "coverage": 0.85,
       "missing_factors": [
@@ -32570,7 +32519,7 @@
       "code": "4768",
       "name": "晶呈科技",
       "industry": "化學工業",
-      "rank": 621,
+      "rank": 620,
       "total_score": 4.0,
       "coverage": 0.85,
       "missing_factors": [
@@ -32621,7 +32570,7 @@
       "code": "4973",
       "name": "廣穎",
       "industry": "半導體業",
-      "rank": 622,
+      "rank": 621,
       "total_score": 4.0,
       "coverage": 0.85,
       "missing_factors": [
@@ -32672,7 +32621,7 @@
       "code": "5475",
       "name": "德宏",
       "industry": "電子零組件業",
-      "rank": 623,
+      "rank": 622,
       "total_score": 4.0,
       "coverage": 1.0,
       "missing_factors": [],
@@ -32729,7 +32678,7 @@
       "code": "6223",
       "name": "旺矽",
       "industry": "半導體業",
-      "rank": 624,
+      "rank": 623,
       "total_score": 4.0,
       "coverage": 0.85,
       "missing_factors": [
@@ -32751,9 +32700,9 @@
           "score": 0.6,
           "percentile": 0.06,
           "raw": {
-            "value": -0.0066
+            "value": -0.0065
           },
-          "reason": "三大法人買超累積張數約當股本的 -0.663%，居全市場前 94%。"
+          "reason": "三大法人買超累積張數約當股本的 -0.645%，居全市場前 94%。"
         },
         "gross_margin_level_stability": {
           "score": 8.0,
@@ -32780,7 +32729,7 @@
       "code": "6789",
       "name": "采鈺",
       "industry": "半導體業",
-      "rank": 625,
+      "rank": 624,
       "total_score": 4.0,
       "coverage": 0.5,
       "missing_factors": [
@@ -32817,7 +32766,7 @@
       "code": "6831",
       "name": "邁科",
       "industry": "電腦及週邊設備業",
-      "rank": 626,
+      "rank": 625,
       "total_score": 4.0,
       "coverage": 0.85,
       "missing_factors": [
@@ -32868,7 +32817,7 @@
       "code": "6885",
       "name": "全福生技",
       "industry": "生技醫療",
-      "rank": 627,
+      "rank": 626,
       "total_score": 4.0,
       "coverage": 1.0,
       "missing_factors": [],
@@ -32925,7 +32874,7 @@
       "code": "7610",
       "name": "聯友金屬-創",
       "industry": "綠能環保",
-      "rank": 628,
+      "rank": 627,
       "total_score": 4.0,
       "coverage": 1.0,
       "missing_factors": [],
@@ -32982,7 +32931,7 @@
       "code": "8027",
       "name": "鈦昇",
       "industry": "電機機械",
-      "rank": 629,
+      "rank": 628,
       "total_score": 4.0,
       "coverage": 0.85,
       "missing_factors": [
@@ -33033,7 +32982,7 @@
       "code": "8111",
       "name": "立碁",
       "industry": "光電業",
-      "rank": 630,
+      "rank": 629,
       "total_score": 4.0,
       "coverage": 0.85,
       "missing_factors": [
@@ -33084,7 +33033,7 @@
       "code": "8155",
       "name": "博智",
       "industry": "電子零組件業",
-      "rank": 631,
+      "rank": 630,
       "total_score": 4.0,
       "coverage": 0.85,
       "missing_factors": [
@@ -33135,7 +33084,7 @@
       "code": "8182",
       "name": "加高",
       "industry": "電子零組件業",
-      "rank": 632,
+      "rank": 631,
       "total_score": 4.0,
       "coverage": 0.85,
       "missing_factors": [
@@ -33186,7 +33135,7 @@
       "code": "2049",
       "name": "上銀",
       "industry": "電機機械",
-      "rank": 633,
+      "rank": 632,
       "total_score": 3.9,
       "coverage": 0.85,
       "missing_factors": [
@@ -33237,7 +33186,7 @@
       "code": "2449",
       "name": "京元電子",
       "industry": "半導體業",
-      "rank": 634,
+      "rank": 633,
       "total_score": 3.9,
       "coverage": 0.85,
       "missing_factors": [
@@ -33288,7 +33237,7 @@
       "code": "2464",
       "name": "盟立",
       "industry": "其他電子業",
-      "rank": 635,
+      "rank": 634,
       "total_score": 3.9,
       "coverage": 0.85,
       "missing_factors": [
@@ -33339,7 +33288,7 @@
       "code": "2467",
       "name": "志聖",
       "industry": "電子零組件業",
-      "rank": 636,
+      "rank": 635,
       "total_score": 3.9,
       "coverage": 0.85,
       "missing_factors": [
@@ -33390,7 +33339,7 @@
       "code": "2484",
       "name": "希華",
       "industry": "電子零組件業",
-      "rank": 637,
+      "rank": 636,
       "total_score": 3.9,
       "coverage": 0.85,
       "missing_factors": [
@@ -33441,7 +33390,7 @@
       "code": "3229",
       "name": "晟鈦",
       "industry": "電子零組件業",
-      "rank": 638,
+      "rank": 637,
       "total_score": 3.9,
       "coverage": 1.0,
       "missing_factors": [],
@@ -33498,7 +33447,7 @@
       "code": "3290",
       "name": "東浦",
       "industry": "電子零組件業",
-      "rank": 639,
+      "rank": 638,
       "total_score": 3.9,
       "coverage": 0.85,
       "missing_factors": [
@@ -33549,7 +33498,7 @@
       "code": "3406",
       "name": "玉晶光",
       "industry": "光電業",
-      "rank": 640,
+      "rank": 639,
       "total_score": 3.9,
       "coverage": 0.85,
       "missing_factors": [
@@ -33600,7 +33549,7 @@
       "code": "6126",
       "name": "信音",
       "industry": "電子零組件業",
-      "rank": 641,
+      "rank": 640,
       "total_score": 3.9,
       "coverage": 0.4,
       "missing_factors": [
@@ -33637,7 +33586,7 @@
       "code": "6191",
       "name": "精成科",
       "industry": "電子零組件業",
-      "rank": 642,
+      "rank": 641,
       "total_score": 3.9,
       "coverage": 0.85,
       "missing_factors": [
@@ -33688,7 +33637,7 @@
       "code": "6426",
       "name": "統新",
       "industry": "通信網路業",
-      "rank": 643,
+      "rank": 642,
       "total_score": 3.9,
       "coverage": 0.85,
       "missing_factors": [
@@ -33739,7 +33688,7 @@
       "code": "6957",
       "name": "裕慶-KY",
       "industry": "其他",
-      "rank": 644,
+      "rank": 643,
       "total_score": 3.9,
       "coverage": 0.5,
       "missing_factors": [
@@ -33776,7 +33725,7 @@
       "code": "8390",
       "name": "金益鼎",
       "industry": "綠能環保",
-      "rank": 645,
+      "rank": 644,
       "total_score": 3.9,
       "coverage": 0.85,
       "missing_factors": [
@@ -33827,7 +33776,7 @@
       "code": "1229",
       "name": "聯華",
       "industry": "食品工業",
-      "rank": 646,
+      "rank": 645,
       "total_score": 3.8,
       "coverage": 1.0,
       "missing_factors": [],
@@ -33884,7 +33833,7 @@
       "code": "2303",
       "name": "聯電",
       "industry": "半導體業",
-      "rank": 647,
+      "rank": 646,
       "total_score": 3.8,
       "coverage": 0.85,
       "missing_factors": [
@@ -33935,7 +33884,7 @@
       "code": "2363",
       "name": "矽統",
       "industry": "半導體業",
-      "rank": 648,
+      "rank": 647,
       "total_score": 3.8,
       "coverage": 0.85,
       "missing_factors": [
@@ -33986,7 +33935,7 @@
       "code": "2489",
       "name": "瑞軒",
       "industry": "光電業",
-      "rank": 649,
+      "rank": 648,
       "total_score": 3.8,
       "coverage": 0.85,
       "missing_factors": [
@@ -34037,7 +33986,7 @@
       "code": "2614",
       "name": "東森",
       "industry": "其他",
-      "rank": 650,
+      "rank": 649,
       "total_score": 3.8,
       "coverage": 0.85,
       "missing_factors": [
@@ -34088,7 +34037,7 @@
       "code": "3169",
       "name": "亞信",
       "industry": "半導體業",
-      "rank": 651,
+      "rank": 650,
       "total_score": 3.8,
       "coverage": 0.4,
       "missing_factors": [
@@ -34125,7 +34074,7 @@
       "code": "4739",
       "name": "康普",
       "industry": "化學工業",
-      "rank": 652,
+      "rank": 651,
       "total_score": 3.8,
       "coverage": 0.85,
       "missing_factors": [
@@ -34176,7 +34125,7 @@
       "code": "4927",
       "name": "泰鼎-KY",
       "industry": "電子零組件業",
-      "rank": 653,
+      "rank": 652,
       "total_score": 3.8,
       "coverage": 1.0,
       "missing_factors": [],
@@ -34233,7 +34182,7 @@
       "code": "5515",
       "name": "建國",
       "industry": "建材營造",
-      "rank": 654,
+      "rank": 653,
       "total_score": 3.8,
       "coverage": 0.85,
       "missing_factors": [
@@ -34284,7 +34233,7 @@
       "code": "5534",
       "name": "長虹",
       "industry": "建材營造",
-      "rank": 655,
+      "rank": 654,
       "total_score": 3.8,
       "coverage": 0.85,
       "missing_factors": [
@@ -34335,7 +34284,7 @@
       "code": "6226",
       "name": "光鼎",
       "industry": "光電業",
-      "rank": 656,
+      "rank": 655,
       "total_score": 3.8,
       "coverage": 0.85,
       "missing_factors": [
@@ -34386,7 +34335,7 @@
       "code": "6244",
       "name": "茂迪",
       "industry": "光電業",
-      "rank": 657,
+      "rank": 656,
       "total_score": 3.8,
       "coverage": 0.85,
       "missing_factors": [
@@ -34437,7 +34386,7 @@
       "code": "6532",
       "name": "瑞耘",
       "industry": "半導體業",
-      "rank": 658,
+      "rank": 657,
       "total_score": 3.8,
       "coverage": 0.85,
       "missing_factors": [
@@ -34488,7 +34437,7 @@
       "code": "6613",
       "name": "朋億*",
       "industry": "其他電子業",
-      "rank": 659,
+      "rank": 658,
       "total_score": 3.8,
       "coverage": 0.85,
       "missing_factors": [
@@ -34539,7 +34488,7 @@
       "code": "7728",
       "name": "光焱科技",
       "industry": "其他電子業",
-      "rank": 660,
+      "rank": 659,
       "total_score": 3.8,
       "coverage": 0.4,
       "missing_factors": [
@@ -34576,7 +34525,7 @@
       "code": "8039",
       "name": "台虹",
       "industry": "電子零組件業",
-      "rank": 661,
+      "rank": 660,
       "total_score": 3.8,
       "coverage": 0.85,
       "missing_factors": [
@@ -34627,7 +34576,7 @@
       "code": "8227",
       "name": "巨有科技",
       "industry": "半導體業",
-      "rank": 662,
+      "rank": 661,
       "total_score": 3.8,
       "coverage": 0.85,
       "missing_factors": [
@@ -34678,7 +34627,7 @@
       "code": "2312",
       "name": "金寶",
       "industry": "其他電子業",
-      "rank": 663,
+      "rank": 662,
       "total_score": 3.7,
       "coverage": 0.85,
       "missing_factors": [
@@ -34729,7 +34678,7 @@
       "code": "2637",
       "name": "慧洋-KY",
       "industry": "航運業",
-      "rank": 664,
+      "rank": 663,
       "total_score": 3.7,
       "coverage": 1.0,
       "missing_factors": [],
@@ -34786,7 +34735,7 @@
       "code": "3178",
       "name": "公準",
       "industry": "半導體業",
-      "rank": 665,
+      "rank": 664,
       "total_score": 3.7,
       "coverage": 0.85,
       "missing_factors": [
@@ -34837,7 +34786,7 @@
       "code": "3357",
       "name": "臺慶科",
       "industry": "電子零組件業",
-      "rank": 666,
+      "rank": 665,
       "total_score": 3.7,
       "coverage": 0.85,
       "missing_factors": [
@@ -34888,7 +34837,7 @@
       "code": "3543",
       "name": "州巧",
       "industry": "光電業",
-      "rank": 667,
+      "rank": 666,
       "total_score": 3.7,
       "coverage": 0.85,
       "missing_factors": [
@@ -34939,7 +34888,7 @@
       "code": "3597",
       "name": "映興",
       "industry": "電子零組件業",
-      "rank": 668,
+      "rank": 667,
       "total_score": 3.7,
       "coverage": 0.55,
       "missing_factors": [
@@ -34983,7 +34932,7 @@
       "code": "4939",
       "name": "亞電",
       "industry": "電子零組件業",
-      "rank": 669,
+      "rank": 668,
       "total_score": 3.7,
       "coverage": 0.85,
       "missing_factors": [
@@ -35034,7 +34983,7 @@
       "code": "5432",
       "name": "新門",
       "industry": "綠能環保",
-      "rank": 670,
+      "rank": 669,
       "total_score": 3.7,
       "coverage": 0.85,
       "missing_factors": [
@@ -35085,7 +35034,7 @@
       "code": "2061",
       "name": "風青",
       "industry": "電器電纜",
-      "rank": 671,
+      "rank": 670,
       "total_score": 3.6,
       "coverage": 0.85,
       "missing_factors": [
@@ -35136,7 +35085,7 @@
       "code": "2441",
       "name": "超豐",
       "industry": "半導體業",
-      "rank": 672,
+      "rank": 671,
       "total_score": 3.6,
       "coverage": 0.85,
       "missing_factors": [
@@ -35187,7 +35136,7 @@
       "code": "2855",
       "name": "統一證",
       "industry": "金融保險",
-      "rank": 673,
+      "rank": 672,
       "total_score": 3.6,
       "coverage": 0.4,
       "missing_factors": [
@@ -35224,7 +35173,7 @@
       "code": "2883",
       "name": "凱基金",
       "industry": "金融保險",
-      "rank": 674,
+      "rank": 673,
       "total_score": 3.6,
       "coverage": 0.55,
       "missing_factors": [
@@ -35268,7 +35217,7 @@
       "code": "2890",
       "name": "永豐金",
       "industry": "金融保險",
-      "rank": 675,
+      "rank": 674,
       "total_score": 3.6,
       "coverage": 0.55,
       "missing_factors": [
@@ -35312,7 +35261,7 @@
       "code": "3036",
       "name": "文曄",
       "industry": "電子通路業",
-      "rank": 676,
+      "rank": 675,
       "total_score": 3.6,
       "coverage": 0.85,
       "missing_factors": [
@@ -35363,7 +35312,7 @@
       "code": "3114",
       "name": "好德",
       "industry": "電子零組件業",
-      "rank": 677,
+      "rank": 676,
       "total_score": 3.6,
       "coverage": 0.4,
       "missing_factors": [
@@ -35400,7 +35349,7 @@
       "code": "3305",
       "name": "昇貿",
       "industry": "其他電子業",
-      "rank": 678,
+      "rank": 677,
       "total_score": 3.6,
       "coverage": 0.85,
       "missing_factors": [
@@ -35451,7 +35400,7 @@
       "code": "3362",
       "name": "先進光",
       "industry": "光電業",
-      "rank": 679,
+      "rank": 678,
       "total_score": 3.6,
       "coverage": 0.85,
       "missing_factors": [
@@ -35502,7 +35451,7 @@
       "code": "3711",
       "name": "日月光投控",
       "industry": "半導體業",
-      "rank": 680,
+      "rank": 679,
       "total_score": 3.6,
       "coverage": 0.85,
       "missing_factors": [
@@ -35553,7 +35502,7 @@
       "code": "4956",
       "name": "光鋐",
       "industry": "光電業",
-      "rank": 681,
+      "rank": 680,
       "total_score": 3.6,
       "coverage": 1.0,
       "missing_factors": [],
@@ -35610,7 +35559,7 @@
       "code": "5608",
       "name": "四維航",
       "industry": "航運業",
-      "rank": 682,
+      "rank": 681,
       "total_score": 3.6,
       "coverage": 0.35,
       "missing_factors": [
@@ -35647,7 +35596,7 @@
       "code": "6177",
       "name": "達麗",
       "industry": "建材營造",
-      "rank": 683,
+      "rank": 682,
       "total_score": 3.6,
       "coverage": 0.85,
       "missing_factors": [
@@ -35698,7 +35647,7 @@
       "code": "6983",
       "name": "華洋精機",
       "industry": "其他電子業",
-      "rank": 684,
+      "rank": 683,
       "total_score": 3.6,
       "coverage": 0.85,
       "missing_factors": [
@@ -35749,7 +35698,7 @@
       "code": "7712",
       "name": "博盛半導體",
       "industry": "半導體業",
-      "rank": 685,
+      "rank": 684,
       "total_score": 3.6,
       "coverage": 0.4,
       "missing_factors": [
@@ -35786,7 +35735,7 @@
       "code": "2344",
       "name": "華邦電",
       "industry": "半導體業",
-      "rank": 686,
+      "rank": 685,
       "total_score": 3.5,
       "coverage": 0.85,
       "missing_factors": [
@@ -35810,7 +35759,7 @@
           "raw": {
             "value": -0.0015
           },
-          "reason": "三大法人買超累積張數約當股本的 -0.149%，居全市場前 83%。"
+          "reason": "三大法人買超累積張數約當股本的 -0.150%，居全市場前 83%。"
         },
         "gross_margin_level_stability": {
           "score": 2.4,
@@ -35827,6 +35776,57 @@
             "value": 1004.2668
           },
           "reason": "近4季營收合計/最新一期非流動資產比值 1004.27，居全市場前 61%（產能利用率代理，非精確固定資產週轉率）。"
+        }
+      },
+      "flags": [],
+      "qualitative_notes": null,
+      "news_warning": null
+    },
+    {
+      "code": "3450",
+      "name": "聯鈞",
+      "industry": "半導體業",
+      "rank": 686,
+      "total_score": 3.5,
+      "coverage": 0.85,
+      "missing_factors": [
+        "institutional_buying_concentration"
+      ],
+      "liquidity_20d": 4163394749.6,
+      "no_recent_trade_reason": null,
+      "data_asof": "2026-10-20",
+      "factors": {
+        "institutional_buying_streak": {
+          "score": 2.8,
+          "percentile": 0.28,
+          "raw": {
+            "value": 0.0
+          },
+          "reason": "可觀察天數中有 0% 是連續買超，居全市場前 72%。"
+        },
+        "institutional_ownership_pct": {
+          "score": 0.2,
+          "percentile": 0.02,
+          "raw": {
+            "value": -0.018
+          },
+          "reason": "三大法人買超累積張數約當股本的 -1.802%，居全市場前 98%。"
+        },
+        "gross_margin_level_stability": {
+          "score": 5.1,
+          "percentile": 0.51,
+          "raw": {
+            "value": 5.5133
+          },
+          "reason": "近8季毛利率水準×穩定度綜合指標 5.5，居全市場前 49%（供應鏈議價力代理，非嚴謹驗證）。"
+        },
+        "capacity_utilization_proxy": {
+          "score": 5.4,
+          "percentile": 0.54,
+          "raw": {
+            "value": 1429.1172
+          },
+          "reason": "近4季營收合計/最新一期非流動資產比值 1429.12，居全市場前 46%（產能利用率代理，非精確固定資產週轉率）。"
         }
       },
       "flags": [],
@@ -36562,12 +36562,12 @@
           "reason": "可觀察天數中有 0% 是連續買超，居全市場前 72%。"
         },
         "institutional_ownership_pct": {
-          "score": 0.9,
-          "percentile": 0.09,
+          "score": 1.0,
+          "percentile": 0.1,
           "raw": {
             "value": -0.0039
           },
-          "reason": "三大法人買超累積張數約當股本的 -0.395%，居全市場前 91%。"
+          "reason": "三大法人買超累積張數約當股本的 -0.394%，居全市場前 90%。"
         },
         "gross_margin_level_stability": {
           "score": 6.6,
@@ -41496,9 +41496,9 @@
           "score": 1.0,
           "percentile": 0.1,
           "raw": {
-            "value": -0.0039
+            "value": -0.0036
           },
-          "reason": "三大法人買超累積張數約當股本的 -0.389%，居全市場前 90%。"
+          "reason": "三大法人買超累積張數約當股本的 -0.363%，居全市場前 90%。"
         },
         "gross_margin_level_stability": {
           "score": 1.3,
@@ -41910,12 +41910,12 @@
           "reason": "可觀察天數中有 0% 是連續買超，居全市場前 72%。"
         },
         "institutional_ownership_pct": {
-          "score": 0.2,
-          "percentile": 0.02,
+          "score": 0.1,
+          "percentile": 0.01,
           "raw": {
             "value": -0.0191
           },
-          "reason": "三大法人買超累積張數約當股本的 -1.912%，居全市場前 98%。"
+          "reason": "三大法人買超累積張數約當股本的 -1.913%，居全市場前 99%。"
         },
         "gross_margin_level_stability": {
           "score": 0.8,
@@ -41961,12 +41961,12 @@
           "reason": "可觀察天數中有 0% 是連續買超，居全市場前 72%。"
         },
         "institutional_ownership_pct": {
-          "score": 0.1,
-          "percentile": 0.01,
+          "score": 0.2,
+          "percentile": 0.02,
           "raw": {
-            "value": -0.0207
+            "value": -0.0179
           },
-          "reason": "三大法人買超累積張數約當股本的 -2.066%，居全市場前 99%。"
+          "reason": "三大法人買超累積張數約當股本的 -1.793%，居全市場前 98%。"
         },
         "gross_margin_level_stability": {
           "score": 3.4,
@@ -42573,7 +42573,7 @@
           "raw": {
             "value": -0.0052
           },
-          "reason": "三大法人買超累積張數約當股本的 -0.516%，居全市場前 92%。"
+          "reason": "三大法人買超累積張數約當股本的 -0.517%，居全市場前 92%。"
         },
         "gross_margin_level_stability": {
           "score": 2.0,
@@ -42699,61 +42699,10 @@
       "news_warning": null
     },
     {
-      "code": "3707",
-      "name": "漢磊",
-      "industry": "半導體業",
-      "rank": 837,
-      "total_score": 1.9,
-      "coverage": 0.85,
-      "missing_factors": [
-        "institutional_buying_concentration"
-      ],
-      "liquidity_20d": 1703521915.0,
-      "no_recent_trade_reason": null,
-      "data_asof": "2026-10-20",
-      "factors": {
-        "institutional_buying_streak": {
-          "score": 2.8,
-          "percentile": 0.28,
-          "raw": {
-            "value": 0.0
-          },
-          "reason": "可觀察天數中有 0% 是連續買超，居全市場前 72%。"
-        },
-        "institutional_ownership_pct": {
-          "score": 1.0,
-          "percentile": 0.1,
-          "raw": {
-            "value": -0.0039
-          },
-          "reason": "三大法人買超累積張數約當股本的 -0.394%，居全市場前 90%。"
-        },
-        "gross_margin_level_stability": {
-          "score": 1.0,
-          "percentile": 0.1,
-          "raw": {
-            "value": 0.8987
-          },
-          "reason": "近8季毛利率水準×穩定度綜合指標 0.9，居全市場前 90%（供應鏈議價力代理，非嚴謹驗證）。"
-        },
-        "capacity_utilization_proxy": {
-          "score": 3.5,
-          "percentile": 0.35,
-          "raw": {
-            "value": 890.2399
-          },
-          "reason": "近4季營收合計/最新一期非流動資產比值 890.24，居全市場前 65%（產能利用率代理，非精確固定資產週轉率）。"
-        }
-      },
-      "flags": [],
-      "qualitative_notes": null,
-      "news_warning": null
-    },
-    {
       "code": "4760",
       "name": "勤凱",
       "industry": "其他電子業",
-      "rank": 838,
+      "rank": 837,
       "total_score": 1.9,
       "coverage": 0.4,
       "missing_factors": [
@@ -42790,7 +42739,7 @@
       "code": "7751",
       "name": "竑騰",
       "industry": "半導體業",
-      "rank": 839,
+      "rank": 838,
       "total_score": 1.9,
       "coverage": 0.4,
       "missing_factors": [
@@ -42827,7 +42776,7 @@
       "code": "7777",
       "name": "能率亞洲",
       "industry": "其他",
-      "rank": 840,
+      "rank": 839,
       "total_score": 1.9,
       "coverage": 0.4,
       "missing_factors": [
@@ -42864,7 +42813,7 @@
       "code": "3081",
       "name": "聯亞",
       "industry": "通信網路業",
-      "rank": 841,
+      "rank": 840,
       "total_score": 1.8,
       "coverage": 0.85,
       "missing_factors": [
@@ -42905,6 +42854,57 @@
             "value": 421.4753
           },
           "reason": "近4季營收合計/最新一期非流動資產比值 421.48，居全市場前 86%（產能利用率代理，非精確固定資產週轉率）。"
+        }
+      },
+      "flags": [],
+      "qualitative_notes": null,
+      "news_warning": null
+    },
+    {
+      "code": "3707",
+      "name": "漢磊",
+      "industry": "半導體業",
+      "rank": 841,
+      "total_score": 1.8,
+      "coverage": 0.85,
+      "missing_factors": [
+        "institutional_buying_concentration"
+      ],
+      "liquidity_20d": 1703521915.0,
+      "no_recent_trade_reason": null,
+      "data_asof": "2026-10-20",
+      "factors": {
+        "institutional_buying_streak": {
+          "score": 2.8,
+          "percentile": 0.28,
+          "raw": {
+            "value": 0.0
+          },
+          "reason": "可觀察天數中有 0% 是連續買超，居全市場前 72%。"
+        },
+        "institutional_ownership_pct": {
+          "score": 0.9,
+          "percentile": 0.09,
+          "raw": {
+            "value": -0.0039
+          },
+          "reason": "三大法人買超累積張數約當股本的 -0.394%，居全市場前 91%。"
+        },
+        "gross_margin_level_stability": {
+          "score": 1.0,
+          "percentile": 0.1,
+          "raw": {
+            "value": 0.8987
+          },
+          "reason": "近8季毛利率水準×穩定度綜合指標 0.9，居全市場前 90%（供應鏈議價力代理，非嚴謹驗證）。"
+        },
+        "capacity_utilization_proxy": {
+          "score": 3.5,
+          "percentile": 0.35,
+          "raw": {
+            "value": 890.2399
+          },
+          "reason": "近4季營收合計/最新一期非流動資產比值 890.24，居全市場前 65%（產能利用率代理，非精確固定資產週轉率）。"
         }
       },
       "flags": [],
@@ -45863,12 +45863,12 @@
           "reason": "可觀察天數中有 20% 是連續買超，居全市場前 35%。"
         },
         "institutional_ownership_pct": {
-          "score": 9.6,
-          "percentile": 0.96,
+          "score": 9.5,
+          "percentile": 0.95,
           "raw": {
             "value": 0.0071
           },
-          "reason": "三大法人買超累積張數約當股本的 +0.710%，居全市場前 4%。"
+          "reason": "三大法人買超累積張數約當股本的 +0.710%，居全市場前 5%。"
         },
         "institutional_buying_concentration": {
           "score": 6.0,
@@ -45906,12 +45906,12 @@
           "reason": "可觀察天數中有 40% 是連續買超，居全市場前 25%。"
         },
         "institutional_ownership_pct": {
-          "score": 7.6,
-          "percentile": 0.76,
+          "score": 7.7,
+          "percentile": 0.77,
           "raw": {
             "value": 0.0012
           },
-          "reason": "三大法人買超累積張數約當股本的 +0.121%，居全市場前 24%。"
+          "reason": "三大法人買超累積張數約當股本的 +0.121%，居全市場前 23%。"
         },
         "institutional_buying_concentration": {
           "score": 7.8,
@@ -50013,12 +50013,12 @@
           "reason": "三大法人買超累積張數約當股本的 +0.002%，居全市場前 51%。"
         },
         "institutional_buying_concentration": {
-          "score": 9.8,
-          "percentile": 0.98,
+          "score": 9.7,
+          "percentile": 0.97,
           "raw": {
             "value": 2.0
           },
-          "reason": "外資佔三大法人買超總量的 200%，居全市場前 2%。"
+          "reason": "外資佔三大法人買超總量的 200%，居全市場前 3%。"
         },
         "gross_margin_level_stability": {
           "score": 9.6,
@@ -51921,6 +51921,65 @@
       "news_warning": null
     },
     {
+      "code": "3205",
+      "name": "佰研",
+      "industry": "生技醫療",
+      "rank": null,
+      "total_score": 6.6,
+      "coverage": 1.0,
+      "missing_factors": [],
+      "liquidity_20d": 897892.5,
+      "no_recent_trade_reason": null,
+      "data_asof": "2026-10-20",
+      "factors": {
+        "institutional_buying_streak": {
+          "score": 9.1,
+          "percentile": 0.91,
+          "raw": {
+            "value": 1.0
+          },
+          "reason": "可觀察天數中有 100% 是連續買超，居全市場前 9%。"
+        },
+        "institutional_ownership_pct": {
+          "score": 6.1,
+          "percentile": 0.61,
+          "raw": {
+            "value": 0.0002
+          },
+          "reason": "三大法人買超累積張數約當股本的 +0.024%，居全市場前 39%。"
+        },
+        "institutional_buying_concentration": {
+          "score": 6.0,
+          "percentile": 0.6,
+          "raw": {
+            "value": 1.0
+          },
+          "reason": "外資佔三大法人買超總量的 100%，居全市場前 40%。"
+        },
+        "gross_margin_level_stability": {
+          "score": 5.6,
+          "percentile": 0.56,
+          "raw": {
+            "value": 6.2082
+          },
+          "reason": "近8季毛利率水準×穩定度綜合指標 6.2，居全市場前 44%（供應鏈議價力代理，非嚴謹驗證）。"
+        },
+        "capacity_utilization_proxy": {
+          "score": 6.3,
+          "percentile": 0.63,
+          "raw": {
+            "value": 1832.4525
+          },
+          "reason": "近4季營收合計/最新一期非流動資產比值 1832.45，居全市場前 37%（產能利用率代理，非精確固定資產週轉率）。"
+        }
+      },
+      "flags": [
+        "流動性不足"
+      ],
+      "qualitative_notes": null,
+      "news_warning": null
+    },
+    {
       "code": "3548",
       "name": "兆利",
       "industry": "電子零組件業",
@@ -52916,65 +52975,6 @@
             "value": 3207.2166
           },
           "reason": "近4季營收合計/最新一期非流動資產比值 3207.22，居全市場前 19%（產能利用率代理，非精確固定資產週轉率）。"
-        }
-      },
-      "flags": [
-        "流動性不足"
-      ],
-      "qualitative_notes": null,
-      "news_warning": null
-    },
-    {
-      "code": "3205",
-      "name": "佰研",
-      "industry": "生技醫療",
-      "rank": null,
-      "total_score": 6.5,
-      "coverage": 1.0,
-      "missing_factors": [],
-      "liquidity_20d": 897892.5,
-      "no_recent_trade_reason": null,
-      "data_asof": "2026-10-20",
-      "factors": {
-        "institutional_buying_streak": {
-          "score": 9.1,
-          "percentile": 0.91,
-          "raw": {
-            "value": 1.0
-          },
-          "reason": "可觀察天數中有 100% 是連續買超，居全市場前 9%。"
-        },
-        "institutional_ownership_pct": {
-          "score": 6.0,
-          "percentile": 0.6,
-          "raw": {
-            "value": 0.0002
-          },
-          "reason": "三大法人買超累積張數約當股本的 +0.024%，居全市場前 40%。"
-        },
-        "institutional_buying_concentration": {
-          "score": 6.0,
-          "percentile": 0.6,
-          "raw": {
-            "value": 1.0
-          },
-          "reason": "外資佔三大法人買超總量的 100%，居全市場前 40%。"
-        },
-        "gross_margin_level_stability": {
-          "score": 5.6,
-          "percentile": 0.56,
-          "raw": {
-            "value": 6.2082
-          },
-          "reason": "近8季毛利率水準×穩定度綜合指標 6.2，居全市場前 44%（供應鏈議價力代理，非嚴謹驗證）。"
-        },
-        "capacity_utilization_proxy": {
-          "score": 6.3,
-          "percentile": 0.63,
-          "raw": {
-            "value": 1832.4525
-          },
-          "reason": "近4季營收合計/最新一期非流動資產比值 1832.45，居全市場前 37%（產能利用率代理，非精確固定資產週轉率）。"
         }
       },
       "flags": [
@@ -65217,12 +65217,12 @@
           "reason": "三大法人買超累積張數約當股本的 +0.002%，居全市場前 50%。"
         },
         "institutional_buying_concentration": {
-          "score": 9.8,
-          "percentile": 0.98,
+          "score": 9.7,
+          "percentile": 0.97,
           "raw": {
             "value": 2.0
           },
-          "reason": "外資佔三大法人買超總量的 200%，居全市場前 2%。"
+          "reason": "外資佔三大法人買超總量的 200%，居全市場前 3%。"
         }
       },
       "flags": [
@@ -65956,12 +65956,12 @@
           "reason": "可觀察天數中有 20% 是連續買超，居全市場前 35%。"
         },
         "institutional_ownership_pct": {
-          "score": 8.9,
-          "percentile": 0.89,
+          "score": 8.8,
+          "percentile": 0.88,
           "raw": {
             "value": 0.0034
           },
-          "reason": "三大法人買超累積張數約當股本的 +0.340%，居全市場前 11%。"
+          "reason": "三大法人買超累積張數約當股本的 +0.340%，居全市場前 12%。"
         },
         "institutional_buying_concentration": {
           "score": 6.7,
@@ -66716,12 +66716,12 @@
           "reason": "三大法人買超累積張數約當股本的 +0.002%，居全市場前 50%。"
         },
         "institutional_buying_concentration": {
-          "score": 9.6,
-          "percentile": 0.96,
+          "score": 9.5,
+          "percentile": 0.95,
           "raw": {
             "value": 1.4545
           },
-          "reason": "外資佔三大法人買超總量的 145%，居全市場前 4%。"
+          "reason": "外資佔三大法人買超總量的 145%，居全市場前 5%。"
         },
         "gross_margin_level_stability": {
           "score": 5.3,
@@ -73392,6 +73392,65 @@
       "news_warning": null
     },
     {
+      "code": "3207",
+      "name": "耀勝",
+      "industry": "電子零組件業",
+      "rank": null,
+      "total_score": 4.9,
+      "coverage": 1.0,
+      "missing_factors": [],
+      "liquidity_20d": 6225510.0,
+      "no_recent_trade_reason": null,
+      "data_asof": "2026-10-20",
+      "factors": {
+        "institutional_buying_streak": {
+          "score": 6.5,
+          "percentile": 0.65,
+          "raw": {
+            "value": 0.2
+          },
+          "reason": "可觀察天數中有 20% 是連續買超，居全市場前 35%。"
+        },
+        "institutional_ownership_pct": {
+          "score": 7.9,
+          "percentile": 0.79,
+          "raw": {
+            "value": 0.0015
+          },
+          "reason": "三大法人買超累積張數約當股本的 +0.146%，居全市場前 21%。"
+        },
+        "institutional_buying_concentration": {
+          "score": 6.9,
+          "percentile": 0.69,
+          "raw": {
+            "value": 1.0041
+          },
+          "reason": "外資佔三大法人買超總量的 100%，居全市場前 31%。"
+        },
+        "gross_margin_level_stability": {
+          "score": 2.6,
+          "percentile": 0.26,
+          "raw": {
+            "value": 2.7527
+          },
+          "reason": "近8季毛利率水準×穩定度綜合指標 2.8，居全市場前 74%（供應鏈議價力代理，非嚴謹驗證）。"
+        },
+        "capacity_utilization_proxy": {
+          "score": 1.1,
+          "percentile": 0.11,
+          "raw": {
+            "value": 346.3859
+          },
+          "reason": "近4季營收合計/最新一期非流動資產比值 346.39，居全市場前 89%（產能利用率代理，非精確固定資產週轉率）。"
+        }
+      },
+      "flags": [
+        "流動性不足"
+      ],
+      "qualitative_notes": null,
+      "news_warning": null
+    },
+    {
       "code": "3268",
       "name": "海德威",
       "industry": "半導體業",
@@ -74404,65 +74463,6 @@
             "value": 665.1037
           },
           "reason": "近4季營收合計/最新一期非流動資產比值 665.10，居全市場前 76%（產能利用率代理，非精確固定資產週轉率）。"
-        }
-      },
-      "flags": [
-        "流動性不足"
-      ],
-      "qualitative_notes": null,
-      "news_warning": null
-    },
-    {
-      "code": "3207",
-      "name": "耀勝",
-      "industry": "電子零組件業",
-      "rank": null,
-      "total_score": 4.8,
-      "coverage": 1.0,
-      "missing_factors": [],
-      "liquidity_20d": 6225510.0,
-      "no_recent_trade_reason": null,
-      "data_asof": "2026-10-20",
-      "factors": {
-        "institutional_buying_streak": {
-          "score": 6.5,
-          "percentile": 0.65,
-          "raw": {
-            "value": 0.2
-          },
-          "reason": "可觀察天數中有 20% 是連續買超，居全市場前 35%。"
-        },
-        "institutional_ownership_pct": {
-          "score": 7.8,
-          "percentile": 0.78,
-          "raw": {
-            "value": 0.0015
-          },
-          "reason": "三大法人買超累積張數約當股本的 +0.146%，居全市場前 22%。"
-        },
-        "institutional_buying_concentration": {
-          "score": 6.9,
-          "percentile": 0.69,
-          "raw": {
-            "value": 1.0041
-          },
-          "reason": "外資佔三大法人買超總量的 100%，居全市場前 31%。"
-        },
-        "gross_margin_level_stability": {
-          "score": 2.6,
-          "percentile": 0.26,
-          "raw": {
-            "value": 2.7527
-          },
-          "reason": "近8季毛利率水準×穩定度綜合指標 2.8，居全市場前 74%（供應鏈議價力代理，非嚴謹驗證）。"
-        },
-        "capacity_utilization_proxy": {
-          "score": 1.1,
-          "percentile": 0.11,
-          "raw": {
-            "value": 346.3859
-          },
-          "reason": "近4季營收合計/最新一期非流動資產比值 346.39，居全市場前 89%（產能利用率代理，非精確固定資產週轉率）。"
         }
       },
       "flags": [
@@ -77487,65 +77487,6 @@
       "news_warning": null
     },
     {
-      "code": "3011",
-      "name": "今皓",
-      "industry": "電子零組件業",
-      "rank": null,
-      "total_score": 4.6,
-      "coverage": 1.0,
-      "missing_factors": [],
-      "liquidity_20d": 3087288.65,
-      "no_recent_trade_reason": null,
-      "data_asof": "2026-10-20",
-      "factors": {
-        "institutional_buying_streak": {
-          "score": 6.5,
-          "percentile": 0.65,
-          "raw": {
-            "value": 0.2
-          },
-          "reason": "可觀察天數中有 20% 是連續買超，居全市場前 35%。"
-        },
-        "institutional_ownership_pct": {
-          "score": 6.4,
-          "percentile": 0.64,
-          "raw": {
-            "value": 0.0003
-          },
-          "reason": "三大法人買超累積張數約當股本的 +0.035%，居全市場前 36%。"
-        },
-        "institutional_buying_concentration": {
-          "score": 9.7,
-          "percentile": 0.97,
-          "raw": {
-            "value": 1.5778
-          },
-          "reason": "外資佔三大法人買超總量的 158%，居全市場前 3%。"
-        },
-        "gross_margin_level_stability": {
-          "score": 1.3,
-          "percentile": 0.13,
-          "raw": {
-            "value": 1.2193
-          },
-          "reason": "近8季毛利率水準×穩定度綜合指標 1.2，居全市場前 87%（供應鏈議價力代理，非嚴謹驗證）。"
-        },
-        "capacity_utilization_proxy": {
-          "score": 0.9,
-          "percentile": 0.09,
-          "raw": {
-            "value": 292.1986
-          },
-          "reason": "近4季營收合計/最新一期非流動資產比值 292.20，居全市場前 91%（產能利用率代理，非精確固定資產週轉率）。"
-        }
-      },
-      "flags": [
-        "流動性不足"
-      ],
-      "qualitative_notes": null,
-      "news_warning": null
-    },
-    {
       "code": "3018",
       "name": "隆銘綠能",
       "industry": "其他電子業",
@@ -78742,6 +78683,65 @@
             "value": 4044.2882
           },
           "reason": "近4季營收合計/最新一期非流動資產比值 4044.29，居全市場前 14%（產能利用率代理，非精確固定資產週轉率）。"
+        }
+      },
+      "flags": [
+        "流動性不足"
+      ],
+      "qualitative_notes": null,
+      "news_warning": null
+    },
+    {
+      "code": "3011",
+      "name": "今皓",
+      "industry": "電子零組件業",
+      "rank": null,
+      "total_score": 4.5,
+      "coverage": 1.0,
+      "missing_factors": [],
+      "liquidity_20d": 3087288.65,
+      "no_recent_trade_reason": null,
+      "data_asof": "2026-10-20",
+      "factors": {
+        "institutional_buying_streak": {
+          "score": 6.5,
+          "percentile": 0.65,
+          "raw": {
+            "value": 0.2
+          },
+          "reason": "可觀察天數中有 20% 是連續買超，居全市場前 35%。"
+        },
+        "institutional_ownership_pct": {
+          "score": 6.4,
+          "percentile": 0.64,
+          "raw": {
+            "value": 0.0003
+          },
+          "reason": "三大法人買超累積張數約當股本的 +0.035%，居全市場前 36%。"
+        },
+        "institutional_buying_concentration": {
+          "score": 9.6,
+          "percentile": 0.96,
+          "raw": {
+            "value": 1.5778
+          },
+          "reason": "外資佔三大法人買超總量的 158%，居全市場前 4%。"
+        },
+        "gross_margin_level_stability": {
+          "score": 1.3,
+          "percentile": 0.13,
+          "raw": {
+            "value": 1.2193
+          },
+          "reason": "近8季毛利率水準×穩定度綜合指標 1.2，居全市場前 87%（供應鏈議價力代理，非嚴謹驗證）。"
+        },
+        "capacity_utilization_proxy": {
+          "score": 0.9,
+          "percentile": 0.09,
+          "raw": {
+            "value": 292.1986
+          },
+          "reason": "近4季營收合計/最新一期非流動資產比值 292.20，居全市場前 91%（產能利用率代理，非精確固定資產週轉率）。"
         }
       },
       "flags": [
@@ -95591,12 +95591,12 @@
           "reason": "三大法人買超累積張數約當股本的 +0.008%，居全市場前 46%。"
         },
         "institutional_buying_concentration": {
-          "score": 0.3,
-          "percentile": 0.03,
+          "score": 0.2,
+          "percentile": 0.02,
           "raw": {
             "value": -0.2727
           },
-          "reason": "外資佔三大法人買超總量的 -27%，居全市場前 97%。"
+          "reason": "外資佔三大法人買超總量的 -27%，居全市場前 98%。"
         },
         "gross_margin_level_stability": {
           "score": 1.2,
