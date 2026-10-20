@@ -967,6 +967,17 @@ def build_prompt() -> int:
 
     # 先.九十三-3（2026-10-14 總司令裁示）：wrapper 60 分鐘會強制砍掉（10/14 03:01、06:31 兩輪 TIMEOUT），
     # 長時間抓取（SIC、Tiingo 等）一律在開工後 45 分鐘自行存檔收尾，下一輪續跑。
+    # 先.一二一-3：最近 7 天撞過 Claude 用量上限 → 補件只排 ①資料錯 ②畫面問題 ③研究，暫停 ④文書核對。
+    # 讀狀態檔失敗只降級成「沒撞過」（十二節：守門員自己壞掉不得擋主流程）。
+    usage_note = ""
+    try:
+        _ust = json.loads((ROOT / "research" / ".claude_usage_state.json").read_text(encoding="utf-8"))
+        _hit = _ust.get("last_hit_at")
+        if isinstance(_hit, (int, float)) and time.time() - _hit < 7 * 86400:
+            usage_note = (f"   ⚠️ **本週已撞過 Claude 用量上限（{_ust.get('last_hit_local', '?')}，先.一二一-3）**："
+                          "補件只排 ①資料錯 ②畫面問題 ③研究，**暫停 ④文書核對**類。\n")
+    except Exception:  # noqa: BLE001
+        usage_note = ""
     _t0 = datetime.now(TZ)
     _wrap_at = (_t0 + timedelta(minutes=WRAP_UP_MIN)).strftime("%H:%M")
     prompt = f"""全程繁體中文。你是 Alpha 專案的開發佇列自走輪次（無人值守，沒有人在旁邊看）。
@@ -1008,7 +1019,7 @@ def build_prompt() -> int:
    新補的預設標「（DevQueue 可執行）」，真的需要總司令拍板的才標互動視窗。
    **不得**用換行統一、自查術語、格式整理這類小事湊數，**不得**補新的 alpha 試驗；
    四個來源都沒有可做的就不補，在收工紀錄照實寫「來源已用盡」。
-
+{usage_note}
 ## 一定要遵守
 1. 先讀 `C:\\alpha\\alpha-app\\CLAUDE.md`（尤其「零之一、停下條件改為白名單」
    「七、資料原則」「七之二、常駐服務發布紀律」「四之二、驗收證據原則」）與
