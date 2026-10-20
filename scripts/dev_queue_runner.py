@@ -498,7 +498,7 @@ def _explicit_order() -> list[str]:
     return [ln.strip() for ln in lines[begin_idx + 1:end_idx] if ln.strip()]
 
 
-def find_next() -> tuple[int, str] | None:
+def _find_next_base(skip: frozenset = frozenset()) -> tuple[int, str] | None:
     """回傳 (行號, 該行文字)，找不到回 None。只認 `- [ ]` 開頭、跳過 `- [!]`。
 
     優先依頂端的權威順序清單取件；清單裡的項目都做完（或都被標成阻塞）之後，
@@ -552,6 +552,8 @@ def find_next() -> tuple[int, str] | None:
             # 這支腳本的機械式解析，所以跳過不影響它們看得到這一項）。
             if cls == "研究":
                 continue
+            if key in skip:
+                continue
             if key in by_key:
                 # 2026-09-30：ORDER清單條目本身只認[研究]/[產品]，不認得項目行
                 # 自己標的「（互動視窗執行」中文括號註記——保險起見這裡也用
@@ -564,8 +566,41 @@ def find_next() -> tuple[int, str] | None:
     # 兩種情況都退回檔案順序，但一樣要濾掉[研究]類與互動視窗專屬項目
     # （用item_class()判斷，邏輯與上面ordered分支一致，只是這裡沒有現成的
     # cls可用；互動視窗專屬見item_class() 2026-09-30新增的偵測）。
-    devqueue_eligible = [(i, ln) for i, ln in pending if item_class(ln) not in ("研究", "互動視窗")]
+    devqueue_eligible = [(i, ln) for i, ln in pending
+                         if item_class(ln) not in ("研究", "互動視窗") and item_key(ln) not in skip]
     return devqueue_eligible[0] if devqueue_eligible else None
+
+
+# 先.一二二-6（2026-10-20）：分批／續跑類條目做完一批仍維持 - [ ]，永遠排在檔案前面，
+# 把排在後面的條目餓死（10/20 09:00～19:00 大多數輪次都在跑 V1 價格補抓）。
+BATCH_ITEM_TAG = re.compile(r"\[分批\]|續跑|斷點|分批|每批|第\s*\d+\s*批")
+
+
+def is_batch_item(text: str) -> bool:
+    return bool(BATCH_ITEM_TAG.search(text))
+
+
+def find_next() -> tuple[int, str] | None:
+    """find_next 的輪替外殼：上一輪派的是分批項，這一輪若又輪到分批項就改拿下一個
+    非分批的可執行條目；沒有其他可執行條目才回頭做分批工作。
+    輪替邏輯自身失敗只降級（CLAUDE.md 十二節）：回傳未輪替的原結果。"""
+    nxt = _find_next_base()
+    try:
+        if nxt is None or not is_batch_item(nxt[1]):
+            return nxt
+        if not _load_state().get("_last_was_batch"):
+            return nxt
+        skip = {item_key(nxt[1])}
+        cand = nxt
+        while cand is not None and is_batch_item(cand[1]):
+            skip.add(item_key(cand[1]))
+            cand = _find_next_base(frozenset(skip))
+        if cand is not None:
+            _safe_print(f"輪替：跳過分批項 {item_key(nxt[1])}，改做 {item_key(cand[1])}")
+            return cand
+    except Exception as e:  # noqa: BLE001
+        _safe_print(f"WARN_DETECTOR_CRASHED: batch rotation failed ({type(e).__name__})")
+    return nxt
 
 
 def _entry_key_class(entry: str) -> tuple[str, str]:
@@ -645,6 +680,7 @@ def _note_dispatch(text: str) -> None:
     recent = st.get("_recent_classes", [])
     recent.append(item_class(text))
     st["_recent_classes"] = recent[-6:]
+    st["_last_was_batch"] = is_batch_item(text)
     _save_state(st)
 
 
