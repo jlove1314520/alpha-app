@@ -6,15 +6,16 @@
 ## 一、第一批三個交易日觀察結果
 
 核對工具：`python scripts/check_password_batch1.py 2026-10-16 2026-10-19 2026-10-20`（只讀；看排程器上次結果、心跳／日誌、當天資料落地）。
+10/20 19:3x 互動視窗補核對（先.一二二-7）：三天輸出 `{"2026-10-16": false, "2026-10-19": true, "2026-10-20": true}`——唯一 NG 是 10/16 權證快照（補不回來）。工具原本只看當天第一次啟動紀錄，改成看最後一次（同日重跑以最後一次為準）。
 
 | 排程 | 10/16 | 10/19 | 10/20 |
 |---|---|---|---|
-| AlphaMarketCatchup（17:30） | OK：當天 market_tw 落地 | OK：當天 market_tw 落地 | （收盤後補） |
-| AlphaMarketCatchupLate（19:30） | OK（融資維持率缺，見下） | OK（同左） | （收盤後補） |
-| AlphaData（15:30） | OK（FinMind 融資金額 402 一處，次日恢復） | OK | （收盤後補） |
-| AlphaQuotesFallback（盤中每 10 分鐘） | OK：29 筆 | OK：29 筆 | （收盤後補） |
-| AlphaWarrantSnapshot（17:30） | **快照缺**：櫃買 16MB 檔下載到一半被對方切斷連線（ConnectionReset），程式 exit=1 | OK | （收盤後補） |
-| AlphaDevQueue（每 30 分鐘） | OK（1 輪用量上限） | 排程照常每 30 分鐘啟動；04:14 起 39 輪是 **claude 每週用量上限**（429 usage_limit_reached，10/20 04:00 重置後恢復） | （收盤後補） |
+| AlphaMarketCatchup（17:30） | OK：當天 market_tw 落地 | OK：當天 market_tw 落地 | OK：當天 market_tw 落地 |
+| AlphaMarketCatchupLate（19:30） | OK（融資維持率缺，見下） | OK（同左） | OK（融資維持率不再缺，先.一二二-4 已修） |
+| AlphaData（15:30） | OK（FinMind 融資金額 402 一處，次日恢復） | OK | OK |
+| AlphaQuotesFallback（盤中每 10 分鐘） | OK：29 筆 | OK：29 筆 | OK：29 筆 |
+| AlphaWarrantSnapshot（17:30） | **快照缺**：櫃買 16MB 檔下載到一半被對方切斷連線（ConnectionReset），程式 exit=1 | OK | **17:30 失敗→19:33 補抓成功**：櫃買 `tpex_warrant_issue` 連線被切斷（ConnectionReset，重試一次也斷）；19:31 用同一個存密碼身分重跑又斷、19:33 再跑 exit=0 快照落地。中間 19:32～19:33 用互動身分單打該端點 2 次都 200（約 5MB、4 秒）——同一身分一下失敗一下成功，判來源不穩、非身分問題 |
+| AlphaDevQueue（每 30 分鐘） | OK（1 輪用量上限） | 排程照常每 30 分鐘啟動；04:14 起 39 輪是 **claude 每週用量上限**（429 usage_limit_reached，10/20 04:00 重置後恢復） | 22 輪中 8 輪用量上限（04:00 前），其餘正常 |
 
 判讀：6 支排程在「存密碼身分」下**每次都有被叫起來、都跑到自己的程式**；看到的三個問題（櫃買連線中斷、FinMind 402、claude 每週用量上限）都是**資料源或額度**，跟登入身分無關，回到互動身分也一樣會發生。
 - 10/16 權證快照：官方端點只給當天，**補不回來**，照實記缺一天。

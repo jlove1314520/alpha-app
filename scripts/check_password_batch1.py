@@ -70,7 +70,8 @@ def check_day(d: str) -> dict:
     res["AlphaQuotesFallback"] = {"ok": len(qf) >= 20, "evidence": f"心跳 {len(qf)} 筆（09:05～13:45 每 10 分鐘約 29 筆）"}
     wl = _read(APP / "research" / "data" / "warrant_snapshot_cycle.log")
     seg = wl.split(f"===== warrant_snapshot launcher: {d} ")
-    wseg = seg[1].split("===== warrant_snapshot launcher:")[0] if len(seg) > 1 else ""
+    # 同一天重跑過（例：10/20 17:30 來源斷線、19:33 補抓成功）以當天最後一次為準
+    wseg = seg[-1].split("===== warrant_snapshot launcher:")[0] if len(seg) > 1 else ""
     has_dir = (APP / "research" / "data" / "warrant_snapshots" / d).exists()
     rc = re.search(r"warrant_snapshot\.py exit=(\d+)", wseg)
     res["AlphaWarrantSnapshot"] = {"ok": has_dir and bool(rc) and rc.group(1) == "0",
