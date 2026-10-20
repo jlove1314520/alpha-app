@@ -132,9 +132,8 @@ jobs:
       - name: 累積個股三大法人歷史（零額外請求，金流一.1）
         run: python .github/scripts/accumulate_institutional.py
         continue-on-error: true
-      - name: 聚合產業金流地圖（零額外請求，金流一.1）
-        run: python scripts/build_sector_flow.py
-        continue-on-error: true
+      # 先.一二一-3：「聚合產業金流地圖」移到價量歷史寫入＋缺日補齊之後（見下方），
+      # 因為法人 20 日均價／逆勢買超要用法人最新日當天的收盤價。
       - name: 抓USD/TWD匯率（yfinance，免金鑰）
         run: python .github/scripts/fetch_fx.py
         continue-on-error: true
@@ -156,6 +155,12 @@ jobs:
         run: |
           python scripts/backfill_price_history_gaps.py || echo "::warning::price_history 缺日補齊未完成"
           python scripts/selftest_price_history_gaps.py || echo "::warning::price_history 仍有全市場缺日"
+        continue-on-error: true
+      # 先.一二一-3（2026-10-20）：從 accumulate_institutional.py 後面移到這裡。原本排在 update_price_history.py 之前，
+      # price_history 還沒有法人最新日的收盤 → est_amount 用前一天收盤、逆勢買超／20 日均價價差算不出來。
+      # 中間的匯率／外資持股兩步不讀寫 sector_flow.json，順序互不影響；仍在 build_by_code 之前，零額外請求。
+      - name: 聚合產業金流地圖（零額外請求，金流一.1）
+        run: python scripts/build_sector_flow.py
         continue-on-error: true
       # 先.九十七-R6（2026-10-15）：維持率步驟移到 price_history 寫入＋缺日補齊之後。晚上 STOCK_DAY_ALL 常仍是前一天，
       # 維持率要用 price_history 同日收盤補；排在前面時當天 price_history 還沒寫入 → 只跑一班（本機補跑／17:13 班）必定 data_incomplete

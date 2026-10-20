@@ -1001,6 +1001,42 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("26. 籌碼分頁三大法人逐日／累計表有資料列或誠實空狀態、免責文字與「估算」標示都在",
     chipErrors.length === 0, chipErrors.join("; ") || `rows=${results.chip_trend_rows}`);
 
+  // 26c.【先.一二一-3，金流一.4 子項】籌碼徽章的「法人 20 日均價」與「逆勢買超」要跟 data/sector_flow.json
+  // 這檔的欄位一致（不重播算法，只比檔案上看得到的數字）：有 inst_avg_price_20d 就要顯示同一個價位且標「估算」、
+  // 沒有就不能顯示；contrarian_buy=true 才能有「逆勢買超」徽章；舊文案「尚未提供」不得再出現。check 26 剛開完 2330 籌碼分頁。
+  const flowBadgeErrors = [];
+  let flowBadgeInfo = "";
+  try {
+    await page.waitForFunction(() => (document.getElementById("chip-badges")?.textContent || "").includes("資料日"), null, { timeout: 15000 }).catch(() => {});
+    const r = await page.evaluate(async () => {
+      const res = await fetch("data/sector_flow.json?t=" + Date.now());
+      if (!res.ok) return { error: "sector_flow.json HTTP " + res.status };
+      const e = ((await res.json()).stocks || {})["2330"] || null;
+      const host = document.getElementById("chip-badges");
+      return { e, text: host?.textContent || "", avgText: document.getElementById("chip-avg-price")?.textContent || null };
+    });
+    if (r.error) flowBadgeErrors.push(r.error);
+    else if (!r.e) flowBadgeErrors.push("sector_flow.json 查無 2330");
+    else {
+      const ap = r.e.inst_avg_price_20d;
+      if (ap && ap.price != null) {
+        if (!r.avgText) flowBadgeErrors.push("檔案有 inst_avg_price_20d，畫面卻沒有 #chip-avg-price");
+        else {
+          if (!r.avgText.includes(Number(ap.price).toLocaleString())) flowBadgeErrors.push(`均價顯示「${r.avgText}」≠ 檔案 ${ap.price}`);
+          if (!/估算/.test(r.avgText)) flowBadgeErrors.push("法人 20 日均價沒標「估算」");
+        }
+      } else if (r.avgText) flowBadgeErrors.push("檔案沒有 inst_avg_price_20d，畫面卻顯示均價");
+      const shown = r.text.includes("逆勢買超") && !r.text.includes("或逆勢買超情形");
+      if (shown !== !!r.e.contrarian_buy) flowBadgeErrors.push(`逆勢買超徽章顯示=${shown} 但檔案 contrarian_buy=${r.e.contrarian_buy}`);
+      if (/尚未提供/.test(r.text)) flowBadgeErrors.push("舊文案「尚未提供」仍在");
+      flowBadgeInfo = `均價=${ap ? ap.price : "—"}、逆勢=${!!r.e.contrarian_buy}`;
+    }
+  } catch (e) {
+    flowBadgeErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("26c. 籌碼徽章的法人 20 日均價／逆勢買超與 sector_flow.json 一致",
+    flowBadgeErrors.length === 0, flowBadgeErrors.join("; ") || flowBadgeInfo);
+
   // 26b.【先.一〇三-3】null 不等於 0：上櫃股外資缺值日一律「—」，合計／累計標「資料不全」，
   // 來源依上市／上櫃標示（5347 世界＝上櫃，company_info 官方來源 tpex）。stock_detail 用固定假資料，
   // 不受當天真實資料是否已補齊影響。

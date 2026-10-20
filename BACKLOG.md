@@ -190,6 +190,7 @@ un-alpha-live-server-cycle.ps1`
    等逐日資料累積到≥20日再評估是否有意義。
    ⚠️ 現況（2026-10-17 核對，先.一〇九-18）：(b) 借券賣出已做——`app-stock.js` 第 345 行起讀 TWSE TWT93U／TPEx tpex_short_sell（`accumulate_securities_lending_sell.py`）；(a) 千張大戶週變化**已做**、改走 TDCC 官方源而非 FinMind（`scripts/fetch_tdcc_holders.py` → `data/holders.json`，源頭一.2a；檔名與原規格的 `holding_dispersion` 不同）〔先.一〇九-23 更正：初版誤寫未做〕；(c) 未再評估。
    ⚠️ 現況（2026-10-20 DevQueue 20261020-093102，先.一二一-1）：20 日視窗已可用（sector_flow meta windows_usable＝[1,5,20]，60 日還需 31 個交易日）；個股頁徽章註記已改成只說異常大買缺 60 日、逆勢買超／法人 20 日均價「尚未提供」（之前誤寫成需更長視窗）。(c) 法人 20 日均價本身仍未做，已排先.一二一-3。
+   ✅ 現況（2026-10-20 DevQueue 20261020-103102，先.一二一-3）：法人 20 日加權均價（`inst_avg_price_20d`）與逆勢買超（`contrarian_buy`）已由 build_sector_flow.py 產出、個股頁籌碼卡顯示，冒煙 26c 守住；只剩異常大買（60 日 z）等資料。
 10. **籌碼分點層——卡付費資料源，待使用者決定**（使用者2026-09-02指令二）：券商分點
     進出、關鍵分點、特定券商（秘密買賣超）、分點均價，免費拿不到（FinMind分點是
     sponsor付費／永豐Shioaji無分點／TWSE狂爬會觸封鎖＋ToS灰色，2026-09-02已探勘證實

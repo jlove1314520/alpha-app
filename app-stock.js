@@ -150,8 +150,8 @@
   // 有走勢圖時把這條價位畫上去（lightweight-charts的priceLine）。
   // 2026-09-08（金流一.3）個股籌碼徽章，資料來自 data/sector_flow.json。
   // **只顯示算得出來的**：streak_days 與 foreign_trust_aligned 現在就有；
-  // abnormal（60日z）需要更長視窗、逆勢買超／法人20日均價尚未實作，沒有就整個不畫，
-  // 不用短視窗冒充——一個看起來像那麼回事的假徽章比沒有徽章傷害大得多。
+  // abnormal（60日z）需要更長視窗，沒有就整個不畫，不用短視窗冒充——一個看起來像那麼回事的假徽章比沒有徽章傷害大得多。
+  // 先.一二一-3：逆勢買超（contrarian_buy）與法人 20 日加權均價（inst_avg_price_20d）只需 20 日，已上線。
   async function renderChipBadges(code){
     const host=document.getElementById('chip-badges');if(!host)return;
     host.innerHTML='';
@@ -175,24 +175,32 @@
     }
     if(e.abnormal&&e.z_today!=null)
       badges.push(pill(`異常大${e.z_today>0?'買':'賣'}（z=${e.z_today}）`,'var(--gold)'));
+    // 先.一二一-3：逆勢買超＝加權跌>1%、該產業跌>0.5%、法人買超 ≥ 前 20 日日均 1.5 倍或 ≥3 億（金流一原規格）
+    if(e.contrarian_buy)
+      badges.push(pill('逆勢買超','var(--up)'));
     // 先.一〇三-3：近 5 日有外資缺值（上櫃常見）→ 連買賣天數／土洋同買是用不完整資料算的，標「資料不全」
     if(e.foreign_missing_days)
       badges.push(pill(`資料不全（近 5 日外資缺 ${e.foreign_missing_days} 日）`,'var(--ink-3)'));
-    if(!badges.length){
-      host.innerHTML='<div class="note">近期無連續買賣（≥2 日）或土洋同買情形。</div>';
-      return;
-    }
+    // 先.一二一-3：法人 20 日加權均價（近 20 日淨買超日的還原收盤依淨買張數加權）與現價差；算不出來就不顯示
+    const ap=e.inst_avg_price_20d;
+    const apTxt=(ap&&ap.price!=null)
+      ?`<div class="note" id="chip-avg-price" style="margin-top:2px">法人 20 日均價（估算）${ap.price.toLocaleString()} 元`
+        +(ap.vs_close_pct!=null?`，現價${ap.vs_close_pct>=0?'高於':'低於'}均價 ${Math.abs(ap.vs_close_pct).toFixed(2)}%`:'')
+        +`（近 20 日 ${ap.buy_days} 個淨買超日加權，非真實成本）</div>`:'';
     const miss=m.windows_missing_days||{};
-    // 先.一二一-1：20 日視窗已可用（windows_usable 含 20），舊文字把逆勢買超／法人 20 日均價
-    // 也寫成「需更長視窗」不對——只有異常大買要 60 日；那兩項是還沒做，不是視窗不夠
-    const missTxt=(Object.keys(miss).length
+    // 先.一二一-1／-3：只有異常大買要 60 日，其餘都已上線
+    const missTxt=Object.keys(miss).length
       ?`　異常大買（60 日 z 分數）需更長視窗，`
         +`${Object.entries(miss).map(([w,n])=>`${w} 日還需 ${n} 個交易日`).join('、')}，`
-        +`累積足夠前不顯示。`:'')
-      +`　逆勢買超、法人 20 日均價尚未提供。`;
-    host.innerHTML=badges.join('')
-      +`<div class="note" style="margin-top:2px">法人行為（描述性資訊，非預測訊號）。`
-      +`資料日 ${m.date||'—'}。${missTxt}</div>`;
+        +`累積足夠前不顯示。`:'';
+    const contraTxt=m.contrarian_note?`　${m.contrarian_note}。`:'';
+    const tail=`<div class="note" style="margin-top:2px">法人行為（描述性資訊，非預測訊號）。`
+      +`資料日 ${m.date||'—'}。${missTxt}${contraTxt}</div>`;
+    if(!badges.length){
+      host.innerHTML='<div class="note">近期無連續買賣（≥2 日）、土洋同買或逆勢買超情形。</div>'+apTxt+tail;
+      return;
+    }
+    host.innerHTML=badges.join('')+apTxt+tail;
   }
   // 先.一〇八-4（UX_AUDIT 不確定第 2 條）：成本線 #d4a84b 在淺色底對比只有 1.96；淺色改讀 --gold-line，深色維持原色不動外觀
   function _costLineColor(){try{if(document.documentElement.getAttribute('data-theme')==='light'){return getComputedStyle(document.documentElement).getPropertyValue('--gold-line').trim()||'#a87a2e'}}catch(e){console.warn('成本線顏色讀取失敗，用預設色',e);if(typeof recordGlobalError==='function')recordGlobalError('成本線顏色',e)}return '#d4a84b'}

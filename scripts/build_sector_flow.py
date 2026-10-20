@@ -53,6 +53,18 @@ WINDOWS = (1, 5, 20, 60)
 ZSCORE_WINDOW = 60
 ZSCORE_THRESHOLD = 2.0     # 寫死門檻，規格指定 |z|>=2 才亮
 
+# 先.一二一-3（金流一.4 子項）：法人 20 日加權均價與逆勢買超，門檻照金流一原規格寫死：
+# 「法人 20 日加權均價（近 20 日淨買超日的收盤價依淨買股數加權）；
+#  逆勢買超（加權跌>1%、該產業跌>0.5%、法人買超 ≥ 近 20 日日均 1.5 倍或 ≥3 億）」
+AVG_PRICE_WINDOW = 20
+CONTRA_WINDOW = 20
+CONTRA_TAIEX_DROP_PCT = -1.0     # 加權指數當日跌幅 > 1%
+CONTRA_INDUSTRY_DROP_PCT = -0.5  # 該產業當日跌幅 > 0.5%
+CONTRA_MULTIPLE = 1.5            # 法人買超 ≥ 近 20 日日均 1.5 倍
+CONTRA_ABS_AMOUNT = 3e8          # 或 ≥ 3 億（估算金額）
+# [自行裁量] 近 20 日日均：20 天裡至少要有 15 天三欄齊全且有收盤價才算，否則不判（記 None）
+CONTRA_MIN_VALID_DAYS = 15
+
 # 規格：「ETF、權證、DR 不得混進產業合計」。這些在 company_info 的 industry
 # 欄位裡長得跟真產業一模一樣（"ETF" 268 檔、"上櫃ETF" 122 檔、"存託憑證" 36 檔…），
 # 不排除的話它們會變成榜上最大的「產業」——實測第一版就是 ETF 淨流出 -363,316 張
@@ -115,6 +127,28 @@ def _closes(price_history: dict) -> dict:
     return out
 
 
+def _daily_px(price_history: dict) -> dict:
+    """每檔近 40 列的 {YYYYMMDD: (close, adj_close, 前一列 adj_close)}，供 20 日均價／逆勢買超用。
+
+    [自行裁量] 均價用 adj_close（還原價，最新一天等於收盤），這樣除權息前後的價位能跟現價直接比；
+    沒有 adj_close 才退回 close。
+    """
+    out = {}
+    for code, rows in (price_history.get("prices") or {}).items():
+        m, prev = {}, None
+        for r in (rows or [])[-40:]:
+            c, a = r.get("close"), r.get("adj_close")
+            a = a if isinstance(a, (int, float)) else c
+            if isinstance(c, (int, float)) and isinstance(a, (int, float)) and r.get("date"):
+                m[str(r["date"]).replace("-", "")] = (float(c), float(a), prev)
+                prev = float(a)
+            else:
+                prev = None
+        if m:
+            out[code] = m
+    return out
+
+
 def _streak(vals: list) -> int:
     """連續同向天數：正=連買、負=連賣、0=最新一天持平或無資料。
 
@@ -153,7 +187,20 @@ def main() -> int:
     companies = ci.get("companies") or {}
     uni = _load(D / "listed_universe.json", {}) or {}
     active = set(uni.get("active") or [])
-    closes = _closes(PHS.load(D / "price_history.json") if PHS.exists(D / "price_history.json") else {})
+    _ph = PHS.load(D / "price_history.json") if PHS.exists(D / "price_history.json") else {}
+    closes = _closes(_ph)
+    dpx = _daily_px(_ph)
+    del _ph
+    # 逆勢買超的「加權跌>1%」：讀 market_tw.json（fetch_market_tw.py 既有輸出，零額外請求），
+    # 資料日必須等於法人最新日，不同日就不判（不拿別天的指數頂替）。
+    _tx = ((_load(D / "market_tw.json", {}) or {}).get("taiex") or {})
+    taiex_chg, taiex_note = None, None
+    if str(_tx.get("data_date") or "").replace("-", "") == dates[-1]             and isinstance(_tx.get("change_pct"), (int, float)):
+        taiex_chg = float(_tx["change_pct"])
+    else:
+        taiex_note = (f"market_tw.json 加權指數資料日 {_tx.get('data_date')} ≠ 法人最新日 {dates[-1]}，"
+                      "逆勢買超本日不判")
+        print("  ! " + taiex_note)
 
     usable = [w for w in WINDOWS if n_dates >= w]
     missing = {str(w): w - n_dates for w in WINDOWS if n_dates < w}
@@ -231,6 +278,41 @@ def main() -> int:
                 z = (amts[-1] - statistics.fmean(amts)) / sd
                 entry["z_today"] = round(z, 2)
                 entry["abnormal"] = abs(z) >= ZSCORE_THRESHOLD
+        # 先.一二一-3：法人 20 日加權均價＝近 20 日「三大法人合計淨買超 > 0」那幾天的
+        # 收盤價（還原價）依淨買張數加權。缺值日（合計 None）或沒收盤價的日子不算。
+        px = dpx.get(code) or {}
+        if n_dates >= AVG_PRICE_WINDOW:
+            num = den = 0.0
+            nbuy = 0
+            for d, v in zip(dates[-AVG_PRICE_WINDOW:], total_ser[-AVG_PRICE_WINDOW:]):
+                if v is not None and v > 0 and d in px:
+                    num += v * px[d][1]
+                    den += v
+                    nbuy += 1
+            if den > 0:
+                avgp = num / den
+                last = px.get(dates[-1])
+                entry["inst_avg_price_20d"] = {
+                    "price": round(avgp, 2),
+                    "buy_days": nbuy,
+                    # 現價＝法人最新日的收盤；price_history 還沒有那天就不算價差（不拿前一天頂替）
+                    "vs_close_pct": round((last[1] / avgp - 1) * 100, 2) if last else None,
+                }
+        # 逆勢買超的個股條件（產業／大盤條件在產業層算完後再合併）
+        if n_dates >= CONTRA_WINDOW + 1:
+            last = px.get(dates[-1])
+            v0 = total_ser[-1]
+            if last and v0 is not None:
+                today_amt = v0 * 1000 * last[0]
+                prior = [v * 1000 * px[d][0]
+                         for d, v in zip(dates[-CONTRA_WINDOW - 1:-1], total_ser[-CONTRA_WINDOW - 1:-1])
+                         if v is not None and d in px]
+                if len(prior) >= CONTRA_MIN_VALID_DAYS:
+                    avg_amt = statistics.fmean(prior)
+                    # [自行裁量] 近 20 日日均 ≤ 0（平常是賣超）時「1.5 倍」沒有意義，只認 ≥3 億這一支
+                    hit = today_amt > 0 and (today_amt >= CONTRA_ABS_AMOUNT
+                                             or (avg_amt > 0 and today_amt >= CONTRA_MULTIPLE * avg_amt))
+                    entry["_contra"] = (hit, round(today_amt), round(avg_amt), len(prior))
         stocks_out[code] = entry
 
     # ── 產業層 ────────────────────────────────────────────────────────────
@@ -278,10 +360,41 @@ def main() -> int:
                     "lots": (stocks_out[c].get(f"net_{w_main}d") or {}).get("total_lots"),
                     "est_amount": (stocks_out[c].get(f"net_{w_main}d") or {}).get("est_amount")}
 
+        # 先.一二一-3：產業當日漲跌（逆勢買超「該產業跌>0.5%」用）。
+        # [自行裁量] 規格沒寫產業漲跌怎麼算：TWSE 類股指數只涵蓋上市、名稱也對不上 company_info 產業別，
+        # 改用成分股當日還原價報酬的**等權平均**（上市櫃一致），且至少 3 檔有當日與前一日價才算。
+        rets = []
+        for c in codes:
+            t = (dpx.get(c) or {}).get(dates[-1])
+            if t and t[2]:
+                rets.append(t[1] / t[2] - 1)
+        if len(rets) >= 3:
+            agg["day_return_pct"] = round(statistics.fmean(rets) * 100, 2)
+            agg["day_return_n"] = len(rets)
         agg["rank_window_days"] = w_main
         agg["top_inflow"] = [_row(c) for c in ranked[::-1][:10]]
         agg["top_outflow"] = [_row(c) for c in ranked[:10]]
         sectors[ind] = agg
+
+    # ── 逆勢買超合併：大盤條件 × 產業條件 × 個股條件 ───────────────────────
+    contra_n = 0
+    for code, e in stocks_out.items():
+        c = e.pop("_contra", None)
+        if c is None or taiex_chg is None:
+            continue
+        ind = e.get("industry")
+        ind_ret = (sectors.get(ind) or {}).get("day_return_pct") if _is_industry(ind) else None
+        if ind_ret is None:
+            continue   # 非產業類別（ETF 等）或產業漲跌算不出來 → 不判
+        hit = (taiex_chg < CONTRA_TAIEX_DROP_PCT and ind_ret < CONTRA_INDUSTRY_DROP_PCT and c[0])
+        e["contrarian_buy"] = bool(hit)
+        if hit:
+            contra_n += 1
+            e["contrarian_detail"] = {
+                "taiex_change_pct": taiex_chg, "industry_return_pct": ind_ret,
+                "today_est_amount": c[1], "avg20_est_amount": c[2], "avg20_valid_days": c[3],
+            }
+    print(f"  逆勢買超：加權 {taiex_chg if taiex_chg is not None else '—'}%，亮燈 {contra_n} 檔")
 
     doc = {
         "meta": {
@@ -295,6 +408,12 @@ def main() -> int:
             "zscore_window": ZSCORE_WINDOW,
             "zscore_threshold": ZSCORE_THRESHOLD,
             "disclaimer": "法人行為（描述性資訊，非預測訊號）",
+            "inst_avg_price_rule": "近 20 日三大法人合計淨買超>0 的日子，還原收盤價依淨買張數加權（估算，非真實成本）",
+            "contrarian_rule": "加權當日跌>1%、該產業（成分股等權還原報酬）跌>0.5%、"
+                               "法人當日淨買超估算金額 ≥ 前 20 日日均 1.5 倍（日均需>0）或 ≥3 億",
+            "contrarian_taiex_change_pct": taiex_chg,
+            "contrarian_note": taiex_note,
+            "contrarian_count": contra_n,
             "non_industry_excluded": excluded_non_industry,
             "known_gaps": [
                 "張數與金額可能反向：淨張數為負而淨金額為正是合理的"
@@ -348,8 +467,11 @@ def _update_queue_countdown(n_dates, dates, missing, usable) -> None:
                 f"- [!] **金流一.4** **阻塞：等資料累積**——目前法人歷史 "
                 f"**{n_dates} 個交易日**（{dates[0]}~{dates[-1]}），"
                 f"可用視窗 {usable}；{miss_txt}。",
-                "  待補：個股頁異常大買（60 日 z）、逆勢買超、法人 20 日均價、"
-                "市場頁象限散點圖（需 20 日加速度）。**不得縮短視窗湊數。**",
+                # 先.一二一-3：逆勢買超、法人 20 日均價已上線（只需 20 日）；象限散點圖的資料
+                # （sectors.*.acceleration／quadrant）20 日可用後已產出，前端未畫是另一項（先.一二一-4），
+                # 不是視窗問題，所以這行只剩真的要等 60 日的項目
+                "  待補（只剩這些要等 60 日）：個股頁異常大買（60 日 z）、首頁自選股異常小點。"
+                "**不得縮短視窗湊數。**",
                 "  <sub>此行由 `scripts/build_sector_flow.py` 每日自動改寫。</sub>",
             ]
         else:
