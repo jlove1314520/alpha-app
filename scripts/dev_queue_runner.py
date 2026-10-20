@@ -192,6 +192,42 @@ def _writers_of(path: str) -> set[str]:
         return set()
 
 
+# 2026-10-21（先.一二二-13）：PENDING_QUEUE.md 是佇列本身，Cowork／其他輪次在檔尾新增條目不代表有人在中途改程式
+# （10/20 20:01／20:31／21:01 三輪都因此讓路）。只有「既有行被改寫或刪除」才算非機器改動；純檔尾新增照常執行。
+APPEND_TOLERANT = ("PENDING_QUEUE.md",)
+_HUNK = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
+
+
+def _is_append_only_diff(diff_text: str, old_line_count: int) -> bool:
+    """git diff -U0 的輸出是否只有「接在舊檔最後一行之後的新增」。沒有任何 hunk（只改權限等）也回 False。"""
+    hunks = 0
+    for ln in diff_text.splitlines():
+        m = _HUNK.match(ln)
+        if not m:
+            continue
+        hunks += 1
+        old_start, old_len = int(m.group(1)), int(m.group(2) or "1")
+        if old_len != 0:          # 有刪除或改寫既有行
+            return False
+        if old_start < old_line_count:   # 新增插在中間（-U0 的純新增 hunk，old_start＝插入點前一行）
+            return False
+    return hunks > 0
+
+
+def _append_only_change(path: str) -> bool:
+    """這個檔相對 HEAD 是否只有檔尾新增。自己出錯一律回 False（照舊視為真改動、讓路），只印警告。"""
+    try:
+        diff = subprocess.run(["git", "-C", str(ROOT), "diff", "-U0", "--no-color", "HEAD", "--", path],
+                              capture_output=True, text=True, check=True, encoding="utf-8", errors="replace",
+                              timeout=60).stdout
+        old = subprocess.run(["git", "-C", str(ROOT), "show", f"HEAD:{path}"],
+                             capture_output=True, check=True, timeout=60).stdout
+        return _is_append_only_diff(diff, old.count(b"\n") + (0 if old.endswith(b"\n") or not old else 1))
+    except Exception as e:  # noqa: BLE001 — 守門員自己失敗只降級（CLAUDE.md 十二）
+        print(f"WARN: 判斷 {path} 是否純檔尾新增失敗（{type(e).__name__}），照舊視為改動", flush=True)
+        return False
+
+
 def _recent_real_dirty_reason() -> str | None:
     """排除機器寫檔後，剩下的未提交變更裡有沒有『最近』被改過的檔案。"""
     try:
@@ -221,6 +257,9 @@ def _recent_real_dirty_reason() -> str | None:
         except OSError:
             continue  # 檔案已被刪除等邊界情況，不當成碰撞訊號
         if age_min < COLLISION_RECENCY_MINUTES:
+            if path in APPEND_TOLERANT and _append_only_change(path):
+                print(f"INFO: {path} 只有檔尾新增條目（{age_min:.1f} 分鐘前），不算有人在中途，照常執行", flush=True)
+                continue
             if cmdlines == "unset":
                 cmdlines = _running_cmdlines()
             if _residual_ok(path, now, seen, cmdlines):

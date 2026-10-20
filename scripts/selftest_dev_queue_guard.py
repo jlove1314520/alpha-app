@@ -96,6 +96,32 @@ for n in ("2", "8", "9"):
     ln = next((x for x in real if f"常備.開發-{n} " in x), "")
     check(f"實際佇列 常備.開發-{n} 不會被守門員擋", ln and not blocked(ln[6:]))
 
+# 先.一二二-13：碰撞偵測對 PENDING_QUEUE.md 純檔尾新增不讓路、改寫既有行仍讓路（用暫存 git repo 產生真的 diff）
+import subprocess  # noqa: E402
+with tempfile.TemporaryDirectory() as td:
+    tdp = Path(td)
+    def _git(*a):
+        return subprocess.run(["git", "-C", td, *a], capture_output=True, text=True, encoding="utf-8", check=True).stdout
+    _git("init", "-q")
+    _git("config", "user.email", "selftest@example.invalid")
+    _git("config", "user.name", "selftest")
+    qf = tdp / "PENDING_QUEUE.md"
+    qf.write_text("- [ ] A\n- [ ] B\n- [ ] C\n", encoding="utf-8")
+    _git("add", "PENDING_QUEUE.md")
+    _git("commit", "-q", "-m", "init")
+    _oroot = D.ROOT
+    D.ROOT = tdp
+    try:
+        qf.write_text("- [ ] A\n- [ ] B\n- [ ] C\n\n- [ ] D 新增條目\n", encoding="utf-8")
+        check("PENDING_QUEUE.md 只在檔尾新增條目 → 視為純新增（不讓路）", D._append_only_change("PENDING_QUEUE.md") is True)
+        qf.write_text("- [x] A 已完成\n- [ ] B\n- [ ] C\n- [ ] D\n", encoding="utf-8")
+        check("PENDING_QUEUE.md 改寫既有行＋檔尾新增 → 不算純新增（照舊讓路）", D._append_only_change("PENDING_QUEUE.md") is False)
+        qf.write_text("- [ ] A\n- [ ] 插在中間\n- [ ] B\n- [ ] C\n", encoding="utf-8")
+        check("PENDING_QUEUE.md 在中間插入 → 不算純新增（照舊讓路）", D._append_only_change("PENDING_QUEUE.md") is False)
+        check("判斷不存在的檔案 → 不拋例外、回 False", D._append_only_change("不存在.md") is False)
+    finally:
+        D.ROOT = _oroot
+
 n_fail = sum(1 for _, ok in results if not ok)
 print(f"合計 {len(results)} 項，失敗 {n_fail}")
 sys.exit(1 if n_fail else 0)
