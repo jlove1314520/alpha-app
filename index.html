@@ -43,7 +43,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(mq.addEventListener)mq.addEventListener('change',h);else if(mq.addListener)mq.addListener(h)}
 })();
 </script>
-<link rel="stylesheet" href="app.css?v=2026-10-20.1047">
+<link rel="stylesheet" href="app.css?v=2026-10-20.1101">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -263,6 +263,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
            沒有 Y 軸卻硬畫散點圖，等於把所有泡泡排在一條線上再叫它象限圖——
            那是假裝有資料。改用長條排行，20 日視窗長滿後再補象限圖。
            順帶好處：不用 SVG 就不會重演走勢線畫到數字上的 viewBox 問題。
+           先.一二一-6（2026-10-20）：20 日視窗已可用，象限散點圖已補上（app-market.js renderFlowQuadrant，
+           固定 viewBox 0 0 340 230、文字只畫在繪圖區內），長條排行保留在圖下方。
            **以估算金額為主、張數為輔**：實測半導體業近5日 -44,973張 但 +415.7億
            （台積電2440一張被買、便宜的被賣），只看張數會得到相反的結論。 -->
       <div class="card">
@@ -1597,6 +1599,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-20.1047"></script>
+<script src="app.js?v=2026-10-20.1101"></script>
 </body>
 </html>

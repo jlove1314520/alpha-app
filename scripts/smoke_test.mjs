@@ -1754,6 +1754,45 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("48. sector_flow.json 的 date 必須等於 T86（institutional_history.json）最新日期",
     t86DateErrors.length === 0, t86DateErrors.join("; ") || t86DateInfo);
 
+  // 48b.【先.一二一-6】市場頁產業金流象限散點圖：泡泡數＝sector_flow.json 有 quadrant_est_amount 的產業數、
+  // 每個泡泡都在 viewBox 內（規格：不得重演畫到數字外的問題）、點泡泡會展開該產業成分股。不重播算法，只比檔案欄位數與畫面元素數。
+  const quadErrors = [];
+  let quadInfo = "";
+  try {
+    await page.evaluate(() => window.go("market"));
+    await page.waitForFunction(() => document.querySelector("#sector-flow-quad svg") || /尚無產業金流/.test(document.getElementById("sector-flow-body")?.textContent || ""), null, { timeout: 15000 }).catch(() => {});
+    const r = await page.evaluate(async () => {
+      const res = await fetch("data/sector_flow.json?t=" + Date.now());
+      if (!res.ok) return { error: "sector_flow.json HTTP " + res.status };
+      const secs = (await res.json()).sectors || {};
+      const want = Object.values(secs).filter((a) => a && a.quadrant_est_amount).length;
+      const svg = document.querySelector("#sector-flow-quad svg");
+      if (!svg) return { want, got: 0, out: [], noSvg: true };
+      const [, , W, H] = (svg.getAttribute("viewBox") || "0 0 0 0").split(/\s+/).map(Number);
+      const gs = [...svg.querySelectorAll("g[data-quad-ind]")];
+      const out = gs.filter((g) => { const c = g.querySelector("circle"); const x = +c.getAttribute("cx"), y = +c.getAttribute("cy"); return !(x >= 0 && x <= W && y >= 0 && y <= H); }).map((g) => g.dataset.quadInd);
+      return { want, got: gs.length, out, first: gs[0] && gs[0].dataset.quadInd };
+    });
+    if (r.error) quadErrors.push(r.error);
+    else {
+      if (r.want >= 2 && r.noSvg) quadErrors.push(`檔案有 ${r.want} 個產業有象限資料，畫面卻沒有象限圖`);
+      else if (r.got !== r.want && !(r.want < 2 && r.got === 0)) quadErrors.push(`泡泡 ${r.got} 個 ≠ 檔案有象限資料的產業 ${r.want} 個`);
+      if (r.out.length) quadErrors.push(`泡泡跑出 viewBox：${r.out.join("、")}`);
+      if (r.first) {
+        await page.evaluate((ind) => document.querySelector(`#sector-flow-quad g[data-quad-ind="${ind}"]`)?.dispatchEvent(new MouseEvent("click", { bubbles: true })), r.first);
+        await page.waitForFunction(() => /買超前 10|賣超前 10/.test(document.getElementById("sector-flow-body")?.textContent || ""), null, { timeout: 5000 }).catch(() => {});
+        const opened = await page.evaluate(() => /買超前 10|賣超前 10/.test(document.getElementById("sector-flow-body")?.textContent || ""));
+        if (!opened) quadErrors.push(`點泡泡「${r.first}」沒有展開成分股`);
+        await page.evaluate(() => { if (typeof window.toggleFlowSector === "function") window.toggleFlowSector(null); });
+      }
+      quadInfo = `泡泡 ${r.got}／${r.want}`;
+    }
+  } catch (e) {
+    quadErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("48b. 產業金流象限散點圖泡泡數＝有象限資料的產業數、全在 viewBox 內、點泡泡展開成分股",
+    quadErrors.length === 0, quadErrors.join("; ") || quadInfo);
+
   // 49.【2026-09-15新增，週六.三／稽核二.五】三大法人柱狀圖零基線：正值柱要從
   // 共用基線往上長、負值柱從同一條基線往下長，不是舊版「單一bar在盒子裡置中」
   // （那樣正負值視覺上各自往兩邊對稱伸展，沒有共用基線，容易誤讀漲跌幅度）。

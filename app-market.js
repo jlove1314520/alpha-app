@@ -797,6 +797,45 @@
   }
   function setFlowWin(w){FLOW_WIN=w;FLOW_OPEN=null;_safeAsync('renderSectorFlow',()=>renderSectorFlow())}
   function toggleFlowSector(ind){FLOW_OPEN=(FLOW_OPEN===ind?null:ind);_safeAsync('renderSectorFlow',()=>renderSectorFlow())}
+  // 先.一二一-6（金流一原規格第 3 點）：產業金流象限散點圖。X＝近 5 日淨流向（估算金額）、
+  // Y＝加速度（5 日日均－20 日日均，估算金額）、半徑＝近 20 日累計絕對值；象限標籤用 build_sector_flow.py 的
+  // quadrant_est_amount（跟泡泡位置同一把尺）。規格要求畫前先定 viewBox：固定 0 0 340 230、寬 100%、高度隨比例，
+  // 文字全部放在繪圖區內側，不會疊到別的數字上。沒有 20 日資料（沒有 quadrant_est_amount）就不畫。
+  function renderFlowQuadrant(sectors){
+    const pts=Object.entries(sectors||{})
+      .filter(([,a])=>a&&a.quadrant_est_amount&&typeof a.net_5d_est_amount==='number'&&typeof a.acceleration_est_amount==='number')
+      .map(([ind,a])=>({ind,x:a.net_5d_est_amount,y:a.acceleration_est_amount,r:Math.abs(a.net_20d_est_amount||0),q:a.quadrant_est_amount}));
+    if(pts.length<2)return '';
+    const W=340,H=230,P=14,cx=W/2,cy=H/2;
+    const mx=Math.max(...pts.map(p=>Math.abs(p.x)),1),my=Math.max(...pts.map(p=>Math.abs(p.y)),1),mr=Math.max(...pts.map(p=>p.r),1);
+    const rad=v=>3+Math.sqrt(v/mr)*11;  // 面積對應金額，3～14px
+    // 平方根刻度（保留正負號）：單一大產業（例如半導體）會把其他泡泡擠在原點，線性刻度看不出分布；
+    // 繪圖範圍再內縮，讓四角的象限文字不被極端泡泡蓋住
+    const sq=(v,m)=>Math.sign(v)*Math.sqrt(Math.abs(v)/m);
+    const X=v=>cx+sq(v,mx)*(cx-P-30),Y=v=>cy-sq(v,my)*(cy-P-24);
+    const col={'流入加速':'var(--up)','流入放緩':'var(--up)','流出放緩':'var(--down)','流出加速':'var(--down)'};
+    // 標籤：20 日累計前 6 大，依序放，跟已放的標籤太近就略過（避免文字疊在一起），其餘看 title／點開
+    const placed=[],top=new Set();
+    pts.slice().sort((a,b)=>b.r-a.r).slice(0,6).forEach(p=>{
+      const x=X(p.x),y=Y(p.y);
+      if(placed.every(q=>Math.abs(q.x-x)>44||Math.abs(q.y-y)>11)){placed.push({x,y});top.add(p.ind)}
+    });
+    const esc=t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/'/g,'&#39;');
+    const dots=pts.sort((a,b)=>b.r-a.r).map(p=>{
+      const x=X(p.x),y=Y(p.y),r=rad(p.r),acc=p.q==='流入加速'||p.q==='流出加速';
+      const lab=top.has(p.ind)?`<text x="${Math.min(W-P-2,Math.max(P+2,x)).toFixed(1)}" y="${(y-r-2<P+8?y+r+9:y-r-2).toFixed(1)}" text-anchor="middle" font-size="8.5" fill="var(--ink-2)">${esc(p.ind)}</text>`:'';
+      return `<g class="press" data-quad-ind="${esc(p.ind)}" onclick="toggleFlowSector(this.dataset.quadInd)" style="cursor:pointer">`
+        +`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="${col[p.q]}" fill-opacity="${acc?.55:.25}" stroke="${col[p.q]}" stroke-width="1">`
+        +`<title>${esc(p.ind)}｜${p.q}｜5日 ${fmtFlowAmt(p.x)}、加速度 ${fmtFlowAmt(p.y)}/日、20日累計 ${fmtFlowAmt(p.r)}</title></circle>${lab}</g>`;
+    }).join('');
+    const corner=(t,x,y,a)=>`<text x="${x}" y="${y}" text-anchor="${a}" font-size="9" fill="var(--ink-4)">${t}</text>`;
+    return `<div id="sector-flow-quad" style="margin-bottom:8px"><svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img" aria-label="產業金流象限散點圖">`
+      +`<line x1="${P}" y1="${cy}" x2="${W-P}" y2="${cy}" stroke="var(--hairline)" stroke-width="1"/>`
+      +`<line x1="${cx}" y1="${P}" x2="${cx}" y2="${H-P}" stroke="var(--hairline)" stroke-width="1"/>`
+      +corner('流入加速',W-P,P+8,'end')+corner('流入放緩',W-P,H-P-2,'end')+corner('流出放緩',P,P+8,'start')+corner('流出加速',P,H-P-2,'start')
+      +dots+`</svg><div class="note" style="margin-top:2px">橫軸＝近 5 日法人淨流向（估算金額，右流入左流出）；縱軸＝加速度（近 5 日日均－近 20 日日均，上加速下放緩）；兩軸為平方根刻度；`
+      +`泡泡大小＝近 20 日累計絕對值。點泡泡看成分股。法人行為（描述性資訊，非預測訊號）。</div></div>`;
+  }
   async function renderSectorFlow(){
     const host=document.getElementById('sector-flow-body');
     const noteEl=document.getElementById('sector-flow-note');
@@ -823,8 +862,12 @@
       .sort((x,y)=>y.amt-x.amt);
     const top=rows.slice(0,8),bot=rows.slice(-5).reverse();
     const shown=top.concat(bot.filter(b=>!top.some(t=>t.ind===b.ind)));
+    // 先.一二一-6：從象限圖點開的產業若不在前 8／後 5 名，補在清單最後，點了才看得到成分股
+    if(FLOW_OPEN&&!shown.some(r=>r.ind===FLOW_OPEN)){const o=rows.find(r=>r.ind===FLOW_OPEN);if(o)shown.push(o)}
+    let quad='';
+    try{quad=renderFlowQuadrant(d.sectors)}catch(e){console.warn('產業金流象限圖失敗，只顯示長條排行',e);if(typeof recordGlobalError==='function')recordGlobalError('產業金流象限圖',e)}
     const maxAbs=Math.max(...shown.map(r=>Math.abs(r.amt)),1);
-    host.innerHTML=shown.map(r=>{
+    host.innerHTML=quad+shown.map(r=>{
       const pct=Math.max(2,Math.abs(r.amt)/maxAbs*100);
       const pos=r.amt>0,col=pos?'var(--up)':'var(--down)';
       const open=FLOW_OPEN===r.ind;
@@ -855,7 +898,7 @@
     if(noteEl){
       const miss=m.windows_missing_days||{};
       const missTxt=Object.keys(miss).length
-        ?`　${Object.entries(miss).map(([w,n])=>`${w} 日視窗還需累積 ${n} 個交易日`).join('、')}（象限散點圖待 20 日視窗長滿後補上）。`:'';
+        ?`　${Object.entries(miss).map(([w,n])=>`${w} 日視窗還需累積 ${n} 個交易日`).join('、')}。`:'';
       noteEl.innerHTML=`資料日 ${m.date||'—'}，${m.trading_days_available||0} 個交易日。`
         +`金額為<b>估算</b>（張×1000×當日收盤），非真實成交金額；自營商含避險未拆分。`
         +`已排除 ETF／ETN／存託憑證等 ${m.non_industry_excluded||0} 檔非產業證券。${missTxt}`;

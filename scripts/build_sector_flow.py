@@ -346,6 +346,14 @@ def main() -> int:
             agg["acceleration"] = round(d5 - d20, 2)
             agg["quadrant"] = (("流入加速" if d5 > d20 else "流入放緩") if d5 > 0
                                else ("流出放緩" if d5 > d20 else "流出加速"))
+            # 先.一二一-6：象限散點圖用的金額版（前端以估算金額為主——張數與金額可能反向，
+            # 實測半導體業 5 日 -44,973 張但 +415.7 億）。[自行裁量] 張數版 acceleration／quadrant 保留不動，
+            # 另給金額版，泡泡的位置與象限標籤才用同一把尺。
+            a5 = agg["net_5d_est_amount"] / 5
+            a20 = agg["net_20d_est_amount"] / 20
+            agg["acceleration_est_amount"] = round(a5 - a20)
+            agg["quadrant_est_amount"] = (("流入加速" if a5 > a20 else "流入放緩") if a5 > 0
+                                          else ("流出放緩" if a5 > a20 else "流出加速"))
         # 2026-09-08 排序依「估算金額」不是張數——這是實測截圖抓到的不一致：
         # 半導體業標題 +415.7 億，成分股卻依張數排，聯電 26,202 張排第一，
         # 而真正撐起那 415 億的台積電（2,440 元一張）只排第四。
