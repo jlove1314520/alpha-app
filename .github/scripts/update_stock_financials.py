@@ -605,6 +605,7 @@ def main():
     errors = []
     income_updated = 0
     skipped_no_baseline = 0
+    skipped_no_baseline_codes = []  # 先.一二一-2：計數旁存代號清單，BACKLOG「979 檔缺 Q1 基準」才能逐檔對
     try:
         income = fetch_income()
         equity = fetch_balance()
@@ -615,6 +616,7 @@ def main():
             discrete = discretize_quarter(existing_quarters, cum)
             if discrete is None:
                 skipped_no_baseline += 1
+                skipped_no_baseline_codes.append(str(code))
                 continue
             fin["quarters"] = merge_quarters(existing_quarters, discrete)
             bal = equity.get(code) or {}
@@ -649,6 +651,7 @@ def main():
     payload["meta"]["financials_source"] = "TWSE openapi t187ap06_L_ci(綜合損益表-一般業) + t187ap07_L_ci(資產負債表-一般業)"
     payload["meta"]["financials_updated_count"] = income_updated
     payload["meta"]["financials_skipped_no_baseline_count"] = skipped_no_baseline
+    payload["meta"]["financials_skipped_no_baseline_codes"] = sorted(set(skipped_no_baseline_codes))
     payload["meta"].setdefault("errors", [])
     payload["meta"]["errors"] = errors
 
