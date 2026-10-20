@@ -2501,6 +2501,8 @@
         // 先.一〇四-1：news.json 最新一則超過 2 天 → 黃色提示（不擋其他內容）
         +(newsDoc&&newsDoc.stale_warning?`<div class="note" style="margin-top:8px;color:var(--warn,#d4a72c)">⚠ 新聞來源可能停更：${String(newsDoc.stale_warning).replace(/</g,'&lt;')}</div>`:'')
         +`<div class="note" data-ui-explain style="margin-top:8px">自選股 ${wl.size} 檔＋真錢持股 ${realCodes.size} 檔（不含研究策略／模擬持股）${realNote?'（'+realNote+'）':''}；依重要度排序（0～10 分，同分新到舊）、每檔最多 2 則，今日事件已列的重訊不重複。點一列跳個股頁。</div>`;
+      // 先.一二一-5：重畫後立刻收合長說明，不等觀察器 120ms 延遲（否則使用者與冒煙 #91 會看到一瞬間長文）
+      uiCompactAll(el);
     }catch(e){
       console.warn('[loadMyHoldingsEvents]',e);recordGlobalError('loadMyHoldingsEvents',e);
       el.innerHTML='<div class="note">載入失敗：'+_uiEsc(e.message)+'</div>';
@@ -4874,7 +4876,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-20.1101';
+  const APP_VERSION='2026-10-20.1447';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
