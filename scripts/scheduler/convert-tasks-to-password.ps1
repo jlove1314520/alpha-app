@@ -21,6 +21,13 @@ param([int]$Batch = 1, [switch]$Revert)
 
 $batches = @{
     1 = @("AlphaMarketCatchup", "AlphaMarketCatchupLate", "AlphaData", "AlphaQuotesFallback", "AlphaWarrantSnapshot", "AlphaDevQueue")
+    # 先.一二一-1（2026-10-20）：第 2 批＝A 組資料／研究 20 支＋B 組常駐服務／盤中報價 3 支（docs/TASK_PASSWORD_BATCH2_PLAN.md 第二節）
+    2 = @("AlphaB25Control", "AlphaDataAudit", "AlphaDepCheck", "AlphaDisposalFlags", "AlphaFinMindWarmup", "AlphaHypothesisQueue", "AlphaMarathon",
+          "AlphaMarginCkCheck", "AlphaMoeaPitSnapshot", "AlphaNewsFallback", "AlphaNightlySix", "AlphaOrphanScan", "AlphaPaperSupplyV2", "AlphaPhoneRegression",
+          "AlphaRfMonthly", "AlphaTdccHolders", "AlphaTwDataCheck", "AlphaWeeklyReport", "AlphaTelegram0815", "AlphaTelegram2015",
+          "AlphaLiveServer", "AlphaShioajiQuotes", "AlphaIbkrQuotes")
+    # 第 3 批＝C 組真錢自動投資 5 支，A＋B 觀察 3 個交易日正常後才跑（AlphaIbkrGateway 是視窗程式，不改）
+    3 = @("AlphaAutoRun0905", "AlphaAutoRun0940", "AlphaAutoSettle1340", "AlphaAutoWatchRun", "AlphaAutoWatchSettle")
 }
 $dir = "C:\alpha\task_password_backup"
 New-Item -ItemType Directory -Force $dir | Out-Null
