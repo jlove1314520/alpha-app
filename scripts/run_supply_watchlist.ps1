@@ -13,7 +13,7 @@
 $repoDir = "C:\alpha\alpha-app"
 $logPath = "$repoDir\research\data\supply_watchlist_cycle.log"
 $outFile = "data/supply_watchlist.json"
-$pythonExe = "C:\Users\user\AppData\Local\Microsoft\WindowsApps\python.exe"
+$pythonExe = "C:\Program Files\Python313\python.exe"
 
 Set-Location $repoDir
 $env:PYTHONIOENCODING = "utf-8"

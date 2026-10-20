@@ -10,7 +10,7 @@
 
 $repoDir = "C:\alpha\alpha-app"
 $logPath = "$repoDir\research\data\moea_pit_cycle.log"
-$pythonExe = "C:\Users\user\AppData\Local\Microsoft\WindowsApps\python.exe"
+$pythonExe = "C:\Program Files\Python313\python.exe"
 $dir = "data/moea_pit"
 
 Set-Location $repoDir

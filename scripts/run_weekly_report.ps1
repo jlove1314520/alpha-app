@@ -10,7 +10,7 @@
 $repoDir = "C:\alpha\alpha-app"
 $logPath = "$repoDir\research\data\weekly_report_cycle.log"
 $outFile = "data/weekly_report.json"
-$pythonExe = "C:\Users\user\AppData\Local\Microsoft\WindowsApps\python.exe"
+$pythonExe = "C:\Program Files\Python313\python.exe"
 
 Set-Location $repoDir
 $env:PYTHONIOENCODING = "utf-8"

@@ -18,7 +18,7 @@
 $repoDir = "C:\alpha\alpha-app"
 $logPath = "$repoDir\research\data\paper_supply_v2_cycle.log"
 $dataLog = "research/data/paper_supply_v2_log.jsonl"
-$pythonExe = "C:\Users\user\AppData\Local\Microsoft\WindowsApps\python.exe"
+$pythonExe = "C:\Program Files\Python313\python.exe"
 
 Set-Location $repoDir
 $env:PYTHONIOENCODING = "utf-8"
