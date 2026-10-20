@@ -1,3 +1,30 @@
+## 2026-10-21 00:40～01:1x（互動視窗）Cowork 收件匣 001：先.一二二-11 usage gate 誤判修正、先.一二三-3 冒煙 #90 夜間 FAIL 修正
+
+等待總司令審閱：0 件（research/AWAITING_REVIEW.md 等待中 0 列）
+
+- **收件匣**：001 原文先寫進 PENDING_QUEUE 並提交（4d6eb8de76），三條標〔互動視窗執行中〕讓 DevQueue 讓行（DevQueue 00:01／00:31 兩輪都 YIELD，沒有同時改）。
+- **先.一二二-11（046a5d887e）**：根因實證——10/20 18:31 那輪錯誤碼字串只出現在 user 事件（工具讀到的檔案內容），8 個 rate_limit_event 全是 status=allowed、帶每週重置 10/27 04:00；舊 parse_limit 整段字串比對＋取全部 resetsAt 最大值 → 誤判。另一陷阱：overageStatus 平常就是 rejected，不能拿來判。修法：只認 rate_limit_event status=rejected 或 result is_error＋usage_limit_reached／429，重置時間只取該事件。自測 scripts/selftest_claude_usage_gate.py 7/7 PASS；重播 53 個歷史輪：48 輪真上限照判、10/20 的 5 輪誤判消失；讀不到檔仍放行 exit 0。
+- **先.一二三-3**：採修法①（改 App、不動測試）。app.js checkTwDataBanner() 先走一般路徑（跟首頁共用 60 秒記憶體快取／SW 存檔）；只有拿到 SW 15 分鐘前以前存的舊檔、或讀失敗，才補打一次 no-store。驗證：瀏覽器時鐘固定 10/20 21:00 跑 measureSecondOpen，舊版重現 market_tw.json×2、新版無重複；橫幅 10/21 21:00（資料停 10/20）照常亮、10/20 21:00 與 15:00 不亮。冒煙 175/175 PASS（#90：資料請求 32 次無重複）。
+- 22:31 那輪留在工作目錄的 PROGRESS／VARIANT_SHORTLIST 改動一起提交。
+
+## 2026-10-21 00:40～01:0x（互動視窗）Cowork 收件匣 001：先.一二二-11 usage gate 誤判修正、先.一二三-3 冒煙 #90 夜間 FAIL 修正
+
+等待總司令審閱：0 件（research/AWAITING_REVIEW.md 等待中 0 列）
+
+- **收件匣**：`C:lpha\cowork_inbox_20261021-0045_最優先三件.md` 原文先寫進 PENDING_QUEUE 並提交（4d6eb8de76），三條標〔互動視窗執行中〕讓 DevQueue 讓行（DevQueue 00:01／00:31 兩輪都是 YIELD，沒有同時在改）。
+- **先.一二二-11（046a5d887e）**：實證根因——10/20 18:31 那輪串流檔裡錯誤碼字串只出現在 6 個 user 事件（工具讀到的檔案內容），8 個 rate_limit_event 全是 `status=allowed`，但帶每週重置時間 10/27 04:00；舊 `parse_limit()` 整段字串比對＋取全部 resetsAt 最大值 → 誤判停到 10/27。另一個陷阱：`overageStatus` 平常就是 `rejected`（362 個串流檔都有），不能拿來判。修法：`scripts/claude_usage_gate.py` 只看每行頂層事件，只認 `rate_limit_event` 的 `rate_limit_info.status=rejected` 或 `result` 事件 `is_error` 且 `api_error=usage_limit_reached`／429，重置時間只取 rejected 那個事件。新自測 `scripts/selftest_claude_usage_gate.py` 7/7 PASS（指定 3 項＋只有 result 錯誤＋混合＋重播 10/20 誤判輪與 10/19 真 429 輪）。重播全部 53 個含該字串的歷史輪：48 輪（10/19 每週上限）照判，10/20 的 5 輪誤判全部消失。讀不到檔仍 exit 0 放行（十二節）。
+- **先.一二三-3**：採修法①（改 App，不動測試）。`app.js` `checkTwDataBanner()` 改成先走一般路徑（跟首頁共用 60 秒記憶體快取／SW 存檔，不多打網路）；只有拿到的是 SW 15 分鐘前以前存的舊檔、或讀失敗，才補打一次 no-store。驗證（瀏覽器時鐘固定在 10/20 21:00 跑 `measureSecondOpen`）：舊版 `market_tw.json×2` 重現 FAIL、新版無重複；橫幅行為：10/21 21:00（資料停在 10/20）照常顯示紅色橫幅、10/20 21:00（已落地）不顯示、15:00 不顯示。
+- 22:31 那輪留在工作目錄的 PROGRESS／VARIANT_SHORTLIST 改動，跟這次一起跑冒煙後提交。
+
+## 2026-10-20 22:31～23:0x（DevQueue 20261020-223102）先.一一四-3c 第 34／35 批＋發現冒煙 #90 夜間必 FAIL（本輪未 commit）
+
+等待總司令審閱：0 件（research/AWAITING_REVIEW.md 等待中 0 列）
+
+- **先.一一四-3c（DevQueue 可執行）**：開工時往前一小時內沒有 FinMind 請求（最後一次是 20:08，其他程式發的 1 次）。22:31:28～22:41:00 跑 `python research/var1018_v1_prep.py --max-fetch 90`，exit 0，stopped＝「達本次上限 --max-fetch 90」，沒有撞到 402；已補價格 691→736／1,751 檔。順帶補記：19:14～19:24 有另一次 `--max-fetch 90`（641→691），當時沒寫進佇列。累計約 1,385 次，還剩約 1,415 次。`[自行裁量]`：rate_limit_state 顯示有 token、每小時上限 600，19:14 那批 10 分鐘發 90 次也沒被擋，所以這輪每小時用量從 50 提高到 90（仍遠低於 600）。下一批最早約 23:41。維持 `- [ ]`。
+- **冒煙測試**：22:47、22:52 各跑一次，兩次都只有 #90 FAIL「重複抓取：/data/market_tw.json×2」，其他 173 項通過。根因是 `app.js` `checkTwDataBanner()`（先.一一三-A3）在交易日 20:30 以後刻意用 no-store 再抓一次 market_tw.json，跟首頁原本的請求重複。這輪只改了 md 文字，不是這輪造成的，但照「冒煙要全過才能 commit」的規則，**這輪沒有 commit**，改動都留在工作目錄，等午夜後（時間回到 20:30 前）冒煙全過的輪次一起提交。已新增 **先.一二三-3** 交辦，列出兩種修法（DevQueue 可執行，不得只放寬測試）。
+- **BLOCKED**：無。**未做**：權威清單下一項——這輪 20:30～24:00 之間做什麼都無法 commit，不另開新項，免得在工作目錄堆一堆沒提交的改動。
+- **收工補件**：沒有做。這輪新增了 先.一二三-3，`- [ ]` 項目數沒有減少。
+
 ## 2026-10-20 19:07～19:2x（互動視窗）先.一二二 由互動視窗接手：-1 A 組 20 支逐支實跑、-2 B 組改路徑＋七之二四步、自動投資 --preflight
 
 等待總司令審閱：0 件（research/AWAITING_REVIEW.md 等待中 0 列）

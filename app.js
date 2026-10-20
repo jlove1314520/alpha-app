@@ -4192,9 +4192,23 @@
     const hide=()=>{if(el.style.display!=='none'){el.style.display='none';el.innerHTML='';try{hubRefresh()}catch(e){console.warn('[checkTwDataBanner:hub]',e)}}};
     const now=new Date(),z=_zonedParts(now,'Asia/Taipei'),today=_ymd(z);
     if(!isTradingDay(now,'Asia/Taipei',TW_HOLIDAYS)||z.h*60+z.mi<20*60+30)return hide();
-    const r=await fetch('data/market_tw.json?t='+Date.now(),{cache:'no-store'});
-    if(!r.ok)throw new Error('market_tw HTTP '+r.status);
-    const dd=(await r.json()).data_date||'';
+    // 先.一二三-3：先走一般路徑（跟首頁同一份 60 秒記憶體快取／SW 存檔，不多打一次網路）；
+    // 只有拿到的是 SW 15 分鐘前以前存的舊檔、或讀失敗時，才補打一次 no-store 直通網路（舊檔不能拿來判「沒進來」）
+    let dd=null,stale=true;
+    try{
+      const r0=await fetch('data/market_tw.json?t='+Date.now());
+      if(r0.ok){
+        dd=(await r0.json()).data_date||'';
+        const at=Date.parse(r0.headers.get('x-alpha-cached-at')||'');
+        stale=r0.headers.get('x-alpha-from-cache')==='1'&&!(Date.now()-at<15*60*1000);
+      }
+    }catch(e){console.warn('[checkTwDataBanner:first]',e)}
+    if(dd===today)return hide();
+    if(dd===null||stale){
+      const r=await fetch('data/market_tw.json?t='+Date.now(),{cache:'no-store'});
+      if(!r.ok)throw new Error('market_tw HTTP '+r.status);
+      dd=(await r.json()).data_date||'';
+    }
     if(dd===today)return hide();
     el.innerHTML='<div class="ui-ban-sit" data-ui-keep>今日台股資料未進來，三層備援都沒補到</div>'
       +`<div style="font-weight:400">最新台股資料日 ${dd?+dd.slice(5,7)+'/'+(+dd.slice(8,10)):'不明'}；今天的數字暫時是前一個交易日的</div>`;
@@ -4876,7 +4890,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-20.1447';
+  const APP_VERSION='2026-10-21.0056';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
