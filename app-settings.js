@@ -370,7 +370,7 @@
   async function loadInstallPush(){
     const body=document.getElementById('install-push-body'),guide=document.getElementById('install-push-guide');
     if(!body)return;
-    const OK='#1aa876',BAD='#e6383f',WARN='#d08a00';
+    const OK='var(--status-ok)',BAD='var(--status-bad)',WARN='var(--warn)';  // 先.一二二-5：原寫死 hex 在淺色只有 2.5～3.7:1，改主題變數
     const rows=[];const row=(label,txt,color)=>rows.push('<div class="f" style="display:flex;justify-content:space-between;gap:8px;padding:2px 0"><span>'+label+'</span><b style="color:'+color+';text-align:right">'+txt+'</b></div>');
     const ios=_iosVersion();
     const standalone=_pushStandalone();
@@ -638,7 +638,7 @@
     const m=txt.match(/"generated_at"\s*:\s*"([^"]+)"/);
     if(!m)return null;const t=new Date(m[1]);return isNaN(t)?null:t;
   }
-  const FRESH_OK_COLOR='#1aa876',FRESH_BAD_COLOR='#e6383f';
+  const FRESH_OK_COLOR='var(--status-ok)',FRESH_BAD_COLOR='var(--status-bad)';  // 先.一二二-5 同上
   // 「最近一個週一至週五、且距now至少minAgeMs」的tz當地hh:mm時刻。往前推日時直接減
   // 86400000ms，跨日光節約切換那一天會差1小時（只影響邊界，已知簡化）。
   function _lastWeekdayInstant(now,tz,h,mi,minAgeMs){

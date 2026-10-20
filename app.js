@@ -1217,7 +1217,7 @@
   function renderWLTabs(){
     const el=document.getElementById('wl-tabs');if(!el)return;
     const o=wlListsRead(),esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    const chip=(on)=>'font-size:11.5px;padding:3px 10px;border-radius:12px;white-space:nowrap;cursor:pointer;border:1px solid var(--hairline);'+(on?'background:var(--accent);color:#fff;border-color:var(--accent)':'');
+    const chip=(on)=>'font-size:11.5px;padding:3px 10px;border-radius:12px;white-space:nowrap;cursor:pointer;border:1px solid var(--hairline);'+(on?'background:var(--accent);color:var(--on-accent);border-color:var(--accent)':'');
     el.innerHTML=Object.keys(o.lists).map(n=>`<span class="press wl-tab" data-name="${esc(n)}" style="${chip(n===o.active)}">${esc(n)}（${o.lists[n].length}）</span>`).join('')
       +`<span class="press" style="${chip(false)}" onclick="wlCreatePrompt()">＋</span>`
       +(Object.keys(o.lists).length>1?`<span class="press" style="${chip(false)}" onclick="wlRemovePrompt()">下架</span>`:'');
@@ -4826,10 +4826,10 @@
     return EVENTS_CACHE;
   }
   const EVENT_TYPE_COLOR={
-    '月營收':'var(--gold)','除權息':'#7aa2f7','法說會':'var(--up)','併購':'#e0af68',
-    '增減資':'#bb9af7','重大訂單':'var(--up)','人事':'var(--ink-3)','財務':'#7dcfff',
-    '訴訟':'var(--down)','處分資產':'#9ece6a','停復牌':'var(--down)','其他':'var(--ink-3)',
-    '財報日':'var(--gold)','8-K':'#7dcfff','8-K/A':'#7dcfff',  // 常備.開發-5 美股
+    '月營收':'var(--gold)','除權息':'var(--ev-blue)','法說會':'var(--up)','併購':'var(--ev-amber)',
+    '增減資':'var(--ev-violet)','重大訂單':'var(--up)','人事':'var(--ink-3)','財務':'var(--ev-cyan)',
+    '訴訟':'var(--down)','處分資產':'var(--ev-lime)','停復牌':'var(--down)','其他':'var(--ink-3)',
+    '財報日':'var(--gold)','8-K':'var(--ev-cyan)','8-K/A':'var(--ev-cyan)',  // 常備.開發-5 美股；先.一二二-5 改 CSS 變數（淺色另給深色版）
   };
   // 常備.開發-22（2026-10-11）：法說會事件附 MOPS「法人說明會簡報內容」官方公開查詢頁連結
   // （公開資訊觀測站舊版站 mopsov.twse.com.tw 的單一公司查詢，GET 直接開即可看到該公司
@@ -4890,7 +4890,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-21.0106';
+  const APP_VERSION='2026-10-21.0150';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
