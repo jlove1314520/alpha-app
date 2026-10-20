@@ -1,3 +1,30 @@
+## 2026-10-20 19:07～19:2x（互動視窗）先.一二二 由互動視窗接手：-1 A 組 20 支逐支實跑、-2 B 組改路徑＋七之二四步、自動投資 --preflight
+
+等待總司令審閱：0 件（research/AWAITING_REVIEW.md 等待中 0 列）
+
+- **接手**：先.一二二-1、-2 改標〔互動視窗執行中〕（commit f2e4361e0a，DevQueue 讓行）。-1 的 ①改路徑 ②telethon ④ps1 批次清單 DevQueue 18:3x 已做（見下一則），本輪核對無誤、補完 ③「A 組每支」實跑。
+- **先.一二二-1 ③ A 組 20 支在目前登入身分（Interactive）各跑一次**（19:09～19:25；DevQueue 18:3x 已跑的 8 支照它的紀錄＋我複查）：
+  - AlphaDataAudit：排程手動觸發 rc=0，audit_report.json 已 commit 並 push（269c0907a6）。
+  - AlphaDepCheck：rc=0，dependency_status.json 19:09:48 產生（落後 7 個套件，只記錄不自動升級），push（3b22362218）。
+  - AlphaNightlySix：rc=0，nightly6_task.log 19:09「結果檔已存在」→ 什麼都不做（設計如此，不會另開 3～5 小時回測）。
+  - AlphaOrphanScan：rc=0，orphan_scan.json 19:12 更新。
+  - AlphaPhoneRegression：rc=0，線上版 7 頁截圖 42 秒、0 個問題（phone_regression/log.jsonl 19:10:32）。
+  - AlphaTdccHolders：rc=0，同一週（20261016）已存 → 不重產、不 commit（設計如此）。
+  - AlphaTwDataCheck：rc=0，「正常（未到 20:30）」，tw_data_check.jsonl 新增一行並 push（4ec6c11fb0）。
+  - AlphaMarginCkCheck：rc=0，ck_check_state.json 19:09:57 更新。
+  - AlphaNewsFallback：19:09 第一次「不跑：repo 正在 rebase 中」（剛好撞到 TwDataCheck 同步，程式自己讓開，不是錯誤）；19:13 重跑：各步 exit=0、已 commit 並 push。
+  - AlphaB25Control：rc=0，「已完成過（100 抽，10/19 01:07），本次直接結束」。
+  - AlphaMarathon：cycle 20261020-191357 reason=OK、1.75 分鐘、成本 0.47 美元。
+  - AlphaHypothesisQueue：19:14:17～19:25:14 正常結束（auth OK、made_progress=True）。
+  - DevQueue 已跑的 8 支：AlphaDisposalFlags（18:30，Shioaji 登入正常、處置 21／注意 38）、AlphaFinMindWarmup（19:07 rc=0）、AlphaMoeaPitSnapshot（1afd11519c）、AlphaRfMonthly、AlphaWeeklyReport（e7d7e02c1f）、AlphaTelegram0815／2015（讀取器 state OK、新 23 則）、AlphaPaperSupplyV2。
+  - **注意（AlphaPaperSupplyV2）**：這支平常就「輸出全空、exit 0」（帳本還沒有任何事件，設計如此），跟 Store 版 python 沒跑的樣子分不出來；我另用 `"C:\Program Files\Python313\python.exe" research\paper_supply_v2.py --status` 確認有真的執行（exit 0、印出事件統計）。切換後也要用這個方式驗。
+  - 20 支都沒有需要還原的。
+- **先.一二二-2 B 組 3 支＋自動投資啟動檔改路徑**（19:16；`C:\alpha\` 不在 repo，原檔各留 `.bak_20261020`）：run-alpha-live-server-cycle／run-shioaji-quotes-cycle／run-ibkr-quotes-cycle／run-auto-trading-cycle 的 `$pythonExe` 改 `C:\Program Files\Python313\python.exe`，每支只改這一行（diff 核對），PowerShell 語法檢查 0 錯誤；無 BOM 的兩支只寫 ASCII 註解（PowerShell 5.1 會用系統碼頁讀）。用到的套件（fastapi、uvicorn、starlette、shioaji 1.7.4、ib_async 2.1.0、cryptography、pydantic…）在官方版都可載入。
+  - **AlphaLiveServer 七之二四步**：重啟前 `scripts/live_server_verify.py` 就是 2 FAIL（舊行程 10/19 21:41 啟動，price_history_store 已改未重啟）→ 停掉舊行程、排程 19:18:01 拉起新行程（執行檔 C:\Program Files\Python313\python.exe，HTTPS 模式）→ 重驗 **4/4 PASS**：①/health 200 ②build sha 047bbea＝HEAD ③OPTIONS 預檢精確來源＋allow-credentials:true ④stale_process＝false（啟動時雜湊＝現在檔案）。驗證工具不讀 token。防火牆：官方版 python 已有私人／公用網路放行規則，另有「Alpha Live 8001」不限程式。
+  - **AlphaShioajiQuotes**：19:19 新路徑啟動，stdout「非交易時段，狀態未變（48 檔）」、stderr 空、exit 正常。收盤時段不連永豐，**盤中串流要 10/21 09:00 才能實證**；官方版登入永豐已由 18:30 處置股旗標與下面的 preflight 證明可行。
+  - **AlphaIbkrQuotes**：19:21 新路徑跑完，輸出與舊 python 完全相同（照實寫 connected:false、不 commit）。**另發現（與本次無關）**：IB Gateway 從 10/17（週六）12:41 起就連不上（10/18～10/20 每班 ConnectionRefused），是 IBKR 每週強制重新登入（CLAUDE.md IBKR 節），要總司令本人登入 Gateway 一次。
+  - **自動投資 `--preflight`（唯讀、不送單）**：19:21 用新路徑跑 exit=0，**PASS 18／FAIL 1**：永豐正式環境唯讀登入、CA 憑證（到期 2028-09-01）、餘額／持股唯讀查詢、推播依賴、5 個排程 Ready…都過；唯一 FAIL「模擬演練 B：停止旗標是開的」＝10/12 先.七十九-4「策略資金凍結」刻意留的 STOP.flag，預期中、不是 python 問題；WARN「每月投入大於總資金」是既有設定提醒。未送任何單。
+
 ## 2026-10-20 18:31～19:1x（DevQueue 20261020-183102）先.一二二-1（原先.一二一-1，互動視窗 19:07 改編號並接手）第二批 A 組切換前置＋V1 價格補抓第 33 批＋收工補件 2 條
 
 等待總司令審閱：0 件（research/AWAITING_REVIEW.md 等待中 0 列，與上一輪相同）
