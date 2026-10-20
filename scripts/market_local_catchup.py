@@ -56,6 +56,11 @@ HB_OLD = ROOT / "research" / "data" / "market_local_catchup.jsonl"
 WINDOW_START = (16, 30)  # 台北時間 16:30～23:59 才執行
 LOOKBACK_DAYS = 5
 PH_RATIO = 0.9
+# 先.一二一-4（2026-10-20）：TWSE MI_MARGN（融資維持率分母）當日資料公布很晚——AlphaTwsePublishProbe
+# 10/05～10/19 每個交易日查到 19:45 都還是「沒有符合條件的資料」（T86 16:15 就有），10/14 那列 22:34 才產生。
+# 所以「今天」在這個時間前沒有融資維持率列是「官方還沒公布」，不是缺；不算缺口、不觸發補抓（隔天會當過去缺日補）。
+# 22:00 為自行裁量的保守值（probe 只量到 20:00，實際公布時間未知）。
+MM_PUBLISH_HHMM = (22, 0)
 TW = timezone(timedelta(hours=8))
 STEP_TIMEOUT = 1800
 os.environ.update(PYTHONIOENCODING="utf-8", PYTHONUTF8="1")  # 子行程（守門員、各步驟）一律 UTF-8 輸出
@@ -162,8 +167,10 @@ def gap_check(days):
         mm = None
     if isinstance(mm, list):
         seen = {r.get("date") for r in mm if isinstance(r, dict)}  # 有列就算（含已試過、標資料不全的，不重抓）
+        now = datetime.now(TW)
+        today = now.date().isoformat()
         for d in days:
-            if d not in seen:
+            if d not in seen and not (d == today and (now.hour, now.minute) < MM_PUBLISH_HHMM):
                 gaps[d].append("margin_maintenance")
     return mt, {d: v for d, v in gaps.items() if v}
 
