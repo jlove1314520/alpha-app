@@ -7,7 +7,7 @@
   - cc_stuck：超過 3 小時沒有進度心跳（佇列還有未完成）／用量閘門擋住／DevQueue 連 3 輪錯誤 → 「⚠️ CC 停住：<原因>」，同原因 6 小時一次。
   - cc_daily：22:00 後第一次 tick 推「今天做完 N 件、還剩 M 件、等你決定 K 件」。
   - 三類都加進設定頁「通知」可個別關閉（web_push PREF_TOGGLES）；push_log 照舊只記類別與成功數。
-  - 掛點：`C:lphaun-dev-queue-cycle.ps1` 每輪最開頭（讓路／閘門判斷之前）`cc_push.py tick`，失敗只降級；改前備份 `.bak_20261021`，parse 0 錯。狀態檔 `research/.cc_push_state.json` 在 MACHINE_WRITTEN 樣式內。
+  - 掛點：`C:\alpha\run-dev-queue-cycle.ps1` 每輪最開頭（讓路／閘門判斷之前）`cc_push.py tick`，失敗只降級；改前備份 `.bak_20261021`，parse 0 錯。狀態檔 `research/.cc_push_state.json` 在 MACHINE_WRITTEN 樣式內。
   - App：`sw.js` 推播點開時若 App 已開著就送 OPEN_URL；`app.js` 認 `#journal` 等錨點切頁。
   - 驗證：`selftest_cc_push.py` 12/12、`selftest_web_push.py` 全過、冒煙 176/176（新增 #174）。web_push 被 live server 匯入，所以照七之二重啟：`live_server_verify.py` 4/4（build 6de9383＝HEAD、OPTIONS 200、stale_process=false）。
   - 測試推播「✅ 測試：CC 推播已上線」：推播服務回 ok 1／failed 0（1 個訂閱）。**手機有沒有真的跳出來，要總司令確認。**
@@ -27,7 +27,7 @@
 
 等待總司令審閱：0 件（research/AWAITING_REVIEW.md 等待中 0 列）
 
-- **收件匣**：`C:lpha\cowork_inbox_20261021-0045_最優先三件.md` 原文先寫進 PENDING_QUEUE 並提交（4d6eb8de76），三條標〔互動視窗執行中〕讓 DevQueue 讓行（DevQueue 00:01／00:31 兩輪都是 YIELD，沒有同時在改）。
+- **收件匣**：`C:\alpha\cowork_inbox\001_20261021-0045_最優先三件.md` 原文先寫進 PENDING_QUEUE 並提交（4d6eb8de76），三條標〔互動視窗執行中〕讓 DevQueue 讓行（DevQueue 00:01／00:31 兩輪都是 YIELD，沒有同時在改）。
 - **先.一二二-11（046a5d887e）**：實證根因——10/20 18:31 那輪串流檔裡錯誤碼字串只出現在 6 個 user 事件（工具讀到的檔案內容），8 個 rate_limit_event 全是 `status=allowed`，但帶每週重置時間 10/27 04:00；舊 `parse_limit()` 整段字串比對＋取全部 resetsAt 最大值 → 誤判停到 10/27。另一個陷阱：`overageStatus` 平常就是 `rejected`（362 個串流檔都有），不能拿來判。修法：`scripts/claude_usage_gate.py` 只看每行頂層事件，只認 `rate_limit_event` 的 `rate_limit_info.status=rejected` 或 `result` 事件 `is_error` 且 `api_error=usage_limit_reached`／429，重置時間只取 rejected 那個事件。新自測 `scripts/selftest_claude_usage_gate.py` 7/7 PASS（指定 3 項＋只有 result 錯誤＋混合＋重播 10/20 誤判輪與 10/19 真 429 輪）。重播全部 53 個含該字串的歷史輪：48 輪（10/19 每週上限）照判，10/20 的 5 輪誤判全部消失。讀不到檔仍 exit 0 放行（十二節）。
 - **先.一二三-3**：採修法①（改 App，不動測試）。`app.js` `checkTwDataBanner()` 改成先走一般路徑（跟首頁共用 60 秒記憶體快取／SW 存檔，不多打網路）；只有拿到的是 SW 15 分鐘前以前存的舊檔、或讀失敗，才補打一次 no-store。驗證（瀏覽器時鐘固定在 10/20 21:00 跑 `measureSecondOpen`）：舊版 `market_tw.json×2` 重現 FAIL、新版無重複；橫幅行為：10/21 21:00（資料停在 10/20）照常顯示紅色橫幅、10/20 21:00（已落地）不顯示、15:00 不顯示。
 - 22:31 那輪留在工作目錄的 PROGRESS／VARIANT_SHORTLIST 改動，跟這次一起跑冒煙後提交。
@@ -130,8 +130,7 @@
 - **先.一二一-5 冒煙 #91 偶發失敗**（commit 915b5c1bd4）：根因在 App 端——`loadMyHoldingsEvents()` 用 innerHTML 重畫整張卡後，長說明要等 MutationObserver 的 120ms 延遲才收成「ⓘ 說明」，這段時間使用者也看得到整段長文，冒煙剛好讀到就 FAIL。改為重畫後直接 `uiCompactAll(el)`；40 字門檻與測試等待條件都沒動。
   證據：連跑 3 次冒煙（14:36:47／14:42:01／14:47:15）皆 175 項全過，#91「12 頁 0 處違規」。
   [自行裁量] 只修交辦指名的這張卡，沒把觀察器 120ms 改成同步（會牽動冒煙 #105 的掃描次數設計，屬架構調整）。
-- **git 殘留 rebase 狀態排除（順手修，純 bug）**：推送時發現 `.git/rebase-merge/` 從 12:35 起只剩一個 autostash 檔，之後所有 `git pull --rebase` 都會拒絕執行。處理：該 autostash（f2b5a6a7，12:35 本機排程寫的 data/ 檔）先用 `git stash store` 保存成 stash，殘留目錄改名移到 `C:lpha
-ebase-merge-stale-20261020-1235\`（沒刪）；擋住 pull 的未追蹤 `data/news_by_code/7704.json` 也移到同一資料夾的 untracked\。同步時 events_by_code／news_*／themes／schema_guard 這些排程產物衝突，一律取遠端（雲端排程）版本，本機版本留在 `stash@{0}`，未丟棄。另外 PENDING_QUEUE.md 開工時已有的排程改寫（倒數）隨本輪第一個 commit 一起提交。
+- **git 殘留 rebase 狀態排除（順手修，純 bug）**：推送時發現 `.git/rebase-merge/` 從 12:35 起只剩一個 autostash 檔，之後所有 `git pull --rebase` 都會拒絕執行。處理：該 autostash（f2b5a6a7，12:35 本機排程寫的 data/ 檔）先用 `git stash store` 保存成 stash，殘留目錄改名移到 `C:\alpha\rebase-merge-stale-20261020-1235\`（沒刪）；擋住 pull 的未追蹤 `data/news_by_code/7704.json` 也移到同一資料夾的 untracked\。同步時 events_by_code／news_*／themes／schema_guard 這些排程產物衝突，一律取遠端（雲端排程）版本，本機版本留在 `stash@{0}`，未丟棄。另外 PENDING_QUEUE.md 開工時已有的排程改寫（倒數）隨本輪第一個 commit 一起提交。
 - **先.一二一-4 融資維持率 19:30 標「缺」**（commit 8319ca4e9a）：**根因＝官方公布太晚，不是算法 bug。** AlphaTwsePublishProbe 用同一個 MI_MARGN 網址，10/05～10/19 每個交易日到 19:45 都查無當日資料（T86 16:15 就有）；margin_maintenance.json 的當日列都在當晚 22:34 或隔天才產生（10/16 列 10/19 17:37 補、10/19 列 10/20 08:45）。修法：`scripts/market_local_catchup.py` 今天 22:00 前沒有融資維持率列不算缺（過去日照舊補）。10/16、10/19 兩列已存在，不用補；10/20 等今晚／明晨排程。
   證據：selftest_market_catchup.py 6/6 PASS；直接呼叫 gap_check 模擬 10/19 19:30 不列缺、22:30 列缺；冒煙 175 項全過。
   [自行裁量] 22:00 是保守值（probe 只量到 20:00，真實公布時間未知）；要知道確切時間得把 probe 時段延長到 23:00，屬排程變更，未做、可提案。
@@ -484,7 +483,7 @@ ebase-merge-stale-20261020-1235\`（沒刪）；擋住 pull 的未追蹤 `data/n
 - **先.一〇九-28（權威清單取到的項目）**：時間閘 2026-10-20 起，今天 10/18 未到，維持 `- [ ]`。
 - **先.一一四-3c（DevQueue 可執行）**：17:01～17:23 跑 `python research/var1018_v1_prep.py --max-fetch 80`，新抓 78 次後 FinMind 回 HTTP 402「Requests reach the upper limit」；共用節流器把 finmind 封鎖 2 小時（約 19:23 解除），腳本依「資料源禮儀」拒發請求、正常結束（exit 0），停止原因寫進 `research/data/var1018_v1_prep_status.json`。快取 192→270 個；三批合計約 268 次、尚餘約 2,530 次。
   - `[自行裁量]`：之後每輪改 `--max-fetch 60`、與前一批隔至少 1 小時；19:23 前的輪次重跑只會被節流器擋下（零請求）。
-  - 觀察：FinMind 免 token 額度實測比 C:lpha\CLAUDE.md「約每小時數百次」緊——約 1 小時 50 分內 268 次就到上限。未改任何頻率上限文件（屬提案範疇）。
+  - 觀察：FinMind 免 token 額度實測比 C:\alpha\CLAUDE.md「約每小時數百次」緊——約 1 小時 50 分內 268 次就到上限。未改任何頻率上限文件（屬提案範疇）。
 - **冒煙**：17:2x `node scripts/smoke_test.mjs` exit 0，171 PASS／0 FAIL。
 - **`- [!]` 阻塞項複查**：先.一〇九-7驗收（10/19 08:30）、研究室.六-週跑（週一）、金流一.4（資料累積）都未到，沒有轉回 `- [ ]`。
 - **收工補件**：`- [ ]` 17 項（≥12）；DevQueue 可執行 2 項（-3c、先.一〇九-28 時間閘）<6。16:55 之後 BACKLOG／UX_REDESIGN_PROPOSAL／DATA_GAP_PLAN 沒有新 commit，PENDING_QUEUE 唯一新 commit 是上一輪自己的 aeb1d7658e → **來源已用盡，不補**。

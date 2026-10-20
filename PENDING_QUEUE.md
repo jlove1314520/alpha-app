@@ -20711,7 +20711,7 @@ un-ibkr-quotes-cycle.ps1 第 174 行、run-shioaji-quotes-cycle.ps1 第 110 行�
 >    A 組每支在目前登入身分各手動跑一次（輸出非空、結束碼 0，逐支寫 PROGRESS），convert-tasks-to-password.ps1 加第 2 批（A＋B）與第 3 批（C）清單。
 > 2. 先.一二二-2：B 組 3 支常駐服務改 python 路徑、照七之二節四步驗證；自動投資只跑 --preflight，不送任何單。
 > 3. 第一批 10/20 補核對（scripts/check_password_batch1.py 2026-10-16 2026-10-19 2026-10-20）。
-> 4. 以上全部正常後，執行 C:lpha\convert-tasks-to-password.ps1 -Batch 2，一步一步帶我操作（我本人在 Windows 視窗輸入密碼；你不讀、不記錄、不索取）。
+> 4. 以上全部正常後，執行 C:\alpha\convert-tasks-to-password.ps1 -Batch 2，一步一步帶我操作（我本人在 Windows 視窗輸入密碼；你不讀、不記錄、不索取）。
 > 5. 切換完逐支驗證（LogonType、下一次執行結果、AlphaPushProbe 推送測試），結果寫 PROGRESS 和 PENDING_QUEUE。
 > 任何一支不正常就停下來，還原那一支再告訴我。
 
