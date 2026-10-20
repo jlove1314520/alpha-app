@@ -4890,7 +4890,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-21.0056';
+  const APP_VERSION='2026-10-21.0106';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
@@ -5154,5 +5154,12 @@ try{
   }).observe(document.getElementById('app'),{childList:true,subtree:true,characterData:true});
   uiCompactAll();
 }catch(e){console.warn('[uiCompact:init]',e);recordGlobalError('uiCompact:init',e)}
+// 先.一二二-14：推播點開帶 #journal 這類錨點 → 直接切到該頁（App 已開著時由 SW 送 OPEN_URL）
+function _openFromHash(h){try{const m=/^#(journal|trade|home|market|picks|settings)$/.exec(h||'');if(m&&typeof go==='function')go(m[1])}catch(e){console.warn('[openFromHash]',e);recordGlobalError('openFromHash',e)}}
+try{
+  if(location.hash)_openFromHash(location.hash);
+  window.addEventListener('hashchange',()=>_openFromHash(location.hash));
+  if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',ev=>{try{const d=ev.data||{};if(d.type==='OPEN_URL')_openFromHash(new URL(d.url,location.href).hash)}catch(e2){console.warn('[sw OPEN_URL]',e2)}});
+}catch(e){console.warn('[openFromHash:init]',e);recordGlobalError('openFromHash:init',e)}
 // 先.六十九-1：核心程式執行完畢（導覽、各面板載入函式都已註冊）＝可互動時間點；scripts/measure_second_open.mjs 讀這個值。
 window.__ALPHA_BOOT_MS=performance.now();

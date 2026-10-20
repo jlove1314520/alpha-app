@@ -39,8 +39,11 @@ MAX_SUBS = 10
 # 否決窗（veto_start）刻意不在表內：推播送不到時該批不執行，若允許關閉等於讓 App 開關間接擋掉交易，
 # 所以永遠送出、無法關閉。測試推播（test）與其他 info 類也不受偏好影響。
 PREFS_NAME = "push_prefs.json"
-PREF_KINDS = {"error": "reject", "complete": "complete", "watchdog": "missed"}
-PREF_DEFAULT = {"veto": True, "reject": True, "complete": True, "missed": True}
+# 先.一二二-14：CC 做完／停住／每日摘要三類（scripts/cc_push.py），kind 與偏好鍵同名，可在設定頁個別關閉。
+PREF_KINDS = {"error": "reject", "complete": "complete", "watchdog": "missed",
+              "cc_done": "cc_done", "cc_stuck": "cc_stuck", "cc_daily": "cc_daily"}
+PREF_TOGGLES = ("reject", "complete", "missed", "cc_done", "cc_stuck", "cc_daily")
+PREF_DEFAULT = {"veto": True, **{k: True for k in PREF_TOGGLES}}
 
 
 def _b64u(b: bytes) -> str:
@@ -110,7 +113,7 @@ def load_prefs(base: Path = DEFAULT_DIR) -> dict:
     out = dict(PREF_DEFAULT)
     try:
         d = json.loads((Path(base) / PREFS_NAME).read_text(encoding="utf-8"))
-        for k in ("reject", "complete", "missed"):
+        for k in PREF_TOGGLES:
             if isinstance(d.get(k), bool):
                 out[k] = d[k]
     except Exception:
@@ -121,7 +124,7 @@ def load_prefs(base: Path = DEFAULT_DIR) -> dict:
 
 def save_prefs(base: Path, prefs: dict) -> dict:
     cur = load_prefs(base)
-    for k in ("reject", "complete", "missed"):
+    for k in PREF_TOGGLES:
         if isinstance(prefs.get(k), bool):
             cur[k] = prefs[k]
     cur["veto"] = True

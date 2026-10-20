@@ -9,7 +9,7 @@
    ——完全不呼叫 respondWith()，讓瀏覽器照平常方式直接打網路，成功拿新資料、
    失敗就是網路錯誤，由 App 的 fetch 呼叫端（index.html 的 fm()）自己顯示
    「連線失敗，請重試」，不會被這裡默默塞舊資料進去。 */
-const CACHE = 'alpha-v2026-10-21.0056'; // 2026-08-28起改用時間戳格式，由.git/hooks/pre-commit在每次commit時自動改寫
+const CACHE = 'alpha-v2026-10-21.0106'; // 2026-08-28起改用時間戳格式，由.git/hooks/pre-commit在每次commit時自動改寫
 // 2026-10-11 常備.開發-20：index.html 的 CSS／JS 拆成 app.css／app.js，一併列為外殼，離線仍可開啟。
 // index.html 以 app.css?v=…／app.js?v=… 引用；isShellRequest 只比對路徑（不含查詢字串），
 // 離線回退用 ignoreSearch 讓安裝時預快取的無查詢字串版本也對得上。
@@ -142,7 +142,8 @@ self.addEventListener('notificationclick', e => {
   e.notification.close();
   const target = new URL((e.notification.data && e.notification.data.url) || './', self.registration.scope).href;
   e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
-    for (const c of list) { if ('focus' in c) return c.focus(); }
+    // 先.一二二-14：App 已開著時也帶到推播指定的頁（例：./#journal），由 app.js 收 OPEN_URL 切頁
+    for (const c of list) { if ('focus' in c) { try { c.postMessage({ type: 'OPEN_URL', url: target }); } catch (err) {} return c.focus(); } }
     return self.clients.openWindow(target);
   }));
 });

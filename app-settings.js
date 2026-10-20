@@ -39,7 +39,7 @@
     }catch(e){console.warn('[loadRiskLimits]',e);recordGlobalError('loadRiskLimits',e);setTxt('risk-limits-note',_isOfflineErr(e)?liveOfflineText():'讀取引擎實際值失敗（本機伺服器是舊版或回應錯誤），目前顯示程式內建預設值。')}
   }
   function _renderNotif(p){
-    ['reject','complete','missed'].forEach(k=>{const el=document.getElementById('notif-'+k);if(el)el.classList.toggle('on',!!(p&&p[k]))});
+    ['reject','complete','missed','cc_done','cc_stuck','cc_daily'].forEach(k=>{const el=document.getElementById('notif-'+k);if(el)el.classList.toggle('on',!!(p&&p[k]))});
   }
   async function loadNotif(){
     const note=document.getElementById('notif-note');

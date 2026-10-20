@@ -43,7 +43,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(mq.addEventListener)mq.addEventListener('change',h);else if(mq.addListener)mq.addListener(h)}
 })();
 </script>
-<link rel="stylesheet" href="app.css?v=2026-10-21.0056">
+<link rel="stylesheet" href="app.css?v=2026-10-21.0106">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -1226,6 +1226,19 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="nm"><b>排程漏跑</b><span>交易日排程沒有心跳時</span></div>
         <div class="switch" id="notif-missed" onclick="toggleNotif(this,'missed')"></div>
       </div>
+      <!-- 先.一二二-14：CC（開發助手）做完交辦／停住／每日摘要推播，可個別關閉 -->
+      <div class="bot-top" style="padding:6px 0">
+        <div class="nm"><b>CC 做完一件事</b><span>總司令／Cowork 交辦標成完成時</span></div>
+        <div class="switch" id="notif-cc_done" onclick="toggleNotif(this,'cc_done')"></div>
+      </div>
+      <div class="bot-top" style="padding:6px 0">
+        <div class="nm"><b>CC 停住</b><span>超過 3 小時沒進度或被擋住（同原因 6 小時一次）</span></div>
+        <div class="switch" id="notif-cc_stuck" onclick="toggleNotif(this,'cc_stuck')"></div>
+      </div>
+      <div class="bot-top" style="padding:6px 0">
+        <div class="nm"><b>CC 每日摘要</b><span>每天 22:00：做完幾件、還剩幾件、等你決定幾件</span></div>
+        <div class="switch" id="notif-cc_daily" onclick="toggleNotif(this,'cc_daily')"></div>
+      </div>
       <div class="note" id="notif-note" style="margin-top:8px">連上電腦才能改，所有裝置共用</div>
     </div>
 
@@ -1599,6 +1612,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-21.0056"></script>
+<script src="app.js?v=2026-10-21.0106"></script>
 </body>
 </html>

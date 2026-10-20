@@ -5833,6 +5833,32 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { pgErrs.push(`測試本身出錯：${e.message || e}`); await page.unrouteAll({ behavior: "ignoreErrors" }).catch(() => {}); }
   record("173. 策略監控台有模擬 G 卡片，點開看持股明細（未開始寫原因、已開始列每檔）（先.一一八-2c）", pgErrs.length === 0, pgErrs.join("; ") || pgInfo);
 
+  // 174.【先.一二二-14】設定頁「通知」有 CC 做完／停住／每日摘要三個開關，照 /push/prefs 顯示；推播點開帶 #journal 會切到日誌頁
+  const ccPushErrs = [];
+  try {
+    const r = await page.evaluate(async () => {
+      const saved = { lf: window.liveFetch, url: LIVE.url, conf: LIVE.configured };
+      window.liveFetch = async (p) => new Response(JSON.stringify(p === "/push/prefs" ? { ok: true, prefs: { veto: true, reject: true, complete: true, missed: true, cc_done: true, cc_stuck: false, cc_daily: true } } : {}), { status: 200 });
+      LIVE.url = "https://smoke.invalid"; LIVE.configured = true;
+      const o = {};
+      try {
+        await loadNotif();
+        o.ids = ["cc_done", "cc_stuck", "cc_daily"].map((k) => !!document.getElementById("notif-" + k));
+        o.on = ["cc_done", "cc_stuck", "cc_daily"].map((k) => { const el = document.getElementById("notif-" + k); return !!el && el.classList.contains("on"); });
+      } finally { window.liveFetch = saved.lf; LIVE.url = saved.url; LIVE.configured = saved.conf; }
+      _openFromHash("#journal");
+      o.journal = document.getElementById("scr-journal").classList.contains("active");
+      _openFromHash("#不存在"); o.still = document.getElementById("scr-journal").classList.contains("active");
+      go("home");
+      return o;
+    });
+    if (JSON.stringify(r.ids) !== "[true,true,true]") ccPushErrs.push(`三個開關沒都出現：${JSON.stringify(r.ids)}`);
+    if (JSON.stringify(r.on) !== "[true,false,true]") ccPushErrs.push(`開關狀態沒照 /push/prefs：${JSON.stringify(r.on)}`);
+    if (!r.journal) ccPushErrs.push("#journal 沒有切到日誌頁");
+    if (!r.still) ccPushErrs.push("不認得的錨點不該切頁");
+  } catch (e) { ccPushErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("174. 設定頁 CC 推播三開關（做完／停住／每日摘要）照偏好顯示，推播點開 #journal 切到日誌頁（先.一二二-14）", ccPushErrs.length === 0, ccPushErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
