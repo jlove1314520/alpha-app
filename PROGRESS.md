@@ -1,3 +1,19 @@
+## 2026-10-21 01:0x～01:2x（互動視窗）Cowork 收件匣 001 第 3 件：先.一二二-14 CC 推播上線＋Claude Code 手機設定
+
+等待總司令審閱：0 件（research/AWAITING_REVIEW.md 等待中 0 列）
+
+- **先.一二二-14（6de93831b7）**：新增 `scripts/cc_push.py`，沿用 `research/web_push.py`（VAPID 私鑰只在 .env，沒讀出）。
+  - cc_done：PROGRESS_HEARTBEAT 新增一行且該條在 PENDING_QUEUE 已是 `- [x]` → 推「✅ 做完：<編號 標題>」，點開到日誌頁。分批類每批心跳但條目仍 `- [ ]`，所以只在整條打勾時推一次；標題含「自走補入」的不推。第一次執行只記位置，不把歷史一次推出去。
+  - cc_stuck：超過 3 小時沒有進度心跳（佇列還有未完成）／用量閘門擋住／DevQueue 連 3 輪錯誤 → 「⚠️ CC 停住：<原因>」，同原因 6 小時一次。
+  - cc_daily：22:00 後第一次 tick 推「今天做完 N 件、還剩 M 件、等你決定 K 件」。
+  - 三類都加進設定頁「通知」可個別關閉（web_push PREF_TOGGLES）；push_log 照舊只記類別與成功數。
+  - 掛點：`C:lphaun-dev-queue-cycle.ps1` 每輪最開頭（讓路／閘門判斷之前）`cc_push.py tick`，失敗只降級；改前備份 `.bak_20261021`，parse 0 錯。狀態檔 `research/.cc_push_state.json` 在 MACHINE_WRITTEN 樣式內。
+  - App：`sw.js` 推播點開時若 App 已開著就送 OPEN_URL；`app.js` 認 `#journal` 等錨點切頁。
+  - 驗證：`selftest_cc_push.py` 12/12、`selftest_web_push.py` 全過、冒煙 176/176（新增 #174）。web_push 被 live server 匯入，所以照七之二重啟：`live_server_verify.py` 4/4（build 6de9383＝HEAD、OPTIONS 200、stale_process=false）。
+  - 測試推播「✅ 測試：CC 推播已上線」：推播服務回 ok 1／failed 0（1 個訂閱）。**手機有沒有真的跳出來，要總司令確認。**
+- **Claude Code 設定（總司令當面指示，/update-config）**：`~/.claude/settings.json` 加 `remoteControlAtStartup: true`（每個新 session 自動連 Remote Control）、`inputNeededNotifEnabled: true`（等你決定時推手機）；`agentPushNotifEnabled` 原本已是 true。只影響之後新開的 session。
+- 順手修正：PENDING_QUEUE 收件匣 001 標題裡的路徑被跳脫字元弄壞，已改回正確路徑。
+
 ## 2026-10-21 00:40～01:1x（互動視窗）Cowork 收件匣 001：先.一二二-11 usage gate 誤判修正、先.一二三-3 冒煙 #90 夜間 FAIL 修正
 
 等待總司令審閱：0 件（research/AWAITING_REVIEW.md 等待中 0 列）
