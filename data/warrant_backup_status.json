@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-19T17:33:03+08:00",
+ "generated_at": "2026-10-20T17:32:31+08:00",
  "last_snapshot_date": "2026-10-19",
  "snapshot_days": 3,
  "snapshot_mb": 10.7,
@@ -8,5 +8,11 @@
  "backed_up_days": 1,
  "backup_location": "本機另一個資料夾（C:\\alpha\\backups，與程式同一顆硬碟；總司令指定路徑前的暫定位置）",
  "schedule": "本機排程 AlphaWarrantSnapshot：交易日 17:30 快照、每 7 天備份一次",
- "note": "先.九十五-2。快照與備份都只存本機，不進 repo。非投資建議。"
+ "note": "先.九十五-2。快照與備份都只存本機，不進 repo。非投資建議。",
+ "last_failure": {
+  "date": "2026-10-20",
+  "exit": 1,
+  "reason": "requests.exceptions.ChunkedEncodingError: (\"Connection broken: ConnectionResetError(10054, '遠端主機已強制關閉一個現存的連線。', None, 10054, None)\", ConnectionResetError(10054, '遠端主機已強制關閉一個現存的連線。', None, 10054, None))",
+  "at": "2026-10-20T17:32:31+08:00"
+ }
 }
