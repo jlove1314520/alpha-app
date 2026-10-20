@@ -2,8 +2,8 @@
  "meta": {
   "created_at": "2026-10-11T14:17:33.521387+08:00",
   "schema_note": "B19 前瞻訊號台帳（非回測）：每筆在事件發生後 4 日內事前寫入，寫入後內容不可修改；entry_close 為寫入日之後第一個交易日收盤（避免前視）；returns.t5/t20/t60 由 update_signal_ledger_returns.py 只回填 null 欄位。status=待驗證線索 者不得影響任何評分。規格 research/B19_SIGNAL_LEDGER_SPEC.md。非投資建議。",
-  "last_build_at": "2026-10-20T01:14:58.493915+08:00",
-  "total_signals": 537,
+  "last_build_at": "2026-10-20T08:45:18.384774+08:00",
+  "total_signals": 551,
   "source": ".github/scripts/build_signal_ledger.py（讀 events.json L1＋news.json L3＋price_history.json）",
   "last_returns_backfill_at": "2026-10-19T17:38:20.686725+08:00"
  },
@@ -18872,6 +18872,497 @@
    "anchor_trade_date": "2026-10-19",
    "weight": 0.5,
    "ref_close": 130.5,
+   "ref_close_date": "2026-10-19",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "d38b444aca0af0bc",
+   "recorded_at": "2026-10-20T08:45:18.384774+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "法說會",
+   "code": "2301",
+   "event_date": "2026-10-19",
+   "title": "光寶科技115年第三季法人說明會",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0833,
+   "pre_vol_spike": 1.439,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-19",
+   "weight": 1.0,
+   "ref_close": 264.0,
+   "ref_close_date": "2026-10-19",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "312057b5ef31ecca",
+   "recorded_at": "2026-10-20T08:45:18.384774+08:00",
+   "layer": "L1",
+   "source": "TWSE 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "增減資",
+   "code": "9955",
+   "event_date": "2026-10-19",
+   "title": "公告本公司115年現金增資收足股款暨增資基準日",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0647,
+   "pre_vol_spike": 1.272,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-19",
+   "weight": 1.0,
+   "ref_close": 22.4,
+   "ref_close_date": "2026-10-19",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "bfcb2b9ddc747fc9",
+   "recorded_at": "2026-10-20T08:45:18.384774+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E7%B4%90%E4%BA%A4%E6%89%80%E5%BB%B6%E9%95%B7%E9%83%A8%E5%88%86%E6%9C%9F%E6%AC%8A%E4%BA%A4%E6%98%93%E6%99%82%E6%AE%B5-%E6%B6%B5%E8%93%8B%E8%98%8B%E6%9E%9C-%E8%BC%9D%E9%81%94-%E5%8F%B0%E7%A9%8D%E9%9B%BB%E7%AD%89%E5%A4%A7%E5%9E%8B%E7%A7%91%E6%8A%80%E8%82%A1-233420272.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-20",
+   "title": "紐交所延長部分期權交易時段，涵蓋蘋果、輝達、台積電等大型科技股",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0472,
+   "pre_vol_spike": 2.489,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-19",
+   "weight": 0.5,
+   "ref_close": 2420.0,
+   "ref_close_date": "2026-10-19",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "2600f70d11a1583f",
+   "recorded_at": "2026-10-20T08:45:18.384774+08:00",
+   "layer": "L3",
+   "source": "經濟日報焦點",
+   "source_id": "https://money.udn.com/money/story/123398/9825173",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-20",
+   "title": "台積電ADR反彈1.8% 止住連三跌 台指期小跌78點",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0472,
+   "pre_vol_spike": 2.489,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-19",
+   "weight": 0.5,
+   "ref_close": 2420.0,
+   "ref_close_date": "2026-10-19",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "cce48ee66e4afa13",
+   "recorded_at": "2026-10-20T08:45:18.384774+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E7%A9%8D%E9%9B%BB-%E5%8F%B0%E9%81%94%E9%9B%BB-pcb%E6%97%8F%E7%BE%A4%E9%A0%98%E8%BB%8D-%E5%8F%B0%E8%82%A1%E5%A0%85%E5%AE%88%E5%AD%A3%E7%B7%9A-230708310.html",
+   "type": "媒體報導",
+   "code": "2308",
+   "event_date": "2026-10-20",
+   "title": "台積電、台達電、PCB族群領軍，台股堅守季線",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1368,
+   "pre_vol_spike": 2.134,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-19",
+   "weight": 0.5,
+   "ref_close": 1640.0,
+   "ref_close_date": "2026-10-19",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "ec4c9592bd0c2966",
+   "recorded_at": "2026-10-20T08:45:18.384774+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E7%A9%8D%E9%9B%BB-%E5%8F%B0%E9%81%94%E9%9B%BB-pcb%E6%97%8F%E7%BE%A4%E9%A0%98%E8%BB%8D-%E5%8F%B0%E8%82%A1%E5%A0%85%E5%AE%88%E5%AD%A3%E7%B7%9A-230708310.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-20",
+   "title": "台積電、台達電、PCB族群領軍，台股堅守季線",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0472,
+   "pre_vol_spike": 2.489,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-19",
+   "weight": 0.5,
+   "ref_close": 2420.0,
+   "ref_close_date": "2026-10-19",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "ae8d89c483f667c2",
+   "recorded_at": "2026-10-20T08:45:18.384774+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E7%A8%8B%E6%9B%A6%E8%B3%87%E8%A8%8A%E7%94%B3%E8%B3%BC%E4%B8%AD%E7%B1%A4%E7%8E%870-6-10-23%E4%BB%A5%E6%AF%8F%E8%82%A160%E5%85%83%E6%8E%9B%E7%89%8C%E4%B8%8A%E6%AB%83-230238579.html",
+   "type": "媒體報導",
+   "code": "6898",
+   "event_date": "2026-10-20",
+   "title": "程曦資訊申購中籤率0.6%，10/23以每股60元掛牌上櫃",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.1348,
+   "pre_vol_spike": 4.421,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-09-24",
+   "weight": 0.5,
+   "ref_close": null,
+   "ref_close_date": null,
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "5a3324484568b3eb",
+   "recorded_at": "2026-10-20T08:45:18.384774+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E4%B8%AD%E4%BF%9D%E7%A7%91%E6%97%97%E4%B8%8B-%E5%9C%8B%E9%9B%B2%E6%99%BA%E6%85%A7%E5%81%9C%E8%BB%8A-%E9%A6%96%E5%89%B5%E6%99%BA%E6%85%A7%E5%81%9C%E8%BB%8A%E7%AE%A1%E7%90%86%E6%95%B8%E6%93%9A%E4%B8%AD%E5%BF%83-%E9%9F%93%E5%9C%8B%E9%A6%96%E5%BA%A6%E4%BA%AE%E7%9B%B8-230219681.html",
+   "type": "媒體報導",
+   "code": "9917",
+   "event_date": "2026-10-20",
+   "title": "中保科旗下「國雲智慧停車」首創智慧停車管理數據中心，韓國首度亮相",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0,
+   "pre_vol_spike": 1.372,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-19",
+   "weight": 1.0,
+   "ref_close": 107.5,
+   "ref_close_date": "2026-10-19",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "ede87d0d5605cfb1",
+   "recorded_at": "2026-10-20T08:45:18.384774+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E4%B8%AD%E8%8F%AF%E9%9B%BB%E4%BF%A1adr19%E6%97%A5%E4%B8%8B%E8%B7%8C0-01%E7%BE%8E%E5%85%83%E8%B7%8C%E5%B9%850-02-%E6%8A%98%E5%8F%B0%E8%82%A1154-54%E5%85%83-213630233.html",
+   "type": "媒體報導",
+   "code": "2412",
+   "event_date": "2026-10-20",
+   "title": "中華電信ADR19日下跌0.01美元跌幅0.02%折台股154.54元",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0546,
+   "pre_vol_spike": 2.181,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-19",
+   "weight": 0.5,
+   "ref_close": 154.5,
+   "ref_close_date": "2026-10-19",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "1f2d2469a6b63337",
+   "recorded_at": "2026-10-20T08:45:18.384774+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E7%A9%8D%E9%9B%BBadr19%E6%97%A5%E4%B8%8A%E6%BC%B27-61%E7%BE%8E%E5%85%83%E6%BC%B2%E5%B9%851-84-%E6%8A%98%E5%8F%B0%E8%82%A12726-81%E5%85%83-213126127.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-20",
+   "title": "台積電ADR19日上漲7.61美元漲幅1.84%折台股2726.81元",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0472,
+   "pre_vol_spike": 2.489,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-19",
+   "weight": 0.5,
+   "ref_close": 2420.0,
+   "ref_close_date": "2026-10-19",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "877f2a5a201b61b0",
+   "recorded_at": "2026-10-20T08:45:18.384774+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E7%A9%8D%E9%9B%BBadr19%E6%97%A5%E4%B8%8A%E6%BC%B27-61%E7%BE%8E%E5%85%83%E6%BC%B2%E5%B9%851-84-%E6%8A%98%E5%8F%B0%E8%82%A12726-81%E5%85%83-213126127.html",
+   "type": "媒體報導",
+   "code": "2726",
+   "event_date": "2026-10-20",
+   "title": "台積電ADR19日上漲7.61美元漲幅1.84%折台股2726.81元",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0075,
+   "pre_vol_spike": 3.005,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-19",
+   "weight": 0.5,
+   "ref_close": 7.94,
+   "ref_close_date": "2026-10-19",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "6f41d6eabd3f57a7",
+   "recorded_at": "2026-10-20T08:45:18.384774+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9824839",
+   "type": "媒體報導",
+   "code": "6770",
+   "event_date": "2026-10-20",
+   "title": "成熟製程市況熱 價量齊揚 世界、力積電等營運進補",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0854,
+   "pre_vol_spike": 1.334,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-19",
+   "weight": 1.0,
+   "ref_close": 65.3,
+   "ref_close_date": "2026-10-19",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "218e3348adef42f1",
+   "recorded_at": "2026-10-20T08:45:18.384774+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E6%98%8E%E8%BC%9D-dr-%E6%94%B6%E8%B3%BC%E8%88%87%E5%87%BA%E5%94%AE-zion-m-180800013.html",
+   "type": "媒體報導",
+   "code": "911608",
+   "event_date": "2026-10-20",
+   "title": "明輝-DR 收購與出售 ZION M OBILITY PTE LTD 股份之公告",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0184,
+   "pre_vol_spike": 0.906,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-19",
+   "weight": 1.0,
+   "ref_close": 2.77,
+   "ref_close_date": "2026-10-19",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "4552b0bbec270f7b",
+   "recorded_at": "2026-10-20T08:45:18.384774+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9824844",
+   "type": "媒體報導",
+   "code": "3576",
+   "event_date": "2026-10-20",
+   "title": "馬斯克發文挺太陽能 元晶、聯合再生樂",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0386,
+   "pre_vol_spike": 1.772,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-19",
+   "weight": 1.0,
+   "ref_close": 17.45,
    "ref_close_date": "2026-10-19",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
    "entry_close": null,
