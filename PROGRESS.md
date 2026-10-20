@@ -1,3 +1,18 @@
+## 2026-10-20 15:31～16:1x（DevQueue 20261020-153102）先.一二一-3 Claude 用量上限自動放慢、V1 價格補抓第 30 批
+
+等待總司令審閱：0 件（research/AWAITING_REVIEW.md 等待中 0 列，與上一輪相同）
+
+- **先.一二一-3 Claude 用量上限時 DevQueue 自動放慢**（commit 8ad76797b4）：新增 `scripts/claude_usage_gate.py`。`C:\alpha\run-dev-queue-cycle.ps1`（不在 git，原檔備份 `.bak_20261020_usage`）開工搶鎖前跑 `check`：還沒到重置時間就只在 cycle log 記一行「usage_gate: 等用量重置到 MM/DD HH:MM」並結束、不啟動 claude；收尾時對本輪 stream-json 跑 `record`：有 `usage_limit_reached` 就讀回應裡的 `resetsAt`（讀不到或超過 8 天視為讀錯，改用現在＋6 小時）寫進 `research/.claude_usage_state.json`。`dev_queue_runner.py` 產生提示詞時，最近 7 天撞過上限就在補件規則下加一行「補件只排 ①資料錯 ②畫面問題 ③研究，暫停 ④文書核對」。
+  證據：用 10/19 12:01 真實 429 輸出（research/data/dev_cycles/20261019-120102.jsonl）解析出重置時間 10/20 04:00，與訊息「resets 4am (Asia/Taipei)」一致；沒有 resetsAt → 6.0 小時；重置前 check 回 1、重置後回 0、狀態檔壞掉回 0（照常跑）；PowerShell 片段實測重置前印「等用量重置到 10/20 15:44」並結束，沒有狀態檔就照常往下；ps1 語法解析 0 錯誤；提示詞實測狀態檔有／壞／無分別出現 1／0／0 行註記、exit 0；冒煙 175 項全過。
+  [自行裁量] 狀態檔改成隱藏檔名 `research/.claude_usage_state.json`（交辦寫的是 `research/claude_usage_state.json`），這樣會落在碰撞偵測 MACHINE_WRITTEN 的 `research/\.[^/]+` 樣式內，不會被誤判成「有人改到一半」（CLAUDE.md 十節）。
+  未驗證：真的撞上限那一輪的 wrapper 完整流程（要等下一次真實 429 才看得到）；marathon／hypothesis_queue 兩支 launcher 沒有加（交辦只寫 DevQueue）。
+- **先.一一四-3c 第 30 批**：上一批 14:49～14:54 已滑出一小時窗，15:50:08～15:55:27 跑 `--max-fetch 50`，exit 0、未撞 402；n_price_cached 540→565／1,751。累計約 1,055 次，尚餘約 1,743 次。下一批最早約 16:51。
+- **先.一一五-3**：shortlist §6 V1 列由腳本自動改為「已補價格 565／1751 檔候選」。
+- **順手修**：本輪 先.一二一-3 條目第一次寫入時，`C:\alpha\run-dev-queue-cycle.ps1` 路徑被 Python 跳脫字元吃成響鈴與換行字元（已推上 8ad76797b4），本 commit 改回正確路徑。
+- **未做**：先.一二一-1（A 組 20 支切換前置，要逐支手動跑並裝 telethon）、先.一二一-2（B 組常駐服務重啟＋四步驗證）、先.一二一-5（第二輪人因檢查）都要 30 分鐘以上，本輪剩約 20 分鐘做不完，留下一輪。
+- **佇列深度**：`- [ ]` 22 項（≥12）；DevQueue 可執行 5 項（<6）。收工補件掃了四個來源：BACKLOG「❌ 待處理」各條都已有 10/16～10/17 核對註記（已做或條件未到）、UX_REDESIGN_PROPOSAL 未實作項已由先.一〇九-34 另開並完成、先.八十全檢修正已無 `- [ ]`、DATA_GAP_PLAN 甲類無待排抓取（先.一〇九-33 註記）——**來源已用盡，不補**。
+- **BLOCKED**：無新增。
+
 ## 2026-10-20 14:31～15:0x（DevQueue 20261020-143102）先.一二一-5 冒煙 #91 偶發失敗根治、先.一二一-4 融資維持率 19:30「缺」誤報根因、V1 價格補抓第 29 批
 
 等待總司令審閱：0 件（research/AWAITING_REVIEW.md 等待中 0 列，與上一輪相同）
