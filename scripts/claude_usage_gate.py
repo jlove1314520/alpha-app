@@ -3,7 +3,8 @@
 
 背景：10/19 04:14～10/20 04:00 撞到 claude 每週用量上限（429 usage_limit_reached），
 之後 39 輪每輪都照樣啟動 claude -p、每輪都白跑。這支讓 run-dev-queue-cycle.ps1：
-  - 收尾時 `record <stream-json>`：偵測到 usage_limit_reached 就讀回應裡的
+  - 收尾時 `record <stream-json>`：偵測到真正的用量上限錯誤事件（先.一二二-11：只認 rate_limit_event
+    status=rejected 或 result is_error＋usage_limit_reached，工具輸出／檔案內容裡的字串不算）就讀該事件的
     resetsAt（epoch 秒；讀不到就現在＋6 小時），寫進 research/.claude_usage_state.json（隱藏檔名＝落在 dev_queue_runner.MACHINE_WRITTEN 的 research/.[^/]+ 樣式內，CLAUDE.md 十節）；
   - 開工時 `check`：重置時間之前回 exit 1，並印一行「等用量重置到 MM/DD HH:MM」，
     wrapper 只記這一行就結束，不啟動 claude；重置後回 exit 0 照常跑。
@@ -56,14 +57,46 @@ def _fmt(ts: float) -> str:
     return datetime.fromtimestamp(ts).strftime("%m/%d %H:%M")
 
 
+def _limit_events(text: str):
+    """先.一二二-11：只看 stream-json 每行的頂層事件，回傳真正的用量上限錯誤事件。
+    算數的只有兩種：①rate_limit_event 且 rate_limit_info.status == "rejected"
+    （注意 overageStatus 平常就是 "rejected"，不算）；②result 事件 is_error 為真且
+    api_error 為 usage_limit_reached（或 api_error_status 429）。
+    工具輸出／讀到的檔案內容（user 事件的 tool_result）、assistant 文字、
+    正常狀態（status=allowed）事件帶的 resetsAt 一律不算——10/20 19:12 就是被這些誤判成 10/27 才重置。"""
+    for line in text.splitlines():
+        line = line.strip()
+        if not line.startswith("{"):
+            continue
+        try:
+            ev = json.loads(line)
+        except ValueError:
+            continue
+        if not isinstance(ev, dict):
+            continue
+        typ = ev.get("type")
+        if typ == "rate_limit_event":
+            info = ev.get("rate_limit_info") or {}
+            if isinstance(info, dict) and info.get("status") == "rejected":
+                yield "rate_limit_event", info.get("resetsAt")
+        elif typ == "result" and ev.get("is_error") is True and (
+                ev.get("api_error") == "usage_limit_reached" or ev.get("api_error_status") == 429):
+            yield "result", None
+
+
 def parse_limit(text: str, now: float) -> tuple[float, str] | None:
-    """有 usage_limit_reached 就回（重置時間 epoch 秒, 來源），沒有回 None。"""
-    if "usage_limit_reached" not in text:
+    """有真正的用量上限錯誤事件就回（重置時間 epoch 秒, 來源），沒有回 None。
+    重置時間只取 rejected 那個事件本身的 resetsAt；沒有（或怪值）就現在＋6 小時。"""
+    hit = False
+    stamps = []
+    for _kind, reset in _limit_events(text):
+        hit = True
+        if isinstance(reset, (int, float)) and now < reset <= now + MAX_WAIT_SEC:
+            stamps.append(float(reset))
+    if not hit:
         return None
-    stamps = [int(x) for x in re.findall(r'"resetsAt"\s*:\s*(\d{9,11})', text)]
-    future = [s for s in stamps if now < s <= now + MAX_WAIT_SEC]
-    if future:
-        return float(max(future)), "resetsAt"
+    if stamps:
+        return max(stamps), "resetsAt"
     return now + DEFAULT_WAIT_SEC, "預設 6 小時"
 
 
@@ -72,7 +105,7 @@ def cmd_record(path: str, cycle_id: str) -> int:
     text = Path(path).read_text(encoding="utf-8", errors="replace")
     got = parse_limit(text, now)
     if got is None:
-        _say("usage_gate: 本輪沒有 usage_limit_reached")
+        _say("usage_gate: 本輪沒有用量上限錯誤事件")
         return 0
     until, source = got
     st = _load()
