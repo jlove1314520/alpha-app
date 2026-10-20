@@ -150,7 +150,7 @@
   // 有走勢圖時把這條價位畫上去（lightweight-charts的priceLine）。
   // 2026-09-08（金流一.3）個股籌碼徽章，資料來自 data/sector_flow.json。
   // **只顯示算得出來的**：streak_days 與 foreign_trust_aligned 現在就有；
-  // abnormal（60日z）、逆勢買超、法人20日均價需要更長視窗，沒有就整個不畫，
+  // abnormal（60日z）需要更長視窗、逆勢買超／法人20日均價尚未實作，沒有就整個不畫，
   // 不用短視窗冒充——一個看起來像那麼回事的假徽章比沒有徽章傷害大得多。
   async function renderChipBadges(code){
     const host=document.getElementById('chip-badges');if(!host)return;
@@ -183,10 +183,13 @@
       return;
     }
     const miss=m.windows_missing_days||{};
-    const missTxt=Object.keys(miss).length
-      ?`　異常大買（60 日 z 分數）、逆勢買超、法人 20 日均價需更長視窗，`
+    // 先.一二一-1：20 日視窗已可用（windows_usable 含 20），舊文字把逆勢買超／法人 20 日均價
+    // 也寫成「需更長視窗」不對——只有異常大買要 60 日；那兩項是還沒做，不是視窗不夠
+    const missTxt=(Object.keys(miss).length
+      ?`　異常大買（60 日 z 分數）需更長視窗，`
         +`${Object.entries(miss).map(([w,n])=>`${w} 日還需 ${n} 個交易日`).join('、')}，`
-        +`累積足夠前不顯示。`:'';
+        +`累積足夠前不顯示。`:'')
+      +`　逆勢買超、法人 20 日均價尚未提供。`;
     host.innerHTML=badges.join('')
       +`<div class="note" style="margin-top:2px">法人行為（描述性資訊，非預測訊號）。`
       +`資料日 ${m.date||'—'}。${missTxt}</div>`;
