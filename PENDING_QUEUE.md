@@ -20753,3 +20753,25 @@ un-ibkr-quotes-cycle.ps1 第 174 行、run-shioaji-quotes-cycle.ps1 第 110 行�
 > 總司令 2026-10-21：「我不要高股息也不要ETF，個股策略出來之後把這些都換掉」
 
 落地意思：真錢與紙上的 ETF 配置（Bb-90 的 0050／00697B／00646、模擬 A～D）只是過渡；任何個股策略通過全部判準（含第 8 關扣成本贏 0050 含息、天條一）後，真錢提案改成個股策略，ETF 部位逐步換掉（換倉計畫屆時另提，仍須總司令核准）。研究資源優先給個股線（模擬 G、V1 之後的個股候選）。已同步寫進 docs/UNFREEZE_CHECKLIST.md「解凍候選」一節。不改任何門檻、不動真錢部位。心跳：本行 - [x]＋PROGRESS_HEARTBEAT 一行〕
+
+# 2026-10-21【Cowork 收件匣 003 四項審閱裁示】（Cowork 派工原文，C:lpha\cowork_inbox_20261021-0750_四項審閱裁示.md；10/21 07:5x 互動視窗收到，動工前先寫入；總司令原話：「依你建議就好」）
+
+> # 003　四項審閱裁示（Cowork 2026-10-21 07:50；總司令原話：「依你建議就好」）
+>
+> 先把本檔裁示原文寫進 PENDING_QUEUE 對應條目，再依序做；每項做完從 AWAITING「等待中」移到「已結案」、PENDING_QUEUE 標 - [x]、PROGRESS_HEARTBEAT 加一行。
+>
+> 1. 先.一二三-1（157 檔 2026Q2 實為上半年累計＋206 檔缺 Q1 基準）：核准甲。
+>    - update_stock_financials.py 缺基準時讀 financials_backfill.json 的 2026Q1（元→仟元換算），還原 2026Q2 單季值並補 2026Q1；兩來源可比的欄位差 >1% 就不寫、記進 meta。
+>    - 寫進 stock_detail.json 的值要標 source（例如 "q1_from_backfill"），App 照常顯示。
+>    - 這是 App 顯示用途；研究端回測程式不得因此改讀 stock_detail.json，請確認 holdout 守門（DISPLAY_ONLY）涵蓋 financials_backfill.json 與這些衍生欄位。
+>    - 修完抽查 5 檔（含 2330）App 個股頁 EPS／毛利率與官方季報一致，截圖路徑寫 PROGRESS。
+> 2. 先.一二二-5（可點元素 <44px）：採甲——只放大點擊熱區（透明 padding／::after），外觀不變；393×852 深淺色前後截圖比對外觀沒變、metrics.json 的 small 清單清空或只剩說明得了原因的項目；冒煙全過。
+> 3. 先.一二二-10（閃黑視窗）：CybexResearchEngine 排程改成隱藏啟動（wscript＋.vbs 包裝或同等做法，taskkill 等 subprocess 加 CREATE_NO_WINDOW）。改之前匯出原排程 XML 備份、可還原；只改啟動方式，不改 Cybex 的程式邏輯、觸發時間與頻率。改完觀察 2 小時，把排程歷程寫進 PROGRESS。
+> 4. 先.一二二-12（高股息 ETF 換股事件——交易的是個股，不是買 ETF）：保留。PREREG 照草稿：①控制組照草稿（同產業同市值 3 檔）；②2025～2026 的事件不解鎖 holdout，改成從今天起前向追蹤。照此定稿 PREREG，主判定只用 2022～2024 的 23 個事件，登記並單發；事件數或資料不足就照草稿規定只登記不檢定。
+>
+> 全部做完寫本檔 .done（第一行完成／部分完成／卡住，各項一句結果＋commit hash）。
+
+- [ ] **先.一二五-1 執行先.一二三-1 甲案：update_stock_financials.py 缺 Q1 基準時讀 financials_backfill.json 的 2026Q1（元→仟元），還原 2026Q2 單季並補 2026Q1；差 >1% 不寫、記 meta；寫入值標 source（q1_from_backfill）；確認 DISPLAY_ONLY 守門涵蓋回補檔與衍生欄位；抽查 5 檔（含 2330）EPS／毛利率對官方季報，截圖路徑寫 PROGRESS**（互動視窗執行〔互動視窗執行中〕；收件匣 003 第 1 項。心跳：本行 - [x]＋AWAITING 移已結案＋PROGRESS_HEARTBEAT 一行）
+- [ ] **先.一二五-2 執行先.一二二-5 甲案：只放大可點元素點擊熱區（透明 padding／::after），外觀不變；393×852 深淺色前後截圖比對；metrics.json small 清單清空或只剩說明得了原因者；冒煙全過**（互動視窗執行〔互動視窗執行中〕；收件匣 003 第 2 項。心跳同上）
+- [ ] **先.一二五-3 執行先.一二二-10：CybexResearchEngine 排程改隱藏啟動（wscript＋.vbs 或同等）、taskkill 等 subprocess 加 CREATE_NO_WINDOW；改前匯出 XML 備份；不改 Cybex 程式邏輯、觸發時間與頻率；觀察 2 小時寫 PROGRESS**（互動視窗執行〔互動視窗執行中〕；收件匣 003 第 3 項。心跳同上）
+- [ ] **先.一二五-4 執行先.一二二-12 裁示：保留；PREREG 照草稿定稿（控制組＝同產業同市值 3 檔；2025～2026 事件不解鎖 holdout、改從今天起前向追蹤）；主判定只用 2022～2024 的 23 個事件，登記並單發；事件數或資料不足就只登記不檢定**（互動視窗執行〔互動視窗執行中〕；收件匣 003 第 4 項。心跳同上）
