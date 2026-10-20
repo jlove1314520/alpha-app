@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-19T06:03:49+00:00",
+ "generated_at": "2026-10-20T02:29:25+00:00",
  "source": "Finnhub /stock/recommendation（免費層；彙整多家券商評等家數，非單一券商報告）",
  "coverage": [
   "NVDA",
@@ -15,6 +15,14 @@
  "price_target": "未提供：Finnhub /stock/price-target 為付費端點（Premium required），待採購",
  "tickers": {
   "NVDA": [
+   {
+    "period": "2026-10-01",
+    "strongBuy": 25,
+    "buy": 41,
+    "hold": 2,
+    "sell": 1,
+    "strongSell": 0
+   },
    {
     "period": "2026-09-01",
     "strongBuy": 24,
@@ -38,17 +46,17 @@
     "hold": 4,
     "sell": 1,
     "strongSell": 0
-   },
-   {
-    "period": "2026-06-01",
-    "strongBuy": 24,
-    "buy": 39,
-    "hold": 4,
-    "sell": 1,
-    "strongSell": 0
    }
   ],
   "AAPL": [
+   {
+    "period": "2026-10-01",
+    "strongBuy": 11,
+    "buy": 20,
+    "hold": 14,
+    "sell": 3,
+    "strongSell": 1
+   },
    {
     "period": "2026-09-01",
     "strongBuy": 12,
@@ -72,17 +80,17 @@
     "hold": 16,
     "sell": 2,
     "strongSell": 0
-   },
-   {
-    "period": "2026-06-01",
-    "strongBuy": 14,
-    "buy": 24,
-    "hold": 15,
-    "sell": 2,
-    "strongSell": 0
    }
   ],
   "MSFT": [
+   {
+    "period": "2026-10-01",
+    "strongBuy": 22,
+    "buy": 40,
+    "hold": 3,
+    "sell": 0,
+    "strongSell": 0
+   },
    {
     "period": "2026-09-01",
     "strongBuy": 23,
@@ -103,14 +111,6 @@
     "period": "2026-07-01",
     "strongBuy": 23,
     "buy": 40,
-    "hold": 5,
-    "sell": 0,
-    "strongSell": 0
-   },
-   {
-    "period": "2026-06-01",
-    "strongBuy": 23,
-    "buy": 38,
     "hold": 5,
     "sell": 0,
     "strongSell": 0
@@ -152,6 +152,14 @@
   ],
   "GOOGL": [
    {
+    "period": "2026-10-01",
+    "strongBuy": 20,
+    "buy": 41,
+    "hold": 6,
+    "sell": 0,
+    "strongSell": 0
+   },
+   {
     "period": "2026-09-01",
     "strongBuy": 20,
     "buy": 43,
@@ -174,17 +182,17 @@
     "hold": 9,
     "sell": 0,
     "strongSell": 0
-   },
-   {
-    "period": "2026-06-01",
-    "strongBuy": 19,
-    "buy": 42,
-    "hold": 9,
-    "sell": 0,
-    "strongSell": 0
    }
   ],
   "AMZN": [
+   {
+    "period": "2026-10-01",
+    "strongBuy": 19,
+    "buy": 48,
+    "hold": 3,
+    "sell": 0,
+    "strongSell": 0
+   },
    {
     "period": "2026-09-01",
     "strongBuy": 20,
@@ -204,14 +212,6 @@
    {
     "period": "2026-07-01",
     "strongBuy": 21,
-    "buy": 49,
-    "hold": 5,
-    "sell": 0,
-    "strongSell": 0
-   },
-   {
-    "period": "2026-06-01",
-    "strongBuy": 22,
     "buy": 49,
     "hold": 5,
     "sell": 0,
