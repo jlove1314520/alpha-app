@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated_at": "2026-10-20T08:44:40.742784+08:00",
+    "generated_at": "2026-10-20T17:36:28.097987+08:00",
     "last_fetch_count": 44,
-    "reductions_generated_at": "2026-10-20T08:44:48.183355+08:00"
+    "reductions_generated_at": "2026-10-20T17:36:36.139210+08:00"
   },
   "events": {
     "01010T": [
@@ -2494,7 +2494,10 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-10-01",
-        "applied": false
+        "applied": true,
+        "official_factor": 0.9813664596273292,
+        "official_source": "TWSE TWT49U",
+        "factor_applied": 0.9813664596273292
       }
     ],
     "1711": [
@@ -2506,7 +2509,10 @@
         "rights_price": 0.0,
         "type": "權",
         "first_seen": "2026-10-05",
-        "applied": false
+        "applied": true,
+        "official_factor": 0.9798432250839866,
+        "official_source": "TWSE TWT49U",
+        "factor_applied": 0.9798432250839866
       }
     ],
     "5522": [
@@ -3216,7 +3222,10 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-10-16",
-        "applied": false
+        "applied": true,
+        "official_factor": 0.9953051643192488,
+        "official_source": "TWSE TWT49U",
+        "factor_applied": 0.9953051643192488
       }
     ],
     "01007T": [
@@ -3625,6 +3634,30 @@
         "first_seen": "2026-10-19",
         "applied": true,
         "factor_applied": 0.9957582184517498
+      }
+    ],
+    "00931B": [
+      {
+        "ex_date": "2026-10-20",
+        "official_factor": 0.9892966360856269,
+        "pre_close": 13.08,
+        "ref_price": 12.94,
+        "source": "TPEx exDailyQ",
+        "first_seen": "2026-10-20",
+        "applied": true,
+        "factor_applied": 0.9892966360856269
+      }
+    ],
+    "00985D": [
+      {
+        "ex_date": "2026-10-20",
+        "official_factor": 0.9938900203665987,
+        "pre_close": 9.82,
+        "ref_price": 9.76,
+        "source": "TPEx exDailyQ",
+        "first_seen": "2026-10-20",
+        "applied": true,
+        "factor_applied": 0.9938900203665987
       }
     ]
   },
