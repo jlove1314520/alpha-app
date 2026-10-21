@@ -384,8 +384,18 @@ def guard_precheck() -> list:
     return found
 
 
-# 先.八十五-1c：佇列 ≥12 項中至少 6 項要 DevQueue 可執行（非[研究]、非互動視窗、不被守門員擋）
+# 先.八十五-1c：佇列 ≥12 項中至少 6 項要 DevQueue 可執行（非互動視窗、不被守門員擋；先.一二七-A 起[研究]也算）
 DEVQUEUE_ELIGIBLE_MIN = 6
+
+# 先.一二七-A（2026-10-21 總司令核准，收件匣 005）：AlphaMarathon／AlphaHypothesisQueue 停用，
+# 研究軌併入 DevQueue——[研究]類也取件，一輪只戴一頂帽子（提示詞依類別帶研究紀律）。
+# 還原舊行為（DevQueue 跳過[研究]）：改成 False，並把兩個排程 Enable 回來。
+RESEARCH_MERGED_INTO_DEVQUEUE = True
+
+
+def _skip_classes() -> tuple:
+    """DevQueue 不取件的類別。互動視窗專屬（含碰核心研究檔案的條目）永遠跳過。"""
+    return ("互動視窗",) if RESEARCH_MERGED_INTO_DEVQUEUE else ("研究", "互動視窗")
 
 
 def eligible_precheck() -> int:
@@ -393,7 +403,7 @@ def eligible_precheck() -> int:
     try:
         n = 0
         for _i, ln in _pending_lines(_lines()):
-            if item_class(ln) in ("研究", "互動視窗"):
+            if item_class(ln) in _skip_classes():
                 continue
             h = guard_hits(re.sub(r"^\s*- \[ \]\s*", "", ln).strip())
             if not (h["needs_user"] or h["irreversible"]):
@@ -589,7 +599,8 @@ def _find_next_base(skip: frozenset = frozenset()) -> tuple[int, str] | None:
             # 2026-09-16該筆⛔記錄），這裡直接跳過，讓它留給對的track去讀
             # PENDING_QUEUE.md（那些track是`claude -p`提示詞讀全文判斷，不靠
             # 這支腳本的機械式解析，所以跳過不影響它們看得到這一項）。
-            if cls == "研究":
+            # 先.一二七-A（2026-10-21）：研究軌併入 DevQueue 後不再跳過，由提示詞切換研究帽。
+            if cls == "研究" and not RESEARCH_MERGED_INTO_DEVQUEUE:
                 continue
             if key in skip:
                 continue
@@ -606,7 +617,7 @@ def _find_next_base(skip: frozenset = frozenset()) -> tuple[int, str] | None:
     # （用item_class()判斷，邏輯與上面ordered分支一致，只是這裡沒有現成的
     # cls可用；互動視窗專屬見item_class() 2026-09-30新增的偵測）。
     devqueue_eligible = [(i, ln) for i, ln in pending
-                         if item_class(ln) not in ("研究", "互動視窗") and item_key(ln) not in skip]
+                         if item_class(ln) not in _skip_classes() and item_key(ln) not in skip]
     return devqueue_eligible[0] if devqueue_eligible else None
 
 
@@ -910,6 +921,38 @@ def _report_order_tag_mismatches() -> None:
         _safe_print(f"WARN_DETECTOR_CRASHED: order_tag_mismatches failed ({type(e).__name__}), skipped this round")
 
 
+CORE_RESEARCH_FILES = ("research/backtest/", "research/validation/", "research/adjust.py",
+                       "research/pit.py", "research/trial_registry.py")
+
+
+def dev_hat_block(crunch: bool) -> str:
+    tail = "" if crunch else ("\n連續做下一項時**只接非[研究]類**；權威清單下一項是[研究]類就收工，"
+                               "留給下一輪戴研究帽（一輪只戴一頂帽子）。")
+    return ("## 本輪帽子：開發／維運（CLAUDE.md 九，先.一二七-A）\n"
+            "開工先寫一句「本輪戴開發帽」（或維運帽）；必交產物照九節（開發→冒煙結果、維運→data/STATUS.json）。" + tail)
+
+
+def research_hat_block(crunch: bool) -> str:
+    tail = "" if crunch else ("\n連續做下一項時**只接[研究]類**；下一項不是[研究]類就收工，留給下一輪換帽。")
+    core = "、".join(f"`{p}`" for p in CORE_RESEARCH_FILES)
+    return f"""## 本輪帽子：研究／驗證（CLAUDE.md 九、七之三、十三；先.一二七-A 研究軌併入 DevQueue）
+開工先寫一句「本輪戴研究帽」或「本輪戴驗證帽」，**擇一**：研究帽產物＝SPEC／PREREG／因子程式碼；
+驗證帽產物＝`TRIALS_LEDGER` 判定。**做與判分離：同一輪不得既開發策略又宣告它有效。**{tail}
+研究紀律（照舊，無例外）：
+1. **事前登記**：任何回測／單發前，PREREG 先定稿 commit，再用 `research/trial_registry.py` 的
+   `register_trial()` 登記（未登記的判定一律無效），之後重跑 `research/selection_bias_ledger.py` 更新 N；
+   自由參數 >5 個照第 11 關計 N。只跑一次，不得看完結果回去調參重測。
+2. **試驗帳本單一寫入者**：`TRIALS_REGISTRY.jsonl`／`TRIALS_LEDGER.md` 只能經 `register_trial()` 寫，不准手改。
+   描述性研究不登記試驗時，照條目指示 append `research/PROGRESS_HEARTBEAT.jsonl` 當心跳。
+3. **核心研究檔案只能互動視窗改**（十三節）：{core} 可以讀、可以呼叫，**不准改原始碼**。
+   需要改就把提案（發現什麼／建議怎麼改／影響哪些判定）寫進 PENDING_QUEUE 新條目並標「（互動視窗執行）」，
+   這一項需要那個修改才能繼續的話，用 `block` 標阻塞，換下一項。
+4. holdout（2025+）不得解鎖；天條一 MDD>50% 直接 `VIOLATES_SURVIVAL`；第 8 關用 `evaluate_gate8()`；
+   含放空腿的數字附資料缺陷但書；美股結論附存活者偏誤但書。
+5. FAIL／不可行一律附至少 3 個變形方向（七之三「失敗必附變形方向」），寫進 `STRATEGY_GRAVEYARD.md`。
+6. 研究帽不改 `index.html`；冒煙測試照樣要跑（全過才 commit）。"""
+
+
 def build_prompt() -> int:
     # 2026-09-19（總司令裁示【最優先·三個都是總司令自己造成的故障】一.2）：
     # 這整段矛盾偵測（含2026-09-18加的ORDER-BEGIN檢查）包一層try/except——
@@ -947,9 +990,9 @@ def build_prompt() -> int:
             # （不歸DevQueue管）——這是正常讓路，不是矛盾。清掉舊的mismatch
             # 旗標（狀態已經自癒）。
             _clear_format_mismatch()
-            _safe_print("NO_PENDING_ITEM_FOR_DEVQUEUE：剩餘待辦皆為[研究]類或"
-                         "「（互動視窗執行」類，留給marathon／hypothesis_queue軌"
-                         "或互動視窗session")
+            _safe_print("NO_PENDING_ITEM_FOR_DEVQUEUE：剩餘待辦皆為「（互動視窗執行」類"
+                         + ("" if RESEARCH_MERGED_INTO_DEVQUEUE else "或[研究]類（留給marathon／hypothesis_queue軌）")
+                         + "，留給互動視窗session")
             return 3
         stale = False
         try:
@@ -1053,6 +1096,9 @@ def build_prompt() -> int:
                           "補件只排 ①資料錯 ②畫面問題 ③研究，**暫停 ④文書核對**類。\n")
     except Exception:  # noqa: BLE001
         usage_note = ""
+    # 先.一二七-A：一輪只戴一頂帽子（CLAUDE.md 九）。研究類帶研究紀律；連續做多項時只接同帽的下一項。
+    _is_research = item_class(text) == "研究"
+    hat_block = research_hat_block(crunch) if _is_research else dev_hat_block(crunch)
     _t0 = datetime.now(TZ)
     _wrap_at = (_t0 + timedelta(minutes=WRAP_UP_MIN)).strftime("%H:%M")
     prompt = f"""全程繁體中文。你是 Alpha 專案的開發佇列自走輪次（無人值守，沒有人在旁邊看）。
@@ -1073,6 +1119,8 @@ def build_prompt() -> int:
 {prev}
 {multi}
 
+{hat_block}
+
 ## 開工前先做兩件事（2026-09-18總司令裁示【改為連續自走】新增）
 1. **檢查已標`- [!]`的阻塞項有沒有解除**：逐項看阻塞原因與預計解除時間，
    到了就自己把那一行改回`- [ ]`並繼續往下做，不需要另外請示。
@@ -1091,9 +1139,14 @@ def build_prompt() -> int:
    ① `BACKLOG.md` 未完成項 ② `docs/UX_REDESIGN_PROPOSAL.md` 未做的 App 項目
    ③ Cowork 全檢報告（2026-10-11，條目已抄在 `PENDING_QUEUE.md`「先.八十　全檢修正」節）未完成項
    ④ `research/DATA_GAP_PLAN.md` 甲類（免費可抓）未做項。**每條寫明來源（檔名＋行號或節名）**；
-   新補的預設標「（DevQueue 可執行）」，真的需要總司令拍板的才標互動視窗。
-   **不得**用換行統一、自查術語、格式整理這類小事湊數，**不得**補新的 alpha 試驗；
-   四個來源都沒有可做的就不補，在收工紀錄照實寫「來源已用盡」。
+   ⑤ **研究候選（先.一二七-A 2026-10-21 起，原馬拉松補件來源併入）**：`research/GRAVEYARD_AUTOPSY.md`
+   第 6 節（6.1 變形方向）、`research/HYPOTHESIS_QUEUE.md` 未跑的假說，補成 `**編號** [研究]` 條目，
+   每條寫明「先寫 PREREG、用沒碰過的資料／新市場／新工具事前登記單發、計入 N」，每輪最多補 3 條。
+   **排序照檔頭【常規.補件順序】**：①資料缺口／數字錯 → ②使用者看得到的畫面問題 → ③研究室回補與上面⑤研究候選
+   → ④BACKLOG 文書核對（每輪最多 3 項）。
+   新補的預設標「（DevQueue 可執行）」，真的需要總司令拍板、或要改核心研究檔案的才標互動視窗。
+   **不得**用換行統一、自查術語、格式整理這類小事湊數；新的 alpha 試驗**只准**從⑤兩個來源補、且一律事前登記；
+   來源都沒有可做的就不補，在收工紀錄照實寫「來源已用盡」。
 {usage_note}
 ## 一定要遵守
 1. 先讀 `C:\\alpha\\alpha-app\\CLAUDE.md`（尤其「零之一、停下條件改為白名單」

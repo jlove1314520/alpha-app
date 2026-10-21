@@ -65,6 +65,8 @@
 遇到不確定屬於哪一類的情況，寧可先提案，不要自己判斷「應該算已交辦」
 就直接動手。
 
+> ⚠️ **2026-10-21 起研究軌併入 DevQueue**（先.一二七-A，總司令核准）：`AlphaMarathon`／`AlphaHypothesisQueue` 已停用（未刪除，XML 備份在 `C:\alpha\task_password_backup\*_pre_merge_20261021.xml`），背景 CC 只剩 `AlphaDevQueue` 一條；[研究]類條目改由 DevQueue 取件，一輪只戴一頂帽子（九節），研究紀律與十三節核心檔案規則照舊。下文提到三條軌道之處保留原文供稽核。
+
 **適用範圍界線（2026-09-02使用者第二次裁示，取代前一版澄清，措辭更
 精確——第一版讓`hypothesis_queue`馬拉松誤停在#17，這版是修正）**：
 
@@ -96,6 +98,8 @@
 
 ## 零之一、停下條件改為白名單（2026-09-18總司令裁示【改為連續自走】，
 取代原本的預設停下，鐵律）
+
+> ⚠️ **2026-10-21 起研究軌併入 DevQueue**（先.一二七-A，總司令核准）：`AlphaMarathon`／`AlphaHypothesisQueue` 已停用（未刪除，XML 備份在 `C:\alpha\task_password_backup\*_pre_merge_20261021.xml`），背景 CC 只剩 `AlphaDevQueue` 一條；[研究]類條目改由 DevQueue 取件，一輪只戴一頂帽子（九節），研究紀律與十三節核心檔案規則照舊。下文提到三條軌道之處保留原文供稽核。
 
 **背景（Cowork查證）**：`PENDING_QUEUE.md`只剩2項未完成、marathon
 log「候選池空轉」122次、最近一輪結論「三條交辦皆外部阻塞，無新工作
@@ -201,6 +205,8 @@ log「候選池空轉」122次、最近一輪結論「三條交辦皆外部阻�
 上下文中——換 session/換機器接手也要看得到排隊全貌。
 
 ## 三之一、交辦優先於自走（2026-09-10 總司令裁示，鐵律）
+
+> ⚠️ **2026-10-21 起研究軌併入 DevQueue**（先.一二七-A，總司令核准）：`AlphaMarathon`／`AlphaHypothesisQueue` 已停用（未刪除，XML 備份在 `C:\alpha\task_password_backup\*_pre_merge_20261021.xml`），背景 CC 只剩 `AlphaDevQueue` 一條；[研究]類條目改由 DevQueue 取件，一輪只戴一頂帽子（九節），研究紀律與十三節核心檔案規則照舊。下文提到三條軌道之處保留原文供稽核。
 
 > 總司令原話：**「自走既擠掉交辦又在空轉，雙輸。」**
 
