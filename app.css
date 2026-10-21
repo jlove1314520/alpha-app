@@ -611,3 +611,26 @@ details.ui-more[open]>summary{color:var(--ink-2)}
 .lab-chip{font-size:10.5px;font-weight:700;border:1px solid;border-radius:6px;padding:1px 6px}
 .lab-stale{font-size:10px;font-weight:700;color:var(--warn);border:1px solid var(--warn);border-radius:5px;padding:0 5px}
 .mkt-state .hdr-gear{position:absolute;right:calc(100% + 8px);top:50%;transform:translateY(-50%)}
+
+/* 先.一二五-2（2026-10-21，總司令核准 先.一二二-5 甲案）：可點元素的「點擊熱區」至少 44×44，外觀不變。
+   做法：透明 ::before 從元素中心往外擴到 44px（元素本身已 ≥44 的方向只多蓋 1px 邊框，min() 取 -1px），不畫任何東西，只接點擊；
+   元素本身大小、位置、間距都不動。position 用 :where() 讓特異度為 0，原本設了 absolute／fixed 的元素照舊。
+   設定頁輸入框外框改成 <label class="setting-input">，點外框也會聚焦輸入框，外框再套同一個熱區。
+   不套用：自選列裡的資料來源小點 .sdot（擴大會吃掉整列「開個股」的點擊）。 */
+/* 大的可點容器（列、卡片）的 ::before 等於自身大小、會蓋在「沒有定位」的子元素上，所以子元素裡會被點的東西
+   （表單元件、.sdot）也一律 position:relative，照樹狀順序畫在容器的 ::before 之上，點擊照舊落在子元素。 */
+:where(.press, button, a[href], summary, [onclick], [role=button], label.setting-input, input, select, textarea){position:relative}
+:where(.press, button, a[href], summary, [onclick], [role=button], label.setting-input):not(.sdot)::before{
+  content:"";position:absolute;background:none;border:0;
+  top:min(-1px, calc(50% - 22px));bottom:min(-1px, calc(50% - 22px));
+  left:min(-1px, calc(50% - 22px));right:min(-1px, calc(50% - 22px))}
+/* 橫向捲動的籤列（overflow:auto）會把 ::before 往上下擴的部分裁掉：上下各加 10px 透明內距、用負外距抵銷，版面位置不變。
+   原外距：#wl-tabs -2/8、#radar-chips 10/0（下內距 4）、#journal-chips 0/12、#sc-tabs 0/8（四個都是行內樣式，所以用 !important；#sc-tabs 下內距 2）。 */
+#wl-tabs{padding-top:10px!important;padding-bottom:10px!important;margin-top:-12px!important;margin-bottom:-2px!important}
+#radar-chips{padding-top:10px!important;padding-bottom:10px!important;margin-top:0!important;margin-bottom:-6px!important}
+#journal-chips{padding-top:10px!important;padding-bottom:10px!important;margin-top:-10px!important;margin-bottom:2px!important}
+#sc-tabs{padding-top:10px!important;padding-bottom:10px!important;margin-top:-10px!important;margin-bottom:0!important}
+/* 頁首告警小點（10px）緊貼設定齒輪左側：兩者距離不夠各自 44px，小點不擴（擴了會蓋掉齒輪），
+   並維持畫在齒輪之上，點小點仍是開告警、點齒輪仍是開設定。 */
+#alert-hub-dot{z-index:1}
+#alert-hub-dot::before{display:none}

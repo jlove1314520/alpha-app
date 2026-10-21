@@ -43,7 +43,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(mq.addEventListener)mq.addEventListener('change',h);else if(mq.addListener)mq.addListener(h)}
 })();
 </script>
-<link rel="stylesheet" href="app.css?v=2026-10-21.0812">
+<link rel="stylesheet" href="app.css?v=2026-10-21.0849">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -1070,11 +1070,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <h3>券商帳戶</h3>
       <div class="setting-row">
         <span>台股</span>
-        <div class="setting-input"><input id="set-broker-tw" type="text" placeholder="尚未填寫" style="width:150px;text-align:right" onblur="saveBroker()"></div>
+        <label class="setting-input"><input id="set-broker-tw" type="text" placeholder="尚未填寫" style="width:150px;text-align:right" onblur="saveBroker()"></label>
       </div>
       <div class="setting-row">
         <span>美股</span>
-        <div class="setting-input"><input id="set-broker-us" type="text" placeholder="尚未填寫" style="width:150px;text-align:right" onblur="saveBroker()"></div>
+        <label class="setting-input"><input id="set-broker-us" type="text" placeholder="尚未填寫" style="width:150px;text-align:right" onblur="saveBroker()"></label>
       </div>
       <div class="note">只是你自己的備註，程式不會讀</div>
     </div>
@@ -1095,7 +1095,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div id="ibkr-token-warn" style="margin-bottom:8px"></div>
       <div class="setting-row" style="margin-top:8px">
         <span>連線密碼</span>
-        <div class="setting-input"><input id="set-live-token" type="password" placeholder="伺服器啟動時印在終端機" style="width:170px;text-align:right" onchange="saveLiveConfig()"></div>
+        <label class="setting-input"><input id="set-live-token" type="password" placeholder="伺服器啟動時印在終端機" style="width:170px;text-align:right" onchange="saveLiveConfig()"></label>
       </div>
       <div class="note" id="live-status-note" style="margin-top:8px">尚未設定</div>
       <button class="btn ghost" style="width:100%;margin-top:10px" onclick="testLiveConnection()">測試連線</button>
@@ -1108,7 +1108,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div id="live-manual-adv" style="margin-top:4px">
       <div class="setting-row" style="margin-top:8px">
         <span>伺服器網址</span>
-        <div class="setting-input"><input id="set-live-url" type="url" placeholder="貼上完整 ts.net 網址" style="width:170px;text-align:right" onchange="saveLiveConfig()"></div>
+        <label class="setting-input"><input id="set-live-url" type="url" placeholder="貼上完整 ts.net 網址" style="width:170px;text-align:right" onchange="saveLiveConfig()"></label>
       </div>
       <!-- 2026-09-08（連線五.1）網址完整檢視。踩到的事：Cowork 在給總司令的測試網址裡
            用了 `tail4c7XXXX` 這種佔位符，總司令照字面貼上，DNS 查不到，整輪測試作廢。
@@ -1141,11 +1141,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       詳見 docs/cloudflare_tunnel_setup.md。 -->
       <div class="setting-row" style="margin-top:8px">
         <span>存取閘道帳號<br><span style="font-size:10px;color:var(--ink-4)">選填，使用存取閘道時才要填</span></span>
-        <div class="setting-input"><input id="set-cf-access-id" type="text" placeholder="留空＝不使用" style="width:170px;text-align:right" onchange="saveLiveConfig()"></div>
+        <label class="setting-input"><input id="set-cf-access-id" type="text" placeholder="留空＝不使用" style="width:170px;text-align:right" onchange="saveLiveConfig()"></label>
       </div>
       <div class="setting-row" style="margin-top:8px">
         <span>存取閘道密碼</span>
-        <div class="setting-input"><input id="set-cf-access-secret" type="password" placeholder="留空＝不使用" style="width:170px;text-align:right" onchange="saveLiveConfig()"></div>
+        <label class="setting-input"><input id="set-cf-access-secret" type="password" placeholder="留空＝不使用" style="width:170px;text-align:right" onchange="saveLiveConfig()"></label>
       </div>
     </div>
 
@@ -1175,7 +1175,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <button class="btn ghost" id="auto-cancel-all" style="width:100%;margin-top:8px;display:none" onclick="autoCancelPending()">取消這一批</button>
       <div class="setting-row" style="margin-top:10px">
         <span>緊急停止<br><span style="font-size:10px;color:var(--ink-4)">開啟後一律拒單，需手動關閉才恢復</span></span>
-        <div class="setting-input"><input id="auto-stop-toggle" type="checkbox" onchange="autoSetStop(this.checked,'緊急停止開關')"></div>
+        <label class="setting-input"><input id="auto-stop-toggle" type="checkbox" onchange="autoSetStop(this.checked,'緊急停止開關')"></label>
       </div>
       <div class="note" style="margin-top:6px">這裡只能停止，不能下單</div>
       <div style="display:flex;gap:8px;margin-top:10px">
@@ -1313,10 +1313,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div class="card" id="bt-path-card">
       <h3>破億試算</h3>
       <div class="note" style="margin:-4px 0 6px;color:var(--warn)">假設情境：以歷史回測月報酬重抽樣試算，不是預測。</div>
-      <div class="setting-row"><span>目前淨資產（元）</span><div class="setting-input"><input id="bt-nw" type="number" inputmode="numeric" placeholder="例如 6000000" style="width:140px;text-align:right" onchange="btSave()"></div></div>
-      <div class="setting-row" style="margin-top:8px"><span>每月投入（元）</span><div class="setting-input"><input id="bt-pmt" type="number" inputmode="numeric" placeholder="例如 300000" style="width:140px;text-align:right" onchange="btSave()"></div></div>
-      <div class="setting-row" style="margin-top:8px"><span>出生日期</span><div class="setting-input"><input id="bt-birth" type="date" style="width:140px" onchange="btSave()"></div></div>
-      <div class="setting-row" style="margin-top:8px"><span>目標年齡</span><div class="setting-input"><input id="bt-age" type="number" inputmode="numeric" placeholder="40" style="width:140px;text-align:right" onchange="btSave()"></div></div>
+      <div class="setting-row"><span>目前淨資產（元）</span><label class="setting-input"><input id="bt-nw" type="number" inputmode="numeric" placeholder="例如 6000000" style="width:140px;text-align:right" onchange="btSave()"></label></div>
+      <div class="setting-row" style="margin-top:8px"><span>每月投入（元）</span><label class="setting-input"><input id="bt-pmt" type="number" inputmode="numeric" placeholder="例如 300000" style="width:140px;text-align:right" onchange="btSave()"></label></div>
+      <div class="setting-row" style="margin-top:8px"><span>出生日期</span><label class="setting-input"><input id="bt-birth" type="date" style="width:140px" onchange="btSave()"></label></div>
+      <div class="setting-row" style="margin-top:8px"><span>目標年齡</span><label class="setting-input"><input id="bt-age" type="number" inputmode="numeric" placeholder="40" style="width:140px;text-align:right" onchange="btSave()"></label></div>
       <div id="bt-out" class="note" style="margin-top:10px;line-height:1.8">請填入上方四欄</div>
       <div id="bt-prob" class="note" style="margin-top:10px;line-height:1.7">假設情境（歷史重抽樣）達標比例：先填淨資產與出生日期</div>
       <div class="note" style="margin-top:6px" id="bt-rate-note">數字只存在你的裝置與電腦；推算用的年化（自動投資 Bb-90 回測，讀 data/strategy_history.json）是過去回測，不是保證</div>
@@ -1612,6 +1612,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-21.0812"></script>
+<script src="app.js?v=2026-10-21.0849"></script>
 </body>
 </html>
