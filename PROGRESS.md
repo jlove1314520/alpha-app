@@ -1,3 +1,18 @@
+## 2026-10-21 20:11 DevQueue 20261021-193101：先.一二七-B2 模擬 H 追蹤程式（第 1 段，未完成）
+
+- 等待總司令審閱：1 件（沿用上一輪，本輪沒有新增）
+- 本輪戴研究帽。沒有登記新試驗、沒有回測、沒讀 holdout（2025+）。
+- **做了什麼**：
+  1. 寫好 `research/paper_8_ml_tracker.py`：`build-panel`（逐檔算 26 個既有因子的每月訓練列，可續跑）、`train`（只准跑一次，模型已存在就拒絕）、排程 `step()`（12/01 前只寫「未開始」摘要）。訓練特徵一律離線：程式擋掉所有網路連線、只讀本機 FinMind 快取，標籤終點 ≤2024-12-31。
+  2. 接上 `market.yml`（模擬 G 之後、策略曲線之前），`data/paper_8.json`、`research/data/paper_8_log.jsonl` 已加進 commit 清單（十節）。
+  3. 順手修：冒煙第 103 項 FAIL（互動視窗 19:12 登記 #459 後，試驗索引沒重建：帳本 438 ≠ 索引 437），重跑 `.github/scripts/build_trials_index.py` 後通過（commit d30086c852）。
+- **證據**：訓練面板 `research/data/paper_8_train_panel/`（本機，不進 repo）已完成 1,126／2,721 檔；`python research/paper_8_ml_tracker.py` 輸出 `{"state": "NOT_STARTED"}`；market.yml 用 yaml 解析通過。冒煙測試 175 項全過、exit 0（19:5x）。
+- **[自行裁量]**：① 訓練宇宙用 `universe.py` 的 universe()（含已下市）裡的普通股；② 持有期內下市的股票用最後收盤價；③ 三大法人特徵在沒有原始資料的日子改回缺值（prepare_factors 原本補 0，覆蓋率會算錯）；④ 分割表沒快取就當作「沒有分割」（抽樣 99% 是空表；不這樣做的話 728 檔會整檔失敗）。
+- **發現的問題**：`f_dividend_yield_ttm` 的分母在 yfinance 路徑其實是還原價，所以越早年殖利率越被高估（實測 1101 2012-12 的值是 0.125）。已另立 先.一二七-B2a（互動視窗執行）；模擬 H 照 PREREG 不改特徵定義。
+- **還沒做（PENDING_QUEUE 那一項維持 - [ ]）**：面板還剩 1,595 檔要續跑；減資表沒快取的檔（29 檔裡有 14 檔）怎麼處理要先決定；train；前向每月預測——repo 的價格只有約 90 天、也沒有季報，252 日類和季報類特徵前向算不出來（PREREG 允許留空值，但預測品質會跟訓練期不同）；market.yml 要加裝 scikit-learn==1.9.0。下一輪從 `build-panel` 續跑。
+- 佇列深度：`- [ ]` 40 項、DevQueue 可執行 19 項，不需補件。
+- 沒提交的部分：工作目錄裡其他排程寫到一半的檔案（audit_report、rate_limit_state 等），本輪不碰也不提交。
+
 ## 2026-10-21 19:13 DevQueue 20261021-183101：先.一一四-3c 第 61～63 批
 
 - 等待總司令審閱：1 件（依互動視窗 ae646e8a3e「AWAITING 3→1」，本輪沒有新增）

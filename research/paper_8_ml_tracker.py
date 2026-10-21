@@ -22,6 +22,7 @@
 3. 三大法人類（f_foreign_streak／f_inst_flow／f_inst_streak_days）在 prepare_factors 裡把缺資料補 0，
    會讓「沒資料」看起來像「有值」；本程式在該日沒有任何法人原始列時改回 NaN，覆蓋率才算得對。
 4. 訓練特徵一律離線計算：只讀本機快取，任何網路連線都被擋下（快取缺的資料集視為缺值，不打 FinMind）。
+5. 例外：TaiwanStockSplitPrice 缺快取視為「無分割事件」（本機快取抽樣 99% 是空表），其餘資料集缺快取該檔失敗、照實記錄。
 自身失敗只印警告、exit 0（十二節）。
 """
 from __future__ import annotations
@@ -95,6 +96,11 @@ def _offline_guard() -> None:
 
     def _cache_only(dataset, data_id="", start_date="2000-01-01", end_date=None, **kw):
         if not fc._cache_path(dataset, data_id, start_date, end_date).exists():
+            if dataset == "TaiwanStockSplitPrice":
+                # [自行裁量]5：分割表本機已快取 726 檔、抽樣 400 檔只有 4 檔非空；缺快取視為無分割事件，
+                # 否則約 728 檔整檔失敗（2026-10-21 第 1 批實測），訓練樣本會少四成。
+                import pandas as pd
+                return pd.DataFrame()
             raise RuntimeError(f"paper_8 離線模式：本機無快取 {dataset}/{data_id}/{start_date}/{end_date}")
         return orig(dataset, data_id, start_date, end_date, **kw)
     fc._fetch = _cache_only
