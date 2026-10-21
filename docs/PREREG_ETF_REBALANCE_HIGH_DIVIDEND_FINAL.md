@@ -91,3 +91,5 @@
 
 ## 審閱狀態
 ~~等待總司令審閱~~ → 2026-10-21 收件匣 003 裁示定稿（見檔頭）。執行程式 `research/etf_rebalance_event_study.py`，結果 `research/data/etf_rebalance_event_study_result.json`。
+
+**結果（2026-10-21 單發，登記後追加；以上內容未改）**：事前登記 #457、結果 #458 **FAIL**——ADD 扣 1× 成本 −0.34%（未扣 +0.35%）、bootstrap 百分位 23.7、兩半方向不一；DEL 方向相反。詳見 `research/STRATEGY_GRAVEYARD.md`。
