@@ -28,7 +28,9 @@
 6. 前向大盤序列：market_tw.json 的官方近 60 日加權指數收盤，每班併進 research/data/paper_8_taiex_closes.json 累積（零額外請求）。
 7. 前向特徵：價量 10 個照 factors.py 同一公式（price_features，scripts/selftest_paper_8_features.py 在歷史資料上核對一致）；
    月營收 2 個直接呼叫 factors 同一支函式、資料換成 data/fundamentals.json 官方累積月營收（pit＝次月 10 日）；
-   其餘 14 個（籌碼、季報、殖利率）repo 沒有同定義的前向資料，一律 NaN，每次再平衡把各特徵覆蓋率寫進帳本。
+   三大法人 3 個（先.一三〇-1 ①，2026-10-21）讀 data/institutional_history.json（每日管線既有 T86／TPEx 累積、零額外請求），
+   同一公式（inst_features，selftest 同一支腳本核對）；特徵日前 20 個交易日有缺班即 NaN。
+   其餘 11 個（融資券、季報、殖利率）repo 沒有同定義的前向資料，一律 NaN，每次再平衡把各特徵覆蓋率寫進帳本。
    repo 價格檔只留約 90 個交易日，252 日類（f_52w_high_prox、f_residual_momentum）前向也是 NaN。
 自身失敗只印警告、exit 0（十二節）。
 """
@@ -375,6 +377,54 @@ def _revenue_frame(entry: dict):
                          for (y, m), v in sorted(rows.items())])
 
 
+INST_HISTORY = ROOT / "data" / "institutional_history.json"
+
+
+def inst_features(px, series: dict, inst_dates: set):
+    """前向三大法人 3 個特徵（先.一三〇-1 ①），照 factors.prepare_factors 同一公式與窗口常數。
+
+    px：DataFrame（date 遞增，欄位 close（原始收盤）／Trading_Volume／Trading_money）；
+    series：data/institutional_history.json 該檔的 {yyyymmdd: [外資張, 投信張, 自營商張]}；
+    inst_dates：該檔案有收錄的日期（全市場，yyyymmdd）。張×1000＝股（與訓練用 T86 股數同單位）。
+    規則（[自行裁量]，PROGRESS 有記）：
+    - 有收錄的日子沒有這檔 → 當 0（同 prepare_factors 的 fillna(0)）；特徵日當天沒有這檔 → NaN（同訓練 [自行裁量]3）。
+    - 特徵日往前 INST_FLOW_WINDOW（20）個交易日只要有一天不在 inst_dates（缺班或累積起點之前）→ 3 個特徵都 NaN，
+      不拿 0 頂替缺資料。連續天數／連續強度從累積起點（2026-08-26）起算，超過可得長度的連續期會被截短（照實記）。
+    已知口徑差：前向外資＝外陸資＋外資自營商（fetch_market_tw.py 寫法），訓練 T86 外資＝不含外資自營商；
+    合計（f_inst_flow／f_inst_streak_days）口徑相同。
+    """
+    import numpy as np
+    import factors as F
+
+    d = px.sort_values("date").reset_index(drop=True).copy()
+    keys = [str(x).replace("-", "") for x in d["date"]]
+    foreign = np.array([float((series.get(k) or [0])[0] or 0) * 1000 for k in keys])
+    total = np.array([sum(float(v or 0) for v in (series.get(k) or [])[:3]) * 1000 for k in keys])
+    avg_vol20 = d["Trading_Volume"].rolling(F.FOREIGN_STREAK_VOL_WINDOW, min_periods=1).mean().to_numpy()
+    d["f_foreign_streak"] = F._foreign_streak_strength(foreign, avg_vol20)
+    net_amount = total * d["close"].to_numpy(dtype=float)
+    value20 = d["Trading_money"].rolling(F.INST_FLOW_WINDOW, min_periods=F.INST_FLOW_WINDOW).mean()
+    import pandas as pd
+    d["f_inst_flow"] = pd.Series(net_amount, index=d.index).rolling(
+        F.INST_FLOW_WINDOW, min_periods=F.INST_FLOW_WINDOW).sum() / (value20 * F.INST_FLOW_WINDOW)
+    d["f_inst_streak_days"] = F._consecutive_positive_streak_days(total)
+    has = np.array([k in series for k in keys])
+    covered = np.array([k in inst_dates for k in keys], dtype=float)
+    full = pd.Series(covered).rolling(F.INST_FLOW_WINDOW, min_periods=F.INST_FLOW_WINDOW).min().to_numpy() == 1.0
+    for c in INST_FEATURES:
+        d.loc[~(has & full), c] = np.nan
+    return d
+
+
+def _load_inst_history() -> tuple[dict, set]:
+    try:
+        doc = json.loads(INST_HISTORY.read_text(encoding="utf-8"))
+        return doc.get("series") or {}, set(doc.get("dates") or [])
+    except (OSError, ValueError) as e:
+        print(f"[paper_8] 警告：讀不到 {INST_HISTORY.name}，法人特徵當缺值：{e}")
+        return {}, set()
+
+
 def revenue_features(entry: dict, fdate: str) -> dict:
     """f_rev_accel／f_revenue_surprise：直接呼叫 factors 的同一支函式（把資料來源換成 repo 官方累積月營收）。"""
     import pandas as pd
@@ -397,10 +447,12 @@ def revenue_features(entry: dict, fdate: str) -> dict:
     return out
 
 
-def forward_features(day: str, prices: dict, funds: dict, active: set, mkt: dict) -> tuple[list, dict]:
+def forward_features(day: str, prices: dict, funds: dict, active: set, mkt: dict,
+                     inst: tuple[dict, set] | None = None) -> tuple[list, dict]:
     """執行日 day 的宇宙與特徵（用 day 前一個交易日收盤以前的資料）。回傳 (rows, coverage)。"""
     import numpy as np
     import pandas as pd
+    inst_series, inst_dates = inst if inst is not None else _load_inst_history()
     out = []
     for code in sorted(active):
         rs = prices.get(code) or []
@@ -417,13 +469,19 @@ def forward_features(day: str, prices: dict, funds: dict, active: set, mkt: dict
         px = pd.DataFrame({"date": [r["date"] for r in hist],
                            "adj_close": [r.get("adj_close") if r.get("adj_close") is not None else r.get("close") for r in hist],
                            "Trading_Volume": [r.get("volume") for r in hist],
-                           "Trading_money": [r.get("turnover") for r in hist]})
-        for c in ("adj_close", "Trading_Volume", "Trading_money"):
+                           "Trading_money": [r.get("turnover") for r in hist],
+                           "close": [r.get("close") for r in hist]})
+        for c in ("adj_close", "Trading_Volume", "Trading_money", "close"):
             px[c] = pd.to_numeric(px[c], errors="coerce")
         last = price_features(px, mkt).iloc[-1]
+        try:
+            last_inst = inst_features(px, inst_series.get(code) or {}, inst_dates).iloc[-1]
+        except Exception as e:  # noqa: BLE001  單檔失敗只影響這檔的法人特徵（十二節）
+            print(f"[paper_8] 警告：{code} 法人特徵計算失敗，當缺值：{e}")
+            last_inst = {}
         row = {"code": code, "feature_date": fdate, "turnover_20d": round(sum(tv) / LIQ_DAYS)}
         for c in FEATURES:
-            v = last.get(c) if c in PRICE_FEATURES else None
+            v = last.get(c) if c in PRICE_FEATURES else (last_inst.get(c) if c in INST_FEATURES else None)
             row[c] = float(v) if v is not None and v == v and np.isfinite(v) else None
         row.update(revenue_features(funds.get(code) or {}, fdate))
         out.append(row)
