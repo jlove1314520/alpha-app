@@ -1,3 +1,20 @@
+## 2026-10-22 03:01～03:1x DevQueue 20261022-030102：先.一二九-1 收件匣做完自動推播保底
+
+- 等待總司令審閱：3 件（沿用 research/AWAITING_REVIEW.md：先.一二二-15、先.一二八、先.一三〇-1；本輪未新增）。
+- 本輪戴開發帽。
+- **先.一二九-1（結案 - [x]）**：
+  - 現況：收件匣視窗依 README 寫完 .done 後會手動跑 `scripts/inbox_done_push.py`，010／011／012 都在 .done 寫好後約 2 秒內推出（push_log 00:08:58／00:51:49／01:27:11）。缺口是「視窗忘了跑就不會推」。
+  - 做法：`C:\alpha\cowork_inbox_channel\server.mjs`（repo 外，改前備份 `server.mjs.bak_20261022`）新增保底——channel 推過的那份出現 .done、滿 20 秒後自動呼叫一次 `inbox_done_push.py`；`inbox_done_push.py` 加防重複（同一份 .done 的檔名＋修改時間只推一次，狀態檔 `research/.inbox_done_push_state.json`，已加 .gitignore），所以手動＋保底不會推兩次。push_log 照舊只記類別與成功數。
+  - [自行裁量] 交辦寫的是改舊監看器 `cowork_inbox_watcher.ps1`，但它已在 先.一三〇-2 ④ 停用、由 channel 取代，所以只改 channel，不動舊監看器。
+  - 證據：新自測 `cowork_inbox_channel/selftest_done_push.mjs`（用假推播程式，不真的推）SELFTEST PASS：舊 .done 不觸發、20 秒內不觸發、之後恰好 1 次；原 `selftest.mjs` 仍 PASS；Python 防重複用假 `_send` 測 3 情境全過（第二次略過／改寫成「卡住」推 cc_stuck／狀態檔寫不進只警告不擋推播）。
+  - 訂閱核對：`push_subscriptions.json` 共 1 筆——iPhone（Apple 推播服務），2026-10-06 21:24 建立。推播確實送到手機（未印金鑰）。
+  - ⚠️ 正在跑的 channel 還是舊版行程；**下次重開 Alpha 視窗後才會載入保底**。在那之前照舊靠視窗手動推，實測一直有推出。
+  - commit 8bf2b03fc9。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0，0 FAIL（03:0x）。
+- **下一項不接**：權威清單下一項 先.一三〇-1 是 [研究] 類（且等總司令甲／乙／丙裁示），依一輪一帽規則收工。
+- **收工佇列深度**：`- [ ]` 26 項（≥12）；DevQueue 可執行 6 項（≥6），不補件。
+- BLOCKED：無新增。
+
 ## 2026-10-22 02:01～02:4x DevQueue 20261022-020102：先.一二七-B2 第 5 段（train 阻塞）＋先.一三〇-3 ② 第 1 批
 
 - 等待總司令審閱：3 件（沿用 research/AWAITING_REVIEW.md：先.一二二-15、先.一二八、先.一三〇-1；本輪未新增）。
