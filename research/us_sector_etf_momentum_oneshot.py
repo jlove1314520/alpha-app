@@ -255,6 +255,9 @@ def judge(close) -> dict:
 
 
 def cmd_run() -> int:
+    # 2026-10-22 收件匣 013④：總司令方針「不要高股息也不要 ETF」，本條不做；尚未單發、未 register_trial、N 未計。
+    print("拒絕：補.研究-產業ETF相對強度 已依總司令方針停止（不要 ETF），不單發、不登記")
+    return 2
     if RESULT.exists():
         print(f"拒絕：{RESULT} 已存在＝已經單發過，PREREG 只准跑一次")
         return 2

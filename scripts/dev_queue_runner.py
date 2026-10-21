@@ -114,6 +114,11 @@ COLLISION_RECENCY_MINUTES = 20  # 略大於devqueue自己15分鐘的排程間隔
 # 命令列提到它 → 視為殘留，記警告後照常執行（不刪、不還原、不 commit，留給人或原寫手處理）。
 RESIDUAL_MINUTES = 60
 DIRTY_SEEN = ROOT / "research" / ".devqueue_dirty_seen.json"
+# 2026-10-22（收件匣 013）：mark_blocked() 自己把條目改成 - [!] 後不 commit，這份未提交的改動被當成「有人在中途」，
+# 加上 AlphaConnectivity 每 30 分鐘 pull --autostash 刷新修改時間，DevQueue 04:22 起連續讓路 3 小時。
+# mark_blocked() 寫完記下 PENDING_QUEUE.md 的內容雜湊；檔案內容仍完全等於這個雜湊＝只有守門員自己的改動，不讓路。
+# 任何人之後再改一個字，雜湊就不同，照舊讓路（不放寬真保護）。
+RUNNER_WRITE = ROOT / "research" / ".devqueue_runner_write.json"
 OTHER_TRACKS = ("marathon", "hypothesis_queue")  # devqueue自己的鎖由wrapper另外處理，不在這裡查
 MACHINE_WRITTEN = [
     re.compile(r"^data/"),                    # 全部是排程產生的資料檔
@@ -151,13 +156,21 @@ def _file_hash(path: Path) -> str | None:
 
 def _running_cmdlines() -> list[str] | None:
     """目前所有 python／powershell／node 程序的命令列（小寫）。查詢失敗回 None（呼叫端視為「不確定」）。"""
+    # 2026-10-22（收件匣 013）：排除自己這個程序與呼叫它的 wrapper——本程式（dev_queue_runner）本身就在
+    # PENDING_QUEUE.md 的「可能寫手」名單裡，自己的命令列永遠命中，殘留判定對 PENDING_QUEUE.md 從來不會成立。
     try:
         r = subprocess.run(
             ["powershell", "-NoProfile", "-Command",
              "Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python|powershell|node|pwsh' } "
-             "| ForEach-Object { $_.CommandLine }"],
+             "| ForEach-Object { \"$($_.ProcessId)`t$($_.CommandLine)\" }"],
             capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
-        return [ln.strip().lower() for ln in r.stdout.splitlines() if ln.strip()]
+        own = {str(os.getpid()), str(os.getppid())}
+        out = []
+        for ln in r.stdout.splitlines():
+            pid, _, cmd = ln.partition("\t")
+            if cmd.strip() and pid.strip() not in own:
+                out.append(cmd.strip().lower())
+        return out
     except Exception as e:  # noqa: BLE001 — 守門員自己失敗只降級（CLAUDE.md 十二）
         print(f"WARN: 查詢執行中程序失敗（{type(e).__name__}），殘留判定本輪保守視為仍在寫", flush=True)
         return None
@@ -228,6 +241,27 @@ def _append_only_change(path: str) -> bool:
         return False
 
 
+def _only_runner_write(path: str) -> bool:
+    """檔案內容是否仍等於 mark_blocked() 上次寫入後記下的雜湊。自己出錯一律回 False（照舊讓路），只印警告。"""
+    try:
+        rec = json.loads(RUNNER_WRITE.read_text(encoding="utf-8"))
+        return bool(rec.get("hash")) and rec.get("path") == path and _file_hash(ROOT / path) == rec["hash"]
+    except FileNotFoundError:
+        return False
+    except Exception as e:  # noqa: BLE001 — 守門員自己失敗只降級（CLAUDE.md 十二）
+        print(f"WARN: 讀守門員寫入紀錄失敗（{type(e).__name__}），照舊視為改動", flush=True)
+        return False
+
+
+def _record_runner_write(path: str) -> None:
+    try:
+        RUNNER_WRITE.write_text(json.dumps({"path": path, "hash": _file_hash(ROOT / path),
+                                            "at": datetime.now(TZ).isoformat(timespec="seconds")},
+                                           ensure_ascii=False), encoding="utf-8")
+    except Exception as e:  # noqa: BLE001
+        print(f"WARN: 守門員寫入紀錄失敗（{type(e).__name__}），下一輪可能因自己的標記讓路", flush=True)
+
+
 def _recent_real_dirty_reason() -> str | None:
     """排除機器寫檔後，剩下的未提交變更裡有沒有『最近』被改過的檔案。"""
     try:
@@ -257,6 +291,10 @@ def _recent_real_dirty_reason() -> str | None:
         except OSError:
             continue  # 檔案已被刪除等邊界情況，不當成碰撞訊號
         if age_min < COLLISION_RECENCY_MINUTES:
+            if path == "PENDING_QUEUE.md" and _only_runner_write(path):
+                print(f"INFO: {path} 的未提交改動只有守門員自己標的 - [!]（內容與 mark_blocked 寫入時相同，"
+                      f"{age_min:.1f} 分鐘前被刷新修改時間），不算有人在中途，照常執行", flush=True)
+                continue
             if path in APPEND_TOLERANT and _append_only_change(path):
                 print(f"INFO: {path} 只有檔尾新增條目（{age_min:.1f} 分鐘前），不算有人在中途，照常執行", flush=True)
                 continue
@@ -751,6 +789,7 @@ def mark_blocked(reason: str) -> int:
     lines[idx] = (text.replace("- [ ]", "- [!]", 1)
                   + f"　**⛔ 自走中止（{stamp}）**：{reason}")
     QUEUE.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
+    _record_runner_write("PENDING_QUEUE.md")
     st = _load_state()
     st.pop(item_key(text), None)
     _save_state(st)
