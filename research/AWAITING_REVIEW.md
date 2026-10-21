@@ -19,12 +19,11 @@
 - 2026-10-07 先.四十五-三 S3-C6 紙上追蹤裁示 → 總司令【先.四十七】裁示：先做樣本外單發、開紙.三前進式紙上追蹤、寫槓桿安全方案草案（結案）。
 - N=0時「等待中」表格留表頭但清空列，不得整份刪除本檔案。
 
-## 等待中（目前：2件）
+## 等待中（目前：1件）
 
 | 項目 | 完成時間 | 等待審閱內容 | 等待時長 |
 |---|---|---|---|
 | 先.一三〇-2 桌面捷徑與收件匣權限（要總司令本人操作） | 2026-10-22 04:1x | 兩件 CC 不能自己做的事：①桌面「Alpha Claude Code.lnk」目前是 `cd C:/alpha; claude`，不會載入收件匣 channel；CC 想改成帶 `--dangerously-load-development-channels` 的指令時被 Claude Code 權限判斷擋下（理由 Create Unsafe Agents），CC 不繞過。要嘛總司令改用 `C:\alpha\start-alpha.bat` 開視窗（它已帶 channel 旗標），要嘛總司令本人改捷徑內容或明確核准後再派。②收件匣讀寫跳確認：在 Alpha 視窗打 `/update-config`，說「允許讀寫 C:\alpha\cowork_inbox 與 C:\alpha\cowork_inbox_channel 底下所有檔案」（設定內容見收件匣 010 .done 第 5 點；照文件寫的路徑語法，未親自驗證）。CC 不自改權限 | 自 04:1x 起 |
-| 先.一三〇-1 模擬 H 前向特徵來源（holdout 規則判斷） | 2026-10-22 01:5x | 前向缺的 11 個特徵（252 日價格 2、營收 2、季報 7、殖利率 1）都要 2025 年以後的歷史，repo 沒有；只有本機 FinMind holdout 期快取或 DISPLAY_ONLY 回補檔有。要裁示：**甲（CC 建議）**＝不碰 holdout，照 先.一三〇-1 ② 在 PREREG 修訂「訓練與前向只用前向可得的子集」（約 11 個：low_vol、短期反轉 1m／1w、amihud、ma_breakout、法人 3、idio_vol、bab、rel_strength；後 3 個 12/01 前自然補上）；乙＝核准模擬 H 前向「只當特徵輸入」讀 2025-11 起的本機快取／回補檔（不評估任何報酬、不改模型），要把 paper_8 加進 ALLOWED_HOLDOUT_READERS，且這些特徵只能在本機算（GitHub Actions 讀不到快取）；丙＝走官方端點補一段前向價格／股利庫（MI_INDEX 2025-11～2026-04 約 220 次、TWT49U＋exDailyQ 各 1～2 次），屬新排程＋新資料源提案，且官方股利表沒有「所屬期間」欄、去重規則對不齊。詳見 PENDING_QUEUE 先.一三〇-1 收件匣 012 結果 | 自 01:5x 起 |
 
 ## 等前置條件（不需總司令動作，不計入等待中）
 
@@ -33,6 +32,8 @@
 | （目前無） | | | |
 
 ## 已結案審閱紀錄
+
+- 2026-10-22 先.一三〇-1 模擬 H 前向特徵來源 → 總司令 07:5x「依你建議」（收件匣 014）：採甲＝不碰 holdout，#459 PREREG 修訂 2 只用前向可得子集（low_vol、短期反轉 1m／1w、amihud、ma_breakout、法人 3、idio_vol、bab、rel_strength），不計 N；乙不採用；全指標版 H2 暫不做。
 
 - 2026-10-22 先.一二八 收件匣單一視窗（channel）安裝與驗收 → 總司令同意、Cowork 透過橋接代為執行 install.ps1 兩步；008／009 由 channel 連續送達成功、009 推播 ok 1，Cowork 驗收通過；舊監看器 AlphaCoworkInbox 已停用（XML 備份在 cowork_inbox_channel）。剩下的捷徑與權限兩件改列「先.一三〇-2 桌面捷徑與收件匣權限」（結案，DevQueue 20261022-040102 依 PENDING_QUEUE 紀錄移列〔自行裁量〕）。
 - 2026-10-22 先.一二二-15 收件匣監看器端對端驗收 → 被 channel 版（先.一二八）取代，舊監看器已停用，不再需要驗收（結案，DevQueue 20261022-040102 移列〔自行裁量〕）。
