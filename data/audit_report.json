@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-10-21T23:00:02.300225+08:00",
- "duration_sec": 8.9,
+ "generated_at": "2026-10-22T03:22:33.489344+08:00",
+ "duration_sec": 4.0,
  "reference": {
   "twse": {
    "ok": true,
@@ -15,7 +15,7 @@
  },
  "universe": 2114,
  "reference_date": "2026-10-20",
- "listed_universe_size": 2144,
+ "listed_universe_size": 2145,
  "stocks_with_violation": 2,
  "code_free_violations": 0,
  "completeness_gap_stocks": 571,
@@ -37,9 +37,9 @@
  "total_violations": 601,
  "by_check": {
   "a_price_source": {
-   "checked": 3953,
+   "checked": 3955,
    "violations": 0,
-   "unverifiable": 4503,
+   "unverifiable": 4501,
    "note": ""
   },
   "a2_not_in_official": {
@@ -79,13 +79,13 @@
    "note": ""
   },
   "f_null_as_number": {
-   "checked": 130,
+   "checked": 129,
    "violations": 0,
    "unverifiable": 0,
    "note": ""
   },
   "g_comma_parsing": {
-   "checked": 58,
+   "checked": 59,
    "violations": 0,
    "unverifiable": 0,
    "note": ""
@@ -6637,7 +6637,7 @@
   "note": "由 scripts/check_external_connectivity.py 每 5 分鐘更新。產出檔停擺依據修改時間判定；connectivity_alerts 額外納入internet/tailscale/ibkr_gateway 這類「行程活著但連不上」的連續失敗告警（2026-09-15新增，此前只印在log沒亮燈，IBKR斷線6天才被發現就是這個缺口）。"
  },
  "self_check": {
-  "checked_at": "2026-10-21T03:23:15.841092+08:00",
+  "checked_at": "2026-10-22T03:22:20.727184+08:00",
   "ok": true,
   "checks": [
    {
@@ -6659,7 +6659,7 @@
   "note": "audit.yml 每次執行最前面跑，確認後面幾支腳本要用到的 import/常數撈得到——2026-09-10~17 因 data_audit.py 誤刪 TWSE_COMPANY 導致build_listed_universe.py 連續一週 ImportError 全滅，但audit_report.json 本身完全沒有任何紀錄，只能靠 gh run list 才查得到，這個欄位就是補這個盲點。"
  },
  "domain_blocklist_scan": {
-  "checked_at": "2026-10-21T03:23:15.841092+08:00",
+  "checked_at": "2026-10-22T03:22:20.727184+08:00",
   "domains": [
    "mopsov.twse.com.tw",
    "doc.twse.com.tw",
@@ -7041,7 +7041,7 @@
   "note": "2026-09-20合規.三：掃repo全部.py找黑名單網域硬寫字串（黑名單來源research/net_guard.py::DOMAIN_BLOCKLIST）。unguarded=True代表該檔案提到黑名單網域卻沒有`import net_guard`，是最可能重演2026-09-19 mopsov違規事件的檔案，由check_external_connectivity.py轉成local_task_health告警。"
  },
  "queue_depth_sync": {
-  "checked_at": "2026-10-21T03:23:15.841092+08:00",
+  "checked_at": "2026-10-22T03:22:20.727184+08:00",
   "ok": true,
   "detail": {
    "ok": true,
@@ -7051,15 +7051,15 @@
   "note": "2026-09-20【Q4前視與#23無法重現】四：確認兩份*_CONTINUATION_PROMPT.txt跟research/queue_depth_config.py（單一事實來源）仍然一致，避免重演2026-09-19門檻更正只同步部分位置、連續5輪沒觸發補件規則的問題。"
  },
  "reproducibility_check": {
-  "checked_at": "2026-10-21T03:23:15.841092+08:00",
+  "checked_at": "2026-10-22T03:22:20.727184+08:00",
   "ok": false,
   "detail": {
    "ok": false,
-   "n_checked": 221,
+   "n_checked": 223,
    "by_status_count": {
-    "IMPORT_ERROR": 197,
+    "IMPORT_ERROR": 198,
     "FILE_NOT_FOUND": 11,
-    "OK": 13
+    "OK": 14
    },
    "broken": [
     {
@@ -7448,6 +7448,12 @@
     },
     {
      "module": "equal_weight_rebalance_sanity",
+     "status": "IMPORT_ERROR",
+     "note": "真的壞了，需要修——這正是#23那種dangling import的同類問題",
+     "detail": "ModuleNotFoundError: No module named 'numpy'"
+    },
+    {
+     "module": "etf_rebalance_event_study",
      "status": "IMPORT_ERROR",
      "note": "真的壞了，需要修——這正是#23那種dangling import的同類問題",
      "detail": "ModuleNotFoundError: No module named 'numpy'"
