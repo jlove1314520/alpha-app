@@ -2,9 +2,9 @@
 
 - 等待總司令審閱：3 件（先.一二二-15 收件匣監看器端對端驗收；先.一二七-B2a 殖利率因子修法＋是否重跑；先.一二八 channel 安裝與驗收）
 - **官方文件查證**（channels、channels-reference、mcp 三頁，2026-10-21 讀）：自建 channel 在預覽期間要 `--dangerously-load-development-channels server:<名稱>`；只要 MCP SDK＋Node／Bun／Deno 任一；Pro/Max 個人帳號不需要組織開關；事件只在視窗開著時送達、閒置不耗用量；v2 runtime 不註冊走 2026-07-28 協定的 channel——本機 SDK 1.32.1 最高 2025-11-25，不受影響。本機：Claude Code 2.1.306、Node 24.19.0、沒有 Bun（不需要）。
-- **已完成**：`C:lpha\cowork_inbox_channel\server.mjs`（只走 stdio、不開任何網路埠、只讀收件匣資料夾、只認 `NNN_*.md`、上限 64KB、一次一份、錯誤只寫 `channel.log` 不崩潰）；`selftest.mjs` 用 SDK Client 模擬 Claude Code：PASS（收到 901、跳過已有 .done 的 900、忽略 .txt、去 BOM、寫 901.done 後才推 902）。
-- **卡住**：登記 `C:lpha\.mcp.json`、備份與改寫 `C:lpha\start-alpha.bat` 三個動作被 CC auto mode 擋下（Safety Bypass Flag／Self-Modification：CC 不得自己改自己的啟動旗標與 MCP 登記）。依規定不繞過。已寫好 `C:lpha\cowork_inbox_channel\install.ps1`（含備份），要總司令本人看過後執行。
-- **還原方法**（uninstall.ps1 也被擋，所以寫在這裡）：把 `C:lpha\start-alpha.bat.bak_20261021` 複製回 `start-alpha.bat`，刪掉 `C:lpha\.mcp.json`（安裝前不存在）。
+- **已完成**：`C:\alpha\cowork_inbox_channel\server.mjs`（只走 stdio、不開任何網路埠、只讀收件匣資料夾、只認 `NNN_*.md`、上限 64KB、一次一份、錯誤只寫 `channel.log` 不崩潰）；`selftest.mjs` 用 SDK Client 模擬 Claude Code：PASS（收到 901、跳過已有 .done 的 900、忽略 .txt、去 BOM、寫 901.done 後才推 902）。
+- **卡住**：登記 `C:\alpha\.mcp.json`、備份與改寫 `C:\alpha\start-alpha.bat` 三個動作被 CC auto mode 擋下（Safety Bypass Flag／Self-Modification：CC 不得自己改自己的啟動旗標與 MCP 登記）。依規定不繞過。已寫好 `C:\alpha\cowork_inbox_channel\install.ps1`（含備份），要總司令本人看過後執行。
+- **還原方法**（uninstall.ps1 也被擋，所以寫在這裡）：把 `C:\alpha\start-alpha.bat.bak_20261021` 複製回 `start-alpha.bat`，刪掉 `C:\alpha\.mcp.json`（安裝前不存在）。
 - **還沒做**：README 改寫（裝好再改，免得規則跟實況不符）、驗收（要總司令在場）、停用 AlphaCoworkInbox（驗收通過才做）。舊監看器照常運作，驗收時放 .md 測試檔，舊監看器也會另開一個視窗，關掉即可。
 - 冒煙測試：本輪沒動 App 程式（21:2x 176/176）。
 
