@@ -65,6 +65,7 @@ from __future__ import annotations
 
 import functools
 import json
+import re
 from pathlib import Path
 
 import numpy as np
@@ -505,29 +506,106 @@ def _dividend_yield_ttm_cash_from_df(div: pd.DataFrame) -> pd.DataFrame:
     （`_dividend_yield_ttm_cash()`，見下）與holdout路徑都呼叫同一份計算
     邏輯，只有「餵進來的div是capped還是uncapped」不同，不會再各自維護
     一份、其中一份忘記更新。
+
+    2026-10-22 先.一二九-2①（B2a 稽核附帶發現）：近 12 個月窗口原本把「往回 365
+    天內所有除息」都加總，一年配一次的公司只要今年除息日比去年早，就把兩年的
+    股利都算進去（2412 2012 年 10.985，實際約 5.46）。改成依股利所屬期間
+    （`year` 欄）只取一年份：年配取窗口內最新一個年度、半年配取最新 2 個半年、
+    季配取最新 4 季；完全相同的列（同除息日、同期間、同金額）只計一次。
+    期間字串解析不了的合併期間（如「108年度及108年第4季」，全庫約 20 列）照舊
+    計入，見 `_dividend_period_key()`。
     """
     if div.empty or "CashExDividendTradingDate" not in div.columns:
         return pd.DataFrame(columns=["pit_date", "ttm_cash_dividend"])
-    events = div[["CashExDividendTradingDate", "CashEarningsDistribution"]].copy()
-    events = events.rename(columns={"CashExDividendTradingDate": "ex_date",
-                                     "CashEarningsDistribution": "cash"})
+    period = div["year"] if "year" in div.columns else pd.Series("", index=div.index)
+    events = pd.DataFrame({"ex_date": div["CashExDividendTradingDate"],
+                           "cash": div["CashEarningsDistribution"],
+                           "period": period.astype(str)})
     events["ex_date"] = events["ex_date"].replace("", np.nan)
     events = events.dropna(subset=["ex_date"])
     events["cash"] = pd.to_numeric(events["cash"], errors="coerce").fillna(0.0)
-    events = events[events["cash"] > 0].sort_values("ex_date").reset_index(drop=True)
+    events = events[events["cash"] > 0]
+    events = events.drop_duplicates(subset=["ex_date", "period", "cash"])
+    events = events.sort_values("ex_date").reset_index(drop=True)
     if events.empty:
         return pd.DataFrame(columns=["pit_date", "ttm_cash_dividend"])
     ex_dates = pd.to_datetime(events["ex_date"])
+    keys = [_dividend_period_key(p) for p in events["period"]]
     # 每個 ex-date 事件當天的 pit_date，值 = 該事件往回 TRAILING_DAYS 內（含自己）
-    # 所有已發生 ex-date 的現金股利加總——只用「已經發生」的事件，天然 PIT-safe。
+    # 已發生 ex-date 的現金股利、依期間只取一年份的加總——只用「已經發生」的事件，天然 PIT-safe。
     ttm = []
     for i in range(len(events)):
         window_start = ex_dates.iloc[i] - pd.Timedelta(days=DIVIDEND_YIELD_TRAILING_DAYS)
-        mask = (ex_dates <= ex_dates.iloc[i]) & (ex_dates > window_start)
-        ttm.append(events.loc[mask, "cash"].sum())
+        idx = np.flatnonzero(((ex_dates <= ex_dates.iloc[i]) & (ex_dates > window_start)).to_numpy())
+        ttm.append(sum(events["cash"].iloc[j] for j in _one_year_of_periods(idx, keys)))
     events["ttm_cash_dividend"] = ttm
     events["pit_date"] = events["ex_date"]
     return events[["pit_date", "ttm_cash_dividend"]]
+
+
+_PERIOD_ANNUAL = re.compile(r"^\s*(\d+)\s*年?\s*$")
+_PERIOD_HALF = re.compile(r"^\s*(\d+)\s*年\s*(前|後|上|下)半年度?\s*$")
+_PERIOD_QUARTER = re.compile(r"^\s*(\d+)\s*年\s*第\s*(\d)\s*季\s*$")
+_PERIODS_PER_YEAR = {"A": 1, "H": 2, "Q": 4}
+
+
+def _dividend_period_key(period: str) -> tuple:
+    """`TaiwanStockDividend.year`（股利所屬期間）→ (頻率, 排序鍵)。
+    「98年」「99」→ ("A", (98,))；「108年後半年度」→ ("H", (108, 2))；
+    「111年第4季」→ ("Q", (111, 4))；合併期間等解析不了的 → ("X", (原字串,))。"""
+    m = _PERIOD_QUARTER.match(period)
+    if m:
+        return ("Q", (int(m.group(1)), int(m.group(2))))
+    m = _PERIOD_HALF.match(period)
+    if m:
+        return ("H", (int(m.group(1)), 1 if m.group(2) in ("前", "上") else 2))
+    m = _PERIOD_ANNUAL.match(period)
+    if m:
+        return ("A", (int(m.group(1)),))
+    return ("X", (period,))
+
+
+def _one_year_of_periods(idx, keys: list) -> list:
+    """窗口內的事件索引 → 只留一年份：每種頻率取最新 N 個不同期間（年 1、半年 2、季 4），
+    同一期間的多列（例如盈餘與公積分兩列）都留；解析不了的期間（"X"）全留。"""
+    keep = []
+    for freq, n in _PERIODS_PER_YEAR.items():
+        members = [j for j in idx if keys[j][0] == freq]
+        latest = set(sorted({keys[j][1] for j in members})[-n:])
+        keep += [j for j in members if keys[j][1] in latest]
+    keep += [j for j in idx if keys[j][0] == "X"]
+    return keep
+
+
+def _raw_close_for_yield(d: pd.DataFrame, stock_id: str, start_date: str,
+                         warnings_out: list | None = None) -> np.ndarray:
+    """殖利率分母用的原始（未還原）收盤，與 `d` 逐列對齊。
+    - `source` 是 yfinance 的列：close 是還原價，改讀 FinMind `TaiwanStockPrice`
+      原始收盤。**只讀已快取的檔、絕不發網路請求**（同 adjust.py
+      `_finmind_cache_ready()` 的原則）；沒快取或那天沒有原始價 → NaN，不拿還原價頂替。
+    - 其他列（finmind／finmind_uncapped，或沒有 source 欄）：close 本來就是原始收盤。
+    """
+    close = pd.to_numeric(d["close"], errors="coerce").to_numpy(dtype=float)
+    if "source" not in d.columns:
+        return close
+    is_yf = (d["source"].astype(str) == "yfinance").to_numpy()
+    if not is_yf.any():
+        return close
+    out = close.copy()
+    out[is_yf] = np.nan
+    from finmind_client import _cache_path
+    from validation.holdout import VAL_END
+    if not _cache_path("TaiwanStockPrice", stock_id, start_date, VAL_END).exists():
+        _record_factor_warning(warnings_out, stock_id, "f_dividend_yield_ttm",
+                               RuntimeError("沒有 FinMind 原始收盤快取，yfinance 路徑的列殖利率留 NaN"))
+        return out
+    raw = load_dev("TaiwanStockPrice", stock_id, start_date)
+    if raw.empty or "close" not in raw.columns:
+        return out
+    raw_by_date = dict(zip(raw["date"].astype(str).str[:10], pd.to_numeric(raw["close"], errors="coerce")))
+    dates = d["date"].astype(str).str[:10].to_numpy()
+    out[is_yf] = [raw_by_date.get(x, np.nan) for x in dates[is_yf]]
+    return out
 
 
 def _dividend_yield_ttm_cash(stock_id: str, start_date: str) -> pd.DataFrame:
@@ -994,11 +1072,16 @@ def prepare_factors(
     # -- trailing 12個月現金股利(_dividend_yield_ttm_cash)除以當日收盤價，
     # 高殖利率排名靠前，不取負號（跟f_value_pb/pe取負號慣例相反，因為這裡
     # 分數定義本身就是「越高越好」，不是像PBR/PER那樣「越低越好」再取負）。
+    # 2026-10-22 先.一二九-2①：分母改原始（未還原）收盤。yfinance 路徑的 close 是
+    # 還原價（adjust.py：close == adj_close），還原係數含抓取日以前所有除權息，
+    # 連 2025～2026 的配息都烤進早年分母（B2a 稽核：2012 年殖利率高估 2.6～3.4 倍，
+    # 且未來配得越多的股票被放大越多＝橫斷面前視）。見 `_raw_close_for_yield()`。
     try:
         div_pit = _dividend_yield_ttm_cash(stock_id, start_date)
         d = _asof_join(d, div_pit, "ttm_cash_dividend", "_ttm_cash_dividend_raw")
+        raw_close = _raw_close_for_yield(d, stock_id, start_date, warnings_out)
         d["f_dividend_yield_ttm"] = np.where(
-            d["close"] > 0, d["_ttm_cash_dividend_raw"] / d["close"], np.nan
+            raw_close > 0, d["_ttm_cash_dividend_raw"] / raw_close, np.nan
         )
         d = d.drop(columns=["_ttm_cash_dividend_raw"])
     except RuntimeError as e:

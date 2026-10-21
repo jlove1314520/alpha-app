@@ -40,6 +40,12 @@ TOLERANCE = 0.005  # 四捨五入到小數點後兩位時的浮點誤差容許�
 
 
 def main() -> int:
+    # 2026-10-22 先.一二九-2：f_dividend_yield_ttm 定義已修正（分母原始收盤、12 月窗口只取一年份），
+    # 這支回歸測試本來就該失敗；而且照跑會在已焚的 2007～2014 資料上算出新的 #399 數字＝第二發。
+    # 停用，不再執行。修正後的自測見 research/selftest_dividend_yield_fix.py。
+    print("已停用（先.一二九-2）：因子定義已修正，重跑會在已焚的 2007～2014 算出新 #399 數字。"
+          "改跑 research/selftest_dividend_yield_fix.py。", flush=True)
+    return 0
     print("=== 修.五自我測試：_dividend_yield_ttm_cash重構後的回歸驗證 ===", flush=True)
     print("載入2007-2014資料（全部本機快取，零新增API呼叫，可安全反覆測試）...", flush=True)
     data, market_df, industry_map, liquidity, n_sample = load_common_stock_data_2007_2014()

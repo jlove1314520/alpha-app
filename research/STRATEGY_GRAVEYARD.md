@@ -401,6 +401,8 @@ tier/樣本規模組合已窮盡，正式結案，不再開新變體**。原始�
 ### dividend_yield_portfolio_v1（HYPOTHESIS_QUEUE.md#4「股票股利率carry」，
 單因子`f_dividend_yield_ttm`月頻Top20，股票，2026-09-02FAIL）
 
+> ⚠️ 2026-10-22 先.一二九-2③ 加註：**因子有前視與分母偏誤，FAIL 結論不變**（#74 CHEAP_PASS 因子層、#75、#371、#376 組合層）。`f_dividend_yield_ttm` 當時的定義有兩個缺陷（B2a 稽核 `research/B2A_DIVIDEND_YIELD_DENOMINATOR_AUDIT.md`）：①yfinance 路徑分母是還原價，早年殖利率高估 2～3.4 倍，且把 2025～2026 配息烤進分母＝橫斷面前視；②近 12 月窗口會把兩年的除息都算進去。兩者都讓高殖利率訊號看起來更好，修正前就已 FAIL，修正後不可能翻成 PASS，所以不重跑；#74 的 CHEAP_PASS 同樣可能被灌水，不得再引用為「殖利率有 IC」的證據。因子已於 2026-10-22 修正（`research/factors.py`）；任何重跑都要另案提出、計 N。
+
 - **哪一關死的**：alpha顯著性（本專案已建立、`portfolio_multifactor_v2`/
   `weinstein_stage2_v2`/`pead_portfolio_v1`三個先例都用過的既有評判
   標準）——腳本內建的第7/8關判定邏輯（`gate7_pass`/`gate8_pass`，見
@@ -1338,6 +1340,8 @@ percentile=88.5雖接近90.0門檻仍判FAIL，不因接近而放寬（比照#24
 完整數字見`TRIALS_LEDGER.md`#97、`HYPOTHESIS_QUEUE.md`#26。
 
 ### 多因子複合評分 z-score blend baseline（HYPOTHESIS_QUEUE.md#27，2026-09-04FAIL）
+
+> ⚠️ 2026-10-22 先.一二九-2③ 查證（B2a「待確認」項）：**殖利率因子的偏誤不可能翻轉本筆 FAIL**。殖利率只出現在隨機控制組的因子池（baseline 沒用）。用既有結果 `data/composite_zscore_v1_random_control.csv`（零重跑）：298 組有效抽樣中 |VAL IC| ≥ baseline 0.0826 的有 38 組，其中含 `f_dividend_yield_ttm` 的 6 組；修正因子只會改變含它的組合，就算這 6 組全部掉到 baseline 以下，percentile 上限也只有 89.3，仍低於 90.0 門檻，FAIL 結論不變、不重跑。
 
 **經濟理由**：吸取#22硬AND合取過度擬合的教訓，改用z-score加總複合
 GP+value_pb+revenue_surprise三個「經濟理由獨立、統計上低相關」的因子
@@ -4077,6 +4081,8 @@ overlap虛胖表面n」有多嚴重的直接證據。登記`TRIALS_LEDGER.md`#37
 
 ## #4 股利率carry單因子組合（dividend_yield_portfolio_v1）（2026-09-25結案，考.一2007-2014單發檢定）
 
+> ⚠️ 2026-10-22 先.一二九-2③ 加註：**因子有前視與分母偏誤，FAIL 結論不變**（#399）。本筆是 B2a 稽核認定受影響最嚴重的一筆（2007～2014 早年還原價分母倍數 2～3.4 倍，IR p=0.0128 可能被灌水）；偏誤方向有利於殖利率訊號，修正前已因 MDD −53.72% 違反天條一判 FAIL，修正後不可能翻成 PASS。2007～2014 已焚，**不重跑**（重跑＝第二發）；`research/test_dividend_yield_refactor_selftest.py`（會重算 #399 數字）已停用。
+
 **死因**：轉向.一「新資料單發檢定」（同上）——**4.2全段MDD硬性條件
 未過（違反天條一）**：2007-2014全段MDD=-53.72%，突破-50%門檻。
 IR(年化)=0.8319，beta_dimson=+0.705，單尾p=0.0128，**通過**Bonferroni
@@ -4114,6 +4120,8 @@ MDD硬約束否決的案例**，具體示範了天條一「MDD不得超過50%，
 MDD -53.72%、0050同期 -55.75%，皆與裁示原文一致。）
 
 ## #400 股利率v1（普通股）×帳戶70/30固定配置（dividend_yield_v1_common_x_account_70_30）（2026-09-27結案，H.一holdout單次正式回測）
+
+> ⚠️ 2026-10-22 先.一二九-2 加註（照實記錄，不改判定）：本筆分母本來就是原始收盤（`uncapped_adjusted_price_series()`），不受分母偏誤影響；但有「近 12 月窗口重複計入兩次除息」的缺陷（B2a 附帶發現）。holdout 已焚，不重跑，FAIL 結論不變。
 
 **死因**：holdout期（2025-01-01~2026-09-24，約21個月）股票部位對0050
 含息總報酬的Dimson beta/Newey-West年化IR為負，未過事前綁定判準①
