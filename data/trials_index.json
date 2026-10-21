@@ -1,9 +1,9 @@
 {
- "generated_at": "2026-10-20T15:27:34+00:00",
+ "generated_at": "2026-10-21T01:22:29+00:00",
  "source": "research/TRIALS_LEDGER.md",
  "disclaimer": "研究紀錄，非投資建議",
- "count": 436,
- "rows_listed": 458,
+ "count": 437,
+ "rows_listed": 460,
  "count_rule": "count＝總 N（與 TRIALS_LEDGER.md 開頭「目前累積總數」、SELECTION_BIAS_LEDGER.md 同一個數字；框架驗證列列出但不計入；事前登記被結果列引用時兩列算 1 筆，事前登記列 counted=false、merged_into=結果列）",
  "dup_ids": [
   94,
@@ -30,9 +30,28 @@
   "447": 450,
   "448": 451,
   "449": 452,
-  "453": 454
+  "453": 454,
+  "457": 458
  },
  "rows": [
+  {
+   "id": 458,
+   "date": "2026-10-21",
+   "track": "TW",
+   "name": "etf_rebalance_high_dividend_event_2022_2024",
+   "verdict": "FAIL",
+   "uid": "458"
+  },
+  {
+   "id": 457,
+   "date": "2026-10-21",
+   "track": "TW",
+   "name": "etf_rebalance_high_dividend_event_2022_2024_prereg",
+   "verdict": "未結案",
+   "counted": false,
+   "merged_into": 458,
+   "uid": "457"
+  },
   {
    "id": 456,
    "date": "2026-10-19",
