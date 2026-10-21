@@ -146,7 +146,7 @@ def main(argv=None) -> int:
         update_shortlist(st)
     except Exception as e:  # noqa: BLE001 —— 進度回報失敗只警告（十二節）
         print(f"[警告] shortlist §6 進度更新失敗：{type(e).__name__}: {e}")
-    print(json.dumps({k: v for k, v in st.items() if k != "per_year_in_market"}, ensure_ascii=False))
+    print(json.dumps({k: v for k, v in st.items() if k != "per_year_in_market"}, ensure_ascii=False, default=str))
     return 0
 
 
@@ -200,7 +200,7 @@ def coverage(cands: list[str], dead: set[str]) -> dict:
             "n_delisted_period_total": len(dead), "delisted_coverage": round(dead_rate, 4),
             "delisted_in_universe_share_of_period_delistings": round(len(dead_u) / len(dead), 4) if dead else None,
             "per_year_in_market": per_year,
-            "ready_to_register": uni_rate >= 0.95 and dead_rate >= 0.95,
+            "ready_to_register": bool(uni_rate >= 0.95 and dead_rate >= 0.95),
             "rule": "母體涵蓋率與下市股涵蓋率都 ≥95% 才登記單發（先.一一四-3c）；不到就停下回報"}
 
 
