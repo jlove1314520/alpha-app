@@ -114,7 +114,7 @@ def pull_or_abort(timeout=180) -> int:
     return 1
 
 
-def commit_paths(paths: list[str], msg: str, drop_on_conflict: bool = False) -> str:
+def commit_paths(paths: list[str], msg: str, drop_on_conflict: bool = False, under_lock=None) -> str:
     if rebase_in_progress():
         return "repo 正在 rebase 中（別的程序留下的），本輪不動，留給人工或下一輪"
     try:
@@ -126,6 +126,14 @@ def commit_paths(paths: list[str], msg: str, drop_on_conflict: bool = False) -> 
     except Exception as e:  # noqa: BLE001
         return f"取鎖失敗（{type(e).__name__}），本輪跳過"
     try:
+        # 2026-10-21 DevQueue 20261021-123101：拿到鎖之後、git add 之前的回呼（例：新聞補班的拆檔同班檢查）。
+        # 放在鎖外會被別的排程 pull --autostash 暫時換掉檔案（12:13 實例：events.json 12:05 版、拆檔三檔 10:35 版被提交）。
+        # 回呼自身失敗只記警告、照常提交（十二節，fail open）。
+        if under_lock is not None:
+            try:
+                under_lock()
+            except Exception as e:  # noqa: BLE001
+                print(f"[warn] commit_paths under_lock 回呼失敗（{type(e).__name__}: {e}），照常提交")
         existing = [p for p in paths if (ROOT / p).exists()]
         if not existing:
             return "沒有產出檔"

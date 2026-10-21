@@ -159,11 +159,13 @@ def main() -> int:
         G._g("checkout", "-q", "HEAD", "--", *[p for p in OUTPUTS if G._g("ls-files", "--error-unmatch", p).returncode == 0])
         log(f"  雲端已在 {age2:.0f} 分鐘前更新，本機這輪作廢（產出檔還原）")
         return 0
-    same = ensure_split_same_batch(env)
-    if same:
-        log("  " + same)
+    # 2026-10-21：同班檢查改在 git 鎖內做（commit_paths 的 under_lock），鎖外做會被別的排程 autostash 換掉檔案
+    def _same_batch_under_lock():
+        same = ensure_split_same_batch(env)
+        if same:
+            log("  " + same)
     res = G.commit_paths(OUTPUTS, f"新聞與事件：本機補班更新（雲端排程 {'未知' if age is None else f'{age:.0f} 分鐘'}未觸發，先.八十-11）",
-                         drop_on_conflict=True)
+                         drop_on_conflict=True, under_lock=_same_batch_under_lock)
     log("  提交：" + res)
     return 0
 
