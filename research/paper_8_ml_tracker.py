@@ -88,6 +88,17 @@ FEATURES = [
 ]
 INST_FEATURES = ("f_foreign_streak", "f_inst_flow", "f_inst_streak_days")
 assert len(FEATURES) == 26
+# PREREG 修訂 2（2026-10-22，先.一三〇-1 採甲）：訓練與前向都只用前向可得的子集。**唯一來源**——train() 只用它，
+# 前向預測用 train() 寫進 features.json 的 features_used（由它而來）；FEATURES（26 個）只剩面板欄位與覆蓋率紀錄用。
+# scripts/selftest_paper_8_features.py 檢查這份名單與 PREREG 修訂 2 寫死的名單完全相同。
+MODEL_FEATURES = (
+    "f_low_vol", "f_short_reversal_1m", "f_short_term_reversal_1w", "f_amihud_illiq", "f_ma_breakout",
+    "f_foreign_streak", "f_inst_flow", "f_inst_streak_days",
+    "f_idio_vol", "f_bab", "f_rel_strength",
+)
+# 前向要大盤序列滿 61 個交易日才有值（2026-10-22 為 60 點）；在這天以前前向覆蓋率檢查豁免（PREREG 修訂 2）。
+FORWARD_COVERAGE_EXEMPT = {"f_idio_vol": "2026-12-01", "f_bab": "2026-12-01", "f_rel_strength": "2026-12-01"}
+assert set(MODEL_FEATURES) <= set(FEATURES) and len(MODEL_FEATURES) == 11
 
 
 def is_common(code: str) -> bool:
@@ -264,8 +275,8 @@ def train() -> dict:
     assert df["label_end"].max() <= LABEL_END_CAP, "標籤讀到 2024-12-31 以後的報酬"
     df["label"] = df.groupby("exec_date")["ret"].rank(pct=True)
     cov = {c: float(df[c].notna().mean()) for c in FEATURES}
-    used = [c for c in FEATURES if cov[c] >= MIN_COVERAGE]
-    dropped = [c for c in FEATURES if cov[c] < MIN_COVERAGE]
+    used = [c for c in MODEL_FEATURES if cov[c] >= MIN_COVERAGE]
+    dropped = [c for c in MODEL_FEATURES if cov[c] < MIN_COVERAGE]
     X = df[used].astype(float).to_numpy()
     y = df["label"].to_numpy(dtype=float)
     model = HistGradientBoostingRegressor(random_state=RANDOM_STATE)
@@ -282,6 +293,8 @@ def train() -> dict:
         "n_panel_errors": int(errs), "min_coverage": MIN_COVERAGE,
         "coverage": {c: round(cov[c], 4) for c in FEATURES},
         "features_used": used, "features_dropped_low_coverage": dropped,
+        "model_features_source": "research/paper_8_ml_tracker.py MODEL_FEATURES（PREREG 修訂 2）",
+        "features_not_in_subset": [c for c in FEATURES if c not in MODEL_FEATURES],
         "n_iter": int(getattr(model, "n_iter_", 0)),
         "frozen_note": "2026-11-30 前 commit；之後不得重訓或更換（PREREG）",
     }
@@ -496,6 +509,8 @@ def predict_ranking(rows: list, meta: dict) -> list:
         raise RuntimeError("模型檔雜湊與 features.json 不符（模型被換過），拒絕預測")
     model = joblib.load(MODEL_PATH)
     used = meta["features_used"]
+    if not set(used) <= set(MODEL_FEATURES):
+        raise RuntimeError(f"features.json 的 features_used 有子集外的特徵（PREREG 修訂 2）：{sorted(set(used) - set(MODEL_FEATURES))}")
     X = np.array([[np.nan if r.get(c) is None else r[c] for c in used] for r in rows], dtype=float)
     pred = model.predict(X)
     rk = [{"code": r["code"], "score": round(float(p), 6), "turnover_20d": r["turnover_20d"]} for r, p in zip(rows, pred)]

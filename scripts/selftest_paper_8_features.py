@@ -67,8 +67,49 @@ def main(ids):
             flag = ok.sum() > 1000 and maxrel < 1e-6 and wrong_val == 0 and extra_nan <= 19
             bad += not flag
             print(f"{sid} {c:26s} 非NaN={int(ok.sum()):5d} 前向多NaN={extra_nan} 前向多值={wrong_val} 最大相對誤差={maxrel:.2e} {'OK' if flag else 'FAIL'}")
+    bad += subset_checks()
     print("全部一致" if not bad else f"FAIL {bad} 項")
     return 1 if bad else 0
+
+
+def subset_checks() -> int:
+    """PREREG 修訂 2（先.一三〇-1 採甲）：①PREREG 寫死的名單＝MODEL_FEATURES（單一來源）；
+    ②子集內每個特徵前向非 NaN 覆蓋率 ≥ 訓練期 − 10 個百分點（FORWARD_COVERAGE_EXEMPT 到期日前豁免）。"""
+    import json
+    import re
+    from datetime import datetime
+    bad = 0
+    txt = (ROOT / "docs" / "PREREG_paper_h_ml_forward.md").read_text(encoding="utf-8")
+    sec = txt.split("### 修訂 2", 1)[1].split("\n### ", 1)[0].split("\n## ", 1)[0]
+    line = next(ln for ln in sec.splitlines() if ln.strip().startswith("`f_"))
+    listed = re.findall(r"`(f_[a-z0-9_]+)`", line)
+    ok = listed == list(P.MODEL_FEATURES)
+    bad += not ok
+    print(f"子集 PREREG 修訂 2 名單＝MODEL_FEATURES（{len(listed)} 個） {'OK' if ok else 'FAIL ' + str(listed)}")
+    if P.FEATURES_PATH.exists():
+        tr = json.loads(P.FEATURES_PATH.read_text(encoding="utf-8"))["coverage"]
+        src = "features.json"
+    else:
+        n, cnt = 0, {c: 0 for c in P.MODEL_FEATURES}
+        for p in P.PANEL_DIR.glob("*.json"):
+            for r in json.loads(p.read_text(encoding="utf-8")).get("rows") or []:
+                n += 1
+                for c in P.MODEL_FEATURES:
+                    cnt[c] += r.get(c) is not None
+        tr = {c: cnt[c] / max(n, 1) for c in P.MODEL_FEATURES}
+        src = f"訓練面板 {n} 列"
+    fw = P.dry_run()
+    today = datetime.now(P.TW).strftime("%Y-%m-%d")
+    for c in P.MODEL_FEATURES:
+        need = tr[c] - 0.10
+        got = fw["coverage"].get(c, 0.0)
+        exp = P.FORWARD_COVERAGE_EXEMPT.get(c)
+        exempt = exp is not None and today < exp
+        ok = got >= need or exempt
+        bad += not ok
+        tag = "OK" if got >= need else (f"豁免至 {exp}" if exempt else "FAIL")
+        print(f"覆蓋 {c:26s} 訓練 {tr[c]:.3f}（{src}） 前向 {got:.3f}（{fw['day']}） 門檻 ≥{need:.3f} {tag}")
+    return bad
 
 
 if __name__ == "__main__":
