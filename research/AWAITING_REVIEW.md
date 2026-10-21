@@ -19,12 +19,11 @@
 - 2026-10-07 先.四十五-三 S3-C6 紙上追蹤裁示 → 總司令【先.四十七】裁示：先做樣本外單發、開紙.三前進式紙上追蹤、寫槓桿安全方案草案（結案）。
 - N=0時「等待中」表格留表頭但清空列，不得整份刪除本檔案。
 
-## 等待中（目前：3件）
+## 等待中（目前：2件）
 
 | 項目 | 完成時間 | 等待審閱內容 | 等待時長 |
 |---|---|---|---|
-| 先.一二二-15 收件匣監看器端對端驗收 | 2026-10-21 04:41 | 監看器與排程 AlphaCoworkInbox 已上線（桌面工作階段在跑）；要總司令在電腦前放一份測試指令，確認 30 秒內出現 claude 視窗、第一次的 Remote Control 確認、手機 Code 分頁看得到「Cowork 收件匣 編號」、做完寫出 .done | 自 04:41 起 |
-| 先.一二八 收件匣單一視窗（channel）安裝與驗收 | 2026-10-21 21:45 | channel server 已寫好並自測通過；CC 不准自己登記 MCP／改啟動捷徑，要總司令本人在電腦前執行 `powershell -ExecutionPolicy Bypass -File C:\alpha\cowork_inbox_channel\install.ps1`（先看過內容），再從桌面捷徑重開 Alpha 視窗並在兩個確認畫面選同意；之後放測試指令驗收，通過才停用舊監看器 | 自 21:45 起 |
+| 先.一三〇-2 桌面捷徑與收件匣權限（要總司令本人操作） | 2026-10-22 04:1x | 兩件 CC 不能自己做的事：①桌面「Alpha Claude Code.lnk」目前是 `cd C:/alpha; claude`，不會載入收件匣 channel；CC 想改成帶 `--dangerously-load-development-channels` 的指令時被 Claude Code 權限判斷擋下（理由 Create Unsafe Agents），CC 不繞過。要嘛總司令改用 `C:\alpha\start-alpha.bat` 開視窗（它已帶 channel 旗標），要嘛總司令本人改捷徑內容或明確核准後再派。②收件匣讀寫跳確認：在 Alpha 視窗打 `/update-config`，說「允許讀寫 C:\alpha\cowork_inbox 與 C:\alpha\cowork_inbox_channel 底下所有檔案」（設定內容見收件匣 010 .done 第 5 點；照文件寫的路徑語法，未親自驗證）。CC 不自改權限 | 自 04:1x 起 |
 | 先.一三〇-1 模擬 H 前向特徵來源（holdout 規則判斷） | 2026-10-22 01:5x | 前向缺的 11 個特徵（252 日價格 2、營收 2、季報 7、殖利率 1）都要 2025 年以後的歷史，repo 沒有；只有本機 FinMind holdout 期快取或 DISPLAY_ONLY 回補檔有。要裁示：**甲（CC 建議）**＝不碰 holdout，照 先.一三〇-1 ② 在 PREREG 修訂「訓練與前向只用前向可得的子集」（約 11 個：low_vol、短期反轉 1m／1w、amihud、ma_breakout、法人 3、idio_vol、bab、rel_strength；後 3 個 12/01 前自然補上）；乙＝核准模擬 H 前向「只當特徵輸入」讀 2025-11 起的本機快取／回補檔（不評估任何報酬、不改模型），要把 paper_8 加進 ALLOWED_HOLDOUT_READERS，且這些特徵只能在本機算（GitHub Actions 讀不到快取）；丙＝走官方端點補一段前向價格／股利庫（MI_INDEX 2025-11～2026-04 約 220 次、TWT49U＋exDailyQ 各 1～2 次），屬新排程＋新資料源提案，且官方股利表沒有「所屬期間」欄、去重規則對不齊。詳見 PENDING_QUEUE 先.一三〇-1 收件匣 012 結果 | 自 01:5x 起 |
 
 ## 等前置條件（不需總司令動作，不計入等待中）
@@ -35,6 +34,8 @@
 
 ## 已結案審閱紀錄
 
+- 2026-10-22 先.一二八 收件匣單一視窗（channel）安裝與驗收 → 總司令同意、Cowork 透過橋接代為執行 install.ps1 兩步；008／009 由 channel 連續送達成功、009 推播 ok 1，Cowork 驗收通過；舊監看器 AlphaCoworkInbox 已停用（XML 備份在 cowork_inbox_channel）。剩下的捷徑與權限兩件改列「先.一三〇-2 桌面捷徑與收件匣權限」（結案，DevQueue 20261022-040102 依 PENDING_QUEUE 紀錄移列〔自行裁量〕）。
+- 2026-10-22 先.一二二-15 收件匣監看器端對端驗收 → 被 channel 版（先.一二八）取代，舊監看器已停用，不再需要驗收（結案，DevQueue 20261022-040102 移列〔自行裁量〕）。
 - 2026-10-22 先.一一四-3c V1 涵蓋率未達 95% → Cowork 轉裁示（先.一三〇-3，2026-10-22 00:3x）：不放棄 V1，①逐檔診斷②官方全市場日檔補缺口③補完重算、仍 <95% 加悲觀／中性兩種假設的 PREREG 修訂；DevQueue 20261022-003101 已完成 ①（結案）。
 - 2026-10-22 先.一二七-B2a 殖利率因子分母修法＋是否重跑 → 總司令先.一二九-2 裁示（Cowork 收件匣 011 派工）：修法甲（分母原始收盤＋12 月窗口只取一年份）已做（`research/factors.py`、自測 `research/selftest_dividend_yield_fix.py` 全過）；#459 模擬 H 修訂 PREREG（未觀察任何結果）；#74／#75／#371／#376／#399 不重跑、墓園加註 FAIL 不變；#102 用既有抽樣結果查證 percentile 上限 89.3＜90，FAIL 不變。
 
