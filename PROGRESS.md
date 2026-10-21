@@ -1,3 +1,18 @@
+## 2026-10-22 03:31～03:5x DevQueue 20261022-033102：先.一三〇-1 標阻塞、補.研究-產業ETF相對強度 PREREG 定稿
+
+- 等待總司令審閱：3 件（沿用 research/AWAITING_REVIEW.md：先.一二二-15、先.一二八、先.一三〇-1；本輪未新增）。
+- 本輪戴研究帽。
+- **先.一三〇-1（標 - [!] 阻塞）**：①②仍在等 AWAITING「先.一三〇-1 前向特徵來源」甲／乙／丙裁示（乙＝讀 holdout 期快取當特徵輸入、丙＝新排程資料源，白名單第 3／6 條），開工檢查該列沒有結案。解除條件＝該列結案；期限 11/25。
+  - ⚠️ 流程問題：`python scripts/dev_queue_runner.py block` 會先輪替到別項才標，本輪誤標到 先.一三〇-2；已 `git checkout` 還原，改手動標 先.一三〇-1。runner 的這個行為要不要改留給互動視窗判斷（本輪沒動 runner）。commit 763f0f963c。
+- **補.研究-產業ETF相對強度（維持 - [ ]，等驗證帽單發）**：
+  - 新增 PREREG 定稿 `docs/PREREG_US_SECTOR_ETF_MOMENTUM_FINAL.md`：9 檔原始 SPDR 產業 ETF、12-1 月動能、前 3 名等權、月頻、下一個交易日收盤執行、us_costs 1×（另報 2×、3×）；對照＝被動等權＋SPY＋隨機挑產業 1,000 次；判準依序：天條一 → 第 1 關 → 第 8 關美股版（`evaluate_gate8()` 只有台股 0050 結果檔，改成比被動等權與 SPY，照實寫明）→ 第 4、5、6 關 → 第 3 關高原 9 格 → 第 7 關相鄰頻率；自由參數 4 個；事前列 3 個變形方向。
+  - 新增程式 `research/us_sector_etf_momentum_oneshot.py`（selftest／probe／run；run 遇到結果檔已存在就拒跑，跑完會呼叫 register_trial()）。
+  - 證據：`selftest` 6/6 OK（用合成價格測：零成本等權淨值和手算一致、改動訊號日之後的價格不影響排名、隨機組同 seed 可重現、成本 1× 比 0× 低）；用合成資料跑過完整判定流程，沒有例外。`probe` 是第 10 關的資料起點探測，只印日期、沒算任何報酬：9 檔都是 1998-12-22～2024-12-31（各 6,548 列），SPY 從 1998-12-01 起，沒有超過 VAL_END，`holdout.assert_no_holdout_leakage()` 通過。
+  - [自行裁量] ①做與判分離：本輪不單發，留給驗證帽；②所有格的起點統一取 2000-03-31 以後（回看 15 個月那一格要用到）；③高原與相鄰頻率共 10 格不拿來挑參數，比照 ML PREREG 只登記 1 筆（總司令可以推翻，改成逐格登記 +11）。
+  - 還沒單發、還沒登記、N 沒變。下一輪驗證帽執行：`python research/us_sector_etf_momentum_oneshot.py run`，接著跑 `python research/selection_bias_ledger.py`。commit 262ea4b9d5。
+- 冒煙：`node scripts/smoke_test.mjs` 176 項全過，exit 0。第一次跑時瀏覽器中途被關（「Target page… has been closed」），重跑就全過，判斷是環境偶發。
+- 收工：下一項 先.一三〇-2 不是 [研究] 類，照規則收工。佇列深度：`- [ ]` 25 項（≥12）、DevQueue 可執行的非研究項約 8 項（≥6），不用補件。
+
 ## 2026-10-22 03:01～03:1x DevQueue 20261022-030102：先.一二九-1 收件匣做完自動推播保底
 
 - 等待總司令審閱：3 件（沿用 research/AWAITING_REVIEW.md：先.一二二-15、先.一二八、先.一三〇-1；本輪未新增）。
