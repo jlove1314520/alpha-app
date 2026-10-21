@@ -1,3 +1,16 @@
+## 2026-10-21 07:50～（互動視窗，Cowork 收件匣 003 四項審閱裁示）
+
+等待總司令審閱：4 件（先.一二三-1 已結案；剩 先.一二二-5、先.一二二-15、先.一二二-10、先.一二二-12，本輪依序處理）
+
+- **先.一二五-1（先.一二三-1 甲案）缺 Q1 基準改讀回補檔**：
+  - `.github/scripts/update_stock_financials.py`：同年較早季度缺時讀 `data/financials_backfill.json`（FinMind 單季，元）當減數；與回補檔同季比對，營收／歸母淨利差 >1% 或 EPS 差 >0.02 就不寫，記 `meta.financials_baseline_from_backfill.rejected`。基準季標 `source=q1_from_backfill`、還原季標 `official_cum_minus_backfill`。
+  - 結果：194 檔補上 2026Q1 並把 2026Q2 改成真正單季；**194 檔 Q1+Q2 的營收、歸母淨利逐檔等於 TWSE 官方上半年累計（不符 0 檔）**。12 檔不寫：11 檔 EPS 差 0.03～0.41（上半年累計 EPS 用加權股數，不等於兩季相加），7812 回補檔沒有 2026Q1。
+  - [自行裁量] ①不做「元→仟元」換算：官方仟元在 `fetch_income()` 已 ×1000，兩邊都是元（提案寫反了），差 >1% 防線一樣在；②EPS 用絕對容差 0.02；③還原不了的 12 檔裡，8 檔原本存的 2026Q2 是已知錯值（上半年累計、單位仟元），移除（寧可空，不顯示錯的）；④順手修 `discretize_quarter()`：較早季度某欄是空的時，原本當 0 相減會把累計數整筆當單季（14 檔歸母淨利），改成空。
+  - 研究端隔離：`research/validation/holdout.py` 加 `DISPLAY_ONLY_DERIVED_SOURCES`；`scripts/selftest_display_only_files.py` 新增「research/ 讀 stock_detail.json 的只准名單上 11 支上線評分／稽核工具（都不是回測）」，新讀取者一律 FAIL；4/4 PASS。
+  - App：財務分頁來源列標「2026Q1 取自 FinMind 季報回補（非官方）」。
+  - 抽查（2330、1109、1304、1449、1516，393×852 財務分頁）：截圖 `research/ux_shots_122/fin_check_125/{代號}_fin.png`。畫面 EPS／毛利率／營益率＝stock_detail 數值；Q1+Q2 對 TWSE 官方上半年累計（t187ap06_L_ci）營收、歸母淨利、EPS 完全一致（例 2330：官方累計 EPS 49.33＝22.08＋27.25；1109：0.15＝0.01＋0.14）。MOPS 單季頁 robots 禁止程式存取，所以「官方」比對用的是官方上半年累計，Q1 本身的單季值來自 FinMind。
+  - 冒煙：`node scripts/smoke_test.mjs` 176/176、exit 0。
+
 ## 2026-10-21 07:01～07:46（DevQueue 20261021-070101）先.一一四-3c 第 43 批＋高股息 ETF 前向記錄改編號
 
 等待總司令審閱：5 件（同上一輪，無增減：先.一二二-5、先.一二三-1、先.一二二-15、先.一二二-10、先.一二二-12 PREREG）

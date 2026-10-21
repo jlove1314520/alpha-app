@@ -73,6 +73,11 @@ DISPLAY_ONLY_DATA_FILES = frozenset({
     "pe_snapshot/",
 })
 
+# 2026-10-21 先.一二五-1（總司令核准 先.一二三-1 甲案）：financials_backfill.json 的數字會間接寫進
+# data/stock_detail.json financials.quarters（App 顯示用），那些季度帶下列 source。研究端回測不得讀
+# stock_detail.json（scripts/selftest_display_only_files.py 限定讀取者名單）；若日後真要讀，必須濾掉這些 source。
+DISPLAY_ONLY_DERIVED_SOURCES = frozenset({"q1_from_backfill", "official_cum_minus_backfill"})
+
 
 def _caller_is_allowlisted() -> bool:
     """走呼叫堆疊，檢查ALLOWED_HOLDOUT_READERS裡的檔名是否出現在呼叫鏈上的任何一層。

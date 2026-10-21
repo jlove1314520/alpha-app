@@ -40,6 +40,37 @@ for p in sorted((ROOT / "research").rglob("*.py")):
     if h:
         bad.append(f"{p.relative_to(ROOT)}：{','.join(h)}")
 res.append((f"research/ 底下沒有程式引用 App 顯示用回補檔（{len(DISPLAY_ONLY_DATA_FILES)} 個檔名）" + ("" if not bad else "；" + "；".join(bad[:5])), not bad))
+# 先.一二五-1（2026-10-21，總司令核准 先.一二三-1 甲案）：stock_detail.json 的 financials.quarters 會帶
+# 回補檔衍生的季度（source＝q1_from_backfill／official_cum_minus_backfill，落在 holdout 期間）。
+# research/ 裡讀 stock_detail.json 的只准是下列上線評分／稽核／回補工具（都不是回測）；新出現的讀取者一律 FAIL，
+# 要放行先確認它不是回測、或已濾掉上面兩種 source，再列名並附出處。
+STOCK_DETAIL_READERS_OK = {
+    "research/audit_e_pe_diagnosis.py",            # 稽核工具，比對 EPS
+    "research/backfill_price_history_gaps.py",     # 補價格缺口，只讀代號清單
+    "research/backfill_stock_financials_gap_2025.py",  # App 顯示端回補工具
+    "research/build_coverage_dashboard.py",        # 覆蓋率儀表板
+    "research/build_stock_financials_history.py",  # App 顯示端回補工具
+    "research/generate_scores_future.py",          # 上線評分（App 今日榜單）
+    "research/generate_scores_live.py",            # 上線評分
+    "research/generate_scores_momentum.py",        # 上線評分
+    "research/live_factors.py",                    # 上線評分因子
+    "research/run_momentum_future_board_pit_backtest.py",  # 只在註解提到資料形狀，不開檔
+    "research/tpex_3insti_client.py",              # 只在說明文字提到
+    "research/validation/holdout.py",              # 守門定義本身（DISPLAY_ONLY_DERIVED_SOURCES 說明）
+}
+res.append(("守門能抓到新的 stock_detail.json 讀取者", "research/x_backtest.py" not in STOCK_DETAIL_READERS_OK))
+new_readers = []
+for p in sorted((ROOT / "research").rglob("*.py")):
+    if "__pycache__" in p.parts:
+        continue
+    rel = p.relative_to(ROOT).as_posix()
+    try:
+        if "stock_detail.json" in p.read_text(encoding="utf-8", errors="replace") and rel not in STOCK_DETAIL_READERS_OK:
+            new_readers.append(rel)
+    except OSError:
+        continue
+res.append(("research/ 沒有新的 stock_detail.json 讀取者（含回補衍生季度，回測不得讀）"
+            + ("" if not new_readers else "；" + "；".join(new_readers[:5])), not new_readers))
 for n, ok in res:
     print(("PASS " if ok else "FAIL ") + n)
 nb = sum(1 for _, ok in res if not ok)

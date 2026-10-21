@@ -68,6 +68,15 @@ INCOME_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap06_L_ci"
 BALANCE_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap07_L_ci"
 QUARTERS_TO_KEEP = 8
 
+# 2026-10-21 先.一二五-1（總司令核准 先.一二三-1 甲案）：同年較早季度缺時，改拿 App 顯示用回補檔
+# （FinMind 逐檔單季，單位元）當減數基準。回補檔在 research/validation/holdout.py DISPLAY_ONLY_DATA_FILES，
+# 這裡是 App 顯示端（.github/scripts），寫進 stock_detail.json 的值一律標 source 讓研究端可辨識。
+BACKFILL_PATH = REPO_ROOT / "data" / "financials_backfill.json"
+SRC_Q_FROM_BACKFILL = "q1_from_backfill"            # 直接取自回補檔的基準季
+SRC_RESTORED_WITH_BACKFILL = "official_cum_minus_backfill"  # 官方累計數減回補檔基準季還原的單季
+BACKFILL_MAX_DIFF = 0.01  # 還原單季 vs 回補檔同季單季，營收／歸母淨利相對差上限
+BACKFILL_EPS_ABS_TOL = 0.02  # EPS 兩邊都只到小數 2 位，1% 對小 EPS 沒意義，改用絕對容差 [自行裁量]
+
 # 2026-08-28新增（使用者裁示「428是我們自己打出來的」，「資料源禮儀」規則，
 # 跟research/finmind_client.py同一套schema/同一份共用狀態檔，各自複製一份
 # 邏輯——跨repo/跨目錄不import是既有慣例）。
@@ -337,6 +346,16 @@ def discretize_quarter(existing_quarters: list[dict], cum: dict) -> dict | None:
     op = (cum["op_cum"] - prior_op) if cum["op_cum"] is not None else None
     net = (cum["net_income_parent_cum"] - prior_net) if cum["net_income_parent_cum"] is not None else None
     eps = (cum["eps_cum"] - prior_eps) if cum["eps_cum"] is not None else None
+    # 2026-10-21 先.一二五-1 順手修：較早季度某欄位是 None 時，上面 `or 0` 會把累計數整筆當單季（例：1540 歸母淨利），
+    # 該欄位改回 None，寧可空也不寫錯值。
+    if any(r.get("net_income_parent") is None for r in prior):
+        net = None
+    if any(r.get("eps") is None for r in prior):
+        eps = None
+    if any(r.get("gross_margin_pct") is None and r.get("revenue") for r in prior):
+        gross = None
+    if any(r.get("op_margin_pct") is None and r.get("revenue") for r in prior):
+        op = None
     return {
         "year": y, "quarter": q,
         "revenue": revenue,
@@ -598,6 +617,55 @@ def compute_roe_ttm(quarters: list[dict], equity_latest: float | None) -> float 
     return round(ttm_ni / equity_latest * 100, 2)
 
 
+def load_backfill() -> dict:
+    """讀回補檔 stocks；讀不到只降級成空 dict（十二節：輔助來源失敗不得中斷主流程）。"""
+    try:
+        return json.loads(BACKFILL_PATH.read_text(encoding="utf-8")).get("stocks", {}) or {}
+    except Exception as e:
+        print(f"[warn] 讀 {BACKFILL_PATH.name} 失敗，缺基準照舊跳過：{e}")
+        return {}
+
+
+def _rel_diff(a, b) -> float | None:
+    if a is None or b is None:
+        return None
+    if b == 0:
+        return 0.0 if a == 0 else float("inf")
+    return abs(a - b) / abs(b)
+
+
+def restore_with_backfill(existing_quarters: list[dict], cum: dict, bf_rows: list[dict]) -> tuple[list[dict] | None, str]:
+    """缺同年較早季度時，用回補檔的同年較早季度當基準還原單季。
+    回傳 (要 merge 的季度列表, 說明)；不寫時列表為 None。回補檔與官方都是元（fetch_income 已 ×1000），不另換算。"""
+    y, q = cum["year"], cum["quarter"]
+    have = {(r.get("year"), r.get("quarter")) for r in existing_quarters}
+    bf = {(r.get("year"), r.get("quarter")): r for r in bf_rows or []}
+    base = []
+    for pq in range(1, q):
+        if (y, pq) in have:
+            base.append(next(r for r in existing_quarters if (r.get("year"), r.get("quarter")) == (y, pq)))
+        elif (y, pq) in bf and bf[(y, pq)].get("revenue") is not None:
+            base.append(dict(bf[(y, pq)], source=SRC_Q_FROM_BACKFILL))
+        else:
+            return None, f"回補檔缺 {y}Q{pq}"
+    discrete = discretize_quarter(base, cum)
+    if discrete is None:
+        return None, "基準仍不齊"
+    ref = bf.get((y, q))
+    if ref:
+        checks = {
+            "revenue": _rel_diff(discrete.get("revenue"), ref.get("revenue")),
+            "net_income_parent": _rel_diff(discrete.get("net_income_parent"), ref.get("net_income_parent")),
+        }
+        bad = [f"{k} 差 {v:.2%}" for k, v in checks.items() if v is not None and v > BACKFILL_MAX_DIFF]
+        if discrete.get("eps") is not None and ref.get("eps") is not None and abs(discrete["eps"] - ref["eps"]) > BACKFILL_EPS_ABS_TOL:
+            bad.append(f"eps {discrete['eps']} vs {ref['eps']}")
+        if bad:
+            return None, "與回補檔同季不符：" + "；".join(bad)
+    discrete["source"] = SRC_RESTORED_WITH_BACKFILL
+    return [b for b in base if b.get("source") == SRC_Q_FROM_BACKFILL] + [discrete], "ok"
+
+
 def main():
     payload = load_existing()
     stocks = payload.setdefault("stocks", {})
@@ -606,19 +674,51 @@ def main():
     income_updated = 0
     skipped_no_baseline = 0
     skipped_no_baseline_codes = []  # 先.一二一-2：計數旁存代號清單，BACKLOG「979 檔缺 Q1 基準」才能逐檔對
+    backfill_used_codes, backfill_rejected, dropped_cum_as_single = [], {}, []
     try:
         income = fetch_income()
         equity = fetch_balance()
+        backfill = None
         for code, cum in income.items():
             entry = stocks.setdefault(code, {})
             fin = entry.setdefault("financials", {})
             existing_quarters = fin.get("quarters", [])
             discrete = discretize_quarter(existing_quarters, cum)
-            if discrete is None:
-                skipped_no_baseline += 1
-                skipped_no_baseline_codes.append(str(code))
-                continue
-            fin["quarters"] = merge_quarters(existing_quarters, discrete)
+            if discrete is not None:
+                # 基準季若是回補檔來的，還原出的單季也沿用標記（之後每輪都走這條，標記才不會掉）
+                if any(r.get("year") == cum["year"] and r.get("quarter", 0) < cum["quarter"]
+                       and r.get("source") == SRC_Q_FROM_BACKFILL for r in existing_quarters):
+                    discrete["source"] = SRC_RESTORED_WITH_BACKFILL
+                fin["quarters"] = merge_quarters(existing_quarters, discrete)
+            else:
+                if backfill is None:
+                    backfill = load_backfill()
+                rows, why = (None, "回補檔無此代號")
+                if str(code) in backfill:
+                    try:
+                        rows, why = restore_with_backfill(existing_quarters, cum, backfill[str(code)])
+                    except Exception as e:  # 回補路徑出錯只當沒補到，不影響其他檔
+                        rows, why = None, f"回補還原失敗：{e}"
+                if rows is None:
+                    skipped_no_baseline += 1
+                    skipped_no_baseline_codes.append(str(code))
+                    if str(code) in backfill:
+                        backfill_rejected[str(code)] = why
+                    # [自行裁量] 2026-08-27 修正前那一輪把「累計數」當單季、且單位仟元寫進同一季（先.一二三-1 157 檔）。
+                    # 還原不了時，至少把這筆已知錯值拿掉（寧可空，不顯示錯的）：同季、同年沒有較早季度、營收等於本次累計數。
+                    same = [r for r in existing_quarters if (r.get("year"), r.get("quarter")) == (cum["year"], cum["quarter"])]
+                    no_prior = not any(r.get("year") == cum["year"] and r.get("quarter", 0) < cum["quarter"] for r in existing_quarters)
+                    if cum["quarter"] > 1 and same and no_prior and cum.get("revenue_cum"):
+                        rv = same[0].get("revenue") or 0
+                        if any(abs(rv * k - cum["revenue_cum"]) <= 0.005 * abs(cum["revenue_cum"]) for k in (1, 1000)):
+                            fin["quarters"] = [r for r in existing_quarters if r not in same]
+                            dropped_cum_as_single.append(str(code))
+                    continue
+                qs = existing_quarters
+                for r in rows:
+                    qs = merge_quarters(qs, r)
+                fin["quarters"] = qs
+                backfill_used_codes.append(str(code))
             bal = equity.get(code) or {}
             eq = bal.get("equity")
             fin["equity_parent_latest"] = eq
@@ -652,6 +752,18 @@ def main():
     payload["meta"]["financials_updated_count"] = income_updated
     payload["meta"]["financials_skipped_no_baseline_count"] = skipped_no_baseline
     payload["meta"]["financials_skipped_no_baseline_codes"] = sorted(set(skipped_no_baseline_codes))
+    # 先.一二五-1：缺基準改用回補檔的結果（App 顯示用途；研究端回測不得讀這些標記的季度）
+    payload["meta"]["financials_baseline_from_backfill"] = {
+        "note": f"同年較早季度缺時取 financials_backfill.json（FinMind，元）當基準；基準季標 source={SRC_Q_FROM_BACKFILL}、"
+                f"還原季標 source={SRC_RESTORED_WITH_BACKFILL}；與回補檔同季營收／歸母淨利差 >{BACKFILL_MAX_DIFF:.0%} 或 EPS 差 >{BACKFILL_EPS_ABS_TOL} 不寫",
+        "used_this_run_codes": sorted(set(backfill_used_codes)),
+        # 全檔目前帶回補標記的代號（第一次補上之後，下一輪起走一般路徑，本輪清單會是空的，所以另算全檔）
+        "tagged_codes": sorted(c for c, s in stocks.items()
+                               if any(r.get("source") in (SRC_Q_FROM_BACKFILL, SRC_RESTORED_WITH_BACKFILL)
+                                      for r in ((s.get("financials") or {}).get("quarters") or []))),
+        "rejected": dict(sorted(backfill_rejected.items())),
+        "dropped_cumulative_as_single_codes": sorted(set(dropped_cum_as_single)),
+    }
     payload["meta"].setdefault("errors", [])
     payload["meta"]["errors"] = errors
 

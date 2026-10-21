@@ -548,7 +548,10 @@
       setTxt('fin-op',lc.op_cum!=null&&lc.revenue_cum?(lc.op_cum/lc.revenue_cum*100).toFixed(1)+'%'+_cq:'—');
     }
     const lcTxt=lcNewer?` · 最新官方累計 ${lc.year} 前${lc.quarter}季：${lc.revenue_cum!=null?'營收 '+(lc.revenue_cum/1e8).toFixed(1)+' 億、':''}EPS ${lc.eps_cum!=null?lc.eps_cum.toFixed(2):'—'}（累計數，非單季）${last?`；單季序列停在 ${last.year}Q${last.quarter}，下一季起以累計差分補上`:''}`:'';
-    if(last||lc)setTxt('fin-note',`來源：${srcTxt}${last?` · 單季 ${last.year}Q${last.quarter}`:''}${lcTxt}；${fcfNote}`);
+    // 先.一二五-1（2026-10-21）：官方缺同年基準季時，基準季取自 FinMind 季報回補（source=q1_from_backfill），照實標出
+    const _bfq=fin.filter(q=>q.source==='q1_from_backfill').map(q=>q.year+'Q'+q.quarter);
+    const bfTxt=_bfq.length?` · ${_bfq.join('、')} 取自 FinMind 季報回補（非官方；官方只給累計數、缺同年基準季），之後的單季＝官方累計減此季`:'';
+    if(last||lc)setTxt('fin-note',`來源：${srcTxt}${last?` · 單季 ${last.year}Q${last.quarter}`:''}${bfTxt}${lcTxt}；${fcfNote}`);
     else setTxt('fin-note','查無財報資料（TWSE／TPEx 官方開放資料皆無此代號，可能為興櫃、ETF 或新上市）');
   }
   // 先.一〇四-8：fundamentals.json 只有近 8 個月；data/revenue_backfill.json（研究室.三 App 顯示用回補，約 260KB）有就合併，
