@@ -44,6 +44,18 @@
 - **怎麼做**：訓練前執行 `python research/paper_8_refresh_dividend_yield.py`，只換面板這一欄（離線、只讀本機快取、不碰 holdout；先拿 `prepare_factors()` 在 2884／2330／2412 逐列比對一致才寫檔）；之後新建的面板列本來就用修正後的 `factors.py`。前向特徵也走同一份 `factors.py`。
 - 這是修正已知資料缺陷，不是新試驗，不計 N。
 
+### 修訂 2（2026-10-22，先.一三〇-1，總司令 07:5x 裁示「依你建議」＝採甲，Cowork 收件匣 014）
+
+- **模型尚未訓練、未觀察任何結果**：本修訂 commit 時 `research/paper_8_model/` 不存在，沒有任何預測、報酬或評估被看過；訓練在本修訂 commit **之後**才執行。
+- **改什麼**：訓練與前向都**只用前向可得的特徵子集**（11 個，名單寫死，依 2026-10-22 收件匣 012 前向覆蓋率表）：
+  `f_low_vol`、`f_short_reversal_1m`、`f_short_term_reversal_1w`、`f_amihud_illiq`、`f_ma_breakout`、`f_foreign_streak`、`f_inst_flow`、`f_inst_streak_days`、`f_idio_vol`、`f_bab`、`f_rel_strength`。
+  - 後 3 個（idio_vol／bab／rel_strength）前向要大盤序列滿 61 個交易日，2026-10-22 為 60 點，**2026-12-01 前自然補上**；在那之前前向覆蓋率檢查對這 3 個豁免，到期日 2026-12-01。
+- **為什麼**：其餘 15 個特徵前向要 2025 年以後的歷史（252 日價格、12 個月以上營收、季報、近 12 月股利），repo 沒有，只有 holdout 期快取或「只給 App 顯示」的回補檔有；總司令裁示**不碰 holdout**（乙不採用）。訓練用全部特徵、前向只有少數有值，等於上線後換一組特徵選股，前向結果無法解讀。
+- **單一來源**：子集寫在 `research/paper_8_ml_tracker.py` 的 `MODEL_FEATURES`，訓練與前向都讀它；自測 `scripts/selftest_paper_8_features.py` 檢查本節名單與 `MODEL_FEATURES` 完全相同，並檢查子集內每個特徵「前向非 NaN 覆蓋率 ≥ 訓練期 − 10 個百分點」（上述 3 個 12/01 前豁免）。
+- **沒改什麼**：模型、預設參數、random_state、訓練期間、標籤、宇宙、組合、成本、判定全部不變；覆蓋率 <50% 機械式排除規則照舊（子集 11 個訓練期覆蓋率都 ≥82%）。
+- 備選（暫不做）：全指標版 H2。
+- 這是事前修訂、不是新試驗，**不計 N**。
+
 ## 輸出與排程（待建，2026-11-30 前完成）
 
 - 程式 `research/paper_8_ml_tracker.py`（訓練＋凍結模型＋每月預測與帳本）；帳本 `research/data/paper_8_log.jsonl`（append-only）；App 摘要 `data/paper_8.json`。
