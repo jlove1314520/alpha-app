@@ -9,7 +9,7 @@
 
 ## 2026-10-21 07:50～（互動視窗，Cowork 收件匣 003 四項審閱裁示）
 
-等待總司令審閱：2 件（先.一二三-1、先.一二二-5、先.一二二-12 已結案；剩 先.一二二-15 收件匣端對端驗收、先.一二二-10 閃黑窗觀察中）
+等待總司令審閱：1 件（先.一二二-15 收件匣端對端驗收；先.一二三-1／先.一二二-5／先.一二二-10／先.一二二-12 本輪結案）
 
 - **先.一二五-1（先.一二三-1 甲案）缺 Q1 基準改讀回補檔**：
   - `.github/scripts/update_stock_financials.py`：同年較早季度缺時讀 `data/financials_backfill.json`（FinMind 單季，元）當減數；與回補檔同季比對，營收／歸母淨利差 >1% 或 EPS 差 >0.02 就不寫，記 `meta.financials_baseline_from_backfill.rejected`。基準季標 `source=q1_from_backfill`、還原季標 `official_cum_minus_backfill`。
@@ -26,6 +26,12 @@
   - [自行裁量] ①量測改成用 `elementFromPoint` 打「以中心為準的 44×44 方框」四角＋四邊中點（舊 `small` 只看元素外框，熱區放大本來就量不到）；舊定義保留成 `smallBox` 對照；②收合 `<details>` 裡看不到的列不計。
   - 中心被搶（stolen）剩 7 項，全部在「規則拿掉」時就存在（多行行內連結的外框中心落在旁邊文字上），不是這次造成。
   - 實點：齒輪下方 6px 開設定、輸入框外框左緣／上方 6px 聚焦、雷達籤上方 6px 選中。冒煙 176/176、exit 0。
+- **先.一二五-3（先.一二二-10）Cybex 排程改隱藏啟動**：
+  - 備份：`C:\alpha\task_trigger_backup\CybexResearchEngine_20261021_before.xml`（排程）、`CybexResearchEngine_research_engine.py.20261021_before.bak`（程式），可還原。
+  - 排程動作由「直接跑 pythonw.exe」改成 `wscript.exe "C:\alpha\run-cybex-engine-hidden.vbs"`：用 0 視窗樣式跑 python.exe，子程序（taskkill、claude）都繼承這個隱藏主控台，不會另外開黑窗。觸發時間（每日 00:30 起每 30 分鐘）、登入類型、不重複執行設定都沒動。
+  - Cybex 程式只改一處：`_kill_tree()` 的 taskkill 補 `CREATE_NO_WINDOW`（唯一缺的地方，開 claude 那段本來就有），邏輯不變；已在 Cybex 的改檔宣告紀錄登記，避免被它自己的越界守門誤判。
+  - 08:15 在 Cybex 禁跑時段（沒有研究 session）結束舊行程；08:30 排程以新方式啟動（wscript → python.exe），之後已正常開過 2 個研究 session。
+  - 閃窗監看 `C:\alpha\task_trigger_backup\watch_console_flash.ps1` 從 08:16 起跑 130 分鐘，紀錄寫在 `console_flash_20261021.log`；到 09:16 為止 0 筆新視窗。依總司令指示，2 小時觀察結果交給 DevQueue 補記（先.一二五-3b，時間閘 10:30）。
 - **先.一二五-4（先.一二二-12）高股息 ETF 換股事件：定稿→登記→單發，結果 FAIL**：
   - PREREG 定稿 `docs/PREREG_ETF_REBALANCE_HIGH_DIVIDEND_FINAL.md`（20fdf6b554，登記與執行前 commit）。照裁示：控制組＝同產業同市值 3 檔；2025～2026 事件不解鎖 holdout、改前向追蹤（先.一二三-4）。[自行裁量] 草稿沒寫死的 13 點在執行前補上，包括「資料不足」門檻：群組 ≥10、每邊 ≥30 筆、每半 ≥3 群組；同日同一批的 ETF 合成一個事件群組；成本一律算在不利假說的方向。
   - 事前登記 #457（ccb2b6f781）→ 單發 `research/etf_rebalance_event_study.py`（只讀本機快取、零外部請求）。23 個事件裡只有 14 個有完整日期（UNCONFIRMED 不補猜），篩完剩 253 筆、12 群組，達門檻，所以照規定做了檢定。
@@ -71,7 +77,7 @@
 - 先.一二二-15 收件匣監看器端對端驗收（要總司令在電腦前放測試指令、確認手機 Code 分頁），04:41 起等待
 - 先.一二二-10 閃黑窗：觀察 2 小時回報＋決定 Cybex 那邊要不要改，04:55 起等待
 
-- **先.一二二-15 收件匣監看器（8de1610b8c）**：新寫 `C:lpha\cowork_inbox_watcher.ps1`（repo 外）＋隱藏啟動 .vbs＋註冊腳本，排程 AlphaCoworkInbox（登入時、Interactive）已註冊並啟動，程序在總司令桌面工作階段。用 `claude --remote-control "Cowork 收件匣 編號"` 開可見視窗；單一實例；每輪錯誤只寫警告。
+- **先.一二二-15 收件匣監看器（8de1610b8c）**：新寫 `C:\alpha\cowork_inbox_watcher.ps1`（repo 外）＋隱藏啟動 .vbs＋註冊腳本，排程 AlphaCoworkInbox（登入時、Interactive）已註冊並啟動，程序在總司令桌面工作階段。用 `claude --remote-control "Cowork 收件匣 編號"` 開可見視窗；單一實例；每輪錯誤只寫警告。
   - 證據：暫存收件匣＋假 claude（不耗用量）測過挑檔、前一個視窗開著不開下一個、.done 交接、視窗關閉重開與上限；提示詞英文雙引號第一版會被 PowerShell 5.1 吃掉，補跳脫後引號／反斜線／中文／換行原樣送達。
   - [自行裁量] 同一份指令最多自動開 2 次；不加略過權限確認的旗標；凌晨不放真測試指令（耗用量，且 Remote Control 第一次確認若卡住會擋住之後的指令）。條目標 [!]，等總司令驗收。
 - **先.一二二-13 碰撞偵測（6e3bf28c31）**：PENDING_QUEUE.md 只有檔尾新增條目時不讓路；改寫既有行、中間插入照舊讓路；判斷失敗只警告。自測 29/29（新增 4 項）、rotation／crunch 自測全過。[自行裁量] 不把整個檔移進 MACHINE_WRITTEN，避免互動視窗改條目時也被放行。
