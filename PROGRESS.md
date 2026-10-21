@@ -1,6 +1,7 @@
 ## 2026-10-21 19:13 DevQueue 20261021-183101：先.一一四-3c 第 61～63 批
 
-- 等待總司令審閱：3 件（沿用上一輪 17:31 紀錄，本輪沒有新增）
+- 等待總司令審閱：1 件（依互動視窗 ae646e8a3e「AWAITING 3→1」，本輪沒有新增）
+- 如實記錄：PENDING_QUEUE.md 的本輪補記，被互動視窗同時段的 commit ae646e8a3e 一起掃進去了（共用工作目錄），內容正確、沒有重做；本輪 commit ef641ce967 只含 PROGRESS／shortlist
 - 做了什麼：照滾動一小時 ≤90 次的節奏跑了三次 `python research/var1018_v1_prep.py`：18:41 跑 35 次、18:55 跑 30 次、19:09 跑 20 次，三次都 exit 0，都沒撞到 402。
 - 證據：`research/data/var1018_v1_prep_status.json` 的 n_price_cached 1,408→1,488／1,751；目前合計約 2,575 次，還剩約 230 次。
 - 冒煙測試：176/176、exit 0（18:3x 跑的，本 commit 沒動程式）。
