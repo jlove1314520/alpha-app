@@ -1097,3 +1097,5 @@
 {"ts": "2026-10-21T21:58:00+08:00", "source": "devqueue", "cycle_id": "20261021-213101", "item": "先.一二七-B2", "summary": "模擬H第2段：前向每月預測完成（價量特徵與prepare_factors逐日一致30/30）、market.yml裝sklearn；面板2,721檔跑完（1,182檔有列、51,518列，減資缺439檔）；train等先.一二九-2"}
 {"ts": "2026-10-21T23:41:42.883239+08:00", "item": "紙.三", "note": "中止（BAA10Y_UNAVAILABLE）：取不到 FRED BAA10Y（RuntimeError）；本次不記帳，下次排程重試", "status": "ERROR"}
 {"ts": "2026-10-21T23:41:43.777291+08:00", "item": "紙.四", "note": "中止（BAA10Y_UNAVAILABLE）：取不到 FRED BAA10Y（RuntimeError）；本次不記帳，下次排程重試", "status": "ERROR"}
+{"ts": "2026-10-22T00:07:59+08:00", "source": "finmind_warmup", "item": "先.一一五-2", "summary": "AlphaFinMindWarmup P3 保鮮層自動恢復（V1 資料補完）"}
+{"ts": "2026-10-22T02:31:00+08:00", "item": "先.一二七-B2", "summary": "第 5 段：減資表補完、面板 1,515 檔 64,606 列、殖利率換新定義；train 阻塞等 先.一三〇-1 裁示", "status": "BLOCKED"}
