@@ -1,3 +1,34 @@
+## 2026-10-21 19:00～19:4x（互動視窗，Cowork 收件匣 005）先.一二七 研究軌併入 DevQueue＋ML／網格 PREREG 裁示
+
+等待總司令審閱：1 件（先.一二二-15 收件匣端對端驗收；先.一二六-1／-2 已依收件匣 005 裁示結案）
+
+### A. 背景 CC 從 3 條減到 1 條（先.一二七-A）
+
+- **停用前的背景 CC 排程**：AlphaMarathon（Ready）、AlphaHypothesisQueue（Ready）、AlphaDevQueue（Running）。
+- **停用後**：AlphaMarathon＝Disabled、AlphaHypothesisQueue＝Disabled、AlphaDevQueue 照常；其餘 35 個 Alpha* 排程未動。**沒有刪除任何排程。**
+- **備份**：`C:\alpha\task_password_backup\AlphaMarathon_pre_merge_20261021.xml`（3,300 bytes）、`AlphaHypothesisQueue_pre_merge_20261021.xml`（2,866 bytes），用 `Export-ScheduledTask` 匯出原始設定。
+- **還原指令**（PowerShell 一行）：`Enable-ScheduledTask -TaskName AlphaMarathon; Enable-ScheduledTask -TaskName AlphaHypothesisQueue`（排程本體還在，只是停用）；若要連 DevQueue 一起回到舊行為，再把 `scripts/dev_queue_runner.py` 的 `RESEARCH_MERGED_INTO_DEVQUEUE` 改成 `False`。若排程被刪了才需要：`Register-ScheduledTask -TaskName AlphaMarathon -Xml (Get-Content 'C:\alpha\task_password_backup\AlphaMarathon_pre_merge_20261021.xml' -Raw)`（另一支同理）。
+- **DevQueue 取件邏輯改了哪裡**（`scripts/dev_queue_runner.py`）：
+  1. 新增 `RESEARCH_MERGED_INTO_DEVQUEUE = True` 與 `_skip_classes()`：[研究]類不再跳過，「（互動視窗」類照舊永遠跳過（碰 research/backtest、validation、adjust.py、pit.py、trial_registry.py 的條目都是這一類）。
+  2. `_find_next_base()` 權威清單分支與檔案順序分支、`eligible_precheck()`（可執行計數）都改用 `_skip_classes()`；`NO_PENDING_ITEM_FOR_DEVQUEUE` 訊息跟著改。
+  3. `build_prompt()` 依派出項目的類別加「本輪帽子」區塊：開發類＝開發／維運帽、連續做只接非[研究]類；研究類＝研究／驗證帽擇一、做與判分離、事前登記（PREREG→`register_trial()`→`selection_bias_ledger.py`）、帳本只能經 `register_trial()` 寫、十三節核心檔案只讀不改（要改就寫提案標互動視窗、本項 block）、holdout／天條一／第 8 關／但書、FAIL 附 3 個變形方向，連續做只接[研究]類。
+  4. 收工補件加 ⑤ 研究候選：`research/GRAVEYARD_AUTOPSY.md` 第 6 節（6.1 變形方向）、`research/HYPOTHESIS_QUEUE.md` 未跑假說，補成 `[研究]` 條目、每輪最多 3 條、一律事前登記；排序照檔頭【常規.補件順序】（①資料→②畫面→③研究室回補與⑤研究候選→④文書）。
+- **CLAUDE.md**：零之一、三之一、「適用範圍界線」三處加註「2026-10-21 起研究軌併入 DevQueue」，舊文保留。
+- **自測**：`python scripts/selftest_dev_queue_research_merge.py` 7/7 PASS（研究類會被取件、互動視窗仍跳過、旗標關閉回到舊行為、研究類提示詞有研究帽＋register_trial＋核心檔案、開發類提示詞沒有研究紀律、補件規則含⑤與常規.補件順序、只剩互動視窗類回 None）；既有 `selftest_dev_queue_rotation／guard／crunch.py` 全部 exit 0；真實佇列 `dev_queue_runner.py next` 照常取到 先.一一四-3c。目前佇列沒有待做的[研究]類條目，所以下一輪不會突然派研究。
+- 冒煙：`node scripts/smoke_test.mjs` exit 0、176/176 PASS（19:3x，含 dev_queue_runner／CLAUDE.md 改動）。A 段 commit 352aab2dcc。
+- 首次派到[研究]類之後的觀察，交 DevQueue 補記：先.一二七-A1（時間閘）。
+
+### B. 先.一二六-1 ML 選股 PREREG 裁示（先.一二七-B）
+
+- (1) **價量版歷史單發**：`docs/PREREG_ML_PRICEVOL_2006_2012_FINAL.md` 定稿凍結（commit dfc30796c8）。10 個價量特徵、HistGradientBoosting 預設參數、前 30／90 緩衝、時點宇宙含下市股、N+1。[自行裁量] 測試年 2008～2012：2006～2007 只能當訓練（60 日特徵 2006-04 起、252 日特徵 2007 起才有值）；最後一次出場用 2013 第一個交易日開盤（唯一讀到 2013 的一天）。照裁示「≥95% 才登記」：**登記與單發等 V1 涵蓋率達標**（先.一二七-B1，時間閘）。照實寫：2010～2012 這些特徵已被 factor_ic 看過、0050 在 2008 回撤約 56%，純多頭選股很可能死在天條一。
+- (2) **模擬 H 前向紙上追蹤**：`docs/PREREG_paper_h_ml_forward.md` 定稿並**事前登記 #459**（綁定已凍結的 PREREG 檔，因追蹤程式尚未寫）；全體 N 437→438、台股 216→217（`selection_bias_ledger.py` 已重跑）。[自行裁量] 模型用 2013～2024-11 訓練一次就凍結、不每年重訓（重訓會用到 2025+ 報酬）；訓練期覆蓋 <50% 的特徵機械式排除（籌碼類預期會被排除——沒有歷史樣本模型學不到；要納入就得補抓 FinMind，已裁示不核准）。追蹤程式交 先.一二七-B2（[研究]，DevQueue 可執行，2026-11-30 前完成）——這也會是 DevQueue 第一次派到[研究]類，觀察交 先.一二七-A1。
+
+### C. 先.一二六-2 個股網格 PREREG 裁示（先.一二七-C）
+
+- `docs/PREREG_STOCK_GRID_2007_2009_FINAL.md` 定稿凍結（commit dfc30796c8）：驗證段甲 2007～2009、「樣本短、檢定力有限」照實寫；規則照草稿一字不改。第 11 關 N+7：`selection_bias_ledger.py` 以列數計 N、沒有參數懲罰欄位，所以登記時寫 1 列主試驗＋6 列參數懲罰佔位。[自行裁量] 登記時點照草稿「沿用 V1：涵蓋率 ≥95% 才登記」，等 V1 達標、跑之前做（先.一二七-C1，時間閘）。
+- **新增控制組工具** `research/validation/random_timing_control.py`（`run_random_timing_control()`）：保留股票、筆數、持有交易日數，只把進場日換成同一日曆月的其他有效交易日；部位與成本公式與 `run_matched_control_group()` 相同；只新增、沒改既有驗證邏輯。自測 `scripts/selftest_random_timing_control.py` 7/7（完美時點百分位 97.0、最差時點 0.7、同 seed 可重現、持有天數保持、無有效日保留原日期並計數、NaN 不污染）。
+- AWAITING：先.一二六-1／-2 移到已結案，等待中 3→1。未讀 holdout、未跑任何回測、零新外部請求。
+
 ## 2026-10-21 17:31～18:1x（DevQueue 20261021-173101）
 
 等待總司令審閱：3 件（沿用 10:05 互動視窗記錄：先.一二二-15 收件匣端對端驗收、先.一二六-1 ML 選股草稿、先.一二六-2 網格草稿；本輪未新增）
@@ -6,6 +37,15 @@
   - [自行裁量] 照每小時 ≤90 次的滾動窗口排，等前一輪各批滑出窗口才發。下一批最早約 18:41（35 次）、18:55 起再多 30、19:09 起再多 20。
   - 冒煙：`node scripts/smoke_test.mjs` exit 0、176/176 PASS（17:3x；本 commit 未動程式）。
 - 佇列：DevQueue 可執行仍只有 V1；本輪不補件（沿用今天判斷：來源已用盡、本週撞過用量上限）。
+
+## 2026-10-21 19:13 DevQueue 20261021-183101：先.一一四-3c 第 61～63 批
+
+- 等待總司令審閱：0 件（本輪沒有新增）
+- 做了什麼：照滾動一小時 ≤90 次的節奏跑了三次 `python research/var1018_v1_prep.py`：18:41 跑 35 次、18:55 跑 30 次、19:09 跑 20 次，三次都 exit 0，都沒撞到 402。
+- 證據：`research/data/var1018_v1_prep_status.json` 的 n_price_cached 1,408→1,488／1,751；目前合計約 2,575 次，還剩約 230 次。
+- 冒煙測試：176/176、exit 0（18:3x 跑的，本 commit 沒動程式）。
+- 下一步：19:42 之後續跑；全部抓完才算涵蓋率（≥95% 才登記）。PENDING_QUEUE 那一項維持 - [ ]。
+- 沒提交的部分：工作目錄裡 CLAUDE.md、scripts/dev_queue_runner.py 等檔有別人改到一半的變更，本輪不碰也不提交。
 
 ## 2026-10-21 16:31～17:1x（DevQueue 20261021-163101）
 
