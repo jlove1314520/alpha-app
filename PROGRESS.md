@@ -1,3 +1,21 @@
+## 2026-10-22 04:01～04:2x DevQueue 20261022-040102：先.一三〇-2 收件匣 channel 收尾結案
+
+- 等待總司令審閱：2 件（research/AWAITING_REVIEW.md）：
+  1. **先.一三〇-2 桌面捷徑與收件匣權限**（自 04:1x 起）：要總司令本人操作的兩件事，白話步驟如下。
+  2. 先.一三〇-1 模擬 H 前向特徵來源甲／乙／丙（自 01:5x 起，沿用）。
+- 本輪戴開發帽。
+- **先.一三〇-2（結案 - [x]）**：①uninstall.ps1、③README channel 版、④舊監看器停用＋XML 備份，前幾輪都已完成；剩下的兩件 CC 不能自己做，改列 AWAITING 追蹤。給總司令的白話步驟（照文件寫的，未親自驗證，以你看到的畫面為準）：
+  - **收件匣不再跳「Do you want to create…」**：在 Alpha 視窗輸入 `/update-config`，然後打一句「允許讀寫 C:\alpha\cowork_inbox 與 C:\alpha\cowork_inbox_channel 底下所有檔案」，畫面問要不要存就選同意。要寫進的設定內容在收件匣 010 的 .done 第 5 點。
+  - **桌面捷徑**：目前「Alpha Claude Code」捷徑開出來的視窗不會載入收件匣 channel。最簡單的做法是改用 `C:\alpha\start-alpha.bat` 開（它已經帶好 channel 設定）；要改捷徑本身，CC 被 Claude Code 的權限判斷擋下、不會繞過，需要你本人改或明確核准後再派。
+  - 證據：`C:\alpha\cowork_inbox_channel\` 底下有 `uninstall.ps1`、`AlphaCoworkInbox_20261022.xml`；010 .done 第 5 點有權限設定內容。commit d4a6e5b29a。
+- **順手整理過時條目**〔自行裁量，可推翻〕：
+  - 先.一二八（channel 安裝與驗收）改 - [x]：008／009 連續由 channel 送達、009 推播 ok 1、舊監看器已停用，條件都已成立。
+  - 先.一二二-15（舊監看器端對端驗收，原 - [!]）改 - [x] 被取代：同一目標已由 channel 版達成，舊監看器已停用。
+  - AWAITING 這兩列移到「已結案」，等待中 3 → 2 件。
+- 冒煙：`node scripts/smoke_test.mjs` 176 項全過，exit 0。
+- 佇列深度：`- [ ]` 23 項（≥12）。非研究、DevQueue 能做的項目 0 項（剩下的都標互動視窗執行或時間閘），低於 6 項門檻；補件來源查過：①BACKLOG 沒有可直接開工的未完成項 ②`docs/UX_REDESIGN_PROPOSAL.md` 未做項已由先.九十五-R3／先.一〇九 處理 ③先.八十 全檢節剩下的都是互動視窗項 ④`research/DATA_GAP_PLAN.md` 甲類已全數抓完——**來源已用盡**，本輪不補。
+- 收工：權威清單下一項 先.一三〇-1 仍阻塞、再下一項 先.一三〇-3 是 [研究] 類，照規則收工，留給研究帽輪次。
+
 ## 2026-10-22 03:31～03:5x DevQueue 20261022-033102：先.一三〇-1 標阻塞、補.研究-產業ETF相對強度 PREREG 定稿
 
 - 等待總司令審閱：3 件（沿用 research/AWAITING_REVIEW.md：先.一二二-15、先.一二八、先.一三〇-1；本輪未新增）。
