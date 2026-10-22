@@ -2,7 +2,7 @@
 
 - 等待總司令審閱：4 件（research/AWAITING_REVIEW.md，本輪未新增）：①先.一三一-1 git stash 要不要刪（08:5x 起）；②先.一三〇-2 桌面捷徑與收件匣權限（04:1x 起）；③先.一三〇-4 個股突破 PREREG（08:1x 起）；④先.一三〇-3 V1 PREREG 修訂草稿 R1（10:5x 起）。
 - 本輪戴研究帽。沒算任何錯價或報酬、沒新登記試驗（#460 已於 10:22 由互動視窗事前登記）、沒讀 holdout。
-- **補.研究-個股期貨基差**（維持 `- [ ]`）：①期交所年度檔 2011～2024 抓完（14 次、全 200）；②歷史最後結算價查三條路都沒有（fSPDataDown dlFileType=1／2／3 各 1 次只有指數／商品／選擇權；年度檔到期日結算價欄＝0；OpenAPI `FinalSettlementPriceSSF` 只回最新月）→ [自行裁量] 期貨腿以標的最後交易日收盤結算；③新增 `research/stock_futures_basis_oneshot.py`，`--prep` 結果：344 個代號對上（OpenAPI `SSFLists` 名冊＋價格比對）、50 個比對失敗、1,320 個契約提前消失（除權／減資調整）整組剔除；④資料替代寫進 `docs/PREREG_STOCK_FUTURES_BASIS_FINAL.md` 附錄 A（看結果前寫，第 1～7 節沒改）；⑤`C:lpha\CLAUDE.md` TAIFEX 節補記本輪請求數（年度檔 14、fSPDataDown 3、OpenAPI 5）。
+- **補.研究-個股期貨基差**（維持 `- [ ]`）：①期交所年度檔 2011～2024 抓完（14 次、全 200）；②歷史最後結算價查三條路都沒有（fSPDataDown dlFileType=1／2／3 各 1 次只有指數／商品／選擇權；年度檔到期日結算價欄＝0；OpenAPI `FinalSettlementPriceSSF` 只回最新月）→ [自行裁量] 期貨腿以標的最後交易日收盤結算；③新增 `research/stock_futures_basis_oneshot.py`，`--prep` 結果：344 個代號對上（OpenAPI `SSFLists` 名冊＋價格比對）、50 個比對失敗、1,320 個契約提前消失（除權／減資調整）整組剔除；④資料替代寫進 `docs/PREREG_STOCK_FUTURES_BASIS_FINAL.md` 附錄 A（看結果前寫，第 1～7 節沒改）；⑤`C:\alpha\CLAUDE.md` TAIFEX 節補記本輪請求數（年度檔 14、fSPDataDown 3、OpenAPI 5）。
 - **下一輪要做**：現貨快取改成拼接多檔（目前 47 個標的沒對到、113,070 候選日因此排除）；寫 `research/stock_futures_basis_run.py`，先用假資料自測，再跑唯一一次 `--run`。
 - **本輪小意外**：想停掉自己卡住的 prep 行程時下了範圍太寬的 `taskkill`；它沒有生效，常駐服務（alpha_live_server 10/21 啟動、shioaji_quotes 08:31 啟動）都是原本的行程、沒被影響；之後改用 PID 停止。
 - 收工補件未做（時間到）：DevQueue 可執行仍低於 6 項門檻，照實記，下一輪補。
