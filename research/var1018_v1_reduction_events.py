@@ -14,6 +14,8 @@ FinMind TaiwanStockCapitalReductionReferencePrice 本機快取 2010 年起且漏
 4. 2011 年起 TWTAUU 有的事件，推導值與 TWTAUU 並列核對（方法驗證）；採用值以 TWTAUU 為準。
 5. |係數−1| < 0.5% 視為單純停牌（不調整）；前後收盤跳動 >±20% 卻推導不出係數的缺口列清單，不得默默算進報酬。
 
+先.一三二-2（2026-10-23）改低記憶體：build_series() 單次串流只留需要代號的收盤，取代整日 rows 快取；locate() 判斷不變。
+
 跑法：cd research && python var1018_v1_reduction_events.py
 輸出：data/v1_reduction_events_2007_2014.csv（adjust.py 讀它補減資事件）、data/v1_reduction_events_report.json
 """
@@ -32,6 +34,7 @@ sys.path.insert(0, str(HERE))
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 from backfill_price_history_gaps import _rate_limit_record_block, _rate_limit_wait_or_raise  # noqa: E402
+from var1018_v1_lowmem import peak_mb  # noqa: E402
 from var1018_v1_official_fill import BLOCK, SOURCES, UA  # noqa: E402
 
 D = HERE / "data"
@@ -53,39 +56,33 @@ def _num(v):
         return None
 
 
-_days: dict[str, list[str]] = {}
+def build_series(codes: set[str]) -> dict[str, dict[str, list[tuple[str, float | None]]]]:
+    """先.一三二-2（2026-10-23）：單次串流掃描官方日檔，只留需要的代號的 (日期, 收盤)，每檔讀完即丟。
+    舊版 rows_of() 把每天整份 rows 留在 _cache 不釋放，上櫃股還會先倒掃完所有上市日檔 → 幾乎整份日檔全進記憶體，
+    兩次被系統以記憶體不足中止。series[src][code] 只含「該檔有列出」的日子，與舊版 `code in rows_of(src, d)` 同義。"""
+    series: dict[str, dict[str, list]] = {"twse": {}, "tpex": {}}
+    for src in ("twse", "tpex"):
+        for p in sorted((OFF / src).glob("*.json")):
+            rows = json.loads(p.read_text(encoding="utf-8")).get("rows") or {}
+            for code in codes & rows.keys():
+                series[src].setdefault(code, []).append((p.stem, rows[code][3]))
+            del rows
+    return series
 
 
-def days(src: str) -> list[str]:
-    if src not in _days:
-        _days[src] = sorted(p.stem for p in (OFF / src).glob("*.json"))
-    return _days[src]
-
-
-_cache: dict[tuple, dict] = {}
-
-
-def rows_of(src: str, ymd: str) -> dict:
-    k = (src, ymd)
-    if k not in _cache:
-        p = OFF / src / f"{ymd}.json"
-        _cache[k] = (json.loads(p.read_text(encoding="utf-8")).get("rows") or {}) if p.exists() else {}
-    return _cache[k]
-
-
-def locate(code: str, a: str, b: str) -> tuple[str, str, float, str, float] | None:
+def locate(code: str, a: str, b: str, series: dict) -> tuple[str, str, float, str, float] | None:
     """(市場, 停牌前日, 停牌前收盤, 恢復日, 恢復日收盤)。兩市場都找不到回 None。
     halt_check 的 from／to 是缺口兩端「有價格的日子」（var1018_v1_halt_check.classify_interval：檢查 a、b 之間），
     所以停牌前日＝≤from 的最後一天、恢復日＝≥to 的第一天（含端點）。"""
     a8, b8 = a.replace("-", ""), b.replace("-", "")
     for src in ("twse", "tpex"):
-        ds = days(src)
-        pre = next((d for d in reversed(ds) if d <= a8 and code in rows_of(src, d)), None)
-        post = next((d for d in ds if d >= b8 and code in rows_of(src, d)), None)
+        lst = series[src].get(code) or []
+        pre = next(((d, c) for d, c in reversed(lst) if d <= a8), None)
+        post = next(((d, c) for d, c in lst if d >= b8), None)
         if pre and post:
-            pc, rc = rows_of(src, pre)[code][3], rows_of(src, post)[code][3]
+            pc, rc = pre[1], post[1]
             if pc and rc:
-                return src, pre, pc, post, rc
+                return src, pre[0], pc, post[0], rc
     return None
 
 
@@ -140,12 +137,15 @@ def main() -> int:
     tw = pd.read_csv(TWTAUU, dtype={"stock_id": str}) if TWTAUU.exists() else pd.DataFrame(columns=["date", "stock_id", "factor"])
     tw_map = {(r.stock_id, r.date): r for r in tw.itertuples()}
     events, unresolved, checks = [], [], []
+    need = {r["code"] for r in halt["rows"] for iv in r.get("intervals") or [] if iv.get("class") == "official_absent"}
+    series = build_series(need)
+    print(f"官方日檔精簡索引：{len(need)} 檔；峰值 {peak_mb()} MB", flush=True)
     for row in halt["rows"]:
         for iv in row.get("intervals") or []:
             if iv.get("class") != "official_absent":
                 continue
             code = row["code"]
-            loc = locate(code, iv["from"], iv["to"])
+            loc = locate(code, iv["from"], iv["to"], series)
             if loc is None:
                 unresolved.append({"code": code, "from": iv["from"], "to": iv["to"], "why": "找不到停牌前／恢復日收盤"})
                 continue
@@ -174,11 +174,12 @@ def main() -> int:
     rep = {"n_gaps_events": len(ev), "n_reduction": int((ev["kind"] == "reduction").sum()) if len(ev) else 0,
            "n_pure_halt": int((ev["kind"] == "pure_halt").sum()) if len(ev) else 0,
            "by_source": ev["source"].value_counts().to_dict() if len(ev) else {},
-           "twtauu_vs_derived": checks, "unresolved": unresolved}
+           "twtauu_vs_derived": checks, "unresolved": unresolved, "peak_working_set_mb": peak_mb()}
     REPORT.write_text(json.dumps(rep, ensure_ascii=False, indent=1), encoding="utf-8")
     print(json.dumps({k: v for k, v in rep.items() if k not in ("twtauu_vs_derived", "unresolved")}, ensure_ascii=False))
     print("TWTAUU vs 推導（方法驗證）：", json.dumps(checks, ensure_ascii=False))
     print(f"推導不出且跳動 >±20%：{len(unresolved)} 筆", json.dumps(unresolved[:10], ensure_ascii=False))
+    print(f"峰值工作集 {rep['peak_working_set_mb']} MB", flush=True)
     return 0
 
 

@@ -1,3 +1,22 @@
+## 2026-10-23 00:31～01:1x DevQueue 20261023-003102（維運帽）：先.一三二-2 本機記憶體不足排查
+
+- 等待總司令審閱：8 件（前 7 件同上一輪；**新增**：先.一三二-2 涵蓋率算法遇週六補班日略過缺口，V1 原定義 79.79% 修正後 55.49%，待 Cowork 審）。
+- 本輪戴維運帽。冒煙 `node scripts/smoke_test.mjs`：=== 冒煙測試結果：全部通過 ===（176 項，exit 0，01:14）。
+
+### ① 00:3x 記憶體快照（Get-Process，WorkingSet）
+- 實體 31.43GB、可用 **4.32GB**、分頁可用 16.56GB。
+- 前 15 名（單一程序 WS／私有 MB）：python 105192＝Cybex `_q078_run.py core` 2,243／3,075；Memory Compression 1,338；pythonw 43156＝Cybex `cybex_bot.py` 942／1,858；vmmem（WSL）930／4,104；claude ×3 546／471／405；MsMpEng 457；FTNN 427；chrome ×3 419／407／372；explorer 392；Dropbox 357；dwm 338。
+- 依名稱合計：chrome 39 個 5,226MB、claude 13 個 3,056MB、python 10 個 2,421MB、svchost 101 個 2,054MB、msedgewebview2 1,339、ChatGPT 880、Dropbox 735、steamwebhelper 730、Riot Client 520。IBKR Gateway 60MB、alpha_live_server 32MB、node（收件匣 channel）53MB。
+- 另見 6 個殘留 `python -m http.server 8792`（各 2～13MB，影響小）。大頭是 Cybex 研究行程與瀏覽器，非本專案；[自行裁量] 不動其他專案的行程，只記錄。
+
+### ②③ 兩支腳本改低記憶體＋重跑
+- 根因：兩支都把每天官方日檔整份 rows 留在快取不釋放（4,184 檔、磁碟 154MB → 數 GB 物件）；coverage_windows 另每窗口重讀 FinMind parquet。
+- 新增 `research/var1018_v1_lowmem.py`（單次串流、只留精簡索引；`peak_mb()` 量峰值）。`var1018_v1_coverage_windows.py` 每檔 parquet 只讀一次、四窗口一起算；`var1018_v1_reduction_events.py` 改 `build_series()` 只留需要代號的收盤。判斷式不變。
+- 自測：`selftest_var1018_v1_lowmem.py` 全部通過（停牌分類 497 筆與舊版 0 不一致；V1 原定義重現 1,247／79.79%／90 檔 63.33%；峰值 528MB）；`selftest_var1018_v1_reduction_lowmem.py` 全部通過（抽 14 缺口與舊版 locate 0 不一致；峰值 160MB）。
+- 重跑：coverage_windows 峰值 546MB；reduction_events 峰值 164MB、新抓恢復日 97 個（0 次 402/403/428/429）→ 108 事件（減資 102／單純停牌 6；TWTAUU 42、上櫃推導 66），unresolved 176（125 找不到前後收盤＝官方日檔只存缺口日；上市恢復日漲跌多為「X」推導不出，例 1441）。
+- **新發現（交 先.一三〇-3、送 Cowork 審，未改定義）**：`var1018_v1_prep.coverage()`／`coverage_merged()` 遇週六補班交易日（例 2007-03-03）reindex 給 NaN、跨過它的缺口被略過。並列 `*_satfix`：V1 原窗口原定義 79.79%→**55.49%**、主定義 95.67%→65.44%；R1-b（t0 2007-07-02）原 81.68%→81.60%、主 98.16%（下市股 80.0%）；GRID 原 86.85%→59.98%；ML 原 78.94%→53.57%。
+- 未算任何報酬、未登記、N 不變；adjust.py patch 未動（等互動視窗）。
+
 ## 2026-10-23 00:01～00:2x DevQueue 20261023-000102（研究帽）：先.一三二-1 交 3 份台股個股層級 PREREG 草稿送審
 
 - 等待總司令審閱：7 件（git stash 43 筆要不要刪、桌面捷徑與收件匣權限、252 日新高 PREREG、V1 PREREG 修訂 R1、期貨法人未平倉前向提案、COT PREREG、**新增**：先.一三二-1 三份個股 PREREG 草稿）。
