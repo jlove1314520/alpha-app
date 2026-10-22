@@ -62,6 +62,69 @@ def rebase_in_progress() -> bool:
     return (GITDIR / "rebase-merge").exists() or (GITDIR / "rebase-apply").exists()
 
 
+AUTOSTASH_LOG = ROOT / "research" / "autostash_failures.jsonl"        # append-only，MACHINE_WRITTEN 樣式內
+AUTOSTASH_ALERT_STATE = ROOT / "research" / ".autostash_alert_state.json"
+AUTOSTASH_ALERT_REPEAT_SEC = 6 * 3600
+
+
+def _worktree_newer(path: str, stash: str) -> bool:
+    """工作樹的 path 是否是 stash 之後別人寫的更新版本（不是 HEAD 版、不是 stash 版、沒有衝突標記）。出錯回 False。"""
+    try:
+        p = ROOT / path
+        if not p.exists():
+            return False
+        w = p.read_bytes()
+        if b"\n<<<<<<< " in b"\n" + w:
+            return False
+        h = subprocess.run(["git", "-C", str(ROOT), "show", f"HEAD:{path}"], capture_output=True, timeout=60).stdout
+        s = subprocess.run(["git", "-C", str(ROOT), "show", f"{stash}:{path}"], capture_output=True, timeout=60).stdout
+        n = lambda b: b.replace(b"\r\n", b"\n")  # core.autocrlf：工作樹 CRLF、物件庫 LF，比內容不比行尾
+        return n(w) != n(h) and n(w) != n(s)
+    except Exception:  # noqa: BLE001
+        return False
+
+
+def _worktree_is_stash(path: str, stash: str) -> bool:
+    """工作樹的 path 已經就是 stash 版（git 部分套回成功的檔）。出錯回 False。"""
+    try:
+        p = ROOT / path
+        s = subprocess.run(["git", "-C", str(ROOT), "show", f"{stash}:{path}"], capture_output=True, timeout=60).stdout
+        return p.exists() and p.read_bytes().replace(b"\r\n", b"\n") == s.replace(b"\r\n", b"\n")
+    except Exception:  # noqa: BLE001
+        return False
+
+
+def _alert_autostash_failure(stash: str, back: list, kept: list, newer: list) -> None:
+    """先.一三一-1：套回失敗不再只印 stderr——寫一行 research/autostash_failures.jsonl，並推 cc_stuck（6 小時內只推一次）。
+    自身任何失敗只印警告（十二節）。"""
+    import json
+    import time
+    from datetime import datetime, timedelta, timezone
+    now = datetime.now(timezone(timedelta(hours=8)))
+    rec = {"at": now.isoformat(timespec="seconds"), "stash": stash, "caller": Path(sys.argv[0]).name if sys.argv else "",
+           "restored": back, "kept_remote": kept, "kept_worktree_newer": newer}
+    try:
+        with AUTOSTASH_LOG.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    except Exception as e:  # noqa: BLE001
+        print(f"[local_git_commit] 警告：autostash 失敗紀錄寫入失敗（{type(e).__name__}）", file=sys.stderr)
+    try:
+        try:
+            st = json.loads(AUTOSTASH_ALERT_STATE.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            st = {}
+        if time.time() - float(st.get("last_push", 0)) < AUTOSTASH_ALERT_REPEAT_SEC:
+            return
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import cc_push  # noqa: PLC0415
+        body = (f"git autostash 套回失敗（{rec['caller']}）：取回 {len(back)}、遠端較新 {len(kept)}、工作樹較新 {len(newer)}；"
+                f"stash {stash[:10]} 未刪，紀錄在 research/autostash_failures.jsonl")
+        cc_push._send("⚠️ CC 停住：git 暫存套回失敗", body, "cc_stuck")
+        AUTOSTASH_ALERT_STATE.write_text(json.dumps({"last_push": time.time(), "stash": stash}), encoding="utf-8")
+    except Exception as e:  # noqa: BLE001
+        print(f"[local_git_commit] 警告：autostash 失敗推播失敗（{type(e).__name__}）", file=sys.stderr)
+
+
 def _restore_failed_autostash(stash_before: str) -> str:
     """先.一〇三-14v（2026-10-16 事故）：pull --autostash 套回失敗時，git 把「別的排程／互動視窗」尚未 commit 的修改
     整包留在 stash（`Your changes are safe in the stash`，exit 0），工作目錄留下衝突標記或被清回 HEAD。10:05 新聞補班就這樣
@@ -77,8 +140,16 @@ def _restore_failed_autostash(stash_before: str) -> str:
         if "autostash" not in _g("log", "-1", "--format=%gs", "-g", "refs/stash").stdout:
             return ""
         names = [n for n in _g("stash", "show", "--name-only", after).stdout.splitlines() if n.strip()]
-        back, kept = [], []
+        back, kept, newer = [], [], []
         for n in names:
+            # 先.一三一-1（2026-10-22）：套回失敗常見原因是別的排程在 stash 之後又寫了同一個檔（rate_limit_state.json）。
+            # 工作樹版本若沒有衝突標記、且既不是 HEAD 版也不是 stash 版＝有人寫了更新的內容 → 保留工作樹，不拿舊 stash 蓋掉。
+            if _worktree_is_stash(n, after):
+                back.append(n)  # git 已經部分套回這個檔
+                continue
+            if _worktree_newer(n, after):
+                newer.append(n)
+                continue
             if _g("diff", "--quiet", f"{after}^1", "HEAD", "--", n).returncode == 0:
                 if _g("checkout", "-q", after, "--", n).returncode == 0:
                     _g("reset", "-q", "--", n)
@@ -86,8 +157,10 @@ def _restore_failed_autostash(stash_before: str) -> str:
                     continue
             kept.append(n)
             _g("checkout", "-q", "HEAD", "--", n)  # 套回失敗會留衝突標記（UU），改回遠端版；本機版仍在 stash
-        msg = f"autostash 套回失敗：已取回 {len(back)} 檔、遠端較新保留遠端版 {len(kept)} 檔（{', '.join(kept)[:200]}）；stash 未刪"
+        msg = (f"autostash 套回失敗：已取回 {len(back)} 檔、遠端較新保留遠端版 {len(kept)} 檔（{', '.join(kept)[:200]}）、"
+               f"工作樹已有更新內容保留 {len(newer)} 檔（{', '.join(newer)[:200]}）；stash 未刪")
         print(f"[local_git_commit] {msg}", file=sys.stderr)
+        _alert_autostash_failure(after, back, kept, newer)
         return msg
     except Exception as e:  # noqa: BLE001
         print(f"[local_git_commit] 警告：autostash 取回失敗（{type(e).__name__}: {e}），stash 仍保留", file=sys.stderr)
