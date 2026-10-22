@@ -153,6 +153,54 @@ def main() -> int:
             else:
                 sys.modules[k] = v
 
+    # 6. 先.一三二-3：tpex_basic 連線中斷（重試後仍斷）→ 其他 6 個來源照抓、照寫，meta 記原因
+    class ChunkErr(Exception):
+        pass
+    calls2 = []
+
+    def fake_get(url, params=None, **kw):
+        calls2.append((url, params))
+        if url.endswith("mopsfin_t187ap37_O"):
+            raise ChunkErr("Connection broken: 10054")
+        name = next(n for n, _s, u, pf in W.REQUESTS if u == url and pf("2026-10-14") == params)
+        js = raw_fixture()[name]
+        return types.SimpleNamespace(status_code=200, json=lambda js=js: js, content=b"x", text="")
+    fake_req2 = types.SimpleNamespace(get=fake_get, exceptions=types.SimpleNamespace(
+        ConnectionError=ChunkErr, ChunkedEncodingError=ChunkErr))
+    fake_rl2 = types.SimpleNamespace(_rate_limit_wait_or_raise=lambda src: None,
+                                     _rate_limit_record_block=lambda *a, **k: None)
+    saved = {k: sys.modules.get(k) for k in ("requests", "backfill_price_history_gaps")}
+    sys.modules["requests"], sys.modules["backfill_price_history_gaps"] = fake_req2, fake_rl2
+    old_wait, W.RETRY_WAIT_SEC = W.RETRY_WAIT_SEC, 0
+    try:
+        with tempfile.TemporaryDirectory() as td:
+            failed = {}
+            raw6 = W.fetch_all("2026-10-14", Path(td) / "raw", failed)
+            ok(set(failed) == {"tpex_basic"} and len(raw6) == 6 and len(calls2) == 8,
+               "tpex_basic 連線中斷 → 重試 1 次後略過，其他 6 個照抓（共 8 次請求，不多打）")
+            snap6 = W.build(raw6)
+            ok("basic_tpex" not in snap6 and "quotes_twse_call" in snap6 and "underlying_tpex" in snap6,
+               "缺來源不產出對應檔，其餘照解析")
+            ok(W.check("2026-10-14", raw6, snap6) == [], "部分來源時，已抓到的照常驗證通過")
+            meta6 = W.write("2026-10-14", snap6, Path(td), failed=failed)
+            d6 = Path(td) / "2026-10-14"
+            ok(meta6.get("partial") is True and "tpex_basic" in meta6["failed_sources"]
+               and meta6["missing_files"] == ["basic_tpex"] and not (d6 / "basic_tpex.json.gz").exists()
+               and (d6 / "quotes_twse_call.json.gz").exists(), "meta 記 partial／失敗原因／缺檔，成功的檔照寫")
+            # 同一天重跑：已抓的不重抓，只補失敗的那個
+            calls2.clear()
+            failed2 = {}
+            W.fetch_all("2026-10-14", Path(td) / "raw", failed2)
+            ok(len(calls2) == 2 and all(u.endswith("mopsfin_t187ap37_O") for u, _ in calls2),
+               "同日重跑只補抓失敗的來源（已存原始回應不重抓）")
+    finally:
+        W.RETRY_WAIT_SEC = old_wait
+        for k, v in saved.items():
+            if v is None:
+                sys.modules.pop(k, None)
+            else:
+                sys.modules[k] = v
+
     ok(len(W.REQUESTS) == 7, "每天固定 7 次請求")
     print(f"\n{'全部通過' if not FAIL else f'失敗 {len(FAIL)} 項'}")
     return 1 if FAIL else 0

@@ -20,6 +20,8 @@ research/data/ 在 .gitignore 裡，快照只存本機，不進 repo。
   python research/warrant_snapshot.py                 # 抓今天（台北）
   python research/warrant_snapshot.py --date 2026-10-14
   python research/warrant_snapshot.py --from-raw DIR  # 不發請求，用既存原始回應重新解析
+
+exit：0 完整、4 部分來源失敗（成功的照寫，meta.partial／failed_sources 記原因）、2 限流封鎖、3 驗證不過、1 全失敗。
 """
 from __future__ import annotations
 
@@ -85,13 +87,19 @@ class Blocked(RuntimeError):
 RETRY_WAIT_SEC = 60
 
 
+def _conn_errors(requests) -> tuple:
+    """連線中斷類例外；測試用的假 requests 沒有 exceptions 屬性時回空 tuple（不攔任何例外）。"""
+    ex = getattr(requests, "exceptions", None)
+    return tuple(c for c in (getattr(ex, "ConnectionError", None), getattr(ex, "ChunkedEncodingError", None)) if c)
+
+
 def _get_once_retry(requests, wait_or_raise, src: str, name: str, url: str, params, sleep=None):
     """先.一〇九-8：10/16 tpex 檔下載到一半 ConnectionResetError 10054，整天快照沒存（權證快照只能當天抓）。
     只對「連線中斷類」（ConnectionError／ChunkedEncodingError，含連線逾時）等 60 秒重試一次；
     HTTP 狀態碼（含 402/403/428/429 限流）不在這裡重試——回應照常交回呼叫端判斷，不違反「額度用完不重試」。
     重試前照樣走節流（wait_or_raise），第二次再斷就把例外往外丟（main 照舊 exit 1）。"""
     import time
-    exc = (requests.exceptions.ConnectionError, requests.exceptions.ChunkedEncodingError)
+    exc = _conn_errors(requests)
     for attempt in (1, 2):
         wait_or_raise(src)
         try:
@@ -103,11 +111,18 @@ def _get_once_retry(requests, wait_or_raise, src: str, name: str, url: str, para
             (sleep or time.sleep)(RETRY_WAIT_SEC)
 
 
-def fetch_all(date: str, raw_dir: Path) -> dict:
-    """發 7 次請求，原始回應 gzip 存 raw_dir（解析失敗時可重跑解析、不必重抓）。回傳 {名稱: 解出的 JSON}。"""
+def fetch_all(date: str, raw_dir: Path, failed: dict | None = None) -> dict:
+    """發 7 次請求，原始回應 gzip 存 raw_dir（解析失敗時可重跑解析、不必重抓）。回傳 {名稱: 解出的 JSON}。
+
+    先.一三二-3：10/16、10/21、10/22 tpex_basic（約 16MB）重試後仍 ChunkedEncodingError，舊版整輪拋錯，
+    後面的上市收盤也沒抓、已抓的也沒寫。改為：單一來源連線中斷（重試一次後）／HTTP 錯誤／非 JSON
+    只記進 failed {名稱: 原因}、跳過它、繼續下一個（請求次數不變：每個來源仍最多 1 次＋連線中斷重試 1 次）。
+    402/403/428/429 照舊拋 Blocked、整輪停止（不改節流）。"""
     import requests
     from backfill_price_history_gaps import _rate_limit_record_block, _rate_limit_wait_or_raise
 
+    failed = {} if failed is None else failed
+    conn = _conn_errors(requests)
     raw_dir.mkdir(parents=True, exist_ok=True)
     out = {}
     for name, src, url, pf in REQUESTS:
@@ -115,15 +130,25 @@ def fetch_all(date: str, raw_dir: Path) -> dict:
         if f.exists():  # 同一天重跑不重抓
             out[name] = json.loads(gzip.decompress(f.read_bytes()).decode("utf-8"))
             continue
-        r = _get_once_retry(requests, _rate_limit_wait_or_raise, src, name, url, pf(date))
+        try:
+            r = _get_once_retry(requests, _rate_limit_wait_or_raise, src, name, url, pf(date))
+        except conn as e:
+            failed[name] = f"連線中斷，重試一次仍失敗（{type(e).__name__}: {str(e)[:160]}）"
+            print(f"  {name}: {failed[name]}；略過此來源、繼續其他來源", flush=True)
+            continue
         if r.status_code in BLOCK:
             _rate_limit_record_block(src, r.status_code, name)
             raise Blocked(f"{name} HTTP {r.status_code}，{src} 封鎖 2 小時，本輪停止")
-        r.raise_for_status()
+        if r.status_code != 200:
+            failed[name] = f"HTTP {r.status_code}"
+            print(f"  {name}: {failed[name]}；略過此來源、繼續其他來源", flush=True)
+            continue
         try:
             js = r.json()
-        except ValueError as e:  # openapi 無效路徑會回 200＋HTML，不能只看狀態碼
-            raise RuntimeError(f"{name} 回傳不是 JSON（前 80 字：{r.text[:80]!r}）") from e
+        except ValueError:  # openapi 無效路徑會回 200＋HTML，不能只看狀態碼
+            failed[name] = f"回傳不是 JSON（前 80 字：{r.text[:80]!r}）"
+            print(f"  {name}: {failed[name]}；略過此來源、繼續其他來源", flush=True)
+            continue
         f.write_bytes(gzip.compress(json.dumps(js, ensure_ascii=False).encode("utf-8")))
         out[name] = js
         print(f"  {name}: HTTP {r.status_code}，{len(r.content):,} bytes", flush=True)
@@ -131,8 +156,9 @@ def fetch_all(date: str, raw_dir: Path) -> dict:
 
 
 def load_raw(raw_dir: Path) -> dict:
+    # 只讀存在的原始回應（部分來源失敗那天缺檔；缺的不產出對應輸出檔）
     return {name: json.loads(gzip.decompress((raw_dir / f"{name}.json.gz").read_bytes()).decode("utf-8"))
-            for name, *_ in REQUESTS}
+            for name, *_ in REQUESTS if (raw_dir / f"{name}.json.gz").exists()}
 
 
 def _key(row: dict, *prefixes) -> str:
@@ -262,18 +288,27 @@ TPEX_EW = {"code": "代號", "close": "收盤"}
 
 
 def build(raw: dict) -> dict:
-    snap = {"basic_twse": parse_basic(raw["twse_basic"]), "basic_tpex": parse_basic(raw["tpex_basic"]),
-            "issue_tpex": parse_tpex_issue(raw["tpex_issue"])}
-    titles = {}
-    snap["quotes_twse_call"], titles["twse_call"] = parse_quotes(raw["twse_call"], TWSE_Q, ("證券代號", "標的代號"))
-    snap["quotes_twse_put"], titles["twse_put"] = parse_quotes(raw["twse_put"], TWSE_Q, ("證券代號", "標的代號"))
-    snap["quotes_tpex"], titles["tpex_ww"] = parse_quotes(raw["tpex_ww"], TPEX_WW, ("代號", "最後買價"))
-    ew, titles["tpex_ew"] = parse_quotes(raw["tpex_ew"], TPEX_EW, ("代號", "收盤"))
-    # 上櫃權證的標的價：WW 沒有，從 EW 取。基本資料表的「標的證券/指數」是名稱不是代號，
-    # 標的代號要用 tpex_warrant_issue 的 UnderlyingStockCode；只留有上櫃權證掛在上面的標的。
-    unders = {v["underlying_code"] for v in snap["issue_tpex"].values() if v.get("underlying_code")}
-    snap["underlying_tpex"] = {r["code"]: r["close"] for r in ew if r["code"] in unders}
-    titles["_underlying_tpex_missing"] = sorted(unders - set(snap["underlying_tpex"]))
+    """raw 缺哪個來源（抓取失敗），就不產出依賴它的檔案（先.一三二-3）；不拿空值頂替。"""
+    snap, titles = {}, {}
+    if "twse_basic" in raw:
+        snap["basic_twse"] = parse_basic(raw["twse_basic"])
+    if "tpex_basic" in raw:
+        snap["basic_tpex"] = parse_basic(raw["tpex_basic"])
+    if "tpex_issue" in raw:
+        snap["issue_tpex"] = parse_tpex_issue(raw["tpex_issue"])
+    if "twse_call" in raw:
+        snap["quotes_twse_call"], titles["twse_call"] = parse_quotes(raw["twse_call"], TWSE_Q, ("證券代號", "標的代號"))
+    if "twse_put" in raw:
+        snap["quotes_twse_put"], titles["twse_put"] = parse_quotes(raw["twse_put"], TWSE_Q, ("證券代號", "標的代號"))
+    if "tpex_ww" in raw:
+        snap["quotes_tpex"], titles["tpex_ww"] = parse_quotes(raw["tpex_ww"], TPEX_WW, ("代號", "最後買價"))
+    if "tpex_ew" in raw and "issue_tpex" in snap:
+        ew, titles["tpex_ew"] = parse_quotes(raw["tpex_ew"], TPEX_EW, ("代號", "收盤"))
+        # 上櫃權證的標的價：WW 沒有，從 EW 取。基本資料表的「標的證券/指數」是名稱不是代號，
+        # 標的代號要用 tpex_warrant_issue 的 UnderlyingStockCode；只留有上櫃權證掛在上面的標的。
+        unders = {v["underlying_code"] for v in snap["issue_tpex"].values() if v.get("underlying_code")}
+        snap["underlying_tpex"] = {r["code"]: r["close"] for r in ew if r["code"] in unders}
+        titles["_underlying_tpex_missing"] = sorted(unders - set(snap["underlying_tpex"]))
     snap["_titles"] = titles
     return snap
 
@@ -283,10 +318,14 @@ def check(date: str, raw: dict, snap: dict) -> list:
     errs = []
     roc = f"{int(date[:4]) - 1911}年{date[5:7]}月{date[8:10]}日"
     for k in ("twse_call", "twse_put"):
+        if k not in raw:  # 抓取失敗的來源記在 meta.failed_sources，不在這裡擋
+            continue
         t = snap["_titles"].get(k, "")
         if roc not in t:
             errs.append(f"{k} title「{t}」不含 {roc}")
     for k in ("tpex_ww", "tpex_ew"):
+        if k not in raw:
+            continue
         rd = _roc_to_iso(raw[k].get("date"))
         if rd != date:
             errs.append(f"{k} 回應日期 {raw[k].get('date')} ≠ {date}")
@@ -296,7 +335,13 @@ def check(date: str, raw: dict, snap: dict) -> list:
     return errs
 
 
-def write(date: str, snap: dict, out_root: Path = OUT_ROOT) -> dict:
+# 每個輸出檔依賴哪些原始來源（任一缺就不產出）
+DEPENDS = {"basic_twse": ("twse_basic",), "basic_tpex": ("tpex_basic",), "issue_tpex": ("tpex_issue",),
+           "quotes_twse_call": ("twse_call",), "quotes_twse_put": ("twse_put",), "quotes_tpex": ("tpex_ww",),
+           "underlying_tpex": ("tpex_issue", "tpex_ew")}
+
+
+def write(date: str, snap: dict, out_root: Path = OUT_ROOT, failed: dict | None = None) -> dict:
     d = out_root / date
     d.mkdir(parents=True, exist_ok=True)
     sizes = {}
@@ -314,6 +359,11 @@ def write(date: str, snap: dict, out_root: Path = OUT_ROOT) -> dict:
         "underlying_tpex_missing": snap.get("_titles", {}).get("_underlying_tpex_missing", []),
         "note": "先.九十四-5a 權證快照；欄位說明見 research/warrant_snapshot.py。非投資建議。",
     }
+    if failed:
+        # 先.一三二-3：部分來源抓取失敗時照寫成功的部分；缺的檔案與原因列在這裡，讀檔端要先看 partial
+        meta["partial"] = True
+        meta["failed_sources"] = dict(failed)
+        meta["missing_files"] = sorted(k for k, deps in DEPENDS.items() if any(x in failed for x in deps))
     (d / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1), encoding="utf-8")
     return meta
 
@@ -325,17 +375,28 @@ def main() -> int:
     ap.add_argument("--keep-raw", action="store_true", help="保留原始回應（預設解析成功後刪除）")
     a = ap.parse_args()
     raw_dir = Path(a.from_raw) if a.from_raw else OUT_ROOT / "_raw" / a.date
+    failed: dict = {}
     try:
-        raw = load_raw(raw_dir) if a.from_raw else fetch_all(a.date, raw_dir)
+        raw = load_raw(raw_dir) if a.from_raw else fetch_all(a.date, raw_dir, failed)
     except Blocked as e:
         print(f"[封鎖] {e}", flush=True)
         return 2
+    if a.from_raw:
+        failed.update({n: "原始回應檔不存在" for n, *_ in REQUESTS if n not in raw})
+    if not raw:
+        print("[全部來源都失敗，不寫檔] " + "；".join(f"{k}: {v}" for k, v in failed.items()), flush=True)
+        return 1
     snap = build(raw)
     errs = check(a.date, raw, snap)
     if errs:
         print("[驗證不過，不寫檔；原始回應保留在 " + str(raw_dir) + "] " + "；".join(errs), flush=True)
         return 3
-    meta = write(a.date, snap)
+    meta = write(a.date, snap, failed=failed)
+    if failed:
+        # 部分成功：保留原始回應，同一天重跑只補抓失敗的來源；exit 4 讓排程記成失敗（不冒充完整快照）
+        print(json.dumps({k: meta[k] for k in ("date", "counts", "failed_sources", "missing_files")},
+                         ensure_ascii=False), flush=True)
+        return 4
     print(json.dumps({k: meta[k] for k in ("date", "counts", "bytes_gz")}, ensure_ascii=False), flush=True)
     if not a.from_raw and not a.keep_raw:
         for f in raw_dir.glob("*.json.gz"):

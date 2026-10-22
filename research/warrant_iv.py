@@ -173,6 +173,10 @@ def main() -> int:
     if not (SNAP_ROOT / a.sample / "meta.json").exists():
         print(f"沒有 {a.sample} 的快照，先跑 research/warrant_snapshot.py", flush=True)
         return 1
+    meta = json.loads((SNAP_ROOT / a.sample / "meta.json").read_text(encoding="utf-8"))
+    if meta.get("partial"):  # 先.一三二-3：部分來源失敗的日子缺檔，不拿來算
+        print(f"{a.sample} 快照不完整，缺 {meta.get('missing_files')}（原因：{meta.get('failed_sources')}）", flush=True)
+        return 1
     res = sample(a.sample)
     OUT.write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
     print(json.dumps({k: res[k] for k in ("date", "n_quotes", "n_iv")}, ensure_ascii=False), flush=True)

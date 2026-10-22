@@ -71,9 +71,17 @@ def is_trading_day(d: datetime) -> tuple[bool, str]:
 
 def run_snapshot(day: str) -> tuple[int | None, str]:
     """回傳 (exit code, 失敗原因摘要)；成功或已存在時原因為空字串。"""
-    if (SNAP_ROOT / day / "meta.json").exists():
-        log(f"{day} 快照已存在，不重跑")
-        return 0, ""
+    mp = SNAP_ROOT / day / "meta.json"
+    if mp.exists():
+        try:
+            partial = bool(json.loads(mp.read_text(encoding="utf-8")).get("partial"))
+        except Exception as e:  # noqa: BLE001  meta 讀不回來就當完整，不重跑（寧可少抓不重複打）
+            log(f"{day} meta.json 讀取失敗（{type(e).__name__}），當作已存在")
+            partial = False
+        if not partial:
+            log(f"{day} 快照已存在，不重跑")
+            return 0, ""
+        log(f"{day} 快照只有部分來源（先.一三二-3），重跑補抓失敗的來源（已抓的不重抓）")
     try:
         r = subprocess.run([sys.executable, str(HERE / "warrant_snapshot.py"), "--date", day], cwd=REPO,
                            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=1800)
@@ -215,7 +223,7 @@ def main() -> int:
     if ok:
         day = now.strftime("%Y-%m-%d")
         rc, why_fail = run_snapshot(day)
-        if rc != 0:  # 2＝限流封鎖、3＝官方回應驗證不過、1／None＝其他錯誤（含重試後仍連線中斷）
+        if rc != 0:  # 2＝限流封鎖、3＝官方回應驗證不過、4＝部分來源失敗（成功的已寫）、1／None＝其他錯誤
             failure = {"date": day, "exit": rc, "reason": why_fail,
                        "at": datetime.now(TPE).isoformat(timespec="seconds")}
     man = weekly_backup(a.force_backup)
