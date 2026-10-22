@@ -241,25 +241,83 @@ def _append_only_change(path: str) -> bool:
         return False
 
 
-def _only_runner_write(path: str) -> bool:
-    """檔案內容是否仍等於 mark_blocked() 上次寫入後記下的雜湊。自己出錯一律回 False（照舊讓路），只印警告。"""
+# 2026-10-22（收件匣 016）：紀錄改成多檔 {"files": {路徑: 雜湊}}——除了 mark_blocked() 的 - [!]，
+# wrapper 每輪收工也記下這輪留在工作樹、沒來得及 commit 的 PENDING_QUEUE.md／PROGRESS.md（git_op_lock 被占時）。
+# 下一輪 check_collision 看到內容仍等於紀錄＝DevQueue 自己的殘留 → 不讓路、先代為 commit；有人改一個字就照舊讓路。
+OWN_TRACKED = ("PENDING_QUEUE.md", "PROGRESS.md")
+
+
+def _load_runner_write() -> dict:
+    """回傳 {路徑: 雜湊}。舊格式 {"path","hash"} 也讀。讀不到回 {}；格式壞掉丟例外給呼叫端（照舊讓路）。"""
     try:
         rec = json.loads(RUNNER_WRITE.read_text(encoding="utf-8"))
-        return bool(rec.get("hash")) and rec.get("path") == path and _file_hash(ROOT / path) == rec["hash"]
     except FileNotFoundError:
-        return False
+        return {}
+    if "files" in rec:
+        return {k: v for k, v in rec["files"].items() if v}
+    return {rec["path"]: rec["hash"]} if rec.get("path") and rec.get("hash") else {}
+
+
+def _only_runner_write(path: str) -> bool:
+    """檔案內容是否仍等於 DevQueue 自己上次寫入／收工時記下的雜湊。自己出錯一律回 False（照舊讓路），只印警告。"""
+    try:
+        h = _load_runner_write().get(path)
+        return bool(h) and _file_hash(ROOT / path) == h
     except Exception as e:  # noqa: BLE001 — 守門員自己失敗只降級（CLAUDE.md 十二）
         print(f"WARN: 讀守門員寫入紀錄失敗（{type(e).__name__}），照舊視為改動", flush=True)
         return False
 
 
-def _record_runner_write(path: str) -> None:
+def _record_runner_write(*paths: str) -> None:
     try:
-        RUNNER_WRITE.write_text(json.dumps({"path": path, "hash": _file_hash(ROOT / path),
-                                            "at": datetime.now(TZ).isoformat(timespec="seconds")},
+        try:
+            files = _load_runner_write()
+        except Exception:  # noqa: BLE001 — 舊紀錄壞掉就重寫
+            files = {}
+        for path in paths:
+            files[path] = _file_hash(ROOT / path)
+        RUNNER_WRITE.write_text(json.dumps({"files": files, "at": datetime.now(TZ).isoformat(timespec="seconds")},
                                            ensure_ascii=False), encoding="utf-8")
     except Exception as e:  # noqa: BLE001
         print(f"WARN: 守門員寫入紀錄失敗（{type(e).__name__}），下一輪可能因自己的標記讓路", flush=True)
+
+
+def _dirty_vs_head(path: str) -> bool:
+    r = subprocess.run(["git", "-C", str(ROOT), "diff", "--quiet", "HEAD", "--", path], capture_output=True, timeout=60)
+    return r.returncode == 1
+
+
+def record_own_dirty() -> int:
+    """wrapper 每輪收工呼叫：把這輪留在工作樹、還沒 commit 的 OWN_TRACKED 檔記下內容雜湊。永遠 exit 0（十二節）。"""
+    try:
+        dirty = [p for p in OWN_TRACKED if (ROOT / p).exists() and _dirty_vs_head(p)]
+        if dirty:
+            _record_runner_write(*dirty)
+        print(f"RECORDED_OWN_DIRTY: {', '.join(dirty) or '（無）'}")
+    except Exception as e:  # noqa: BLE001
+        print(f"WARN: record_own_dirty 失敗（{type(e).__name__}），不影響本輪", flush=True)
+    return 0
+
+
+def _commit_own_leftovers() -> None:
+    """check_collision 判定 PROCEED 之後：工作樹裡內容仍等於紀錄的 OWN_TRACKED 檔＝上一輪 DevQueue 自己的殘留，
+    先代為 commit（local_git_commit.commit_paths：取 git_op_lock、只收這幾個檔、pull 套回失敗有處理）。
+    自身任何失敗只印警告、不擋本輪（十二節）。"""
+    try:
+        own = [p for p in OWN_TRACKED if (ROOT / p).exists() and _dirty_vs_head(p) and _only_runner_write(p)]
+        if not own:
+            return
+        import local_git_commit as LGC  # noqa: PLC0415
+        res = LGC.commit_paths(own, "DevQueue 上一輪收工紀錄代為提交（收工時未能 commit，內容與當時紀錄的雜湊相同）")
+        print(f"INFO: 上一輪 DevQueue 留下的 {', '.join(own)} 代為提交：{res}", flush=True)
+        if res.startswith("已 commit"):
+            files = _load_runner_write()
+            for p in own:
+                files.pop(p, None)
+            RUNNER_WRITE.write_text(json.dumps({"files": files, "at": datetime.now(TZ).isoformat(timespec="seconds")},
+                                               ensure_ascii=False), encoding="utf-8")
+    except Exception as e:  # noqa: BLE001
+        print(f"WARN: 代為提交上一輪殘留失敗（{type(e).__name__}: {e}），本輪照常執行", flush=True)
 
 
 def _recent_real_dirty_reason() -> str | None:
@@ -291,8 +349,8 @@ def _recent_real_dirty_reason() -> str | None:
         except OSError:
             continue  # 檔案已被刪除等邊界情況，不當成碰撞訊號
         if age_min < COLLISION_RECENCY_MINUTES:
-            if path == "PENDING_QUEUE.md" and _only_runner_write(path):
-                print(f"INFO: {path} 的未提交改動只有守門員自己標的 - [!]（內容與 mark_blocked 寫入時相同，"
+            if path in OWN_TRACKED and _only_runner_write(path):
+                print(f"INFO: {path} 的未提交改動是 DevQueue 自己留下的（內容與紀錄的雜湊相同，"
                       f"{age_min:.1f} 分鐘前被刷新修改時間），不算有人在中途，照常執行", flush=True)
                 continue
             if path in APPEND_TOLERANT and _append_only_change(path):
@@ -327,6 +385,7 @@ def check_collision() -> int:
         print(f"YIELD: {reason}")
         return 1
     print("PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案")
+    _commit_own_leftovers()
     return 0
 
 # 2026-09-18（總司令裁示【改為連續自走】）：這幾個regex對應CLAUDE.md
@@ -1247,6 +1306,8 @@ def main() -> int:
         return build_prompt()
     if cmd == "check_collision":
         return check_collision()
+    if cmd == "record_own_dirty":
+        return record_own_dirty()
     if cmd == "block":
         return mark_blocked(sys.argv[2] if len(sys.argv) > 2 else "未說明原因")
     if cmd in ("ok", "fail"):

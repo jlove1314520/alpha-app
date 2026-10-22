@@ -66,5 +66,45 @@ with tempfile.TemporaryDirectory() as td:
     D.RUNNER_WRITE.write_text("{壞掉", encoding="utf-8")
     check("2d 寫入紀錄壞掉 → 讓路（fail safe）", D._recent_real_dirty_reason() is not None)
 
+# 3. 收件匣 016：上一輪收工沒 commit 的 PENDING_QUEUE.md／PROGRESS.md → 下一輪代為 commit；有人再改就照舊讓路
+import local_git_commit as LGC  # noqa: E402
+
+with tempfile.TemporaryDirectory() as td:
+    td = Path(td)
+    origin, root = td / "origin.git", td / "repo"
+    subprocess.run(["git", "init", "-q", "--bare", "-b", "main", str(origin)], check=True)
+    subprocess.run(["git", "clone", "-q", str(origin), str(root)], check=True, capture_output=True)
+    git = lambda *a: subprocess.run(["git", "-C", str(root), *a], capture_output=True, text=True, encoding="utf-8")
+    git("config", "user.email", "selftest@example.invalid"); git("config", "user.name", "selftest")
+    git("checkout", "-q", "-b", "main")
+    q, pg = root / "PENDING_QUEUE.md", root / "PROGRESS.md"
+    q.write_text("# 佇列\n- [ ] **甲**\n", encoding="utf-8", newline="\n")
+    pg.write_text("## 舊紀錄\n", encoding="utf-8", newline="\n")
+    git("add", "-A"); git("commit", "-q", "-m", "init"); git("push", "-q", "-u", "origin", "main")
+    lock = td / "fake_lock.py"
+    lock.write_text("import sys\nprint('ACQUIRED token=selftest')\nsys.exit(0)\n", encoding="utf-8")
+    D.ROOT, D.QUEUE = root, q
+    D.RUNNER_WRITE, D.DIRTY_SEEN = root / ".runner_write.json", root / ".dirty_seen.json"
+    D._other_track_lock_reason = lambda: None
+    LGC.ROOT, LGC.GITDIR, LGC.LOCK = root, root / ".git", lock
+
+    q.write_text("# 佇列\n- [x] **甲** 做完\n", encoding="utf-8", newline="\n")
+    pg.write_text("## 本輪收工\n## 舊紀錄\n", encoding="utf-8", newline="\n")
+    D.record_own_dirty()
+    rec = D._load_runner_write()
+    check("3a 收工記下兩個檔的雜湊", set(rec) == {"PENDING_QUEUE.md", "PROGRESS.md"}, str(sorted(rec)))
+    rc = D.check_collision()
+    clean = git("status", "--porcelain", "--", "PENDING_QUEUE.md", "PROGRESS.md").stdout.strip() == ""
+    pushed = git("rev-parse", "HEAD").stdout == git("rev-parse", "origin/main").stdout
+    check("3b 下一輪不讓路、代為 commit 並 push", rc == 0 and clean and pushed, f"rc={rc} clean={clean} pushed={pushed}")
+    check("3c 提交後紀錄清掉", D._load_runner_write() == {}, str(D._load_runner_write()))
+
+    pg.write_text("## 又一輪收工\n## 本輪收工\n## 舊紀錄\n", encoding="utf-8", newline="\n")
+    D.record_own_dirty()
+    pg.write_text("## 又一輪收工（互動視窗補一個字）\n## 本輪收工\n## 舊紀錄\n", encoding="utf-8", newline="\n")
+    head0 = git("rev-parse", "HEAD").stdout
+    rc = D.check_collision()
+    check("3d 紀錄後有人再改 → 讓路、不代為 commit", rc == 1 and git("rev-parse", "HEAD").stdout == head0, f"rc={rc}")
+
 print(f"\n結果：{'全部通過' if not fails else '失敗 ' + str(fails)}")
 sys.exit(1 if fails else 0)
