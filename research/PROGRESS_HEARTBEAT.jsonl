@@ -1103,3 +1103,4 @@
 {"ts": "2026-10-22T08:20:41.895494+08:00", "item": "紙.三", "note": "中止（BAA10Y_UNAVAILABLE）：取不到 FRED BAA10Y（RuntimeError）；本次不記帳，下次排程重試", "status": "ERROR"}
 {"ts": "2026-10-22T08:20:42.645950+08:00", "item": "紙.四", "note": "中止（BAA10Y_UNAVAILABLE）：取不到 FRED BAA10Y（RuntimeError）；本次不記帳，下次排程重試", "status": "ERROR"}
 {"ts": "2026-10-22T16:06:17+08:00", "item": "補.研究-期貨法人未平倉", "summary": "第10關探測：TAIFEX下載僅近3年、OpenAPI僅當日、FinMind起點2018-06-05；同機制已於TRIALS_LEDGER #24~#31測過，無未用資料可單發→改寫前向追蹤提案（待核准），未登記、N不變", "status": "DONE_NO_TRIAL"}
+{"ts": "2026-10-22T16:10:13+08:00", "item": "補.研究-信用利差低波", "summary": "日股含下市股長歷史三來源查證：J-Quants免費2年延遲12週(長歷史待採購)、yfinance下市股0覆蓋(6502.T)、Stooq需CAPTCHA key→判不可行，附4變形方向；未登記、N不變", "status": "DONE_NO_TRIAL"}
