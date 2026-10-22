@@ -4097,7 +4097,7 @@ async function runSmokeTest(baseUrl, headless = true) {
       if (!r2330.length || !r2330.every(x => /台積電 2330/.test(x))) hevErrs.push(`2330 的列沒顯示股名：${r2330.slice(0, 2).join("、")}`);
       if (st.rows.some(x => /^(\d{4}) \1$/.test(x))) hevErrs.push("出現「代號 代號」重複顯示");
       if (bad.length) hevErrs.push("仍有事件檔 404：" + bad.map(u => u.replace(/^.*\//, "")).join("、"));
-      const idxOk = await p.evaluate(async () => { const s = await eventsIndex(); return !!s && s.size > 100 && !s.has("8054"); });
+      const idxOk = await p.evaluate(async () => { const s = await eventsIndex(); return !!s && s.size > 100 && !s.has("6693"); });  // 2026-10-22：8054 於 15:39 新聞更新後已有事件，改用仍無事件的 6693 驗「索引不含無事件代號」
       if (!idxOk) hevErrs.push("events_by_code/_index.json 沒讀到或內容不對");
     } finally { await ctx.close(); }
   } catch (e) { hevErrs.push(`測試本身出錯：${e.message || e}`); }
