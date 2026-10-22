@@ -116,35 +116,57 @@ def load_futures() -> pd.DataFrame:
 
 
 def load_spot(sid: str):
-    f = RAW / f"TaiwanStockPrice__{sid}__2010-01-01__2024-12-31.parquet"
-    if not f.exists():
+    """拼接該代號所有結束日 ≤2024-12-31 的快取檔（不讀 *__latest 檔，避免碰到 2025+）。"""
+    parts = []
+    for f in RAW.glob(f"TaiwanStockPrice__{sid}__*.parquet"):
+        end = f.stem.split("__")[-1]
+        if end == "latest" or end > END:
+            continue
+        try:
+            parts.append(pd.read_parquet(f)[["date", "open", "max", "min", "close", "spread", "Trading_Volume"]])
+        except Exception as e:  # 空檔／壞檔：略過，不影響其他檔
+            print(f"[警告] 讀不到 {f.name}：{type(e).__name__}")
+    if not parts:
         return None
-    p = pd.read_parquet(f)[["date", "open", "max", "min", "close", "spread", "Trading_Volume"]]
+    p = pd.concat(parts, ignore_index=True)
+    p["date"] = p["date"].astype(str)
+    p = p.drop_duplicates("date", keep="last")
     p["date"] = pd.to_datetime(p["date"])
     p = p[(p["close"] > 0) & (p["date"] <= END)].sort_values("date")
     return p.set_index("date")
 
 
 def load_div(sid: str):
-    f = RAW / f"TaiwanStockDividend__{sid}__2010-01-01__2024-12-31.parquet"
-    if not f.exists():
+    """拼接該代號所有結束日 ≤2024-12-31 的股利快取檔；回傳 (現金股利, 股票股利, 覆蓋區間)。
+    覆蓋區間取檔名起訖的聯集外框（區間中間若有缺檔不另偵測，列為已知限制）。"""
+    parts, lo, hi = [], None, None
+    for f in RAW.glob(f"TaiwanStockDividend__{sid}__*.parquet"):
+        _, _, a, b = f.stem.split("__")
+        if b == "latest" or b > END:
+            continue
+        try:
+            parts.append(pd.read_parquet(f))
+        except Exception as e:  # 空檔／壞檔：略過，不影響其他檔
+            print(f"[警告] 讀不到 {f.name}：{type(e).__name__}")
+            continue
+        lo = a if lo is None or a < lo else lo
+        hi = b if hi is None or b > hi else hi
+    if not parts:
         return None
-    d = pd.read_parquet(f)
-    out = []
+    d = pd.concat(parts, ignore_index=True)
+    out, sx = set(), set()
     for _, r in d.iterrows():
+        ann = r.get("AnnouncementDate")
+        ann = pd.Timestamp(ann) if ann else None
         cash = float(r.get("CashEarningsDistribution") or 0) + float(r.get("CashStatutorySurplus") or 0)
         ex = r.get("CashExDividendTradingDate")
-        ann = r.get("AnnouncementDate")
         if cash > 0 and ex:
-            out.append((pd.Timestamp(ex), pd.Timestamp(ann) if ann else None, cash))
-    sx = []
-    for _, r in d.iterrows():
+            out.add((pd.Timestamp(ex), ann, cash))
         st = float(r.get("StockEarningsDistribution") or 0) + float(r.get("StockStatutorySurplus") or 0)
         ex = r.get("StockExDividendTradingDate")
-        ann = r.get("AnnouncementDate")
         if st > 0 and ex:
-            sx.append((pd.Timestamp(ex), pd.Timestamp(ann) if ann else None))
-    return out, sx
+            sx.add((pd.Timestamp(ex), ann))
+    return sorted(out, key=str), sorted(sx, key=str), (pd.Timestamp(lo), pd.Timestamp(hi))
 
 
 def price_match(code, fut, spots_all):
@@ -250,9 +272,13 @@ def candidates(fut, mapping, tdays, tidx, ltd, vanished, spots, divs):
     f = f[~miss].copy()
     f["locked"] = (f["S1"] == f["max"]) & (f["S1"] == f["min"]) & (f["spread"] > 0) & (
         f["spread"] / (f["S1"] - f["spread"]) >= 0.095)
+    cov = f.apply(lambda r: r["sid"] in divs and divs[r["sid"]][2][0] <= r["date"]
+                  and r["T"] <= divs[r["sid"]][2][1], axis=1) if len(f) else []
+    excl["股利快取未涵蓋持有期"] = int(len(f) - np.sum(cov))
+    f = f[np.asarray(cov, dtype=bool)].copy()
     Ds, stk = [], []
     for r in f[["sid", "date", "T"]].itertuples(index=False):
-        divl, sx = divs.get(r.sid) or ([], [])
+        divl, sx, _ = divs[r.sid]
         Ds.append(sum(cv for ex, ann, cv in divl if r.date < ex <= r.T and ann is not None and ann <= r.date))
         stk.append(any(r.date < ex <= r.T and ann is not None and ann <= r.date for ex, ann in sx))
     f["D"] = Ds
