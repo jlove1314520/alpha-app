@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-21T14:32:58+00:00",
+ "generated_at": "2026-10-22T17:41:19+08:00",
  "label": "market",
  "checked": [
   "data/STATUS.json",
@@ -26,6 +26,17 @@
   "data/paper_tracking_watch.json",
   "data/picks_ledger.json",
   "data/price_history/_meta.json",
+  "data/price_history/b0.json",
+  "data/price_history/b1.json",
+  "data/price_history/b2.json",
+  "data/price_history/b3.json",
+  "data/price_history/b4.json",
+  "data/price_history/b5.json",
+  "data/price_history/b6.json",
+  "data/price_history/b7.json",
+  "data/price_history/b8.json",
+  "data/price_history/b9.json",
+  "data/price_history/bx.json",
   "data/quotes_all_tw.json",
   "data/research.json",
   "data/research_radar.json",
@@ -37,6 +48,7 @@
   "data/stock_detail.json",
   "data/stock_detail_eps.json",
   "data/strategies.json",
+  "data/strategy_curves.json",
   "data/strategy_performance.json",
   "data/trials_index.json",
   "data/us_13f_holdings.json",
@@ -49,7 +61,22 @@
   "scores_future.json",
   "scores_momentum.json"
  ],
- "rejected": [],
+ "rejected": [
+  {
+   "file": "data/daily_brief.json",
+   "errors": [
+    "不是合法 JSON：ValueError: 含 NaN（瀏覽器 JSON.parse 不接受）"
+   ],
+   "action": "已還原成上一版（HEAD），本次不發布"
+  },
+  {
+   "file": "data/market_us.json",
+   "errors": [
+    "不是合法 JSON：ValueError: 含 NaN（瀏覽器 JSON.parse 不接受）"
+   ],
+   "action": "已還原成上一版（HEAD），本次不發布"
+  }
+ ],
  "guard_error": null,
  "note": "常備.開發-28：排程 commit 前驗證 App 會讀的 JSON；不過者還原上一版、不發布。generated_at 是「結果最後一次改變」的時間，不是每次執行時間。"
 }
