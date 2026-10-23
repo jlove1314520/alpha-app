@@ -26,6 +26,7 @@
 
 用法：
   python research/var1018_v1_oneshot.py selftest   # 合成資料自測＋無網路守門，不碰真資料報酬
+  python research/var1018_v1_oneshot.py probe      # 修訂 R2 後資料探測（母體／涵蓋／跳動數），不算報酬
   python research/var1018_v1_oneshot.py run        # 只跑一次；結果檔已存在就拒跑
 輸出：research/data/var1018_v1_oneshot_result.json（git add -f 入庫）
 """
@@ -54,6 +55,7 @@ RESULT = HERE / "data" / "var1018_v1_oneshot_result.json"
 FILL_REPORT = HERE / "data" / "v1_reduction_fill_report.json"
 PREREG = "docs/PREREG_VAR1018_V1_equal_weight_rebalance_tw2007_FINAL.md"
 PREREG_COMMIT = "7e657456b6"
+PREREG_R2_COMMIT = "R2_PENDING"   # 修訂 R2（先.一三三-1b）commit，單發前填入
 T0, END = pd.Timestamp("2007-07-02"), pd.Timestamp("2014-12-31")
 REBAL = 21
 TAIL_DAYS = 20          # 同涵蓋率定義：最後一筆價格距離終點 ≤20 天才算有到終點
@@ -151,7 +153,7 @@ def official_closes(codes: set[str]) -> dict[str, dict]:
     return out
 
 
-def raw_close(code: str, off: dict) -> pd.Series:
+def raw_close(code: str, off: dict, listed: np.ndarray | None = None, chk: np.ndarray | None = None) -> pd.Series:
     import var1018_v1_prep as V
     s = pd.Series(dtype=float)
     if V.cached("TaiwanStockPrice", code):
@@ -164,6 +166,10 @@ def raw_close(code: str, off: dict) -> pd.Series:
         s = pd.concat([s, o[~o.index.isin(s.index)]])  # FinMind 優先，官方補 FinMind 沒有的日子
     s = s[~s.index.duplicated()].sort_index()
     s.index = pd.to_datetime(s.index)
+    if chk is not None:  # 修訂 R2①：可核對日（兩市場官方日檔皆 ok）只留官方有列的價格列（同 var1018_v1_r2_coverage.r2_filter）
+        import var1018_v1_r2_coverage as R2
+        kept, _ = R2.r2_filter(s.index.to_numpy().astype("datetime64[D]"), listed, chk)
+        s = s[s.index.isin(pd.to_datetime(kept))]
     return s
 
 
@@ -182,14 +188,21 @@ def build_data() -> dict:
     dl["date"] = pd.to_datetime(dl["date"])
     ddate = dict(zip(dl["stock_id"], dl["date"]))
     del dl
+    import var1018_v1_lowmem as L
+    import var1018_v1_r2_coverage as R2
     codes = [c for c in cands if c != "0050"]
     off = official_closes(set(codes))
+    idx = L.build_index()
+    chk = R2.checkable_days(idx)
     series, meta = {}, {}
     for c in codes:
-        s = raw_close(c, off)
+        lst = idx["listed"].get(c)
+        s = raw_close(c, off, lst, chk)
         t = s.index[(s.index >= T0 - pd.Timedelta(days=10)) & (s.index <= END)]
         if len(t) == 0 or t[0] > T0 + pd.Timedelta(days=10):
             continue  # 不在 t0 母體（同 coverage_windows._code_window）
+        if not R2.in_official_near(lst, T0):
+            continue  # 修訂 R2②：t0 前後 10 天官方日檔沒有列＝不在母體
         ev, err = events_for(c)
         adj = apply_events(s, ev)
         series[c] = adj[(adj.index >= T0 - pd.Timedelta(days=10)) & (adj.index <= END)]
@@ -432,6 +445,46 @@ def run() -> int:
     return 0
 
 
+# ------------------------------------------------------------------ 單發前資料探測（只看母體／涵蓋／跳動數，不算任何報酬）
+PROBE = HERE / "data" / "var1018_v1_r2_probe.json"
+
+
+def probe() -> int:
+    """修訂 R2 後重做資料探測（先.一三三-1a 定案條件）：母體檔數、下市股、缺資料下市股、相鄰交易日還原收盤 >±7.5% 筆數。
+    不呼叫 simulate／evaluate，不算策略或基準報酬。"""
+    install_no_network_guard()
+    data = build_data()
+    cal, series, meta = data["cal"], data["series"], data["meta"]
+    codes = sorted(series)
+    M = make_matrix(series, cal, codes, meta)
+    jumps = []
+    for c in codes:
+        s = series[c]
+        s = s[(s.index >= T0) & (s.index <= END)]
+        pos = pd.Series(np.arange(len(cal)), index=cal).reindex(s.index)
+        r = s.pct_change()
+        adj = (pos.diff() == 1) & (r.abs() > 0.075)
+        for d in s.index[adj.to_numpy()]:
+            jumps.append({"stock_id": c, "date": str(d.date()), "ret": round(float(r[d]), 4)})
+    by_year: dict[str, int] = {}
+    for j in jumps:
+        by_year[j["date"][:4]] = by_year.get(j["date"][:4], 0) + 1
+    out = {"generated_at": datetime.now().isoformat(timespec="seconds"), "returns_computed": False, "zero_requests": True,
+           "n_universe": len(codes), "n_delisted_in_universe": int(sum(meta[c]["dead"] for c in codes)),
+           "n_missing_data_delisted": int(M["missing_dead"].sum()),
+           "missing_data_delisted": [c for c, f in zip(codes, M["missing_dead"]) if f],
+           "n_alive_price_ends_early": int(M["early_alive"].sum()),
+           "alive_price_ends_early": [c for c, f in zip(codes, M["early_alive"]) if f],
+           "n_adjacent_moves_over_7p5pct": len(jumps), "n_adjacent_stocks": len({j["stock_id"] for j in jumps}),
+           "adjacent_by_year": dict(sorted(by_year.items())),
+           "adjacent_list": sorted(jumps, key=lambda j: -abs(j["ret"]))[:200],
+           "events_errors": {c: m["events_error"] for c, m in meta.items() if m["events_error"]},
+           "n_trading_days": len(cal)}
+    PROBE.write_text(json.dumps(out, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
+    print(json.dumps({k: v for k, v in out.items() if not isinstance(v, (list, dict)) or k == "adjacent_by_year"}, ensure_ascii=False))
+    return 0
+
+
 # ------------------------------------------------------------------ 自測（合成資料，不碰真資料報酬）
 def selftest() -> int:
     ok = True
@@ -480,4 +533,4 @@ def selftest() -> int:
 
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "selftest"
-    raise SystemExit(run() if cmd == "run" else selftest())
+    raise SystemExit(run() if cmd == "run" else probe() if cmd == "probe" else selftest())

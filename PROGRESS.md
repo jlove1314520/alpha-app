@@ -1,3 +1,13 @@
+## 2026-10-23 15:01～15:3x DevQueue 20261023-150102（研究帽）
+
+等待總司令審閱：1 件——先.一三三-1c（FinMind 2009 年股利整年缺漏，選補法），等待約 0 小時。
+
+### 先.一三三-1b V1 PREREG 修訂 R2 ✅
+- 做了什麼：`docs/PREREG_VAR1018_V1_equal_weight_rebalance_tw2007_FINAL.md` 加「修訂 R2」（Cowork 020 B1 採甲；寫明未觀察任何結果、不另計 N）：價格列只採兩市場官方日檔可核對日有列的日子、母體需 t0 前後 10 天官方有列。
+- 證據（零請求、未算報酬）：`research/var1018_v1_r2_coverage.py` → `research/data/var1018_v1_r2_coverage.json`：母體 1,253→1,126、下市股 73，主定義 satfix 98.31%／下市股 79.45%（仍 <95% → 兩假設分支照舊）。`research/var1018_v1_oneshot.py` 只改資料讀取、新增 `probe`，selftest PASS；probe 相鄰日 >±7.5% 3,714→317 筆（`research/data/var1018_v1_r2_probe.json`）。冒煙 176 項全 PASS（EXIT 0）。
+- [自行裁量]：第一次重算排除了收盤 ≤0 的 FinMind 無成交列（88.87%），與 PREREG「有列就算」不同，改回主結果、原數字留作揭露變體。
+- BLOCKED：probe 揭出 **FinMind `TaiwanStockDividend` 2009 年整年 0 筆**（2008 年 798 檔、2010 年 688 檔有），2009 除權息全部未還原（317 筆跳動中 186 筆在 2009）→ 先.一三三-1 仍阻塞、#462 未執行；另開 先.一三三-1c（建議用官方 TWT49U／exDailyQ 補 2007-07～2014，套用方式待定），列 AWAITING。先.一三三-2b 的兩個窗口也含 2009，已在條目補記。
+
 ## 2026-10-23 15:xx 互動視窗（Cowork 收件匣 020）：模擬 I 讀取放行（holdout 守門只開兩支）、十項審查一次結案
 
 - 等待總司令審閱：0 件。
@@ -8,6 +18,7 @@
   - 先.一三二-0 已解除阻塞交回 DevQueue。
 - **B. 十項審查**：照 Cowork 轉來的裁示原文記進各條目、AWAITING 全部結案（等待中 0 件）；四項「照做」開成 DevQueue 條目：V1 修訂 R2（先.一三三-1b）、網格／ML 修訂定稿（先.一三三-2b）、稽核雲端裝套件（先.一三二-8b）、颱風臨時休市判斷與 10/23 補記（先.一三二-10b）。
 - **冒煙測試**：`node scripts/smoke_test.mjs` exit 0、176 項全 PASS。
+
 
 ## 2026-10-23 13:31～14:1x DevQueue 20261023-133102：reproducibility_check 提案（先.一三二-8）＋Shioaji 查因結案＝颱風休市（先.一三二-9）＋日曆臨時休市提案（先.一三二-10）
 
