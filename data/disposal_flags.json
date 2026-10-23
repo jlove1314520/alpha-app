@@ -1,12 +1,12 @@
 {
  "meta": {
-  "generated_at": "2026-10-22T18:30:02+08:00",
+  "generated_at": "2026-10-23T18:30:02+08:00",
   "errors": [],
   "supplemented": {},
   "primary": "shioaji",
   "disposal_latest_announced": {
-   "TSE": "2026-10-19",
-   "OTC": "2026-10-21",
+   "TSE": "2026-10-20",
+   "OTC": "2026-10-22",
    "otc_lag_trading_days": 0
   },
   "notice_latest_announced": {
@@ -16,7 +16,7 @@
   },
   "expired_dropped": 0,
   "counts": {
-   "disposal": 17,
+   "disposal": 19,
    "notice": 41
   },
   "note": "處置股＝交易所公告分盤撮合（每 N 分鐘撮合一次）與預收款券；注意股＝當日公布注意交易資訊。App 個股頁紅標、AI 選股候選排除處置期間內個股。非投資建議。"
@@ -24,7 +24,7 @@
  "disposal": {
   "053040": {
    "start": "2026-10-20",
-   "end": "2026-10-27",
+   "end": "2026-10-28",
    "announced": "2026-10-19",
    "interval": "2分鐘",
    "unit_limit": null,
@@ -35,7 +35,7 @@
   },
   "2221": {
    "start": "2026-10-19",
-   "end": "2026-10-23",
+   "end": "2026-10-27",
    "announced": "2026-10-16",
    "interval": "2分鐘",
    "unit_limit": null,
@@ -46,7 +46,7 @@
   },
   "22211": {
    "start": "2026-10-19",
-   "end": "2026-10-23",
+   "end": "2026-10-27",
    "announced": "2026-10-16",
    "interval": "2分鐘",
    "unit_limit": null,
@@ -56,19 +56,19 @@
    "source": "shioaji_punish"
   },
   "2424": {
-   "start": "2026-10-16",
-   "end": "2026-10-22",
-   "announced": "2026-10-15",
-   "interval": "10分鐘",
+   "start": "2026-10-21",
+   "end": "2026-10-29",
+   "announced": "2026-10-20",
+   "interval": "25分鐘",
    "unit_limit": null,
    "total_limit": null,
-   "reason": "該有價證券之交易，連續三個營業日達本公司「公布注意交易資訊」標準。",
+   "reason": "該有價證券之交易，連續三個營業日達本公司「公布注意交易資訊」標準，且該股票於最近三十個營業日內曾發布處置交易資訊。",
    "exchange": "TSE",
    "source": "shioaji_punish"
   },
   "3055": {
    "start": "2026-10-19",
-   "end": "2026-10-23",
+   "end": "2026-10-27",
    "announced": "2026-10-16",
    "interval": "2分鐘",
    "unit_limit": null,
@@ -79,7 +79,7 @@
   },
   "3167": {
    "start": "2026-10-20",
-   "end": "2026-10-27",
+   "end": "2026-10-28",
    "announced": "2026-10-19",
    "interval": "2分鐘",
    "unit_limit": null,
@@ -90,7 +90,7 @@
   },
   "3230": {
    "start": "2026-10-19",
-   "end": "2026-10-23",
+   "end": "2026-10-27",
    "announced": "2026-10-16",
    "interval": "2分鐘",
    "unit_limit": 10.0,
@@ -101,7 +101,7 @@
   },
   "3287": {
    "start": "2026-10-22",
-   "end": "2026-10-29",
+   "end": "2026-10-30",
    "announced": "2026-10-21",
    "interval": "2分鐘",
    "unit_limit": null,
@@ -112,7 +112,7 @@
   },
   "3354": {
    "start": "2026-10-21",
-   "end": "2026-10-28",
+   "end": "2026-10-29",
    "announced": "2026-10-20",
    "interval": "2分鐘",
    "unit_limit": 10.0,
@@ -123,7 +123,7 @@
   },
   "3597": {
    "start": "2026-10-19",
-   "end": "2026-10-23",
+   "end": "2026-10-27",
    "announced": "2026-10-16",
    "interval": "2分鐘",
    "unit_limit": null,
@@ -132,9 +132,20 @@
    "exchange": "OTC",
    "source": "shioaji_punish"
   },
+  "4542": {
+   "start": "2026-10-23",
+   "end": "2026-11-04",
+   "announced": "2026-10-22",
+   "interval": "2分鐘",
+   "unit_limit": null,
+   "total_limit": null,
+   "reason": "連續5個營業日達本中心「公布注意交易資訊」標準，且最近30個營業日內曾發布處置，且該連續期間曾達沖銷標準。",
+   "exchange": "OTC",
+   "source": "shioaji_punish"
+  },
   "4979": {
    "start": "2026-10-19",
-   "end": "2026-10-23",
+   "end": "2026-10-27",
    "announced": "2026-10-16",
    "interval": "2分鐘",
    "unit_limit": null,
@@ -145,7 +156,7 @@
   },
   "49793": {
    "start": "2026-10-19",
-   "end": "2026-10-23",
+   "end": "2026-10-27",
    "announced": "2026-10-16",
    "interval": "2分鐘",
    "unit_limit": null,
@@ -156,7 +167,7 @@
   },
   "49794": {
    "start": "2026-10-19",
-   "end": "2026-10-23",
+   "end": "2026-10-27",
    "announced": "2026-10-16",
    "interval": "2分鐘",
    "unit_limit": null,
@@ -165,9 +176,20 @@
    "exchange": "OTC",
    "source": "shioaji_punish"
   },
+  "5205": {
+   "start": "2026-10-23",
+   "end": "2026-11-02",
+   "announced": "2026-10-22",
+   "interval": "2分鐘",
+   "unit_limit": null,
+   "total_limit": null,
+   "reason": "連續3個營業日達本中心「公布注意交易資訊」標準，且最近30個營業日內曾發布處置。",
+   "exchange": "OTC",
+   "source": "shioaji_punish"
+  },
   "6716": {
    "start": "2026-10-20",
-   "end": "2026-10-27",
+   "end": "2026-10-28",
    "announced": "2026-10-19",
    "interval": "2分鐘",
    "unit_limit": 10.0,
@@ -176,31 +198,31 @@
    "exchange": "OTC",
    "source": "shioaji_punish"
   },
-  "8111": {
-   "start": "2026-10-16",
-   "end": "2026-10-22",
-   "announced": "2026-10-15",
+  "8358": {
+   "start": "2026-10-23",
+   "end": "2026-11-02",
+   "announced": "2026-10-22",
    "interval": "2分鐘",
-   "unit_limit": 10.0,
-   "total_limit": 30.0,
-   "reason": "最近10個營業日內有6個營業日達本中心「公布注意交易資訊」標準。",
+   "unit_limit": null,
+   "total_limit": null,
+   "reason": "連續5個營業日達本中心「公布注意交易資訊」標準，且最近30個營業日內曾發布處置。",
    "exchange": "OTC",
    "source": "shioaji_punish"
   },
-  "81114": {
-   "start": "2026-10-16",
-   "end": "2026-10-22",
-   "announced": "2026-10-15",
+  "8437": {
+   "start": "2026-10-23",
+   "end": "2026-11-02",
+   "announced": "2026-10-22",
    "interval": "2分鐘",
    "unit_limit": 10.0,
    "total_limit": 30.0,
-   "reason": "該轉換公司債之標的證券上櫃股票立碁電子工業股份有限公司(代號：8111)經本中心發布處置  * 處置起訖期間： 自115年10月16日起5個營業日(115年10月16日至115年10月22日)，如遇： (1)有價證券最後交易日在處置期間，僅處置至其最後交易日； (2)休市、有價證券停止買賣、全日暫停交易，則順延執行。",
+   "reason": "連續5個營業日達本中心「公布注意交易資訊」標準。",
    "exchange": "OTC",
    "source": "shioaji_punish"
   },
   "911608": {
    "start": "2026-10-19",
-   "end": "2026-10-23",
+   "end": "2026-10-27",
    "announced": "2026-10-16",
    "interval": "2分鐘",
    "unit_limit": 10.0,
