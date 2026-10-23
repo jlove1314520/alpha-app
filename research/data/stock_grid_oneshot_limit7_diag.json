@@ -1,0 +1,11 @@
+{
+ "generated_at": "2026-10-23T22:50",
+ "script": "research/stock_grid_limit7_diag.py",
+ "purpose": "揭露：costs.limit_status() 寫死 ±10%，2015-06-01 前台股漲跌幅 ±7%；不改判定、不重跑單發",
+ "neutral_1x_final_equity_replay": 92353401.38222288,
+ "n_round_trips": 2514,
+ "buys_executed_on_7pct_limitup_lock_day": 3,
+ "sells_executed_on_7pct_limitdown_lock_day": 23,
+ "lock_definition": "開盤與最低 ≥ 前一有效還原收盤×1.07×(1−0.15%)（漲停）；開盤與最高 ≤ ×0.93×(1+0.15%)（跌停），同 limit_status() 容忍度",
+ "direction_of_bias": "這 23 筆賣單實際上當天賣不掉、會順延到之後（多半更低價），所以結果檔的權益偏樂觀；網格 1× 已是淨虧損，修正方向只會更差，不會讓 FAIL 翻轉"
+}
