@@ -31,13 +31,18 @@ US_CLOSED = {  # NYSE 官方頁抄錄（2026-10-13 查證）
              "2026-07-03", "2026-09-07", "2026-11-26", "2026-12-25"],
     "2027": ["2027-01-01", "2027-01-18", "2027-02-15", "2027-03-26", "2027-05-31", "2027-06-18",
              "2027-07-05", "2027-09-06", "2027-11-25", "2027-12-24"],
+    # 先.一三二-13b（2026-10-24 同頁抄錄）：2028 元旦落在週六，官方註明不補假
+    "2028": ["2028-01-17", "2028-02-21", "2028-04-14", "2028-05-29", "2028-06-19", "2028-07-04",
+             "2028-09-04", "2028-11-23", "2028-12-25"],
 }
-# 先.一三二-13a（2026-10-24）：同一官方頁註腳「Each market will close early at 1:00 p.m.」抄錄（美東時間；只抄檔內已有的年度）
+# 先.一三二-13a（2026-10-24）：同一官方頁註腳「Each market will close early at 1:00 p.m.」抄錄（美東時間）
 US_EARLY_CLOSE = {
     "2026": {"2026-11-27": "13:00", "2026-12-24": "13:00"},
     "2027": {"2027-11-26": "13:00"},
+    "2028": {"2028-07-03": "13:00", "2028-11-24": "13:00"},
 }
 US_EARLY_CLOSE_TRANSCRIBED_AT = "2026-10-24"
+US_CLOSED_TRANSCRIBED_AT = {"2028": "2026-10-24"}  # 2026／2027 為 2026-10-13 抄錄
 REFRESH_DAYS = 7
 # 先.一三二-10b（2026-10-24，收件匣 020 B4 採丙的「收盤後正式確認」半邊）：颱風當天臨時休市原本要等 7 天快取過期才記得到。
 # 改成每天另問 1 次 FMTQIK（目標日所在月份），目標日＝台北 17:00 以後是今天、之前是昨天；同一目標日只問一次（每日約 +1 次）。
@@ -212,7 +217,7 @@ def main() -> int:
     out = {"generated_at": now.isoformat(timespec="seconds"),
            "note": "休市日（全日不交易）；週末不列。台股來自 TWSE 官方日曆端點；美股依 NYSE 官方頁抄錄。",
            "tw": tw,
-           "us": {y: {"closed": d, "published": True, "source": NYSE_URL, "transcribed_at": "2026-10-13",
+           "us": {y: {"closed": d, "published": True, "source": NYSE_URL, "transcribed_at": US_CLOSED_TRANSCRIBED_AT.get(y, "2026-10-13"),
                       "early_close": US_EARLY_CLOSE.get(y, {}), "early_close_transcribed_at": US_EARLY_CLOSE_TRANSCRIBED_AT}
                   for y, d in US_CLOSED.items()}}
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
