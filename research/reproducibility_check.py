@@ -38,6 +38,7 @@ import random
 import re
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 try:  # Windows cp950主控台印不出特殊符號時降級，不崩潰（見CLAUDE.md第十二節）
@@ -50,6 +51,20 @@ ROOT = Path(__file__).parent
 TRIALS_LEDGER = ROOT / "TRIALS_LEDGER.md"
 OUT_PATH = ROOT / "reproducibility_check_result.json"
 TIMEOUT_SECONDS = 10
+# 2026-10-24 先.一三二-8b（收件匣 020 B3 建議④）：逐支開子行程、每支約 2 秒，
+# 225 支序列跑超過 audit_preflight 的 300 秒逾時，改 4 條並行。
+MAX_WORKERS = 4
+# 缺的是這些第三方套件 → 記 ENV_MISSING（環境沒裝，不是腳本壞掉），不算進 broken。
+# 刻意用明確清單、不是「不在 research/ 就算第三方」：被刪掉／改名的專案模組
+# （#23 那種 dangling import）也會是 ModuleNotFoundError，不能被當成環境問題藏掉。
+# 清單外的缺模組一律照舊記 IMPORT_ERROR。
+KNOWN_THIRD_PARTY = frozenset({
+    "numpy", "pandas", "scipy", "requests", "yfinance", "fastapi", "pyarrow",
+    "bs4", "cryptography", "shioaji", "sklearn", "uvicorn", "statsmodels",
+    "pydantic", "ib_async", "ib_insync", "joblib", "telethon", "pywebpush",
+    "matplotlib", "lxml", "playwright", "certifi", "urllib3",
+})
+_MISSING_MOD_RE = re.compile(r"ModuleNotFoundError: No module named '([^']+)'")
 
 _PY_NAME_RE = re.compile(r"\b([A-Za-z_][A-Za-z0-9_]*)\.py\b")
 
@@ -86,6 +101,13 @@ def check_one(module_name: str) -> dict:
     if "PermissionError" in stderr:
         return {"module": module_name, "status": "BLOCKED_BY_GUARD",
                 "note": "被net_guard/既有合規防呆正確擋下，不是bug", "detail": last_line}
+    missing = _MISSING_MOD_RE.search(stderr)
+    if missing:
+        top = missing.group(1).split(".")[0]
+        is_project = (ROOT / f"{top}.py").exists() or (ROOT / top).is_dir()
+        if top in KNOWN_THIRD_PARTY and not is_project:
+            return {"module": module_name, "status": "ENV_MISSING", "missing_package": top,
+                    "note": "執行環境沒裝這個第三方套件，驗不到、但不是腳本壞掉", "detail": last_line}
     if any(err in stderr for err in ("ImportError", "ModuleNotFoundError", "AttributeError", "NameError")):
         return {"module": module_name, "status": "IMPORT_ERROR",
                 "note": "真的壞了，需要修——這正是#23那種dangling import的同類問題",
@@ -229,18 +251,18 @@ def main() -> int:
     print(f"從TRIALS_LEDGER.md掃出{len(names)}個候選腳本名稱，逐一檢查import...")
 
     results = []
-    for i, name in enumerate(names):
-        r = check_one(name)
-        results.append(r)
-        if (i + 1) % 20 == 0:
-            print(f"  {i + 1}/{len(names)}")
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
+        for i, r in enumerate(pool.map(check_one, names)):  # map 保持原本順序
+            results.append(r)
+            if (i + 1) % 20 == 0:
+                print(f"  {i + 1}/{len(names)}")
 
     by_status: dict[str, list[dict]] = {}
     for r in results:
         by_status.setdefault(r["status"], []).append(r)
 
     print("\n=== 結果摘要 ===")
-    for status in ("OK", "BLOCKED_BY_GUARD", "FILE_NOT_FOUND", "TIMEOUT", "IMPORT_ERROR", "OTHER_ERROR"):
+    for status in ("OK", "BLOCKED_BY_GUARD", "FILE_NOT_FOUND", "ENV_MISSING", "TIMEOUT", "IMPORT_ERROR", "OTHER_ERROR"):
         items = by_status.get(status, [])
         print(f"{status}: {len(items)}")
 
@@ -251,6 +273,11 @@ def main() -> int:
             print(f"  {r['module']}.py — {r['status']}：{r.get('detail', '')}")
     else:
         print("\n沒有發現新的dangling import（除了已經修好的#23）。")
+    env_missing = by_status.get("ENV_MISSING", [])
+    if env_missing:  # 驗不到的照列，不隱藏
+        print(f"\n環境缺套件、本次驗不到（{len(env_missing)}個，不算壞掉）：")
+        for r in env_missing:
+            print(f"  {r['module']}.py — 缺 {r['missing_package']}")
 
     spot_check = None
     if "--skip-rerun" not in sys.argv:
@@ -272,6 +299,7 @@ def main() -> int:
         "n_checked": len(names),
         "by_status_count": {k: len(v) for k, v in by_status.items()},
         "broken": broken,
+        "env_missing": [{"module": r["module"], "missing_package": r["missing_package"]} for r in env_missing],
         "all_results": results,
         "result_reproducibility_spot_check": spot_check,
     }, ensure_ascii=False, indent=2), encoding="utf-8")

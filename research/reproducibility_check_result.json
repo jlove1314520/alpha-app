@@ -1,18 +1,30 @@
 {
   "checked_at": null,
-  "n_checked": 180,
+  "n_checked": 236,
   "by_status_count": {
-    "OK": 174,
-    "FILE_NOT_FOUND": 5,
-    "OTHER_ERROR": 1
+    "OK": 221,
+    "FILE_NOT_FOUND": 11,
+    "OTHER_ERROR": 3,
+    "TIMEOUT": 1
   },
   "broken": [
     {
       "module": "deep_dive_f_us_low_vol_small_tier",
       "status": "OTHER_ERROR",
       "detail": "AssertionError: this script is specifically the small-tier deep-dive; if TIER in us_factor_ic_by_size.py has been changed since, re-check before reusing"
+    },
+    {
+      "module": "ml_pricevol_register_result",
+      "status": "OTHER_ERROR",
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'research/data/ml_pricevol_oneshot_result.json'"
+    },
+    {
+      "module": "stock_grid_register_result",
+      "status": "OTHER_ERROR",
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'research/data/stock_grid_oneshot_result.json'"
     }
   ],
+  "env_missing": [],
   "all_results": [
     {
       "module": "adjust",
@@ -31,7 +43,23 @@
       "status": "OK"
     },
     {
+      "module": "audit_f52w_dsr",
+      "status": "OK"
+    },
+    {
+      "module": "audit_universe_composition_val",
+      "status": "OK"
+    },
+    {
       "module": "avg_pairwise_correlation_gate",
+      "status": "OK"
+    },
+    {
+      "module": "b18_8k_commercial_gate",
+      "status": "OK"
+    },
+    {
+      "module": "b30_customer_concentration_gate",
       "status": "OK"
     },
     {
@@ -63,6 +91,10 @@
       "status": "OK"
     },
     {
+      "module": "build_signal_ledger",
+      "status": "FILE_NOT_FOUND"
+    },
+    {
       "module": "build_twse_listing_dates",
       "status": "OK"
     },
@@ -79,7 +111,19 @@
       "status": "OK"
     },
     {
+      "module": "candidate_report",
+      "status": "OK"
+    },
+    {
       "module": "capital_reduction_car_gate",
+      "status": "OK"
+    },
+    {
+      "module": "cbi_signal_gate",
+      "status": "OK"
+    },
+    {
+      "module": "chip_atom_ic_map",
       "status": "OK"
     },
     {
@@ -93,6 +137,10 @@
     {
       "module": "composite_zscore_v1_random_control",
       "status": "OK"
+    },
+    {
+      "module": "control_group",
+      "status": "FILE_NOT_FOUND"
     },
     {
       "module": "control_group_standard",
@@ -111,8 +159,20 @@
       "status": "OK"
     },
     {
+      "module": "core_tilt_v2_stage1",
+      "status": "OK"
+    },
+    {
       "module": "costs",
       "status": "FILE_NOT_FOUND"
+    },
+    {
+      "module": "crisis_gate_leveraged_bb90",
+      "status": "OK"
+    },
+    {
+      "module": "crisis_gate_timing_sensitivity",
+      "status": "OK"
     },
     {
       "module": "cta_momentum_12m",
@@ -228,6 +288,10 @@
       "status": "OK"
     },
     {
+      "module": "dgbas_unemployment_gate",
+      "status": "OK"
+    },
+    {
       "module": "dividend_yield_portfolio_v1",
       "status": "OK"
     },
@@ -256,7 +320,19 @@
       "status": "OK"
     },
     {
+      "module": "etf_rebalance_event_study",
+      "status": "OK"
+    },
+    {
+      "module": "event_driven_gate_sequence",
+      "status": "OK"
+    },
+    {
       "module": "ex_dividend_seasonal_sanity",
+      "status": "OK"
+    },
+    {
+      "module": "exit_rule_lab",
       "status": "OK"
     },
     {
@@ -348,6 +424,10 @@
       "status": "OK"
     },
     {
+      "module": "fetch",
+      "status": "FILE_NOT_FOUND"
+    },
+    {
       "module": "finra_threshold_probe",
       "status": "OK"
     },
@@ -392,6 +472,14 @@
       "status": "OK"
     },
     {
+      "module": "hy_credit_spread_probe",
+      "status": "OK"
+    },
+    {
+      "module": "hy_etf_ratio_gate",
+      "status": "OK"
+    },
+    {
       "module": "index_reconstitution_probe",
       "status": "OK"
     },
@@ -416,6 +504,10 @@
       "status": "OK"
     },
     {
+      "module": "ledger",
+      "status": "FILE_NOT_FOUND"
+    },
+    {
       "module": "lending_fee_gate63",
       "status": "OK"
     },
@@ -429,6 +521,10 @@
     },
     {
       "module": "lending_fee_gate_v2_longhold",
+      "status": "OK"
+    },
+    {
+      "module": "leveraged_bb90_backtest",
       "status": "OK"
     },
     {
@@ -472,6 +568,15 @@
       "status": "OK"
     },
     {
+      "module": "ml_pricevol_oneshot",
+      "status": "OK"
+    },
+    {
+      "module": "ml_pricevol_register_result",
+      "status": "OTHER_ERROR",
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'research/data/ml_pricevol_oneshot_result.json'"
+    },
+    {
       "module": "monthly_revenue_event_study",
       "status": "OK"
     },
@@ -496,6 +601,10 @@
       "status": "OK"
     },
     {
+      "module": "overnight_1999_2009",
+      "status": "OK"
+    },
+    {
       "module": "overnight_intraday_alt_cutpoint_placebo",
       "status": "OK"
     },
@@ -514,6 +623,42 @@
     {
       "module": "pair_trading_sanity",
       "status": "OK"
+    },
+    {
+      "module": "paper_10_disposition_tracker",
+      "status": "OK"
+    },
+    {
+      "module": "paper_11_tdcc_bigholder_tracker",
+      "status": "OK"
+    },
+    {
+      "module": "paper_12_warrant_wave_tracker",
+      "status": "OK"
+    },
+    {
+      "module": "paper_6_vrp_wing_tracker",
+      "status": "OK"
+    },
+    {
+      "module": "paper_7_revsurprise_tracker",
+      "status": "OK"
+    },
+    {
+      "module": "paper_8_ml_tracker",
+      "status": "OK"
+    },
+    {
+      "module": "paper_9_breakout_tracker",
+      "status": "OK"
+    },
+    {
+      "module": "paper_forward_common",
+      "status": "OK"
+    },
+    {
+      "module": "parsers",
+      "status": "FILE_NOT_FOUND"
     },
     {
       "module": "pead_portfolio_v1",
@@ -536,6 +681,14 @@
       "status": "OK"
     },
     {
+      "module": "r1_0050_credit_gate",
+      "status": "OK"
+    },
+    {
+      "module": "regime_alt_a_train_verdict",
+      "status": "OK"
+    },
+    {
       "module": "regime_conditions",
       "status": "OK"
     },
@@ -544,7 +697,15 @@
       "status": "OK"
     },
     {
+      "module": "regime_gate_common",
+      "status": "OK"
+    },
+    {
       "module": "regime_overlay",
+      "status": "OK"
+    },
+    {
+      "module": "regime_overlay_exit_rule_gate",
       "status": "OK"
     },
     {
@@ -564,11 +725,23 @@
       "status": "OK"
     },
     {
+      "module": "run_momentum_future_board_pit_backtest",
+      "status": "OK"
+    },
+    {
+      "module": "run_score_backtest",
+      "status": "OK"
+    },
+    {
       "module": "run_value_board_v2_pit_backtest",
       "status": "OK"
     },
     {
       "module": "score",
+      "status": "OK"
+    },
+    {
+      "module": "sec_rate_limiter",
       "status": "OK"
     },
     {
@@ -608,6 +781,32 @@
       "status": "OK"
     },
     {
+      "module": "stock_futures_basis_oneshot",
+      "status": "OK"
+    },
+    {
+      "module": "stock_futures_basis_run",
+      "status": "OK"
+    },
+    {
+      "module": "stock_grid_limit7_diag",
+      "status": "TIMEOUT",
+      "note": "10秒內未完成import，可能頂層有重度/網路操作，需要人工檢查是否應該加`if __name__ == '__main__':`保護"
+    },
+    {
+      "module": "stock_grid_oneshot",
+      "status": "OK"
+    },
+    {
+      "module": "stock_grid_register_result",
+      "status": "OTHER_ERROR",
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'research/data/stock_grid_oneshot_result.json'"
+    },
+    {
+      "module": "tail_test",
+      "status": "OK"
+    },
+    {
       "module": "train_only_ic_weight_bigsample",
       "status": "OK"
     },
@@ -620,8 +819,16 @@
       "status": "OK"
     },
     {
+      "module": "txo_vrp_2002_2014",
+      "status": "OK"
+    },
+    {
       "module": "universe",
       "status": "OK"
+    },
+    {
+      "module": "update_signal_ledger_returns",
+      "status": "FILE_NOT_FOUND"
     },
     {
       "module": "us_8k_item502_gate52",
@@ -720,7 +927,35 @@
       "status": "OK"
     },
     {
+      "module": "var1018_twdata",
+      "status": "OK"
+    },
+    {
+      "module": "var1018_v1_oneshot",
+      "status": "OK"
+    },
+    {
+      "module": "var1018_v2_turn_of_month",
+      "status": "OK"
+    },
+    {
+      "module": "var1018_v4_short_margin_reversed",
+      "status": "OK"
+    },
+    {
+      "module": "var1018_v5_january_reversal",
+      "status": "OK"
+    },
+    {
+      "module": "var1018_v7_us_unemployment",
+      "status": "OK"
+    },
+    {
       "module": "verify_pit_value_pb",
+      "status": "OK"
+    },
+    {
+      "module": "vix_term_structure_gate",
       "status": "OK"
     },
     {
@@ -734,6 +969,11 @@
     {
       "module": "weinstein_alpha_gate",
       "status": "OK"
+    },
+    {
+      "module": "weinstein_v2_alpha_gate",
+      "status": "OK"
     }
-  ]
+  ],
+  "result_reproducibility_spot_check": null
 }

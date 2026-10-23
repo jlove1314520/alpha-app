@@ -36,8 +36,11 @@ jobs:
         with:
           python-version: "3.12"
 
+      # 2026-10-24 先.一三二-8b（收件匣 020 B3 採建議④）：加裝 numpy／pandas／scipy，
+      # 讓 audit_preflight 的 reproducibility_check 真的驗得到研究腳本的 import
+      # （原本 200 筆 IMPORT_ERROR 全是這兩個套件沒裝）；其餘沒裝的第三方套件記 ENV_MISSING。
       - name: 安裝相依
-        run: pip install requests certifi urllib3
+        run: pip install requests certifi urllib3 numpy pandas scipy
 
       # 2026-09-17（總司令裁示【記一筆】：監控工具自己也要被監控）：
       # audit.yml曾因data_audit.py誤刪一個常數，讓build_listed_universe.py
