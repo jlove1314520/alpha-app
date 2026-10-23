@@ -106,6 +106,10 @@ def confirm_recent_closure(tw: dict, now) -> None:
         print("[warn] 每日臨時休市確認 FMTQIK 回傳非 OK，保留既有")
         return
     un = set(ycur.get("unscheduled_closed") or [])
+    sus = ycur.get("suspected_closed_today")
+    if isinstance(sus, dict) and sus.get("date") in traded:  # 盤中零請求推測說休市，官方卻有成交 → 告警
+        print(f"::warning::{sus['date']} 盤中判疑似休市（{sus.get('source')}），但 FMTQIK 有成交——官方報價源可能當機，請查")
+        ycur["suspected_closed_mismatch"] = {"date": sus["date"], "checked_at": now.isoformat(timespec="seconds")}
     d = _d(target.year, target.month, 1)
     while d <= target:
         iso = d.isoformat()

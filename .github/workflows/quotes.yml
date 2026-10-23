@@ -70,6 +70,12 @@ jobs:
         continue-on-error: true  # 2026-08-26 新增：台股這步萬一真的故障也不該拖累美股那步
         # 跟下面 commit 那步一起被跳過——兩邊各自獨立成敗，一邊掛掉不拖垮另一邊（使用者要求）。
 
+      # 先.一三二-10b：台北 09:30 後官方報價檔每檔資料日期都早於今天 → trading_calendar.json 記 suspected_closed_today
+      # （零請求、不寫正式休市；輸出 data/trading_calendar.json 被下方 git add -A data/ 結構性涵蓋，十節）。自身失敗只警告。
+      - name: 盤中疑似臨時休市判斷（零請求）
+        run: python .github/scripts/detect_suspected_closure.py
+        continue-on-error: true
+
       - name: 抓美股盤中報價（Finnhub，需要 FINNHUB_API_KEY secret）
         env:
           FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
