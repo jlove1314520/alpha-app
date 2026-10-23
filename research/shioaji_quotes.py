@@ -843,6 +843,29 @@ def _is_tw_trading_window(now: datetime) -> bool:
     return wd <= 4 and 8 * 60 + 30 <= minutes < 13 * 60 + 45
 
 
+def _tw_closed_today(now: datetime) -> str | None:
+    """先.一三二-11（併 先.一三二-10b 移交）：讀 `data/trading_calendar.json`，今天是休市日就回傳原因。
+
+    認三種：官方休市表 `closed`、事後確認的臨時休市 `unscheduled_closed`、
+    盤中零請求判的 `suspected_closed_today`（只認 date＝今天台北，且收盤確認沒有記成
+    「疑似卻有成交」的 `suspected_closed_mismatch`，同 scripts/quotes_local_fallback.py）。
+    自身任何失敗只印警告、回 None（照常跑，CLAUDE.md 十二節：寧可漏抓，不可癱瘓）。"""
+    try:
+        d = now.astimezone(TW_TZ).strftime("%Y-%m-%d")
+        cal = json.loads((REPO_ROOT / "data" / "trading_calendar.json").read_text(encoding="utf-8"))
+        y = (cal.get("tw") or {}).get(d[:4]) or {}
+        if d in set(y.get("closed") or []):
+            return "官方休市表"
+        if d in set(y.get("unscheduled_closed") or []):
+            return "臨時休市（官方確認）"
+        s, m = y.get("suspected_closed_today"), y.get("suspected_closed_mismatch")
+        if isinstance(s, dict) and s.get("date") == d and not (isinstance(m, dict) and m.get("date") == d):
+            return "疑似臨時休市（官方報價檔今天沒有新日期）"
+    except Exception as e:  # noqa: BLE001
+        print(f"  [休市判斷] 讀交易日曆失敗，照常執行：{type(e).__name__}: {e}", flush=True)
+    return None
+
+
 def _write_market_closed() -> None:
     """非交易時段：保留最後一次盤中資料，只把market_status標成closed。
 
@@ -1379,15 +1402,15 @@ def _git(args: list[str]) -> subprocess.CompletedProcess:
     return subprocess.run(["git", *args], cwd=REPO_ROOT, capture_output=True, text=True)
 
 
-def _build_payload(state: TickState) -> dict:
+def _build_payload(state: TickState, market_status: str = "open") -> dict:
     """純函式：把TickState目前的快照組成要寫進JSON的payload——抽出來
     跟「寫檔+git操作」分開，讓`research/shioaji_tick_stream_test.py`
     能夠只測試「callback更新狀態→組出正確payload」這段，不必連帶碰
     真正的`data/quotes_sinopac.json`或觸發git commit/push。"""
     return {
         "fetched_at": datetime.now(TW_TZ).isoformat(),
-        "connected": True,
-        "market_status": "open",
+        "connected": market_status == "open",
+        "market_status": market_status,
         "error": None,
         "quotes": state.snapshot(),
     }
@@ -1438,7 +1461,12 @@ def _flush_and_push(state: TickState, final: bool = False) -> None:
     `_last_committed_quotes()`docstring的緊急修復根因說明。"""
     if not final and not INTRADAY_GIT_PUSH:
         return
-    payload = _build_payload(state)
+    # 先.一三二-11：收盤收尾時 market_status 寫 closed（舊版一律寫 open）；
+    # 當日零 tick（多半是休市）不覆蓋冷檔，保留上一份有效快照（10/23 a2890280be 寫出 quotes:{} 蓋掉前一日）。
+    payload = _build_payload(state, market_status="closed" if final else "open")
+    if not payload["quotes"]:
+        print("今日零 tick（可能休市），保留上一份快照，不覆蓋 data/quotes_sinopac.json", flush=True)
+        return
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
@@ -1821,6 +1849,12 @@ def run_stream_daemon() -> None:
                         and os.environ.get("ALPHA_SHIOAJI_FORCE_RUN") != "1"):
                     print("交易時段結束，收尾並登出", flush=True)
                     break
+                # 先.一三二-11：盤中才判出的疑似臨時休市（detect_suspected_closure.py 09:30 後才寫）→ 收尾不再空跑。
+                # 只在至今零 tick 時才採信：已經收到 tick 就是有開盤，旗標誤判也不能砍掉當天串流。
+                _closed_reason = None if state.snapshot() else _tw_closed_today(datetime.now(TW_TZ))
+                if _closed_reason and os.environ.get("ALPHA_SHIOAJI_FORCE_RUN") != "1":
+                    print(f"今天休市（{_closed_reason}），收尾並登出", flush=True)
+                    break
 
         # 2026-09-07（資料一.1）收盤收尾：13:45離開迴圈後先把緩衝裡剩下的tick寫完，
         # 再把當天的jsonl壓成單一parquet並刪jsonl。順序不能倒——先壓縮會漏掉最後
@@ -1854,6 +1888,11 @@ def main():
     # 在收盤後照樣登入、訂閱、開 kbars 服務（收盤時本來就沒有 tick，只是不會有
     # 串流資料，不影響任何既有排程行為）。預設關閉，不會意外在半夜佔著連線。
     if not _is_tw_trading_window(now) and os.environ.get("ALPHA_SHIOAJI_FORCE_RUN") != "1":
+        _write_market_closed()
+        return
+    _closed_reason = _tw_closed_today(now)
+    if _closed_reason and os.environ.get("ALPHA_SHIOAJI_FORCE_RUN") != "1":
+        print(f"今天休市（{_closed_reason}），不登入永豐、不空跑")
         _write_market_closed()
         return
     run_stream_daemon()
