@@ -94,20 +94,51 @@ def _worktree_is_stash(path: str, stash: str) -> bool:
         return False
 
 
-def _alert_autostash_failure(stash: str, back: list, kept: list, newer: list) -> None:
+# 先.一三一-3（2026-10-23 總司令核准「確認沒有獨有內容後自動刪除」）：機器寫檔樣式（與 dev_queue_runner.MACHINE_WRITTEN 同一份；
+# 匯入失敗退回只認 data/，寧可少刪）。遠端較新的檔只要有一個不在這裡（人寫的 .md／程式），就保留 stash 並推播。
+def _machine_written(path: str) -> bool:
+    try:
+        sys.path.insert(0, str(ROOT / "scripts"))
+        from dev_queue_runner import MACHINE_WRITTEN  # noqa: PLC0415
+        return any(p.match(path) for p in MACHINE_WRITTEN)
+    except Exception:  # noqa: BLE001
+        return path.startswith("data/")
+
+
+def _auto_drop_if_nothing_unique(stash: str, names: list, back: list, kept: list, newer: list) -> tuple[bool, str]:
+    """stash 裡每個檔都已「取回」「工作樹較新」或「遠端較新且是機器寫檔」→ 沒有獨有內容，drop 這一筆。
+    只刪 stash@{0} 且它正是這次的 autostash；任何不確定或失敗都保留（十二節：寧可留著，不可誤刪）。回傳 (是否刪除, 說明)。"""
+    try:
+        accounted = set(back) | set(newer) | {k for k in kept if _machine_written(k)}
+        human_kept = [k for k in kept if not _machine_written(k)]
+        if human_kept or set(names) - accounted:
+            return False, f"stash 未刪（有人寫的檔遠端較新或未處理：{', '.join(human_kept or sorted(set(names) - accounted))[:200]}）"
+        if _g("rev-parse", "-q", "--verify", "stash@{0}").stdout.strip() != stash:
+            return False, "stash 未刪（stash@{0} 已不是這次的 autostash）"
+        if _g("stash", "drop", "-q", "stash@{0}").returncode != 0:
+            return False, "stash 未刪（drop 失敗）"
+        return True, "已確認沒有獨有內容，自動刪除這筆 stash（先.一三一-3）"
+    except Exception as e:  # noqa: BLE001
+        return False, f"stash 未刪（自動清除判斷出錯：{type(e).__name__}）"
+
+
+def _alert_autostash_failure(stash: str, back: list, kept: list, newer: list, dropped: bool = False, drop_reason: str = "") -> None:
     """先.一三一-1：套回失敗不再只印 stderr——寫一行 research/autostash_failures.jsonl，並推 cc_stuck（6 小時內只推一次）。
-    自身任何失敗只印警告（十二節）。"""
+    先.一三一-3：已確認沒有獨有內容、自動刪掉 stash 的只記紀錄不推播；保留 stash 的才推。自身任何失敗只印警告（十二節）。"""
     import json
     import time
     from datetime import datetime, timedelta, timezone
     now = datetime.now(timezone(timedelta(hours=8)))
     rec = {"at": now.isoformat(timespec="seconds"), "stash": stash, "caller": Path(sys.argv[0]).name if sys.argv else "",
-           "restored": back, "kept_remote": kept, "kept_worktree_newer": newer}
+           "restored": back, "kept_remote": kept, "kept_worktree_newer": newer,
+           "stash_dropped": dropped, "drop_reason": drop_reason}
     try:
         with AUTOSTASH_LOG.open("a", encoding="utf-8") as f:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
     except Exception as e:  # noqa: BLE001
         print(f"[local_git_commit] 警告：autostash 失敗紀錄寫入失敗（{type(e).__name__}）", file=sys.stderr)
+    if dropped:
+        return  # 沒有獨有內容、已自動清掉：只記紀錄，不吵總司令
     try:
         try:
             st = json.loads(AUTOSTASH_ALERT_STATE.read_text(encoding="utf-8"))
@@ -157,10 +188,11 @@ def _restore_failed_autostash(stash_before: str) -> str:
                     continue
             kept.append(n)
             _g("checkout", "-q", "HEAD", "--", n)  # 套回失敗會留衝突標記（UU），改回遠端版；本機版仍在 stash
+        dropped, why = _auto_drop_if_nothing_unique(after, names, back, kept, newer)
         msg = (f"autostash 套回失敗：已取回 {len(back)} 檔、遠端較新保留遠端版 {len(kept)} 檔（{', '.join(kept)[:200]}）、"
-               f"工作樹已有更新內容保留 {len(newer)} 檔（{', '.join(newer)[:200]}）；stash 未刪")
+               f"工作樹已有更新內容保留 {len(newer)} 檔（{', '.join(newer)[:200]}）；{why}")
         print(f"[local_git_commit] {msg}", file=sys.stderr)
-        _alert_autostash_failure(after, back, kept, newer)
+        _alert_autostash_failure(after, back, kept, newer, dropped=dropped, drop_reason=why)
         return msg
     except Exception as e:  # noqa: BLE001
         print(f"[local_git_commit] 警告：autostash 取回失敗（{type(e).__name__}: {e}），stash 仍保留", file=sys.stderr)
