@@ -1,3 +1,23 @@
+## 2026-10-23 20:31～20:5x DevQueue 20261023-203101（驗證帽：#462 判定登記）
+
+等待總司令審閱：2 件（沿用，本輪沒有新增）——①先.一三三-1d FinMind 股利公式漏資本公積（等甲／乙裁示，自 17:3x）；②先.一三二-0b 模擬 I 排程方式（自 17:5x）。
+
+### 先.一三三-1 V1 等權再平衡單發（#462）commit＋登記 ✅
+- 沒有重跑 run（結果檔 18:30 已存在，拒跑守門仍在）。
+- commit f4f2b2bd47：`research/var1018_v1_oneshot.py`（R2／R3 commit 常數＋R3 官方除權息補充揭露欄）、`research/STRATEGY_GRAVEYARD.md` V1 條目（附 4 個變形方向）、登記腳本 `research/var1018_v1_register_result.py`。
+- 結果檔 `research/data/var1018_v1_oneshot_result.json` 在 .gitignore（`research/data/`）裡面，照「資料不進公開 repo」不 commit，留在本機（與其他 research/data 原始結果相同處理）。
+- commit 53183a93b0：`register_trial()` 登記 **TRIALS_LEDGER #467**（父筆 #462），verdict＝VIOLATES_SURVIVAL（兩假設的策略全期 MDD 悲觀 −64.0%／中性 −63.7%，都超過天條一 50%）；兩假設算同一次試驗，N 只 +1；`selection_bias_ledger.py` 重跑後 N（全體）＝445（TW 222）。
+- [自行裁量] 登記第一次被 `trial_registry.py` 擋下（`failed_gates` 值域沒有「天條一」）→ 改填 `["gate1"]`（六關第 1 關＝淨利>0 且 MDD 可接受，已有 VIOLATES_SURVIVAL 用 gate1 的前例）；第二次被擋（result 沒有統計量）→ 補上結果檔裡的日頻 Sharpe 與 n（直接取自結果檔，沒有估算）。兩次都是在寫入之前就被擋，帳本沒有殘缺的列。
+- 冒煙：20:3x `node scripts/smoke_test.mjs` → 176 PASS／0 FAIL（exit 0）。
+
+### 下一項沒有接
+- 先.一三三-1d：互動視窗專屬（核心檔 adjust.py），跳過。
+- 先.一三三-2b（網格／ML 定稿修訂＋登記）屬研究帽的產物（PREREG）。本輪戴驗證帽，帽子只能擇一。[自行裁量] 留給下一輪研究帽，本輪收工。
+
+### 收工補件
+- `- [ ]` 25 項（≥12）；DevQueue 可執行的非研究項有 4 項（補.資料-上市 2007H2 日檔、先.一三二-8b、10b、11），少於 6 項。
+- 照順序查了補件來源：DATA_GAP_PLAN 甲類沒有待抓的；UX 深色對比已經由先.一一〇-8 完成；BACKLOG 剩下的都是已做、暫緩或待裁示；全檢節沒有 `- [ ]` → **來源已用盡，本輪不補**（不拿小事湊數）。
+
 ## 2026-10-23 19:01～19:1x DevQueue 20261023-190102（開發帽：冒煙 #27）
 
 等待總司令審閱：2 件（沿用，本輪沒有新增）——①先.一三三-1d FinMind 股利公式漏資本公積（等甲／乙裁示，自 17:3x）；②先.一三二-0b 模擬 I 排程方式（自 17:5x）。
