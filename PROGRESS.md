@@ -1,3 +1,21 @@
+## 2026-10-23 12:31～13:1x DevQueue 20261023-123102：0050 成分股每週排程（先.一三二-5c）＋兩個告警誤報修正（先.一三二-6／-7）＋補件 2 條
+
+- 等待總司令審閱：8 件（與 `research/AWAITING_REVIEW.md`「等待中」8 列一致，本輪無增減：先.一三〇-2、先.一三〇-4、先.一三〇-3、補.研究-期貨法人未平倉、補.研究-COT期貨部位、先.一三二-2、先.一三三-1a、先.一三三-2）。
+- 本輪戴維運帽。交辦佇列 `- [ ]` 還有 21 條（完成 先.一三二-5c；新補 -8、-9；-6、-7 本輪補入即完成）。
+- **先.一三二-5c → `- [x]`**（3f4ff50455）
+  - 做了什麼：`.github/workflows/market.yml` 在模擬 J／K 追蹤之前新增「0050 constituents」一步（`python research/fetch_tw50_constituents.py`，continue-on-error），`data/tw50_constituents.json` 加進 commit 步驟的 `git add -A` 清單（十節，commit 訊息有註明）。
+  - 證據：YAML 解析通過；相依檔與套件（pandas、requests）都在 repo 與 workflow 安裝清單內；本機再跑印「上次抓取 2026-10-23T12:08:00+08:00，未滿 6 天，略過（不送請求）」exit 0。
+  - **未驗證**：雲端能不能連到元大官網——腳本未滿 6 天會略過，第一次雲端實抓約 10/29 之後；連不到就照條目分支改掛本機排程。`[自行裁量]` 不手動觸發 workflow 驗證（腳本會略過、驗不到連線，也不為驗證而 --force 多打一次）。
+- **先.一三二-6 → `- [x]`**（0d02aae3db，[自走補入]）：停擺自檢一直把 10/21 已核准停用的 AlphaMarathon／AlphaHypothesisQueue 判成停擺（log 3,900 多分鐘沒動是正常的）。`scripts/pipeline_freshness.py` 認登錄檔新欄位 `retired`、標 skipped；`data/seed/pipeline_registry.json` 兩條加 `retired`，只提交這兩行（排程自己寫的 fault_history 變動不納入）。本機實測本機停擺告警 3→1（只剩 AlphaIbkrQuotes，要總司令重登 Gateway，不是誤報）。**過程出錯照實記**：第一次寫入把 Windows 路徑反斜線寫成不合法的 JSON 跳脫，登錄檔壞了約 1 分鐘才修好；監測器讀登錄檔失敗只會降級成警告（十二節），沒看到崩潰。
+- **先.一三二-7 → `- [x]`**（6f6211e92f，[自走補入]）：合規.三告警 4 支腳本提到黑名單網域卻沒接 net_guard（`research/backfill_stock_financials_gap_2025.py`、`research/irb130_pledge_probe.py`、`scripts/extract_company_products.py`、`scripts/probe_news_sources.py`），照 09-20 既有做法補 `import net_guard`＋`install()`。scripts/ 兩支實測對 mopsov 的請求在送出前就被擋；本機重跑掃描 unguarded 6→0（雲端報告要等下一次 audit.yml 才會更新）。
+- **收工補件**（DevQueue 可執行項原本是 0，低於 6）：從稽核報告與 STATUS 實讀到的告警補了 2 條，都排進權威清單：
+  - **先.一三二-8**：稽核 `reproducibility_check` 在雲端等於失效——200 筆 IMPORT_ERROR 全是 numpy／pandas 沒裝（audit.yml 只裝 requests 三件）。修法有好幾種要取捨（裝套件可能讓雲端逐支 import 上百支研究腳本跑很久／頂層程式有副作用），所以列成寫提案。本機重跑 `--skip-rerun` 超過 5 分鐘被我逾時中止，結果檔沒有被改動。
+  - **先.一三二-9**：本機 Shioaji 報價今天沒更新。只讀查到一半（維持 `- [ ]`）：daemon 08:31 起還在跑；12:28 SDK 回報連線中斷、重連逾時；重連後補資料時 2330 等 5 檔都回「今日尚無 1 分K」，但今天是交易日——要對照「流量超額時查詢會安靜回空值」與 `api.usage()`；`/health` 本輪回的不是 JSON。下一輪從條目寫的斷點接著查。
+  - 補件來源①～④前幾輪已確認用盡；本輪新補的都是當下實讀到的資料／告警問題。DevQueue 可執行項現在是 2 條，還是低於 6，照實記錄。
+- 冒煙：三個 commit 前各跑一次，`node scripts/smoke_test.mjs` exit 0、176/176 全打勾。
+- BLOCKED：無新增。先.一三二-3（權證快照）等今天 17:30 排程實跑，還沒到解除時間。
+- 本輪沒有動到 `alpha_live_server.py`／`shioaji_quotes.py`，不需要重啟服務。
+
 ## 2026-10-23 12:01～12:1x DevQueue 20261023-120102：0050 官方成分股清單 data/tw50_constituents.json（先.一三二-5b）
 
 - 等待總司令審閱：8 件（與 `research/AWAITING_REVIEW.md`「等待中」8 列一致，本輪無增減：先.一三〇-2、先.一三〇-4、先.一三〇-3、補.研究-期貨法人未平倉、補.研究-COT期貨部位、先.一三二-2、先.一三三-1a、先.一三三-2）。
