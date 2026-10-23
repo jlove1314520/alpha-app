@@ -1,3 +1,13 @@
+## 2026-10-24 01:31～01:39 DevQueue 20261024-013101：先.一三三-2e 再驗後標阻塞；#118 根因唯讀診斷（本輪零 commit）
+
+- 等待總司令審閱：2 件（沿用 `research/AWAITING_REVIEW.md`：先.一三二-0b AlphaPaper9 排程註冊〔自 10-23 21:3x〕、先.一三三-1e 公積配息三件判斷〔自 10-23 21:2x〕；本輪未新增）。
+- 本輪戴研究帽。
+- **先.一三三-2e（Bonferroni N 工具）→ `- [!]` 阻塞**：`python research/bonferroni_n.py selftest` 01:31 再驗 PASS（total_n()=453＝SELECTION_BIAS_LEDGER.md 標頭 453，門檻 99.9890 百分位）。但冒煙 `node scripts/smoke_test.mjs`（01:36:59，321.8 秒）**#118 FAIL**，其餘全過——與上一輪 00:01／00:07 同一則訊息，連續第三次。照規則不 commit；`research/bonferroni_n.py`（未追蹤）、`research/MARATHON_PROTOCOL.md`（第 8 節加一行）照舊留工作目錄。解除條件：2h 修好、冒煙全過 → 改回 `- [ ]`、直接 commit 標 [x]。
+- **#118 根因（唯讀，未改任何程式，已寫進 先.一三三-2h 條目）**：`app.js` 我的持股事件在事件數超過顯示上限時輸出 `<details><summary class="note">看全部 N 則</summary>`，排在範圍說明 `.note` 之前；`scripts/smoke_test.mjs` 第 4092 行 `el.querySelector(".note")` 抓到的是「看全部 6 則」，兩條文字比對都失敗。是 10-24 事件數跨過顯示上限觸發的**測試選擇器問題**，App 範圍說明應仍在（waitForFunction 有等到「不含研究策略」）。建議修法：測試改抓含「自選股」的 `.note`，或 App 把 summary 改別的 class。屬開發帽，本輪不改。
+- [自行裁量] 把 先.一三三-2h 移到 2f 之前：它擋住所有 commit，排在後面的話下一輪研究帽做 2f／2g 也一樣無法 commit。
+- 收工：下一項為 2h〔開發〕，非[研究]類 → 照規則收工換帽。佇列 `- [ ]` 26 項（≥12），未補件。
+- **本輪零 commit**：PENDING_QUEUE.md（2e 標 [!]、2h 補診斷並移位）與本段 PROGRESS 都留在工作目錄，等冒煙全過時一起進下一個 commit。
+
 ## 2026-10-23 23:31～10-24 00:1x DevQueue 20261023-233101：先.一三三-2c-判／2d-判 判定回填＋墓園；先.一三三-2e Bonferroni N 工具
 
 - 等待總司令審閱：2 件（沿用 `research/AWAITING_REVIEW.md`：先.一三二-0b 排程註冊、先.一三三-1e 公積配息三件判斷；本輪未新增）。
