@@ -61,18 +61,46 @@ def us_market_session(now: datetime) -> str:
     切換時 `datetime.now(US_TZ)` 本身就會自動反映正確的美東當地時間，這個函式
     只需要比較「美東當地時間的分鐘數」，不需要另外處理日光節約的偏移量。
     邊界：盤前 04:00–09:30、盤中 09:30–16:00、盤後 16:00–20:00、其餘/週末休市。
+    先.一三二-13c（2026-10-24）：再扣 data/trading_calendar.json us[年] 的休市日（整天 closed）與
+    early_close 提早收盤日（盤中到 13:00、盤後到 17:00，NYSE 官方頁註腳「late trading sessions will close at 5:00 p.m.」）。
     """
     wd = now.weekday()
     if wd > 4:
         return "closed"
+    closed, early = _us_calendar()
+    day = now.date().isoformat()
+    if day in closed:
+        return "closed"
+    close_m = 16 * 60
+    if day in early:
+        h, m = early[day]
+        close_m = h * 60 + m
+    post_end_m = close_m + 4 * 60  # 正常日 16:00→20:00；提早收盤日 13:00→17:00
     minutes = now.hour * 60 + now.minute
     if 4 * 60 <= minutes < 9 * 60 + 30:
         return "pre"
-    if 9 * 60 + 30 <= minutes < 16 * 60:
+    if 9 * 60 + 30 <= minutes < close_m:
         return "regular"
-    if 16 * 60 <= minutes < 20 * 60:
+    if close_m <= minutes < post_end_m:
         return "post"
     return "closed"
+
+
+def _us_calendar() -> tuple[set, dict]:
+    """讀 data/trading_calendar.json 的美股休市日與提早收盤日（美東日期）。
+    讀不到或格式不對只印警告、回空（＝照舊只扣週末、16:00 收盤；CLAUDE.md 十二節）。"""
+    try:
+        cal = json.loads((REPO_ROOT / "data" / "trading_calendar.json").read_text(encoding="utf-8"))
+        closed, early = set(), {}
+        for y in (cal.get("us") or {}).values():
+            closed |= set(y.get("closed") or [])
+            for d, hm in (y.get("early_close") or {}).items():
+                h, m = str(hm).split(":")
+                early[d] = (int(h), int(m))
+        return closed, early
+    except Exception as e:  # noqa: BLE001
+        print(f"  ! us_market_session：讀不到美股交易日曆，只扣週末：{type(e).__name__}: {e}")
+        return set(), {}
 
 
 def fetch_extended_hours_yf(tickers: list[str]) -> dict[str, dict]:
