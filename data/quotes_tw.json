@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-10-23T02:15:08+00:00",
+  "fetched_at": "2026-10-23T02:35:11+00:00",
   "source": "TWSE MIS（mis.twse.com.tw，證交所公開即時行情端點）",
   "meta": {
     "trading_window": true,
@@ -13,7 +13,7 @@
     },
     "runner": {
       "by": "local_fallback",
-      "cloud_age_min": 19.8,
+      "cloud_age_min": 19.9,
       "note": "雲端排程落後 ≥15 分鐘，由本機備援補抓（先.八十二-4）"
     }
   },
