@@ -1,3 +1,18 @@
+## 2026-10-23 12:01～12:1x DevQueue 20261023-120102：0050 官方成分股清單 data/tw50_constituents.json（先.一三二-5b）
+
+- 等待總司令審閱：8 件（與 `research/AWAITING_REVIEW.md`「等待中」8 列一致，本輪無增減：先.一三〇-2、先.一三〇-4、先.一三〇-3、補.研究-期貨法人未平倉、補.研究-COT期貨部位、先.一三二-2、先.一三三-1a、先.一三三-2）。
+- 本輪戴研究帽。交辦佇列 `- [ ]` 還有 21 條（新增 1 條 先.一三二-5c、完成 1 條）。
+- **先.一三二-5b → `- [x]`**（e494ed0cb3）
+  - 做了什麼：新增 `research/fetch_tw50_constituents.py`。來源是元大投信官方商品頁 `www.yuantaetfs.com/product/detail/0050/ratio`（robots.txt `Allow: /`）。頁面 HTML 表只畫前 5 檔，完整 50 檔在頁內嵌資料（`window.__NUXT__` 的 `FundWeights.StockWeights`），用純文字解析取出，**不執行網站的 JavaScript**。同站憑證缺 Subject Key Identifier，沿用 `fetch_0050_nav._StrictOffAdapter`（只關 `VERIFY_X509_STRICT`）。
+  - 頻率：共用 `data/rate_limit_state.json` 來源名 `yuanta_www`（同源 ≥3 秒、402/403/428/429 封鎖 2 小時不重試）；上次抓取未滿 6 天就略過、不送請求。本輪實際 1 次請求。已寫進 `C:\alpha\CLAUDE.md` 頻率清單「元大投信 0050 成分股」節（該檔不在 repo）。
+  - 產出 `data/tw50_constituents.json`：`as_of` 2026-10-22、50 檔、股票權重合計 99.77%（其餘是期貨）；`history` 只在成分股變動時新增一筆。檢核（剛好 50 檔、不重複、權重 90～101%）不過就不覆蓋舊檔。
+  - 證據：Python 解析結果跟一次性 node 對照求值比較，代號／權重／名稱三項全一致；`paper_11_tdcc_bigholder_tracker.tw50_members()` 讀到 50 檔（2330 在、2002 不在）；再跑一次印「未滿 6 天，略過（不送請求）」。冒煙 `node scripts/smoke_test.mjs` exit 0、176 項全打勾。
+  - `[自行裁量]`：①006208（富邦）沒有另外做交叉核對——兩檔追蹤同一個臺灣 50 指數，當成同一份清單，`note` 欄有寫；②`codes` 只放最新一期，追蹤器沒改；③排程沒掛（`.github/workflows/` 屬維運帽），另外補 **先.一三二-5c**（market.yml 每日 3 班呼叫、腳本自己略過，實際每週約 1 次；Actions 連不到元大就改本機排程）。補檔之前帳本的 null 不回填（模擬 K 12/01 才開跑，目前帳本是空的）。
+  - 測試過程中跑追蹤器時 `data/paper_11.json` 只變了時間戳，已還原，沒有 commit；`data/rate_limit_state.json` 混有其他排程的寫入，沒有納入本次 commit。
+- 收工：下一項是 先.一三二-5c [維運]，不是[研究]類 → 依本輪規則收工，留給下一輪換帽。
+- 佇列深度：`- [ ]` 21 條（≥12）；非[研究]、非互動視窗的 DevQueue 可執行項約 9 條（≥6）→ 本輪不補件。
+- BLOCKED：無新增。
+
 ## 2026-10-23 11:31～12:0x DevQueue 20261023-113102：模擬 J／K／L 定稿登記 #464～#466＋個股前向追蹤共用框架；模擬 L 接本機排程
 
 - 等待總司令審閱：8 件（先.一三二-1 三份草稿已由 Cowork 審過、移已結案；清單見 `research/AWAITING_REVIEW.md`）。
