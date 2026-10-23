@@ -7,7 +7,8 @@
   「當年度」的表（title 為「115 年市場開休市日期」）——所以一定要核對 title 的民國年，不符就當作尚未公布。
 - 美股：NYSE 沒有開放 API，依官方頁 https://www.nyse.com/markets/hours-calendars 抄錄（全日休市；2026-10-13 查證，
   頁面列到 2027 年）。提早收盤（半日市）不列入休市。
-頻率：每日 3 班 market.yml 各跑一次，但同一年度 7 天內抓過就不再問（每週約 1～2 次請求），官方未公布上限；
+頻率：每日 3 班 market.yml 各跑一次，但同一年度 7 天內抓過就不再問（每週約 1～2 次請求）；另每日 1 次 FMTQIK
+當月確認臨時休市（先.一三二-10b，見 confirm_recent_closure）。官方未公布上限；
 402/403/428/429 不重試。抓不到就保留既有內容。用法：python .github/scripts/fetch_trading_calendar.py
 """
 import json
@@ -32,6 +33,12 @@ US_CLOSED = {  # NYSE 官方頁抄錄（2026-10-13 查證）
              "2027-07-05", "2027-09-06", "2027-11-25", "2027-12-24"],
 }
 REFRESH_DAYS = 7
+# 先.一三二-10b（2026-10-24，收件匣 020 B4 採丙的「收盤後正式確認」半邊）：颱風當天臨時休市原本要等 7 天快取過期才記得到。
+# 改成每天另問 1 次 FMTQIK（目標日所在月份），目標日＝台北 17:00 以後是今天、之前是昨天；同一目標日只問一次（每日約 +1 次）。
+# 目標日是「今天」時，FMTQIK 可能還沒更新當天，所以另要求官方報價檔 data/quotes_tw.json 的資料日期全部早於今天（零請求），
+# 兩邊一致才寫進 unscheduled_closed；不一致只印告警、不寫。
+DAILY_CONFIRM_HOUR = 17
+QUOTES_TW = REPO_ROOT / "data" / "quotes_tw.json"
 TW = timezone(timedelta(hours=8))
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -50,6 +57,75 @@ def fetch_tw(year: int) -> list | None:
     if int(m.group(1)) + 1911 != year:
         return None
     return sorted({row[0] for row in doc["data"] if not ("開始交易日" in row[1] or "最後交易日" in row[1])})
+
+
+def _fmtqik_traded(year: int, month: int) -> set | None:
+    """FMTQIK 單月實際交易日；stat 非 OK 回 None。402/403/428/429 拋錯不重試。"""
+    r = requests.get(FMTQIK_URL, params={"date": f"{year}{month:02d}01", "response": "json"}, timeout=20,
+                     headers={"User-Agent": "Mozilla/5.0 (compatible; AlphaAppMarketFetcher/1.0)"})
+    if r.status_code in (402, 403, 428, 429):
+        raise RuntimeError(f"FMTQIK HTTP {r.status_code}（不重試）")
+    j = r.json()
+    if j.get("stat") != "OK":
+        return None
+    traded = set()
+    for row in j.get("data") or []:
+        ry, rm, rd = [int(x) for x in str(row[0]).strip().split("/")]
+        traded.add(f"{ry + 1911}-{rm:02d}-{rd:02d}")
+    return traded
+
+
+def _official_quotes_all_before(day) -> bool | None:
+    """官方報價檔每檔 date 是否全部早於 day（零請求）；讀不到或沒有資料回 None。"""
+    try:
+        q = json.loads(QUOTES_TW.read_text(encoding="utf-8")).get("quotes") or {}
+        dates = {str(v.get("date") or "") for v in q.values() if isinstance(v, dict)} - {""}
+    except (OSError, ValueError, AttributeError):
+        return None
+    if not dates:
+        return None
+    return max(dates) < day.strftime("%Y%m%d")
+
+
+def confirm_recent_closure(tw: dict, now) -> None:
+    """每日一次確認目標日所在月份有沒有臨時休市（見 DAILY_CONFIRM_HOUR 註解）。自身失敗只警告、保留既有。"""
+    from datetime import date as _d, timedelta as _td
+    target = now.date() if now.hour >= DAILY_CONFIRM_HOUR else now.date() - _td(days=1)
+    ycur = tw.get(str(target.year))
+    if not ycur or not ycur.get("published"):
+        return
+    if (ycur.get("daily_confirm_through") or "") >= target.isoformat():
+        return
+    closed = set(ycur.get("closed") or [])
+    try:
+        traded = _fmtqik_traded(target.year, target.month)
+    except Exception as e:  # noqa: BLE001
+        print(f"[warn] 每日臨時休市確認 FMTQIK 失敗，保留既有：{type(e).__name__}: {e}")
+        return
+    if traded is None:
+        print("[warn] 每日臨時休市確認 FMTQIK 回傳非 OK，保留既有")
+        return
+    un = set(ycur.get("unscheduled_closed") or [])
+    d = _d(target.year, target.month, 1)
+    while d <= target:
+        iso = d.isoformat()
+        if d.weekday() < 5 and iso not in closed and iso not in traded:
+            if d == now.date():
+                quotes_before = _official_quotes_all_before(d)
+                if quotes_before:
+                    un.add(iso)
+                else:
+                    print(f"[warn] {iso} FMTQIK 沒有成交、但官方報價檔不是全部早於今天（{quotes_before}），"
+                          f"可能 FMTQIK 尚未更新，不寫入；下一個目標日會再確認")
+                    target = d - _td(days=1)  # 今天沒確認完，不把確認進度推到今天
+            else:
+                un.add(iso)
+        d += _td(days=1)
+    ycur["unscheduled_closed"] = sorted(un)
+    ycur["unscheduled_source"] = ("TWSE FMTQIK 市場成交資訊（已過去月份的實際交易日；"
+                                  "當月每日收盤後確認，當天另需官方報價檔資料日期佐證）")
+    ycur["daily_confirm_through"] = max(target.isoformat(), ycur.get("daily_confirm_through") or "")
+    ycur["daily_confirm_checked_at"] = now.isoformat(timespec="seconds")
 
 
 def fetch_unscheduled(year: int, closed: set, today) -> list | None:
@@ -119,6 +195,10 @@ def main() -> int:
                 print(f"[warn] {y} 臨時停市查證失敗，保留既有：{type(e).__name__}: {e}")
                 if cur.get("unscheduled_closed") is not None:
                     tw[str(y)]["unscheduled_closed"] = cur["unscheduled_closed"]
+    try:
+        confirm_recent_closure(tw, now)
+    except Exception as e:  # noqa: BLE001 — 守門自身失敗只降級成警告（十二節）
+        print(f"[warn] 每日臨時休市確認失敗，保留既有：{type(e).__name__}: {e}")
     out = {"generated_at": now.isoformat(timespec="seconds"),
            "note": "休市日（全日不交易）；週末不列。台股來自 TWSE 官方日曆端點；美股依 NYSE 官方頁抄錄。",
            "tw": tw,
