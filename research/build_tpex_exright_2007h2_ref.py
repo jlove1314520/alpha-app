@@ -141,8 +141,8 @@ def main() -> int:
             unmatched.append({**base, "reason": "缺前收盤（官方日檔與 FinMind 價格快取都沒有）",
                               "cash_dividend": cash, "stock_dividend_yuan": stock})
             continue
-        if sub_rate > 1:  # FinMind 部分列以百分比或每千股表示，>1 一律視為每千股
-            sub_rate = sub_rate / 1000.0
+        if sub_rate > 1:  # FinMind 部分列以百分比表示（上市 2007H2 對 TWT49U 驗證：÷100 誤差 ≤1.2%）
+            sub_rate = sub_rate / 100.0
         ref_basic = (prev - cash) / (1 + stock / 10.0)
         ref_full = (prev - cash + sub_rate * sub_px) / (1 + stock / 10.0 + sub_rate)
         ref = ref_full if sub_rate > 0 else ref_basic
