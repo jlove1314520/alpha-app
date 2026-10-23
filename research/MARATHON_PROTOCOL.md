@@ -813,6 +813,7 @@ Cybex 第 101／140 輪的 meta 定律：binary on/off 閘門（訊號過門檻�
   - `SELECTION_BIAS_LEDGER.md` 的全體 N；
   - `data/trials_index.json` 的 count。
   - 三處不一致時，冒煙 #103 會 FAIL。DSR 的 N 一律取這個數字，不得另外自己數。
+  - 程式裡要用 N（Bonferroni 百分位門檻、DSR）時一律 `from bonferroni_n import total_n, required_percentile`（`research/bonferroni_n.py`，2026-10-23 先.一三三-2e）。**不得用 `TRIALS_REGISTRY.jsonl` 的列數**——那只涵蓋 JSONL 啟用後的列、且沒扣事前登記合併（實例：#468 單發用了 289，正確是 453）。
 - **V 的寫法不變**：照七之三節「DSR／E[max SR] 一律附 V 的來源與樣本數」，並把 V、V×0.5、V×2 並列。
 
 ## 9. 建倉日不得事後倒填（2026-10-13 先.八十一-16 總司令裁示）
