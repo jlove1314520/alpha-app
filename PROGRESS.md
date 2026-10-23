@@ -1,3 +1,12 @@
+## 2026-10-24 05:01～05:2x DevQueue 20261024-050101：先.一三二-8c 完成（條目 - [x]）
+
+- 等待總司令審閱：4 件（`research/AWAITING_REVIEW.md`，本輪無增減）：先.一三二-0b AlphaPaper9 排程註冊（等總司令親自輸入密碼，自 10-23 21:3x）；先.一三三-1e 公積配息三件判斷（自 10-23 21:2x）；先.一三三-2f 網格變形② PREREG（等 Cowork，自 10-24 02:5x）；先.一三三-2g ML 產業輪動 PREREG（等 Cowork，自 10-24 03:0x）。
+- 本輪戴研究帽（本項標 [研究]；必交產物＝研究程式修正，無新試驗、無 SPEC）。下一項 先.一三二-11 是 [維運]（動 Shioaji 常駐行程、需七之二重啟四步驗證），依一輪一頂帽子留給下一輪。
+- **先.一三二-8c → `- [x]`**：`research/ml_pricevol_register_result.py`、`research/stock_grid_register_result.py` 頂層流程包進 `main()`＋`if __name__ == "__main__":`（`git diff -w` 只多出包裝，登記內容一字未改、未重跑登記）。
+  - 全 repo AST 掃頂層 `register_trial(`：另找到 `research/var1018_v1_register_result.py`（同型、沒有 dry_run，import 即真寫帳本）→ [自行裁量] 一併包 `main()`；`scripts/selftest_trial_registry_commit.py`（`dry_run=True` 不寫帳本）只列出不改。
+  - 證據：兩支 `--dry-run` 照常；`python research/reproducibility_check.py --skip-rerun` → OK 223／FILE_NOT_FOUND 11／TIMEOUT 1／OTHER_ERROR 3→1（剩 deep_dive_f_us_low_vol_small_tier 與 TIMEOUT 的 stock_grid_limit7_diag，依條目只記錄不改）；TRIALS_LEDGER.md／TRIALS_REGISTRY.jsonl git diff 0 行；`node scripts/smoke_test.mjs` 176 PASS／0 FAIL（總計 315.3 秒）。
+- 收工補件：`- [ ]` 22 項 ≥12，不補。
+
 ## 2026-10-24 04:31～04:5x DevQueue 20261024-043101：先.一三二-10b 第 3 批完成（條目 - [x]）
 
 - 等待總司令審閱：4 件（`research/AWAITING_REVIEW.md`，本輪無增減）：先.一三二-0b AlphaPaper9 排程註冊（等總司令親自輸入密碼，自 10-23 21:3x）；先.一三三-1e 公積配息三件判斷（自 10-23 21:2x）；先.一三三-2f 網格變形② PREREG（等 Cowork，自 10-24 02:5x）；先.一三三-2g ML 產業輪動 PREREG（等 Cowork，自 10-24 03:0x）。

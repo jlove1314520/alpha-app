@@ -2,9 +2,9 @@
   "checked_at": null,
   "n_checked": 236,
   "by_status_count": {
-    "OK": 221,
+    "OK": 223,
     "FILE_NOT_FOUND": 11,
-    "OTHER_ERROR": 3,
+    "OTHER_ERROR": 1,
     "TIMEOUT": 1
   },
   "broken": [
@@ -12,16 +12,6 @@
       "module": "deep_dive_f_us_low_vol_small_tier",
       "status": "OTHER_ERROR",
       "detail": "AssertionError: this script is specifically the small-tier deep-dive; if TIER in us_factor_ic_by_size.py has been changed since, re-check before reusing"
-    },
-    {
-      "module": "ml_pricevol_register_result",
-      "status": "OTHER_ERROR",
-      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'research/data/ml_pricevol_oneshot_result.json'"
-    },
-    {
-      "module": "stock_grid_register_result",
-      "status": "OTHER_ERROR",
-      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'research/data/stock_grid_oneshot_result.json'"
     }
   ],
   "env_missing": [],
@@ -573,8 +563,7 @@
     },
     {
       "module": "ml_pricevol_register_result",
-      "status": "OTHER_ERROR",
-      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'research/data/ml_pricevol_oneshot_result.json'"
+      "status": "OK"
     },
     {
       "module": "monthly_revenue_event_study",
@@ -799,8 +788,7 @@
     },
     {
       "module": "stock_grid_register_result",
-      "status": "OTHER_ERROR",
-      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'research/data/stock_grid_oneshot_result.json'"
+      "status": "OK"
     },
     {
       "module": "tail_test",
