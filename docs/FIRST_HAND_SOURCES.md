@@ -642,3 +642,5 @@ robots.txt 全站 Disallow（見本檔開頭）。既有設計小抄
 **缺口與限制**：`research/data/v1_official_daily/tpex/` 快取只存開高低收量額，**沒有存漲跌欄**，所以 2007-07-02～12-14 的其餘 110 個交易日（快取 120 天－已有原始 10 天）要重抓官方日檔（`www/zh-tw/afterTrading/otc?type=EW`，每日 1 次、`tpex_www` 節流 ≥3 秒，約 6 分鐘）才能標出全部事件；本輪手上只有其中 10 天的原始回應（9 筆事件）。重抓已另立佇列項。
 
 **後續（同輪完成）**：`research/fetch_tpex_exright_marks_2007h2.py` 重抓 110 天官方日檔，2007-07-01～12-16 共 120 個日期全到齊（4 天休市 0 列），標出上櫃除權息事件 383 筆 → `research/data/tpex_exright_marks_2007h2.json`（本機）。注意 2007 年日檔是 17 欄（多最後買量／賣量），一律用欄位名對應。近似參考價對「除權（現金增資）」不可靠（1 筆高於前收、1 筆等於前收），精確參考價仍待股利金額來源。
+
+**後續二（2026-10-23，DevQueue cycle 20261023-163102，零請求）**：`research/build_tpex_exright_2007h2_ref.py` 把 383 筆標記對本機 FinMind `TaiwanStockDividend` 快取，用（前收盤−現金股利＋認購率×認購價）÷（1＋配股元數/10＋認購率）算精確參考價 → `research/data/tpex_exright_2007h2_ref.json`（本機）。341 筆對上（27 筆含現增認購）；近似值 339 筆可比，262 筆 <1%、336 筆 <3%、最大 3.43%，**近似值系統性偏低**。對不到 42 筆：無 FinMind 快取 16、FinMind 該檔整段零筆股利 23、現增除權（FinMind 股利表不收）3。參考價是 FinMind 金額推算、非官方公告值；只建資料，未套用還原。
