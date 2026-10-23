@@ -4090,7 +4090,8 @@ async function runSmokeTest(baseUrl, headless = true) {
       const st = await p.evaluate(() => {
         const el = document.getElementById("my-holdings-events");
         const rows = [...(el ? el.querySelectorAll("b") : [])].map(b => b.textContent.trim());
-        return { rows, note: ((el && el.querySelector(".note")) || {}).textContent || "", hidden: document.getElementById("home-my-events-card").hidden };
+        // 2026-10-24 先.一三三-2h：事件超過顯示上限時「看全部 N 則」summary 也是 .note 且排在說明前面，改抓說明專屬的 data-ui-explain
+        return { rows, note: ((el && el.querySelector(".note[data-ui-explain]")) || {}).textContent || "", hidden: document.getElementById("home-my-events-card").hidden };
       });
       if (st.hidden) hevErrs.push("卡片沒顯示（自選股 2330 應有事件）");
       if (!/自選股 4 檔＋真錢持股 \d+ 檔（不含研究策略／模擬持股）/.test(st.note)) hevErrs.push(`說明沒寫明範圍：${st.note.slice(0, 90)}`);
