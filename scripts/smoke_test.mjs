@@ -816,7 +816,7 @@ async function runSmokeTest(baseUrl, headless = true) {
       [...document.querySelectorAll("#us-idx-rows .row")].map(r => ({
         name: r.querySelector(".nm b")?.textContent,
         price: r.querySelector(".px b")?.textContent,
-        src: r.querySelector(".nm span")?.textContent,
+        src: r.querySelector(".nm > span")?.textContent,  // 先.一三三-1e：只取來源標示（.nm 的直接子 span），不得抓到 <b> 裡的落後標示 stale-tag
       }))
     );
     if (rows.length !== 4) fourIndicesErrors.push(`應該有4個指數列，實際${rows.length}個：${JSON.stringify(rows)}`);
@@ -1085,8 +1085,10 @@ async function runSmokeTest(baseUrl, headless = true) {
     await page.waitForTimeout(1500);
     const info = await page.evaluate(() => {
       const rows = [...document.querySelectorAll("#idx-rows .row")];
+      // 先.一三三-1e（2026-10-23）：先.一〇四-6 在名稱 <b> 裡加了落後標示 <span class="stale-tag">MM/DD</span>，
+      // 原本 ".nm span" 抓到的是那個「10/22」而不是來源標示；改抓 .nm 的直接子 span（來源標示本身），檢查式不變。
       const tpex = rows.find(r => r.textContent.includes("櫃買指數"));
-      return { tpexSrc: tpex ? tpex.querySelector(".nm span")?.textContent : null, heat: document.getElementById("heat-datatime")?.textContent || "", idx: document.getElementById("idx-datatime")?.textContent || "" };
+      return { tpexSrc: tpex ? tpex.querySelector(".nm > span")?.textContent : null, heat: document.getElementById("heat-datatime")?.textContent || "", idx: document.getElementById("idx-datatime")?.textContent || "" };
     });
     if (!info.tpexSrc || !/收盤（\d{2}-\d{2}）/.test(info.tpexSrc)) idxDateErrors.push(`櫃買指數列來源標示沒有帶收盤日期：「${info.tpexSrc}」`);
     if (!/收盤（\d{2}-\d{2}）/.test(info.heat)) idxDateErrors.push(`類股熱力圖時間標示沒有帶收盤日期：「${info.heat}」`);
