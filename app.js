@@ -1023,8 +1023,9 @@
   // 最後交易日＝今天是交易日且已過收盤資料落地時刻（台股 18:00／美股 16:30 當地）就是今天，否則往前找最近的交易日。
   function lastTradingDay(mkt){
     try{
-      const tz=mkt==='us'?'America/New_York':'Asia/Taipei',hol=mkt==='us'?US_HOLIDAYS:TW_HOLIDAYS,cut=mkt==='us'?16*60+30:18*60;
+      const tz=mkt==='us'?'America/New_York':'Asia/Taipei',hol=mkt==='us'?US_HOLIDAYS:TW_HOLIDAYS;
       const now=new Date(),z=_zonedParts(now,tz);
+      const cut=mkt==='us'?usCloseMin(_ymd(z))+30:18*60;  // 先.一三二-13f：美股半日市收盤＋30 分（正常日 16:30）
       let d=new Date(Date.UTC(z.y,z.m-1,z.d,12));
       const isTd=x=>{const wd=x.getUTCDay();if(wd===0||wd===6)return false;return !hol.has(x.toISOString().slice(0,10))};
       if(!(isTd(d)&&z.h*60+z.mi>=cut)){do{d=new Date(d.getTime()-86400000)}while(!isTd(d))}
@@ -4917,7 +4918,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-24.0722';
+  const APP_VERSION='2026-10-24.0728';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
