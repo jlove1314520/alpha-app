@@ -71,6 +71,29 @@ for p in sorted((ROOT / "research").rglob("*.py")):
         continue
 res.append(("research/ 沒有新的 stock_detail.json 讀取者（含回補衍生季度，回測不得讀）"
             + ("" if not new_readers else "；" + "；".join(new_readers[:5])), not new_readers))
+# 先.一三二-0a（2026-10-23，收件匣 020）：holdout 期間的限定讀取資料夾（模擬 I 252 日回看）只准單獨列名的程式提到。
+from validation.holdout import ALLOWED_HOLDOUT_READERS, RESTRICTED_LOOKBACK_DIRS  # noqa: E402
+LOOKBACK_DEFINERS = {"research/validation/holdout.py", "scripts/selftest_display_only_files.py"}  # 定義與守門本身
+res.append(("限定讀取資料夾的讀取者都在 ALLOWED_HOLDOUT_READERS（單獨列名）",
+            all(r in ALLOWED_HOLDOUT_READERS for rs in RESTRICTED_LOOKBACK_DIRS.values() for r in rs)))
+res.append(("守門能抓到假程式提到限定資料夾", any(d in 'open("research/data/paper_9_lookback/x.json")' for d in RESTRICTED_LOOKBACK_DIRS)))
+lb_bad = []
+for base in ("research", "scripts"):
+    for p in sorted((ROOT / base).rglob("*.py")):
+        if "__pycache__" in p.parts:
+            continue
+        rel = p.relative_to(ROOT).as_posix()
+        if rel in LOOKBACK_DEFINERS:
+            continue
+        try:
+            text = p.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        for d, readers in RESTRICTED_LOOKBACK_DIRS.items():
+            if d in text and p.name not in readers:
+                lb_bad.append(f"{rel}：{d}")
+res.append(("holdout 限定讀取資料夾（" + "、".join(RESTRICTED_LOOKBACK_DIRS) + "）只有列名程式提到"
+            + ("" if not lb_bad else "；" + "；".join(lb_bad[:5])), not lb_bad))
 for n, ok in res:
     print(("PASS " if ok else "FAIL ") + n)
 nb = sum(1 for _, ok in res if not ok)

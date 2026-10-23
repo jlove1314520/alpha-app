@@ -58,7 +58,19 @@ ALLOWED_HOLDOUT_READERS = frozenset({
     # 先.四十七-一：S3-C6 危機閘門樣本外單發。總司令 2026-10-07【先.四十七】一原文同意「再次動用 2025-01-01～
     # 2026-09-30 保留資料，只此一次」，僅限 #424 登記內容（SHA256 76c3eea0…）。由互動視窗加入（CLAUDE.md 十三）。
     "crisis_gate_s3c6_oos_2025.py",
+    # 先.一三二-0a（2026-10-23 互動視窗，收件匣 020）：模擬 I（#463，docs/PREREG_STOCK_BREAKOUT_252H_FINAL.md §5-1 採甲，
+    # 總司令 2026-10-22 13:1x 裁示）。2025-10-28～2026-10-30 官方全市場日檔**只當 252 日最高還原收盤與 20 日均量的訊號回看輸入**，
+    # 不得對 2026-11-02 以前的任何日期計算報酬或淨值（scripts/selftest_paper_9_no_pre_start_returns.py 檢查）；
+    # 資料只能放 research/data/paper_9_lookback/，且只有這兩支可以讀（RESTRICTED_LOOKBACK_DIRS，scripts/selftest_display_only_files.py 檢查）。
+    "fetch_paper_9_lookback.py",      # 一次性抓取腳本
+    "paper_9_breakout_tracker.py",    # 前向紙上追蹤（2026-11-02 起）
 })
+
+# 先.一三二-0a：holdout 期間資料的「限定讀取者」資料夾。鍵＝research/data/ 底下的資料夾名，值＝唯一可在原始碼中提到它的檔名。
+# research/ 與 scripts/ 底下其他任何 .py 提到這個資料夾名就 FAIL（scripts/selftest_display_only_files.py）。
+RESTRICTED_LOOKBACK_DIRS = {
+    "paper_9_lookback": frozenset({"fetch_paper_9_lookback.py", "paper_9_breakout_tracker.py"}),
+}
 
 
 # 2026-10-15 先.一百-4（研究室.三／.四）：只給 App 顯示與研究紀錄用的回補檔，內容涵蓋 2025 年以後（holdout 期間），
