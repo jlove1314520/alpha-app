@@ -35,6 +35,18 @@ from finmind_client import _cache_path  # noqa: E402
 from validation.holdout import VAL_END  # noqa: E402
 
 START = "2010-01-01"
+
+# 離線：本機沒有快取的「分割／減資」表當成空表（有快取就照讀）。有補充檔與沒補充檔兩次計算用同一套，比對仍公平。
+_real_load_dev = adjust.load_dev
+
+
+def _load_dev_offline(ds, sid, *a, **k):
+    if ds in ("TaiwanStockSplitPrice", "TaiwanStockCapitalReductionReferencePrice") and sid and             not _cache_path(ds, sid, a[0] if a else START, VAL_END).exists():
+        return pd.DataFrame()
+    return _real_load_dev(ds, sid, *a, **k)
+
+
+adjust.load_dev = _load_dev_offline
 CASES = {"1441": "2010-10", "1506": "2010-10", "1526": "2010-10", "1413": "2014-11"}
 fails = []
 
@@ -58,12 +70,12 @@ def frame(sid: str, with_supp: bool) -> pd.DataFrame:
 
 
 def cached(sid: str) -> bool:
-    need = ["TaiwanStockPrice", "TaiwanStockDividend", "TaiwanStockSplitPrice", "TaiwanStockCapitalReductionReferencePrice"]
+    need = ["TaiwanStockPrice", "TaiwanStockDividend"]
     return all(_cache_path(ds, sid, START, VAL_END).exists() for ds in need)
 
 
 ev = pd.read_csv(adjust.SUPPLEMENTAL_REDUCTIONS, dtype={"stock_id": str})
-red = ev[ev["kind"] == "reduction"]
+red = ev[ev["kind"].isin(["reduction", "reduction_assumed"])]
 
 # 1. 四個案例
 for sid, ym in CASES.items():
@@ -92,6 +104,9 @@ for sid in [s for s in with_ev if cached(s)] + others:
         a, b = frame(sid, False), frame(sid, True)
     except Exception as e:  # noqa: BLE001
         skipped.append(f"{sid}:{type(e).__name__}")
+        continue
+    if a.empty or b.empty or "adj_close" not in a.columns or "adj_close" not in b.columns:
+        skipped.append(f"{sid}:empty")
         continue
     m = a[["date", "adj_close"]].merge(b[["date", "adj_close"]], on="date", suffixes=("_old", "_new"))
     post = m[m["date"] >= "2015-01-01"]
