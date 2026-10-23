@@ -1,0 +1,160 @@
+{
+ "generated_at": "2026-10-23T15:44:51",
+ "task": "補.資料-FinMind 股利 2007～2014 漏記逐檔分類（零請求）",
+ "input": [
+  "official_exright_2007_2014.csv",
+  "TaiwanStockDividend 本機快取（同 fetch_exright_2007_2014.finmind_ex_dates）"
+ ],
+ "categories": {
+  "same_day": "FinMind 同日有",
+  "empty_cache": "FinMind 快取整段零筆股利",
+  "date_shift": "FinMind 同股事件日期差 1～7 天",
+  "absent": "FinMind 有該股其他事件但 ±7 天內沒有",
+  "no_cache": "沒有涵蓋整段的 FinMind 快取（不算漏記）"
+ },
+ "total": {
+  "same_day": 5637,
+  "empty_cache": 462,
+  "no_cache": 1052,
+  "absent": 795
+ },
+ "by_year_market": {
+  "2007_tpex": {
+   "same_day": 3
+  },
+  "2007_twse": {
+   "same_day": 444,
+   "empty_cache": 41,
+   "no_cache": 8,
+   "absent": 8
+  },
+  "2008_tpex": {
+   "same_day": 356,
+   "no_cache": 22,
+   "empty_cache": 18
+  },
+  "2008_twse": {
+   "empty_cache": 50,
+   "same_day": 536,
+   "no_cache": 18,
+   "absent": 5
+  },
+  "2009_tpex": {
+   "absent": 297,
+   "no_cache": 33,
+   "empty_cache": 14
+  },
+  "2009_twse": {
+   "empty_cache": 48,
+   "no_cache": 27,
+   "absent": 432,
+   "same_day": 4
+  },
+  "2010_tpex": {
+   "absent": 14,
+   "no_cache": 48,
+   "empty_cache": 12,
+   "same_day": 295
+  },
+  "2010_twse": {
+   "absent": 27,
+   "empty_cache": 54,
+   "no_cache": 47,
+   "same_day": 499
+  },
+  "2011_tpex": {
+   "no_cache": 74,
+   "same_day": 324,
+   "empty_cache": 20
+  },
+  "2011_twse": {
+   "same_day": 589,
+   "empty_cache": 53,
+   "no_cache": 81,
+   "absent": 6
+  },
+  "2012_tpex": {
+   "no_cache": 102,
+   "same_day": 318,
+   "empty_cache": 18
+  },
+  "2012_twse": {
+   "same_day": 532,
+   "no_cache": 104,
+   "empty_cache": 35,
+   "absent": 3
+  },
+  "2013_tpex": {
+   "same_day": 305,
+   "empty_cache": 17,
+   "no_cache": 116
+  },
+  "2013_twse": {
+   "same_day": 552,
+   "no_cache": 106,
+   "empty_cache": 33
+  },
+  "2014_tpex": {
+   "no_cache": 142,
+   "same_day": 306,
+   "empty_cache": 18
+  },
+  "2014_twse": {
+   "no_cache": 124,
+   "empty_cache": 31,
+   "same_day": 574,
+   "absent": 3
+  }
+ },
+ "date_shift_days_hist": {},
+ "examples": {
+  "empty_cache": [
+   "1716 2007-07-03 twse",
+   "2833 2007-07-03 twse",
+   "3009 2007-07-05 twse",
+   "1715 2007-07-11 twse",
+   "5854 2007-07-12 twse",
+   "3367 2007-07-18 twse",
+   "6286 2007-07-19 twse",
+   "3315 2007-07-23 twse",
+   "2456 2007-07-25 twse",
+   "2452 2007-07-26 twse",
+   "2526 2007-07-26 twse",
+   "9915 2007-07-26 twse",
+   "2325 2007-07-27 twse",
+   "2315 2007-07-31 twse",
+   "8078 2007-08-01 twse",
+   "2447 2007-08-02 twse",
+   "2473 2007-08-02 twse",
+   "1520 2007-08-10 twse",
+   "2448 2007-08-13 twse",
+   "3063 2007-08-14 twse"
+  ],
+  "absent": [
+   "2458 2007-07-19 twse",
+   "3035 2007-07-19 twse",
+   "3702 2007-07-31 twse",
+   "1617 2007-08-13 twse",
+   "1532 2007-08-14 twse",
+   "3003 2007-08-30 twse",
+   "5203 2007-09-07 twse",
+   "6168 2007-12-21 twse",
+   "2434 2008-07-24 twse",
+   "2542 2008-08-07 twse",
+   "2601 2008-09-17 twse",
+   "3057 2008-10-02 twse",
+   "1409 2008-10-16 twse",
+   "6208 2009-02-10 tpex",
+   "8929 2009-02-23 tpex",
+   "3086 2009-03-09 tpex",
+   "2014 2009-03-10 twse",
+   "2430 2009-05-07 twse",
+   "2317 2009-06-02 twse",
+   "6160 2009-06-03 tpex"
+  ]
+ },
+ "notes": [
+  "2009 年的 absent 主要就是 FinMind 2009 整年缺漏（先.一三三-1c）。",
+  "只數事件、不改 adjust.py、不算報酬、不碰 holdout。"
+ ]
+}
