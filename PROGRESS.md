@@ -1,3 +1,19 @@
+## 2026-10-24 05:31～06:0x DevQueue 20261024-053101：先.一三二-11、-13、先.一二〇-1／-2、先.一二五-3b、先.一一五-2r 完成
+
+- 等待總司令審閱：4 件（`research/AWAITING_REVIEW.md`，本輪無增減）：先.一三二-0b AlphaPaper9 排程註冊（等總司令親自輸入密碼，自 10-23 21:3x）；先.一三三-1e 公積配息三件判斷（自 10-23 21:2x）；先.一三三-2f 網格變形② PREREG（等 Cowork，自 10-24 02:5x）；先.一三三-2g ML 產業輪動 PREREG（等 Cowork，自 10-24 03:0x）。
+- 本輪戴維運帽（必交產物 `data/STATUS.json`：schedule_health 美股兩項改扣美股休市日、`known_simplification` 改寫，已重產）。
+- **先.一三二-11 → `- [x]`（commit eeb284d45c）**：`research/shioaji_quotes.py` 收盤收尾若當日零 tick → 不覆蓋 `data/quotes_sinopac.json`、不 commit，印「今日零 tick（可能休市），保留上一份快照」；收盤快照改寫 `market_status:"closed"`、`connected:false`（舊版一律 open）；新增 `_tw_closed_today()` 讀交易日曆（closed／unscheduled_closed／今天且無 mismatch 的 suspected_closed_today），`main()` 休市日不登入，常駐迴圈在「至今零 tick」時判到休市就收尾登出（已有 tick 就不採信旗標）。
+  - 證據：離線自測 13/13（不碰真檔、不呼叫真 git）；既有 `shioaji_tick_stream_test.py` 17/17；冒煙 176 PASS 0 FAIL。
+  - 七之二：live server 未改；OPTIONS 預檢 200、`access-control-allow-origin: https://jlove1314520.github.io`、`access-control-allow-credentials: true`；`/health`（帶 token）stale_process=false、build 6de9383。Shioaji 常駐行程週六不在跑，launcher 每 2 分鐘開新行程、05:37／05:39 已用新程式碼跑 `main()` 無錯。⚠️ **daemon 啟動 log 的 build sha 要等 10/27 08:30 才看得到**，已補條目 先.一三二-11a；零 tick 守門要等下一次真的休市才會實地觸發。
+  - [自行裁量] 收盤快照 connected 改 false（收尾即登出）；盤中只在零 tick 時採信休市旗標，避免誤判砍掉真實交易日串流。
+- **先.一三二-13 → `- [x]`（commit a41a1896bf）**：`generate_status_json.py` 新增 `_us_closed_dates()`／`_us_closed_run_dates()`，美股盤中兩項跳過美股休市日、美股日排程跳過對應那一班（UTC 日期換算，排程改到 UTC 隔天也不會錯位）；讀不到日曆只警告。證據：自測 12/12（感恩節 11/26 美東 11:00 → ok、對照不扣 → overdue；正常日舊資料仍 overdue；11/27 開盤寬限 ok；日排程兩情境；缺檔 fail-open）；冒煙 176 全過。[自行裁量] 半日市未建模（日曆沒有提早收盤欄位），已補條目 先.一三二-13a。
+- **先.一二〇-1、-2 → `- [x]`（commit 96c317e6a9，兩條同一個核對放在同一個 commit，照實記錄）**：signal_ledger 進場日 10/14 49/49、10/15 38/38 的 returns.t5 已回填；抽查 6 檔 entry_close 與出場價都和 price_history 一致、報酬重算相同。10/16 的 29 筆 0/29 **不是 bug**：10/23 臨時休市，日曆取自 price_history 實際交易日，T+5 順延到 10/26。[自行裁量] 併入 先.一二〇-3，-3 時間閘改 10/28。BACKLOG.md 第 205 行段後補一行。零外部請求。
+- **先.一二五-3b → `- [x]`（commit cb14be2e7e＋e80a7548c8 修路徑字元）**：10/21 08:16～10:26 觀察期新視窗 3 筆，都是 Cowork 收件匣 004 啟動器的互動視窗，Cybex 0 筆；`CybexResearchEngine` 仍為 wscript 隱藏啟動、LastTaskResult 0；引擎 log 照常。[自行裁量] 規格寫「有新視窗→[!]」，但三筆都不是 Cybex，判 - [x]，總司令可推翻。
+- **先.一一五-2r → `- [x]`**：AlphaFinMindWarmup P3 已於 **2026-10-22 00:07:59** 自動恢復（resume_reason「V1 資料補完」，來源 `research/data/finmind_warmup_p3_pause.json`）。
+- 阻塞項檢查：先.一三二-3（權證快照）10/23 exit=3 是因為臨時休市當天報價表全空（排程跑時日曆還沒記上 10/23），不是快照程式壞掉，維持 [!] 等 10/26 交易日；先.一二〇-3 改閘到 10/28；其餘時間閘未到或需總司令。
+- **收工補件（2 條）**：先.一三二-11a `- [!]`（時間閘 10/27 08:30，Shioaji 新版 build sha 驗證）、先.一三二-13a `- [ ]`（美股半日市進日曆）。DevQueue 可執行非研究項目前只有 1 項（-13a），<6；本輪只掃了自己工作中發現的缺口，**BACKLOG／UX 提案／全檢報告／DATA_GAP_PLAN 四個來源本輪因時間上限未掃**，下一輪開工先補。
+- 收工原因：權威清單沒有其他 DevQueue 可執行項目，且接近 06:16 時間上限。
+
 ## 2026-10-24 05:01～05:2x DevQueue 20261024-050101：先.一三二-8c 完成（條目 - [x]）
 
 - 等待總司令審閱：4 件（`research/AWAITING_REVIEW.md`，本輪無增減）：先.一三二-0b AlphaPaper9 排程註冊（等總司令親自輸入密碼，自 10-23 21:3x）；先.一三三-1e 公積配息三件判斷（自 10-23 21:2x）；先.一三三-2f 網格變形② PREREG（等 Cowork，自 10-24 02:5x）；先.一三三-2g ML 產業輪動 PREREG（等 Cowork，自 10-24 03:0x）。
