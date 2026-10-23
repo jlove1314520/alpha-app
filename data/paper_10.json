@@ -1,0 +1,15 @@
+{
+ "label": "模擬 J 處置股解除後反彈",
+ "note": "處置期間下跌的股票，在處置解除後隔天收盤買進、持有 20 個交易日；最多 20 檔、每筆淨值 1/20；成本 1×",
+ "prereg": "docs/PREREG_DISPOSITION_RELEASE_REBOUND_FORWARD_FINAL.md",
+ "trial_no": 464,
+ "start_not_before": "2026-12-01",
+ "judge_after": "2028-12-01",
+ "started": false,
+ "generated_at": "2026-10-23T11:40:54+08:00",
+ "judge": "2028-12-01 後判一次：已平倉 ≥100 筆前提；天條一回撤 ≤50%；扣 1× 年化 > 0050 含息；2×／3× 成本年化 >0；隨機時點對照 > 第 95 百分位（1,000 次、seed 20261201）；影子帳本（處置期間上漲者）最終淨值須低於本線",
+ "known_limit": "前向 24 個月，處置事件年均約 300 件、條件後約一半；檢定力有限",
+ "disclaimer": "紙上追蹤，非投資建議。虛擬帳戶，未使用真實資金。",
+ "why_not_started": "2026-12-01 起跑（PREREG 寫死，不倒填）",
+ "events_accumulated": 17
+}

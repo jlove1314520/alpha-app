@@ -1,0 +1,15 @@
+{
+ "label": "模擬 K 集保千張大戶增持",
+ "note": "每月第一個交易日：千張大戶持股比 4 週增幅排名前 20 進場、跌出前 60 出場、等權；近 20 日均成交值 ≥3,000 萬；成本 1×",
+ "prereg": "docs/PREREG_TDCC_BIGHOLDER_FORWARD_FINAL.md",
+ "trial_no": 465,
+ "start_not_before": "2026-12-01",
+ "judge_after": "2028-12-01",
+ "started": false,
+ "generated_at": "2026-10-23T11:40:55+08:00",
+ "judge": "2028-12-01 後判一次：已平倉 ≥100 筆前提；天條一回撤 ≤50%；扣 1× 年化 > 0050 含息；2×／3× 成本年化 >0；隨機時點對照 > 第 95 百分位（1,000 次、seed 20261201）",
+ "known_limit": "千張大戶含 ETF 發行人／政府基金／保管帳戶；ETF 申贖造成的機械變動只揭露不剔除；24 個月檢定力弱",
+ "disclaimer": "紙上追蹤，非投資建議。虛擬帳戶，未使用真實資金。",
+ "etf_member_source": "data/tw50_constituents.json（未建檔前記 null）",
+ "why_not_started": "2026-12-01 起跑（PREREG 寫死，不倒填）"
+}
