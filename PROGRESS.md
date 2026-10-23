@@ -1,3 +1,19 @@
+## 2026-10-23 11:31～12:0x DevQueue 20261023-113102：模擬 J／K／L 定稿登記 #464～#466＋個股前向追蹤共用框架；模擬 L 接本機排程
+
+- 等待總司令審閱：8 件（先.一三二-1 三份草稿已由 Cowork 審過、移已結案；清單見 `research/AWAITING_REVIEW.md`）。
+- 本輪戴研究帽。交辦佇列 `- [ ]` 還有 21 條。
+- **先.一三二-5 → `- [x]`**
+  - ①～④ 定稿：`docs/PREREG_DISPOSITION_RELEASE_REBOUND_FORWARD_FINAL.md`（模擬 J：歷史前置條件 79.66%／68.85% 不成立，照草稿自己的規則改前向；H=20、M=20 不變；刪 holdout 出場待修點）、`docs/PREREG_TDCC_BIGHOLDER_FORWARD_FINAL.md`（模擬 K：L=4、M=20、R=60；ETF 申贖只揭露、另存 0050／006208 成分股欄）、`docs/PREREG_WARRANT_ISSUANCE_WAVE_FORWARD_FINAL.md`（模擬 L：W=20、M=20、R=60；11/30 前快照連續 10 個交易日成功才 12/01 起跑，否則順延月初）——e9254c61a2；草稿原文保留在各檔下半部供稽核。
+  - 登記：`register_trial()` **#464／#465／#466**（6091c5c8de），全體 N 442→445，`selection_bias_ledger.py`＋`.github/scripts/build_trials_index.py` 重跑（冒煙 #103 對齊）。判定日 2028-12-01。
+  - ⑤ 框架（605a0053c9）：`research/paper_forward_common.py`（宇宙、monthly／event 兩種組合、成本 engine 1×、每交易日一列帳本含已平倉交易表可直接餵 `run_random_timing_control`、step() 冪等並依序補漏跑日、起跑前 NOT_STARTED）＋三支訊號 `research/paper_10_disposition_tracker.py`（事件累積 `research/data/paper_10_events.json`＋條件有效性影子帳本）、`paper_11_tdcc_bigholder_tracker.py`、`paper_12_warrant_wave_tracker.py`。
+  - 自測 `scripts/selftest_paper_forward_common.py` 全過：起跑前 NOT_STARTED 不寫帳本、補跑 15 天後再跑不新增（冪等）、等權、每月最多一次、延長處置合併、主／影子帳本互斥、未滿 H 天不出場、H 天出場且交易表欄位齊、K 週窗 PIT、L 起跑前提與順延；tracemalloc 峰值約 200MB（<1GB）。自測用到 2026 的價格只當程式輸入，不印任何淨值／報酬。
+  - 排程：模擬 J／K 接 `market.yml`（同模擬 G，git add 清單已加，十節）；現在實跑三支都是 NOT_STARTED（J 已累積 17 段處置）。
+  - `[自行裁量]`：J 隨機時點種子改 20261201（與 K／L 一致）；K 成分股清單 repo 沒有 → 欄位先記 null、另排 先.一三二-5b；漏跑日依序補處理。
+- **先.一三二-5a → `- [x]`**（2f1a2f8288，[自走補入] 本輪新增）：`research/warrant_snapshot_daily.py` 快照後以獨立行程跑模擬 L，同一個 path-scoped commit 帶 `data/paper_12.json`＋`research/data/paper_12_log.jsonl`；故意讓 subprocess 丟例外驗證快照流程不受影響（十二節）。**未在真排程下觀察過**，下一班 17:30 起生效。
+- 新增 [自走補入] **先.一三二-5b** 0050／006208 成分股清單（模擬 K 揭露欄用，DevQueue 可執行），本輪沒做。
+- 冒煙：每個 commit 前都跑，176/176 全過（e9254c61a2、6091c5c8de、605a0053c9、2f1a2f8288 各一次）。
+- 未計算任何報酬、未讀 holdout 做評估、未改核心研究檔。
+
 ## 2026-10-23 10:31～11:0x DevQueue 20261023-103102：網格／ML 涵蓋率修訂草稿送審；模擬 I 定稿登記 #463，第③步要互動視窗改 holdout.py
 
 - 等待總司令審閱：9 件（新增 先.一三三-2；清單見 `research/AWAITING_REVIEW.md`）。
