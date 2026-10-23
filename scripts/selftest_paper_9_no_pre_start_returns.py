@@ -2,7 +2,7 @@
 """先.一三二-0a（2026-10-23，收件匣 020）：模擬 I 追蹤程式不得對 2026-11-02 以前的日期算報酬或淨值。
 
 模擬 I（#463，docs/PREREG_STOCK_BREAKOUT_252H_FINAL.md §5-1 採甲）可以讀 2025-10-28～2026-10-30 的官方日檔
-（research/data/paper_9_lookback/，research/validation/holdout.py ALLOWED_HOLDOUT_READERS），但**只當訊號回看輸入**。
+（research/data/ 底下的模擬 I 回看資料夾，見 research/validation/holdout.py ALLOWED_HOLDOUT_READERS／RESTRICTED_LOOKBACK_DIRS），但**只當訊號回看輸入**。
 本自測也是 DevQueue 寫 research/paper_9_breakout_tracker.py 時必須照著做的介面約定：
   - 常數 START_NOT_BEFORE == "2026-11-02"；LOG（帳本路徑）、OUT（App 摘要路徑）為模組層變數（自測會改指到暫存資料夾）；
   - step(today: str | None = None)：today < START_NOT_BEFORE 一律回 {"state": "NOT_STARTED", ...}，不寫帳本；
