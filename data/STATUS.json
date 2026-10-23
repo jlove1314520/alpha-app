@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-24T04:42:00.459202+08:00",
-  "latest_commit": "ddfbe46",
+  "updated_at": "2026-10-24T04:46:31.900628+08:00",
+  "latest_commit": "b44abbd221",
   "data_files": [
     {
       "path": "data/adjustment_anomalies.json",
@@ -12,11 +12,19 @@
     },
     {
       "path": "data/adr_premium.json",
-      "generated_at": "2026-10-23T17:53:38+00:00",
+      "generated_at": "2026-10-23T20:41:03+00:00",
       "records": 4,
       "source": "通用解析（讀 computed_at）",
       "detail": "",
       "status": "ok"
+    },
+    {
+      "path": "data/app_errors_summary.json",
+      "generated_at": "2026-10-17T00:04:11+08:00",
+      "records": 7,
+      "source": "通用解析（讀 generated_at）",
+      "detail": "",
+      "status": "stale"
     },
     {
       "path": "data/audit_report.json",
@@ -572,7 +580,7 @@
     },
     {
       "path": "data/quotes_tw.json",
-      "generated_at": "2026-10-23T17:53:22+00:00",
+      "generated_at": "2026-10-23T20:40:59+00:00",
       "records": 233,
       "source": "TWSE MIS（mis.twse.com.tw，證交所公開即時行情端點）",
       "detail": "queried=233 matched=233 trading_window=False",
@@ -580,10 +588,10 @@
     },
     {
       "path": "data/quotes_us.json",
-      "generated_at": "2026-10-23T17:53:27+00:00",
+      "generated_at": "2026-10-23T20:41:03+00:00",
       "records": 9,
       "source": "Finnhub /quote（免費額度，regular quote）+ yfinance Ticker.info（extended_hours：pre/post market，2026-08-27新增）",
-      "detail": "queried=9 matched=9 trading_window=True market_session=regular extended_hours_matched=9",
+      "detail": "queried=9 matched=9 trading_window=False market_session=post extended_hours_matched=9",
       "status": "ok"
     },
     {
@@ -1000,12 +1008,10 @@
         }
       ],
       "last_run": "2026-10-23T15:28:23Z",
-      "last_status": "in_progress",
+      "last_status": "success",
       "today_runs": {
-        "date_tw": "2026-10-23",
-        "total": 4,
-        "in_progress": 1,
-        "success": 3
+        "date_tw": "2026-10-24",
+        "total": 0
       }
     },
     {
@@ -1013,32 +1019,30 @@
       "name": "盤中近即時報價（台股+美股）",
       "schedule": "盤中每10分鐘：台股09:00-13:30、美股13:30-21:00(左右)，週一至週五",
       "crons": null,
-      "last_run": "2026-10-23T13:16:00Z",
+      "last_run": "2026-10-23T20:40:22Z",
       "last_status": "success",
       "today_runs": {
-        "date_tw": "2026-10-23",
-        "total": 5,
-        "success": 5
+        "date_tw": "2026-10-24",
+        "total": 0
       }
     }
   ],
   "schedule_health": {
-    "checked_at": "2026-10-24T04:42:00+08:00",
+    "checked_at": "2026-10-24T04:46:55+08:00",
     "any_overdue": true,
     "overdue_names": [
-      "台股逐筆tick（本機Shioaji）",
-      "美股盤中報價（GitHub Actions quotes.yml）",
       "美股即時報價（本機IBKR）"
     ],
-    "known_simplification": "不扣台美股國定假日：假日當天的盤中規則會誤判overdue（跟fetch_quotes_tw.py同一個既有簡化）",
+    "known_simplification": "台股項目扣 data/trading_calendar.json 休市日（含今天疑似臨時休市，先.一三二-10b）；美股仍不扣國定假日，假日當天盤中規則會誤判overdue",
+    "tw_closed_today_note": null,
     "checks": [
       {
         "name": "台股盤中報價（GitHub Actions quotes.yml）",
         "file": "data/quotes_tw.json",
         "owner": "GitHub Actions",
         "status": "ok",
-        "last_data_at": "2026-10-24T01:53+08:00",
-        "expected_at_or_after": "2026-10-23T13:00+08:00",
+        "last_data_at": "2026-10-24T04:40+08:00",
+        "expected_at_or_after": "2026-10-22T13:00+08:00",
         "rule": "盤後/假日：需有最近一個交易日的收盤資料",
         "note": "每10分鐘；盤中超過30分鐘沒落地=異常"
       },
@@ -1046,9 +1050,9 @@
         "name": "台股逐筆tick（本機Shioaji）",
         "file": "data/quotes_sinopac.json",
         "owner": "本機排程AlphaShioajiQuotes",
-        "status": "overdue",
+        "status": "ok",
         "last_data_at": "2026-10-22T13:46+08:00",
-        "expected_at_or_after": "2026-10-23T13:00+08:00",
+        "expected_at_or_after": "2026-10-22T13:00+08:00",
         "rule": "盤後/假日：需有最近一個交易日的收盤資料",
         "note": "只有使用者這台機器開機且排程在跑才會更新；乙.1冷熱分離上線後盤中不再push，只在收盤後commit一次"
       },
@@ -1056,8 +1060,8 @@
         "name": "美股盤中報價（GitHub Actions quotes.yml）",
         "file": "data/quotes_us.json",
         "owner": "GitHub Actions",
-        "status": "overdue",
-        "last_data_at": "2026-10-24T01:53+08:00",
+        "status": "ok",
+        "last_data_at": "2026-10-24T04:41+08:00",
         "expected_at_or_after": "2026-10-24T03:30+08:00",
         "rule": "盤後/假日：需有最近一個交易日的收盤資料",
         "note": "每10分鐘（美東正常盤）；盤前盤後另有extended_hours欄位"
@@ -1078,7 +1082,7 @@
         "owner": "GitHub Actions",
         "status": "ok",
         "last_data_at": "2026-10-23T23:30+08:00",
-        "expected_at_or_after": "2026-10-23T17:13+08:00",
+        "expected_at_or_after": "2026-10-22T17:13+08:00",
         "rule": "每個平日09:13（UTC）排程，寬限3.0小時",
         "note": "台北17:13排程，寬限3小時→20:13後仍沒有當天資料=異常（時刻來源：market.yml cron）"
       },
@@ -1098,7 +1102,7 @@
         "owner": "GitHub Actions",
         "status": "ok",
         "last_data_at": "2026-10-23T23:32+08:00",
-        "expected_at_or_after": "2026-10-23T17:13+08:00",
+        "expected_at_or_after": "2026-10-22T17:13+08:00",
         "rule": "每個平日09:13（UTC）排程，寬限3.0小時",
         "note": ""
       },
@@ -1108,7 +1112,7 @@
         "owner": "GitHub Actions",
         "status": "ok",
         "last_data_at": "2026-10-23T23:33+08:00",
-        "expected_at_or_after": "2026-10-23T17:13+08:00",
+        "expected_at_or_after": "2026-10-22T17:13+08:00",
         "rule": "每個平日09:13（UTC）排程，寬限3.0小時",
         "note": ""
       },
@@ -1118,7 +1122,7 @@
         "owner": "GitHub Actions",
         "status": "ok",
         "last_data_at": "2026-10-23T23:30+08:00",
-        "expected_at_or_after": "2026-10-23T17:13+08:00",
+        "expected_at_or_after": "2026-10-22T17:13+08:00",
         "rule": "每個平日09:13（UTC）排程，寬限3.0小時",
         "note": ""
       },
@@ -1128,7 +1132,7 @@
         "owner": "GitHub Actions",
         "status": "ok",
         "last_data_at": "2026-10-23T23:33+08:00",
-        "expected_at_or_after": "2026-10-23T17:13+08:00",
+        "expected_at_or_after": "2026-10-22T17:13+08:00",
         "rule": "每個平日09:13（UTC）排程，寬限3.0小時",
         "note": ""
       },
@@ -1138,26 +1142,19 @@
         "owner": "GitHub Actions",
         "status": "ok",
         "last_data_at": "2026-10-23T23:33+08:00",
-        "expected_at_or_after": "2026-10-23T17:13+08:00",
+        "expected_at_or_after": "2026-10-22T17:13+08:00",
         "rule": "每個平日09:13（UTC）排程，寬限3.0小時",
         "note": ""
       }
     ]
   },
   "local_pipeline_health": {
-    "checked_at": "2026-10-23T23:34:30.792652+08:00",
+    "checked_at": "2026-10-24T04:46:55.984413+08:00",
     "registry": "data/seed/pipeline_registry.json",
     "any_stalled": true,
     "stalled": [
-      "AlphaLiveServer：產出檔 research/alpha_live_server_cycle.log 不存在",
-      "AlphaShioajiQuotes：產出檔 research/shioaji_quotes_cycle.log 不存在",
-      "AlphaIbkrQuotes：產出檔 research/ibkr_quotes_cycle.log 不存在",
-      "AlphaIbkrQuotes：data/quotes_ibkr.json 已 7953 分鐘沒有新產出（預期每 5 分鐘，門檻 15 分鐘；JSON 欄位 fetched_at）",
-      "AlphaConnectivity：research/external_connectivity.jsonl 已 22 分鐘沒有新產出（預期每 5 分鐘，門檻 15 分鐘；JSONL 末筆 ts）",
-      "AlphaData：產出檔 C:/alpha/alpha-data/alpha.db 不存在",
-      "AlphaQuotesTW：data/quotes_tw.json 已連續錯過 14 個應跑班次（門檻 3 班，最近應跑 2026-10-23 23:30；JSON 欄位 fetched_at）",
-      "AlphaNewsEvents：data/news.json 已連續錯過 3 個應跑班次（門檻 3 班，最近應跑 2026-10-23 23:30；JSON 欄位 fetched_at）",
-      "AlphaDisposalFlags：產出檔 research/data/disposal_flags_cycle.log 不存在"
+      "AlphaIbkrQuotes：data/quotes_ibkr.json 已 8266 分鐘沒有新產出（預期每 5 分鐘，門檻 15 分鐘；JSON 欄位 fetched_at）",
+      "AlphaConnectivity：research/external_connectivity.jsonl 已 30 分鐘沒有新產出（預期每 5 分鐘，門檻 15 分鐘；JSONL 末筆 ts）"
     ],
     "pipelines": [
       {
@@ -1166,8 +1163,11 @@
         "artifact": "research/alpha_live_server_cycle.log",
         "expected_interval_min": 1,
         "freshness": "log_last_timestamp",
-        "status": "missing",
-        "reason": "產出檔不存在"
+        "source": "log 內最後時間戳",
+        "last_output": "2026-10-24T04:46:02+08:00",
+        "age_min": 0.9,
+        "stall_limit_min": 3,
+        "status": "ok"
       },
       {
         "task": "AlphaShioajiQuotes",
@@ -1175,8 +1175,11 @@
         "artifact": "research/shioaji_quotes_cycle.log",
         "expected_interval_min": 2,
         "freshness": "log_last_timestamp",
-        "status": "missing",
-        "reason": "產出檔不存在"
+        "source": "log 內最後時間戳",
+        "last_output": "2026-10-24T04:45:06+08:00",
+        "age_min": 1.8,
+        "stall_limit_min": 6,
+        "status": "ok"
       },
       {
         "task": "AlphaShioajiQuotes",
@@ -1186,7 +1189,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 checked_at",
         "last_output": "2026-10-22T13:47:01.939725+08:00",
-        "age_min": 2027.5,
+        "age_min": 2339.9,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -1196,8 +1199,11 @@
         "artifact": "research/ibkr_quotes_cycle.log",
         "expected_interval_min": 5,
         "freshness": "log_last_timestamp",
-        "status": "missing",
-        "reason": "產出檔不存在"
+        "source": "log 內最後時間戳",
+        "last_output": "2026-10-24T04:46:05+08:00",
+        "age_min": 0.8,
+        "stall_limit_min": 15,
+        "status": "ok"
       },
       {
         "task": "AlphaIbkrQuotes",
@@ -1207,7 +1213,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 fetched_at",
         "last_output": "2026-10-18T11:01:05.500839+08:00",
-        "age_min": 7953.4,
+        "age_min": 8265.8,
         "stall_limit_min": 15,
         "status": "stalled"
       },
@@ -1218,8 +1224,8 @@
         "expected_interval_min": 5,
         "freshness": "jsonl_last_field",
         "source": "JSONL 末筆 ts",
-        "last_output": "2026-10-23T23:12:02.039476+08:00",
-        "age_min": 22.5,
+        "last_output": "2026-10-24T04:17:02.516401+08:00",
+        "age_min": 29.9,
         "stall_limit_min": 15,
         "status": "stalled"
       },
@@ -1239,8 +1245,8 @@
         "expected_interval_min": 15,
         "freshness": "log_last_timestamp",
         "source": "log 內最後時間戳",
-        "last_output": "2026-10-23T22:56:23+08:00",
-        "age_min": 38.1,
+        "last_output": "2026-10-24T04:06:40+08:00",
+        "age_min": 40.3,
         "stall_limit_min": 45,
         "status": "ok"
       },
@@ -1268,8 +1274,11 @@
         "artifact": "C:/alpha/alpha-data/alpha.db",
         "expected_interval_min": 1440,
         "freshness": "sqlite_max_date",
-        "status": "missing",
-        "reason": "產出檔不存在"
+        "source": "各表 max(date)：daily_price=2026-10-22、inst_trades=2026-10-22、valuation=2026-10-22、taifex_large=20261020",
+        "last_output": "2026-10-22T00:00:00+08:00",
+        "age_min": 3166.9,
+        "stall_limit_min": 4320,
+        "status": "ok"
       },
       {
         "task": "AlphaDepCheck",
@@ -1279,7 +1288,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 generated_at",
         "last_output": "2026-10-20T19:09:48.347309+08:00",
-        "age_min": 4584.7,
+        "age_min": 4897.1,
         "stall_limit_min": 30240,
         "status": "ok"
       },
@@ -1291,7 +1300,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 meta.generated_at",
         "last_output": "2026-10-23T23:33:24.499608+08:00",
-        "age_min": 1.1,
+        "age_min": 313.5,
         "shift_profile": "market_yml",
         "missed_shifts": 0,
         "missed_shift_threshold": 2,
@@ -1306,7 +1315,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 fetched_at",
         "last_output": "2026-10-23T15:30:04+00:00",
-        "age_min": 4.4,
+        "age_min": 316.9,
         "shift_profile": "market_yml",
         "missed_shifts": 0,
         "missed_shift_threshold": 2,
@@ -1321,7 +1330,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 meta.generated_at",
         "last_output": "2026-10-23T23:32:24.754198+08:00",
-        "age_min": 2.1,
+        "age_min": 314.5,
         "shift_profile": "market_yml",
         "missed_shifts": 0,
         "missed_shift_threshold": 2,
@@ -1336,7 +1345,7 @@
         "freshness": "dir_latest_json_field",
         "source": "目錄最新檔 2026-10-22.json 的 meta.date",
         "last_output": "2026-10-22T00:00:00+08:00",
-        "age_min": 2854.5,
+        "age_min": 3166.9,
         "stall_limit_min": 8640,
         "status": "ok"
       },
@@ -1348,7 +1357,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 meta.generated_at",
         "last_output": "2026-10-23T23:33:01.833548+08:00",
-        "age_min": 1.5,
+        "age_min": 313.9,
         "shift_profile": "market_yml",
         "missed_shifts": 0,
         "missed_shift_threshold": 2,
@@ -1362,13 +1371,13 @@
         "expected_interval_min": 60,
         "freshness": "json_field",
         "source": "JSON 欄位 fetched_at",
-        "last_output": "2026-10-23T13:16:38+00:00",
-        "age_min": 137.9,
+        "last_output": "2026-10-23T20:40:59+00:00",
+        "age_min": 5.9,
         "shift_profile": "quotes_yml",
-        "missed_shifts": 14,
+        "missed_shifts": 0,
         "missed_shift_threshold": 3,
-        "latest_due_shift": "2026-10-23 23:30",
-        "status": "stalled"
+        "latest_due_shift": null,
+        "status": "ok"
       },
       {
         "task": "AlphaNewsEvents",
@@ -1377,13 +1386,13 @@
         "expected_interval_min": 30,
         "freshness": "json_field",
         "source": "JSON 欄位 fetched_at",
-        "last_output": "2026-10-23T22:05:04.795171+08:00",
-        "age_min": 89.4,
+        "last_output": "2026-10-24T03:58:40.035789+08:00",
+        "age_min": 48.3,
         "shift_profile": "news_events_yml",
-        "missed_shifts": 3,
+        "missed_shifts": 2,
         "missed_shift_threshold": 3,
-        "latest_due_shift": "2026-10-23 23:30",
-        "status": "stalled"
+        "latest_due_shift": "2026-10-24 04:30",
+        "status": "ok"
       },
       {
         "task": "AlphaDataAudit",
@@ -1392,12 +1401,12 @@
         "expected_interval_min": 1440,
         "freshness": "json_field",
         "source": "JSON 欄位 generated_at",
-        "last_output": "2026-10-23T23:00:02.356691+08:00",
-        "age_min": 34.5,
+        "last_output": "2026-10-24T03:21:06.730723+08:00",
+        "age_min": 85.8,
         "shift_profile": "audit_yml",
-        "missed_shifts": 1,
+        "missed_shifts": 0,
         "missed_shift_threshold": 2,
-        "latest_due_shift": "2026-10-23 23:20",
+        "latest_due_shift": null,
         "status": "ok"
       },
       {
@@ -1406,8 +1415,11 @@
         "artifact": "research/data/disposal_flags_cycle.log",
         "expected_interval_min": 1440,
         "freshness": "log_last_timestamp",
-        "status": "missing",
-        "reason": "產出檔不存在"
+        "source": "log 內最後時間戳",
+        "last_output": "2026-10-23T18:30:06+08:00",
+        "age_min": 616.8,
+        "stall_limit_min": 4320,
+        "status": "ok"
       },
       {
         "task": "AlphaResearchLayer",
@@ -1417,7 +1429,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 meta.generated_at",
         "last_output": "2026-10-23T23:34:13+08:00",
-        "age_min": 0.3,
+        "age_min": 312.7,
         "shift_profile": "market_yml",
         "missed_shifts": 0,
         "missed_shift_threshold": 2,
@@ -1432,7 +1444,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 meta.generated_at",
         "last_output": "2026-10-23T23:34:13+08:00",
-        "age_min": 0.3,
+        "age_min": 312.7,
         "shift_profile": "market_yml",
         "missed_shifts": 0,
         "missed_shift_threshold": 2,
@@ -1440,15 +1452,12 @@
         "status": "ok"
       }
     ],
-    "note": "本機排程管線的新鮮度。判定看的是**產出檔內部的資料時間戳**（能取得的話），不是檔案修改時間——mtime 新鮮不代表資料新鮮，alpha.db 就是 mtime 天天更新但資料停在 2026-08-21。這份與 data/audit_report.json 的 local_task_health、scripts/pipeline_inventory.py 讀同一份登錄檔。",
-    "status": "ok",
-    "status_checked_at": "2026-10-23T20:42:00.459202+00:00",
-    "status_age_hours": 5.1
+    "note": "本機排程管線的新鮮度。判定看的是**產出檔內部的資料時間戳**（能取得的話），不是檔案修改時間——mtime 新鮮不代表資料新鮮，alpha.db 就是 mtime 天天更新但資料停在 2026-08-21。這份與 data/audit_report.json 的 local_task_health、scripts/pipeline_inventory.py 讀同一份登錄檔。"
   },
   "adjustment_anomaly_warnings": {
-    "n_warnings": 1953,
+    "n_warnings": 6993,
     "file": "data/adjustment_anomalies.json",
-    "generated_at": "2026-10-23T23:34:30.797309+08:00",
+    "generated_at": "2026-10-24T04:46:56.016766+08:00",
     "note": "research/adjust.py::adjusted_price_series()偵測到的單日|報酬|>11%還原價異常（新上市5日內除外），修.六第三點新增。只降級為警告，不影響任何回測/排程執行；由 market.yml 每次排程執行generate_status_json.py 時更新（先.六十-C9 起），非即時。"
   },
   "app_data_sources": [
@@ -1832,11 +1841,10 @@
     "scores.json（選股頁分數）2026-08-27新增GitHub Actions每日排程（research/generate_scores_live.py，market.yml），只讀repo內JSON、不依賴parquet/FinMind，不會再因為研究者本機沒開機而停擺——但這條JSON-only路徑覆蓋率上限約0.74（technical/analyst/catalyst三項恆缺），跟研究端手動執行（research/generate_scores_v2.py，因子較完整）互不覆蓋衝突，用meta.engine_version分辨這次是哪條管線產生的。",
     "本檔案（STATUS.json）由generate_status_json.py產生，APP_DATA_SOURCES那份面板對照表是人工核對、不是自動掃描——異動面板資料源時要記得同步更新腳本裡的常數，否則這份清單會跟實際程式碼不同步。",
     "earnings_calendar.json：yfinance get_calendar()（下一次財報日期）穩定可用，但get_earnings_dates()（用來推估盤前/盤後公布時段）在這台機器持續遇到curl_cffi對guce.yahoo.com的DNS解析失敗（socket.gethostbyname()本身正常，是curl_cffi內部的環境特定問題，不是程式bug）——estimated_session因此誠實降級為'unknown'，不影響next_earnings_date本身的可靠性；GitHub Actions runner環境不一定有同樣的DNS問題，之後排程實跑可能就會恢復正常。",
-    "2026-10-23（DevQueue 20261023-133102，先.一三二-10）：交易日曆 trading_calendar.json 的 unscheduled_closed 只靠 TWSE FMTQIK 回填「今天以前」且 7 天快取，當天颱風臨時休市（10/23 薔琵）記不到 → schedule_health 會把本機 Shioaji 判逾期、常駐行程照常空跑；修法提案 docs/PROPOSAL_UNSCHEDULED_CLOSURE_SAMEDAY.md 等裁示。收盤零 tick 仍 commit 空快照另案 先.一三二-11。",
-    "2026-10-24 先.一三二-8b：audit.yml 的 reproducibility_check 雲端改裝 numpy／pandas／scipy、4 條並行（本機 236 支 91 秒）；缺清單內第三方套件（yfinance、shioaji、sklearn 等）記 ENV_MISSING、不算壞掉、報告 env_missing 照列——這些腳本在雲端仍驗不到。清單外的缺模組照舊記 IMPORT_ERROR（防 #23 那種被刪除的專案模組被當成環境問題藏掉）。"
+    "2026-10-23（DevQueue 20261023-133102，先.一三二-10）：交易日曆 trading_calendar.json 的 unscheduled_closed 只靠 TWSE FMTQIK 回填「今天以前」且 7 天快取，當天颱風臨時休市（10/23 薔琵）記不到 → schedule_health 會把本機 Shioaji 判逾期、常駐行程照常空跑；修法提案 docs/PROPOSAL_UNSCHEDULED_CLOSURE_SAMEDAY.md 已核准採丙並完成（先.一三二-10b，2026-10-24：盤中零請求寫 suspected_closed_today、收盤後 FMTQIK 確認、schedule_health 與 4 支本機讀者已扣休市日；10/23 已補進 unscheduled_closed）。收盤零 tick 仍 commit 空快照另案 先.一三二-11。"
   ],
   "any_overdue": true,
-  "updated_by": "scripts/check_local_schedule_heartbeat.py（local_schedule_watchdog.yml 每 30 分鐘）",
+  "updated_by": "generate_status_json.py（market.yml 每次排程＋手動）",
   "local_schedule_heartbeat": {
     "checked_at": "2026-10-23T20:42:00.267342+00:00",
     "stall_threshold_minutes": 60,
@@ -1922,12 +1930,5 @@
     "judged_by": "any_of_local_heartbeats",
     "stall_minutes": 24.8,
     "note": "本機排程最後活動時間；2026-09-27【乾.三主體第八點】裁示改為「DevQueue／Marathon／Hypothesis-queue三軌任一有新鮮心跳（≤60分鐘）即視為本機整體存活」（取代原本只看DevQueue單一訊號的版本，因為DevQueue的既有碰撞防護機制在互動視窗長時間編輯檔案時會正確YIELD但不留心跳，容易誤判——詳見PENDING_QUEUE.md查.一條目的根因分析）。個別軌道超過360分鐘另外標記track_stalled警告，不影響本機整體存活的判定，但值得單獨留意。偵測放在雲端是因為本機push被卡住時無法自己通知任何人。"
-  },
-  "data_files_checked_at": "2026-10-24T04:42:00.459202+08:00",
-  "orphan_processes": {
-    "count": 0,
-    "total_private_mb": 0,
-    "checked_at": "2026-10-23T03:00:02+08:00",
-    "warning": false
   }
 }

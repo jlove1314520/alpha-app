@@ -43,6 +43,16 @@ MESSAGE = "今日台股資料未進來，三層備援都沒補到"
 CAL_NOTE = {"note": ""}  # 先.一一四-1：當年官方日曆未公布時，告警文字附註（假日可能誤報）
 
 
+def _suspected_today(y: dict, d) -> set:
+    """先.一三二-10b：盤中零請求判的「今天疑似臨時休市」（detect_suspected_closure.py）也當休市；
+    只認 date＝今天（台北）且收盤確認沒有記成「疑似卻有成交」的。"""
+    iso = d.isoformat()
+    s, m = y.get("suspected_closed_today"), y.get("suspected_closed_mismatch")
+    if isinstance(s, dict) and s.get("date") == iso == datetime.now(TW).date().isoformat()             and not (isinstance(m, dict) and m.get("date") == iso):
+        return {iso}
+    return set()
+
+
 def is_trading_day(d) -> bool:
     """官方交易日曆（data/trading_calendar.json，來源 TWSE holidaySchedule＋臨時停市）。週末一律非交易日；
     當年官方日曆尚未公布（published 不是 true）時照週一～五判斷，並在告警文字附註，不假裝已核對官方日曆。"""
@@ -53,7 +63,7 @@ def is_trading_day(d) -> bool:
         y = (cal.get("tw") or {}).get(str(d.year)) or {}
         if y.get("published") is not True:
             CAL_NOTE["note"] = f"（{d.year} 年官方交易日曆尚未公布，暫照週一～五判斷，國定假日可能誤報）"
-        return d.isoformat() not in (set(y.get("closed") or []) | set(y.get("unscheduled_closed") or []))
+        return d.isoformat() not in (set(y.get("closed") or []) | set(y.get("unscheduled_closed") or []) | _suspected_today(y, d))
     except Exception as e:  # noqa: BLE001 —— 讀不到日曆照平日判斷（多報一次無害，漏報才有害）
         print(f"::warning::trading_calendar 讀取失敗，照平日判斷：{type(e).__name__}: {e}")
         return True

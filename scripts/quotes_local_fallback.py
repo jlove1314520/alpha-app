@@ -46,7 +46,16 @@ def is_trading_day(d: str) -> bool | None:
         cal = json.loads((ROOT / "data" / "trading_calendar.json").read_text(encoding="utf-8"))["tw"][d[:4]]
     except Exception:  # noqa: BLE001
         return None  # 日曆讀不到：只用週末判斷
-    return d not in set(cal.get("closed") or []) | set(cal.get("unscheduled_closed") or [])
+    return d not in set(cal.get("closed") or []) | set(cal.get("unscheduled_closed") or []) | _suspected_today(cal, d)
+
+
+def _suspected_today(y: dict, d: str) -> set:
+    """先.一三二-10b：盤中零請求判的「今天疑似臨時休市」（detect_suspected_closure.py）也當休市；
+    只認 date＝今天（台北）且收盤確認沒有記成「疑似卻有成交」的。"""
+    s, m = y.get("suspected_closed_today"), y.get("suspected_closed_mismatch")
+    if isinstance(s, dict) and s.get("date") == d == datetime.now(TW).strftime("%Y-%m-%d")             and not (isinstance(m, dict) and m.get("date") == d):
+        return {d}
+    return set()
 
 
 def _age(txt: str | None) -> float | None:

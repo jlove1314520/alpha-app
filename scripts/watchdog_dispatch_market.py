@@ -36,13 +36,23 @@ START_HM = (17, 45)
 REASON = "watchdog_tw_catchup"
 
 
+def _suspected_today(y: dict, d) -> set:
+    """先.一三二-10b：盤中零請求判的「今天疑似臨時休市」（detect_suspected_closure.py）也當休市；
+    只認 date＝今天（台北）且收盤確認沒有記成「疑似卻有成交」的。"""
+    iso = d.isoformat()
+    s, m = y.get("suspected_closed_today"), y.get("suspected_closed_mismatch")
+    if isinstance(s, dict) and s.get("date") == iso == datetime.now(TW).date().isoformat()             and not (isinstance(m, dict) and m.get("date") == iso):
+        return {iso}
+    return set()
+
+
 def is_trading_day(d) -> bool:
     if d.weekday() >= 5:
         return False
     try:
         cal = json.loads((ROOT / "data" / "trading_calendar.json").read_text(encoding="utf-8"))
         y = (cal.get("tw") or {}).get(str(d.year)) or {}
-        closed = set(y.get("closed") or []) | set(y.get("unscheduled_closed") or [])
+        closed = set(y.get("closed") or []) | set(y.get("unscheduled_closed") or []) | _suspected_today(y, d)
         return d.isoformat() not in closed
     except Exception as e:  # noqa: BLE001 -- 讀不到日曆照平日判斷（多觸發一次無害，漏補才有害）
         print(f"::warning::trading_calendar 讀取失敗，照平日判斷：{type(e).__name__}: {e}")

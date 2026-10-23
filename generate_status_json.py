@@ -902,47 +902,67 @@ def _parse_ts(val) -> datetime | None:
         return None
 
 
-def _last_weekday_instant(now: datetime, tz, hour: int, minute: int, min_age: timedelta = timedelta(0)) -> datetime:
-    """回傳「最近一個週一至週五、且距現在至少min_age」的 tz 當地 hh:mm 時刻（UTC aware）。"""
+def _tw_closed_dates(now: datetime) -> tuple[set, str]:
+    """先.一三二-10b：台股日曆休市日（closed＋unscheduled_closed＋今天的 suspected_closed_today），
+    給台股各項時窗判斷跳過，避免颱風臨時休市當天誤報逾期。讀不到只警告、回空集合（＝照舊只扣週末，十二節）。"""
+    try:
+        cal = json.loads((REPO_ROOT / "data" / "trading_calendar.json").read_text(encoding="utf-8"))
+        today = now.astimezone(TAIPEI_TZ).date().isoformat()
+        out, note = set(), ""
+        for y in (cal.get("tw") or {}).values():
+            out |= set(y.get("closed") or []) | set(y.get("unscheduled_closed") or [])
+            s, m = y.get("suspected_closed_today"), y.get("suspected_closed_mismatch")
+            if isinstance(s, dict) and s.get("date") == today and not (isinstance(m, dict) and m.get("date") == today):
+                out.add(today)
+                note = f"今天 {today} 疑似臨時休市（{s.get('source')}；非官方確認）"
+        return out, note
+    except Exception as e:  # noqa: BLE001
+        print(f"  ! schedule_health：讀不到 trading_calendar.json，台股只扣週末：{type(e).__name__}: {e}")
+        return set(), ""
+
+
+def _last_weekday_instant(now: datetime, tz, hour: int, minute: int, min_age: timedelta = timedelta(0),
+                          closed: frozenset = frozenset()) -> datetime:
+    """回傳「最近一個週一至週五（且不在 closed 日期集合）、且距現在至少min_age」的 tz 當地 hh:mm 時刻（UTC aware）。"""
     local = now.astimezone(tz)
     cand = local.replace(hour=hour, minute=minute, second=0, microsecond=0)
-    for _ in range(10):
-        if cand.weekday() < 5 and (now - cand.astimezone(timezone.utc)) >= min_age:
+    for _ in range(15):
+        if cand.weekday() < 5 and cand.date().isoformat() not in closed and (now - cand.astimezone(timezone.utc)) >= min_age:
             return cand.astimezone(timezone.utc)
         cand -= timedelta(days=1)
     return cand.astimezone(timezone.utc)
 
 
-def _in_session(now: datetime, tz, open_hm: tuple[int, int], close_hm: tuple[int, int]) -> bool:
+def _in_session(now: datetime, tz, open_hm: tuple[int, int], close_hm: tuple[int, int], closed: frozenset = frozenset()) -> bool:
     local = now.astimezone(tz)
-    if local.weekday() >= 5:
+    if local.weekday() >= 5 or local.date().isoformat() in closed:
         return False
     m = local.hour * 60 + local.minute
     return open_hm[0] * 60 + open_hm[1] <= m < close_hm[0] * 60 + close_hm[1]
 
 
-def _intraday_rule(now: datetime, ts: datetime | None, tz, open_hm, close_hm) -> tuple[str, datetime, str]:
+def _intraday_rule(now: datetime, ts: datetime | None, tz, open_hm, close_hm, closed: frozenset = frozenset()) -> tuple[str, datetime, str]:
     """盤中：資料時間戳距現在不得超過INTRADAY_MAX_GAP_MIN分鐘（開盤後前30分鐘寬限，
     要求的是上一個收盤資料）；盤後/假日：至少要有最近一個交易日的收盤資料。"""
-    if _in_session(now, tz, open_hm, close_hm):
-        session_open = _last_weekday_instant(now, tz, *open_hm)
+    if _in_session(now, tz, open_hm, close_hm, closed):
+        session_open = _last_weekday_instant(now, tz, *open_hm, closed=closed)
         if now - session_open < timedelta(minutes=INTRADAY_MAX_GAP_MIN):
-            due = _last_weekday_instant(now, tz, *close_hm) - timedelta(minutes=INTRADAY_MAX_GAP_MIN)
+            due = _last_weekday_instant(now, tz, *close_hm, closed=closed) - timedelta(minutes=INTRADAY_MAX_GAP_MIN)
             rule = f"開盤前{INTRADAY_MAX_GAP_MIN}分鐘寬限期：需有上一交易日收盤資料"
         else:
             due = now - timedelta(minutes=INTRADAY_MAX_GAP_MIN)
             rule = f"盤中：資料不得超過{INTRADAY_MAX_GAP_MIN}分鐘未更新"
     else:
-        due = _last_weekday_instant(now, tz, *close_hm) - timedelta(minutes=INTRADAY_MAX_GAP_MIN)
+        due = _last_weekday_instant(now, tz, *close_hm, closed=closed) - timedelta(minutes=INTRADAY_MAX_GAP_MIN)
         rule = "盤後/假日：需有最近一個交易日的收盤資料"
     if ts is None:
         return "missing", due, rule
     return ("ok" if ts >= due else "overdue"), due, rule
 
 
-def _daily_rule(now: datetime, ts: datetime | None, tz, run_hm, grace_h: float) -> tuple[str, datetime, str]:
+def _daily_rule(now: datetime, ts: datetime | None, tz, run_hm, grace_h: float, closed: frozenset = frozenset()) -> tuple[str, datetime, str]:
     """每日排程：最近一個「已經過了grace_h小時」的平日排程時刻之後，必須有資料。"""
-    due = _last_weekday_instant(now, tz, *run_hm, min_age=timedelta(hours=grace_h))
+    due = _last_weekday_instant(now, tz, *run_hm, min_age=timedelta(hours=grace_h), closed=closed)
     rule = f"每個平日{run_hm[0]:02d}:{run_hm[1]:02d}（{getattr(tz, 'key', None) or 'UTC'}）排程，寬限{grace_h}小時"
     if ts is None:
         return "missing", due, rule
@@ -1008,13 +1028,17 @@ def build_schedule_health() -> dict:
         ("大盤融資維持率（market.yml）", "data/margin_maintenance.json", "daily", (timezone.utc, tw_hm, 3.0), "GitHub Actions", ""),
         ("前瞻選股台帳（market.yml）", "data/picks_ledger.json", "daily", (timezone.utc, tw_hm, 3.0), "GitHub Actions", ""),
     ]
+    tw_closed, tw_closed_note = _tw_closed_dates(now)
+    tw_closed = frozenset(tw_closed)
     out = []
     for name, rel, kind, args, owner, note in checks:
         ts = _file_ts(rel)
+        # 先.一三二-10b：台股項目（台北時區盤中、或台股日排程時刻）跳過日曆休市日；美股項目照舊只扣週末
+        cl = tw_closed if ((kind == "intraday" and args[0] is TAIPEI_TZ) or (kind == "daily" and args[1] == tw_hm)) else frozenset()
         if kind == "intraday":
-            status, due, rule = _intraday_rule(now, ts, *args)
+            status, due, rule = _intraday_rule(now, ts, *args, closed=cl)
         else:
-            status, due, rule = _daily_rule(now, ts, *args)
+            status, due, rule = _daily_rule(now, ts, *args, closed=cl)
         out.append({
             "name": name, "file": rel, "owner": owner, "status": status,
             "last_data_at": ts.astimezone(TAIPEI_TZ).isoformat(timespec="minutes") if ts else None,
@@ -1026,7 +1050,8 @@ def build_schedule_health() -> dict:
         "checked_at": now.astimezone(TAIPEI_TZ).isoformat(timespec="seconds"),
         "any_overdue": bool(overdue),
         "overdue_names": overdue,
-        "known_simplification": "不扣台美股國定假日：假日當天的盤中規則會誤判overdue（跟fetch_quotes_tw.py同一個既有簡化）",
+        "known_simplification": "台股項目扣 data/trading_calendar.json 休市日（含今天疑似臨時休市，先.一三二-10b）；美股仍不扣國定假日，假日當天盤中規則會誤判overdue",
+        "tw_closed_today_note": tw_closed_note or None,
         "checks": out,
     }
 
@@ -1169,7 +1194,7 @@ KNOWN_LIMITATIONS = [
     "scores.json（選股頁分數）2026-08-27新增GitHub Actions每日排程（research/generate_scores_live.py，market.yml），只讀repo內JSON、不依賴parquet/FinMind，不會再因為研究者本機沒開機而停擺——但這條JSON-only路徑覆蓋率上限約0.74（technical/analyst/catalyst三項恆缺），跟研究端手動執行（research/generate_scores_v2.py，因子較完整）互不覆蓋衝突，用meta.engine_version分辨這次是哪條管線產生的。",
     "本檔案（STATUS.json）由generate_status_json.py產生，APP_DATA_SOURCES那份面板對照表是人工核對、不是自動掃描——異動面板資料源時要記得同步更新腳本裡的常數，否則這份清單會跟實際程式碼不同步。",
     "earnings_calendar.json：yfinance get_calendar()（下一次財報日期）穩定可用，但get_earnings_dates()（用來推估盤前/盤後公布時段）在這台機器持續遇到curl_cffi對guce.yahoo.com的DNS解析失敗（socket.gethostbyname()本身正常，是curl_cffi內部的環境特定問題，不是程式bug）——estimated_session因此誠實降級為'unknown'，不影響next_earnings_date本身的可靠性；GitHub Actions runner環境不一定有同樣的DNS問題，之後排程實跑可能就會恢復正常。",
-    "2026-10-23（DevQueue 20261023-133102，先.一三二-10）：交易日曆 trading_calendar.json 的 unscheduled_closed 只靠 TWSE FMTQIK 回填「今天以前」且 7 天快取，當天颱風臨時休市（10/23 薔琵）記不到 → schedule_health 會把本機 Shioaji 判逾期、常駐行程照常空跑；修法提案 docs/PROPOSAL_UNSCHEDULED_CLOSURE_SAMEDAY.md 等裁示。收盤零 tick 仍 commit 空快照另案 先.一三二-11。",
+    "2026-10-23（DevQueue 20261023-133102，先.一三二-10）：交易日曆 trading_calendar.json 的 unscheduled_closed 只靠 TWSE FMTQIK 回填「今天以前」且 7 天快取，當天颱風臨時休市（10/23 薔琵）記不到 → schedule_health 會把本機 Shioaji 判逾期、常駐行程照常空跑；修法提案 docs/PROPOSAL_UNSCHEDULED_CLOSURE_SAMEDAY.md 已核准採丙並完成（先.一三二-10b，2026-10-24：盤中零請求寫 suspected_closed_today、收盤後 FMTQIK 確認、schedule_health 與 4 支本機讀者已扣休市日；10/23 已補進 unscheduled_closed）。收盤零 tick 仍 commit 空快照另案 先.一三二-11。",
 ]
 
 
