@@ -5,6 +5,9 @@
 # and data\warrant_backup_status.json for the settings page.
 # Rule-10 note: the only tracked file rewritten is data/warrant_backup_status.json (path-scoped commit under git_op_lock);
 # covered by dev_queue_runner MACHINE_WRITTEN (^data/). Snapshots and backups never go into the repo.
+# xian.132-5a (2026-10-23): after the snapshot it also runs research\paper_12_warrant_wave_tracker.py (paper L, trial #466,
+# reads local snapshots only, zero extra requests) and commits data/paper_12.json + research/data/paper_12_log.jsonl (add -f)
+# in the same path-scoped commit; covered by MACHINE_WRITTEN (^data/ and ^research/data/*.jsonl).
 
 $repoDir = "C:\alpha\alpha-app"
 $logPath = "$repoDir\research\data\warrant_snapshot_cycle.log"

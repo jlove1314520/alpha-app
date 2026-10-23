@@ -170,7 +170,25 @@ def write_status(man: dict, failure: dict | None = None) -> bool:
     return True
 
 
-def commit_status() -> None:
+PAPER12_TRACKED = ("data/paper_12.json", "research/data/paper_12_log.jsonl")
+
+
+def run_paper_12() -> bool:
+    """先.一三二-5a：模擬 L（#466）訊號要讀本機快照，所以在快照之後於本機跑追蹤程式（獨立行程，失敗只記 log，十二節）。
+    回傳 data/paper_12.json 或帳本是否有變動（有才一起提交）。出現日索引 research/data/paper_12_appearances.json 可由快照重建、不提交。"""
+    try:
+        r = subprocess.run([sys.executable, str(HERE / "paper_12_warrant_wave_tracker.py")], cwd=REPO, capture_output=True,
+                           text=True, encoding="utf-8", errors="replace", timeout=900)
+        log("模擬 L：" + ((r.stdout or "") + (r.stderr or "")).strip()[-400:])
+        st = subprocess.run(["git", "status", "--porcelain", "--ignored", "--", *PAPER12_TRACKED], cwd=REPO,
+                            capture_output=True, text=True, encoding="utf-8", errors="replace")
+        return bool((st.stdout or "").strip())
+    except Exception as e:  # noqa: BLE001
+        log(f"模擬 L 追蹤失敗（{type(e).__name__}: {e}），不影響快照與備份")
+        return False
+
+
+def commit_status(extra: tuple = ()) -> None:
     g = lambda *a: subprocess.run(["git", *a], cwd=REPO, capture_output=True, text=True, encoding="utf-8", errors="replace")
     try:  # 先.一〇三-15ag：git 改走 local_git_commit.run_git（逾時殺整棵行程樹、禁止互動式認證），匯入失敗退回原寫法（十二節）（原本沒有逾時，改為 180 秒）
         sys.path.insert(0, str(REPO / "scripts"))
@@ -190,10 +208,12 @@ def commit_status() -> None:
         if not tok:
             log("拿不到 git_op_lock，本次不提交（狀態檔留在本機，下次一起送）")
             return
-        rel = "data/warrant_backup_status.json"
+        rels = ["data/warrant_backup_status.json", *[x for x in extra if (REPO / x).exists()]]
+        g("add", "-f", "--", *rels)
         c = g("commit", "-o", "-m", "權證快照備份狀態自動更新（先.九十五-2，AlphaWarrantSnapshot）\n\n"
-              "十節註記：本排程只改寫 data/warrant_backup_status.json（path-scoped commit），"
-              "dev_queue_runner MACHINE_WRITTEN 以 ^data/ 涵蓋。", "--", rel)
+              "十節註記：本排程只改寫 data/warrant_backup_status.json，以及先.一三二-5a 模擬 L 的 data/paper_12.json、"
+              "research/data/paper_12_log.jsonl（path-scoped commit）；dev_queue_runner MACHINE_WRITTEN 以 ^data/、"
+              "^research/data/*.jsonl 涵蓋，research/data 為 gitignore、只用 add -f 提交這一支帳本。", "--", *rels)
         if c.returncode != 0:
             log("commit 失敗：" + (c.stderr or c.stdout).strip()[-200:])
             return
@@ -227,8 +247,9 @@ def main() -> int:
             failure = {"date": day, "exit": rc, "reason": why_fail,
                        "at": datetime.now(TPE).isoformat(timespec="seconds")}
     man = weekly_backup(a.force_backup)
-    if write_status(man, failure) and not a.no_commit:
-        commit_status()
+    p12 = run_paper_12()
+    if (write_status(man, failure) or p12) and not a.no_commit:
+        commit_status(PAPER12_TRACKED if p12 else ())
     return 0
 
 
