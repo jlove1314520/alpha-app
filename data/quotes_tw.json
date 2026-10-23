@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-10-23T04:25:08+00:00",
+  "fetched_at": "2026-10-23T04:37:40+00:00",
   "source": "TWSE MIS（mis.twse.com.tw，證交所公開即時行情端點）",
   "meta": {
     "trading_window": true,
@@ -10,11 +10,6 @@
     "sparkline": {
       "mode": "moved_to_build_sparklines_py",
       "note": "走勢線改由 data/sparklines.json 提供（全市場約2827檔，零額外請求）"
-    },
-    "runner": {
-      "by": "local_fallback",
-      "cloud_age_min": 19.9,
-      "note": "雲端排程落後 ≥15 分鐘，由本機備援補抓（先.八十二-4）"
     }
   },
   "quotes": {
