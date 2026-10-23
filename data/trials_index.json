@@ -1,9 +1,9 @@
 {
- "generated_at": "2026-10-23T15:34:08+00:00",
+ "generated_at": "2026-10-23T15:50:45+00:00",
  "source": "research/TRIALS_LEDGER.md",
  "disclaimer": "研究紀錄，非投資建議",
  "count": 453,
- "rows_listed": 477,
+ "rows_listed": 485,
  "count_rule": "count＝總 N（與 TRIALS_LEDGER.md 開頭「目前累積總數」、SELECTION_BIAS_LEDGER.md 同一個數字；框架驗證列列出但不計入；事前登記被結果列引用時兩列算 1 筆，事前登記列 counted=false、merged_into=結果列）",
  "dup_ids": [
   94,
@@ -32,15 +32,89 @@
   "449": 452,
   "453": 454,
   "457": 458,
-  "462": 467
+  "462": 467,
+  "468": 476,
+  "469": 477,
+  "470": 478,
+  "471": 479,
+  "472": 480,
+  "473": 481,
+  "474": 482,
+  "475": 483
  },
  "rows": [
+  {
+   "id": 483,
+   "date": "2026-10-23",
+   "track": "TW",
+   "name": "ml_pricevol_tw2008_2012_oneshot",
+   "verdict": "VIOLATES_SURVIVAL",
+   "uid": "483"
+  },
+  {
+   "id": 482,
+   "date": "2026-10-23",
+   "track": "TW",
+   "name": "stock_grid_tw2007q4_2009_oneshot_param_penalty_7",
+   "verdict": "FAIL",
+   "uid": "482"
+  },
+  {
+   "id": 481,
+   "date": "2026-10-23",
+   "track": "TW",
+   "name": "stock_grid_tw2007q4_2009_oneshot_param_penalty_6",
+   "verdict": "FAIL",
+   "uid": "481"
+  },
+  {
+   "id": 480,
+   "date": "2026-10-23",
+   "track": "TW",
+   "name": "stock_grid_tw2007q4_2009_oneshot_param_penalty_5",
+   "verdict": "FAIL",
+   "uid": "480"
+  },
+  {
+   "id": 479,
+   "date": "2026-10-23",
+   "track": "TW",
+   "name": "stock_grid_tw2007q4_2009_oneshot_param_penalty_4",
+   "verdict": "FAIL",
+   "uid": "479"
+  },
+  {
+   "id": 478,
+   "date": "2026-10-23",
+   "track": "TW",
+   "name": "stock_grid_tw2007q4_2009_oneshot_param_penalty_3",
+   "verdict": "FAIL",
+   "uid": "478"
+  },
+  {
+   "id": 477,
+   "date": "2026-10-23",
+   "track": "TW",
+   "name": "stock_grid_tw2007q4_2009_oneshot_param_penalty_2",
+   "verdict": "FAIL",
+   "uid": "477"
+  },
+  {
+   "id": 476,
+   "date": "2026-10-23",
+   "track": "TW",
+   "name": "stock_grid_tw2007q4_2009_oneshot",
+   "verdict": "FAIL",
+   "uid": "476"
+  },
   {
    "id": 475,
    "date": "2026-10-23",
    "track": "TW",
    "name": "ml_pricevol_tw2008_2012_prereg",
    "verdict": "未結案",
+   "counted": false,
+   "merged_into": 483,
    "uid": "475"
   },
   {
@@ -49,6 +123,8 @@
    "track": "TW",
    "name": "stock_grid_tw2007q4_2009_prereg_param_penalty_7",
    "verdict": "未結案",
+   "counted": false,
+   "merged_into": 482,
    "uid": "474"
   },
   {
@@ -57,6 +133,8 @@
    "track": "TW",
    "name": "stock_grid_tw2007q4_2009_prereg_param_penalty_6",
    "verdict": "未結案",
+   "counted": false,
+   "merged_into": 481,
    "uid": "473"
   },
   {
@@ -65,6 +143,8 @@
    "track": "TW",
    "name": "stock_grid_tw2007q4_2009_prereg_param_penalty_5",
    "verdict": "未結案",
+   "counted": false,
+   "merged_into": 480,
    "uid": "472"
   },
   {
@@ -73,6 +153,8 @@
    "track": "TW",
    "name": "stock_grid_tw2007q4_2009_prereg_param_penalty_4",
    "verdict": "未結案",
+   "counted": false,
+   "merged_into": 479,
    "uid": "471"
   },
   {
@@ -81,6 +163,8 @@
    "track": "TW",
    "name": "stock_grid_tw2007q4_2009_prereg_param_penalty_3",
    "verdict": "未結案",
+   "counted": false,
+   "merged_into": 478,
    "uid": "470"
   },
   {
@@ -89,6 +173,8 @@
    "track": "TW",
    "name": "stock_grid_tw2007q4_2009_prereg_param_penalty_2",
    "verdict": "未結案",
+   "counted": false,
+   "merged_into": 477,
    "uid": "469"
   },
   {
@@ -97,6 +183,8 @@
    "track": "TW",
    "name": "stock_grid_tw2007q4_2009_prereg",
    "verdict": "未結案",
+   "counted": false,
+   "merged_into": 476,
    "uid": "468"
   },
   {

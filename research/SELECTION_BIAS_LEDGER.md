@@ -1,6 +1,6 @@
 # SELECTION_BIAS_LEDGER.md — 跨輪次選擇偏誤總帳
 
-**自動產生**：`research/selection_bias_ledger.py`（2026-10-23 23:43）。
+**自動產生**：`research/selection_bias_ledger.py`（2026-10-23 23:44）。
 每新增候選就重跑一次。做法比照 Cybex `_r436_selection_bias_ledger.py`，
 **只抄方法不抄參數**（Cybex 的閾值來自加密市場，對台股零效力）。
 
