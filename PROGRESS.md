@@ -6,7 +6,7 @@
   - [自行裁量] ENV_MISSING 用明確第三方清單（`KNOWN_THIRD_PARTY`），清單外缺模組照記 IMPORT_ERROR，免得被刪掉的專案模組（#23 那種）被當成環境問題藏掉。
   - ⚠️ 雲端未驗：看下一班 audit.yml（台北週一 23:20）`audit_report.json` `reproducibility_check.detail.by_status_count`。
 - **先.一三二-10b 第 1 批（commit ae6d0120fa，條目維持 `- [ ]`）**：`fetch_trading_calendar.py` 加每日 1 次 FMTQIK 當月確認（17:00 後目標日＝今天、否則昨天；今天要記休市另需 quotes_tw.json 日期佐證）；實跑 1 次 FMTQIK → `unscheduled_closed` 補進 2026-10-23（官方確認無成交）；自測 5/5；冒煙 176 全過。`C:\alpha\CLAUDE.md` 頻率清單加 FMTQIK 一節（該檔不在 git，只改本機）。
-- **先.一三二-10b 第 2 批（commit df015880e0，條目維持 `- [ ]`）**：新增 `.github/scripts/detect_suspected_closure.py`（零請求，盤中寫 `suspected_closed_today`、不寫正式休市），接進 quotes.yml；FMTQIK 收盤確認遇「疑似休市卻有成交」告警。git 歷史重放 10/23／10/22 報價檔 3/3、讀檔失敗只警告 exit 0；冒煙 176 全過。⚠️ 雲端未驗（下一次休市才觸發）。
+- **先.一三二-10b 第 2 批（commit 09fd3d33c4，條目維持 `- [ ]`）**：新增 `.github/scripts/detect_suspected_closure.py`（零請求，盤中寫 `suspected_closed_today`、不寫正式休市），接進 quotes.yml；FMTQIK 收盤確認遇「疑似休市卻有成交」告警。git 歷史重放 10/23／10/22 報價檔 3/3、讀檔失敗只警告 exit 0；冒煙 176 全過。⚠️ 雲端未驗（下一次休市才觸發）。
   - [自行裁量] 放 quotes.yml 而非 market.yml；已知風險：休市當天兩支 workflow 都改 trading_calendar.json，可能 rebase 衝突。
   - 第 3 批（尚餘）：讀者端（schedule_health、quotes_local_fallback、watchdog_dispatch_market、market_local_catchup、check_tw_data_landed、Shioaji 常駐行程）加讀 `suspected_closed_today`；動 shioaji_quotes.py 要照七之二重啟四步驗證。
 - **補件**：先.一三二-8c [研究]——`research/ml_pricevol_register_result.py`、`stock_grid_register_result.py` 頂層直接 `register_trial()`、沒有 `__main__` 保護，稽核 import 時只因相對路徑剛好找不到結果檔才沒重複登記（本輪 reproducibility_check 實跑發現）。
