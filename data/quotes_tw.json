@@ -1,8 +1,8 @@
 {
-  "fetched_at": "2026-10-23T00:06:41+00:00",
+  "fetched_at": "2026-10-23T01:15:12+00:00",
   "source": "TWSE MIS（mis.twse.com.tw，證交所公開即時行情端點）",
   "meta": {
-    "trading_window": false,
+    "trading_window": true,
     "queried": 232,
     "matched": 232,
     "live": 232,
@@ -10,6 +10,11 @@
     "sparkline": {
       "mode": "moved_to_build_sparklines_py",
       "note": "走勢線改由 data/sparklines.json 提供（全市場約2827檔，零額外請求）"
+    },
+    "runner": {
+      "by": "local_fallback",
+      "cloud_age_min": 68.4,
+      "note": "雲端排程落後 ≥15 分鐘，由本機備援補抓（先.八十二-4）"
     }
   },
   "quotes": {
@@ -409,16 +414,6 @@
       "prev_close": 32.3,
       "change": 0.15,
       "change_pct": 0.464,
-      "time": "13:30:00",
-      "date": "20261022",
-      "stale": false
-    },
-    "2356": {
-      "name": "英業達",
-      "price": 60.5,
-      "prev_close": 61.3,
-      "change": -0.8,
-      "change_pct": -1.305,
       "time": "13:30:00",
       "date": "20261022",
       "stale": false
@@ -1309,6 +1304,16 @@
       "prev_close": 94.8,
       "change": 0.5,
       "change_pct": 0.527,
+      "time": "13:30:00",
+      "date": "20261022",
+      "stale": false
+    },
+    "3714": {
+      "name": "富采",
+      "price": 61.7,
+      "prev_close": 62.6,
+      "change": -0.9,
+      "change_pct": -1.438,
       "time": "13:30:00",
       "date": "20261022",
       "stale": false
