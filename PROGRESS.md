@@ -1,3 +1,18 @@
+## 2026-10-24 04:31～04:5x DevQueue 20261024-043101：先.一三二-10b 第 3 批完成（條目 - [x]）
+
+- 等待總司令審閱：4 件（`research/AWAITING_REVIEW.md`，本輪無增減）：先.一三二-0b AlphaPaper9 排程註冊（等總司令親自輸入密碼，自 10-23 21:3x）；先.一三三-1e 公積配息三件判斷（自 10-23 21:2x）；先.一三三-2f 網格變形② PREREG（等 Cowork，自 10-24 02:5x）；先.一三三-2g ML 產業輪動 PREREG（等 Cowork，自 10-24 03:0x）。
+- 本輪戴維運帽（必交產物 `data/STATUS.json`：schedule_health 新增 `tw_closed_today_note`、`known_simplification` 改寫，已重產）。
+- **先.一三二-10b 第 3 批（讀者端）→ `- [x]`（commit ac283f8963）**：
+  - `generate_status_json.py` schedule_health：新增 `_tw_closed_dates()`（closed＋unscheduled_closed＋今天且沒有 mismatch 的 suspected_closed_today），台股各項時窗跳過休市日（連休也算：10/27 開盤前寬限要求的是 10/22 收盤）；美股照舊；讀不到日曆只警告、退回只扣週末。
+  - `scripts/quotes_local_fallback.py`／`watchdog_dispatch_market.py`／`market_local_catchup.py`／`check_tw_data_landed.py` 的 `is_trading_day()` 加讀今天的 `suspected_closed_today`。
+  - 證據：時窗自測 7/7（10/23 11:00 有日曆 ok、無日曆 overdue＝舊行為、10/27 10:30 舊資料仍 overdue 等）；讀取自測 21/21＋helper 12/12（mismatch／昨天舊值／讀不到日曆都照常）；`python generate_status_json.py` exit 0；`node scripts/smoke_test.mjs` 176 PASS／0 FAIL（總計 315.7 秒）。
+  - [自行裁量] ①疑似休市但收盤確認有成交（mismatch）時不算休市，寧可多報一次；②疑似休市當天 watchdog／catchup 不補跑（疑似成立的前提就是官方報價檔有抓到、日期卻是舊的，補跑也拿不到資料）。
+  - 未做、移交 先.一三二-11：Shioaji 常駐行程據此不空跑（同一支檔案、同一套七之二驗證）。⚠️ 雲端與真實休市日都還沒驗（要等下一次臨時休市）。
+- **git 狀況（照實記錄）**：push 前 rebase 撞到排程心跳 commit 的 `data/STATUS.json`，重產後 rebase 狀態卡住；已把 autostash 存成 `stash@{0}`「autostash 10b-3 rebase」、結束 rebase、把 main 指回本輪 commit 後 push 成功。stash 裡其他排程的機器狀態檔：工作目錄沒變過的 4 個（dev_queue_cycle.log、DEV_QUEUE_PROMPT.txt、by_code/_meta.json、orphan_scan.json）已從 stash 還原；其餘 10 個工作目錄已有更新版本，保留新版。**stash@{0} 留著當備份，沒刪。**
+- **收工補件（2 條）**：先.一三二-12 `- [!]`（本機 IBKR 美股報價 10/18 11:01 起停更：quotes 每 5 分鐘 ConnectionRefused、Gateway 行程在跑＝停在登入畫面，符合每週日權杖作廢；**BLOCKED 等總司令本人登入 IB Gateway 一次**）；先.一三二-13 `- [ ]`（schedule_health 美股兩項扣 `trading_calendar.json` us 休市日，DevQueue 可執行）。其他來源：DATA_GAP_PLAN 甲類已全部抓完、UX 提案剩下的是已有條目的 先.一〇九-39、BACKLOG 文書核對本週暫停 → 來源已用盡。
+- 佇列深度：`- [ ]` 23 項（≥12）；DevQueue 可執行的非研究項 2 項（先.一三二-11、-13，<6，來源已用盡）。下一項 先.一三二-8c 是 [研究]，照帽子規則本輪不接。
+- 收工原因：權威清單下一項是 [研究] 類。
+
 ## 2026-10-24 03:31～04:0x DevQueue 20261024-033101：先.一三二-8b 完成；先.一三二-10b 第 1～2 批
 
 - 等待總司令審閱：4 件（`research/AWAITING_REVIEW.md`，本輪無增減）：先.一三二-0b AlphaPaper9 排程註冊（等總司令親自輸入密碼，自 10-23 21:3x）；先.一三三-1e 公積配息三件判斷（自 10-23 21:2x）；先.一三三-2f 網格變形② PREREG（等 Cowork，自 10-24 02:5x）；先.一三三-2g ML 產業輪動 PREREG（等 Cowork，自 10-24 03:0x）。
