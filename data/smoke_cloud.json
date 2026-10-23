@@ -1,19 +1,23 @@
 {
- "generated_at": "2026-10-22T21:56:02.869Z",
+ "generated_at": "2026-10-23T21:40:11.270Z",
  "url": "https://jlove1314520.github.io/alpha-app",
  "all_passed": false,
  "crashed": false,
  "crash_error": null,
  "total": 176,
- "passed": 175,
- "failed": 1,
+ "passed": 174,
+ "failed": 2,
  "failures": [
+  {
+   "name": "65. STATUS.json < 100 KB；還原價異常明細移到 data/adjustment_anomalies.json，STATUS 只留摘要＋連結；設定頁讀新檔",
+   "detail": "兩檔 n_warnings 不一致（1953 vs 6993）"
+  },
   {
    "name": "146. 減少動態效果：手機設定開啟時淡入／閃色／分頁過場／骨架／長條／開關動畫時間為 0，閃色仍會自動移除（先.九十四-5e）",
    "detail": "0 秒動畫下 animationend 沒觸發，閃色 class 沒被移除"
   }
  ],
  "global_errors_final": [],
- "run_url": "https://github.com/jlove1314520/alpha-app/actions/runs/39860441756",
- "commit": "30fcdcbc2"
+ "run_url": "https://github.com/jlove1314520/alpha-app/actions/runs/40027770535",
+ "commit": "b95cfa4a8"
 }
