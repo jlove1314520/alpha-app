@@ -1,3 +1,16 @@
+## 2026-10-24 06:31～06:5x DevQueue 20261024-063101：先.一三二-13a、-13b、-13c 完成
+
+- 等待總司令審閱：4 件（`research/AWAITING_REVIEW.md`，本輪無增減）：先.一三二-0b AlphaPaper9 排程註冊（等總司令親自輸入密碼，自 10-23 21:3x）；先.一三三-1e 公積配息三件判斷（自 10-23 21:2x）；先.一三三-2f 網格變形② PREREG（等 Cowork，自 10-24 02:5x）；先.一三三-2g ML 產業輪動 PREREG（等 Cowork，自 10-24 03:0x）。
+- 本輪戴維運帽（必交產物 `data/STATUS.json`：schedule_health `known_simplification` 改寫、已重產兩次）。
+- **先.一三二-13a → `- [x]`（commit 43059f82d3）**：讀 1 次 NYSE 官方頁（302 轉 /trade/hours-calendars），註腳抄出 2026-11-27、2026-12-24、2027-11-26 13:00 提早收盤，寫進 `data/trading_calendar.json` us[年].early_close（另記 `early_close_transcribed_at`）＋ `fetch_trading_calendar.py` 常數（不然下一班 market.yml 會蓋掉）。`generate_status_json.py` 新增 `_us_early_close()`／`_last_close_instant()`，美東盤中項目遇半日市收盤改 13:00。
+  - 證據：11-27 美東 14:00、資料停 13:00 → ok（舊邏輯 overdue）；正常日 14:00 舊資料 → overdue；台股項目不受影響；日曆檔不存在／格式錯 → 警告、回空。冒煙 176 PASS 0 FAIL。
+  - [自行裁量] 新增 `early_close_transcribed_at` 欄位，不改既有休市日的 `transcribed_at`（2026-10-13）。
+- **先.一三二-13b → `- [x]`（commit e44b8e4c4f，[自走補入]）**：同一份官方頁已列 2028 年，補 2028 休市 9 天＋半日市 07-03、11-24（零新請求）。證據：腳本常數組出的 us 區塊與檔案逐字相同、全是平日；冒煙全過。
+- **先.一三二-13c → `- [x]`（commit 00eff4e832，[自走補入]，純 bug 修復）**：`fetch_quotes_us.py::us_market_session()` 原本只扣週末，感恩節照樣標 regular；改讀日曆：休市日 closed、半日市盤中到 13:00／盤後到 17:00（官方註腳）。證據：8 個時點自測全對、日曆讀不到照舊；冒煙 176 PASS 0 FAIL。
+- 順手核對：先.一〇九-39（深色對比提案）已由 先.一一〇-8 完成，條目改 `- [x]` 並標過時。
+- **收工補件**：先.一三二-13d `- [ ]`［開發］App 美股時鐘／診斷橫幅／指數盤中標記不扣休市日與半日市（app.js 888／2747／2868 行）。`- [ ]` 20 項 ≥12；DevQueue 可執行只剩 13d 1 項（<6）——其餘 19 項都是互動視窗或時間閘。補件來源①BACKLOG 未完成項多已核對成「現況」註記、②UX_REDESIGN 剩待裁示、③全檢節已清、④DATA_GAP_PLAN 甲類已全抓完，**來源已用盡**，照實記錄不湊數。
+- 收工原因：權威清單下一個 DevQueue 可執行項是 13d［開發］，本輪戴維運帽，留給下一輪。
+
 ## 2026-10-24 05:31～06:0x DevQueue 20261024-053101：先.一三二-11、-13、先.一二〇-1／-2、先.一二五-3b、先.一一五-2r 完成
 
 - 等待總司令審閱：4 件（`research/AWAITING_REVIEW.md`，本輪無增減）：先.一三二-0b AlphaPaper9 排程註冊（等總司令親自輸入密碼，自 10-23 21:3x）；先.一三三-1e 公積配息三件判斷（自 10-23 21:2x）；先.一三三-2f 網格變形② PREREG（等 Cowork，自 10-24 02:5x）；先.一三三-2g ML 產業輪動 PREREG（等 Cowork，自 10-24 03:0x）。
