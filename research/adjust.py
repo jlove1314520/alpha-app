@@ -302,7 +302,8 @@ def adjustment_events(stock_id: str, start_date: str = "1990-01-01") -> pd.DataF
     pv_df = _par_value_change_market_wide(start_date, stock_id)
 
     supp = _supplemental_reduction_events(stock_id)
-    if div.empty and split_df.empty and cr_df.empty and pv_df.empty and not supp:
+    supp_x = _supplemental_exright_events(stock_id)
+    if div.empty and split_df.empty and cr_df.empty and pv_df.empty and not supp and not supp_x:
         return _empty_events_df()
 
     raw = load_dev("TaiwanStockPrice", stock_id, start_date)
@@ -313,7 +314,47 @@ def adjustment_events(stock_id: str, start_date: str = "1990-01-01") -> pd.DataF
     trading_dates = raw["date"].tolist()
 
     ev = _combine_adjustment_events(div, split_df, cr_df, pv_df, close_by_date, trading_dates)
+    ev = _merge_supplemental_exrights(ev, supp_x, start_date)
     return _merge_supplemental_reductions(ev, supp, start_date)
+
+
+# 2026-10-23 先.一三三-1c／收件匣 021（Cowork 裁示採甲＋方式 (a)）：官方除權息補充事件 2007-07～2014。
+# FinMind TaiwanStockDividend 2009 整年缺漏、且本函式的 FinMind 公式只用 CashEarningsDistribution／StockEarningsDistribution，
+# 漏掉資本公積配息／配股（例 2331 2012-08-15 公積配息 2.12 元：官方 12.05→9.58、FinMind 算 −3%）。由
+# research/build_exright_supplement.py 產生（上市 TWT49U＋上櫃 exDailyQ，係數＝除權息參考價÷前收盤；上櫃 2007 下半年由日檔標記＋
+# FinMind 股利金額推，42 筆近似值標 approx）。同日同股只取一筆、**官方優先**（取代 FinMind 同日 dividend 事件），FinMind 沒有的直接補；
+# 差異 >1% 清單在 research/data/official_exright_supplement_report.json。只涵蓋 ≤2014-12-31，2015 以後還原不變。檔案不存在＝不補（十二節）。
+SUPPLEMENTAL_EXRIGHTS = Path(__file__).resolve().parent / "data" / "official_exright_supplement_2007_2014.csv"
+_SUPP_X_CACHE: dict | None = None
+
+
+def _supplemental_exright_events(stock_id: str) -> list[dict]:
+    global _SUPP_X_CACHE
+    if _SUPP_X_CACHE is None:
+        _SUPP_X_CACHE = {}
+        try:
+            if SUPPLEMENTAL_EXRIGHTS.exists():
+                df = pd.read_csv(SUPPLEMENTAL_EXRIGHTS, dtype={"stock_id": str})
+                for r in df.itertuples():
+                    if r.factor > 0 and str(r.ex_date) <= "2014-12-31":
+                        _SUPP_X_CACHE.setdefault(r.stock_id, []).append({
+                            "ex_date": str(r.ex_date), "prev_trading_date": None, "factor": float(r.factor),
+                            "cash": 0.0, "stock_ratio": 0.0, "event_type": "dividend_official_supp"})
+        except Exception as e:  # noqa: BLE001 — 補充檔壞掉只降級成不補（十二節）
+            print(f"[adjust] 警告：官方除權息補充檔讀取失敗（{type(e).__name__}: {e}），本次不補", file=sys.stderr)
+            _SUPP_X_CACHE = {}
+    return list(_SUPP_X_CACHE.get(stock_id, []))
+
+
+def _merge_supplemental_exrights(ev: pd.DataFrame, supp: list[dict], start_date: str) -> pd.DataFrame:
+    add = [e for e in supp if e["ex_date"] >= start_date]
+    if not add:
+        return ev
+    dates = {e["ex_date"] for e in add}
+    if len(ev) and "event_type" in ev.columns:
+        ev = ev[~((ev["event_type"] == "dividend") & ev["ex_date"].astype(str).isin(dates))]
+    out = pd.concat([ev, pd.DataFrame(add)], ignore_index=True) if len(ev) else pd.DataFrame(add)
+    return out.sort_values("ex_date").reset_index(drop=True)
 
 
 # 2026-10-22 先.一三〇-3／收件匣 017：官方減資補充事件（2007～2014）。FinMind 減資表本機快取 2010 年起且有漏（1441 2010-10），
