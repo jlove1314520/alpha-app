@@ -921,6 +921,36 @@ def _tw_closed_dates(now: datetime) -> tuple[set, str]:
         return set(), ""
 
 
+def _us_closed_dates() -> tuple[set, str]:
+    """先.一三二-13：美股日曆休市日（data/trading_calendar.json us[年].closed，美東當地日期），
+    給美股各項時窗判斷跳過，避免感恩節這類國定假日誤報逾期。讀不到只警告、回空集合（＝照舊只扣週末，十二節）。"""
+    try:
+        cal = json.loads((REPO_ROOT / "data" / "trading_calendar.json").read_text(encoding="utf-8"))
+        out = set()
+        for y in (cal.get("us") or {}).values():
+            out |= set(y.get("closed") or [])
+        return out, ""
+    except Exception as e:  # noqa: BLE001
+        print(f"  ! schedule_health：讀不到 trading_calendar.json，美股只扣週末：{type(e).__name__}: {e}")
+        return set(), "讀不到 trading_calendar.json，美股只扣週末"
+
+
+def _us_closed_run_dates(us_closed: set, run_hm: tuple[int, int]) -> set:
+    """美股休市日（美東日期）→ 對應那一班美股日排程的 UTC 日期（該日美東 16:00 收盤後的第一個 run_hm UTC）。
+    現行 21:43 UTC 在美東同一天收盤後，對應同一個日期；寫成換算是為了排程時刻改到 UTC 隔天也不會錯位。"""
+    out = set()
+    for d in us_closed:
+        try:
+            close = datetime.fromisoformat(d).replace(hour=16, tzinfo=NY_TZ).astimezone(timezone.utc)
+        except ValueError:
+            continue
+        run = close.replace(hour=run_hm[0], minute=run_hm[1], second=0, microsecond=0)
+        if run < close:
+            run += timedelta(days=1)
+        out.add(run.date().isoformat())
+    return out
+
+
 def _last_weekday_instant(now: datetime, tz, hour: int, minute: int, min_age: timedelta = timedelta(0),
                           closed: frozenset = frozenset()) -> datetime:
     """回傳「最近一個週一至週五（且不在 closed 日期集合）、且距現在至少min_age」的 tz 當地 hh:mm 時刻（UTC aware）。"""
@@ -1030,11 +1060,22 @@ def build_schedule_health() -> dict:
     ]
     tw_closed, tw_closed_note = _tw_closed_dates(now)
     tw_closed = frozenset(tw_closed)
+    us_closed, us_closed_warn = _us_closed_dates()
+    us_closed_run = frozenset(_us_closed_run_dates(us_closed, us_hm))
+    us_closed = frozenset(us_closed)
     out = []
     for name, rel, kind, args, owner, note in checks:
         ts = _file_ts(rel)
-        # 先.一三二-10b：台股項目（台北時區盤中、或台股日排程時刻）跳過日曆休市日；美股項目照舊只扣週末
-        cl = tw_closed if ((kind == "intraday" and args[0] is TAIPEI_TZ) or (kind == "daily" and args[1] == tw_hm)) else frozenset()
+        # 先.一三二-10b：台股項目（台北時區盤中、或台股日排程時刻）跳過日曆休市日
+        # 先.一三二-13：美股盤中（美東時區）跳過美股休市日；美股日排程跳過休市日對應的那一班（UTC 日期）
+        if (kind == "intraday" and args[0] is TAIPEI_TZ) or (kind == "daily" and args[1] == tw_hm):
+            cl = tw_closed
+        elif kind == "intraday" and args[0] is NY_TZ:
+            cl = us_closed
+        elif kind == "daily" and args[1] == us_hm:
+            cl = us_closed_run
+        else:
+            cl = frozenset()
         if kind == "intraday":
             status, due, rule = _intraday_rule(now, ts, *args, closed=cl)
         else:
@@ -1050,7 +1091,7 @@ def build_schedule_health() -> dict:
         "checked_at": now.astimezone(TAIPEI_TZ).isoformat(timespec="seconds"),
         "any_overdue": bool(overdue),
         "overdue_names": overdue,
-        "known_simplification": "台股項目扣 data/trading_calendar.json 休市日（含今天疑似臨時休市，先.一三二-10b）；美股仍不扣國定假日，假日當天盤中規則會誤判overdue",
+        "known_simplification": "台股項目扣 data/trading_calendar.json 休市日（含今天疑似臨時休市，先.一三二-10b）；美股項目扣同檔 us 休市日（先.一三二-13）；美股提早收盤（半日市）未建模，當天盤中 13:00 後仍照 16:00 收盤計" + (f"；{us_closed_warn}" if us_closed_warn else ""),
         "tw_closed_today_note": tw_closed_note or None,
         "checks": out,
     }
