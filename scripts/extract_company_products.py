@@ -33,6 +33,9 @@ import requests
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / ".github" / "scripts"))
+sys.path.insert(0, str(ROOT / "research"))
+import net_guard  # noqa: E402  2026-10-23 先.一三二-7：合規.三告警（提到黑名單網域卻沒接防呆），補上
+net_guard.install()
 
 for _s in (sys.stdout, sys.stderr):
     try:

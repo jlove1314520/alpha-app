@@ -91,6 +91,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 import finmind_client  # noqa: E402
+import net_guard  # noqa: E402  2026-10-23 先.一三二-7：合規.三告警（提到黑名單網域卻沒接防呆），補上
+net_guard.install()
 
 REPO_ROOT = Path(__file__).parent.parent
 STOCK_DETAIL_PATH = REPO_ROOT / "data" / "stock_detail.json"

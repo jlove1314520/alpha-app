@@ -16,9 +16,14 @@
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 from urllib.parse import urlparse
 
 import requests
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "research"))
+import net_guard  # noqa: E402  2026-10-23 先.一三二-7：合規.三告警（提到黑名單網域卻沒接防呆），補上
+net_guard.install()
 
 for _s in (sys.stdout, sys.stderr):
     try:

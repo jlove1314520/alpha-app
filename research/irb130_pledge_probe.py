@@ -72,6 +72,9 @@ import time
 
 import requests
 
+import net_guard  # noqa: E402  2026-10-23 先.一三二-7：合規.三告警（提到黑名單網域卻沒接防呆），補上
+net_guard.install()
+
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
