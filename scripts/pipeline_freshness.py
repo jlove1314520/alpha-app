@@ -178,6 +178,14 @@ def evaluate(now: datetime | None = None) -> tuple[list[dict], list[str]]:
             "freshness": spec.get("freshness", "mtime"),
         }
         try:
+            # 2026-10-23 DevQueue 20261023-123102：經核准停用的排程（例：先.一二七-A 停用 AlphaMarathon／
+            # AlphaHypothesisQueue）在登錄檔標 "retired": "停用日期＋依據"，不再判停擺；條目保留供稽核。
+            # 沿用 skipped 狀態，下游（fault ledger、STATUS）不必另外認新狀態。
+            retired = spec.get("retired")
+            if retired:
+                row.update(status="skipped", reason=f"已停用：{retired}")
+                rows.append(row)
+                continue
             win = spec.get("window_hours")
             if win and not (win[0] <= now.hour < win[1]):
                 row.update(status="skipped",
