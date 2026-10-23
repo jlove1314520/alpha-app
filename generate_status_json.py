@@ -1169,6 +1169,7 @@ KNOWN_LIMITATIONS = [
     "scores.json（選股頁分數）2026-08-27新增GitHub Actions每日排程（research/generate_scores_live.py，market.yml），只讀repo內JSON、不依賴parquet/FinMind，不會再因為研究者本機沒開機而停擺——但這條JSON-only路徑覆蓋率上限約0.74（technical/analyst/catalyst三項恆缺），跟研究端手動執行（research/generate_scores_v2.py，因子較完整）互不覆蓋衝突，用meta.engine_version分辨這次是哪條管線產生的。",
     "本檔案（STATUS.json）由generate_status_json.py產生，APP_DATA_SOURCES那份面板對照表是人工核對、不是自動掃描——異動面板資料源時要記得同步更新腳本裡的常數，否則這份清單會跟實際程式碼不同步。",
     "earnings_calendar.json：yfinance get_calendar()（下一次財報日期）穩定可用，但get_earnings_dates()（用來推估盤前/盤後公布時段）在這台機器持續遇到curl_cffi對guce.yahoo.com的DNS解析失敗（socket.gethostbyname()本身正常，是curl_cffi內部的環境特定問題，不是程式bug）——estimated_session因此誠實降級為'unknown'，不影響next_earnings_date本身的可靠性；GitHub Actions runner環境不一定有同樣的DNS問題，之後排程實跑可能就會恢復正常。",
+    "2026-10-23（DevQueue 20261023-133102，先.一三二-10）：交易日曆 trading_calendar.json 的 unscheduled_closed 只靠 TWSE FMTQIK 回填「今天以前」且 7 天快取，當天颱風臨時休市（10/23 薔琵）記不到 → schedule_health 會把本機 Shioaji 判逾期、常駐行程照常空跑；修法提案 docs/PROPOSAL_UNSCHEDULED_CLOSURE_SAMEDAY.md 等裁示。收盤零 tick 仍 commit 空快照另案 先.一三二-11。",
 ]
 
 

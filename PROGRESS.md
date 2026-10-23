@@ -1,3 +1,22 @@
+## 2026-10-23 13:31～14:1x DevQueue 20261023-133102：reproducibility_check 提案（先.一三二-8）＋Shioaji 查因結案＝颱風休市（先.一三二-9）＋日曆臨時休市提案（先.一三二-10）
+
+- 等待總司令審閱：10 件（與 `research/AWAITING_REVIEW.md`「等待中」10 列一致；本輪新增 2 件）：
+  - 先.一三〇-2、先.一三〇-4、先.一三〇-3、補.研究-期貨法人未平倉、補.研究-COT期貨部位、先.一三二-2、先.一三三-1a、先.一三三-2（沿用前幾輪，等待時長見該檔）
+  - **先.一三二-8**（新，0 小時）：審 `docs/PROPOSAL_REPRO_CHECK_CLOUD_ENV.md`，建議①裝 numpy／pandas／scipy＋②缺第三方套件記 ENV_MISSING＋4 條並行
+  - **先.一三二-10**（新，0 小時）：審 `docs/PROPOSAL_UNSCHEDULED_CLOSURE_SAMEDAY.md`，建議盤中零請求判疑似休市＋收盤 FMTQIK 確認
+- 本輪戴維運帽。交辦佇列 `- [ ]` 還有 20 條（完成 -8、-9、-10；新補 -10、-11）。
+- **先.一三二-8 → `- [x]`**（3f5eb7dcfe）
+  - 做了什麼：寫提案，未改程式。
+  - 證據：雲端 200 筆錯誤逐筆分類＝`No module named 'numpy'` 163、`'pandas'` 37；本機固定種子 20261023 抽 20 支重跑 import 20／20 OK、平均 2.0 秒、最慢 2.8 秒 → 225 支序列約 7.6 分鐘，超過 `audit_preflight.py` 300 秒逾時（上一輪本機逾時的原因）。研究腳本第三方套件 import 次數：pandas 441、numpy 294、requests 94、scipy 87、yfinance 13、其他各 ≤7。
+- **先.一三二-9 → `- [x]`**（9c430433f1）：**今天 10/23 是薔琵颱風臨時休市，不是行程故障**
+  - 證據：①雲端官方 `quotes_tw.json`（13:45 抓）232 檔 `date` 全是 20261022；②常駐行程 13:45 登出後，用同設定（simulation=True）做一次只讀 `api.usage()`＝25,349,428／2,147,483,648 bytes（排除流量超額），`snapshots(2330)` 時間戳＝10/22 收盤；③`data/news.json`「休市一天」「股匯期休市四天」「下周二開盤」；④`data/events.json` 多則「10/23 法說會因颱風延期」。未送單、未印任何憑證。
+  - 上一輪 `/health` 回非 JSON：live server 現在是 HTTP，用 https 打會 TLS 失敗；`http://127.0.0.1:8001/health` 回 `{"ok":true}`。
+  - `[自行裁量]` 13:45 常駐行程 commit 了零 tick 空快照（a2890280be，`quotes:{}`、`connected:true`、`market_status:"open"`），我把 `data/quotes_sinopac.json` 還原成 10/22 的真實快照；這個還原被 13:47 launcher 自動 commit 7b73e4de7c 一併提交（不是本輪自己 commit 的，照實記錄）。
+- **先.一三二-10 → `- [x]`**（d94e586e1f，[自走補入]）：寫提案。`fetch_trading_calendar.py` 只判 `d < today`、整份日曆 7 天快取 → 當天臨時休市結構上記不到；讀日曆的程式有 7 支。`generate_status_json.py` KNOWN_LIMITATIONS 補一條並重產 `data/STATUS.json`（維運帽產物）。
+- **先.一三二-11 維持 `- [ ]`**（[自走補入]）：收盤零 tick 不得覆蓋前一日快照——要改常駐服務 `shioaji_quotes.py`＋七之二四步驗證，本輪剩不到 20 分鐘，留下一輪（休市到 10/26，常駐行程不跑，交易日 08:30 前或 13:46 後做）。
+- **收工補件：未補齊**。DevQueue 可執行剩 3 項（-11、先.一〇三-15g、先.一〇三-15aj），低於 6（`- [ ]` 共 20 項，12 項門檻有達到；不足的是「DevQueue 可執行 6 項」這個門檻）。來源④ DATA_GAP_PLAN 甲類已用盡（該檔第 50 行：甲類沒有待排抓取）、`BACKLOG.md` 無未勾項目；①②③ 其餘來源本輪時間上限到了來不及逐條核對，下一輪開工先補。
+- 冒煙測試：每項 commit 前各跑一次，三次都是 176 PASS／0 FAIL（第一次曾因我加的 300 秒外層逾時砍掉瀏覽器而出現「page closed」，拿掉逾時重跑全過，不是功能問題）。
+
 ## 2026-10-23 12:31～13:1x DevQueue 20261023-123102：0050 成分股每週排程（先.一三二-5c）＋兩個告警誤報修正（先.一三二-6／-7）＋補件 2 條
 
 - 等待總司令審閱：8 件（與 `research/AWAITING_REVIEW.md`「等待中」8 列一致，本輪無增減：先.一三〇-2、先.一三〇-4、先.一三〇-3、補.研究-期貨法人未平倉、補.研究-COT期貨部位、先.一三二-2、先.一三三-1a、先.一三三-2）。
