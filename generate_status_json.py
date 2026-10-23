@@ -935,6 +935,39 @@ def _us_closed_dates() -> tuple[set, str]:
         return set(), "讀不到 trading_calendar.json，美股只扣週末"
 
 
+def _us_early_close() -> dict:
+    """先.一三二-13a：美股提早收盤日（trading_calendar.json us[年].early_close，美東日期→(時, 分)）。
+    讀不到或格式不對只警告、回空 dict（＝照舊全照 16:00 收盤，十二節）。"""
+    try:
+        cal = json.loads((REPO_ROOT / "data" / "trading_calendar.json").read_text(encoding="utf-8"))
+        out = {}
+        for y in (cal.get("us") or {}).values():
+            for d, hm in (y.get("early_close") or {}).items():
+                h, m = str(hm).split(":")
+                out[d] = (int(h), int(m))
+        return out
+    except Exception as e:  # noqa: BLE001
+        print(f"  ! schedule_health：讀不到美股提早收盤日，照舊 16:00 收盤：{type(e).__name__}: {e}")
+        return {}
+
+
+def _last_close_instant(now: datetime, tz, close_hm, closed: frozenset = frozenset(), early: dict | None = None) -> datetime:
+    """最近一個（不在未來的）交易日收盤時刻；early 有列的日期改用該日提早收盤時刻（先.一三二-13a）。"""
+    early = early or {}
+    local = now.astimezone(tz)
+    day = local.date()
+    for _ in range(15):
+        ds = day.isoformat()
+        if day.weekday() < 5 and ds not in closed:
+            h, m = early.get(ds, close_hm)
+            cand = datetime(day.year, day.month, day.day, h, m, tzinfo=tz)
+            if cand <= local:
+                return cand.astimezone(timezone.utc)
+        day -= timedelta(days=1)
+    h, m = close_hm
+    return datetime(day.year, day.month, day.day, h, m, tzinfo=tz).astimezone(timezone.utc)
+
+
 def _us_closed_run_dates(us_closed: set, run_hm: tuple[int, int]) -> set:
     """美股休市日（美東日期）→ 對應那一班美股日排程的 UTC 日期（該日美東 16:00 收盤後的第一個 run_hm UTC）。
     現行 21:43 UTC 在美東同一天收盤後，對應同一個日期；寫成換算是為了排程時刻改到 UTC 隔天也不會錯位。"""
@@ -963,27 +996,31 @@ def _last_weekday_instant(now: datetime, tz, hour: int, minute: int, min_age: ti
     return cand.astimezone(timezone.utc)
 
 
-def _in_session(now: datetime, tz, open_hm: tuple[int, int], close_hm: tuple[int, int], closed: frozenset = frozenset()) -> bool:
+def _in_session(now: datetime, tz, open_hm: tuple[int, int], close_hm: tuple[int, int], closed: frozenset = frozenset(),
+                early: dict | None = None) -> bool:
     local = now.astimezone(tz)
     if local.weekday() >= 5 or local.date().isoformat() in closed:
         return False
+    close_hm = (early or {}).get(local.date().isoformat(), close_hm)
     m = local.hour * 60 + local.minute
     return open_hm[0] * 60 + open_hm[1] <= m < close_hm[0] * 60 + close_hm[1]
 
 
-def _intraday_rule(now: datetime, ts: datetime | None, tz, open_hm, close_hm, closed: frozenset = frozenset()) -> tuple[str, datetime, str]:
+def _intraday_rule(now: datetime, ts: datetime | None, tz, open_hm, close_hm, closed: frozenset = frozenset(),
+                   early: dict | None = None) -> tuple[str, datetime, str]:
     """盤中：資料時間戳距現在不得超過INTRADAY_MAX_GAP_MIN分鐘（開盤後前30分鐘寬限，
-    要求的是上一個收盤資料）；盤後/假日：至少要有最近一個交易日的收盤資料。"""
-    if _in_session(now, tz, open_hm, close_hm, closed):
+    要求的是上一個收盤資料）；盤後/假日：至少要有最近一個交易日的收盤資料。
+    early（先.一三二-13a）：{美東日期: (時, 分)} 提早收盤日，當天收盤時刻改用它。"""
+    if _in_session(now, tz, open_hm, close_hm, closed, early):
         session_open = _last_weekday_instant(now, tz, *open_hm, closed=closed)
         if now - session_open < timedelta(minutes=INTRADAY_MAX_GAP_MIN):
-            due = _last_weekday_instant(now, tz, *close_hm, closed=closed) - timedelta(minutes=INTRADAY_MAX_GAP_MIN)
+            due = _last_close_instant(now, tz, close_hm, closed, early) - timedelta(minutes=INTRADAY_MAX_GAP_MIN)
             rule = f"開盤前{INTRADAY_MAX_GAP_MIN}分鐘寬限期：需有上一交易日收盤資料"
         else:
             due = now - timedelta(minutes=INTRADAY_MAX_GAP_MIN)
             rule = f"盤中：資料不得超過{INTRADAY_MAX_GAP_MIN}分鐘未更新"
     else:
-        due = _last_weekday_instant(now, tz, *close_hm, closed=closed) - timedelta(minutes=INTRADAY_MAX_GAP_MIN)
+        due = _last_close_instant(now, tz, close_hm, closed, early) - timedelta(minutes=INTRADAY_MAX_GAP_MIN)
         rule = "盤後/假日：需有最近一個交易日的收盤資料"
     if ts is None:
         return "missing", due, rule
@@ -1063,6 +1100,7 @@ def build_schedule_health() -> dict:
     us_closed, us_closed_warn = _us_closed_dates()
     us_closed_run = frozenset(_us_closed_run_dates(us_closed, us_hm))
     us_closed = frozenset(us_closed)
+    us_early = _us_early_close()
     out = []
     for name, rel, kind, args, owner, note in checks:
         ts = _file_ts(rel)
@@ -1077,7 +1115,8 @@ def build_schedule_health() -> dict:
         else:
             cl = frozenset()
         if kind == "intraday":
-            status, due, rule = _intraday_rule(now, ts, *args, closed=cl)
+            # 先.一三二-13a：美股盤中項目遇提早收盤日，收盤時刻改 13:00
+            status, due, rule = _intraday_rule(now, ts, *args, closed=cl, early=us_early if args[0] is NY_TZ else None)
         else:
             status, due, rule = _daily_rule(now, ts, *args, closed=cl)
         out.append({
@@ -1091,7 +1130,7 @@ def build_schedule_health() -> dict:
         "checked_at": now.astimezone(TAIPEI_TZ).isoformat(timespec="seconds"),
         "any_overdue": bool(overdue),
         "overdue_names": overdue,
-        "known_simplification": "台股項目扣 data/trading_calendar.json 休市日（含今天疑似臨時休市，先.一三二-10b）；美股項目扣同檔 us 休市日（先.一三二-13）；美股提早收盤（半日市）未建模，當天盤中 13:00 後仍照 16:00 收盤計" + (f"；{us_closed_warn}" if us_closed_warn else ""),
+        "known_simplification": "台股項目扣 data/trading_calendar.json 休市日（含今天疑似臨時休市，先.一三二-10b）；美股項目扣同檔 us 休市日（先.一三二-13）；美股提早收盤（半日市）扣同檔 us[年].early_close，當天收盤時刻改用它（先.一三二-13a）" + (f"；{us_closed_warn}" if us_closed_warn else ""),
         "tw_closed_today_note": tw_closed_note or None,
         "checks": out,
     }

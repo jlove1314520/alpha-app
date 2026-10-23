@@ -6,7 +6,7 @@
   為交易日，其餘列出者休市）。**已知地雷**：查詢尚未公布的年份（例如 2026-10 查 2027）時，官方不報錯、直接回傳
   「當年度」的表（title 為「115 年市場開休市日期」）——所以一定要核對 title 的民國年，不符就當作尚未公布。
 - 美股：NYSE 沒有開放 API，依官方頁 https://www.nyse.com/markets/hours-calendars 抄錄（全日休市；2026-10-13 查證，
-  頁面列到 2027 年）。提早收盤（半日市）不列入休市。
+  頁面列到 2027 年）。提早收盤（半日市）不列入休市，另記在 us[年].early_close（先.一三二-13a，2026-10-24 抄錄）。
 頻率：每日 3 班 market.yml 各跑一次，但同一年度 7 天內抓過就不再問（每週約 1～2 次請求）；另每日 1 次 FMTQIK
 當月確認臨時休市（先.一三二-10b，見 confirm_recent_closure）。官方未公布上限；
 402/403/428/429 不重試。抓不到就保留既有內容。用法：python .github/scripts/fetch_trading_calendar.py
@@ -32,6 +32,12 @@ US_CLOSED = {  # NYSE 官方頁抄錄（2026-10-13 查證）
     "2027": ["2027-01-01", "2027-01-18", "2027-02-15", "2027-03-26", "2027-05-31", "2027-06-18",
              "2027-07-05", "2027-09-06", "2027-11-25", "2027-12-24"],
 }
+# 先.一三二-13a（2026-10-24）：同一官方頁註腳「Each market will close early at 1:00 p.m.」抄錄（美東時間；只抄檔內已有的年度）
+US_EARLY_CLOSE = {
+    "2026": {"2026-11-27": "13:00", "2026-12-24": "13:00"},
+    "2027": {"2027-11-26": "13:00"},
+}
+US_EARLY_CLOSE_TRANSCRIBED_AT = "2026-10-24"
 REFRESH_DAYS = 7
 # 先.一三二-10b（2026-10-24，收件匣 020 B4 採丙的「收盤後正式確認」半邊）：颱風當天臨時休市原本要等 7 天快取過期才記得到。
 # 改成每天另問 1 次 FMTQIK（目標日所在月份），目標日＝台北 17:00 以後是今天、之前是昨天；同一目標日只問一次（每日約 +1 次）。
@@ -206,7 +212,9 @@ def main() -> int:
     out = {"generated_at": now.isoformat(timespec="seconds"),
            "note": "休市日（全日不交易）；週末不列。台股來自 TWSE 官方日曆端點；美股依 NYSE 官方頁抄錄。",
            "tw": tw,
-           "us": {y: {"closed": d, "published": True, "source": NYSE_URL, "transcribed_at": "2026-10-13"} for y, d in US_CLOSED.items()}}
+           "us": {y: {"closed": d, "published": True, "source": NYSE_URL, "transcribed_at": "2026-10-13",
+                      "early_close": US_EARLY_CLOSE.get(y, {}), "early_close_transcribed_at": US_EARLY_CLOSE_TRANSCRIBED_AT}
+                  for y, d in US_CLOSED.items()}}
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     print("trading_calendar：" + "；".join(f"台股{y} {'已公布 ' + str(len(v['closed'])) + ' 日' if v.get('published') else '尚未公布'}" for y, v in sorted(tw.items())))
     return 0
