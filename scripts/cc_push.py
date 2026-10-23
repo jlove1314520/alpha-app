@@ -123,17 +123,73 @@ def scan(st: dict, send=_send) -> int:
 
 
 def _last_progress_ts(now: datetime) -> datetime | None:
+    """心跳檔最後一筆（舊介面，保留給其他呼叫端）。"""
+    r = _hb_last(now)
+    return r[0] if r else None
+
+
+def _hb_last(now: datetime) -> tuple[datetime, str] | None:
     last = None
     for line in _read(HB).splitlines()[-200:]:
         try:
-            ts = datetime.fromisoformat(json.loads(line)["ts"])
+            rec = json.loads(line)
+            ts = datetime.fromisoformat(rec["ts"])
         except Exception:  # noqa: BLE001
             continue
         if ts.tzinfo is None:
             ts = ts.replace(tzinfo=TW)
-        if ts <= now and (last is None or ts > last):
-            last = ts
+        if ts <= now and (last is None or ts > last[0]):
+            last = (ts, f"心跳：{str(rec.get('item', ''))[:30]}")
     return last
+
+
+# 2026-10-23 先.一三四-1（收件匣 022）：「停住」誤報——心跳只在有心跳指示的編號條目完成時才寫，補.資料／收件匣／DevQueue 分段進度
+# 都不寫，11:46～17:20 有十幾個 commit 仍被報「超過 3 小時沒有任何進度」。最後進度改取三者最晚：心跳、最後一個非機器自動提交的
+# commit、收件匣最後一個 .done。機器自動提交用訊息關鍵字排除（心跳／自動更新／cycle log／新聞與事件／探測／連通／盤中報價…）。
+MACHINE_COMMIT = re.compile(r"心跳|自動更新|cycle log|新聞與事件|探測|連通|盤中報價|停擺告警|本機補班|本機備援|補抓|DevQueue-Cycle")
+INBOX = ROOT.parent / "cowork_inbox"
+
+
+def _git_last_manual(now: datetime) -> tuple[datetime, str] | None:
+    try:
+        import subprocess  # noqa: PLC0415
+        out = subprocess.run(["git", "-C", str(ROOT), "log", "-200", "--format=%ct\t%s"], capture_output=True, text=True,
+                             encoding="utf-8", errors="replace", timeout=60).stdout
+        for ln in out.splitlines():
+            ct, _, subj = ln.partition("\t")
+            if subj and not MACHINE_COMMIT.search(subj):
+                ts = datetime.fromtimestamp(int(ct), TW)
+                if ts <= now:
+                    return ts, f"commit：{subj[:30]}"
+    except Exception as e:  # noqa: BLE001 — 十二節：只降級
+        _warn(f"讀 git log 失敗：{e}")
+    return None
+
+
+def _inbox_last_done(now: datetime) -> tuple[datetime, str] | None:
+    try:
+        best = None
+        for p in INBOX.glob("*.done"):
+            ts = datetime.fromtimestamp(p.stat().st_mtime, TW)
+            if ts <= now and (best is None or ts > best[0]):
+                best = (ts, f"收件匣：{p.stem[:30]}")
+        return best
+    except Exception as e:  # noqa: BLE001
+        _warn(f"讀收件匣 .done 失敗：{e}")
+        return None
+
+
+def _last_progress(now: datetime) -> tuple[datetime, str] | None:
+    cands = [c for c in (_hb_last(now), _git_last_manual(now), _inbox_last_done(now)) if c]
+    return max(cands, key=lambda c: c[0]) if cands else None
+
+
+def _queue_executable() -> bool:
+    """DevQueue 最後一輪的結束原因是 QUEUE_EMPTY／GATED＝沒有可執行項目（剩下的都在等審／等條件）。讀不到就照舊看 - [ ] 數。"""
+    ends = re.findall(r"DevQueue cycle end: \S+ \S+ cycle_id=\S+ reason=(\S+)", _read(DQ_LOG))
+    if ends:
+        return ends[-1] not in ("QUEUE_EMPTY", "GATED")
+    return bool(re.findall(r"^- \[ \] \*\*", _read(PQ), re.M))
 
 
 def stuck_reasons(now: datetime) -> list[tuple[str, str]]:
@@ -149,10 +205,14 @@ def stuck_reasons(now: datetime) -> list[tuple[str, str]]:
     ends = re.findall(r"DevQueue cycle end: \S+ \S+ cycle_id=\S+ reason=(\S+) exit=(-?\d+)", _read(DQ_LOG))[-3:]
     if len(ends) == 3 and all(e[1] != "0" for e in ends):
         out.append(("dq_errors", f"DevQueue 連續 3 輪錯誤結束（最後一輪 {ends[-1][0]}）"))
-    last = _last_progress_ts(now)
+    last = _last_progress(now)
     open_items = len(re.findall(r"^- \[ \] \*\*", _read(PQ), re.M))
-    if open_items and last and (now - last).total_seconds() > STUCK_SEC:
-        out.append(("no_progress", f"超過 3 小時沒有任何進度（最後一次 {last.astimezone(TW):%m/%d %H:%M}），佇列還有 {open_items} 件"))
+    if last and (now - last[0]).total_seconds() > STUCK_SEC:
+        when = f"{last[0].astimezone(TW):%m/%d %H:%M}"
+        if _queue_executable():
+            out.append(("no_progress", f"超過 3 小時沒有任何進度（最後一次 {when}，{last[1]}），佇列還有 {open_items} 件"))
+        else:
+            out.append(("queue_idle", f"佇列都在等審／等條件，沒有可做的（最後進度 {when}，{last[1]}）"))
     return out
 
 
@@ -162,7 +222,8 @@ def stuck(st: dict, now: datetime, send=_send) -> int:
     for key, text in stuck_reasons(now):
         if now.timestamp() - float(seen.get(key, 0)) < STUCK_REPEAT_SEC:
             continue
-        r = send(f"⚠️ CC 停住：{text}"[:80], text, "cc_stuck")
+        title = f"⏸ {text}" if key == "queue_idle" else f"⚠️ CC 停住：{text}"
+        r = send(title[:80], text, "cc_stuck")
         seen[key] = now.timestamp()
         n += 1
         if not r.get("ok") and not r.get("muted"):
