@@ -597,7 +597,7 @@
       const q=INTRADAY_SINOPAC&&INTRADAY_SINOPAC.quotes&&INTRADAY_SINOPAC.quotes[code];
       if(!q||q.sim_price==null||!q.sim_at)return '';
       const z=zonedNow('Asia/Taipei');const m=z.h*60+z.mi;
-      const inWin=z.wd>=1&&z.wd<=5&&((m>=8*60+30&&m<9*60)||(m>=13*60+25&&m<13*60+30));
+      const inWin=z.wd>=1&&z.wd<=5&&!_isTwHolidayToday()&&((m>=8*60+30&&m<9*60)||(m>=13*60+25&&m<13*60+30));
       if(!inWin||!_isTaipeiToday(q.sim_at))return '';
       return '試撮 '+nf(q.sim_price);
     }catch(e){console.warn('[simTradeText]',e);recordGlobalError('simTradeText',e);return ''}
@@ -865,7 +865,7 @@
     if(!dotEl||!bEl||!tmEl)return;
     const z=zonedNow(tz);
     const mins=z.h*60+z.mi;
-    const open=z.wd>=1&&z.wd<=5&&mins>=openMin&&mins<closeMin;
+    const open=z.wd>=1&&z.wd<=5&&mins>=openMin&&mins<closeMin&&!(elId==='mkt-tw'&&_isTwHolidayToday());  // 先.一三二-13e：扣台股休市日
     const data=intradayGetter?intradayGetter():null;
     const age=intradayAgeMin(data);
     let label,dot;
@@ -888,6 +888,13 @@
   // 先.一三二-13d（2026-10-24）：扣美股休市日與半日市。z 沒帶日期（zonedNow 只有時分）就補抓美東今天日期。
   // 休市日用 US_HOLIDAYS（內建 2026／2027＋trading_calendar.json 讀到後併入）；半日市收盤時刻只認
   // TRADING_CAL.us[年].early_close[日期]，還沒讀到就照舊 16:00。盤後＝收盤後 4 小時（正常日 16:00～20:00）。
+  // 先.一三二-13e（2026-10-24）：台股今天是否休市日（TW_HOLIDAYS 已併入 trading_calendar.json 的 closed／unscheduled_closed）。
+  // 判斷失敗就當不是休市日（照舊只扣週末，失敗方向同既有假日表說明）。
+  function _isTwHolidayToday(){
+    try{const p=_zonedParts(new Date(),'Asia/Taipei');
+      return TW_HOLIDAYS.has(`${p.y}-${String(p.m).padStart(2,'0')}-${String(p.d).padStart(2,'0')}`)}
+    catch(e){console.warn('[_isTwHolidayToday]',e);recordGlobalError('_isTwHolidayToday',e);return false}
+  }
   function _usEtYmd(z){
     if(z&&z.y&&z.m&&z.d)return `${z.y}-${String(z.m).padStart(2,'0')}-${String(z.d).padStart(2,'0')}`;
     const p=_zonedParts(new Date(),'America/New_York');
@@ -1087,7 +1094,7 @@
     // 發明一套邊界，跟後端資料源禮儀的既有慣例一致。
     const z=zonedNow('Asia/Taipei');
     const mins=z.h*60+z.mi;
-    return z.wd>=1&&z.wd<=5&&mins>=8*60+30&&mins<13*60+45;
+    return z.wd>=1&&z.wd<=5&&mins>=8*60+30&&mins<13*60+45&&!_isTwHolidayToday();  // 先.一三二-13e：扣台股休市日
   }
   function isUsTradingWindowNow(){
     // 沿用既有usMarketSession()（盤前/盤中/盤後/休市四態），非'closed'都算
@@ -2722,7 +2729,7 @@
   function isTwSourceNotYetPublished(){
     try{
       const z=_zonedParts(new Date(),'Asia/Taipei');
-      if(z.wd<1||z.wd>5)return false;                 // 假日本來就沒有
+      if(z.wd<1||z.wd>5||_isTwHolidayToday())return false;  // 假日本來就沒有（先.一三二-13e：含國定休市日）
       const mins=z.h*60+z.mi;
       return mins>=13*60+30&&mins<17*60+30;           // 收盤後 4 小時內
     }catch(e){console.warn('[isTwSourceNotYetPublished]',e);return false}
@@ -2763,7 +2770,7 @@
     // 快取已載入。
     await loadMarketDataFiles();
     const nowTW=zonedNow('Asia/Taipei'),nowUS=zonedNow('America/New_York');
-    const twOpen=nowTW.wd>=1&&nowTW.wd<=5&&(nowTW.h*60+nowTW.mi)>=540&&(nowTW.h*60+nowTW.mi)<810;
+    const twOpen=nowTW.wd>=1&&nowTW.wd<=5&&(nowTW.h*60+nowTW.mi)>=540&&(nowTW.h*60+nowTW.mi)<810&&!_isTwHolidayToday();  // 先.一三二-13e
     const usOpen=usMarketSession(nowUS)==='regular';  // 先.一三二-13d：扣休市日與半日市（原本寫死 09:30～16:00）
     const problems=diagQuoteProblems(twOpen,usOpen);
     const stDoc=await ensureStatusDoc();
@@ -3749,7 +3756,7 @@
   function toggleHomeStatus(){const st=document.getElementById('home-status-strip'),d=document.getElementById('home-status-detail');if(!st||!d)return;const open=d.hidden;d.hidden=!open;st.classList.toggle('open',open)}
   function renderHomeStatusSummary(){
     const el=document.getElementById('home-status-summary'),dot=document.getElementById('home-status-dot');if(!el||!dot)return;
-    const zTw=zonedNow('Asia/Taipei');const twOpen=zTw.wd>=1&&zTw.wd<=5&&(zTw.h*60+zTw.mi)>=540&&(zTw.h*60+zTw.mi)<810;
+    const zTw=zonedNow('Asia/Taipei');const twOpen=zTw.wd>=1&&zTw.wd<=5&&(zTw.h*60+zTw.mi)>=540&&(zTw.h*60+zTw.mi)<810&&!_isTwHolidayToday();  // 先.一三二-13e
     const usSess=usMarketSession(zonedNow('America/New_York'));
     // 2026-09-15（週六.六／稽核二.五）週末/國定假日跟「交易日已收盤」是兩種不同狀態，
     // 不該共用「已收盤」這個字——已收盤暗示「今天有開、現在收了」，週末/假日根本沒開盤。
@@ -4910,7 +4917,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-24.0713';
+  const APP_VERSION='2026-10-24.0722';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

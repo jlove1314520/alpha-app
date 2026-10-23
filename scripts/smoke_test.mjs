@@ -5923,10 +5923,38 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { usCalErrs.push(`測試本身出錯：${e.message || e}`); }
   record("175. 美股時鐘／診斷橫幅盤中判斷／指數盤中標記扣休市日與半日市：感恩節收盤、半日市 13:00 後盤後、正常日 14:00 盤中（先.一三二-13d）", usCalErrs.length === 0, usCalErrs.join("; "));
 
+  // 先.一三二-13e：台股盤中判斷扣台股休市日（固定 2026-10-26 週一休市日／10-27 交易日 10:00 台北）
+  const twCalErrs = [];
+  try {
+    const cases = [
+      { t: "2026-10-26T02:00:00Z", name: "10/26 休市日 10:00", open: false },
+      { t: "2026-10-27T02:00:00Z", name: "10/27 交易日 10:00", open: true },
+    ];
+    for (const c of cases) {
+      const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+      try {
+        const p = await ctx.newPage();
+        await p.clock.setFixedTime(new Date(c.t));
+        await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+        await p.waitForFunction(() => typeof TRADING_CAL !== "undefined" && TRADING_CAL, null, { timeout: 15000 }).catch(() => null);
+        await p.waitForTimeout(1500);
+        const r = await p.evaluate(() => {
+          try { updateClocks(); } catch (e) {}
+          return { hol: _isTwHolidayToday(), win: isTwTradingWindowNow(), lab: document.querySelector("#mkt-tw b")?.textContent || "" };
+        });
+        if (r.win !== c.open) twCalErrs.push(`${c.name}：盤中時窗應為 ${c.open}，實得 ${r.win}`);
+        if (r.hol === c.open) twCalErrs.push(`${c.name}：休市日判斷錯（${r.hol}）`);
+        if (!c.open && /延遲/.test(r.lab)) twCalErrs.push(`${c.name}：時鐘不應顯示延遲，實得「${r.lab}」`);
+        if (c.open && /已收盤/.test(r.lab)) twCalErrs.push(`${c.name}：時鐘不應顯示已收盤，實得「${r.lab}」`);
+      } finally { await ctx.close(); }
+    }
+  } catch (e) { twCalErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("176. 台股時鐘／盤中時窗扣台股休市日：10/26 休市日 10:00 不顯示延遲、10/27 10:00 盤中（先.一三二-13e）", twCalErrs.length === 0, twCalErrs.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144/146/147/148/151/152/157/158/161/164/175新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144/146/147/148/151/152/157/158/161/164/175/176新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
