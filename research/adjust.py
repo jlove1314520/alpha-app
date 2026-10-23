@@ -148,8 +148,17 @@ def _dividend_events_from_df(div: pd.DataFrame, close_by_date: dict, trading_dat
         ex_date = row.get("CashExDividendTradingDate") or row.get("StockExDividendTradingDate")
         if not ex_date:
             continue
-        cash = row.get("CashEarningsDistribution") or 0.0
-        stock_ratio = (row.get("StockEarningsDistribution") or 0.0) / 10.0
+        # 2026-10-23 先.一三三-1d（收件匣 023 採甲）：加資本公積配息／配股。原本只用盈餘配息／配股，漏 CashStatutorySurplus／
+        # StockStatutorySurplus（例 2331 2012-08-15 盈餘 0.35＋公積 2.12：官方參考價 12.05→9.58，舊公式只算 −3%）；只有公積配發的
+        # 列以前被下面「沒有任何配發」直接跳過。影響清單 research/data/adjust_surplus_fix_impact.json。
+        def _num(v):
+            try:
+                v = float(v)
+            except (TypeError, ValueError):
+                return 0.0
+            return 0.0 if pd.isna(v) else v
+        cash = _num(row.get("CashEarningsDistribution")) + _num(row.get("CashStatutorySurplus"))
+        stock_ratio = (_num(row.get("StockEarningsDistribution")) + _num(row.get("StockStatutorySurplus"))) / 10.0
         rights_ratio = (row.get("CashIncreaseSubscriptionRate") or 0.0) / 1000.0
         rights_price = row.get("CashIncreaseSubscriptionpRrice") or 0.0
         if cash == 0 and stock_ratio == 0 and rights_ratio == 0:
