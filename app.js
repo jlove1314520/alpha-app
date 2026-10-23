@@ -885,12 +885,32 @@
   // 同一套邊界(04:00-09:30盤前/09:30-16:00盤中/16:00-20:00盤後/其餘休市)，
   // 用 zonedNow() 算的美東當地時間分鐘數判斷，不是寫死UTC常數，日光節約
   // 由 Intl.DateTimeFormat 自動處理（跟既有 mktPill() 同一個機制）。
+  // 先.一三二-13d（2026-10-24）：扣美股休市日與半日市。z 沒帶日期（zonedNow 只有時分）就補抓美東今天日期。
+  // 休市日用 US_HOLIDAYS（內建 2026／2027＋trading_calendar.json 讀到後併入）；半日市收盤時刻只認
+  // TRADING_CAL.us[年].early_close[日期]，還沒讀到就照舊 16:00。盤後＝收盤後 4 小時（正常日 16:00～20:00）。
+  function _usEtYmd(z){
+    if(z&&z.y&&z.m&&z.d)return `${z.y}-${String(z.m).padStart(2,'0')}-${String(z.d).padStart(2,'0')}`;
+    const p=_zonedParts(new Date(),'America/New_York');
+    return `${p.y}-${String(p.m).padStart(2,'0')}-${String(p.d).padStart(2,'0')}`;
+  }
+  function usCloseMin(ymd){
+    try{
+      const y=String(ymd||'').slice(0,4);
+      const ec=TRADING_CAL&&TRADING_CAL.us&&TRADING_CAL.us[y]&&TRADING_CAL.us[y].early_close;
+      const t=ec&&ec[ymd];
+      if(typeof t==='string'&&/^\d{1,2}:\d{2}$/.test(t)){const [h,mi]=t.split(':').map(Number);return h*60+mi}
+    }catch(e){console.warn('[usCloseMin]',e);recordGlobalError('usCloseMin',e)}
+    return 16*60;
+  }
   function usMarketSession(z){
     if(z.wd<1||z.wd>5)return 'closed';
+    let close=16*60;
+    try{const ymd=_usEtYmd(z);if(US_HOLIDAYS.has(ymd))return 'closed';close=usCloseMin(ymd)}
+    catch(e){console.warn('[usMarketSession]',e);recordGlobalError('usMarketSession',e)}
     const m=z.h*60+z.mi;
     if(m>=4*60&&m<9*60+30)return 'pre';
-    if(m>=9*60+30&&m<16*60)return 'regular';
-    if(m>=16*60&&m<20*60)return 'post';
+    if(m>=9*60+30&&m<close)return 'regular';
+    if(m>=close&&m<close+4*60)return 'post';
     return 'closed';
   }
   // 2026-08-28 P0-a 根治：同mktPill()，.tm改回顯示美東現在時間(每秒更新)，
@@ -2744,7 +2764,7 @@
     await loadMarketDataFiles();
     const nowTW=zonedNow('Asia/Taipei'),nowUS=zonedNow('America/New_York');
     const twOpen=nowTW.wd>=1&&nowTW.wd<=5&&(nowTW.h*60+nowTW.mi)>=540&&(nowTW.h*60+nowTW.mi)<810;
-    const usOpen=nowUS.wd>=1&&nowUS.wd<=5&&(nowUS.h*60+nowUS.mi)>=570&&(nowUS.h*60+nowUS.mi)<960;
+    const usOpen=usMarketSession(nowUS)==='regular';  // 先.一三二-13d：扣休市日與半日市（原本寫死 09:30～16:00）
     const problems=diagQuoteProblems(twOpen,usOpen);
     const stDoc=await ensureStatusDoc();
     const twSched=marketScheduleLabel(stDoc,'tw'),usSched=marketScheduleLabel(stDoc,'us');
@@ -2865,7 +2885,7 @@
       if(!file||!file.fetched_at||!item)return '';
       const z=_zonedParts(new Date(file.fetched_at),'America/New_York');
       const etDate=`${z.y}-${String(z.m).padStart(2,'0')}-${String(z.d).padStart(2,'0')}`;
-      const intra=item.intraday===true||(item.intraday==null&&item.as_of===etDate&&z.h*60+z.mi<16*60);
+      const intra=item.intraday===true||(item.intraday==null&&item.as_of===etDate&&!US_HOLIDAYS.has(etDate)&&z.h*60+z.mi<usCloseMin(etDate));  // 先.一三二-13d：扣休市日、半日市收盤改 13:00
       return intra?`${String(z.m).padStart(2,'0')}/${String(z.d).padStart(2,'0')} ${String(z.h).padStart(2,'0')}:${String(z.mi).padStart(2,'0')} 美東`:'';
     }catch(e){console.warn('[_usIndexIntradayTag]',e);recordGlobalError('_usIndexIntradayTag',e);return ''}
   }
@@ -4890,7 +4910,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-21.0849';
+  const APP_VERSION='2026-10-24.0713';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

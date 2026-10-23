@@ -5887,10 +5887,46 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { fzErrs.push(`測試本身出錯：${e.message || e}`); }
   record("99. 自動投資「已暫停：等紙上策略打贏 0050」：STOP＋strategy_frozen 才顯示、緊急停止不混用、暫停前顯示流程驗證單（先.七十九-5）", fzErrs.length === 0, fzErrs.join("; "));
 
+  // 先.一三二-13d：美股時鐘／診斷橫幅／指數盤中標記扣休市日與半日市（固定時間各開一個獨立 context）
+  const usCalErrs = [];
+  try {
+    const cases = [
+      { t: "2026-11-26T16:00:00Z", name: "感恩節 11:00", sess: "closed", tag: false },
+      { t: "2026-11-27T19:00:00Z", name: "半日市 14:00", sess: "post", tag: false },
+      { t: "2026-11-27T17:00:00Z", name: "半日市 12:00", sess: "regular", tag: true },
+      { t: "2026-11-24T19:00:00Z", name: "正常日 14:00", sess: "regular", tag: true },
+    ];
+    for (const c of cases) {
+      const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+      try {
+        const p = await ctx.newPage();
+        await p.clock.setFixedTime(new Date(c.t));
+        await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+        await p.waitForFunction(() => typeof TRADING_CAL !== "undefined" && TRADING_CAL, null, { timeout: 15000 }).catch(() => null);
+        await p.waitForTimeout(1500);
+        const r = await p.evaluate((t) => {
+          const z = zonedNow("America/New_York");
+          const sess = usMarketSession(z);
+          try { updateClocks(); } catch (e) {}
+          const lab = document.querySelector("#mkt-us b")?.textContent || "";
+          const tag = _usIndexIntradayTag({ fetched_at: t }, { as_of: t.slice(0, 10), close: 1 });
+          return { cal: !!TRADING_CAL, sess, lab, tag };
+        }, c.t);
+        if (!r.cal) usCalErrs.push(`${c.name}：沒讀到交易日曆`);
+        if (r.sess !== c.sess) usCalErrs.push(`${c.name}：時段應為 ${c.sess}，實得 ${r.sess}`);
+        if (c.sess === "closed" && /盤前|盤後|延遲/.test(r.lab)) usCalErrs.push(`${c.name}：時鐘應顯示已收盤，實得「${r.lab}」`);
+        if (c.sess === "post" && r.lab !== "盤後") usCalErrs.push(`${c.name}：時鐘應顯示盤後，實得「${r.lab}」`);
+        if (c.sess === "regular" && /盤前|盤後|已收盤/.test(r.lab)) usCalErrs.push(`${c.name}：時鐘應顯示盤中，實得「${r.lab}」`);
+        if (!!r.tag !== c.tag) usCalErrs.push(`${c.name}：指數盤中標記應${c.tag ? "有" : "無"}，實得「${r.tag}」`);
+      } finally { await ctx.close(); }
+    }
+  } catch (e) { usCalErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("175. 美股時鐘／診斷橫幅盤中判斷／指數盤中標記扣休市日與半日市：感恩節收盤、半日市 13:00 後盤後、正常日 14:00 盤中（先.一三二-13d）", usCalErrs.length === 0, usCalErrs.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144/146/147/148/151/152/157/158/161/164新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144/146/147/148/151/152/157/158/161/164/175新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
