@@ -2,6 +2,7 @@
 
 - 日檔：research/data/raw/v1_resume_day/twse/YYYYMMDD.json（MI_INDEX ALLBUT0999 原始回應，
   var1018_v1_reduction_events.py 抓的恢復買賣日；只有這批保留「漲跌(+/-)」欄原文）
+  ＋ research/data/raw/twse_daily_2007h2/YYYYMMDD.json（fetch_twse_daily_2007h2.py 補抓 2007H2 其餘交易日）
 - 除權息：research/data/raw/exright_2007_2014/twse_YYYY_H.json（2007H2～2012H2）
   ＋ research/data/raw/twse_twt49u/YYYY_H.json（2013～2014）
 證交所「X」＝不比價，涵蓋除權息以外的情況（減資恢復買賣、新上市首日等），
@@ -21,6 +22,14 @@ sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 HERE = Path(__file__).resolve().parent
 DAILY = HERE / "data" / "raw" / "v1_resume_day" / "twse"
+DAILY_2007H2 = HERE / "data" / "raw" / "twse_daily_2007h2"  # fetch_twse_daily_2007h2.py 補抓的 2007H2 其餘交易日
+
+
+def daily_files() -> list[Path]:
+    """兩個原文日檔目錄合併，同一天以 v1_resume_day 為準。"""
+    by_day = {f.stem: f for f in DAILY_2007H2.glob("*.json")}
+    by_day.update({f.stem: f for f in DAILY.glob("*.json")})
+    return [by_day[d] for d in sorted(by_day)]
 EXR = [HERE / "data" / "raw" / "exright_2007_2014", HERE / "data" / "raw" / "twse_twt49u"]
 OUT = HERE / "data" / "twse_daily_x_marks_vs_twt49u.json"
 RESUME_CSV = HERE / "data" / "v1_reduction_events_2007_2014.csv"  # 停牌缺口（halt_to／resume_date）
@@ -46,7 +55,7 @@ def resume_keys() -> set:
 def prev_day_traded(code: str, day: str, cache: dict):
     """回 True/False＝前一交易日官方日檔有/無該檔；None＝本機沒有那一天的日檔、判不了。
     前一交易日用兩個本機日檔目錄的日期聯集推（只在兩者連續時才可信，所以要求前一天檔案就在 DAILY 或 OFFICIAL_DAILY）。"""
-    prev = cache.setdefault("_days", sorted({f.stem for f in OFFICIAL_DAILY.glob("*.json")} | {f.stem for f in DAILY.glob("*.json")}))
+    prev = cache.setdefault("_days", sorted({f.stem for f in OFFICIAL_DAILY.glob("*.json")} | {f.stem for f in daily_files()}))
     cands = [d for d in prev if d < day]
     if not cands:
         return None
@@ -64,7 +73,8 @@ def prev_day_traded(code: str, day: str, cache: dict):
                 # rows[代號]＝[開, 高, 低, 收, 量, 值]；收盤 None＝只有零股等成交、沒有收盤價
                 cache[p] = {c for c, v in rows.items() if v and v[3] is not None}
             else:
-                j = json.loads((DAILY / f"{p}.json").read_text(encoding="utf-8"))
+                fp = DAILY / f"{p}.json"
+                j = json.loads((fp if fp.exists() else DAILY_2007H2 / f"{p}.json").read_text(encoding="utf-8"))
                 codes = set()
                 for t in j.get("tables") or []:
                     fi = t.get("fields") or []
@@ -117,7 +127,7 @@ def main() -> int:
     per_day, x_only, hits = [], [], []
     tot = Counter()
     sym = Counter()
-    for f in sorted(DAILY.glob("*.json")):
+    for f in daily_files():
         day = f.stem
         try:
             j = json.loads(f.read_text(encoding="utf-8"))
@@ -170,7 +180,12 @@ def main() -> int:
         "x_without_twt49u_by_why": dict(Counter(x["why"] for x in x_only).most_common()),
         "symbols_seen": dict(sym.most_common()),
         "y2007h2": {"days": len(h2007), "x": sum(p["n_x"] for p in h2007),
-                    "twt49u": sum(p["n_twt49u"] for p in h2007), "both": sum(p["n_both"] for p in h2007)},
+                    "twt49u": sum(p["n_twt49u"] for p in h2007), "both": sum(p["n_both"] for p in h2007),
+                    "twt49u_without_x": [(p["date"], c) for p in h2007 for c in p["twt49u_without_x"]],
+                    "x_without_twt49u_by_why": dict(Counter(x["why"] for x in x_only
+                                                            if "20070701" <= x["date"] <= "20071231").most_common()),
+                    "x_without_twt49u_unexplained": [x for x in x_only if "20070701" <= x["date"] <= "20071231"
+                                                     and x["why"].startswith("前一交易日有成交")]},
     }
     OUT.write_text(json.dumps({"generated_at": datetime.now().isoformat(timespec="seconds"),
                                "requests_sent": 0, "summary": summary, "per_day": per_day,
