@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """先.一三三-1（2026-10-23，DevQueue）：V1 等權再平衡溢酬——台股 2007-07～2014 時點宇宙單發（事前登記 #462）。
 
-規則照 `docs/PREREG_VAR1018_V1_equal_weight_rebalance_tw2007_FINAL.md`「定稿條文」（commit 7e657456b6），不改任何一條：
+規則照 `docs/PREREG_VAR1018_V1_equal_weight_rebalance_tw2007_FINAL.md`「定稿條文」（commit 7e657456b6）＋修訂 R2（9c9ad23f8c）＋修訂 R3（fc3b43df96），不改任何一條：
 - t0＝2007-07-02，驗證期 2007-07-02～2014-12-31；宇宙＝t0 前後 10 天內有價格列的上市＋上櫃普通股（4 碼、非 0 開頭，含之後下市）。
 - 策略：t0 收盤等權買入，之後每 21 個交易日（t0 起算）把仍在市的股票拉回等權；基準：同一組股票 t0 等權後不再平衡。
 - 下市股：最後交易日收盤出場、持現金；停牌期間持有不動、無價格日不計報酬。
@@ -55,7 +55,10 @@ RESULT = HERE / "data" / "var1018_v1_oneshot_result.json"
 FILL_REPORT = HERE / "data" / "v1_reduction_fill_report.json"
 PREREG = "docs/PREREG_VAR1018_V1_equal_weight_rebalance_tw2007_FINAL.md"
 PREREG_COMMIT = "7e657456b6"
-PREREG_R2_COMMIT = "R2_PENDING"   # 修訂 R2（先.一三三-1b）commit，單發前填入
+PREREG_R2_COMMIT = "9c9ad23f8c"   # 修訂 R2（先.一三三-1b）commit
+PREREG_R3_COMMIT = "fc3b43df96"   # 修訂 R3（先.一三三-1c，股利 FinMind＋官方補充）commit
+ADJUST_SUPP_X_COMMIT = "a4d9b90b35"  # adjust.py 官方除權息補充事件 commit
+SUPP_X_CSV = HERE / "data" / "official_exright_supplement_2007_2014.csv"
 T0, END = pd.Timestamp("2007-07-02"), pd.Timestamp("2014-12-31")
 REBAL = 21
 TAIL_DAYS = 20          # 同涵蓋率定義：最後一筆價格距離終點 ≤20 天才算有到終點
@@ -207,7 +210,8 @@ def build_data() -> dict:
         adj = apply_events(s, ev)
         series[c] = adj[(adj.index >= T0 - pd.Timedelta(days=10)) & (adj.index <= END)]
         meta[c] = {"dead": c in dead, "delist": ddate.get(c), "n_events": int(len(ev)), "events_error": err,
-                   "supp_events": int((ev["event_type"] == "capital_reduction_official_supp").sum()) if len(ev) else 0}
+                   "supp_events": int((ev["event_type"] == "capital_reduction_official_supp").sum()) if len(ev) else 0,
+                   "supp_x_events": int((ev["event_type"] == "dividend_official_supp").sum()) if len(ev) else 0}
     s50 = raw_close("0050", {})
     ev50, err50 = events_for("0050")
     a50 = apply_events(s50, ev50)
@@ -397,6 +401,20 @@ def disclosures(codes: set[str], meta: dict) -> dict:
             "events_errors": {c: m["events_error"] for c, m in meta.items() if m["events_error"]}}
 
 
+def r3_disclosure(codes: set[str], meta: dict) -> dict:
+    """修訂 R3：結果檔另報官方補充事件數、近似值事件數（母體股＋0050，除權息日在驗證期內）。"""
+    try:
+        d = pd.read_csv(SUPP_X_CSV, dtype={"stock_id": str})
+        w = d[d["stock_id"].isin(codes | {"0050"}) & (d["ex_date"] >= str(T0.date())) & (d["ex_date"] <= CUTOFF) & (d["factor"] > 0)]
+        ap = w[w["source"] == "tpex_2007h2_approx"]
+        return {"csv": "research/data/official_exright_supplement_2007_2014.csv", "n_csv_total": int(len(d)),
+                "n_in_universe_window": int(len(w)), "by_source": {k: int(v) for k, v in w["source"].value_counts().items()},
+                "n_approx": int(len(ap)), "approx_list": ap[["stock_id", "ex_date", "factor"]].to_dict("records"),
+                "n_supp_events_applied_universe": int(sum(m.get("supp_x_events", 0) for m in meta.values()))}
+    except Exception as e:  # noqa: BLE001 —— 揭露欄失敗不擋主結果，照實寫
+        return {"error": f"{type(e).__name__}: {e}"}
+
+
 def run() -> int:
     if RESULT.exists():
         print(f"拒跑：結果檔已存在（{RESULT}）——V1 只跑一次（PREREG 定稿條文 7）")
@@ -412,6 +430,7 @@ def run() -> int:
     nav50 = (a50 / base50).to_numpy()
     cagr50 = cagr(nav50, cal)
     out = {"trial_parent": 462, "prereg": PREREG, "prereg_commit": PREREG_COMMIT,
+           "prereg_r2_commit": PREREG_R2_COMMIT, "prereg_r3_commit": PREREG_R3_COMMIT, "adjust_supp_x_commit": ADJUST_SUPP_X_COMMIT,
            "generated_at": datetime.now().isoformat(timespec="seconds"), "window": [str(T0.date()), str(cal[-1].date())],
            "n_trading_days": len(cal), "n_universe": len(codes),
            "n_delisted_in_universe": int(sum(meta[c]["dead"] for c in codes)),
@@ -427,8 +446,10 @@ def run() -> int:
 "cache_late_start": {ds: sorted(k for k, u in CACHE_USE.items() if u.get(ds) and u[ds][:10] > "2007-07-01")
                                 for ds in ("TaiwanStockPrice", "TaiwanStockDividend")},
            "discretion": __doc__.split("[自行裁量]")[1].split("用法：")[0].strip()}
-    out["coverage_check_vs_prereg"] = {"prereg_universe": 1253, "prereg_delisted": 75,
-                                       "match": out["n_universe"] == 1253 and out["n_delisted_in_universe"] == 75}
+    # 修訂 R2-4：probe 口徑母體 1,126、程式口徑下市股 76（涵蓋率口徑 73）
+    out["coverage_check_vs_prereg"] = {"prereg_r2_universe": 1126, "prereg_r2_delisted_program": 76,
+                                       "match": out["n_universe"] == 1126 and out["n_delisted_in_universe"] == 76}
+    out["r3_official_exright_supplement"] = r3_disclosure(set(codes), meta)
     out["results"] = {h: evaluate(M, cal, h, cagr50) for h in ("pessimistic", "neutral")}
     v = [out["results"][h]["verdict"] for h in ("pessimistic", "neutral")]
     out["verdict"] = "VIOLATES_SURVIVAL" if "VIOLATES_SURVIVAL" in v else ("PASS" if v == ["PASS", "PASS"] else "FAIL")
