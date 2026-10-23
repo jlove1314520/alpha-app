@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-10-23T08:12:11.092257+08:00",
+    "generated_at": "2026-10-23T20:55:58.358668+08:00",
     "financials_source": "TWSE openapi t187ap06_L_ci(綜合損益表-一般業) + t187ap07_L_ci(資產負債表-一般業)",
     "financials_updated_count": 1038,
     "errors": [],
@@ -37,8 +37,8 @@
         "quarters_updated": 0
       },
       "mopsfin_t187ap06_O_ci": {
-        "rows": 885,
-        "cum": 885,
+        "rows": 888,
+        "cum": 888,
         "quarters_updated": 19
       },
       "mopsfin_t187ap06_O_fh": {
@@ -145024,7 +145024,24 @@
             "eps": 15.36
           }
         ],
-        "roe_ttm_pct": null
+        "roe_ttm_pct": null,
+        "prev_cum": null,
+        "latest_cum": {
+          "year": 2026,
+          "quarter": 2,
+          "revenue_cum": 1164304000.0,
+          "gross_cum": 260088000.0,
+          "op_cum": 170457000.0,
+          "net_income_parent_cum": 136520000.0,
+          "eps_cum": 5.34,
+          "source": "mopsfin_t187ap06_O_ci",
+          "industry": "上櫃一般業"
+        },
+        "source": "mopsfin_t187ap06_O_ci",
+        "industry_format": "上櫃一般業",
+        "equity_parent_latest": 1453937.0,
+        "shares_outstanding_approx": 28092.0,
+        "non_current_assets_latest": 207442.0
       },
       "institutional": {
         "date": "20261022",
@@ -231515,7 +231532,24 @@
             "eps": 8.48
           }
         ],
-        "roe_ttm_pct": null
+        "roe_ttm_pct": null,
+        "prev_cum": null,
+        "latest_cum": {
+          "year": 2026,
+          "quarter": 2,
+          "revenue_cum": 621509000.0,
+          "gross_cum": 148818000.0,
+          "op_cum": 84231000.0,
+          "net_income_parent_cum": 81320000.0,
+          "eps_cum": 2.8,
+          "source": "mopsfin_t187ap06_O_ci",
+          "industry": "上櫃一般業"
+        },
+        "source": "mopsfin_t187ap06_O_ci",
+        "industry_format": "上櫃一般業",
+        "equity_parent_latest": 596203.0,
+        "shares_outstanding_approx": 29016.0,
+        "non_current_assets_latest": 477056.0
       }
     },
     "6899": {
@@ -292473,6 +292507,26 @@
             "dealer_lots": -1.1
           }
         ]
+      }
+    },
+    "6938": {
+      "financials": {
+        "prev_cum": null,
+        "latest_cum": {
+          "year": 2026,
+          "quarter": 2,
+          "revenue_cum": 329471000.0,
+          "gross_cum": 98999000.0,
+          "op_cum": 45750000.0,
+          "net_income_parent_cum": 37628000.0,
+          "eps_cum": 2.99,
+          "source": "mopsfin_t187ap06_O_ci",
+          "industry": "上櫃一般業"
+        },
+        "source": "mopsfin_t187ap06_O_ci",
+        "industry_format": "上櫃一般業",
+        "shares_outstanding_approx": 12570.0,
+        "non_current_assets_latest": 67377.0
       }
     }
   }

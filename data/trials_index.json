@@ -1,9 +1,9 @@
 {
- "generated_at": "2026-10-23T03:40:10+00:00",
+ "generated_at": "2026-10-23T12:59:30+00:00",
  "source": "research/TRIALS_LEDGER.md",
  "disclaimer": "研究紀錄，非投資建議",
  "count": 445,
- "rows_listed": 468,
+ "rows_listed": 469,
  "count_rule": "count＝總 N（與 TRIALS_LEDGER.md 開頭「目前累積總數」、SELECTION_BIAS_LEDGER.md 同一個數字；框架驗證列列出但不計入；事前登記被結果列引用時兩列算 1 筆，事前登記列 counted=false、merged_into=結果列）",
  "dup_ids": [
   94,
@@ -31,9 +31,18 @@
   "448": 451,
   "449": 452,
   "453": 454,
-  "457": 458
+  "457": 458,
+  "462": 467
  },
  "rows": [
+  {
+   "id": 467,
+   "date": "2026-10-23",
+   "track": "TW",
+   "name": "var1018_v1_equal_weight_rebalance_tw2007h2_oneshot",
+   "verdict": "VIOLATES_SURVIVAL",
+   "uid": "467"
+  },
   {
    "id": 466,
    "date": "2026-10-23",
@@ -72,6 +81,8 @@
    "track": "TW",
    "name": "var1018_v1_equal_weight_rebalance_tw2007h2_prereg",
    "verdict": "未結案",
+   "counted": false,
+   "merged_into": 467,
    "uid": "462"
   },
   {
