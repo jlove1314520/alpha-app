@@ -106,5 +106,15 @@ with tempfile.TemporaryDirectory() as td:
     rc = D.check_collision()
     check("3d 紀錄後有人再改 → 讓路、不代為 commit", rc == 1 and git("rev-parse", "HEAD").stdout == head0, f"rc={rc}")
 
+    # 3e（收件匣 020）：commit_paths 要能提交「已追蹤檔被刪除」——原本只收存在的檔，刪除永遠漏掉
+    gone = root / "obsolete.patch"
+    gone.write_text("x\n", encoding="utf-8", newline="\n")
+    git("add", "obsolete.patch"); git("commit", "-q", "-m", "add obsolete"); git("push", "-q")
+    gone.unlink()
+    res = LGC.commit_paths(["obsolete.patch"], "remove obsolete")
+    in_head = git("ls-files", "--error-unmatch", "obsolete.patch").returncode == 0
+    pushed = git("rev-parse", "HEAD").stdout == git("rev-parse", "origin/main").stdout
+    check("3e commit_paths 會提交已追蹤檔的刪除並 push", res.startswith("已 commit") and not in_head and pushed, f"{res}／仍在 HEAD={in_head}")
+
 print(f"\n結果：{'全部通過' if not fails else '失敗 ' + str(fails)}")
 sys.exit(1 if fails else 0)

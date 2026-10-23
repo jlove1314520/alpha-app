@@ -240,9 +240,16 @@ def commit_paths(paths: list[str], msg: str, drop_on_conflict: bool = False, und
             except Exception as e:  # noqa: BLE001
                 print(f"[warn] commit_paths under_lock 回呼失敗（{type(e).__name__}: {e}），照常提交")
         existing = [p for p in paths if (ROOT / p).exists()]
+        # 2026-10-23 收件匣 020：已追蹤但磁碟上已刪除的檔也要提交「刪除」——原本只收存在的檔，git rm 的刪除永遠不會被
+        # commit（V1 草稿改名、pending_patches 刪除兩次都漏，後者被 autostash 收走又放回）。
+        removed = [p for p in paths if not (ROOT / p).exists()
+                   and _g("ls-files", "--error-unmatch", "--", p).returncode == 0]
+        if removed:
+            _g("rm", "-q", "--cached", "--", *removed)
+        existing += removed
         if not existing:
             return "沒有產出檔"
-        _g("add", "--", *existing)
+        _g("add", "--", *[p for p in existing if p not in removed])
         if _g("diff", "--cached", "--quiet", "--", *existing).returncode == 0:
             return "沒有變更"
         c = _g("commit", "-q", "-m", msg, "--", *existing)
