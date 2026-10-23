@@ -1,3 +1,16 @@
+## 2026-10-23 23:31～10-24 00:1x DevQueue 20261023-233101：先.一三三-2c-判／2d-判 判定回填＋墓園；先.一三三-2e Bonferroni N 工具
+
+- 等待總司令審閱：2 件（沿用 `research/AWAITING_REVIEW.md`：先.一三二-0b 排程註冊、先.一三三-1e 公積配息三件判斷；本輪未新增）。
+- 本輪戴驗證帽（只回填判定、寫墓園，未開發任何策略）。
+- **先.一三三-2c-判（個股網格 #468～#474）**：`research/stock_grid_register_result.py`（先 commit 176ac75a1c 再執行一次）寫 #476 主結果列 FAIL（failed_gates gate1＋gate4、日頻 Sharpe −0.0341／n=564）＋#477～#482 第 11 關佔位同步列；`selection_bias_ledger.py` 重跑 N 仍 453（事前登記與結果合併）。死因：第 8 關簡化版不過（1× 總報酬 −7.65%、2×／3× 期末 0.890／0.856 億）；2009 網格 +12.5% vs 0050 +75.0%＝PREREG 第 3 節事前寫的死法。墓園附 3 個變形方向（四件事）＋±7% 漲跌停揭露（23 賣／3 買落在鎖死日，偏誤只會更差）。commit 6c95ef11fa。
+- **先.一三三-2d-判（ML 價量 #475）**：`research/ml_pricevol_register_result.py` 寫 #483 VIOLATES_SURVIVAL（全期 MDD −52.75%、2008 策略 −45.2% vs 0050 −43.3%），N 仍 453；墓園附 PREREG 第 7 節 3 個變形方向＋訓練期不可佐證比例；另揭露超額集中在被看過的 2011～2012。commit b11774bee0。
+- **先.一三三-2e（⚠️ 已實作但未 commit）**：新增 `research/bonferroni_n.py`（口徑同 selection_bias_ledger；selftest 453＝453 PASS），`MARATHON_PROTOCOL.md` 第 8 節規定程式用 N 一律用它（#468 單發曾用 TRIALS_REGISTRY 列數 289）。
+- **[自行裁量]**：佔位列 FAIL＋no_stats_reason、統計量只記主列；第 8 關不在 failed_gates 值域→用 gate1＋gate4 並寫進 notes；#483 結果檔無日報酬序列，不記 DSR 四件組、不重跑補算；單發程式 Bonferroni N=289 照實揭露、以 453 重算仍過、不改判。
+- **意外修正**：#476～#482 登記後冒煙 #103（索引 477≠帳本 485）FAIL——6c95ef11fa 是在登記前跑的冒煙，該 commit 推上去時索引落後；b11774bee0 本機重建 `data/trials_index.json`／`data/research_scorecard.json` 修好。教訓：登記試驗後要先重建索引再跑冒煙。
+- **冒煙**：23:38 176／176、23:56 176／176；跨過午夜後 00:01、00:07 兩次 #118（我的持股事件說明文字）FAIL 175／176，與本輪改動無關（只動 research／PENDING_QUEUE），但照規則 **2e 程式不 commit**（檔案留在工作目錄），補 先.一三三-2h 查根因。[自行裁量] 只 commit 進度紀錄（PROGRESS／PENDING_QUEUE），讓下一輪與總司令看得到狀態。
+- **佇列**：`- [ ]` 25 項；DevQueue 可執行 3→7，收工補件 先.一三三-2e／2f／2g／2h（[自走補入]，來源：本輪墓園變形方向與 Bonferroni 發現）。下一項 先.一三三-2f 區間市網格 PREREG 草稿（時間到、留下一輪）。
+- **BLOCKED**：無新增。
+
 ## 2026-10-23 23:01～23:3x DevQueue 20261023-230101：先.一三三-2d ML 價量單發（#475）程式＋執行一次
 
 - 等待總司令審閱：2 件（沿用 `research/AWAITING_REVIEW.md`：先.一三二-0b 排程註冊、先.一三三-1e 公積配息三件判斷；本輪未新增）。
