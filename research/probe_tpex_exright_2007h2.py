@@ -99,12 +99,13 @@ def derive_check() -> dict:
     raw = {}
     for day in days:
         t = json.load(open(RESUME / f"{day}.json", encoding="utf-8"))["tables"][0]
-        raw[day] = {r[0]: r for r in t["data"]}
+        f = [x.strip() for x in t["fields"]]  # 欄位用名稱對應：2007 年版本多兩欄，位置會跑掉
+        raw[day] = {r[0]: dict(zip(f, r)) for r in t["data"]}
     marks = {}
     kinds = Counter()
     for day in days:
         for c, r in raw[day].items():
-            s = r[3].strip()
+            s = str(r["漲跌"]).strip()
             if _num(s) is None and s not in ("", "--", "---"):
                 marks[(day, c)] = s
                 kinds[s] += 1
@@ -120,9 +121,9 @@ def derive_check() -> dict:
         if not i:
             continue
         r = raw[days[i - 1]].get(c)
-        if r is None or _num(r[2]) != pc:
+        if r is None or _num(r["收盤"]) != pc:
             continue  # 前一個檔案不是真正的前一交易日
-        up, dn = _num(r[13]), _num(r[14])
+        up, dn = _num(r["次日漲停價"]), _num(r["次日跌停價"])
         n += 1
         ok += abs((up + dn) / 2 - ref) / ref < 0.01
     return {
