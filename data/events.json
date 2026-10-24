@@ -1,13 +1,13 @@
 {
- "fetched_at": "2026-10-25T04:57:16.423921+08:00",
+ "fetched_at": "2026-10-25T06:05:03.484423+08:00",
  "source": "TWSE/TPEx 重大訊息＋TWSE 月營收＋既有除權息檔（全部官方端點）",
  "keep_days": 90,
  "importance_version": "v0（2026-10-18 先.一一〇-9）",
  "meta": {
   "twse_mops": {
    "ok": true,
-   "rows": 46,
-   "kept": 46
+   "rows": 5,
+   "kept": 5
   },
   "tpex_mops": {
    "ok": true,
@@ -25,7 +25,7 @@
    "note": "沿用既有排程產物，未額外請求"
   }
  },
- "count": 7917,
+ "count": 7922,
  "events": [
   {
    "code": "01007T",
@@ -133,6 +133,336 @@
    "date": "2026-10-27",
    "type": "除權息",
    "title": "除權息交易日（現金 0.268 元）",
+   "source": "TWSE 除權息",
+   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u",
+   "importance": 5
+  },
+  {
+   "code": "2072",
+   "name": "世紀能源",
+   "date": "2026-10-24",
+   "type": "其他",
+   "title": "公告本公司名稱由「世紀離岸風電設備股份有限公司」更名 為「世紀能源設備股份有限公司」，公告期間：115年8月26日至 115年11月25日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "6949",
+   "name": "沛爾生醫*-創",
+   "date": "2026-10-24",
+   "type": "其他",
+   "title": "公告本公司股票面額由「新台幣10元」變更為「新台幣0.5元」， 公告期間：115年08月06日至115年11月05日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "5203",
+   "name": "訊連",
+   "date": "2026-10-24",
+   "type": "其他",
+   "title": "本公司部分產品於Apple平台停止提供下載對營運之影響 與因應措施",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "6467",
+   "name": "泰合",
+   "date": "2026-10-24",
+   "type": "訴訟",
+   "title": "公告本公司505(b)(2)新藥BEQIA (TAH3311)美國專利訴訟案",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 7
+  },
+  {
+   "code": "3432",
+   "name": "台端",
+   "date": "2026-10-24",
+   "type": "其他",
+   "title": "依臺灣證券交易所股份有限公司臺證上一字第1121801204 號函辦理",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "6486",
+   "name": "互動",
+   "date": "2026-10-23",
+   "type": "增減資",
+   "title": "公告本公司董事會決議辦理現金增資發行普通股",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 7
+  },
+  {
+   "code": "6486",
+   "name": "互動",
+   "date": "2026-10-23",
+   "type": "人事",
+   "title": "公告本公司董事會決議發行國內第三次有擔保轉換公司債",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "6486",
+   "name": "互動",
+   "date": "2026-10-23",
+   "type": "併購",
+   "title": "公告本公司董事會通過民國115年第三季合併財務報告",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 9
+  },
+  {
+   "code": "5903",
+   "name": "全家",
+   "date": "2026-10-23",
+   "type": "人事",
+   "title": "代重要子公司全台物流(股)公司公告董事會決議 召開股東臨時會事宜",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "3511",
+   "name": "矽瑪",
+   "date": "2026-10-23",
+   "type": "人事",
+   "title": "本公司董事會通過民國115年第三季財務報告",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "6907",
+   "name": "雅特力-KY",
+   "date": "2026-10-23",
+   "type": "併購",
+   "title": "公告本公司董事會決議通過115年第三季合併財務報告",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 9
+  },
+  {
+   "code": "1295",
+   "name": "生合",
+   "date": "2026-10-23",
+   "type": "重大訂單",
+   "title": "公告本公司國內第一次無擔保轉換公司債(生合一)遇颱風影 響， 調整得標價款、投標處理費及得標手續費解交日作業及原 掛牌日期由10月29日順延至10月30日",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 9
+  },
+  {
+   "code": "8040",
+   "name": "九暘",
+   "date": "2026-10-23",
+   "type": "人事",
+   "title": "公告本公司董事會通過一一五年第三季個別財務報告",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "8040",
+   "name": "九暘",
+   "date": "2026-10-23",
+   "type": "人事",
+   "title": "公告本公司董事會通過新任業務主管追認案",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "6488",
+   "name": "環球晶",
+   "date": "2026-10-23",
+   "type": "人事",
+   "title": "代子公司昆山中辰矽晶有限公司公告董事會決議通過子公司之增資案",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "6182",
+   "name": "合晶",
+   "date": "2026-10-23",
+   "type": "人事",
+   "title": "公告本公司董事會通過會計暨公司治理主管異動案",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "6182",
+   "name": "合晶",
+   "date": "2026-10-23",
+   "type": "增減資",
+   "title": "公告本公司董事會決議通過辦理現金增資發行新股",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 7
+  },
+  {
+   "code": "6182",
+   "name": "合晶",
+   "date": "2026-10-23",
+   "type": "人事",
+   "title": "公告本公司董事會決議通過發行國內第九次無擔保轉換公司債",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "6182",
+   "name": "合晶",
+   "date": "2026-10-23",
+   "type": "人事",
+   "title": "公告本公司董事會決議通過發行國內第十次無擔保轉換公司債",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "7751",
+   "name": "竑騰",
+   "date": "2026-10-23",
+   "type": "人事",
+   "title": "公告本公司董事會決議發行國內第一次及第二次無擔保 轉換公司債",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "3491",
+   "name": "昇達科",
+   "date": "2026-10-23",
+   "type": "其他",
+   "title": "代重要子公司昆山昕芮特電子科技有限公司公告決議發放現金股利",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "3491",
+   "name": "昇達科",
+   "date": "2026-10-23",
+   "type": "其他",
+   "title": "代重要子公司昇達通訊(香港)有限公司公告決議發放現金股利",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "5299",
+   "name": "杰力",
+   "date": "2026-10-23",
+   "type": "併購",
+   "title": "公告本公司115年第三季合併財務報告已經董事會決議通過",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 9
+  },
+  {
+   "code": "7751",
+   "name": "竑騰",
+   "date": "2026-10-23",
+   "type": "人事",
+   "title": "本公司董事會通過增加透過第三地轉投資大陸孫公司",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "8155",
+   "name": "博智",
+   "date": "2026-10-23",
+   "type": "處分資產",
+   "title": "代本公司之子公司Allied Circuit Meiko Vietnam Co., Ltd.公告向關係人取得不動產使用權資產",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 7
+  },
+  {
+   "code": "8044",
+   "name": "網家",
+   "date": "2026-10-23",
+   "type": "人事",
+   "title": "代重要子公司二十一世紀金融科技株式會社公告董事會 決議申請股票於日本東京證券交易所Growth市場上市",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "8044",
+   "name": "網家",
+   "date": "2026-10-23",
+   "type": "增減資",
+   "title": "代重要子公司二十一世紀金融科技株式會社公告 董事會決議辦理現金增資發行新股並洽特定人認購",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 7
+  },
+  {
+   "code": "8044",
+   "name": "網家",
+   "date": "2026-10-23",
+   "type": "其他",
+   "title": "代子公司二十一世紀金融科技株式會社公告決議 召開股東臨時會",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "3259",
+   "name": "鑫創",
+   "date": "2026-10-23",
+   "type": "人事",
+   "title": "公告本公司董事會重要決議事項",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "3259",
+   "name": "鑫創",
+   "date": "2026-10-23",
+   "type": "人事",
+   "title": "公告本公司董事會通過委任策略長及總經理",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "3259",
+   "name": "鑫創",
+   "date": "2026-10-23",
+   "type": "人事",
+   "title": "公告本公司董事辭任",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "6931",
+   "name": "",
+   "date": "2026-10-23",
+   "type": "除權息",
+   "title": "除權息交易日（現金 0.12 元）",
+   "source": "TWSE 除權息",
+   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u",
+   "importance": 5
+  },
+  {
+   "code": "2028",
+   "name": "",
+   "date": "2026-10-23",
+   "type": "除權息",
+   "title": "除權息交易日（現金 0.2 元）",
    "source": "TWSE 除權息",
    "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u",
    "importance": 5
@@ -599,286 +929,6 @@
    "title": "代子公司Winking Studios Limited公告發行激勵股份",
    "source": "TWSE 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
-   "code": "6486",
-   "name": "互動",
-   "date": "2026-10-23",
-   "type": "增減資",
-   "title": "公告本公司董事會決議辦理現金增資發行普通股",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 7
-  },
-  {
-   "code": "6486",
-   "name": "互動",
-   "date": "2026-10-23",
-   "type": "人事",
-   "title": "公告本公司董事會決議發行國內第三次有擔保轉換公司債",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
-   "code": "6486",
-   "name": "互動",
-   "date": "2026-10-23",
-   "type": "併購",
-   "title": "公告本公司董事會通過民國115年第三季合併財務報告",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 9
-  },
-  {
-   "code": "5903",
-   "name": "全家",
-   "date": "2026-10-23",
-   "type": "人事",
-   "title": "代重要子公司全台物流(股)公司公告董事會決議 召開股東臨時會事宜",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
-   "code": "3511",
-   "name": "矽瑪",
-   "date": "2026-10-23",
-   "type": "人事",
-   "title": "本公司董事會通過民國115年第三季財務報告",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
-   "code": "6907",
-   "name": "雅特力-KY",
-   "date": "2026-10-23",
-   "type": "併購",
-   "title": "公告本公司董事會決議通過115年第三季合併財務報告",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 9
-  },
-  {
-   "code": "1295",
-   "name": "生合",
-   "date": "2026-10-23",
-   "type": "重大訂單",
-   "title": "公告本公司國內第一次無擔保轉換公司債(生合一)遇颱風影 響， 調整得標價款、投標處理費及得標手續費解交日作業及原 掛牌日期由10月29日順延至10月30日",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 9
-  },
-  {
-   "code": "8040",
-   "name": "九暘",
-   "date": "2026-10-23",
-   "type": "人事",
-   "title": "公告本公司董事會通過一一五年第三季個別財務報告",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
-   "code": "8040",
-   "name": "九暘",
-   "date": "2026-10-23",
-   "type": "人事",
-   "title": "公告本公司董事會通過新任業務主管追認案",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
-   "code": "6488",
-   "name": "環球晶",
-   "date": "2026-10-23",
-   "type": "人事",
-   "title": "代子公司昆山中辰矽晶有限公司公告董事會決議通過子公司之增資案",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
-   "code": "6182",
-   "name": "合晶",
-   "date": "2026-10-23",
-   "type": "人事",
-   "title": "公告本公司董事會通過會計暨公司治理主管異動案",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
-   "code": "6182",
-   "name": "合晶",
-   "date": "2026-10-23",
-   "type": "增減資",
-   "title": "公告本公司董事會決議通過辦理現金增資發行新股",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 7
-  },
-  {
-   "code": "6182",
-   "name": "合晶",
-   "date": "2026-10-23",
-   "type": "人事",
-   "title": "公告本公司董事會決議通過發行國內第九次無擔保轉換公司債",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
-   "code": "6182",
-   "name": "合晶",
-   "date": "2026-10-23",
-   "type": "人事",
-   "title": "公告本公司董事會決議通過發行國內第十次無擔保轉換公司債",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
-   "code": "7751",
-   "name": "竑騰",
-   "date": "2026-10-23",
-   "type": "人事",
-   "title": "公告本公司董事會決議發行國內第一次及第二次無擔保 轉換公司債",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
-   "code": "3491",
-   "name": "昇達科",
-   "date": "2026-10-23",
-   "type": "其他",
-   "title": "代重要子公司昆山昕芮特電子科技有限公司公告決議發放現金股利",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
-   "code": "3491",
-   "name": "昇達科",
-   "date": "2026-10-23",
-   "type": "其他",
-   "title": "代重要子公司昇達通訊(香港)有限公司公告決議發放現金股利",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
-   "code": "5299",
-   "name": "杰力",
-   "date": "2026-10-23",
-   "type": "併購",
-   "title": "公告本公司115年第三季合併財務報告已經董事會決議通過",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 9
-  },
-  {
-   "code": "7751",
-   "name": "竑騰",
-   "date": "2026-10-23",
-   "type": "人事",
-   "title": "本公司董事會通過增加透過第三地轉投資大陸孫公司",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
-   "code": "8155",
-   "name": "博智",
-   "date": "2026-10-23",
-   "type": "處分資產",
-   "title": "代本公司之子公司Allied Circuit Meiko Vietnam Co., Ltd.公告向關係人取得不動產使用權資產",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 7
-  },
-  {
-   "code": "8044",
-   "name": "網家",
-   "date": "2026-10-23",
-   "type": "人事",
-   "title": "代重要子公司二十一世紀金融科技株式會社公告董事會 決議申請股票於日本東京證券交易所Growth市場上市",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
-   "code": "8044",
-   "name": "網家",
-   "date": "2026-10-23",
-   "type": "增減資",
-   "title": "代重要子公司二十一世紀金融科技株式會社公告 董事會決議辦理現金增資發行新股並洽特定人認購",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 7
-  },
-  {
-   "code": "8044",
-   "name": "網家",
-   "date": "2026-10-23",
-   "type": "其他",
-   "title": "代子公司二十一世紀金融科技株式會社公告決議 召開股東臨時會",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
-   "code": "3259",
-   "name": "鑫創",
-   "date": "2026-10-23",
-   "type": "人事",
-   "title": "公告本公司董事會重要決議事項",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
-   "code": "3259",
-   "name": "鑫創",
-   "date": "2026-10-23",
-   "type": "人事",
-   "title": "公告本公司董事會通過委任策略長及總經理",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
-   "code": "3259",
-   "name": "鑫創",
-   "date": "2026-10-23",
-   "type": "人事",
-   "title": "公告本公司董事辭任",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
-   "code": "6931",
-   "name": "",
-   "date": "2026-10-23",
-   "type": "除權息",
-   "title": "除權息交易日（現金 0.12 元）",
-   "source": "TWSE 除權息",
-   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u",
-   "importance": 5
-  },
-  {
-   "code": "2028",
-   "name": "",
-   "date": "2026-10-23",
-   "type": "除權息",
-   "title": "除權息交易日（現金 0.2 元）",
-   "source": "TWSE 除權息",
-   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u",
    "importance": 5
   },
   {
