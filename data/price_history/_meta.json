@@ -1,7 +1,7 @@
 {
   "meta": {
     "backfill_note": "2026-08-27一次性回補：讀research端FinMind歷史parquet快取（TaiwanStockPrice）補上約90個交易日OHLCV歷史，供generate_scores_live.py的technical因子(站上60日均線×20/60日均量比)使用。close為原始收盤價（未還原權息，MA60在除權息當天附近會有跳空失真，是刻意的簡化，見generate_scores_live.py檔頭說明）。2026-08-27新增adj_close（還原權息收盤價，讀本機FinMind TaiwanStockDividend快取算出，跟research/adjust.py同一條TWSE官方公式），供generate_scores_momentum.py的relative_strength因子改用，修正除息跳空被誤判成下跌的P0 bug——之後由update_price_history.py每日排程用TWSE官方TWT48U接續回溯調整新事件。merge-safe，既有較新資料不會被覆蓋。",
-    "generated_at": "2026-10-23T23:33:01.833548+08:00",
+    "generated_at": "2026-10-24T08:06:45.868139+08:00",
     "twse_updated_count": 1368,
     "tpex_updated_count": 990,
     "errors": [],
@@ -43,7 +43,7 @@
     ],
     "splits_note": "股票分割還原（先.八十-12）：分割前 adj_close ÷ 分割比例；close 為原始成交價",
     "whitelist_fill": {
-      "generated_at": "2026-10-23T23:33:01.804386+08:00",
+      "generated_at": "2026-10-24T08:06:45.837675+08:00",
       "target_dates": {
         "twse": "2026-10-22",
         "tpex": "2026-10-22"
