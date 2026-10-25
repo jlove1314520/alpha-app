@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-25T12:35:03.838197+08:00",
+ "fetched_at": "2026-10-25T14:05:03.725677+08:00",
  "source": "TWSE/TPEx 重大訊息＋TWSE 月營收＋既有除權息檔（全部官方端點）",
  "keep_days": 90,
  "importance_version": "v0（2026-10-18 先.一一〇-9）",
@@ -11,8 +11,8 @@
   },
   "tpex_mops": {
    "ok": true,
-   "rows": 26,
-   "kept": 26
+   "rows": 1,
+   "kept": 1
   },
   "twse_revenue": {
    "ok": true,
@@ -25,7 +25,7 @@
    "note": "沿用既有排程產物，未額外請求"
   }
  },
- "count": 7922,
+ "count": 7923,
  "events": [
   {
    "code": "01007T",
@@ -185,6 +185,36 @@
    "title": "依臺灣證券交易所股份有限公司臺證上一字第1121801204 號函辦理",
    "source": "TWSE 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "6279",
+   "name": "胡連",
+   "date": "2026-10-24",
+   "type": "併購",
+   "title": "本公司公告通過義大利子公司Hu Lane Associate Europe S.r.l., 取得LA PUNTA S.R.L.80%股權之收購案",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 9
+  },
+  {
+   "code": "6931",
+   "name": "",
+   "date": "2026-10-23",
+   "type": "除權息",
+   "title": "除權息交易日（現金 0.12 元）",
+   "source": "TWSE 除權息",
+   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u",
+   "importance": 5
+  },
+  {
+   "code": "2028",
+   "name": "",
+   "date": "2026-10-23",
+   "type": "除權息",
+   "title": "除權息交易日（現金 0.2 元）",
+   "source": "TWSE 除權息",
+   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u",
    "importance": 5
   },
   {
@@ -445,26 +475,6 @@
    "title": "公告本公司董事辭任",
    "source": "TPEx 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
-   "code": "6931",
-   "name": "",
-   "date": "2026-10-23",
-   "type": "除權息",
-   "title": "除權息交易日（現金 0.12 元）",
-   "source": "TWSE 除權息",
-   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u",
-   "importance": 5
-  },
-  {
-   "code": "2028",
-   "name": "",
-   "date": "2026-10-23",
-   "type": "除權息",
-   "title": "除權息交易日（現金 0.2 元）",
-   "source": "TWSE 除權息",
-   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u",
    "importance": 5
   },
   {
