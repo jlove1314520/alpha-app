@@ -1,93 +1,87 @@
 {
  "schema": 1,
- "generated_at": "2026-10-20T18:40:02+08:00",
- "week_start": "2026-10-13",
- "week_end": "2026-10-20",
+ "generated_at": "2026-10-25T20:00:01+08:00",
+ "week_start": "2026-10-18",
+ "week_end": "2026-10-25",
  "disclaimer": "研究與紀錄用途，非投資建議",
  "system_health": {
-  "audit_generated_at": "2026-10-20T04:38:28.462052+08:00",
+  "audit_generated_at": "2026-10-24T23:00:02.433018+08:00",
   "audit_gate_pass": true,
-  "violation_rate": 0.00047,
+  "violation_rate": 0.00095,
   "violation_rate_gate": 0.01,
   "self_check_ok": true,
   "self_check_failed": [],
-  "audit_age_hours": 14.0,
+  "audit_age_hours": 21.0,
   "alerts": [
-   "AlphaIbkrQuotes：data/quotes_ibkr.json 已 3336 分鐘沒有新產出（預期每 5 分鐘，門檻 15 分鐘；JSON 欄位 fetched_at）",
-   "AlphaMarathon：research/marathon_cycle.log 已 3991 分鐘沒有新產出（預期每 30 分鐘，門檻 90 分鐘；log 內最後時間戳）",
-   "AlphaHypothesisQueue：research/hypothesis_queue_cycle.log 已 3990 分鐘沒有新產出（預期每 30 分鐘，門檻 90 分鐘；log 內最後時間戳）",
-   "AlphaQuotesTW：data/quotes_tw.json 已連續錯過 4 個應跑班次（門檻 3 班，最近應跑 2026-10-20 18:30；JSON 欄位 fetched_at）",
-   "AlphaNewsEvents：data/news.json 已連續錯過 4 個應跑班次（門檻 3 班，最近應跑 2026-10-20 18:30；JSON 欄位 fetched_at）",
-   "【使用者可見】阻塞已25個交易日未處理：⛔（2026-09-15）【使用者可見】sparklines.json過期直接影響使用者在App",
-   "合規.三：research/backfill_stock_financials_gap_2025.py 硬寫黑名單網域字串但未import net_guard（見audit_preflight.py）",
-   "合規.三：research/irb130_pledge_probe.py 硬寫黑名單網域字串但未import net_guard（見audit_preflight.py）"
+   "AlphaShioajiQuotes：data/quotes_sinopac.json 已 4690 分鐘沒有新產出（預期每 1440 分鐘，門檻 4320 分鐘；JSON 欄位 checked_at）",
+   "AlphaIbkrQuotes：data/quotes_ibkr.json 已 10616 分鐘沒有新產出（預期每 5 分鐘，門檻 15 分鐘；JSON 欄位 fetched_at）",
+   "AlphaData：C:/alpha/alpha-data/alpha.db 已 5517 分鐘沒有新產出（預期每 1440 分鐘，門檻 4320 分鐘；各表 max(date)：daily_price=2026-10-22、inst_trades=2026-10-22、valuation=2026-10-22、tai",
+   "【使用者可見】阻塞已28個交易日未處理：⛔（2026-09-15）【使用者可見】sparklines.json過期直接影響使用者在App",
+   "ibkr_gateway: 連續失敗902次（四個 API 埠全部關閉（4001/4002/7496/7497）——Gateway 若在跑多半是卡在登入畫面，需人工重登）"
   ],
-  "alerts_total": 11,
+  "alerts_total": 5,
   "level": "warn"
  },
  "freshness": {
   "total": 23,
   "counts": {
-   "ok": 19,
-   "stalled": 4
+   "ok": 17,
+   "stalled": 3,
+   "skipped": 3
   },
   "stalled": [
    {
+    "task": "AlphaShioajiQuotes",
+    "artifact": "data/quotes_sinopac.json",
+    "age_min": 4693.0,
+    "missed_shifts": null
+   },
+   {
     "task": "AlphaIbkrQuotes",
     "artifact": "data/quotes_ibkr.json",
-    "age_min": 3338.9,
+    "age_min": 10618.9,
     "missed_shifts": null
    },
    {
-    "task": "AlphaMarathon",
-    "artifact": "research/marathon_cycle.log",
-    "age_min": 3994.0,
+    "task": "AlphaData",
+    "artifact": "C:/alpha/alpha-data/alpha.db",
+    "age_min": 5520.0,
     "missed_shifts": null
-   },
-   {
-    "task": "AlphaHypothesisQueue",
-    "artifact": "research/hypothesis_queue_cycle.log",
-    "age_min": 3993.5,
-    "missed_shifts": null
-   },
-   {
-    "task": "AlphaQuotesTW",
-    "artifact": "data/quotes_tw.json",
-    "age_min": 42.9,
-    "missed_shifts": 5
    }
   ],
   "level": "bad"
  },
  "research": {
-  "trials_total": 270,
-  "trials_week": 18,
+  "trials_total": 297,
+  "trials_week": 37,
   "verdicts_week": {
-   "未結案": 10,
-   "FAIL": 3,
-   "VIOLATES_SURVIVAL": 2,
-   "PASS": 2,
+   "未結案": 22,
+   "FAIL": 10,
+   "VIOLATES_SURVIVAL": 3,
+   "PASS": 1,
    "ABANDONED": 1
   },
   "trials_week_names": [
-   "var1018_v2_turn_of_month_spx_taiex1990_prereg",
-   "var1018_v4_short_margin_reversed_tw2007_prereg",
-   "var1018_v5_january_reversal_tw_prereg",
-   "var1018_v2_turn_of_month_spx_taiex1990",
-   "var1018_v4_short_margin_reversed_tw2007",
-   "var1018_v5_january_reversal_tw",
-   "var1018_v7_us_unemployment_spx_prereg",
-   "var1018_v7_us_unemployment_spx",
-   "paper_f_wing_iron_butterfly_forward_prereg",
-   "paper_g_revsurprise_lowturnover_forward_prereg"
+   "stock_grid_tw2007q4_2009_prereg_param_penalty_7",
+   "ml_pricevol_tw2008_2012_prereg",
+   "stock_grid_tw2007q4_2009_oneshot",
+   "stock_grid_tw2007q4_2009_oneshot_param_penalty_2",
+   "stock_grid_tw2007q4_2009_oneshot_param_penalty_3",
+   "stock_grid_tw2007q4_2009_oneshot_param_penalty_4",
+   "stock_grid_tw2007q4_2009_oneshot_param_penalty_5",
+   "stock_grid_tw2007q4_2009_oneshot_param_penalty_6",
+   "stock_grid_tw2007q4_2009_oneshot_param_penalty_7",
+   "ml_pricevol_tw2008_2012_oneshot"
   ],
-  "heartbeats_week": 230,
+  "heartbeats_week": 57,
   "heartbeats_by_track": {
-   "interactive": 184,
-   "dev_queue": 20,
-   "devqueue": 24,
+   "interactive": 35,
+   "devqueue": 3,
    "marathon": 1,
-   "hypothesis_queue": 1
+   "hypothesis_queue": 1,
+   "dev_queue": 4,
+   "其他": 12,
+   "finmind_warmup": 1
   },
   "level": "ok"
  },
@@ -129,32 +123,32 @@
   "watch": {
    "status": "OK",
    "items": 0,
-   "generated_at": "2026-10-20T17:37:46.206447+08:00"
+   "generated_at": "2026-10-24T08:07:51.818434+08:00"
   },
   "level": "ok"
  },
  "live_execution": {
-  "events_week": 13,
+  "events_week": 15,
   "codes_week": {
-   "run:FROZEN": 9,
-   "settle:NOTHING_TO_SETTLE": 4
+   "run:FROZEN": 10,
+   "settle:NOTHING_TO_SETTLE": 5
   },
   "errors_week": 0,
   "last_event": {
-   "ts": "2026-10-20T13:40:01+08:00",
+   "ts": "2026-10-23T13:40:01+08:00",
    "task": "settle",
    "code": "NOTHING_TO_SETTLE"
   },
-  "heartbeat_updated_at": "2026-10-20T13:40:01+08:00",
-  "heartbeat_age_hours": 5.0,
+  "heartbeat_updated_at": "2026-10-23T13:40:01+08:00",
+  "heartbeat_age_hours": 54.3,
   "note": "只列已公開的排程事件代碼；成交數量、金額、損益只在本機日誌頁（連上電腦）顯示。",
   "level": "ok"
  },
  "summary": [
-  "系統健康：稽核閘門通過、自檢正常、告警 11 條",
-  "資料新鮮度：23 條管線，4 條停擺或缺檔",
-  "研究進度：本週登記試驗 18 筆（登記檔累計 270 列），心跳 230 次",
+  "系統健康：稽核閘門通過、自檢正常、告警 5 條",
+  "資料新鮮度：23 條管線，3 條停擺或缺檔",
+  "研究進度：本週登記試驗 37 筆（登記檔累計 297 列），心跳 57 次",
   "紙上追蹤：5 本帳，追蹤看門狗 OK",
-  "真錢執行：本週排程事件 13 次，錯誤 0 次"
+  "真錢執行：本週排程事件 15 次，錯誤 0 次"
  ]
 }
