@@ -1,13 +1,13 @@
 {
- "fetched_at": "2026-10-26T05:05:04.164805+08:00",
+ "fetched_at": "2026-10-26T06:05:47.563886+08:00",
  "source": "TWSE/TPEx 重大訊息＋TWSE 月營收＋既有除權息檔（全部官方端點）",
  "keep_days": 90,
  "importance_version": "v0（2026-10-18 先.一一〇-9）",
  "meta": {
   "twse_mops": {
    "ok": true,
-   "rows": 5,
-   "kept": 5
+   "rows": 1,
+   "kept": 1
   },
   "tpex_mops": {
    "ok": true,
@@ -25,7 +25,7 @@
    "note": "沿用既有排程產物，未額外請求"
   }
  },
- "count": 7923,
+ "count": 7924,
  "events": [
   {
    "code": "01007T",
@@ -138,6 +138,26 @@
    "importance": 5
   },
   {
+   "code": "6949",
+   "name": "沛爾生醫*-創",
+   "date": "2026-10-25",
+   "type": "其他",
+   "title": "公告本公司股票面額由「新台幣10元」變更為「新台幣0.5元」， 公告期間：115年08月06日至115年11月05日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "6279",
+   "name": "胡連",
+   "date": "2026-10-24",
+   "type": "併購",
+   "title": "本公司公告通過義大利子公司Hu Lane Associate Europe S.r.l., 取得LA PUNTA S.R.L.80%股權之收購案",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 9
+  },
+  {
    "code": "2072",
    "name": "世紀能源",
    "date": "2026-10-24",
@@ -186,16 +206,6 @@
    "source": "TWSE 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01",
    "importance": 5
-  },
-  {
-   "code": "6279",
-   "name": "胡連",
-   "date": "2026-10-24",
-   "type": "併購",
-   "title": "本公司公告通過義大利子公司Hu Lane Associate Europe S.r.l., 取得LA PUNTA S.R.L.80%股權之收購案",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 9
   },
   {
    "code": "6931",
