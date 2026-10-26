@@ -1,31 +1,14 @@
 {
- "generated_at": "2026-10-25T21:10:58.597Z",
+ "generated_at": "2026-10-26T22:55:14.099Z",
  "url": "https://jlove1314520.github.io/alpha-app",
- "all_passed": false,
+ "all_passed": true,
  "crashed": false,
  "crash_error": null,
  "total": 179,
- "passed": 175,
- "failed": 4,
- "failures": [
-  {
-   "name": "131. by_code 小檔與整份檔一致性自測 0 不一致；標示不一致時個股頁退回整份檔並記 log（先.八十一-28）",
-   "detail": "一致性自測不通過：by_code 一致性：抽樣 64 檔，不一致 58 處；例：_meta.holders.meta 與整份檔不同（整份檔可能已更新、小檔未重產）；2330：holders.stocks 不一致；0050：holders.stocks 不一致"
-  },
-  {
-   "name": "132. 整份事件改讀精簡版 events_search.json（筆數相同、搜尋結果不少），讀不到退回整份（先.八十一-30）",
-   "detail": "頂層 fetched_at 不同; [精簡版壞掉] 頂層 fetched_at 不同"
-  },
-  {
-   "name": "142. 事件精簡版與整份檔同一班（fetched_at 一致）；不同班時 App 退回整份並標示（先.八十一-56）",
-   "detail": "同一班時應讀精簡版，實際 full"
-  },
-  {
-   "name": "146. 減少動態效果：手機設定開啟時淡入／閃色／分頁過場／骨架／長條／開關動畫時間為 0，閃色仍會自動移除（先.九十四-5e）",
-   "detail": "0 秒動畫下 animationend 沒觸發，閃色 class 沒被移除"
-  }
- ],
+ "passed": 179,
+ "failed": 0,
+ "failures": [],
  "global_errors_final": [],
- "run_url": "https://github.com/jlove1314520/alpha-app/actions/runs/40233787864",
- "commit": "cd84147e2"
+ "run_url": "https://github.com/jlove1314520/alpha-app/actions/runs/40415358183",
+ "commit": "cc2bdc19d"
 }
