@@ -1,3 +1,26 @@
+## 2026-10-27 07:01～07:4x DevQueue 20261027-070102（研究帽）：先.一三五-3／-4／-5 三項完成
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3 列）：①先.一三二-0b／先.一三五-2 模擬 I 排程註冊（總司令執行一次 `register-paper9-task-interactive.ps1`，自 06:5x）；②先.一三五-4 網格區間市版＋ML 產業輪動前向草稿（建議照稿，24 小時預設放行，自 07:2x）；③先.一三五-5 模擬 M 前向草稿（建議甲照稿，24 小時預設放行，自 07:2x）。
+- 本輪戴研究帽（產物：PREREG 修訂 3、三份前向 PREREG 草稿、factors.py 因子修正）。做與判分離：沒有任何試驗判定。
+
+### 先.一三五-3（收件匣 024 ①～④）✅（commit 6a8ec15763＋本段收尾 commit）
+- **①** 墓園殖利率類 4 處（#74/#75/#371/#376、隨機控制組上限推論那條、#399、#400）與 B2a 稽核文件加 ⚠️ 註：「兩個偏誤方向相反、淨方向不確定，FAIL 維持，不重驗」；舊文字保留；不計 N。
+- **②** `research/estimate_surplus_bias_flip.py`（零請求、不重跑）→ `research/data/surplus_bias_flip_estimate.json`：受影響 FinMind 路徑 332 檔，每檔每年公積漏算平均 0.64%（中位 0.42%）；100 檔樣本 17% 受影響 → 估計偏誤約 0.15%/年，硬上限 0.86%/年。12 筆（#63、#67、#82、#86、#92、#94、#131、#310～#315）全部「偏誤不足以翻轉」（最小缺口：#86 2018 年 −2.91%、#314 約 2.4%/年），**沒有待重驗候選**。[自行裁量] 沒有逐期持股紀錄，用樣本宇宙占比代替持股占比、另給硬上限；顯著所需 alpha 由既有 p 值以 t≈1.96 反推。
+- **④** `research/factors.py` 殖利率分子＝盈餘配息＋資本公積配息。新自測 `research/selftest_dividend_yield_surplus.py` 全過（只配公積年度算進、同列相加、無欄位＝0、2331 2012-08-15＝2.47）；既有 `selftest_dividend_yield_fix.py` 照過。2015 後影響清單 `research/data/factor_dividend_yield_surplus_impact.json`：474 檔／1,325 個 pit_date 變動（303 個舊算法無值），相對變動中位 +40.9%。
+- **③** PREREG 修訂 3 先 commit（記舊雜湊 47b8cca9…、未評估）→ FinMind 路徑有變動的 332 檔面板整檔重算（舊檔搬 `research/data/paper_8_train_panel_rev2_backup/`）→ 舊模型改名 `*.rev2_superseded.*` 保留 → `train` 一次：**新 sha256 0bcc7cee0a3699145a05f142c09564d27f798ed20d0e70523291d7e9cde46fe0**（64,606 列、11 特徵全用），已寫回修訂 3；`scripts/selftest_paper_8_features.py` 全部一致。變動列：價格類特徵約 960～975、標籤 355（接近原估上限 1,037）。重訓後沒做任何預測評估、沒看報酬，不計 N。[自行裁量] 不只重算 173 檔「受影響列>0」，而是 FinMind 路徑有變動的全部 332 檔（還原係數往前影響價格水準）。面板第一次背景執行被工具時限停掉（完成 2667／2721），續跑補齊 54 檔，2,721 檔全部可解析。
+
+### 先.一三五-5 模擬 M 前向草稿 ✅（commit c04b4b2ce0）
+- `docs/PREREG_DRAFT_PAPER_M_ML_LOW_BETA.md`：寫死甲＝模擬 H 模型前 60 名中 60 日 beta 最低 30 檔、100% 投入；乙（按 beta 調權重留現金）屬曝險縮放家族②不採 [自行裁量]。參數 4 個、2027-01-04 起跑、判定 2029-01，附 3 個變形方向。未登記、未算報酬。
+
+### 先.一三五-4 網格區間市版／ML 產業輪動前向草稿 ✅（commit 343f6f7395）
+- `docs/PREREG_DRAFT_STOCK_GRID_V2_RANGE_FORWARD.md`（日頻網格＋區間濾網，[自行裁量] 參數 9→5：ATR 窗／濾網回看／冷卻共用 N＝20）；`docs/PREREG_DRAFT_ML_INDUSTRY_ROTATION_FORWARD.md`（自建上市產業指數、8 個前向可得特徵、模型訓練一次凍結、70／30，參數 4 個）。兩份 2027-01-04 起跑；歷史版草稿保留不執行。未登記、未算報酬。
+
+### 收工
+- 權威清單已無可執行 `- [ ]`（`dev_queue_runner.py next` → NO_PENDING_ITEM）。
+- **佇列補件：本輪未補**——07:34 時剩約 12 分鐘、還要跑冒煙與 commit，來不及照補件規則逐條查來源；CLAUDE.md 零之二的空轉補件（連續 2 輪 QUEUE_EMPTY 自動做候選補件）會接手。照實記錄，不湊數。
+- 冒煙：每項 commit 前都跑 `node scripts/smoke_test.mjs`，4 次皆 179 PASS／0 FAIL（exit 0；最後一次 07:39）。
+- 沒 commit 的本機檔：`research/data/` 底下輸出（.gitignore，FinMind 衍生資料不進公開 repo）。
+
 ## 2026-10-27 06:31～06:4x DevQueue 20261027-063102：先.一三五-2 標阻塞（需總司令執行排程註冊），下一項為[研究]類，收工
 
 - 等待總司令審閱：1 件（`research/AWAITING_REVIEW.md`，本輪無增減）：先.一三二-0b／先.一三五-2 請總司令執行一次模擬 I 排程註冊（不需密碼，11/02 前，自 10-27 06:5x）。

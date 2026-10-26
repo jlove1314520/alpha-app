@@ -64,6 +64,7 @@
   1. 訓練面板裡「2015～2024 有公積還原變動、且走 FinMind 路徑」的股票，面板檔整檔用現行程式重算（`research/paper_8_ml_tracker.py build-panel`，離線、只讀本機快取、不碰 holdout）；[自行裁量] 不只重算 173 檔「受影響列 >0」的，而是 FinMind 路徑有變動的全部股票，因為還原係數會往前影響整段價格水準（成交值類特徵），上限估計只算了報酬窗口。舊面板檔先搬到 `research/data/paper_8_train_panel_rev2_backup/`，不刪。
   2. 舊模型改名留在 `research/paper_8_model/`（`model.rev2_superseded.joblib`、`features.rev2_superseded.json`），git 歷史也保留；再跑一次 `train`。
   3. 新模型雜湊寫回本節。
+- **執行結果（2026-10-27 07:3x，DevQueue 20261027-070102）**：332 檔面板整檔重算（離線、只讀本機快取，2,721 檔面板全部可解析）；332 檔列數不變 11,454 列，特徵或標籤有變動的列：f_low_vol 972、f_idio_vol 972、f_bab 973、f_rel_strength 975、f_ma_breakout 959、f_short_reversal_1m 365、f_short_term_reversal_1w 109、標籤用報酬 ret 355；f_amihud_illiq 與法人 3 個 0（面板失敗檔 2 個與重算前相同：3402 缺 PER 快取、6428 缺資產負債表快取）。重訓：64,606 列／1,515 檔／143 個月、11 個特徵全用、無低覆蓋排除；**新模型 `model.joblib` sha256 `0bcc7cee0a3699145a05f142c09564d27f798ed20d0e70523291d7e9cde46fe0`**（sklearn 1.9.0）。重訓後沒有做任何預測評估、沒看任何報酬；`scripts/selftest_paper_8_features.py` 全部一致。
 - **沒改什麼**：模型、預設參數、random_state、訓練期間、標籤定義、特徵子集（修訂 2 的 11 個）、覆蓋率規則、宇宙、組合、成本、判定全部不變。殖利率特徵不在子集內；面板裡殖利率欄重算時一併用 2026-10-27 補公積後的 `factors.py`（先.一三五-3④），不影響模型。
 - 這是事前修訂、不是新試驗，**不計 N**。之後到 2026-11-30 凍結日前不再重訓。
 

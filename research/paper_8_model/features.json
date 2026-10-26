@@ -1,12 +1,12 @@
 {
  "prereg": "docs/PREREG_paper_h_ml_forward.md",
  "trial_id": 459,
- "trained_at": "2026-10-22T07:55:27+08:00",
+ "trained_at": "2026-10-27T07:32:12+08:00",
  "model": "sklearn.ensemble.HistGradientBoostingRegressor（全部預設參數）",
  "random_state": 20261021,
  "sklearn_version": "1.9.0",
  "model_file": "model.joblib",
- "model_sha256": "47b8cca9707c9abbd77a57dbcc7c640244b80d9ce3f7ff967b8dab9542d25513",
+ "model_sha256": "0bcc7cee0a3699145a05f142c09564d27f798ed20d0e70523291d7e9cde46fe0",
  "train_months": [
   "2013-01",
   "2024-11"
@@ -43,7 +43,7 @@
   "f_gross_profitability": 0.8237,
   "f_asset_growth": 0.8067,
   "f_accruals": 0.7173,
-  "f_dividend_yield_ttm": 0.8069
+  "f_dividend_yield_ttm": 0.808
  },
  "features_used": [
   "f_low_vol",
@@ -77,6 +77,6 @@
   "f_accruals",
   "f_dividend_yield_ttm"
  ],
- "n_iter": 36,
+ "n_iter": 34,
  "frozen_note": "2026-11-30 前 commit；之後不得重訓或更換（PREREG）"
 }
