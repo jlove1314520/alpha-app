@@ -4,3 +4,4 @@
 {"ts": "2026-10-21T20:30:00+08:00", "date": "2026-10-21", "trading_day": true, "market_tw_data_date": "2026-10-21", "result": "正常", "reason": "market_tw 已落地（data_date=2026-10-21）"}
 {"ts": "2026-10-22T20:30:00+08:00", "date": "2026-10-22", "trading_day": true, "market_tw_data_date": "2026-10-22", "result": "正常", "reason": "market_tw 已落地（data_date=2026-10-22）"}
 {"ts": "2026-10-23T20:30:00+08:00", "date": "2026-10-23", "trading_day": true, "market_tw_data_date": "2026-10-22", "result": "告警", "reason": "今日台股資料未進來，三層備援都沒補到（market_tw data_date=2026-10-22，今天 2026-10-23）"}
+{"ts": "2026-10-26T20:30:00+08:00", "date": "2026-10-26", "trading_day": false, "market_tw_data_date": "2026-10-22", "result": "正常", "reason": "2026-10-26 非交易日"}
