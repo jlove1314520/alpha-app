@@ -1051,6 +1051,109 @@ def research_hat_block(crunch: bool) -> str:
 6. 研究帽不改 `index.html`；冒煙測試照樣要跑（全過才 commit）。"""
 
 
+# 2026-10-27 先.一三五-1（Cowork 收件匣 024）：DevQueue 10/24 07:28 起每輪 QUEUE_EMPTY 空轉約 70 小時——剩下的都在等 Cowork 審，
+# 而 Cowork 只在總司令說「讀」時才審。兩個補救，都只在「沒有可執行的 - [ ]」時才啟動：
+# (a) 24 小時預設放行：AWAITING 等 Cowork 審的草稿／提案超過 24 小時沒裁示 → 照草稿自己標的「建議選項」執行，標 [預設放行]，
+#     Cowork 事後可推翻（照 PREREG 修訂規則處理）。不適用（仍要等）：解鎖或擴大 holdout、真錢、刪除／不可逆、需要密碼或本人登入、
+#     新增付費資料、改既有關卡門檻（下面 DEFAULT_RELEASE_EXCLUDE 關鍵字；寧可多擋）。
+# (b) QUEUE_EMPTY／GATED 連續 2 輪 → 這一輪做「候選補件」（只限台股個股層級、優先前向版，照 先.一三二-1 格式），不准空轉超過 1 小時。
+AWAIT_FILE = ROOT / "research" / "AWAITING_REVIEW.md"
+DEFAULT_RELEASE_HOURS = 24
+DEFAULT_RELEASE_EXCLUDE = re.compile(
+    r"holdout|保留資料|真錢|實盤|下單|刪除|清除|drop|不可逆|密碼|登入|本人|親手|請總司令|付費|採購|門檻|GATE\d|非阻塞")
+_AWAIT_TIME = re.compile(r"(20\d\d-\d\d-\d\d) (\d\d):(\d|x)(\d|x)")
+
+
+def _default_release_candidates(now: datetime | None = None, text: str | None = None) -> list[tuple[str, float]]:
+    """AWAITING「等待中」表格裡等超過 24 小時、且不碰排除類別的列 → [(項目欄, 已等小時)]。自身失敗回 []（十二節）。"""
+    try:
+        now = now or datetime.now(TZ)
+        text = AWAIT_FILE.read_text(encoding="utf-8") if text is None else text
+        sec = text.split("## 等待中", 1)[1].split("\n## ", 1)[0]
+        out = []
+        for ln in sec.splitlines():
+            if not ln.startswith("| ") or ln.startswith("| 項目") or ln.startswith("|---"):
+                continue
+            cells = [c.strip() for c in ln.strip("|").split("|")]
+            m = _AWAIT_TIME.search(cells[1] if len(cells) > 1 else "")
+            if not m:
+                continue
+            mm = (m.group(3) if m.group(3) != "x" else "0") + (m.group(4) if m.group(4) != "x" else "0")
+            t = datetime.strptime(f"{m.group(1)} {m.group(2)}:{mm}", "%Y-%m-%d %H:%M").replace(tzinfo=TZ)
+            age = (now - t).total_seconds() / 3600
+            if age >= DEFAULT_RELEASE_HOURS and not DEFAULT_RELEASE_EXCLUDE.search(ln):
+                out.append((cells[0], round(age, 1)))
+        return out
+    except Exception as e:  # noqa: BLE001
+        _safe_print(f"WARN_DETECTOR_CRASHED: default_release_candidates failed ({type(e).__name__})")
+        return []
+
+
+def _consecutive_idle_rounds(log_text: str | None = None) -> int:
+    """dev_queue_cycle.log 最近連續幾輪是 QUEUE_EMPTY／GATED（YIELD 讓路的輪不算、也不打斷）。自身失敗回 0。"""
+    try:
+        text = (ROOT / "research" / "dev_queue_cycle.log").read_text(encoding="utf-8", errors="replace") if log_text is None else log_text
+        reasons = re.findall(r"DevQueue cycle end: \S+ \S+ cycle_id=\S+ reason=(\S+)", text)
+        n = 0
+        for r in reversed(reasons):
+            if r in ("QUEUE_EMPTY", "GATED"):
+                n += 1
+            elif r == "YIELD":
+                continue
+            else:
+                break
+        return n
+    except Exception as e:  # noqa: BLE001
+        _safe_print(f"WARN_DETECTOR_CRASHED: consecutive_idle_rounds failed ({type(e).__name__})")
+        return 0
+
+
+def _idle_fallback_prompt() -> bool:
+    """沒有可執行項目時：先試 24 小時預設放行，再試連續 2 輪空轉的候選補件。寫了提示詞回 True（本輪照常跑），否則 False。"""
+    try:
+        # 防重複（趕工迴圈會連續呼叫 build_prompt）：同一項 24 小時內只試一次預設放行；候選補件每小時最多一次。
+        st = _load_state()
+        tried = st.get("_default_release_tried", {})
+        now_ts = time.time()
+        cands = [c for c in _default_release_candidates() if now_ts - float(tried.get(c[0], 0)) >= DEFAULT_RELEASE_HOURS * 3600]
+        if cands:
+            item, age = cands[0]
+            tried[item] = now_ts
+            st["_default_release_tried"] = {k: v for k, v in tried.items() if now_ts - float(v) < 7 * 86400}
+            _save_state(st)
+            PROMPT_OUT.write_text(f"""# DevQueue 本輪：24 小時預設放行（先.一三五-1，Cowork 收件匣 024）
+
+`research/AWAITING_REVIEW.md` 等待中的「{item}」已等 {age} 小時、沒有 Cowork 裁示，而且不屬於排除類別。
+照 `C:\\alpha\\alpha-app\\CLAUDE.md`「零之二、24 小時預設放行」執行：
+1. 讀 PENDING_QUEUE.md 對應條目與草稿／提案原文，找出**作者自己標的建議選項**（「建議」「推薦」「甲（建議）」之類）。
+   **找不到明確的建議選項就不要自己挑**：`python scripts/dev_queue_runner.py block "預設放行：草稿沒有標建議選項"`，收工。
+2. 再檢查一次：執行內容若涉及解鎖或擴大 holdout、真錢、刪除／不可逆、密碼或本人登入、新增付費資料、改既有關卡門檻 → 不做，同上 block。
+3. 照建議選項執行（PREREG 定稿＋register_trial、程式、文件……照該條目原本的流程），研究紀律照舊（不碰 holdout、照實計 N）。
+4. 條目與 PROGRESS 都標 **[預設放行]**，寫明「Cowork 可推翻，推翻時照 PREREG 修訂規則處理」；AWAITING 該列移到「已結案審閱紀錄」並註明 [預設放行]。
+5. 冒煙全過再 commit。
+""", encoding="utf-8", newline="\n")
+            _safe_print(f"DEFAULT_RELEASE：{item}（已等 {age} 小時）")
+            return True
+        idle = _consecutive_idle_rounds()
+        if idle >= 2 and now_ts - float(st.get("_last_replenish", 0)) >= 3600:
+            st["_last_replenish"] = now_ts
+            _save_state(st)
+            PROMPT_OUT.write_text(f"""# DevQueue 本輪：候選補件（先.一三五-1，Cowork 收件匣 024；已連續 {idle} 輪 QUEUE_EMPTY／GATED）
+
+佇列沒有可執行項目，不准再空轉。照 先.一三二-1 的格式補件：
+- **只限台股個股層級**（不要 ETF、不要高股息），**優先前向版**（與模擬 J／K／L 同框架、2027-01-04 起跑，參數 ≤5）；
+- 每條寫成 PENDING_QUEUE `- [ ]` 新條目（標「DevQueue 可執行」、附心跳位置與來源：墓園變形方向／LEADS／資料缺口等），至少 3 條；
+- 需要 Cowork 審的草稿送 AWAITING（24 小時後適用預設放行）；
+- 不碰 holdout、不算任何報酬、不登記試驗（登記等定稿）。
+冒煙全過再 commit。
+""", encoding="utf-8", newline="\n")
+            _safe_print(f"IDLE_REPLENISH：連續 {idle} 輪空轉 → 候選補件")
+            return True
+    except Exception as e:  # noqa: BLE001 — 十二節：只降級
+        _safe_print(f"WARN_DETECTOR_CRASHED: idle_fallback failed ({type(e).__name__})")
+    return False
+
+
 def build_prompt() -> int:
     # 2026-09-19（總司令裁示【最優先·三個都是總司令自己造成的故障】一.2）：
     # 這整段矛盾偵測（含2026-09-18加的ORDER-BEGIN檢查）包一層try/except——
@@ -1091,7 +1194,7 @@ def build_prompt() -> int:
             _safe_print("NO_PENDING_ITEM_FOR_DEVQUEUE：剩餘待辦皆為「（互動視窗執行」類"
                          + ("" if RESEARCH_MERGED_INTO_DEVQUEUE else "或[研究]類（留給marathon／hypothesis_queue軌）")
                          + "，留給互動視窗session")
-            return 3
+            return 0 if _idle_fallback_prompt() else 3
         stale = False
         try:
             stale = _stale_status_markers_present()
@@ -1136,9 +1239,9 @@ def build_prompt() -> int:
             _safe_print(f"WARN_DETECTOR_CRASHED: gated check failed ({type(e).__name__})")
         if gated:
             _safe_print("NO_PENDING_ITEM_GATED：剩餘項目皆為時間閘或 BLOCKED，正常無為")
-            return 6
+            return 0 if _idle_fallback_prompt() else 6
         _safe_print("NO_PENDING_ITEM")
-        return 3
+        return 0 if _idle_fallback_prompt() else 3
     _clear_format_mismatch()
     _, text = nxt
     key = item_key(text)

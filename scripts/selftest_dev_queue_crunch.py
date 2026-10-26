@@ -18,6 +18,8 @@ sys.path.insert(0, str(ROOT / "scripts"))
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 import dev_queue_runner as R  # noqa: E402
+# 先.一三五-1：空轉補救（預設放行／候選補件）有自己的自測（selftest_dev_queue_idle_fallback.py）；這裡隔離，避免讀到真 log 的空轉輪數
+R._idle_fallback_prompt = lambda: False
 import dev_queue_crunch as C  # noqa: E402
 
 results = []

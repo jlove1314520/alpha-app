@@ -23,7 +23,7 @@
 
 | 項目 | 完成時間 | 等待審閱內容 | 等待時長 |
 |---|---|---|---|
-| 先.一三二-0b（非阻塞、方便時再做）把 AlphaPaper9 換成 Password 類型 | 2026-10-27 06:3x | 收件匣 024 ②：11/02 前先用 Interactive（只在登入時執行、不需密碼）註冊；總司令方便時執行 `powershell -ExecutionPolicy Bypass -File C:/alpha/register-paper9-task.ps1` 換成 Password 類型（腳本會偵測已存在，需先刪除舊排程或改用 -Force 版本，見先.一三五-2）。 | 非阻塞 |
+| 先.一三二-0b／先.一三五-2 請總司令執行一次模擬 I 排程註冊（11/02 前，不需密碼） | 2026-10-27 06:5x | CC 自己建立排程被自動權限擋下。請在 PowerShell 視窗執行 `powershell -ExecutionPolicy Bypass -File C:/alpha/register-paper9-task-interactive.ps1`（不需密碼；只在登入時執行、隱藏不閃窗；會自動試跑一次，結果在 research/data/paper_9_cycle.log）。之後方便時再換 Password 類型（非阻塞）。 | 自 06:5x 起 |
 
 ## 等前置條件（不需總司令動作，不計入等待中）
 
