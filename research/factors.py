@@ -514,16 +514,21 @@ def _dividend_yield_ttm_cash_from_df(div: pd.DataFrame) -> pd.DataFrame:
     季配取最新 4 季；完全相同的列（同除息日、同期間、同金額）只計一次。
     期間字串解析不了的合併期間（如「108年度及108年第4季」，全庫約 20 列）照舊
     計入，見 `_dividend_period_key()`。
+
+    2026-10-27 先.一三五-3④：現金股利＝盈餘配息＋資本公積配息（欄位不存在時當 0）。
     """
     if div.empty or "CashExDividendTradingDate" not in div.columns:
         return pd.DataFrame(columns=["pit_date", "ttm_cash_dividend"])
     period = div["year"] if "year" in div.columns else pd.Series("", index=div.index)
+    # 2026-10-27 先.一三五-3④（收件匣 024）：分子補資本公積配息（CashStatutorySurplus），
+    # 同 adjust.py 先.一三三-1d 的修法；原本只用盈餘配息，只配公積的那一年整筆被跳過。
+    surplus = div["CashStatutorySurplus"] if "CashStatutorySurplus" in div.columns else pd.Series(0.0, index=div.index)
     events = pd.DataFrame({"ex_date": div["CashExDividendTradingDate"],
-                           "cash": div["CashEarningsDistribution"],
+                           "cash": pd.to_numeric(div["CashEarningsDistribution"], errors="coerce").fillna(0.0)
+                                   + pd.to_numeric(surplus, errors="coerce").fillna(0.0),
                            "period": period.astype(str)})
     events["ex_date"] = events["ex_date"].replace("", np.nan)
     events = events.dropna(subset=["ex_date"])
-    events["cash"] = pd.to_numeric(events["cash"], errors="coerce").fillna(0.0)
     events = events[events["cash"] > 0]
     events = events.drop_duplicates(subset=["ex_date", "period", "cash"])
     events = events.sort_values("ex_date").reset_index(drop=True)

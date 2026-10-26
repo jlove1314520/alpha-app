@@ -56,6 +56,17 @@
 - 備選（暫不做）：全指標版 H2。
 - 這是事前修訂、不是新試驗，**不計 N**。
 
+### 修訂 3（2026-10-27，先.一三五-3③，Cowork 收件匣 024 裁示「12/01 前用修正後面板重訓一次」）
+
+- **模型從未評估、未觀察任何結果**：修訂 2 之後訓練出的模型（`model.joblib` sha256 `47b8cca9707c9abbd77a57dbcc7c640244b80d9ce3f7ff967b8dab9542d25513`，2026-10-22 07:55）沒有拿去做任何預測評估、回測或報酬計算；前向追蹤 12/01 才開始，帳本沒有任何建倉。
+- **為什麼重訓**：2026-10-23 先.一三三-1d 修正 `research/adjust.py`——FinMind 股利公式原本漏資本公積配息／配股，FinMind 路徑股票 2015 以後的還原價少算除息跌幅。訓練面板（特徵與標籤都用還原價）受影響列數上限 1,037／64,606（1.61%，`research/data/adjust_surplus_fix_impact.json`）。這是修正已知資料缺陷，不是看結果改模型。
+- **怎麼做**（本修訂 commit **之後**才執行）：
+  1. 訓練面板裡「2015～2024 有公積還原變動、且走 FinMind 路徑」的股票，面板檔整檔用現行程式重算（`research/paper_8_ml_tracker.py build-panel`，離線、只讀本機快取、不碰 holdout）；[自行裁量] 不只重算 173 檔「受影響列 >0」的，而是 FinMind 路徑有變動的全部股票，因為還原係數會往前影響整段價格水準（成交值類特徵），上限估計只算了報酬窗口。舊面板檔先搬到 `research/data/paper_8_train_panel_rev2_backup/`，不刪。
+  2. 舊模型改名留在 `research/paper_8_model/`（`model.rev2_superseded.joblib`、`features.rev2_superseded.json`），git 歷史也保留；再跑一次 `train`。
+  3. 新模型雜湊寫回本節。
+- **沒改什麼**：模型、預設參數、random_state、訓練期間、標籤定義、特徵子集（修訂 2 的 11 個）、覆蓋率規則、宇宙、組合、成本、判定全部不變。殖利率特徵不在子集內；面板裡殖利率欄重算時一併用 2026-10-27 補公積後的 `factors.py`（先.一三五-3④），不影響模型。
+- 這是事前修訂、不是新試驗，**不計 N**。之後到 2026-11-30 凍結日前不再重訓。
+
 ## 輸出與排程（待建，2026-11-30 前完成）
 
 - 程式 `research/paper_8_ml_tracker.py`（訓練＋凍結模型＋每月預測與帳本）；帳本 `research/data/paper_8_log.jsonl`（append-only）；App 摘要 `data/paper_8.json`。
