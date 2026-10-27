@@ -526,3 +526,16 @@ CLAUDE.md 既有規則：**原始交易所資料不得對外轉售，衍生訊�
 | 3 | 其他供應商：Stooq | 本專案 `docs/US_PRICE_SOURCES.md`：需免費 key 且要人工過 CAPTCHA（待決）；且同屬現存代號資料，不保證含下市股 | 未取得 |
 
 結論：**免費可得的日股原生長歷史不含下市股**；用 yfinance 現存股做會系統性高估低波組合在危機期的表現（危機中倒掉的股票被排除，偏誤方向正好有利於假說），不採用。判「不可行」，變形方向見 `research/STRATEGY_GRAVEYARD.md` 同名條目。
+
+## 🟡 停資停券預告表：只能前向累積（先.一三五-1i，2026-10-28 DevQueue 20261028-023102 查證）
+
+用途：候選 N9「融券停券前強制回補」的停券日期（`research/FORWARD_CANDIDATES.md`）。探測程式 `research/probe_margin_suspension_preannounce.py`，原始回應存 `research/data/raw/margin_suspension_probe/`（不重抓）。
+
+| 來源類別 | 查了什麼 | 看到什麼 |
+|---|---|---|
+| ① 官方網站 | `www.twse.com.tw/rwd/zh/marginTrading/BFI84U?startDate&endDate&response=json`（「得為融資融券有價證券停券預告表」） | 200，欄位 股票代號／股票名稱／停券起日(最後回補日)／停券迄日／原因，19 列；**帶 2026-10 與 2013-06 兩個區間回傳逐位元組相同** → 忽略日期參數、只有當下預告。官方附註：「自發行公司停止過戶前六個營業日起，停止融券賣出四日；已融券者，應於停止過戶第六個營業日前，還券了結」 |
+| ② 官方 API | TWSE `openapi.twse.com.tw/v1/exchangeReport/BFI84U`（Code／Name／StartDate／EndDate／Reason，20 筆）；TPEx `www.tpex.org.tw/openapi/v1/tpex_margin_trading_term`（Date／SecuritiesCompanyCode／CompanyName／ShortSaleSuspensionStartDate／ShortSaleSuspensionEndDate／Reason，13 筆，Date 只有當日，Reason 本次全空白） | 都無日期參數，只有當下快照（TWSE openapi 2026-09-07 #51 查證已實測帶 date 參數回同一批）；`openapi.twse.com.tw/robots.txt` 404（不存在） |
+| ③ GitHub／社群 | 網頁搜尋「BFI84U 停券預告表 歷史資料 github」 | 沒有找到任何人累積的歷史檔 |
+| ④ 其他供應商 | FinMind `TaiwanStockMarginShortSaleSuspension` | 付費層（免費層 HTTP 400，2026-09-07 #51 查證），依鐵律標「待採購」，不繞爬 |
+
+**結論**：沒有可查歷史的免費來源 → N9 只能**前向累積**（每日存一份快照）。推導路徑：停券＝停止過戶日前 6 個營業日起 4 日（上表官方附註），除權息停券可由既有除權息事件推回；**股東會停券需要停止過戶日，來源是 MOPS（robots 全站 Disallow），推導不出來**。本次請求：TWSE openapi 2 次（含 robots）、TWSE rwd 2 次、TPEx openapi 1 次，共用 `rate_limit_state`（同源 ≥3 秒）。累積排程未掛，提案見 `PENDING_QUEUE.md` 先.一三五-1i-a。
