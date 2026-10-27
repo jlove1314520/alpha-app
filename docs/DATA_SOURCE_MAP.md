@@ -539,3 +539,16 @@ CLAUDE.md 既有規則：**原始交易所資料不得對外轉售，衍生訊�
 | ④ 其他供應商 | FinMind `TaiwanStockMarginShortSaleSuspension` | 付費層（免費層 HTTP 400，2026-09-07 #51 查證），依鐵律標「待採購」，不繞爬 |
 
 **結論**：沒有可查歷史的免費來源 → N9 只能**前向累積**（每日存一份快照）。推導路徑：停券＝停止過戶日前 6 個營業日起 4 日（上表官方附註），除權息停券可由既有除權息事件推回；**股東會停券需要停止過戶日，來源是 MOPS（robots 全站 Disallow），推導不出來**。本次請求：TWSE openapi 2 次（含 robots）、TWSE rwd 2 次、TPEx openapi 1 次，共用 `rate_limit_state`（同源 ≥3 秒）。累積排程未掛，提案見 `PENDING_QUEUE.md` 先.一三五-1i-a。
+
+## 🟢🟡 鉅額交易日成交資訊：上市可查歷史、上櫃逐筆只有當日（先.一三五-1l，2026-10-28 DevQueue 20261028-043102 查證）
+
+用途：候選 N10「折價鉅額交易後承接」（`research/FORWARD_CANDIDATES.md`）。探測程式 `research/probe_block_trade.py`，原始回應存 `research/data/raw/block_trade_probe/`（不重抓）。
+
+| 來源類別 | 查了什麼 | 看到什麼 |
+|---|---|---|
+| ① 官方網站 | TWSE `www.twse.com.tw/rwd/zh/block/BFIAUU?date=YYYYMMDD&response=json`（既有 `research/twse_block_trade_client.py`，2015～2024-03 已快取 2,400 天）；本次帶 2005-01-03 探起點 | 欄位 證券代號／證券名稱／交易別／成交價／成交股數／成交金額（逐筆）；帶 2005-01-03 回 `stat`「查詢日期小於094年04月04日，請重新查詢!」→ **歷史起點 2005-04-04**、可逐日查歷史 |
+| ② 官方 API | TPEx swagger（`www.tpex.org.tw/openapi/swagger.json`，本機快取 `research/data/raw/tpex_exright_probe/swagger.bin`）列 6 支鉅額端點，皆**無參數**。實打 `tpex_daily_qutoes_block`：17 筆、只有當日（1151027），欄位 Date／TransactionType／SettlementPeriod／Code／Name／TradePrice／NumberOfSharesTraded／TradeValue／TradingTime（逐筆）；`tpex_daily_trade_block_day`（「鉅額交易歷史成交資訊」）：1,434 列＝**今年 1/2～10/27 共 187 個交易日**的每檔每日彙總（最高／最低／加權平均價、筆數、交易別 逐筆交易／配對交易），**只有 Name 沒有代號** | 上櫃逐筆成交價只有當日；年內彙總可回補今年，跨年要靠每日累積 |
+| ③ 開放資料目錄 | data.gov.tw／國網中心 SciDM 鏡像目錄的 TPEx 鉅額資料集條目（網頁搜尋「tpex.org.tw 鉅額交易 日成交資訊」） | 欄位描述與 ② 一致，參考文件指回 TPEx OAS／swagger，沒有其他歷史下載點 |
+| ④ 其他供應商 | Apify actor `chamarix/taiwan-block-trades`（商業爬蟲，非官方） | 反推資料公開存在；**不採用**（二手爬取，鐵律只走官方） |
+
+**結論**：上市 → **可查歷史（2005-04-04 起）**；上櫃 → 逐筆**只能前向累積**（今年的每日彙總可一次補）。三個官方來源**都沒有買賣方身分、也沒有前一日收盤**，N10 的「折價」要另用官方日行情前收自算；「換交易對手」方向查不到身分，只能測混合樣本。TWSE robots.txt（2026-10-14 查）只禁 /epaper/、/FTSE/；TPEx robots.txt 不存在（轉址錯誤頁）。本次請求：TWSE rwd 1 次（`twse_rwd`）、TPEx openapi 2 次（`tpex_openapi`），共用 `rate_limit_state`（同源 ≥3 秒），全 200。上櫃累積排程未掛（屬提案）。
