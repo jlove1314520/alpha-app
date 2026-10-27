@@ -24,6 +24,9 @@
 | 項目 | 完成時間 | 等待審閱內容 | 等待時長 |
 |---|---|---|---|
 | 先.一三五-1i-a 停資停券預告表每日累積排程提案 | 2026-10-28 02:55 | 核准與否：併進 market.yml 17:13 班、每日 +2 次請求（TWSE BFI84U＋TPEx），寫 data/margin_suspension_daily/；不核准則候選 N9 股東會版擱置 | 剛送出 |
+| 先.一三五-1k-a 前向模擬看守員掛排程提案 | 2026-10-28 04:45 | 核准與否：market.yml paper_* 追蹤步驟後加 `python research/forward_sim_watch.py`（零請求）、data/forward_sim_watch.json 進 git add 清單、pipeline_registry 加列 | 剛開始等
+| 先.一三五-1l-a 上櫃鉅額逐筆每日累積提案 | 2026-10-28 04:50 | 核准與否：每日 +1 次 tpex_openapi 請求累積 tpex_daily_qutoes_block；建議等 Cowork 決定 N10 是否挑入再掛 | 剛開始等
+| 先.一三五-1m-a 上櫃保留官方次日漲跌停價提案 | 2026-10-28 04:56 | 甲（price_history 加兩欄）或乙（另存 data/tpex_limit_next.json＋本機累積，建議乙）；改既有管線 | 剛開始等
 
 ## 等前置條件（不需總司令動作，不計入等待中）
 

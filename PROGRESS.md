@@ -1,3 +1,18 @@
+## 2026-10-28 04:31～05:10 DevQueue 20261028-043102（維運帽）：先.一三五-1k／1l／1m／1n／1o 五項完成
+
+- **等待總司令審閱：4 件**（`research/AWAITING_REVIEW.md` 等待中表格 4 列）——①先.一三五-1i-a 停資停券預告表每日累積排程提案（02:55 送出，約 2 小時）；②先.一三五-1k-a 前向模擬看守員掛 market.yml＋pipeline_registry 提案（04:45，剛開始等）；③先.一三五-1l-a 上櫃鉅額逐筆每日累積提案（04:50，建議等 Cowork 決定 N10 再掛）；④先.一三五-1m-a 上櫃保留官方次日漲跌停價提案（04:56，甲／乙，建議乙）。
+- **做了什麼**：
+  1. **先.一三五-1k 前向模擬看守員**（commit 1bd731471e）：新增 `research/forward_sim_watch.py`，只讀 paper_5～18 的 generated_at／started／start_not_before（缺時退回 start）／last_error，不讀淨值與報酬、零請求；判 STALE／NOT_STARTED_LATE／ERROR／MISSING／UNREADABLE，休市日讀 trading_calendar；自身例外 fail open、exit 0。正式跑 14 檔全 OK（**目前沒有任何一支停更**，不開 bug 條目）。
+  2. **先.一三五-1l 鉅額交易端點查證**（commit 96ec43bdbc）：上市 TWSE rwd BFIAUU 可逐日查歷史、**起點 2005-04-04**；上櫃 TPEx openapi 逐筆只有當日、`tpex_daily_trade_block_day` 只有今年每日彙總且無代號；三者都無買賣方身分與前收。三來源＝TPEx swagger、data.gov.tw／國網中心目錄、Apify 第三方（只反推存在、不採用）。`research/probe_block_trade.py` 3 次請求全 200。寫入 `docs/DATA_SOURCE_MAP.md`、`C:\alpha\CLAUDE.md` 頻率清單、FORWARD_CANDIDATES N10。
+  3. **先.一三五-1m N7 前向版漲跌停價**（commit 144284e89c，零請求）：上櫃 `tpex_mainboard_quotes` 有 `NextLimitUp／NextLimitDown`，但 `update_price_history.py::fetch_tpex()` 只存 8 欄、丟掉；上市 STOCK_DAY_ALL 沒有，需自算。同 commit 修本輪自己寫的三條提案標記（`**…** [維運]（互動視窗` 認不到 `INLINE_INTERACTIVE_TAG`，會被 DevQueue 誤取件），並收工補件 3 條（1n～1p）。
+  4. **先.一三五-1n 起跑判定逐支核對**（commit 58d3a3ef92，零請求）：只有 paper_12（權證快照連續 10 日閘門、起跑順延）會誤報；看守員加閘門處理，自測 19 → 22 項全過。
+  5. **先.一三五-1o paper_9／12 早一班**（commit 75702aa4c8）：本機排程一天一次（AlphaPaper9 18:30、AlphaWarrantSnapshot 17:30），設計如此；看守員檔頭註明。
+- **[自行裁量]**：①看守員正式輸出 `data/forward_sim_watch.json` 未掛排程前不 commit（避免變成過期快照被誤讀）；②「已過 1 個交易日」解讀為起跑日當天整天已過；③1l 只探 TWSE 更早起點 1 次、TPEx www 歷史頁三來源都找不到就不猜網址硬打；④paper_12 閘門達成日當天不算晚。
+- **帽子產物**：維運帽 → `data/STATUS.json` 本輪無更動——沒有新增或改動 App 資料源／面板（看守員未掛排程、只做查證與文件）。
+- **BLOCKED**：無新增。
+- **冒煙**：五次 `node scripts/smoke_test.mjs`（每項各一次）皆 EXIT=0、179 項 PASS、0 FAIL（本輪改用完整輸出存檔後計數，不再只看末段）。
+- **佇列深度**：`- [ ]` 約 25 項（≥12）；DevQueue 可執行剩 1 項（先.一三五-1p 上市漲跌幅官方條文核對，需對外查證、本輪時間不夠留下一輪），<6。補件來源 ①BACKLOG ②UX_REDESIGN_PROPOSAL ③先.八十全檢節 ④DATA_GAP_PLAN 甲類已用盡；本輪只能從自己的查證結果衍生出 3 條（1n～1p），**來源已用盡**。
+
 ## 2026-10-28 04:01～ DevQueue 20261028-040102（研究帽）：先.一三五-1 空轉補件第二批（前向上限已滿 → 只寫候選＋補其他類）
 
 - **等待總司令審閱：1 件**——先.一三五-1i-a 停資停券預告表每日累積排程提案（02:55 送出，約 1 小時）。
