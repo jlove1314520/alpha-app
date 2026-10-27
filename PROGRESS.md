@@ -1,3 +1,13 @@
+## 2026-10-28 07:01～07:10 DevQueue 20261028-070102（維運帽）：先.一三五-1 空轉補件第三批（前向上限 14／13 已滿 → 不新增候選，改補資料缺口條目）
+
+- 等待審閱：5 件（停資停券累積、看守員掛排程、上櫃鉅額累積、上櫃次日漲跌停價、前向上限計法）。
+- 做了什麼：PENDING_QUEUE 新增 3 條 `- [ ]`（DevQueue 可執行、零請求）：先.一三五-1q（N12 可轉債轉換價重設公告來源，先數本機重大訊息歸檔標題）、1r（N11 現金減資事件率，只數事件）、1s（N8 SOX 日線與半導體業名單本機可得性）。
+- 修帳：`research/AWAITING_REVIEW.md` 標題寫「目前：1件」但表格有 4 列 → 改 5 件，並補列 `FORWARD_CANDIDATES.md` 頂端早就寫著「14／13 待 Cowork 確認計法」卻沒進等待表的那件（附甲乙丙，建議甲＝F-翼併入 F 計算）。
+- [自行裁量]：上限滿時依零之二⑤ 不寫 PREREG、不送候選 AWAITING；前置條目都限定零請求、不讀價格，避免碰到需要另外核准的抓取。
+- 沒做：不讀價格、不算報酬、不登記試驗、不碰 holdout。
+- 冒煙測試：node scripts/smoke_test.mjs exit 0，全部 [x]、0 失敗。
+- 影響檔案：PENDING_QUEUE.md、research/AWAITING_REVIEW.md、research/FORWARD_CANDIDATES.md、research/PROGRESS_HEARTBEAT.jsonl、PROGRESS.md。
+
 ## 2026-10-28 04:31～05:10 DevQueue 20261028-043102（維運帽）：先.一三五-1k／1l／1m／1n／1o 五項完成
 
 - **等待總司令審閱：4 件**（`research/AWAITING_REVIEW.md` 等待中表格 4 列）——①先.一三五-1i-a 停資停券預告表每日累積排程提案（02:55 送出，約 2 小時）；②先.一三五-1k-a 前向模擬看守員掛 market.yml＋pipeline_registry 提案（04:45，剛開始等）；③先.一三五-1l-a 上櫃鉅額逐筆每日累積提案（04:50，建議等 Cowork 決定 N10 再掛）；④先.一三五-1m-a 上櫃保留官方次日漲跌停價提案（04:56，甲／乙，建議乙）。

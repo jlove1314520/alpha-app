@@ -1126,3 +1126,4 @@
 {"ts": "2026-10-28T04:53:00+08:00", "item": "先.一三五-1m", "summary": "零請求查證：上櫃 tpex_mainboard_quotes 有 NextLimitUp/Down 但 fetch_tpex 丟掉；上市 STOCK_DAY_ALL 無、需自算；寫 FORWARD_CANDIDATES N7；保留欄位提案 先.一三五-1m-a", "status": "DONE", "cycle_id": "20261028-043102"}
 {"ts": "2026-10-28T04:58:00+08:00", "item": "先.一三五-1n", "summary": "逐支核對 paper_5～18 started 翻轉時機：只有 paper_12 閘門順延會誤報，forward_sim_watch 加閘門處理，selftest 22 過 0 失敗", "status": "DONE", "cycle_id": "20261028-043102"}
 {"ts": "2026-10-28T05:04:00+08:00", "item": "先.一三五-1o", "summary": "paper_9／12 generated_at 早一班＝本機排程一天一次（AlphaPaper9 18:30、AlphaWarrantSnapshot 17:30），設計如此；看守員檔頭註明", "status": "DONE", "cycle_id": "20261028-043102"}
+{"ts": "2026-10-28T07:10:00+08:00", "item": "先.一三五-1", "summary": "空轉補件第三批：上限 14/13 已滿不新增候選，補 N8/N11/N12 資料前置 3 條（1q/1r/1s）；AWAITING 計數 1→5 並補列上限計法", "status": "DONE", "cycle_id": "20261028-070102"}
