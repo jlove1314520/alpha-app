@@ -1,3 +1,20 @@
+## 2026-10-27 23:xx 互動視窗：收件匣 026（DevQueue「WARN 後無聲停止」）——完成
+
+- **等待總司令審閱：0 件**
+- **先把 025 收尾**（先.一三七-1）：冒煙全過 → commit；register_trial #484～#489、trials_index 重建、selection_bias_ledger 重跑（N 全體 459）；025 .done＋推播。
+  DevQueue 自己補的 先.一三六-B7b「補做 6 筆登記」已標 `- [x]` 結案，避免重登。`dev_queue_runner.py` 入庫版本本來就是 LF（git 正規化），工作樹也改回 LF。
+- **根因照實**：15:31～21:31 那幾輪不是 WARN 之後當掉。`check_collision` 那一行前面是一長串 WARN（殘留檔照常執行），**最後一句其實都是 YIELD**
+  （互動視窗做 025 時 CLAUDE.md、dev_queue_runner.py 20 分鐘內被動過＝讓路，這個行為是對的）；問題在讓路這條出口直接 exit、不寫 cycle end，log 上跟「程式死掉」分不出來。
+- **修法**（先.一三七-2）：`C:/alpha/run-dev-queue-cycle.ps1`（不在 repo，備份 `run-dev-queue-cycle.ps1.bak_20261027_026`）每條出口都寫 cycle end：
+  YIELD／CRUNCH_GATE／USAGE_GATE／LOCK_BUSY 記 exit=0（正常略過，不算錯誤輪）；check_collision 看不懂的回傳碼 → `reason=UNHANDLED_<碼>`、不往下跑；
+  PowerShell 例外由 trap 補一行 `UNHANDLED_PS_EXCEPTION`。`dev_queue_runner._consecutive_idle_rounds` 這四種原因不算也不打斷連續空轉計數。
+  新自測 `scripts/selftest_dev_queue_cycle_exits.py` 12/12：真的跑 wrapper（環境變數 `ALPHA_DQ_SELFTEST_ROOT` 指暫存假 repo＋立即結束的假 claude，正式排程不設），
+  含「WARN＋PROCEED 走完 lock→prompt→claude→finally→cycle end OK」、YIELD、UNHANDLED_7、鎖被占、用量閘門、佇列空。
+- **停住推播**（先.一三七-3）：`scripts/cc_push.py` 新增 `silent_cycles()`——最新一輪（正在跑）之前的 2 輪都「有 start、沒 end」→ 推 cc_stuck，附 cycle_id 和該輪 log 最後一行；長輪次重疊不誤報。
+  selftest_cc_push 12/12、selftest_cc_push_stuck 全過、selftest_dev_queue_idle_fallback 全過、selftest_dev_queue_guard 29/29。
+- 冒煙測試：`node scripts/smoke_test.mjs` 全過（exit 0）；本輪沒改 index.html／App 檔。
+- 下一步：明早看 dev_queue_cycle.log，讓路輪次應出現 `reason=YIELD` 的 cycle end。
+
 ## 2026-10-27 23:01～23:4x DevQueue 20261027-230102（研究帽）：先.一三六-B7 第 3 批——模擬 O 面板缺口補抓（未完）＋發現 B1～B6 的 6 筆登記漏做
 
 - **等待總司令審閱：0 件**（`research/AWAITING_REVIEW.md` 等待中 0 列）。

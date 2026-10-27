@@ -1090,7 +1090,8 @@ def _default_release_candidates(now: datetime | None = None, text: str | None = 
 
 
 def _consecutive_idle_rounds(log_text: str | None = None) -> int:
-    """dev_queue_cycle.log 最近連續幾輪是 QUEUE_EMPTY／GATED（YIELD 讓路的輪不算、也不打斷）。自身失敗回 0。"""
+    """dev_queue_cycle.log 最近連續幾輪是 QUEUE_EMPTY／GATED（YIELD 讓路的輪不算、也不打斷）。自身失敗回 0。
+    收件匣 026 起讓路／閘門／鎖被占也寫 cycle end（YIELD／CRUNCH_GATE／USAGE_GATE／LOCK_BUSY），同樣不算、不打斷。"""
     try:
         text = (ROOT / "research" / "dev_queue_cycle.log").read_text(encoding="utf-8", errors="replace") if log_text is None else log_text
         reasons = re.findall(r"DevQueue cycle end: \S+ \S+ cycle_id=\S+ reason=(\S+)", text)
@@ -1098,7 +1099,7 @@ def _consecutive_idle_rounds(log_text: str | None = None) -> int:
         for r in reversed(reasons):
             if r in ("QUEUE_EMPTY", "GATED"):
                 n += 1
-            elif r == "YIELD":
+            elif r in ("YIELD", "CRUNCH_GATE", "USAGE_GATE", "LOCK_BUSY"):
                 continue
             else:
                 break

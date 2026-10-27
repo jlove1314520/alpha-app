@@ -5,7 +5,8 @@
 - cc_done：PROGRESS_HEARTBEAT.jsonl 新增一行、且該條在 PENDING_QUEUE 已是 `- [x]` → 推「✅ 做完：<條目一句話>」，
   點開到 App 日誌頁（./#journal）。分批類（V1 補資料等）每批寫心跳但條目仍是 `- [ ]`，所以不會逐批推，整條打勾才推一次。
   DevQueue 自己補入的條目（標題含「自走補入」）不推。
-- cc_stuck：超過 3 小時沒有任何進度心跳（且佇列還有未完成項）、被用量閘門擋住、或 DevQueue 連 3 輪錯誤結束
+- cc_stuck：超過 3 小時沒有任何進度心跳（且佇列還有未完成項）、被用量閘門擋住、DevQueue 連 3 輪錯誤結束、
+  或 DevQueue 連 2 輪「有 cycle start、沒 cycle end」（收件匣 026：wrapper 每條出口都會寫 cycle end，沒寫＝中途死掉）
   → 推「⚠️ CC 停住：<原因>」；同一原因 6 小時內只推一次。
 - cc_daily：每天 22:00 後第一次 tick 推「今天做完 N 件、還剩 M 件、等你決定 K 件」。
 
@@ -192,6 +193,19 @@ def _queue_executable() -> bool:
     return bool(re.findall(r"^- \[ \] \*\*", _read(PQ), re.M))
 
 
+def silent_cycles(log_text: str, need: int = 2) -> list[tuple[str, str]]:
+    """收件匣 026：最近 need 輪（不含最新一輪＝正在跑、tick 就是它開頭呼叫的）都「有 cycle start、沒 cycle end」
+    → [(cycle_id, 該輪 log 最後一行)]；否則 []。end 行可能落在下一輪 start 之後（長輪次重疊），所以 end 全檔比對。"""
+    parts = re.split(r"^===== DevQueue cycle start: \S+ \S+ cycle_id=(\S+) =====\r?$", log_text, flags=re.M)
+    cycles = list(zip(parts[1::2], parts[2::2]))[:-1][-need:]
+    if len(cycles) < need:
+        return []
+    ended = set(re.findall(r"DevQueue cycle end: \S+ \S+ cycle_id=(\S+) ", log_text))
+    if any(cid in ended for cid, _ in cycles):
+        return []
+    return [(cid, ([ln.strip() for ln in body.splitlines() if ln.strip()] or ["（沒有任何後續紀錄）"])[-1]) for cid, body in cycles]
+
+
 def stuck_reasons(now: datetime) -> list[tuple[str, str]]:
     """[(原因鍵, 給人看的原因)]。"""
     out = []
@@ -205,6 +219,13 @@ def stuck_reasons(now: datetime) -> list[tuple[str, str]]:
     ends = re.findall(r"DevQueue cycle end: \S+ \S+ cycle_id=\S+ reason=(\S+) exit=(-?\d+)", _read(DQ_LOG))[-3:]
     if len(ends) == 3 and all(e[1] != "0" for e in ends):
         out.append(("dq_errors", f"DevQueue 連續 3 輪錯誤結束（最後一輪 {ends[-1][0]}）"))
+    try:
+        sil = silent_cycles(_read(DQ_LOG))
+        if sil:
+            out.append(("dq_silent", f"DevQueue 連 {len(sil)} 輪沒有結束紀錄（{'、'.join(c for c, _ in sil)}），"
+                                     f"最後停在：{sil[-1][1][:120]}"))
+    except Exception as e:  # noqa: BLE001
+        _warn(f"silent_cycles 失敗（{type(e).__name__}），本輪略過")
     last = _last_progress(now)
     open_items = len(re.findall(r"^- \[ \] \*\*", _read(PQ), re.M))
     if last and (now - last[0]).total_seconds() > STUCK_SEC:
