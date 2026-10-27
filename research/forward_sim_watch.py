@@ -12,6 +12,9 @@ M～R 2027-01-04，任何一支追蹤程式安靜停跑都只能等人肉眼發�
   起跑有前置閘門者（含 `snapshot_streak_need`，目前只有 paper_12）閘門未達成前不判②，達成後以 `streak_achieved_on` 起算。
   另：檔案不存在 → MISSING；不是合法 JSON／不是物件 → UNREADABLE；都沒事 → OK。
 輸出 `data/forward_sim_watch.json`。看守員自身任何例外 fail open：只印警告、exit 0（CLAUDE.md 十二節）。
+更新來源（先.一三五-1o 查證）：paper_9 走本機排程 AlphaPaper9（平日 18:30，`scripts/run_paper_9.py`）、
+paper_12 走本機排程 AlphaWarrantSnapshot（平日 17:30，`scripts/run_warrant_snapshot.ps1`），一天一次，
+generated_at 比其他支（雲端 market.yml 每日 3 班）早一班是設計如此；本機電腦沒開機連 3 個交易日就會被判 STALE。
 本程式零外部請求；尚未掛排程（掛 market.yml＋pipeline_registry 屬提案，待互動視窗核准）。
 
 用法：python research/forward_sim_watch.py             （正式，寫 data/forward_sim_watch.json）
