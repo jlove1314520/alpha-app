@@ -1,3 +1,22 @@
+## 2026-10-27 13:4x～14:xx 互動視窗：收件匣 025（前向草稿一次審完＋模擬 I 改掛既有排程）——部分完成
+
+- **等待總司令審閱：0 件**（`research/AWAITING_REVIEW.md` 等待中由 5 列降為 0：四列依 025 B 結案；模擬 I 排程那列由總司令 19:02 下令執行註冊後結案）。
+- **A 模擬 I 改掛既有排程 → 被權限擋，停下**：選 `C:/alpha/run-market-catchup-late.ps1`（AlphaMarketCatchupLate 平日 19:30，收盤資料第二層保險之後＝已落地；20:30 AlphaTwDataCheck 是排程直接跑 python、沒有 wrapper 檔可掛），
+  要在尾端加「local_git_commit.py pull → scripts/run_paper_9.ps1、try/catch 只寫警告」。寫檔被 Claude Code 自動權限擋（Unauthorized Persistence），照 025 原文停下、**未繞過**，wrapper 原封未動。
+  **19:02 結案**：總司令下令互動視窗執行 `register-paper9-task-interactive.ps1` → AlphaPaper9 已註冊（Interactive、平日 18:30、下次 10/28 18:30），試跑 exit 0、`NOT_STARTED`（起跑 11/02）。PENDING_QUEUE 先.一三六-A 改 `- [x]`、AWAITING 那列移入已結案。
+- **B 六份前向草稿定稿＋登記**（先.一三六-B1～B6）：`git mv` 成 FINAL 並加定稿節——
+  模擬 M `docs/PREREG_PAPER_M_ML_LOW_BETA_FINAL.md`（甲）、模擬 N `docs/PREREG_STOCK_GRID_V2_RANGE_FORWARD_FINAL.md`、模擬 O `docs/PREREG_ML_INDUSTRY_ROTATION_FORWARD_FINAL.md`（乙＋70／30）、
+  模擬 P `docs/PREREG_ORDER_WIN_DRIFT_FORWARD_FINAL.md`、模擬 Q `docs/PREREG_MARGIN_LIQUIDATION_REBOUND_FORWARD_FINAL.md`（§5-1 甲）、模擬 R `docs/PREREG_SBL_COVERING_DRIFT_FORWARD_FINAL.md`（§5-1 甲只做上市）。
+  全部 2027-01-04 起跑、共用 `research/paper_forward_common.py`；`register_trial()` 6 筆 **#484～489**（verdict 未結案、N+6），已重跑 `research/selection_bias_ledger.py` 與 `.github/scripts/build_trials_index.py`。
+  - [自行裁量] 模擬代號 025 沒指定：依 paper_N 順排 M＝paper_13 … R＝paper_18，Cowork 可改名。
+  - [自行裁量] N3（模擬 P）025 只寫「定稿登記」、沒寫 §5-1 甲／乙 → 照草稿自己標的建議選項**乙＝事前改 36 個月**（判定 2030-01-02 後）；Cowork 要 24 個月的話，起跑前改回甲不算看過結果。
+- **N1／N2／N6 擱置**：不登記，移到新建的 `research/FORWARD_CANDIDATES.md` 候選清單（草稿保留供稽核）；PENDING_QUEUE 1a／1b／1g 標 `- [-]`、1c／1e／1f 標 `- [x]`。
+- **CLAUDE.md 零之二⑤**：前向模擬同時進行上限 13 個，名單與計數放 `research/FORWARD_CANDIDATES.md`；上限滿時空轉補件只寫候選、不寫可登記草稿。`dev_queue_runner._idle_fallback_prompt()` 候選補件提示詞同步加這條；自測 `scripts/selftest_dev_queue_idle_fallback.py` 全過。
+- ⚠️ **計數照實**：025 寫「F～L 7 個」，但實際 F～L 有 8 支追蹤程式（F-翼 `paper_6` 另一支）→ 現在進行中 14／13。互動視窗沒有自行刪減，交 Cowork 定 F-翼怎麼算。
+- **新增 DevQueue 條目** 先.一三六-B7：六支追蹤程式 2026-12-15 前寫好（2027-01-04 前 NOT_STARTED、不算報酬；不新建本機排程；模擬 O 模型 2026-12-31 前訓練凍結）。
+- 冒煙測試：`node scripts/smoke_test.mjs` 全過（見下方 commit 前執行紀錄）；本輪沒改 index.html／App 檔。登記後 N（全體）＝459（selection_bias_ledger：宣稱校正 11 筆→撐住 3、倒下 4）。
+- 下一步：等總司令執行模擬 I 排程註冊（11/02 前）；DevQueue 接 先.一三六-B7。
+
 ## 2026-10-27 22:01～22:3x DevQueue 20261027-220102（研究帽）：先.一三六-B7 第 2 批——模擬 O（paper_15 ML 產業輪動）程式＋自測，模型未訓練
 
 - **等待總司令審閱：1 件**（`research/AWAITING_REVIEW.md` 等待中 1 列，本輪未增減）：先.一三二-0b／一三五-2／一三六-A 模擬 I 排程註冊（等總司令本人操作，自 10/27 06:5x）。
