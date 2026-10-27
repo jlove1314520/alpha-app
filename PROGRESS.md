@@ -1,4 +1,15 @@
-## 2026-10-27 13:4x～14:xx 互動視窗：收件匣 025（前向草稿一次審完＋模擬 I 改掛既有排程）——部分完成
+## 2026-10-27 23:01～23:4x DevQueue 20261027-230102（研究帽）：先.一三六-B7 第 3 批——模擬 O 面板缺口補抓（未完）＋發現 B1～B6 的 6 筆登記漏做
+
+- **等待總司令審閱：0 件**（`research/AWAITING_REVIEW.md` 等待中 0 列）。
+- 本輪戴研究帽。做與判分離：沒有判定、沒有登記試驗、沒訓練模型、沒算任何報酬；未碰 holdout（FinMind 補抓 end 一律 2024-12-31）。
+- **做了什麼**：新增 `research/fetch_paper_15_dividend_gap.py`（只補模擬 O 面板失敗那 101 檔的 adjust.py 快取：Dividend／SplitPrice／CapitalReductionReferencePrice 2012-01-01～2024-12-31＋全市場 ParValueChange；走 `finmind_client._fetch` 共用節流，有 token 方案每小時 600 次、實際約 6 秒一次，402/403/428/429 即停不重試；`--until` 到點停）。
+- **證據**：第 1 批 Dividend 101／101 成功；第 2 批 153 次成功、0 失敗，剩 50 個，斷點 `TaiwanStockSplitPrice/6573`。冒煙 `node scripts/smoke_test.mjs` 179 PASS／0 FAIL。
+- **13 檔無價格鍵**：本機 TaiwanStockInfo 名冊顯示全部 2025-01 以後才出現（12 檔興櫃轉上市、7823 2026 新上市），訓練期不是上市股 → 照實排除、不抓，訓練時在 FINAL 揭露。
+- **BLOCKED（新條目 先.一三六-B7b，互動視窗執行）**：B1～B6 標了 [x]，但 `TRIALS_REGISTRY.jsonl` 最後一筆仍是 10/23 #483，六份 FORWARD_FINAL 都沒試驗編號 → 6 筆 `register_trial()` 漏做。FINAL §6 規定登記之後才訓練；訓練只能一次、順序錯了不可還原，**登記完成前不訓練**。[自行裁量] DevQueue 不代做登記（B1～B6 指定互動視窗、帳本 append-only）。
+- **下一輪續做**：`python research/fetch_paper_15_dividend_gap.py --until <收尾前>` 補完 50 個 → 刪面板裡「本機無快取 …/2012-01-01/2024-12-31」且非 TaiwanStockPrice 的錯誤檔 → `build-panel`（應只剩 13 檔錯誤）→ 等 B7b 完成才 `train`。2026-12-31 前。
+- 交辦佇列：B7 維持 - [ ]；下一項 B7a 是[維運]，換帽留下一輪。
+
+## 2026-10-27 13:4x～14:xx 互動視窗：收件匣 025（前向草稿一次審完＋模擬 I 改掛既有排程）——完成（A 改由總司令 19:02 下令註冊）
 
 - **等待總司令審閱：0 件**（`research/AWAITING_REVIEW.md` 等待中由 5 列降為 0：四列依 025 B 結案；模擬 I 排程那列由總司令 19:02 下令執行註冊後結案）。
 - **A 模擬 I 改掛既有排程 → 被權限擋，停下**：選 `C:/alpha/run-market-catchup-late.ps1`（AlphaMarketCatchupLate 平日 19:30，收盤資料第二層保險之後＝已落地；20:30 AlphaTwDataCheck 是排程直接跑 python、沒有 wrapper 檔可掛），
