@@ -114,7 +114,7 @@ class Spec:
     trial_no: int | None
     start_not_before: str         # 起跑日（含），之前 NOT_STARTED
     judge_after: str              # 判定日
-    mode: str                     # "monthly" | "event"
+    mode: str                     # "monthly" | "weighted"（目標權重，模擬 O） | "event"
     top_n: int                    # M
     exit_rank: int | None = None  # R（monthly）
     hold_days: int | None = None  # H（event）
@@ -235,6 +235,54 @@ def _day_monthly(spec: Spec, px: Px, day: str, state: dict, ctx: dict, active: s
             "closed_trades": closed, "positions": new_pos}
 
 
+def _day_weighted(spec: Spec, px: Px, day: str, state: dict, ctx: dict, active: set) -> dict:
+    """mode="weighted"（模擬 O 用）：每月第一個交易日調到訊號給的目標權重 [{code, weight}]（權重合計 ≤1，其餘留現金）。
+    目標值＝調倉後淨值 × weight；調倉後淨值含本次買賣成本，以二分法解（同 _day_monthly 的做法）。不在目標裡的持股全數出場。"""
+    positions, cash = state["positions"], state["cash"]
+    vals = _mark(px, positions, day, active, spec.delist_value)
+    nav_pre = sum(vals.values()) + cash
+    if state.get("last_rebalance_month") == day[:7]:
+        return {"date": day, "event": "mark", "nav": round(nav_pre, 2), "cash": round(cash, 2), "positions": positions}
+    uni = universe(px, day, active, spec.min_turnover)
+    ctx.pop("skip_reason", None)
+    rk = spec.signal(ctx, day, uni)
+    if rk is None:
+        return {"date": day, "event": "skip", "skip_reason": ctx.get("skip_reason", "訊號資料不足"), "rebalance_month": day[:7],
+                "nav": round(nav_pre, 2), "cash": round(cash, 2), "positions": positions}
+    w = {r["code"]: float(r["weight"]) for r in rk if r.get("weight") and px.close_on(r["code"], day) is not None}
+    assert sum(w.values()) <= 1.0 + 1e-9, "目標權重合計超過 1"
+
+    def after(s: float):
+        sells = {c: max(0.0, vals[c] - s * w.get(c, 0.0)) for c in positions}
+        buys = {c: max(0.0, s * wc - vals.get(c, 0.0)) for c, wc in w.items()}
+        c3 = cash + sum(v * (1 - SELL) for v in sells.values()) - sum(b * (1 + BUY) for b in buys.values())
+        return s * sum(w.values()) + c3, c3, sells, buys
+
+    lo, hi = 0.0, nav_pre * 1.01 + 1.0
+    for _ in range(80):
+        m = (lo + hi) / 2
+        lo, hi = (m, hi) if after(m)[0] >= m else (lo, m)
+    s = lo
+    nav, cash3, sells, buys = after(s)
+    new_pos, closed = {}, []
+    for c, wc in w.items():
+        p_now = px.close_on(c, day)
+        base = positions.get(c) or {"entry_date": day, "entry_px": p_now}
+        new_pos[c] = {**base, "units": s * wc / p_now}
+    for c in positions:
+        if c not in w:
+            p_now = px.close_on(c, day) or px.close_le(c, day) or positions[c]["entry_px"]
+            closed.append(_closed(c, positions[c], day, p_now, "not_in_target"))
+    traded = sum(sells.values()) + sum(buys.values())
+    cost = sum(sells.values()) * SELL + sum(buys.values()) * BUY
+    return {"date": day, "event": "inception" if not state.get("started") else "rebalance", "rebalance_month": day[:7],
+            "nav_pre": round(nav_pre, 2), "nav": round(nav, 2), "cash": round(cash3, 2),
+            "rebalance_cost": round(cost, 2), "turnover_pct": round(traded / nav_pre * 100, 2) if nav_pre else None,
+            "entered": [c for c in w if c not in positions], "exited": [c for c in positions if c not in w],
+            "picks": [r for r in rk if r["code"] in w], "universe_n": len(uni), "closed_trades": closed,
+            "positions": new_pos}
+
+
 def _day_event(spec: Spec, px: Px, day: str, state: dict, ctx: dict, active: set) -> dict:
     positions, cash = dict(state["positions"]), state["cash"]
     cal = px.calendar
@@ -341,7 +389,7 @@ def step(spec: Spec, ctx: dict | None = None, px: Px | None = None, active: set 
     todo = [d for d in px.calendar if d >= start and (not last or d > last["date"])]
     done = []
     for d in todo:
-        rec = (_day_monthly if spec.mode == "monthly" else _day_event)(spec, px, d, state, ctx, active)
+        rec = {"monthly": _day_monthly, "weighted": _day_weighted}.get(spec.mode, _day_event)(spec, px, d, state, ctx, active)
         _append(spec, rec)
         state = {"positions": rec["positions"], "cash": rec["cash"], "started": True,
                  "last_rebalance_month": rec.get("rebalance_month") or state["last_rebalance_month"]}

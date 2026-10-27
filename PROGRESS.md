@@ -1,3 +1,14 @@
+## 2026-10-27 22:01～22:3x DevQueue 20261027-220102（研究帽）：先.一三六-B7 第 2 批——模擬 O（paper_15 ML 產業輪動）程式＋自測，模型未訓練
+
+- **等待總司令審閱：1 件**（`research/AWAITING_REVIEW.md` 等待中 1 列，本輪未增減）：先.一三二-0b／一三五-2／一三六-A 模擬 I 排程註冊（等總司令本人操作，自 10/27 06:5x）。
+- 本輪戴研究帽（產物＝追蹤程式碼）。做與判分離：沒有判定、沒有登記試驗、沒算任何報酬；零外部請求（面板全離線讀 FinMind 本機快取），未碰 holdout（面板只到 2024-12-31）。
+- **做了什麼**：`research/paper_15_ml_industry_tracker.py`（build-panel 逐檔日資料快取 → train 合成自建上市產業指數＋8 個前向可得特徵＋HGB 訓練一次 → 排程 step）；
+  `research/paper_forward_common.py` 新增 `mode="weighted"`（目標權重調倉，模擬 O 的前 1/4 產業等權×產業內市值×70%）；既有 monthly／event 不變。
+- **證據**：`python scripts/selftest_paper_15.py` → ALL PASS（22 項）；`python scripts/selftest_paper_13_18.py` → ALL PASS；冒煙 `node scripts/smoke_test.mjs` 179 PASS／0 FAIL。
+- **[自行裁量]**：①歷史股數＝BalanceSheet 普通股股本÷10，季報法定期限後才可用、不回填；前向用 foreign_holding.json 發行股數。②訓練成分股只含今天有官方上市產業代碼的代號（已下市不納入，揭露）。③ma_breakout 的量改用合計成交金額。④前 1/4 四捨五入。⑤無 2010 價格鍵的檔改用 2012 鍵。
+- **未完成（PENDING_QUEUE 該項維持 - [ ]）**：面板 1,085 檔中 114 檔失敗（101 檔缺 2012 起股利快取、13 檔無 2012 價格鍵）。模型只准訓練一次，缺口沒處理前**不訓練**；下一輪先處理缺口→訓練→commit 模型＋FINAL 記雜湊→掛 market.yml。2026-12-31 前。
+- 交辦佇列：本項續做中；下一項非[研究]類則收工。
+
 ## 2026-10-27 17:31～18:1x DevQueue 20261027-173102（研究帽）：先.一三六-B7 第 1 批——模擬 M／N／P／Q／R 五支前向追蹤程式＋自測（O 留下一輪）
 
 - **等待總司令審閱：1 件**（`research/AWAITING_REVIEW.md` 等待中 1 列，本輪未增減）：先.一三二-0b／一三五-2／一三六-A 模擬 I 排程註冊（等總司令本人操作，自 10/27 06:5x）。
