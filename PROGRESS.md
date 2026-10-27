@@ -1,3 +1,16 @@
+## 2026-10-28 00:01～00:30 DevQueue 20261028-000102（研究帽）：先.一三六-B7 結案（模擬 O 模型訓練凍結）
+
+- **等待總司令審閱：0 件**
+- **做了什麼**：
+  1. 六支前向追蹤 `research/paper_13～18_*_tracker.py` 的 `TRIAL_NO` 從 None 補成 #484～#489（M／N／O／P／Q／R，照 `TRIALS_REGISTRY.jsonl` 名稱對應；登記本身是 10/27 互動視窗 先.一三七-1 做的，本輪沒有新登記），六份 FINAL 檔頭各加一行試驗編號。
+  2. 模擬 O 面板缺口：FinMind 補抓剩餘 50 個（`research/fetch_paper_15_dividend_gap.py`，共用 `_fetch` 節流，0 失敗、0 封鎖），刪 101 個「缺 CapitalReduction」錯誤面板檔（`research/data/` 衍生快取、可重算）→ `build-panel` 重算 → 1,085 檔只剩 13 檔錯誤（2025 後才上市、訓練期不是上市股，照實排除）。
+  3. **模擬 O 唯一一次訓練**（00:20）：`research/paper_15_model/model.joblib` sha256 `9c49f1ef8b82ea46037c7e57b6ad34d13497c9ad57cebcfc3aa5b605975202ed`；3,485 列、32 產業、138 個月、標籤最晚實現 2024-12-02（≤2024-12-31，未碰 holdout）；已記入 `docs/PREREG_ML_INDUSTRY_ROTATION_FORWARD_FINAL.md`。訓練只擬合截面排序標籤，**沒有算任何組合報酬**。
+  4. `market.yml` 既有 Paper 13～18 step 加 `paper_15_ml_industry_tracker.py`；git add 清單補 `data/paper_15.json`、`research/data/paper_15_log.jsonl`（十節）。scikit-learn 1.9.0 由同 job 的模擬 H step 安裝。
+- **證據**：commit `82b038b5d0`；`selftest_paper_13_18.py`／`selftest_paper_15.py` ALL PASS；實跑 `paper_15` step＝`NOT_STARTED`（起跑 2027-01-04）；冒煙 `node scripts/smoke_test.mjs` 179 項全 `[x]`、exit 0。
+- **自己的失誤照實寫**：我用 `--help` 想看參數，腳本不認得這個參數、直接照常開始補抓（請求數與原計畫相同，未超量）；外面的 `| head -20` 只截了畫面，事後再跑一次確認缺口 0、0 次請求。本輪 FinMind 請求合計 50 次。
+- **BLOCKED**：無新增。下一項 先.一三六-B7a 是 [維運]，依本輪「只接 [研究]」收工，留給下一輪換帽。
+- **佇列深度**：`- [ ]` 20 項、非互動視窗可執行約 10 項，兩個門檻都達到，本輪不補件。
+
 ## 2026-10-27 23:xx 互動視窗：收件匣 026（DevQueue「WARN 後無聲停止」）——完成
 
 - **等待總司令審閱：0 件**
