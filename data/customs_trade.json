@@ -1,19 +1,11 @@
 {
-  "fetched_at": "2026-10-26T17:03:14+00:00",
+  "fetched_at": "2026-10-27T00:54:22+00:00",
   "source": "財政部關務署官方開放資料（data.gov.tw #6053，海關進出口貿易統計），免金鑰",
   "unit": "新臺幣千元",
   "note": "官方每月更新，資料通常落後1個月；出入超=出口總值-進口總值，正值為貿易順差、負值為逆差",
-  "errors": [],
-  "latest": {
-    "date": "2026-08",
-    "export_total": 2655171348.0,
-    "import_total": 1933095811.0,
-    "trade_balance": 722075537.0
-  },
-  "yoy": {
-    "base_date": "2025-08",
-    "export_yoy_pct": 52.59,
-    "import_yoy_pct": 55.65
-  },
-  "history_months": 152
+  "errors": [
+    "customs_trade: HTTPSConnectionPool(host='opendata.customs.gov.tw', port=443): Max retries exceeded with url: /data/6053/csv.csv (Caused by ConnectTimeoutError(<HTTPSConnection(host='opendata.customs.gov.tw', port=443) at 0x7f8faab419a0>, 'Connection to opendata.customs.gov.tw timed out. (connect timeout=20)'))"
+  ],
+  "latest": null,
+  "yoy": null
 }
