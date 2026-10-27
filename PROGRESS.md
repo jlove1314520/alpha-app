@@ -1,3 +1,22 @@
+## 2026-10-28 00:31～00:55 DevQueue 20261028-003102（維運帽）：先.一三六-B7a 融資累積檔記「資料日」
+
+- **等待總司令審閱：0 件**
+- **做了什麼**：
+  1. 先查兩邊回應有沒有日期：TPEx `tpex_mainboard_margin_balance` 有 `Date` 欄（看本機已存的 TPEx swagger schema，沒有另外送請求）；TWSE openapi `MI_MARGN` 沒有日期欄。
+  2. `.github/scripts/update_margin_maintenance.py`：上櫃取回應的 Date（只有單一日期才採用）；上市拿同一班 rwd MI_MARGN（這個回應有日期）的逐股融資今日餘額去比對 openapi，重疊 ≥100 檔且 ≥98% 相同，才推定 openapi 的資料日＝rwd 的資料日；
+     結果寫進 `stock_detail.json` 的 `meta.margin_data_dates`（含 `tpex_codes`、`recorded_at`）。寫入逐股融資時先把它清成 null，程式中途失敗就不會留下前一班的舊日期。寫資料日失敗只印警告，不會中斷維持率的計算（十二節）。
+  3. `.github/scripts/accumulate_margin_by_stock.py`：**另存對照，不改鍵**——頂層新增 `data_dates`（執行日鍵 → 上市／上櫃資料日）與 `tpex_codes`；舊鍵、`series` 都不改寫。`recorded_at` 超過 6 小時的視為舊值，不採用。
+  4. `research/paper_17_margin_liquidation_tracker.py`：有資料日就拿資料日當 t0（同一個資料日只算一次、上櫃代號用 tpex 的日期、資料日不在價格日曆裡就不出事件）；沒有資料日才退回原本的後備做法（去掉跟前一鍵相同的複本、把鍵對到 ≤ 該鍵的最後交易日）。
+- **證據**：用現有累積檔（還沒有 data_dates）比對新舊兩版 `raw_events`，結果完全相同（32＝32、逐筆相等）——中間第一版曾把後備路徑也加上「同 t0 只算一次」，比出少 6 筆，已改回，後備行為維持原樣；
+  `scripts/selftest_paper_13_18.py` 新增第 4 節 4 條全 PASS（ALL PASS）；新增 `scripts/selftest_margin_data_dates.py` 12 條全 PASS。零額外外部請求。
+  十節：沒有新增排程輸出檔；`stock_detail.json`、`margin_by_stock_history.json` 本來就在 market.yml 的 git add 清單裡。
+- **[自行裁量]**：①選「另存 data_dates 對照」而不是改鍵（`research/cand_n4_event_rate.py` 也在讀 series，不動它）；②上市推定門檻定為重疊 ≥100 檔、≥98% 相同；③新鮮度 6 小時。
+- **⚠️ 未驗證**：真實的 market.yml 班次還沒跑過新程式。已補 `- [!] 先.一三六-B7a-驗`（時間閘，今天台北 17:40 後解除）。
+- **我自己的失誤照實寫**：第一次跑冒煙時外面包了 `timeout 300`，跑到第 169 項左右瀏覽器被砍掉，出現一串「Target page … has been closed」的 FAIL——這是我的指令造成的，不是程式的問題。已拿掉時限重跑：`node scripts/smoke_test.mjs` 179 項 PASS、0 FAIL、exit 0。
+- **BLOCKED**：新增 先.一三六-B7a-驗（時間閘）。
+- **佇列深度／補件**：`- [ ]` 19 項（≥12）；DevQueue 可執行（非研究、非互動視窗）在 B7a 做完後是 0 項（<6）。補件來源依序查：②docs/UX_REDESIGN_PROPOSAL.md、③先.八十全檢節、④DATA_GAP_PLAN 甲類（第 50 行已寫明甲類沒有待排的抓取），前幾輪都已經補完，**①～④來源已用盡**；
+  ⑤研究候選這一輪戴維運帽、時間也不夠，沒有補，留給下一輪的研究帽或零之二的空轉補件。只補了 1 條真實的驗收項（B7a-驗）。
+
 ## 2026-10-28 00:01～00:30 DevQueue 20261028-000102（研究帽）：先.一三六-B7 結案（模擬 O 模型訓練凍結）
 
 - **等待總司令審閱：0 件**

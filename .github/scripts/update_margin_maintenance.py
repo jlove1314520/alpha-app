@@ -302,16 +302,60 @@ def fetch_margin_by_stock_tpex() -> dict[str, dict]:
     if not isinstance(rows, list):
         raise RuntimeError("tpex_mainboard_margin_balance 回傳非預期格式（可能是無效路徑回傳的HTML）")
     per_stock = {}
+    dates = set()
     for row in rows:
         code = row.get("SecuritiesCompanyCode")
         if not code:
             continue
+        d = _roc_to_iso(row.get("Date"))  # 先.一三六-B7a：回應自帶資料日（民國年 7 碼）
+        if d:
+            dates.add(d)
         per_stock[code] = {
             "margin_balance_today": _num(row.get("MarginPurchaseBalance")),
             "margin_balance_prev": _num(row.get("MarginPurchaseBalancePreviousDay")),
             "short_balance_today": _num(row.get("ShortSaleBalance")),
         }
+    global TPEX_MARGIN_DATA_DATE
+    TPEX_MARGIN_DATA_DATE = max(dates) if len(dates) == 1 else None  # 日期不只一個就不猜
     return per_stock
+
+
+TPEX_MARGIN_DATA_DATE: str | None = None  # 先.一三六-B7a：fetch_margin_by_stock_tpex() 填入
+
+
+def infer_twse_margin_data_date(openapi_lots: dict[str, float], money_date: str | None,
+                                rwd_lots: dict[str, float]) -> tuple[str | None, str]:
+    """先.一三六-B7a：openapi MI_MARGN 沒有日期欄位；拿同班 rwd MI_MARGN（有 date）的逐股融資今日餘額比對，
+    重疊 ≥100 檔且 ≥98% 相同 → 推定 openapi 資料日＝rwd 的資料日。零額外請求；對不上就回 None（不猜）。"""
+    if not money_date or not rwd_lots:
+        return None, "同班 rwd MI_MARGN 沒有逐股資料，無法比對"
+    common = [c for c in openapi_lots if c in rwd_lots]
+    if len(common) < 100:
+        return None, f"openapi 與 rwd 重疊只有 {len(common)} 檔（<100）"
+    same = sum(1 for c in common if openapi_lots[c] == rwd_lots[c])
+    frac = same / len(common)
+    if frac >= 0.98:
+        return money_date, f"openapi 與 rwd {money_date} 逐股融資今日餘額 {same}/{len(common)} 相同"
+    return None, f"openapi 與 rwd {money_date} 只有 {frac:.1%} 相同（<98%），不推定"
+
+
+def record_margin_data_dates(twse_date: str | None, twse_basis: str, tpex_date: str | None,
+                             tpex_codes: set[str] | None = None) -> None:
+    """先.一三六-B7a：把逐股融資的資料日寫進 stock_detail.json meta.margin_data_dates（每班都覆寫，失敗寫 null，
+    不留前一班的舊值）；accumulate_margin_by_stock.py 讀它另存 data_dates 對照。"""
+    detail_path = REPO_ROOT / "data" / "stock_detail.json"
+    try:
+        detail = json.loads(detail_path.read_text(encoding="utf-8"))
+        detail.setdefault("meta", {})["margin_data_dates"] = {
+            "twse": twse_date, "twse_basis": twse_basis, "tpex": tpex_date,
+            "tpex_basis": "TPEx 回應 Date 欄" if tpex_date else "TPEx 回應沒有單一 Date（或抓取失敗）",
+            "tpex_codes": sorted(tpex_codes or []),  # 上櫃代號（累積檔據此挑 tpex 資料日）
+            "recorded_at": datetime.now(TW_TZ).isoformat(timespec="seconds"),
+        }
+        detail_path.write_text(json.dumps(detail, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
+        print(f"融資資料日：上市 {twse_date}（{twse_basis}）／上櫃 {tpex_date}")
+    except Exception as e:  # noqa: BLE001 — 記資料日失敗只降級成警告，不中斷維持率計算
+        print(f"::warning::寫 margin_data_dates 失敗：{type(e).__name__}: {e}")
 
 
 def _roc_to_iso(v) -> str | None:
@@ -463,6 +507,8 @@ def merge_stock_detail_margin(per_stock: dict[str, dict], tpex_codes: set[str] |
             continue
         stocks.setdefault(code, {})["margin"] = row
         matched += 1
+    # 先.一三六-B7a：本班逐股融資已換新 → 先清掉前一班的資料日，等 record_margin_data_dates() 寫本班的（中途失敗就留 null）
+    detail.setdefault("meta", {})["margin_data_dates"] = None
     detail.setdefault("meta", {})["margin_source"] = (
         "TWSE MI_MARGN（同一次呼叫，跟大盤融資維持率共用，不額外打；只保留官方上市"
         "公司清單(t187ap03_L)內的代碼)+TPEx tpex_mainboard_margin_balance"
@@ -556,6 +602,8 @@ def main():
         money_date, margin_money, lots_same_day = None, None, {}
         data_incomplete = True
         incomplete_reason = f"TWSE全市場融資金額取得失敗：{e}"
+    twse_dd, twse_basis = infer_twse_margin_data_date(margin_by_stock, money_date, lots_same_day)
+    record_margin_data_dates(twse_dd, twse_basis, TPEX_MARGIN_DATA_DATE if tpex_codes else None, tpex_codes)
     # 2026-10-07（先.四十三-三）：分子＝與分母同一天的逐股融資餘額 × 同一天收盤價。
     # 收盤價先用 STOCK_DAY_ALL；日期不同改用 price_history.json 同一天的收盤；仍對不上→不相除、標資料不完整。
     close_source, numerator_close_date = "STOCK_DAY_ALL", close_date

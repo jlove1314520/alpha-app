@@ -7,8 +7,9 @@
 - t1（t0 下一個交易日）收盤買進；t1 漲停鎖死 → 放棄、不遞延；同代號 20 個交易日內只算第一個事件；
   t0 前 20 個交易日均成交值 ≥1,000 萬；同日超額依代號排序；下市無後續價格以 −100% 計。
 - 揭露欄（不判定）：同日事件檔數、t0 是否同時有重大訊息（mops_events_archive）；t0 加權指數報酬 price_history 沒有指數序列，記 null。
-- ⚠️ data/margin_by_stock_history.json 的日期鍵是「管線執行日」不是資料日（先.一三五-1e 發現）：本檔去掉與前一鍵相同的複本、
-  把鍵對到 ≤ 該鍵的最後交易日；若某班在資料更新前執行，事件日可能晚一個交易日（[自行裁量]；累積程式記資料日另立維運條目）。
+- ⚠️ data/margin_by_stock_history.json 的日期鍵是「管線執行日」不是資料日（先.一三五-1e 發現）。先.一三六-B7a（2026-10-28）起
+  累積檔另存 `data_dates`（執行日鍵 → 上市／上櫃官方資料日）：**有資料日就用資料日當 t0**（同一資料日只算第一次）；
+  沒有的舊鍵才退回後備＝去掉與前一鍵相同的複本、把鍵對到 ≤ 該鍵的最後交易日（[自行裁量]，某班在資料更新前執行時事件日可能晚一個交易日）。
 資料：data/margin_by_stock_history.json（每日管線既有呼叫累積）＋data/price_history＋data/ex_dividend_events.json，零額外外部請求。
 """
 from __future__ import annotations
@@ -36,25 +37,50 @@ def ex_dates(doc: dict) -> dict:
     return {c: {e.get("ex_date") for e in evs or [] if e.get("ex_date")} for c, evs in ((doc or {}).get("events") or {}).items()}
 
 
+def data_day(margin: dict, d8: str, code: str) -> str | None:
+    """先.一三六-B7a：執行日鍵 d8 對應的官方資料日（ISO）；累積檔沒記就回 None（走後備）。"""
+    dd = ((margin or {}).get("data_dates") or {}).get(d8) or {}
+    tp = (margin or {}).get("tpex_codes") or ()
+    mkt = "tpex" if code in (tp if isinstance(tp, set) else set(tp)) else "twse"
+    v = dd.get(mkt)
+    return E.iso(v) if v else None
+
+
+def resolve_t0(px: C.Px, margin: dict, d8: str, code: str) -> str | None:
+    """t0：有資料日且是交易日 → 資料日；資料日不在價格日曆（休市或價格還沒進來）→ None；沒資料日 → 後備 ≤ 鍵的最後交易日。"""
+    dday = data_day(margin, d8, code)
+    if dday:
+        i = E.tindex(px, dday)
+        return dday if i >= 0 and px.calendar[i] == dday else None
+    i = E.tindex(px, E.iso(d8))  # 後備：週六／休市日的鍵 → 對到 ≤ 該鍵的最後交易日（[自行裁量]，見檔頭）
+    return px.calendar[i] if i >= 0 else None
+
+
 def raw_events(margin: dict, px: C.Px, exd: dict) -> list:
     out = []
+    tpex = set((margin or {}).get("tpex_codes") or [])
+    margin = {**(margin or {}), "tpex_codes": tpex}
     for code, ser in ((margin or {}).get("series") or {}).items():
         if not C.is_common(code):
             continue
-        last_v = None
+        last_v, seen_days = None, set()
         for d8, v in sorted((ser or {}).items()):
             if not v or len(v) < 2 or v[0] is None or v[1] is None:
                 continue
-            if last_v is not None and list(v) == list(last_v):
-                continue  # 日期鍵是管線執行日：TWSE／TPEx 未更新時是前一鍵的原樣複本（先.一三五-1e 發現），去掉
+            dday = data_day(margin, d8, code)
+            if dday:
+                if dday in seen_days:
+                    continue  # 同一官方資料日（執行日不同）只算第一次；新舊鍵對到同一事件由 E.dedupe（同代號 20 日）去掉
+                seen_days.add(dday)
+            elif last_v is not None and list(v) == list(last_v):
+                continue  # 後備：沒資料日的舊鍵，TWSE／TPEx 未更新時是前一鍵的原樣複本（先.一三五-1e 發現），去掉
             last_v = v
+            t0 = resolve_t0(px, margin, d8, code)
+            if t0 is None:
+                continue
             today, prev = float(v[0]), float(v[1])
             if prev < MIN_PREV_BAL or today / prev - 1 > -D_DROP:
                 continue
-            i = E.tindex(px, E.iso(d8))  # 週六／休市日的鍵 → 對到 ≤ 該鍵的最後交易日（[自行裁量]，見檔頭）
-            if i < 0:
-                continue
-            t0 = px.calendar[i]
             if t0 in exd.get(code, set()):
                 continue
             r = E.raw_ret(px, code, t0)

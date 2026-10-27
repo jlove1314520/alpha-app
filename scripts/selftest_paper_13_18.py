@@ -7,6 +7,8 @@
 2. 假裝已起跑（起跑日改成價格日曆倒數第 15 個交易日）＋合成事件：會寫帳本、再跑一次不新增列（冪等）；
    只在 t1＝t0 下一個交易日進場；同代號去重；漲停鎖死放棄；除權息排除。
 3. P 的標題分類規則（收／排除字）。
+4. Q 的資料日對照（先.一三六-B7a）：累積檔有 data_dates 時 t0＝官方資料日（不是執行日鍵）、同一資料日只算一次、
+   上櫃代號取 tpex 資料日；沒有 data_dates 時走後備（鍵對到 ≤ 鍵的最後交易日）。
 """
 from __future__ import annotations
 
@@ -164,6 +166,36 @@ check(P.is_order_win({"source": "TWSE 重大訊息", "title": "本公司接獲�
 check(P.is_order_win({"source": "TPEx 重大訊息", "title": "公告本公司得標新北市工程"}), "P: 得標 → 收")
 check(not P.is_order_win({"source": "TWSE 重大訊息", "title": "更正本公司得標金額"}), "P: 含『更正』→ 排除")
 check(not P.is_order_win({"source": "新聞", "title": "接獲大單"}), "P: 非重大訊息來源 → 不收")
+
+# 4. Q 資料日對照（合成融資序列＋真實價格：借一個真實「當日跌 ≥5%」的交易日當資料日，不評估任何報酬）
+exq = Q.ex_dates(C.load_json(Q.EXDIV, {}))
+pick = None
+for ci in range(len(cal) - 3, 25, -1):
+    d0 = cal[ci]
+    for code in list(px.rows)[:400]:
+        if C.is_common(code) and d0 not in exq.get(code, set()):
+            rr = E.raw_ret(px, code, d0)
+            if rr is not None and rr <= -Q.R_DROP:
+                pick = (code, d0, ci)
+                break
+    if pick:
+        break
+check(pick is not None, "Q: 找得到一個真實大跌日當合成資料日（測試前提）")
+if pick:
+    code, d0, ci = pick
+    nxt8, nxt2_8 = cal[ci + 1].replace("-", ""), cal[ci + 2].replace("-", "")
+    v = [800.0, 1000.0, 0.0]  # 融資 −20%
+    base = {"series": {code: {nxt8: v, nxt2_8: v}}}
+    mq = {**base, "data_dates": {nxt8: {"twse": d0.replace("-", ""), "tpex": None},
+                                 nxt2_8: {"twse": d0.replace("-", ""), "tpex": None}}}
+    ev = Q.raw_events(mq, px, exq)
+    check(len(ev) == 1 and ev[0]["t0"] == d0, f"Q: 有 data_dates → t0＝資料日 {d0}（不是執行日鍵 {cal[ci + 1]}），同資料日兩鍵只算一次")
+    check(Q.resolve_t0(px, base, nxt8, code) == cal[ci + 1], "Q: 沒有 data_dates → 後備＝鍵對到 ≤ 鍵的最後交易日")
+    mt = {**base, "tpex_codes": [code], "data_dates": {nxt8: {"twse": nxt2_8, "tpex": d0.replace("-", "")}}}
+    check(Q.data_day(mt, nxt8, code) == d0 and Q.data_day({**mt, "tpex_codes": []}, nxt8, code) == cal[ci + 2],
+          "Q: 上櫃代號取 tpex 資料日、上市取 twse 資料日")
+    check(Q.resolve_t0(px, {**base, "data_dates": {nxt8: {"twse": "20991231"}}}, nxt8, code) is None,
+          "Q: 資料日不在價格日曆 → 不出事件（不猜）")
 
 print(f"\n{'ALL PASS' if not fails else f'{len(fails)} FAIL'}（暫存目錄 {td}）")
 sys.exit(1 if fails else 0)
