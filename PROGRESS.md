@@ -1,3 +1,18 @@
+## 2026-10-27 17:31～18:1x DevQueue 20261027-173102（研究帽）：先.一三六-B7 第 1 批——模擬 M／N／P／Q／R 五支前向追蹤程式＋自測（O 留下一輪）
+
+- **等待總司令審閱：1 件**（`research/AWAITING_REVIEW.md` 等待中 1 列，本輪未增減）：先.一三二-0b／一三五-2／一三六-A 模擬 I 排程註冊（等總司令本人操作，自 10/27 06:5x）。
+- 本輪戴研究帽（產物＝追蹤程式碼）。做與判分離：沒有判定、沒有登記試驗、沒算任何報酬；五支實跑全部 NOT_STARTED（價格最新 2026-10-22，起跑 2027-01-04），零外部請求，未碰 holdout。
+- **做了什麼**：`research/paper_13_ml_low_beta_tracker.py`（模擬 M，月頻；模擬 H 凍結模型排名前 60 中 60 日 beta 最低 30 檔、前 90 名且 beta ≤ 目標集合最大者續抱）、
+  `research/paper_14_grid_range_tracker.py`（模擬 N，日頻增量網格＋不加濾網影子網格；月初列記 eligible_nofilter／built 供濾網控制組）、
+  `research/paper_16_order_win_tracker.py`（模擬 P，標題規則照 FINAL、判定日 2030-01-02、精準度稽核狀態寫進摘要）、
+  `research/paper_17_margin_liquidation_tracker.py`（模擬 Q）、`research/paper_18_sbl_covering_tracker.py`（模擬 R，只上市）；
+  事件型共用小工具 `research/paper_forward_events.py`；組合／帳本／成本仍用 `research/paper_forward_common.py`（未改）。排程掛既有 `market.yml`（模擬 H 之後一個 step；git add 清單已補 data/paper_{13,14,16,17,18}.json 與 research/data 帳本，十節）。
+- **證據**：`python scripts/selftest_paper_13_18.py` → ALL PASS（起跑前 NOT_STARTED 且不寫帳本、摘要無淨值欄；只在 t1 進場、同代號去重、持有 5 日出場、冪等；網格合成價格：跌破下緣掛買→隔日開盤買→站上上緣隔日賣、跌破 L₋₅ 停損優先＋冷卻 20 日、影子網格＝全建；M 目標集合／續抱規則；漲停鎖死、除權息窗口、P 標題收／排除）。冒煙測試 `node scripts/smoke_test.mjs` 179 PASS／0 FAIL（exit 0）。
+- **[自行裁量]**：①網格前向 price_history 只留約 90 日 → 逐日增量、狀態存帳本最後一列；小數單位；還原開高低＝原始×還原比；建格時點沿用 #468（月初收盤、次一收盤起判斷），中心／g／濾網用前一交易日資料。②事件型去重在流動性門檻之前、依 t0 先後。③P 在雲端只看得到 data/events.json（90 天）——每日 t1 進場不受影響，精準度稽核改在本機做。④Q 的「t0 加權指數報酬」揭露欄記 null（price_history 無指數）。⑤Q 照先.一三五-1e 的發現去掉融資檔原樣複本、日期鍵對到 ≤ 該鍵最後交易日；另補維運條目 **先.一三六-B7a** 讓累積程式記真正資料日（起跑前做）。
+- **⚠️ 尚未登記**：六支 TRIAL_NO 都是 None——TRIALS_REGISTRY 最後一筆仍是 #483，B1～B6 定稿後的 `register_trial()` 還沒做（互動視窗／核心檔單一入口）。
+- **未完成（B7 維持 - [ ]）**：模擬 O（`paper_15_ml_industry_tracker.py`＋模型訓練凍結，2026-12-31 前）。卡點：自建產業指數要前一日市值權重，需先決定歷史股數來源；下一輪續做。
+- **commit 說明**：本輪 PENDING_QUEUE commit 一併帶入互動視窗 17:00 未提交的 B1～B6 定稿（6 份 FINAL 改名、PENDING_QUEUE 對應行）；CLAUDE.md、scripts/dev_queue_runner.py、research/AWAITING_REVIEW.md 的未提交修改不是本輪的，未動、未提交（十三節 5）。
+
 ## 2026-10-27 12:01～12:1x DevQueue 20261027-120102（研究帽）：先.一三五-1e／1f／1g 三項 ① 事件率量測完成，② 定稿阻塞到 10/28 11:35
 
 - **等待總司令審閱：5 件**（`research/AWAITING_REVIEW.md` 等待中 5 列，本輪未增減）：先.一三五-4 前向草稿、先.一三五-5 模擬 M 草稿、先.一三五-1a～1c 三份草稿、先.一三五-1e～1g 三份草稿（等約 0.5 小時）、先.一三二-0b／一三五-2 模擬 I 排程註冊（等總司令本人操作）。
