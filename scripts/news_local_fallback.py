@@ -134,6 +134,13 @@ def main() -> int:
         log(f"不跑：{why}")
         return 0
     age = origin_age_min()
+    # 先.一三五-1d（2026-10-27）：重大訊息長期歸檔（events.json 只留 90 天）。origin_age_min 已 fetch 過，
+    # 工作目錄版＋origin/main 版都歸檔；零外部請求，輸出在 research/data/（不進 repo）。自身失敗只記 log（十二節）。
+    try:
+        import archive_mops_events as A
+        log(f"重大訊息歸檔：新增 {A.run(['origin/main'])} 筆")
+    except Exception as e:  # noqa: BLE001
+        log(f"[warn] 重大訊息歸檔失敗：{type(e).__name__}: {e}")
     if age is not None and age < STALE_MIN:
         log(f"雲端 news.json {age:.0f} 分鐘前更新，不需補班")
         return 0
