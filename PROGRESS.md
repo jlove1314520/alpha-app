@@ -1,3 +1,14 @@
+## 2026-10-27 10:01～10:2x DevQueue 20261027-100102（維運帽）：先.一三五-1d 重大訊息長期歸檔
+
+- **等待總司令審閱：4 件**（`research/AWAITING_REVIEW.md` 等待中 4 列，本輪未增減）：先.一三五-4 前向草稿、先.一三五-5 模擬 M 草稿、先.一三五-1a～1c 三份候選草稿、先.一三二-0b／一三五-2 模擬 I 排程註冊。
+- 本輪戴維運帽（產物：`data/STATUS.json` known_limitations 補一條，同步加進 `generate_status_json.py` 常數以免下次產生被覆蓋）。
+- **先.一三五-1d**（commit 89801d823e）：新增 `scripts/archive_mops_events.py`——讀 `data/events.json`（工作目錄＋`--git-rev origin/main`），source 含「重大訊息」者以（代號、日期、標題）去重 append 到 `research/data/mops_events_archive.jsonl`；零外部請求；讀不到檔／壞 JSON／錯 git rev 只印 [warn]、exit 0（十二節）。
+  - [自行裁量] 掛本機 `AlphaNewsFallback`（每 30 分鐘，`scripts/news_local_fallback.py` 在 `origin_age_min()` 的 fetch 之後、補班早退判斷之前呼叫，try/except 只記 log）。不掛雲端的理由：`research/data/` 在 .gitignore，雲端 runner 寫了留不住。十節：輸出路徑符合 `MACHINE_WRITTEN` 的 `^research/data/[^/]+\.jsonl$`，不進任何 workflow git add 清單（commit 訊息已註明）。
+  - 證據：手動首跑新增 4,377 筆（＝events.json 內 TWSE 重大訊息 2,919＋TPEx 1,458），重跑新增 0、唯一鍵數＝列數 4,377；日期 2026-09-06～10-26。排程實跑：`research/news_local_fallback.log` 10:05 那班出現「重大訊息歸檔：新增 0 筆」，接著照常判斷「不需補班」——主流程沒被拖垮。`selftest_news_fallback_order.py` 6/6；冒煙 `node scripts/smoke_test.mjs` exit 0、179 項全打勾。
+  - 限制：只在這台電腦有；2026-09-06 以前的重大訊息已被 90 天視窗刷掉、無法從 events.json 回補。後續：先.一三五-1a～1c 10/28 解除阻塞定稿時，事件抽取可改讀歸檔檔，樣本不再受 90 天限制。
+- 下一項：`find_next()` 回 None——剩下 19 個 `- [ ]` 全部是「互動視窗執行」或時間閘；`- [!]` 中 先.一三五-1a～1c 預計解除 10/28 09:05、未到。本輪無可做項，收工。
+- **佇列深度**：`- [ ]` 19 項（≥12）；DevQueue 可執行 0 項（<6）。補件來源 BACKLOG／UX_REDESIGN_PROPOSAL／先.八十全檢節／DATA_GAP_PLAN 甲類，最近 5 輪（含 09:31、09:01 兩輪）都已核對為用盡，本輪沒有新增可做的來源，**來源已用盡、未補件**，照實記錄不湊數；研究候選補件由零之二節空轉補件（下一輪若 QUEUE_EMPTY 連 2 輪）接手。
+
 ## 2026-10-27 09:31～09:5x DevQueue 20261027-093102（研究帽）：先.一三五-1a／1b／1c 三項 ① 事件率量測完成，② 定稿阻塞到 10/28 09:05
 
 - **等待總司令審閱：4 件**（`research/AWAITING_REVIEW.md` 等待中 4 列，本輪未增減）：先.一三五-4 前向草稿、先.一三五-5 模擬 M 草稿、先.一三五-1a～1c 三份前向草稿（本輪補上事件率，仍等 Cowork 審，10/28 09:05 後預設放行）、先.一三二-0b／先.一三五-2 模擬 I 排程註冊（等總司令本人操作）。
