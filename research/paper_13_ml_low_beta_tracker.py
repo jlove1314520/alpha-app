@@ -23,7 +23,7 @@ MIN_TURNOVER = 30_000_000.0
 START = "2027-01-04"
 JUDGE = "2029-01-02"
 PREREG = "docs/PREREG_PAPER_M_ML_LOW_BETA_FINAL.md"
-TRIAL_NO = None  # 待互動視窗 register_trial()（先.一三六-B1 定稿時尚未登記，2026-10-27 查 TRIALS_REGISTRY 最後一筆 #483）
+TRIAL_NO = 484  # register_trial() #484（2026-10-27 互動視窗 先.一三七-1 登記）
 LOG = ROOT / "research" / "data" / "paper_13_log.jsonl"
 
 

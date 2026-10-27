@@ -2,6 +2,7 @@
 
 > **定稿（2026-10-27，互動視窗，先.一三六-B2）**：Cowork 收件匣 025（2026-10-27 13:35）B 段「一次定案、不用等 24 小時」審查通過，**照稿**（參數 5 個：宇宙 50／MA60／N＝20 共用／10 格／濾網 1×g）。下方草稿全文即規則；本節只補定案點，衝突處以本節為準。未計算任何報酬。
 > - 名稱：**模擬 N**；程式代號 `paper_14`：`research/paper_14_grid_range_tracker.py`（訊號）＋共用框架 `research/paper_forward_common.py`，帳本 `research/data/paper_14_log.jsonl`、摘要 `data/paper_14.json`。
+> - **試驗編號：#485**（`research/TRIALS_REGISTRY.jsonl`，2026-10-27 互動視窗 先.一三七-1 `register_trial()` 登記；2026-10-28 DevQueue 先.一三六-B7 補記於此）。
 > - 日頻規則：追蹤程式每個交易日收盤後跑、隔日開盤成交；排程掛法另案（照十節 allowlist、不新建排程優先）。
 > - 判定日 2029-01-02 之後第一個有收盤資料的交易日；隨機時點種子 20270104、濾網控制組種子 20261024；其他照草稿 §4。
 > - 起跑：**2027-01-04** 起第一個有收盤資料的執行日；共用 `research/paper_forward_common.py` 框架。

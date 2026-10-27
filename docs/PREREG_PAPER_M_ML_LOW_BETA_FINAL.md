@@ -2,6 +2,7 @@
 
 > **定稿（2026-10-27，互動視窗，先.一三六-B1）**：Cowork 收件匣 025（2026-10-27 13:35）B 段「一次定案、不用等 24 小時」審查通過，**照稿甲**（模型前 60 名中 60 日 beta 最低 30 檔等權、100% 投入；乙不採）。下方草稿全文即規則；本節只補定案點，衝突處以本節為準。未計算任何報酬。
 > - 名稱：**模擬 M**；程式代號 `paper_13`：`research/paper_13_ml_low_beta_tracker.py`（訊號）＋共用框架 `research/paper_forward_common.py`，帳本 `research/data/paper_13_log.jsonl`、摘要 `data/paper_13.json`。
+> - **試驗編號：#484**（`research/TRIALS_REGISTRY.jsonl`，2026-10-27 互動視窗 先.一三七-1 `register_trial()` 登記；2026-10-28 DevQueue 先.一三六-B7 補記於此）。
 > - 判定日 2029-01-02 之後第一個有收盤資料的執行日；隨機時點種子 20270104；其他照草稿 §5。
 > - 起跑：**2027-01-04** 起第一個有收盤資料的執行日；共用 `research/paper_forward_common.py` 框架。
 > - 前向模擬同時進行上限 13 個（CLAUDE.md 零之二⑤）：F～L 7 個＋M＋N＋O＋P＋Q＋R＝13，已滿。

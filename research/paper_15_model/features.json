@@ -1,0 +1,42 @@
+{
+ "prereg": "docs/PREREG_ML_INDUSTRY_ROTATION_FORWARD_FINAL.md",
+ "trial_id": 486,
+ "trained_at": "2026-10-28T00:20:11+08:00",
+ "model": "sklearn.ensemble.HistGradientBoostingRegressor（全部預設參數）",
+ "random_state": 20261021,
+ "sklearn_version": "1.9.0",
+ "model_file": "model.joblib",
+ "model_sha256": "9c49f1ef8b82ea46037c7e57b6ad34d13497c9ad57cebcfc3aa5b605975202ed",
+ "train_months": [
+  "2013-01",
+  "2024-11"
+ ],
+ "label_end_max": "2024-12-02",
+ "n_rows": 3485,
+ "n_industries": 32,
+ "n_months": 138,
+ "n_stocks_in_panel": 1026,
+ "n_panel_errors": 13,
+ "coverage": {
+  "f_low_vol": 0.8034,
+  "f_short_reversal_1m": 0.9687,
+  "f_short_term_reversal_1w": 0.9747,
+  "f_amihud_illiq": 0.9065,
+  "f_ma_breakout": 0.7802,
+  "f_idio_vol": 0.7699,
+  "f_bab": 0.7699,
+  "f_rel_strength": 0.9552
+ },
+ "features_used": [
+  "f_low_vol",
+  "f_short_reversal_1m",
+  "f_short_term_reversal_1w",
+  "f_amihud_illiq",
+  "f_ma_breakout",
+  "f_idio_vol",
+  "f_bab",
+  "f_rel_strength"
+ ],
+ "min_members": 5,
+ "frozen_note": "2026-12-31 前 commit；之後不得重訓或更換（FINAL）"
+}

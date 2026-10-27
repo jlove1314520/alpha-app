@@ -26,7 +26,7 @@ SBL_BALANCE_IDX = 4           # twse_fields: sbl_prev_balance, sbl_sell, sbl_ret
 START = "2027-01-04"
 JUDGE = "2029-01-02"
 PREREG = "docs/PREREG_SBL_COVERING_DRIFT_FORWARD_FINAL.md"
-TRIAL_NO = None  # 待互動視窗 register_trial()（先.一三六-B6 定稿時尚未登記，2026-10-27 查 TRIALS_REGISTRY 最後一筆 #483）
+TRIAL_NO = 489  # register_trial() #489（2026-10-27 互動視窗 先.一三七-1 登記）
 SBL = ROOT / "data" / "securities_lending_sell_history.json"
 EXDIV = ROOT / "data" / "ex_dividend_events.json"
 

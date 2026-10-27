@@ -61,7 +61,7 @@ PANEL_DIR = RESEARCH / "data" / "paper_15_stock_daily"   # research/data/ 已 gi
 LOG = RESEARCH / "data" / "paper_15_log.jsonl"
 OUT = ROOT / "data" / "paper_15.json"
 PREREG = "docs/PREREG_ML_INDUSTRY_ROTATION_FORWARD_FINAL.md"
-TRIAL_NO = None  # 待互動視窗 register_trial()（先.一三六-B3 定稿時尚未登記）
+TRIAL_NO = 486  # register_trial() #486（2026-10-27 互動視窗 先.一三七-1 登記）
 
 RANDOM_STATE = 20261021
 TRAIN_FIRST_MONTH, TRAIN_LAST_MONTH = "2013-01", "2024-11"

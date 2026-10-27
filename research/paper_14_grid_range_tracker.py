@@ -32,7 +32,7 @@ ALLOC = C.INITIAL / TOPN / NSLOT
 START = "2027-01-04"
 JUDGE = "2029-01-02"
 PREREG = "docs/PREREG_STOCK_GRID_V2_RANGE_FORWARD_FINAL.md"
-TRIAL_NO = None  # 待互動視窗 register_trial()（先.一三六-B2 定稿時尚未登記，2026-10-27 查 TRIALS_REGISTRY 最後一筆 #483）
+TRIAL_NO = 485  # register_trial() #485（2026-10-27 互動視窗 先.一三七-1 登記）
 
 
 def adj_ohlc(px: C.Px, code: str, d: str):
