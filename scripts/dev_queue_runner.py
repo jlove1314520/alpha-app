@@ -1145,6 +1145,9 @@ def _idle_fallback_prompt() -> bool:
 - 每條寫成 PENDING_QUEUE `- [ ]` 新條目（標「DevQueue 可執行」、附心跳位置與來源：墓園變形方向／LEADS／資料缺口等），至少 3 條；
 - 需要 Cowork 審的草稿送 AWAITING（24 小時後適用預設放行）；
 - 不碰 holdout、不算任何報酬、不登記試驗（登記等定稿）。
+- **前向模擬同時進行上限 13 個**（CLAUDE.md 零之二⑤，收件匣 025）：先看 `research/FORWARD_CANDIDATES.md` 頂端「進行中」計數；
+  **上限已滿時只把候選寫進該檔候選表（機制、來源、資料、參數草案），不寫可登記的 PREREG 草稿、不送 AWAITING**，
+  這一輪改補其他類（資料缺口、維運、既有模擬的追蹤程式／自測）。
 冒煙全過再 commit。
 """, encoding="utf-8", newline="\n")
             _safe_print(f"IDLE_REPLENISH：連續 {idle} 輪空轉 → 候選補件")
