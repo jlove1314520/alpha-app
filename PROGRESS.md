@@ -1,3 +1,15 @@
+## 2026-10-27 09:0x～09:2x DevQueue 20261027-090102（研究帽）：先.一三五-1 空轉補件——三份台股個股前向草稿
+
+- **等待總司令審閱：4 件**（`research/AWAITING_REVIEW.md` 等待中 4 列；本輪新增「先.一三五-1a～1c 三份前向草稿」1 列，等 0 小時，2026-10-28 09:05 後適用 24 小時預設放行）。
+- 觸發：連 2 輪 QUEUE_EMPTY（08:01、08:31）→ 照零之二節做候選補件。只限台股個股層級、全部前向版、未登記、未讀任何價格、未算任何報酬、未碰 holdout。
+- **N1 重大訊息反應過度後反轉**（`docs/PREREG_DRAFT_MATERIAL_NEWS_REVERSAL_FORWARD.md`）：來源＝墓園 #52-TW 原文「重探應優先測反轉」；4 類（併購／增減資／財務／人事）、t1 收盤反應超額 ≤ −5% 才買、持 10 日、最多 20 檔（參數 3）。建議選項：影子帳本（無新聞同幅度下跌股）升格判準，擋掉「#18 短期反轉換皮」。
+- **N2 庫藏股買回決議**（`docs/PREREG_DRAFT_BUYBACK_ANNOUNCEMENT_FORWARD.md`）：來源＝墓園 B 邊界 #40（VAL 只有 50 筆）；持 20 日沿用原規格、最多 20 檔（參數 2）；本機近 50 天依規則數到 14 則。建議選項：N+1 同家族。
+- **N3 重大訂單／得標漂移**（`docs/PREREG_DRAFT_ORDER_WIN_DRIFT_FORWARD.md`）：來源＝墓園 B #72（合規來源只能前向、機制從未測）；`type`＝重大訂單分類欄抽看 4 則全誤分類，改用寫死標題規則（近 50 天 7 則）＋60 則時只看標題的精準度稽核（<70% → DATA_DEFECT）；參數 2。建議選項：事前改 36 個月（24 個月大概率不足 100 筆）。
+- PENDING_QUEUE 新增 4 條 `- [ ]`：先.一三五-1a～1c（各自先做不需審的事件抽取＋事件率量測，審後或預設放行後定稿登記）、先.一三五-1d（重大訊息長期歸檔，events.json 只留 90 天）。
+- [自行裁量] ①沒挑 TDCC 散戶人數反向（模擬 K 還在跑、同家族）、現金增資折價（#51 子事件 2 是放空方向，只做多做不出策略）；②三份都用「t1 收盤進場」，不論公告在盤中或盤後，偏保守。
+- 心跳：`research/PROGRESS_HEARTBEAT.jsonl` 一行（status AWAITING）。
+- **副帶純 bug 修復（擋 commit 的冒煙 #122）**：第一次冒煙 178 過／1 FAIL（#122 進出口沒標資料月）。根因：10/27 08:54 台北 market.yml 抓關務署 ConnectTimeout，`.github/scripts/fetch_customs_trade.py` 把 `data/customs_trade.json` 的 latest 覆寫成 null。照 `fetch_industrial_production.py` 10/23 同修法：失敗時保留上一版並標 `kept_previous_latest`／`previous_fetched_at`（workflow 該步本來就 continue-on-error，不影響其他步驟）；資料檔用 54aa032d55 的上一版（資料月 2026-08）還原＋保留本次失敗原因。自測：模擬逾時 → 保留 2026-08、kept=True；無上一版 → latest 照舊 null。重跑冒煙：**179 PASS／0 FAIL**（09:2x）。十節：輸出檔不變，已在 market.yml git add 清單內。
+
 ## 2026-10-27 07:01～07:4x DevQueue 20261027-070102（研究帽）：先.一三五-3／-4／-5 三項完成
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3 列）：①先.一三二-0b／先.一三五-2 模擬 I 排程註冊（總司令執行一次 `register-paper9-task-interactive.ps1`，自 06:5x）；②先.一三五-4 網格區間市版＋ML 產業輪動前向草稿（建議照稿，24 小時預設放行，自 07:2x）；③先.一三五-5 模擬 M 前向草稿（建議甲照稿，24 小時預設放行，自 07:2x）。

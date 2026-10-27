@@ -6,6 +6,18 @@
   "errors": [
     "customs_trade: HTTPSConnectionPool(host='opendata.customs.gov.tw', port=443): Max retries exceeded with url: /data/6053/csv.csv (Caused by ConnectTimeoutError(<HTTPSConnection(host='opendata.customs.gov.tw', port=443) at 0x7f8faab419a0>, 'Connection to opendata.customs.gov.tw timed out. (connect timeout=20)'))"
   ],
-  "latest": null,
-  "yoy": null
+  "latest": {
+    "date": "2026-08",
+    "export_total": 2655171348.0,
+    "import_total": 1933095811.0,
+    "trade_balance": 722075537.0
+  },
+  "yoy": {
+    "base_date": "2025-08",
+    "export_yoy_pct": 52.59,
+    "import_yoy_pct": 55.65
+  },
+  "history_months": 152,
+  "kept_previous_latest": true,
+  "previous_fetched_at": "2026-10-26T17:03:14+00:00"
 }

@@ -121,10 +121,25 @@ def main() -> int:
         payload["latest"] = None
         payload["yoy"] = None
 
+    # 2026-10-27 純 bug 修復（同 fetch_industrial_production.py 10/23 修法）：官方端點逾時時不得把上一版好資料
+    # 覆蓋成 null（10/27 08:54 台北 ConnectTimeout 就把 latest 洗掉、App 顯示查無資料），保留上一版並標 kept_previous_latest。
+    try:
+        prev_payload = json.loads(OUT_PATH.read_text(encoding="utf-8")) if OUT_PATH.exists() else {}
+    except Exception as e:
+        print(f"讀上一版 {OUT_PATH} 失敗，無法保留舊值：{e}")
+        prev_payload = {}
+    if payload.get("latest") is None and prev_payload.get("latest"):
+        for k in ("latest", "yoy", "history_months"):
+            if k in prev_payload:
+                payload[k] = prev_payload[k]
+        payload["kept_previous_latest"] = True
+        payload["previous_fetched_at"] = prev_payload.get("previous_fetched_at") or prev_payload.get("fetched_at")
+        print(f"海關進出口本次失敗，保留上一版 {payload['latest'].get('date')}（上一版抓取 {payload['previous_fetched_at']}）")
+
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"寫入 {OUT_PATH}")
-    return 0 if payload.get("latest") else 1
+    return 0 if payload.get("latest") and not payload.get("kept_previous_latest") else 1
 
 
 if __name__ == "__main__":
