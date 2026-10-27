@@ -1121,3 +1121,4 @@
 {"ts": "2026-10-28T02:55:00+08:00", "item": "先.一三五-1i", "summary": "停資停券預告表四類來源查證：TWSE openapi/rwd BFI84U、TPEx tpex_margin_trading_term 皆只有當下快照（rwd 忽略日期參數），社群查無、FinMind 付費 → 只能前向累積；5 次請求；累積排程提案 1i-a 待核准", "status": "DONE", "cycle_id": "20261028-023102"}
 {"ts": "2026-10-28T02:50:30+08:00", "item": "先.一三五-1j", "summary": "新增 scripts/selftest_paper_6_7.py：F-翼／G 起跑前 NOT_STARTED、輸入壞掉只警告 exit 0、重跑冪等，15 項全過；合成輸入、未印淨值", "status": "DONE", "cycle_id": "20261028-023102"}
 {"ts": "2026-10-28T04:03:22+08:00", "item": "先.一三五-1（空轉補件第二批）", "summary": "前向上限 14／13 已滿：候選表新增 N10 折價鉅額承接、N11 現金減資公告日漂移、N12 CB 向下重設反向（未登記、不計 N、無 PREREG、不送 AWAITING）；補 3 條 DevQueue 可執行 先.一三五-1k／1l／1m", "status": "DONE", "cycle_id": "20261028-040102"}
+{"ts": "2026-10-28T04:40:00+08:00", "item": "先.一三五-1k", "summary": "新增 research/forward_sim_watch.py：paper_5～18 新鮮度／起跑日／last_error 檢查，selftest 19 過 0 失敗，正式跑 14 檔全 OK；掛排程提案 先.一三五-1k-a 待互動視窗核准", "status": "DONE", "cycle_id": "20261028-043102"}
