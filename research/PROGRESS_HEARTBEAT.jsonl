@@ -1124,3 +1124,4 @@
 {"ts": "2026-10-28T04:40:00+08:00", "item": "先.一三五-1k", "summary": "新增 research/forward_sim_watch.py：paper_5～18 新鮮度／起跑日／last_error 檢查，selftest 19 過 0 失敗，正式跑 14 檔全 OK；掛排程提案 先.一三五-1k-a 待互動視窗核准", "status": "DONE", "cycle_id": "20261028-043102"}
 {"ts": "2026-10-28T04:48:00+08:00", "item": "先.一三五-1l", "summary": "鉅額交易端點查證：TWSE BFIAUU 可查歷史、起點 2005-04-04；TPEx 逐筆只有當日、年內彙總無代號；皆無買賣方身分與前收；3 次請求全 200；累積排程提案 先.一三五-1l-a", "status": "DONE", "cycle_id": "20261028-043102"}
 {"ts": "2026-10-28T04:53:00+08:00", "item": "先.一三五-1m", "summary": "零請求查證：上櫃 tpex_mainboard_quotes 有 NextLimitUp/Down 但 fetch_tpex 丟掉；上市 STOCK_DAY_ALL 無、需自算；寫 FORWARD_CANDIDATES N7；保留欄位提案 先.一三五-1m-a", "status": "DONE", "cycle_id": "20261028-043102"}
+{"ts": "2026-10-28T04:58:00+08:00", "item": "先.一三五-1n", "summary": "逐支核對 paper_5～18 started 翻轉時機：只有 paper_12 閘門順延會誤報，forward_sim_watch 加閘門處理，selftest 22 過 0 失敗", "status": "DONE", "cycle_id": "20261028-043102"}

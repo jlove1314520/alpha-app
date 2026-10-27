@@ -9,6 +9,7 @@ M～R 2027-01-04，任何一支追蹤程式安靜停跑都只能等人肉眼發�
   ① `generated_at` 之後到今天（含）已過 >2 個交易日 → STALE
   ② 今天 ≥ 起跑日，且起跑日到昨天（含）已過 ≥1 個交易日仍 `started=false` → NOT_STARTED_LATE
   ③ 有 `last_error` → ERROR
+  起跑有前置閘門者（含 `snapshot_streak_need`，目前只有 paper_12）閘門未達成前不判②，達成後以 `streak_achieved_on` 起算。
   另：檔案不存在 → MISSING；不是合法 JSON／不是物件 → UNREADABLE；都沒事 → OK。
 輸出 `data/forward_sim_watch.json`。看守員自身任何例外 fail open：只印警告、exit 0（CLAUDE.md 十二節）。
 本程式零外部請求；尚未掛排程（掛 market.yml＋pipeline_registry 屬提案，待互動視窗核准）。
@@ -99,6 +100,16 @@ def check_one(path: Path, today: date, closed: set[str]) -> dict:
     started = d.get("started") is True
     start_s = d.get("start_not_before") or d.get("start")
     start = _parse_date(start_s)
+    # 先.一三五-1n：起跑有前置閘門的（paper_12 權證快照需連續 N 日成功，C.step start_override 順延），
+    # 摘要檔的 start_not_before 仍是 PREREG 原值；閘門未達成前不判晚起跑，達成後以達成日為起算。
+    gated = "snapshot_streak_need" in d
+    if gated:
+        achieved = _parse_date(d.get("streak_achieved_on"))
+        row["gate"] = {"streak_achieved_on": d.get("streak_achieved_on"), "gate_deadline": d.get("gate_deadline")}
+        if achieved is None:
+            start = None
+        elif start is None or achieved > start:
+            start = achieved
     err = d.get("last_error")
     row.update(generated_at=d.get("generated_at"), started=started, start_not_before=start_s)
 
@@ -224,6 +235,21 @@ def _selftest() -> int:
         check("paper_18 ERROR 且 issues 有 3 條", st["paper_18.json"]["status"] == "ERROR"
               and len(st["paper_18.json"]["issues"]) == 3)
         check("overall=ALERT", res and res["overall"] == "ALERT")
+
+        # 閘門順延（paper_12 型）：未達成不判晚、達成後照達成日起算
+        w(12, {"generated_at": fresh, "started": False, "start_not_before": "2026-11-02",
+               "snapshot_streak_need": 10, "streak_achieved_on": None})
+        r12 = check_one(root / "data" / "paper_12.json", now.date(), set())
+        check("閘門未達成 → 不判晚起跑", r12["status"] == "OK")
+        w(12, {"generated_at": fresh, "started": False, "start_not_before": "2026-11-02",
+               "snapshot_streak_need": 10, "streak_achieved_on": "2026-11-05"})
+        r12 = check_one(root / "data" / "paper_12.json", now.date(), set())
+        check("閘門今天達成 → 不判晚起跑", r12["status"] == "OK")
+        w(12, {"generated_at": fresh, "started": False, "start_not_before": "2026-11-02",
+               "snapshot_streak_need": 10, "streak_achieved_on": "2026-11-03"})
+        r12 = check_one(root / "data" / "paper_12.json", now.date(), set())
+        check("閘門達成後已過交易日仍未起跑 → LATE", r12["status"] == "NOT_STARTED_LATE")
+        (root / "data" / "paper_12.json").unlink()
 
         # 日曆讀不到：只排除週末，仍跑完
         (root / "data" / "trading_calendar.json").write_text("壞", encoding="utf-8")
