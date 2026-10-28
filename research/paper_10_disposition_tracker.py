@@ -5,6 +5,8 @@
 research/paper_forward_common.py，本檔只有：處置事件累積、訊號函式、條件有效性對照（影子帳本）。
 - 事件來源 data/disposal_flags.json（本機 AlphaDisposalFlags 每日 18:30 產生並 commit），每次執行併進
   research/data/paper_10_events.json（12/01 前也照常累積，只累積、不建倉），零額外外部請求。
+- `limit_up_at_entry`（PREREG 修訂 R1，先.一四一-1）：r+1 原始收盤 ≥ r+1 官方漲停價（research/official_limit.py：
+  上櫃用前一日 TPEx 公告次日漲停價、缺檔或上市用 tw_limit_price 計算；除權息日基準用參考價），來源記 limit_src／limit_base。
 - 主帳本 research/data/paper_10_log.jsonl＋摘要 data/paper_10.json；影子帳本（處置期間報酬 ≥0）
   research/data/paper_10_control_log.jsonl＋research/data/paper_10_control.json。
 """
@@ -15,13 +17,13 @@ from datetime import date, datetime
 from pathlib import Path
 
 import paper_forward_common as C
+from official_limit import OfficialLimits
 
 ROOT = C.ROOT
 EVENTS = ROOT / "research" / "data" / "paper_10_events.json"
 FLAGS = ROOT / "data" / "disposal_flags.json"
 H, M = 20, 20
 MIN_PRE_TURNOVER = 10_000_000.0
-LIMIT_UP_RATIO = 1.095
 START = "2026-12-01"
 JUDGE = "2028-12-01"
 PREREG = "docs/PREREG_DISPOSITION_RELEASE_REBOUND_FORWARD_FINAL.md"
@@ -103,8 +105,13 @@ def make_signal(segments: list, control: bool):
             if (ret >= 0) != control:
                 continue
             raw_r, raw_d = px.raw_close_on(code, r), px.raw_close_on(code, day)
+            lim = ctx.get("limits") or ctx.setdefault("limits", OfficialLimits())
+            lp = lim.limits(code, day, r, raw_r)
             cands.append({"code": code, "disposal_start": ev["start"], "release_date": r, "disposal_ret": round(ret, 6),
-                          "pre_turnover_20d": round(liq), "limit_up_at_entry": bool(raw_r and raw_d and raw_d >= raw_r * LIMIT_UP_RATIO)})
+                          "pre_turnover_20d": round(liq),
+                          "limit_up_at_entry": bool(lp and raw_d and raw_d >= lp["up"] - 1e-9),
+                          "limit_up_price": lp["up"] if lp else None, "limit_src": lp["src"] if lp else "unavailable",
+                          "limit_base": lp["base_src"] if lp else None})
         cands.sort(key=lambda c: (c["disposal_ret"], c["code"]))
         ctx.setdefault("skips", {})[day] = skips
         return cands

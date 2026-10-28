@@ -8,7 +8,8 @@
   濾網 |MA60(t) − MA60(t−20)| ≤ g（t＝前一交易日）不符 → 本月不建格。格線在建格當天收盤後生效（同 #468）。
 - 收盤由上往下跌破格下緣 Lᵢ 且格位空 → 隔日開盤買一份；收盤站上 Lᵢ₊₁ → 隔日開盤賣；收盤跌破 L₋₅ → 隔日開盤全出、冷卻 20 個交易日。
 - 每格固定金額＝100 萬 ÷ 50 ÷ 10；現金不足一份不買；開盤一字漲停（買）／跌停（賣）鎖死 → 買單取消、賣單順延
-  （`costs.limit_status()`，還原開高低收對前一還原收盤）；停牌日不成交、掛單順延；下市以最後可得價出場。
+  （PREREG 修訂 R1，先.一四一-1：原始開高低收對官方漲跌停價，research/official_limit.py——上櫃用前一日 TPEx 公告
+  次日漲跌停價、缺檔或上市用 tw_limit_price 以原始前收計算（除權息日用參考價）；不再呼叫核心檔 costs.limit_status()）；停牌日不成交、掛單順延；下市以最後可得價出場。
 - 影子網格（不加濾網，只記帳不判定，PREREG §4-5 控制組用）：research/data/paper_14_shadow_log.jsonl。
 - 帳本每個交易日一列（nav／cash／positions 與共用框架同格式，另含 grid_state 供下一次接續）；月初列另記
   eligible_nofilter（不看濾網會建格的股票）與 built（實際建格），判定時的濾網控制組由它抽樣。
@@ -22,7 +23,7 @@
 from __future__ import annotations
 
 import paper_forward_common as C
-from validation.costs import limit_status
+from official_limit import OfficialLimits, lock_status
 
 ROOT = C.ROOT
 TOPN, MA_N, N, NSLOT = 50, 60, 20, 10
@@ -117,11 +118,21 @@ def _close_cell(st, code, s, d, px_, how, closed):
         sp.remove(s)
 
 
-def process_day(px: C.Px, d: str, st: dict, active: set, use_filter: bool) -> dict:
+def raw_ohlc_prev(px: C.Px, code: str, d: str):
+    """(原始開高低收, 該檔前一筆原始收盤)；當天無列回 None。"""
+    i = (px.idx.get(code) or {}).get(d)
+    if i is None:
+        return None
+    r = px.rows[code][i]
+    pc = next((px.rows[code][k].get("close") for k in range(i - 1, -1, -1) if px.rows[code][k].get("close")), None)
+    return (r.get("open"), r.get("high"), r.get("low"), r.get("close")), pc
+
+
+def process_day(px: C.Px, d: str, st: dict, active: set, use_filter: bool, limits: OfficialLimits | None = None) -> dict:
     """處理交易日 d（開盤執行掛單 → 收盤訊號 → 月初收盤建格），就地更新 st，回傳帳本列。"""
     cal = px.calendar
     prev = px.prev_trading_day(d)
-    closed, info = [], {}
+    closed, info, lim_src = [], {}, {}
     st["cells"] = {c: {int(k): v for k, v in cs.items()} for c, cs in st["cells"].items()}
     for k in ("pend_buy", "pend_sell"):
         st[k] = {c: [int(s) for s in v] for c, v in st[k].items() if v}
@@ -150,15 +161,19 @@ def process_day(px: C.Px, d: str, st: dict, active: set, use_filter: bool) -> di
                 st["pend_buy"].pop(c, None)
                 st["pend_sell"].pop(c, None)
             continue  # 停牌：順延
-        ls = limit_status(o[0], o[1], o[2], o[3], st["last_c"].get(c) or 0)
+        raw, raw_pc = raw_ohlc_prev(px, c, d)
+        lim = (limits or OfficialLimits()).limits(c, d, prev, raw_pc)
+        lock_up, lock_down = lock_status(lim, *raw)
+        src = lim["src"] if lim else "unavailable"
+        lim_src[src] = lim_src.get(src, 0) + 1
         for s in list(st["pend_sell"].get(c) or []):
-            if ls.limit_down or s not in (st["cells"].get(c) or {}):
+            if lock_down or s not in (st["cells"].get(c) or {}):
                 continue
             _close_cell(st, c, s, d, o[0], "open", closed)
         if not st["pend_sell"].get(c):
             st["pend_sell"].pop(c, None)
         for s in st["pend_buy"].pop(c, []):
-            if ls.limit_up:
+            if lock_up:
                 info["buy_blocked_limit"] = info.get("buy_blocked_limit", 0) + 1
                 continue
             cost = ALLOC
@@ -229,6 +244,8 @@ def process_day(px: C.Px, d: str, st: dict, active: set, use_filter: bool) -> di
            "nav": round(st["cash"] + val, 2), "cash": round(st["cash"], 2), "positions": positions,
            "closed_trades": closed, "cells_used": used, "capital_use_pct": round(val / (st["cash"] + val) * 100, 2) if st["cash"] + val else None,
            **info, "grid_state": st}
+    if lim_src:
+        rec["limit_src"] = lim_src  # 本日掛單檢查漲跌停所用價格來源（tpex_official／calc／calc_tpex_missing）
     if month_start:
         rec["rebalance_month"] = d[:7]
     return rec
@@ -257,8 +274,9 @@ def run_one(spec: C.Spec, px: C.Px, active: set, use_filter: bool) -> dict:
     last = log[-1] if log else None
     st = (last or {}).get("grid_state") or empty_state()
     done = []
+    limits = OfficialLimits()
     for d in [x for x in px.calendar if x >= spec.start_not_before and (not last or x > last["date"])]:
-        rec = process_day(px, d, st, active, use_filter)
+        rec = process_day(px, d, st, active, use_filter, limits)
         if not log and not done:
             rec["event"] = "inception"
         C._append(spec, rec)
