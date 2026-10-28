@@ -21,6 +21,7 @@ import update_picks_ledger_returns as upl  # noqa: E402
 
 LEDGER_PATH = upl.REPO_ROOT / "data" / "signal_ledger.json"
 WINDOWS = {"t5": 5, "t20": 20, "t60": 60}
+ENTRY_SKIP_REASON = "進場日無收盤（停牌／無成交／未掛牌）"
 
 
 def main() -> None:
@@ -38,9 +39,14 @@ def main() -> None:
 
     # 第一步：進場價（只填一次）＝寫入日之後第一個交易日的收盤。寫入日當天收盤不算——
     # 排程 17:13 寫入時當天已收盤，那個價格寫入當下買不到。
-    entry_filled = 0
+    # 先.一四〇-1（2026-10-28，Cowork 收件匣 029 定案丙→甲）：進場日該股沒有列、但之後已有列＝那天真的沒有收盤
+    # （停牌／無成交／未掛牌，不是資料還沒到）→ 寫 entry_skip_reason，之後不再列入回填候選、統計分母排除。
+    # 進場規則不變（不改用「之後第一個有收盤的日子」，那會把停牌復牌跳空算進訊號報酬）。
+    # 10/28 首批 10 筆已用 TPEx 個股日成交資訊逐筆查證都不是漏抓（research/probe_signal_ledger_entry_gaps.py）；
+    # 日後若懷疑漏抓，重跑那支探測即可對照官方列。
+    entry_filled = skip_new = 0
     for s in all_sigs:
-        if s.get("entry_close") is not None:
+        if s.get("entry_close") is not None or s.get("entry_skip_reason"):
             continue
         rec_day = s["recorded_at"][:10]
         nxt = next((d for d in calendar if d > rec_day), None)
@@ -48,18 +54,27 @@ def main() -> None:
             continue
         px, actual, stale = upl._lookup_price_on(s["code"], nxt, prices)
         if stale or px is None or actual != nxt:
-            continue  # 該股當天無成交/資料未到，留 null 下輪再試；不拿別天的價格頂替
+            own_days = {r["date"] for r in prices.get(s["code"]) or []}
+            if own_days and max(own_days) > nxt and nxt not in own_days:
+                s["entry_skip_reason"] = ENTRY_SKIP_REASON
+                s["entry_skip_marked_at"] = datetime.now(upl.TW_TZ).isoformat()
+                skip_new += 1
+            continue  # 資料未到就留 null 下輪再試；不拿別天的價格頂替
         s["entry_close"], s["entry_date"] = px, nxt
         entry_filled += 1
+    skipped_all = [s for s in all_sigs if s.get("entry_skip_reason")]
+    ledger["meta"]["entry_skipped"] = {
+        "count": len(skipped_all), "reason": ENTRY_SKIP_REASON,
+        "note": "這些訊號進場日沒有收盤、不回填報酬，任何勝率／平均報酬統計的分母都要排除並揭露這個筆數（先.一四〇-1）"}
     sigs = [s for s in all_sigs if s.get("entry_close") and s.get("entry_date")]
 
     pending = [s for s in sigs if any(s["returns"].get(k) is None for k in WINDOWS)]
     due = [s for s in pending if upl._trading_days_after(s["entry_date"], 5, calendar)]
     if not due:
-        if entry_filled:
+        if entry_filled or skip_new:
             ledger["meta"]["last_returns_backfill_at"] = datetime.now(upl.TW_TZ).isoformat()
             LEDGER_PATH.write_text(json.dumps(ledger, ensure_ascii=False, indent=1, allow_nan=False), encoding="utf-8")
-        print(f"進場價新填 {entry_filled} 筆；沒有訊號到達 T+5（待回填 {len(pending)} 筆）")
+        print(f"進場價新填 {entry_filled} 筆、進場日無收盤新標 {skip_new} 筆（累計 {len(skipped_all)}）；沒有訊號到達 T+5（待回填 {len(pending)} 筆）")
         return
     taiex = upl._fetch_taiex_history(min(s["entry_date"] for s in due))
 
@@ -83,10 +98,10 @@ def main() -> None:
                                  "exit_date": actual, "filled_at": datetime.now(upl.TW_TZ).isoformat()}
             filled += 1
 
-    if filled or entry_filled:
+    if filled or entry_filled or skip_new:
         ledger["meta"]["last_returns_backfill_at"] = datetime.now(upl.TW_TZ).isoformat()
         LEDGER_PATH.write_text(json.dumps(ledger, ensure_ascii=False, indent=1, allow_nan=False), encoding="utf-8")
-    print(f"signal_ledger 回填：進場價新填 {entry_filled} 筆、報酬新填 {filled} 欄、出場價缺失/過期跳過 {skipped} 欄")
+    print(f"signal_ledger 回填：進場價新填 {entry_filled} 筆、進場日無收盤新標 {skip_new} 筆（累計 {len(skipped_all)}）、報酬新填 {filled} 欄、出場價缺失/過期跳過 {skipped} 欄")
 
 
 if __name__ == "__main__":
