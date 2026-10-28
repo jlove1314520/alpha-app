@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-10-28T00:07:16.131694+08:00",
+ "generated_at": "2026-10-29T00:03:55.109303+08:00",
  "note": "research/adjust.py::adjusted_price_series()偵測到的單日|報酬|>11%還原價異常（新上市5日內除外），修.六第三點新增。只降級為警告，不影響任何回測/排程執行；由 market.yml 每次排程執行generate_status_json.py 時更新（先.六十-C9 起），非即時。",
- "n_warnings": 6993,
+ "n_warnings": 7032,
  "warnings": [
   {
    "stock_id": "5395",
@@ -48951,6 +48951,279 @@
    "ret_pct": 10.01,
    "threshold_pct": 7.5,
    "detected_at": "2026-10-23T21:03:49.601391"
+  },
+  {
+   "stock_id": "2429",
+   "date": "2013-09-14",
+   "ret_pct": 18.27,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-27T22:13:40.815726"
+  },
+  {
+   "stock_id": "3694",
+   "date": "2012-01-30",
+   "ret_pct": 8.72,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-27T22:17:18.632119"
+  },
+  {
+   "stock_id": "1213",
+   "date": "2012-02-06",
+   "ret_pct": 9.24,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-27T22:27:55.622891"
+  },
+  {
+   "stock_id": "1805",
+   "date": "2013-02-25",
+   "ret_pct": 7.98,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-27T22:28:03.326802"
+  },
+  {
+   "stock_id": "2231",
+   "date": "2012-02-06",
+   "ret_pct": 9.4,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-27T22:28:05.787701"
+  },
+  {
+   "stock_id": "2231",
+   "date": "2012-03-05",
+   "ret_pct": 10.15,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-27T22:28:05.789238"
+  },
+  {
+   "stock_id": "2231",
+   "date": "2013-09-16",
+   "ret_pct": 7.86,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-27T22:28:05.830574"
+  },
+  {
+   "stock_id": "2506",
+   "date": "2013-02-25",
+   "ret_pct": 8.4,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-27T22:28:14.465444"
+  },
+  {
+   "stock_id": "1449",
+   "date": "2012-05-09",
+   "ret_pct": -8.82,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-28T00:17:39.433364"
+  },
+  {
+   "stock_id": "1449",
+   "date": "2012-10-03",
+   "ret_pct": -7.69,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-28T00:17:39.441117"
+  },
+  {
+   "stock_id": "1449",
+   "date": "2012-11-01",
+   "ret_pct": -10.65,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-28T00:17:39.443364"
+  },
+  {
+   "stock_id": "1449",
+   "date": "2012-11-19",
+   "ret_pct": -12.84,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-28T00:17:39.444263"
+  },
+  {
+   "stock_id": "1475",
+   "date": "2012-07-24",
+   "ret_pct": -7.63,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-28T00:17:42.081107"
+  },
+  {
+   "stock_id": "1475",
+   "date": "2013-05-21",
+   "ret_pct": -13.33,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-28T00:17:42.095373"
+  },
+  {
+   "stock_id": "1475",
+   "date": "2013-11-14",
+   "ret_pct": 9.82,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-28T00:17:42.100746"
+  },
+  {
+   "stock_id": "1475",
+   "date": "2019-06-13",
+   "ret_pct": 12.03,
+   "threshold_pct": 10.5,
+   "detected_at": "2026-10-28T00:17:42.216968"
+  },
+  {
+   "stock_id": "1516",
+   "date": "2012-10-11",
+   "ret_pct": -10.0,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-28T00:17:44.624528"
+  },
+  {
+   "stock_id": "1516",
+   "date": "2013-02-04",
+   "ret_pct": -9.95,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-28T00:17:44.629844"
+  },
+  {
+   "stock_id": "1516",
+   "date": "2013-04-26",
+   "ret_pct": 9.09,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-28T00:17:44.632291"
+  },
+  {
+   "stock_id": "1516",
+   "date": "2014-03-03",
+   "ret_pct": -12.08,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-28T00:17:44.643757"
+  },
+  {
+   "stock_id": "1516",
+   "date": "2014-05-21",
+   "ret_pct": -8.77,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-28T00:17:44.647017"
+  },
+  {
+   "stock_id": "1516",
+   "date": "2014-06-17",
+   "ret_pct": -8.97,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-28T00:17:44.648132"
+  },
+  {
+   "stock_id": "1516",
+   "date": "2014-08-27",
+   "ret_pct": -8.24,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-28T00:17:44.650445"
+  },
+  {
+   "stock_id": "1516",
+   "date": "2014-10-20",
+   "ret_pct": -8.82,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-28T00:17:44.652611"
+  },
+  {
+   "stock_id": "2321",
+   "date": "2016-02-18",
+   "ret_pct": -10.55,
+   "threshold_pct": 10.5,
+   "detected_at": "2026-10-28T00:17:54.645545"
+  },
+  {
+   "stock_id": "2321",
+   "date": "2023-05-04",
+   "ret_pct": -11.18,
+   "threshold_pct": 10.5,
+   "detected_at": "2026-10-28T00:17:54.787434"
+  },
+  {
+   "stock_id": "2321",
+   "date": "2023-08-14",
+   "ret_pct": -10.96,
+   "threshold_pct": 10.5,
+   "detected_at": "2026-10-28T00:17:54.792008"
+  },
+  {
+   "stock_id": "2438",
+   "date": "2013-04-11",
+   "ret_pct": 8.01,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-28T00:18:03.578371"
+  },
+  {
+   "stock_id": "2491",
+   "date": "2013-07-01",
+   "ret_pct": -8.33,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-28T00:18:08.716054"
+  },
+  {
+   "stock_id": "2491",
+   "date": "2013-07-08",
+   "ret_pct": -8.57,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-28T00:18:08.716492"
+  },
+  {
+   "stock_id": "2491",
+   "date": "2013-11-28",
+   "ret_pct": -10.75,
+   "threshold_pct": 7.5,
+   "detected_at": "2026-10-28T00:18:08.728487"
+  },
+  {
+   "stock_id": "2910",
+   "date": "2020-01-30",
+   "ret_pct": -10.95,
+   "threshold_pct": 10.5,
+   "detected_at": "2026-10-28T00:18:15.350149"
+  },
+  {
+   "stock_id": "5608",
+   "date": "2021-10-04",
+   "ret_pct": -11.16,
+   "threshold_pct": 10.5,
+   "detected_at": "2026-10-28T00:18:53.318963"
+  },
+  {
+   "stock_id": "8101",
+   "date": "2024-11-19",
+   "ret_pct": 450.0,
+   "threshold_pct": 10.5,
+   "detected_at": "2026-10-28T00:19:22.745635"
+  },
+  {
+   "stock_id": "8476",
+   "date": "2015-12-09",
+   "ret_pct": 13.88,
+   "threshold_pct": 10.5,
+   "detected_at": "2026-10-28T00:19:26.972508"
+  },
+  {
+   "stock_id": "8476",
+   "date": "2015-12-21",
+   "ret_pct": -11.65,
+   "threshold_pct": 10.5,
+   "detected_at": "2026-10-28T00:19:26.973227"
+  },
+  {
+   "stock_id": "8476",
+   "date": "2017-03-15",
+   "ret_pct": 29.09,
+   "threshold_pct": 10.5,
+   "detected_at": "2026-10-28T00:19:26.997427"
+  },
+  {
+   "stock_id": "8476",
+   "date": "2017-03-28",
+   "ret_pct": -13.21,
+   "threshold_pct": 10.5,
+   "detected_at": "2026-10-28T00:19:26.998214"
+  },
+  {
+   "stock_id": "8476",
+   "date": "2024-11-11",
+   "ret_pct": 103.06,
+   "threshold_pct": 10.5,
+   "detected_at": "2026-10-28T00:19:27.173489"
   }
  ]
 }

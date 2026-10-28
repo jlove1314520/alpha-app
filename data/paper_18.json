@@ -2,15 +2,15 @@
  "label": "模擬 R 借券大幅回補漂移",
  "note": "上市股借券賣出餘額 5 日減 ≥40% 的隔天收盤買進、持有 20 個交易日；最多 20 檔、每筆淨值 1/20；成本 1×",
  "prereg": "docs/PREREG_SBL_COVERING_DRIFT_FORWARD_FINAL.md",
- "trial_no": null,
+ "trial_no": 489,
  "start_not_before": "2027-01-04",
  "judge_after": "2029-01-02",
  "started": false,
- "generated_at": "2026-10-28T00:06:51+08:00",
+ "generated_at": "2026-10-29T00:03:36+08:00",
  "judge": "2029-01-02 後判一次：已平倉 ≥100 筆前提；天條一回撤 ≤50%；扣 1× 年化 > 0050 含息；2×／3× 成本年化 >0；隨機時點對照 > 第 95 百分位（1,000 次、seed 20270104）",
  "known_limit": "只做上市；還券也可能是出借人召回（被迫還券），無法逐筆區分；事件數不足 100 筆照判 INCONCLUSIVE",
  "disclaimer": "紙上追蹤，非投資建議。虛擬帳戶，未使用真實資金。",
  "events_source": "data/securities_lending_sell_history.json series_twse（2026-09-24 起前向累積）",
  "why_not_started": "2027-01-04 起跑（PREREG 寫死，不倒填）",
- "raw_events_after_dedupe": 26
+ "raw_events_after_dedupe": 27
 }

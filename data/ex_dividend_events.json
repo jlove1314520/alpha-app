@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated_at": "2026-10-28T00:05:28.603723+08:00",
+    "generated_at": "2026-10-29T00:02:36.672919+08:00",
     "last_fetch_count": 14,
-    "reductions_generated_at": "2026-10-28T00:05:36.023890+08:00"
+    "reductions_generated_at": "2026-10-29T00:02:44.146858+08:00"
   },
   "events": {
     "01010T": [
@@ -796,7 +796,10 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-08-26",
-        "applied": false
+        "applied": true,
+        "official_factor": 0.9603960396039605,
+        "official_source": "TWSE TWT49U",
+        "factor_applied": 0.9603960396039605
       }
     ],
     "4582": [
@@ -2584,7 +2587,10 @@
         "rights_price": 0.0,
         "type": "權",
         "first_seen": "2026-10-13",
-        "applied": false
+        "applied": true,
+        "official_factor": 0.9457142857142857,
+        "official_source": "TWSE TWT49U",
+        "factor_applied": 0.9457142857142857
       }
     ],
     "2762": [
@@ -3904,6 +3910,42 @@
         "first_seen": "2026-10-27",
         "applied": true,
         "factor_applied": 0.9738532110091743
+      }
+    ],
+    "00726B": [
+      {
+        "ex_date": "2026-10-28",
+        "official_factor": 0.9857231533209188,
+        "pre_close": 32.22,
+        "ref_price": 31.76,
+        "source": "TPEx exDailyQ",
+        "first_seen": "2026-10-28",
+        "applied": true,
+        "factor_applied": 0.9857231533209188
+      }
+    ],
+    "00990B": [
+      {
+        "ex_date": "2026-10-28",
+        "official_factor": 0.9919759277833501,
+        "pre_close": 9.97,
+        "ref_price": 9.89,
+        "source": "TPEx exDailyQ",
+        "first_seen": "2026-10-28",
+        "applied": true,
+        "factor_applied": 0.9919759277833501
+      }
+    ],
+    "2063": [
+      {
+        "ex_date": "2026-10-28",
+        "official_factor": 0.8903490759753593,
+        "pre_close": 24.35,
+        "ref_price": 21.68,
+        "source": "TPEx exDailyQ",
+        "first_seen": "2026-10-28",
+        "applied": true,
+        "factor_applied": 0.8903490759753593
       }
     ]
   },
