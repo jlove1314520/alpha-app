@@ -396,7 +396,7 @@ def check_collision() -> int:
 # 邏輯處理，不在這裡。
 NEEDS_USER = re.compile(
     r"登入|授權|實機|親自|購買|採購|付費|花錢|信用卡|核准|裁示|截圖給|公司手機|"
-    r"手動貼|貼給總司令|請總司令|等總司令")
+    r"手動貼|貼給總司令|請總司令|等總司令|需總司令|待總司令|本人登入")
 IRREVERSIBLE = re.compile(
     r"刪除|清空|holdout|真實下單|下單 API|不可逆|覆蓋.*資料庫|"
     r"調鬆.*門檻|放寬.*門檻|改.*GATE\d|修改.*通過門檻|violation_rate門檻|"
@@ -413,6 +413,15 @@ GUARD_NEGATIONS = ("不接", "不用", "不得", "不做", "無需", "非")
 GUARD_NEG_WINDOW = 8
 _GUARD_DESC_PREFIX = ("來源：", "現況：", "心跳：", "驗收：", "心跳位置：", "驗收條件：")
 _GUARD_SAFE_DELETE = re.compile(r"localStorage|快取|cache|登記|allowlist|暫存|本機.{0,6}鍵")
+# 2026-10-28 收件匣 028：「總司令裁示已核准」「核准後」「裁示：甲」「（收件匣 027）」這類＝已經裁示過、交辦執行，
+# 不是要人動手。命中字前 6 字內有「已」、後面緊接「已核准／已同意／已定案／已裁示」「後」「：」、或前後 12 字內有
+# 「收件匣 NNN」→ 不算（只對需總司令那組，不可逆那組照舊）。真的要人操作的寫法照擋：命中字本身是
+# 請／等／需／待總司令、本人登入、貼給總司令，或前後 6 字內出現這些字。10/23 先.一三二-0、10/28 先.一三八-1 都是被這個誤擋空轉。
+GUARD_APPROVED_ON = True  # 自測用開關（selftest_dev_queue_guard_approved.py 比對修前／修後），正式一律 True
+GUARD_APPROVED_WINDOW = 6
+_GUARD_STILL_NEEDS = re.compile(r"請總司令|等總司令|需總司令|待總司令|貼給總司令|本人")
+_GUARD_APPROVED_POST = re.compile(r"^(已(核准|同意|定案|裁示)|後|[：:])")
+_GUARD_INBOX_REF = re.compile(r"收件匣\s*\d{3}")
 
 
 def guard_scope(clean: str) -> str:
@@ -439,11 +448,24 @@ def _guard_hit_ignored(text: str, mt: "re.Match", irreversible: bool) -> bool:
             return True
     if not irreversible and "時" in text[mt.end():mt.end() + 3]:
         return True
+    if not irreversible and GUARD_APPROVED_ON and _guard_already_approved(text, mt):
+        return True
     if irreversible and mt.group(0) in ("刪除", "清空"):
         clause = re.split(r"[，。；;、\n]", text[mt.end():])[0][:30]
         if _GUARD_SAFE_DELETE.search(clause):
             return True
     return False
+
+
+def _guard_already_approved(text: str, mt: "re.Match") -> bool:
+    """收件匣 028：命中的「核准／裁示…」是在講已經裁示過的事（見 _GUARD_APPROVED_POST 上方註解）。"""
+    w = GUARD_APPROVED_WINDOW
+    p, e = mt.start(), mt.end()
+    pre, post = text[max(0, p - w):p], text[e:e + w]
+    if _GUARD_STILL_NEEDS.search(pre + mt.group(0) + post):
+        return False
+    return ("已" in pre or bool(_GUARD_APPROVED_POST.match(post))
+            or bool(_GUARD_INBOX_REF.search(text[max(0, p - 12):e + 12])))
 
 
 def guard_hits(clean: str) -> dict:
