@@ -1,3 +1,17 @@
+## 2026-10-28 16:01～16:4x DevQueue 20261028-160102（維運帽）：先.一三八-5／-6／-B3 完成，-B1 已上線等資料、-B2 阻塞
+
+- **等待總司令審閱：1 件**（先.一二〇-3b 前瞻台帳進場日規則提案，未變；`research/AWAITING_REVIEW.md` 等待中 1 列）。
+- **先.一三八-5**（commit a9e34098f7）：新增 `data/us_index_close_history.json`，`fetch_market_us.py` 寫檔後 append（零新增請求、盤中不寫、同日去重、自身失敗只警告）；`market.yml` git add 已加（十節）。git 歷史回填：116 版 → 39 個收盤日＋sparkline 錨定補 09-14／15／16、10-13 → 每指數 43 列，08-26～10-26 區間無缺日。
+  - 證據：自測 `selftest_us_index_close_history.py` 8/8 PASS；sparkline 交叉驗證 2,229／2,432 點一致（不一致者為 yfinance 個別版本漏列造成位移，錨定規則會擋）。
+  - [自行裁量] 「48 天」其實是 commit 日數，收盤日 43；只有盤中版的 4 天用 sparkline 兩端錨定補、標 method=sparkline_anchor。雲端實跑 append **未驗證**（等今晚 05:43 班）。
+- **先.一三八-6**（commit 0a292b077b）：`paper_forward_common.read_log()` 採 (b)＋(c)：最後一行半截且無結尾換行 → 原檔備份 `research/data/ledger_corrupt_backup/` 後丟棄該行補跑、摘要 `ledger_repairs`；其他壞行照舊停跑；帳本存在但無有效列 → 停跑不重建倉。market.yml 加備份資料夾 git add。
+  - 證據：`selftest_paper_forward_ledger_corrupt.py` 擴充全過、`selftest_paper_forward_common.py`／`selftest_paper_13_18.py` 全過。[自行裁量] 半截行丟掉後若已無有效列也走 (c) 停跑。
+- **先.一三八-B1**（commit ff765584b9）：`scripts/mem_profile_sample.py` 掛既有 DevQueue runner 與連通性監測入口（不新建排程），平日 18:30～21:30 取樣，**實際間隔約 10～30 分、不保證 10 分**（照實降級）。標 `- [!]`：等量滿 2 個平日（預計 10/29 21:30 後）。
+- **先.一三八-B2**：依賴 B1 資料，標 `- [!]`。
+- **先.一三八-B3**（commit 51b61c14c2）：冒煙測試開跑前可用記憶體 <1.5GB 等 10 分鐘重量、仍不足 exit 3「記憶體不足、未執行」（.mjs／.py 同步）。自測 `selftest_smoke_mem_guard.py` 8/8 PASS。
+- **冒煙**：四個 commit 前各跑一次 `node scripts/smoke_test.mjs`，皆 exit 0「全部通過」（16:16、16:25、16:32、16:39）。
+- **佇列補件**：時間不夠，本輪未重算深度、未補件，留給下一輪。
+
 ## 2026-10-28 15:01～15:4x DevQueue 20261028-150101（維運帽）：先.一三八-1／2／4 完成，補件 2 條
 
 - **等待總司令審閱：1 件**（先.一二〇-3b 前瞻台帳進場日規則提案，未變；`research/AWAITING_REVIEW.md` 等待中 1 列）。
