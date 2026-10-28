@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-28T08:40:00+08:00",
+  "updated_at": "2026-10-28T08:46:00+08:00",
   "latest_commit": "d8acfab",
   "data_files": [
     {
@@ -1880,7 +1880,7 @@
     "2026-10-27（DevQueue 20261027-100102，先.一三五-1d）：data/events.json 只留 90 天；重大訊息（TWSE／TPEx）另由本機 AlphaNewsFallback（每 30 分鐘，scripts/news_local_fallback.py 開頭呼叫 scripts/archive_mops_events.py）以（代號、日期、標題）去重 append 到 research/data/mops_events_archive.jsonl（本機檔、不進公開 repo、零外部請求）。限制：只在這台電腦有；本機排程停擺超過 90 天仍會遺失；首次歸檔 4,377 筆、最早 2026-09-06（更早的已被 90 天視窗刷掉，無法回補）。"
   ],
   "any_overdue": true,
-  "updated_by": "DevQueue 20261028-083102（維運帽：先.一三五-1q-b FinMind 可轉債文件查證，零請求，無資料源／面板異動）",
+  "updated_by": "DevQueue 20261028-083102（維運帽：先.一三五-1q-b／1q-c 可轉債轉換價來源查證，無資料源／面板異動）",
   "local_schedule_heartbeat": {
     "checked_at": "2026-10-27T22:41:56.520502+00:00",
     "stall_threshold_minutes": 60,
