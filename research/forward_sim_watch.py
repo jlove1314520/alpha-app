@@ -51,6 +51,8 @@ def _tw_closed(root: Path) -> set[str]:
         out: set[str] = set()
         for y in cal.values():
             out.update((y or {}).get("closed") or [])
+            # 先.一三五-1ak：臨時休市（颱風假等，fetch_trading_calendar 事後確認）也是休市，否則帳本沒列會被誤判 LEDGER_GAP
+            out.update((y or {}).get("unscheduled_closed") or [])
         return out
     except Exception as e:
         print(f"[warn] forward_sim_watch：trading_calendar 讀取失敗，只排除週末：{e}")
@@ -383,6 +385,15 @@ def _selftest() -> int:
         st4 = {r["file"]: r for r in (res4 or {}).get("items", [])}
         check("整合：paper_17 摘要 OK＋帳本缺日 → LEDGER_GAP", st4["paper_17.json"]["status"] == "LEDGER_GAP")
         check("整合輸出不含 nav 值", '"nav"' not in json.dumps(res4, ensure_ascii=False))
+
+        # 先.一三五-1ak：臨時休市日（unscheduled_closed）帳本沒列不算漏記
+        (root / "data" / "trading_calendar.json").write_text(json.dumps(
+            {"tw": {"2026": {"closed": ["2026-10-26"], "unscheduled_closed": ["2026-10-23"]}}}), encoding="utf-8")
+        (root / "research" / "data").mkdir(parents=True, exist_ok=True)
+        lg = root / "research" / "data" / "paper_99_log.jsonl"
+        lg.write_text('{"date": "2026-10-22"}' + chr(10) + '{"date": "2026-10-27"}' + chr(10), encoding="utf-8")
+        check("臨時休市日帳本沒列不報 LEDGER_GAP", check_ledger_dates(lg, _tw_closed(root))["n_gap_days"] == 0)
+        check("對照：只讀 closed 時 10/23 會被當漏記", check_ledger_dates(lg, {"2026-10-26"})["n_gap_days"] == 1)
 
         # 日曆讀不到：只排除週末，仍跑完
         (root / "data" / "trading_calendar.json").write_text("壞", encoding="utf-8")

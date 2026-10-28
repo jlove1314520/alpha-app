@@ -1,3 +1,16 @@
+## 2026-10-28 23:01 DevQueue 20261028-230102（維運帽）：先.一四〇-1 進場日缺列查證＋回填規則、順手修 market.yml commit fatal 128、1aa 保留期間讀取清查、1ai TDCC 缺週連續週數
+
+- **等待總司令審閱：2 件**（`research/AWAITING_REVIEW.md` 等待中 2 列，本輪未增減）：①先.一三五-1ad paper_10／14 漲跌停判斷官方檔位版（20:15 起）；②先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）。
+- **先.一四〇-1**（commit 8f531f08c4）：10 筆進場日缺列逐筆官方查證（TPEx 個股日成交資訊 2026-10，共 8 次請求、`tpex_www` ≥3 秒、全 200），**全部不是漏抓**——無成交價 3（3085／4198／5276）、停止交易 2（3632／6167，10/07～10/16 官方無列）、尚未掛牌 5（6898×4 10/23 初次上櫃、7710 初次上市前）。`update_signal_ledger_returns.py` 加 `entry_skip_reason`（進場日該股無列、但之後已有列才標）＋`meta.entry_skipped` 揭露筆數；進場規則不變。暫存複本測試（零外部請求）新標恰好 10 筆、二次 0 筆。真的台帳等 market.yml 下一班套用。[自行裁量]：要求「該股之後已有列」才標，資料未到的 25 筆不動。
+- **先.一四〇-1z**（commit 592c508d67，純 bug 修復）：查 10/28 資料為何沒進來，發現 14:35Z 補救班 commit 步驟 **exit 128**——今天下午加進大清單的 `data/margin_suspension_daily/`（只有 17:13 班建立）與 `data/tpex_limit_next.json`（沒收集到就不寫）不存在時 `git add -A` fatal（本機重現）。兩個改成獨立 `git add … 2>/dev/null || true`。想手動觸發 market.yml 補今天資料，本機 PAT 回 401（無 actions 權限），未繞過；10/29 08:4x 排程班會補上 10/28 收盤。00:44Z 那次 exit 1 早於這兩個 commit，原因未查到（當時沒有衝突 annotation）。
+- **先.一三五-1aa**（commit 84e06f891a）：`scripts/audit_forward_reserved_reads.py`（零請求）→ 14/14 起跑守門＋帳本無起跑前列，只當訊號輸入，不需提案；paper_9 自測 5/0。
+- **先.一三五-1ai**（commit 74f4079844）：paper_11 用日期間隔找 4 週前對照，不受缺週影響；但 holders.json 的 `streak_weeks` 跨缺週累計（170 檔顯示「5 週」實際橫跨 7 週）→ `_streak()` 遇相隔 >9 天中斷。⚠️ holders.json 要等下一個新週別才重產（未為此多送請求）。
+- **先.一三五-1ak**（本輪最後一個 commit）：`forward_sim_watch._tw_closed()` 加讀臨時休市 `unscheduled_closed`，10/23 不再被判帳本漏記；自測 35/0。其他只讀 closed 的程式已列清單，14 支追蹤程式都不在內。
+- **先.一二〇-3** 仍 `- [!]`：時間閘已過，但 10/28 收盤沒進 repo，解除條件改為 price_history 出現 10/28。
+- **收工補件**：`- [ ]` 19→23（≥12）；DevQueue 可執行非研究類 0→4（先.一四〇-2 workflow git add 路徑自測、-3 核對台帳套用〔時間閘 10/29 09:30〕、-4 管線臨時休市影響清查、-5 holders 重產後核對〔時間閘〕），**未達 6 條門檻**：本輪時間到，沒有再從 BACKLOG／UX 提案挖，下一輪補。
+- 本輪外部請求：TPEx 8 次（上述），其餘零請求；未算報酬、未登記試驗、未碰保留期間判定。
+- **冒煙**：每個 commit 前 `node scripts/smoke_test.mjs` EXIT=0、179 項 [x]、0 FAIL。
+
 ## 2026-10-28 23:xx 互動視窗：收件匣 029（待審 6 件一次定案）——完成 5 件、1 件等總司令執行一次
 
 - **等待總司令審閱：2 件**（`research/AWAITING_REVIEW.md` 等待中 7→2）：①先.一三五-1ad paper_10／14 漲跌停判斷（029 未涵蓋，20:15 起）；②**新** 先.一三五-1ae-a 權證 20:30 補跑觸發——請總司令執行一次 `powershell -ExecutionPolicy Bypass -File C:\alpha\add-warrant-2030-trigger.ps1`。
