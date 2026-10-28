@@ -1873,6 +1873,7 @@
     }
   ],
   "known_limitations": [
+    "2026-10-28 先.一三八-8（DevQueue 20261028-170102）：data/pe_snapshot 停在 10-22 的直接原因＝10-27 上市本益比要 10-28 早班才進來，而 10-27 23:19、10-28 08:44 兩班 market.yml 在 commit 步驟失敗沒推上（推測 rebase 衝突，run log 需 admin 讀不到，已加 annotation 輸出衝突檔名，見 先.一三八-10）；並存 bug 已修：舊版只取多數資料日，上櫃每份快照 0 檔，改為每個資料日各寫一份、同日合併（實班驗收見 先.一三八-9）。alpha.db 停在 10-22 是休市空窗，10-28 15:30 已補到 10-27；taifex_large 停在 20261020 另查（先.一三八-11）。",
     "【策略層面，最重要】2026-08-27新增題材動能榜（scores_momentum.json）+未來性濾網（scores_future.json），跟價值成長榜（scores.json）三榜並列——三榜都尚未經過組合策略回測驗證，App固定顯示「本榜為資料排序，尚未經過組合策略回測驗證，不代表能贏大盤」，見TODO的B16項目。權重是專家判斷的初始設計值（weights_frozen_momentum.json/weights_frozen_future.json），不是回測最佳化結果。",
     "2026-08-27修正P0 bug（使用者回報）：題材動能榜relative_strength因子改用還原權息收盤價（price_history.json新增adj_close欄位）——來源雙軌：一次性回補讀research端FinMind TaiwanStockDividend本機快取（research/build_price_history.py），之後每日排程改讀TWSE官方rwd/zh/exRight/TWT48U除權息預告表累積事件、回溯調整（.github/scripts/update_price_history.py，見data/ex_dividend_events.json）——刻意不在每日排程呼叫FinMind，維持JSON-only架構原則。已知殘留限制：(1)TWT48U只回傳未來約5週的事件預告，不支援歷史查詢，故涵蓋率隨每天累積逐步提高，剛上線這幾週少數個股可能還沒回溯到；(2)實測發現少數股票(如2420/2227/6216/8442等8檔)的research端FinMind快取已經停在很久以前(2024-12-31)，導致「除權息日前一筆可用資料」距離超過10天，判定無法安全定錨調整係數，這類事件會被跳過(adj_close退回等於close，不會比修正前更差)並記錄skip_reason，不會靜默套用錯誤係數。",
     "margin_maintenance.json：分母（全市場融資金額）2026-09-15起改用TWSE官方www.twse.com.tw/rwd信用交易統計端點（同T86網站家族），拔掉最後一個FinMind依賴；單日查無資料時往回找最多5天取最新可用值，若5天內都失敗才明確寫入data_incomplete=true，App顯示「資料不完整」，不會沿用舊值假裝正常。",
