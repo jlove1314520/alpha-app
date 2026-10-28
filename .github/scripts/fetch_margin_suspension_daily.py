@@ -6,7 +6,7 @@ TPEx openapi 只有當日），不從今天開始每天存就永遠沒有歷史�
 - 只在 market.yml 台北 17:13 班跑（已定案，Cowork 收件匣 027），每次 TWSE openapi 1 次＋TPEx openapi 1 次＝每日 2 次。
 - 共用 data/rate_limit_state.json（來源名 twse_openapi／tpex_openapi，同源間隔 ≥3 秒，
   402/403/428/429 即標記封鎖 2 小時不重試）；任一邊失敗只略過那一邊。
-- 輸出 data/margin_suspension_daily/YYYY-MM-DD.json（台北日期，一天一檔）；當天檔兩邊都已成功就不再送請求。
+- 輸出 data/margin_suspension_daily/YYYY-MM-DD.json（台北盤後日，一天一檔；台北 14:00 前執行歸前一天，先.一四〇-8）；當天檔兩邊都已成功就不再送請求。
 - 原始欄位照存（另加統一鍵 code／name／start／end／reason，民國日期轉西元），不猜、不補。
 """
 from __future__ import annotations
@@ -217,9 +217,16 @@ def fetch_one(market: str) -> list:
         raise RuntimeError(f"{source} 回應不是 JSON（可能是 200＋HTML 錯誤頁）：{e}") from e
 
 
+def snapshot_day(now_tw: datetime) -> str:
+    """先.一四〇-8：檔名＝這份預告所屬的台北盤後日。17:13 班被 GitHub 延到過午夜才跑（10/28 班實際在 10/29 00:02）
+    時，台北 14:00 前執行一律歸前一天；否則存成隔天檔，隔天真正的 17:13 班會以為「今天已存過」而略過、少一天。"""
+    d = now_tw - timedelta(days=1) if now_tw.hour < 14 else now_tw
+    return d.strftime("%Y-%m-%d")
+
+
 def main(argv: list[str]) -> int:
     dry = "--dry-run" in argv
-    today = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d")
+    today = snapshot_day(datetime.now(timezone(timedelta(hours=8))))
     out_path = OUT_DIR / f"{today}.json"
     prior = None
     if out_path.exists():
