@@ -1,0 +1,1058 @@
+{
+ "note": "美股四大指數每日收盤累積（資料源 yfinance，非 Yahoo 官方；美股原生來源）。date＝收盤日（美東），只收收盤、不收盤中值；source=yfinance 為每日管線寫入，source=git_backfill 為從 data/market_us.json git 歷史回填（每日取該日最後一版）。非投資建議。",
+ "names": {
+  "^DJI": "道瓊工業指數",
+  "^GSPC": "S&P 500",
+  "^IXIC": "那斯達克綜合指數",
+  "^SOX": "費城半導體指數"
+ },
+ "series": {
+  "^DJI": [
+   {
+    "date": "2026-08-26",
+    "close": 53463.88,
+    "source": "git_backfill",
+    "git_commit_at": "2026-08-27T10:02:35+08:00"
+   },
+   {
+    "date": "2026-08-27",
+    "close": 53569.44,
+    "source": "git_backfill",
+    "git_commit_at": "2026-08-28T07:40:36+00:00"
+   },
+   {
+    "date": "2026-08-28",
+    "close": 53559.99,
+    "source": "git_backfill",
+    "git_commit_at": "2026-08-29T04:00:25+00:00"
+   },
+   {
+    "date": "2026-08-31",
+    "close": 53185.9,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-01T11:35:12+00:00"
+   },
+   {
+    "date": "2026-09-01",
+    "close": 52766.88,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-02T11:12:11+00:00"
+   },
+   {
+    "date": "2026-09-02",
+    "close": 53061.95,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-03T11:47:20+00:00"
+   },
+   {
+    "date": "2026-09-03",
+    "close": 53686.11,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-04T11:11:49+00:00"
+   },
+   {
+    "date": "2026-09-04",
+    "close": 53414.25,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-07T12:21:48+00:00"
+   },
+   {
+    "date": "2026-09-08",
+    "close": 52786.07,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-08T23:32:29+00:00"
+   },
+   {
+    "date": "2026-09-09",
+    "close": 52380.66,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-09T23:26:29+00:00"
+   },
+   {
+    "date": "2026-09-10",
+    "close": 52064.1,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-11T13:28:58+00:00"
+   },
+   {
+    "date": "2026-09-11",
+    "close": 52573.29,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-11T23:27:42+00:00"
+   },
+   {
+    "date": "2026-09-14",
+    "close": 52421.2,
+    "source": "git_backfill",
+    "method": "sparkline_anchor"
+   },
+   {
+    "date": "2026-09-15",
+    "close": 52093.11,
+    "source": "git_backfill",
+    "method": "sparkline_anchor"
+   },
+   {
+    "date": "2026-09-16",
+    "close": 51461.9,
+    "source": "git_backfill",
+    "method": "sparkline_anchor"
+   },
+   {
+    "date": "2026-09-17",
+    "close": 51778.04,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-17T23:39:27+00:00"
+   },
+   {
+    "date": "2026-09-18",
+    "close": 51682.64,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-18T23:32:32+00:00"
+   },
+   {
+    "date": "2026-09-21",
+    "close": 52048.83,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-22T00:17:16+00:00"
+   },
+   {
+    "date": "2026-09-22",
+    "close": 51863.69,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-22T23:45:24+00:00"
+   },
+   {
+    "date": "2026-09-23",
+    "close": 51511.59,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-23T23:54:41+00:00"
+   },
+   {
+    "date": "2026-09-24",
+    "close": 51349.98,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-25T00:03:21+00:00"
+   },
+   {
+    "date": "2026-09-25",
+    "close": 51828.62,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-26T00:07:33+00:00"
+   },
+   {
+    "date": "2026-09-28",
+    "close": 51481.51,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-29T01:16:41+00:00"
+   },
+   {
+    "date": "2026-09-29",
+    "close": 51349.92,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-30T00:41:38+00:00"
+   },
+   {
+    "date": "2026-09-30",
+    "close": 50906.05,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-01T00:43:19+00:00"
+   },
+   {
+    "date": "2026-10-01",
+    "close": 50926.56,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-02T01:08:08+00:00"
+   },
+   {
+    "date": "2026-10-02",
+    "close": 51176.96,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-03T00:50:45+00:00"
+   },
+   {
+    "date": "2026-10-05",
+    "close": 51267.9,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-06T01:59:18+00:00"
+   },
+   {
+    "date": "2026-10-06",
+    "close": 51521.28,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-07T01:06:16+00:00"
+   },
+   {
+    "date": "2026-10-07",
+    "close": 51179.87,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-08T01:24:31+00:00"
+   },
+   {
+    "date": "2026-10-08",
+    "close": 51231.64,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-09T01:30:56+00:00"
+   },
+   {
+    "date": "2026-10-09",
+    "close": 51654.95,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-10T01:19:50+00:00"
+   },
+   {
+    "date": "2026-10-12",
+    "close": 51850.55,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-13T19:20:13+08:00"
+   },
+   {
+    "date": "2026-10-13",
+    "close": 51670.1,
+    "source": "git_backfill",
+    "method": "sparkline_anchor"
+   },
+   {
+    "date": "2026-10-14",
+    "close": 51621.48,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-15T00:12:02+00:00"
+   },
+   {
+    "date": "2026-10-15",
+    "close": 52177.69,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-16T17:43:44+08:00"
+   },
+   {
+    "date": "2026-10-16",
+    "close": 52002.41,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-19T17:42:48+08:00"
+   },
+   {
+    "date": "2026-10-19",
+    "close": 51966.03,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-20T17:42:01+08:00"
+   },
+   {
+    "date": "2026-10-20",
+    "close": 52495.88,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-21T17:41:47+08:00"
+   },
+   {
+    "date": "2026-10-21",
+    "close": 52856.09,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-22T00:21:12+00:00"
+   },
+   {
+    "date": "2026-10-22",
+    "close": 52867.98,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-23T12:59:56+00:00"
+   },
+   {
+    "date": "2026-10-23",
+    "close": 52215.16,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-24T00:08:18+00:00"
+   },
+   {
+    "date": "2026-10-26",
+    "close": 52361.58,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-27T13:04:24+00:00"
+   }
+  ],
+  "^GSPC": [
+   {
+    "date": "2026-08-26",
+    "close": 7675.7,
+    "source": "git_backfill",
+    "git_commit_at": "2026-08-27T10:02:35+08:00"
+   },
+   {
+    "date": "2026-08-27",
+    "close": 7730.99,
+    "source": "git_backfill",
+    "git_commit_at": "2026-08-28T07:40:36+00:00"
+   },
+   {
+    "date": "2026-08-28",
+    "close": 7711.76,
+    "source": "git_backfill",
+    "git_commit_at": "2026-08-29T04:00:25+00:00"
+   },
+   {
+    "date": "2026-08-31",
+    "close": 7686.14,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-01T11:35:12+00:00"
+   },
+   {
+    "date": "2026-09-01",
+    "close": 7631.47,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-02T11:12:11+00:00"
+   },
+   {
+    "date": "2026-09-02",
+    "close": 7666.6,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-03T11:47:20+00:00"
+   },
+   {
+    "date": "2026-09-03",
+    "close": 7747.71,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-04T11:11:49+00:00"
+   },
+   {
+    "date": "2026-09-04",
+    "close": 7718.6,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-07T12:21:48+00:00"
+   },
+   {
+    "date": "2026-09-08",
+    "close": 7673.52,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-08T23:32:29+00:00"
+   },
+   {
+    "date": "2026-09-09",
+    "close": 7636.36,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-09T23:26:29+00:00"
+   },
+   {
+    "date": "2026-09-10",
+    "close": 7591.7,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-11T13:28:58+00:00"
+   },
+   {
+    "date": "2026-09-11",
+    "close": 7656.98,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-11T23:27:42+00:00"
+   },
+   {
+    "date": "2026-09-14",
+    "close": 7619.98,
+    "source": "git_backfill",
+    "method": "sparkline_anchor"
+   },
+   {
+    "date": "2026-09-15",
+    "close": 7585.73,
+    "source": "git_backfill",
+    "method": "sparkline_anchor"
+   },
+   {
+    "date": "2026-09-16",
+    "close": 7551.81,
+    "source": "git_backfill",
+    "method": "sparkline_anchor"
+   },
+   {
+    "date": "2026-09-17",
+    "close": 7637.76,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-17T23:39:27+00:00"
+   },
+   {
+    "date": "2026-09-18",
+    "close": 7650.5,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-18T23:32:32+00:00"
+   },
+   {
+    "date": "2026-09-21",
+    "close": 7764.7,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-22T00:17:16+00:00"
+   },
+   {
+    "date": "2026-09-22",
+    "close": 7764.64,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-22T23:45:24+00:00"
+   },
+   {
+    "date": "2026-09-23",
+    "close": 7706.03,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-23T23:54:41+00:00"
+   },
+   {
+    "date": "2026-09-24",
+    "close": 7704.13,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-25T00:03:21+00:00"
+   },
+   {
+    "date": "2026-09-25",
+    "close": 7743.41,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-26T00:07:33+00:00"
+   },
+   {
+    "date": "2026-09-28",
+    "close": 7683.69,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-29T01:16:41+00:00"
+   },
+   {
+    "date": "2026-09-29",
+    "close": 7670.84,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-30T00:41:38+00:00"
+   },
+   {
+    "date": "2026-09-30",
+    "close": 7651.54,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-01T00:43:19+00:00"
+   },
+   {
+    "date": "2026-10-01",
+    "close": 7666.45,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-02T01:08:08+00:00"
+   },
+   {
+    "date": "2026-10-02",
+    "close": 7722.72,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-03T00:50:45+00:00"
+   },
+   {
+    "date": "2026-10-05",
+    "close": 7773.95,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-06T01:59:18+00:00"
+   },
+   {
+    "date": "2026-10-06",
+    "close": 7818.93,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-07T01:06:16+00:00"
+   },
+   {
+    "date": "2026-10-07",
+    "close": 7801.77,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-08T01:24:31+00:00"
+   },
+   {
+    "date": "2026-10-08",
+    "close": 7765.36,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-09T01:30:56+00:00"
+   },
+   {
+    "date": "2026-10-09",
+    "close": 7811.54,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-10T01:19:50+00:00"
+   },
+   {
+    "date": "2026-10-12",
+    "close": 7807.24,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-13T19:20:13+08:00"
+   },
+   {
+    "date": "2026-10-13",
+    "close": 7805.45,
+    "source": "git_backfill",
+    "method": "sparkline_anchor"
+   },
+   {
+    "date": "2026-10-14",
+    "close": 7718.94,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-15T00:12:02+00:00"
+   },
+   {
+    "date": "2026-10-15",
+    "close": 7744.06,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-16T17:43:44+08:00"
+   },
+   {
+    "date": "2026-10-16",
+    "close": 7659.44,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-19T17:42:48+08:00"
+   },
+   {
+    "date": "2026-10-19",
+    "close": 7690.73,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-20T17:42:01+08:00"
+   },
+   {
+    "date": "2026-10-20",
+    "close": 7712.57,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-21T17:41:47+08:00"
+   },
+   {
+    "date": "2026-10-21",
+    "close": 7757.17,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-22T00:21:12+00:00"
+   },
+   {
+    "date": "2026-10-22",
+    "close": 7663.43,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-23T12:59:56+00:00"
+   },
+   {
+    "date": "2026-10-23",
+    "close": 7623.68,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-24T00:08:18+00:00"
+   },
+   {
+    "date": "2026-10-26",
+    "close": 7676.77,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-27T13:04:24+00:00"
+   }
+  ],
+  "^IXIC": [
+   {
+    "date": "2026-08-26",
+    "close": 26130.2,
+    "source": "git_backfill",
+    "git_commit_at": "2026-08-27T10:02:35+08:00"
+   },
+   {
+    "date": "2026-08-27",
+    "close": 26541.35,
+    "source": "git_backfill",
+    "git_commit_at": "2026-08-28T07:40:36+00:00"
+   },
+   {
+    "date": "2026-08-28",
+    "close": 26402.42,
+    "source": "git_backfill",
+    "git_commit_at": "2026-08-29T04:00:25+00:00"
+   },
+   {
+    "date": "2026-08-31",
+    "close": 26370.89,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-01T11:35:12+00:00"
+   },
+   {
+    "date": "2026-09-01",
+    "close": 26099.77,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-02T11:12:11+00:00"
+   },
+   {
+    "date": "2026-09-02",
+    "close": 26217.83,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-03T11:47:20+00:00"
+   },
+   {
+    "date": "2026-09-03",
+    "close": 26584.06,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-04T11:11:49+00:00"
+   },
+   {
+    "date": "2026-09-04",
+    "close": 26506.99,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-07T12:21:48+00:00"
+   },
+   {
+    "date": "2026-09-08",
+    "close": 26421.41,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-08T23:32:29+00:00"
+   },
+   {
+    "date": "2026-09-09",
+    "close": 26253.34,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-09T23:26:29+00:00"
+   },
+   {
+    "date": "2026-09-10",
+    "close": 26081.72,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-11T13:28:58+00:00"
+   },
+   {
+    "date": "2026-09-11",
+    "close": 26333.04,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-11T23:27:42+00:00"
+   },
+   {
+    "date": "2026-09-14",
+    "close": 26186.41,
+    "source": "git_backfill",
+    "method": "sparkline_anchor"
+   },
+   {
+    "date": "2026-09-15",
+    "close": 25981.57,
+    "source": "git_backfill",
+    "method": "sparkline_anchor"
+   },
+   {
+    "date": "2026-09-16",
+    "close": 25978.43,
+    "source": "git_backfill",
+    "method": "sparkline_anchor"
+   },
+   {
+    "date": "2026-09-17",
+    "close": 26418.3,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-17T23:39:27+00:00"
+   },
+   {
+    "date": "2026-09-18",
+    "close": 26522.54,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-18T23:32:32+00:00"
+   },
+   {
+    "date": "2026-09-21",
+    "close": 27122.09,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-22T00:17:16+00:00"
+   },
+   {
+    "date": "2026-09-22",
+    "close": 27244.28,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-22T23:45:24+00:00"
+   },
+   {
+    "date": "2026-09-23",
+    "close": 26936.04,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-23T23:54:41+00:00"
+   },
+   {
+    "date": "2026-09-24",
+    "close": 26939.37,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-25T00:03:21+00:00"
+   },
+   {
+    "date": "2026-09-25",
+    "close": 27068.72,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-26T00:07:33+00:00"
+   },
+   {
+    "date": "2026-09-28",
+    "close": 26820.38,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-29T01:16:41+00:00"
+   },
+   {
+    "date": "2026-09-29",
+    "close": 26797.54,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-30T00:41:38+00:00"
+   },
+   {
+    "date": "2026-09-30",
+    "close": 26861.06,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-01T00:43:19+00:00"
+   },
+   {
+    "date": "2026-10-01",
+    "close": 26871.6,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-02T01:08:08+00:00"
+   },
+   {
+    "date": "2026-10-02",
+    "close": 27190.86,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-03T00:50:45+00:00"
+   },
+   {
+    "date": "2026-10-05",
+    "close": 27477.31,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-06T01:59:18+00:00"
+   },
+   {
+    "date": "2026-10-06",
+    "close": 27599.89,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-07T01:06:16+00:00"
+   },
+   {
+    "date": "2026-10-07",
+    "close": 27538.69,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-08T01:24:31+00:00"
+   },
+   {
+    "date": "2026-10-08",
+    "close": 27193.34,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-09T01:30:56+00:00"
+   },
+   {
+    "date": "2026-10-09",
+    "close": 27366.17,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-10T01:19:50+00:00"
+   },
+   {
+    "date": "2026-10-12",
+    "close": 27245.9,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-13T19:20:13+08:00"
+   },
+   {
+    "date": "2026-10-13",
+    "close": 27204.38,
+    "source": "git_backfill",
+    "method": "sparkline_anchor"
+   },
+   {
+    "date": "2026-10-14",
+    "close": 26692.87,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-15T00:12:02+00:00"
+   },
+   {
+    "date": "2026-10-15",
+    "close": 26713.03,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-16T17:43:44+08:00"
+   },
+   {
+    "date": "2026-10-16",
+    "close": 26140.03,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-19T17:42:48+08:00"
+   },
+   {
+    "date": "2026-10-19",
+    "close": 26430.89,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-20T17:42:01+08:00"
+   },
+   {
+    "date": "2026-10-20",
+    "close": 26424.82,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-21T17:41:47+08:00"
+   },
+   {
+    "date": "2026-10-21",
+    "close": 26702.86,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-22T00:21:12+00:00"
+   },
+   {
+    "date": "2026-10-22",
+    "close": 26008.86,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-23T12:59:56+00:00"
+   },
+   {
+    "date": "2026-10-23",
+    "close": 25955.34,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-24T00:08:18+00:00"
+   },
+   {
+    "date": "2026-10-26",
+    "close": 26169.38,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-27T13:04:24+00:00"
+   }
+  ],
+  "^SOX": [
+   {
+    "date": "2026-08-26",
+    "close": 11611.24,
+    "source": "git_backfill",
+    "git_commit_at": "2026-08-27T10:02:35+08:00"
+   },
+   {
+    "date": "2026-08-27",
+    "close": 11882.17,
+    "source": "git_backfill",
+    "git_commit_at": "2026-08-28T07:40:36+00:00"
+   },
+   {
+    "date": "2026-08-28",
+    "close": 11469.66,
+    "source": "git_backfill",
+    "git_commit_at": "2026-08-29T04:00:25+00:00"
+   },
+   {
+    "date": "2026-08-31",
+    "close": 11535.05,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-01T11:35:12+00:00"
+   },
+   {
+    "date": "2026-09-01",
+    "close": 11288.61,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-02T11:12:11+00:00"
+   },
+   {
+    "date": "2026-09-02",
+    "close": 11339.25,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-03T11:47:20+00:00"
+   },
+   {
+    "date": "2026-09-03",
+    "close": 11352.13,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-04T11:11:49+00:00"
+   },
+   {
+    "date": "2026-09-04",
+    "close": 11735.26,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-07T12:21:48+00:00"
+   },
+   {
+    "date": "2026-09-08",
+    "close": 11887.87,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-08T23:32:29+00:00"
+   },
+   {
+    "date": "2026-09-09",
+    "close": 11931.32,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-09T23:26:29+00:00"
+   },
+   {
+    "date": "2026-09-10",
+    "close": 11614.17,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-11T13:28:58+00:00"
+   },
+   {
+    "date": "2026-09-11",
+    "close": 11824.0,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-11T23:27:42+00:00"
+   },
+   {
+    "date": "2026-09-14",
+    "close": 11131.28,
+    "source": "git_backfill",
+    "method": "sparkline_anchor"
+   },
+   {
+    "date": "2026-09-15",
+    "close": 11175.55,
+    "source": "git_backfill",
+    "method": "sparkline_anchor"
+   },
+   {
+    "date": "2026-09-16",
+    "close": 11246.11,
+    "source": "git_backfill",
+    "method": "sparkline_anchor"
+   },
+   {
+    "date": "2026-09-17",
+    "close": 11599.49,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-17T23:39:27+00:00"
+   },
+   {
+    "date": "2026-09-18",
+    "close": 11921.69,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-18T23:32:32+00:00"
+   },
+   {
+    "date": "2026-09-21",
+    "close": 12433.17,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-22T00:17:16+00:00"
+   },
+   {
+    "date": "2026-09-22",
+    "close": 12689.82,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-22T23:45:24+00:00"
+   },
+   {
+    "date": "2026-09-23",
+    "close": 12534.27,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-23T23:54:41+00:00"
+   },
+   {
+    "date": "2026-09-24",
+    "close": 12492.54,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-25T00:03:21+00:00"
+   },
+   {
+    "date": "2026-09-25",
+    "close": 12668.93,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-26T00:07:33+00:00"
+   },
+   {
+    "date": "2026-09-28",
+    "close": 12465.24,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-29T01:16:41+00:00"
+   },
+   {
+    "date": "2026-09-29",
+    "close": 12629.16,
+    "source": "git_backfill",
+    "git_commit_at": "2026-09-30T00:41:38+00:00"
+   },
+   {
+    "date": "2026-09-30",
+    "close": 12628.62,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-01T00:43:19+00:00"
+   },
+   {
+    "date": "2026-10-01",
+    "close": 12829.0,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-02T01:08:08+00:00"
+   },
+   {
+    "date": "2026-10-02",
+    "close": 13136.67,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-03T00:50:45+00:00"
+   },
+   {
+    "date": "2026-10-05",
+    "close": 13172.74,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-06T01:59:18+00:00"
+   },
+   {
+    "date": "2026-10-06",
+    "close": 13217.82,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-07T01:06:16+00:00"
+   },
+   {
+    "date": "2026-10-07",
+    "close": 13066.15,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-08T01:24:31+00:00"
+   },
+   {
+    "date": "2026-10-08",
+    "close": 12623.71,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-09T01:30:56+00:00"
+   },
+   {
+    "date": "2026-10-09",
+    "close": 12572.42,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-10T01:19:50+00:00"
+   },
+   {
+    "date": "2026-10-12",
+    "close": 12236.79,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-13T19:20:13+08:00"
+   },
+   {
+    "date": "2026-10-13",
+    "close": 12208.79,
+    "source": "git_backfill",
+    "method": "sparkline_anchor"
+   },
+   {
+    "date": "2026-10-14",
+    "close": 11684.38,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-15T00:12:02+00:00"
+   },
+   {
+    "date": "2026-10-15",
+    "close": 11581.21,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-16T17:43:44+08:00"
+   },
+   {
+    "date": "2026-10-16",
+    "close": 11137.29,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-19T17:42:48+08:00"
+   },
+   {
+    "date": "2026-10-19",
+    "close": 11316.34,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-20T17:42:01+08:00"
+   },
+   {
+    "date": "2026-10-20",
+    "close": 11283.81,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-21T17:41:47+08:00"
+   },
+   {
+    "date": "2026-10-21",
+    "close": 11505.56,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-22T00:21:12+00:00"
+   },
+   {
+    "date": "2026-10-22",
+    "close": 10731.98,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-23T12:59:56+00:00"
+   },
+   {
+    "date": "2026-10-23",
+    "close": 10779.46,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-24T00:08:18+00:00"
+   },
+   {
+    "date": "2026-10-26",
+    "close": 11083.47,
+    "source": "git_backfill",
+    "git_commit_at": "2026-10-27T13:04:24+00:00"
+   }
+  ]
+ },
+ "updated_at": "2026-10-28T08:04:32+00:00",
+ "row_count": {
+  "^DJI": 43,
+  "^GSPC": 43,
+  "^IXIC": 43,
+  "^SOX": 43
+ }
+}

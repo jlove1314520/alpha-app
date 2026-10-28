@@ -66,6 +66,16 @@ def main():
     OUT_PATH.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"寫入 {OUT_PATH}，{len(indices)}/{len(INDICES)} 檔成功" + (f"，失敗：{failed}" if failed else ""))
 
+    # 先.一三八-5：非盤中收盤 append 進 data/us_index_close_history.json（零新增請求）。
+    # 累積檔自身失敗只警告，不影響 market_us.json（十二節）。
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from us_index_close_history import append_from_market_us
+        n = append_from_market_us(out, source="yfinance")
+        print(f"收盤累積 data/us_index_close_history.json：變動 {n} 列")
+    except Exception as e:
+        print(f"  ・[警告] 收盤累積失敗（不影響 market_us.json）：{e}")
+
     if not indices:
         sys.exit(1)
 
