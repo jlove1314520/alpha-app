@@ -499,6 +499,8 @@ jobs:
           git add -f research/data/paper_8_log.jsonl 2>/dev/null || true
           git add -f research/data/paper_8_taiex_closes.json 2>/dev/null || true
           for f in paper_10_log.jsonl paper_10_control_log.jsonl paper_10_events.json paper_10_control.json paper_11_log.jsonl paper_13_log.jsonl paper_14_log.jsonl paper_14_shadow_log.jsonl paper_14_shadow.json paper_15_log.jsonl paper_16_log.jsonl paper_17_log.jsonl paper_18_log.jsonl; do git add -f research/data/$f 2>/dev/null || true; done
+          # 先.一三八-6：前向帳本最後一行半截時 paper_forward_common.read_log 會把原檔備份到這個資料夾（十節，備份要進 repo 才能還原）
+          git add -f research/data/ledger_corrupt_backup/ 2>/dev/null || true
           # 先.六十九-3：commit 訊息註明 quote_lite（兩層：熱門單檔＋分片）本次變動檔數
           QL=$(git diff --cached --name-only -- data/quote_lite | wc -l | tr -d ' ')
           git diff --cached --quiet && echo "無變動，略過 commit" || git commit -m "自動更新大盤/類股/三大法人/期貨/美股指數/個股基本面/匯率/融資維持率/個股財報籌碼/選股分數(價值成長+題材動能+未來性)/前瞻選股台帳 $(date -u +'%Y-%m-%d %H:%M UTC')（quote_lite 變動 ${QL} 檔）"

@@ -131,10 +131,53 @@ class Spec:
     extra_summary: dict = field(default_factory=dict)
 
 
+LEDGER_BACKUP_DIR = ROOT / "research" / "data" / "ledger_corrupt_backup"
+NL = chr(10)
+
+
 def read_log(spec: Spec) -> list:
+    """讀前向帳本（先.一三八-6，Cowork 收件匣 027 已定案採 先.一三五-1t-a 的 (b)＋(c)）：
+    (b) 只有「最後一行半截且檔尾沒有換行」（_append 寫到一半被中斷的唯一形狀）→ 原檔整份備份到
+        research/data/ledger_corrupt_backup/<帳本名>.corrupt-<時間>，帳本丟棄該行後照常補跑；摘要的 ledger_repairs 會列出備份。
+    其他位置的壞行 → 照舊丟 ValueError（追蹤停跑、摘要 last_error、看守員判 ERROR，等人工）。
+    (c) 帳本檔存在但沒有任何有效列 → 丟 RuntimeError 停跑，不重新建倉（擋住靜默重置前向紀錄）。
+    檔案不存在／讀不到 → []（尚未起跑）。"""
     try:
-        return [json.loads(l) for l in spec.log_path.read_text(encoding="utf-8").splitlines() if l.strip()]
+        text = spec.log_path.read_text(encoding="utf-8")
     except OSError:
+        return []
+    lines = text.splitlines()
+    nonblank = [i for i, l in enumerate(lines) if l.strip()]
+    rows = []
+    for i in nonblank:
+        try:
+            rows.append(json.loads(lines[i]))
+        except ValueError:
+            if i == nonblank[-1] and not text.endswith(NL):
+                _drop_half_tail(spec, text, lines[:i])
+                break
+            raise ValueError(f"前向帳本 {spec.log_path.name} 第 {i + 1} 行壞掉（不是最後一行半截），停跑等人工修帳本")
+    if not rows:
+        raise RuntimeError(f"前向帳本 {spec.log_path.name} 存在但沒有任何有效列，停跑、不重新建倉（等人工確認）")
+    return rows
+
+
+def _drop_half_tail(spec: Spec, text: str, keep: list) -> None:
+    LEDGER_BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now(TW).strftime("%Y%m%d-%H%M%S")
+    bak = LEDGER_BACKUP_DIR / f"{spec.log_path.name}.corrupt-{stamp}"
+    bak.write_text(text, encoding="utf-8", newline="")
+    tmp = spec.log_path.with_name(spec.log_path.name + ".tmp")
+    body = NL.join(l for l in keep if l.strip())
+    tmp.write_text(body + NL if body else "", encoding="utf-8", newline="")
+    tmp.replace(spec.log_path)
+    print(f"[warn] {spec.log_path.name} 最後一行半截：原檔備份 {bak.name}，已丟棄該行後補跑（先.一三八-6 (b)）")
+
+
+def ledger_repairs(spec: Spec) -> list:
+    try:
+        return sorted(p.name for p in LEDGER_BACKUP_DIR.glob(spec.log_path.name + ".corrupt-*"))
+    except Exception:  # noqa: BLE001
         return []
 
 
@@ -339,6 +382,10 @@ def write_summary(spec: Spec, px: Px | None, log: list, extra: dict | None = Non
            "generated_at": datetime.now(TW).isoformat(timespec="seconds"), "judge": spec.judge_text,
            "known_limit": spec.known_limit, "disclaimer": "紙上追蹤，非投資建議。虛擬帳戶，未使用真實資金。",
            **spec.extra_summary, **(extra or {})}
+    repairs = ledger_repairs(spec) if spec.log_path is not None else []
+    if repairs:
+        doc["ledger_repairs"] = {"backups": repairs, "dir": "research/data/ledger_corrupt_backup",
+                                 "rule": "最後一行半截已備份原檔後丟棄該行補跑（先.一三八-6 (b)）"}
     if log:
         ev = log[-1]
         navs = [e["nav"] for e in log if e.get("nav") is not None]

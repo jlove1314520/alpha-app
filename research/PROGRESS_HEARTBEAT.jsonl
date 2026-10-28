@@ -1145,3 +1145,4 @@
 {"ts": "2026-10-28T13:27:00+08:00", "item": "先.一二〇-3a", "summary": "10 筆未定進場根因＝進場日當天該股無價格列、程式只認那天；屬規則取捨，開提案 3b", "status": "DONE", "cycle_id": "20261028-130102"}
 {"ts": "2026-10-28T13:33:00+08:00", "item": "先.一二〇-3c", "summary": "7 檔進場日無列：2 檔寫入時未掛牌、4 檔極低成交疑零成交、6167 查不到（疑停牌或漏抓），寫回 3b", "status": "DONE", "cycle_id": "20261028-130102"}
 {"ts": "2026-10-28T16:18:00+08:00", "item": "先.一三八-5", "summary": "四大指數收盤累積檔 us_index_close_history.json（fetch_market_us append＋market.yml git add）＋git 歷史回填 43 收盤日／指數（含 sparkline 錨定 4 日）", "status": "DONE", "cycle_id": "20261028-160102"}
+{"ts": "2026-10-28T16:26:00+08:00", "item": "先.一三八-6", "summary": "前向帳本壞行規則 (b) 最後一行半截備份後丟棄補跑＋(c) 無有效列停跑不重建倉，paper_forward_common 共用、自測擴充", "status": "DONE", "cycle_id": "20261028-160102"}
