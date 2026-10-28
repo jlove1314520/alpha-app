@@ -76,3 +76,14 @@ Stooq 免費 key（需人工過 CAPTCHA）。兩者都需要總司令親自領�
 - 兩者都由 `.github/scripts/fetch_news_events.py` 同一班產生（news_events.yml 每 30 分鐘、本機 `scripts/news_local_fallback.py` 補班），零額外請求。
 - 個股新聞只比對標題裡的代號與官方名稱（`news_matcher`），覆蓋率有限；存檔沒有某檔＝近 14 天沒有點名它的新聞，不是錯誤。
 - 10/01～10/11、10/14 的新聞在先.一〇四-1 修好排序前就被擠掉，存檔也補不回。
+
+## 🟢 上櫃日線成交量＝一般交易整股，不含零股／盤後定價（2026-10-29 先.一四〇-12）
+
+- `data/price_history` 上櫃的 `volume`／`turnover` 取自 TPEx openapi `tpex_mainboard_quotes`（`TradingShares`／`TransactionAmount`，`update_price_history.py::fetch_tpex()`）。
+- 跟 TPEx 網頁「個股日成交資訊」（`afterTrading/tradingStock`）的「成交張數／成交仟元」**口徑不同**，後者較大，不是本機漏算：
+  1. 既有 raw 8 檔×10 月共 71 個同日比對（零請求）：本機量 **71/71 都是 1000 股整數倍**；34 筆一致、37 筆本機 < 官方，**沒有一筆本機 > 官方**，金額也一樣。
+  2. 官方在「沒有整股成交」的日子仍有量值（3085 10/22「0 張、5 仟元」、10/27「0 張、1 筆」，開高低收都是 `--`）＝零股成交。
+  3. TPEx swagger 另有 `tpex_odd_stock`（零股交易資訊）、`tpex_off_market`（盤後定價行情）兩個獨立端點，主板收盤行情不含這兩種；個股日成交資訊註記只寫「不含鉅額交易」。
+- 影響：上櫃小型股的「成交量」偏小（例 3632 10/21 整股 1 張、含零股 8 張）。流動性門檻、量能類訊號用的是一般交易整股，這是目前的定義。
+- 上市（STOCK_DAY_ALL／MI_INDEX）是否同樣只含整股，本次未查證。
+- 要不要改成含零股＋盤後定價＝改資料定義，屬提案，目前不改。
