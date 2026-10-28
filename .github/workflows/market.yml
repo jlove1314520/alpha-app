@@ -524,5 +524,7 @@ jobs:
             git rebase origin/main || { echo "::warning::market.yml rebase衝突檔：$(git diff --name-only --diff-filter=U | paste -sd ' ')"; echo "rebase衝突，放棄自動解決"; git rebase --abort; exit 1; }
             sleep $((RANDOM % 6 + 3))
           done
+          # 先.一四〇-11：run log 要 admin 權限才能讀，重試耗盡也寫 annotation（跟 rebase 衝突那條分得開），下次 exit 1 能直接看到是哪一種
+          echo "::warning::market.yml push 重試 5 次仍失敗：$(git status -sb | head -1)"
           echo "重試5次後仍push失敗"
           exit 1
