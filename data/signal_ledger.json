@@ -2,8 +2,8 @@
  "meta": {
   "created_at": "2026-10-11T14:17:33.521387+08:00",
   "schema_note": "B19 前瞻訊號台帳（非回測）：每筆在事件發生後 4 日內事前寫入，寫入後內容不可修改；entry_close 為寫入日之後第一個交易日收盤（避免前視）；returns.t5/t20/t60 由 update_signal_ledger_returns.py 只回填 null 欄位。status=待驗證線索 者不得影響任何評分。規格 research/B19_SIGNAL_LEDGER_SPEC.md。非投資建議。",
-  "last_build_at": "2026-10-29T00:03:17.460517+08:00",
-  "total_signals": 1299,
+  "last_build_at": "2026-10-29T00:54:46.101911+08:00",
+  "total_signals": 1315,
   "source": ".github/scripts/build_signal_ledger.py（讀 events.json L1＋news.json L3＋price_history.json）",
   "last_returns_backfill_at": "2026-10-29T00:03:19.007118+08:00",
   "entry_skipped": {
@@ -47167,6 +47167,572 @@
    "anchor_trade_date": "2026-10-28",
    "weight": 1.0,
    "ref_close": 51.0,
+   "ref_close_date": "2026-10-28",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "4195c57072877cec",
+   "recorded_at": "2026-10-29T00:54:46.101911+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9843004",
+   "type": "媒體報導",
+   "code": "5469",
+   "event_date": "2026-10-29",
+   "title": "瀚宇博、精成科攻 AI 應用",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0453,
+   "pre_vol_spike": 0.989,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-28",
+   "weight": 1.0,
+   "ref_close": 82.2,
+   "ref_close_date": "2026-10-28",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "56f5dfda1c2b6398",
+   "recorded_at": "2026-10-29T00:54:46.101911+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9843004",
+   "type": "媒體報導",
+   "code": "6191",
+   "event_date": "2026-10-29",
+   "title": "瀚宇博、精成科攻 AI 應用",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0033,
+   "pre_vol_spike": 0.658,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-28",
+   "weight": 1.0,
+   "ref_close": 90.7,
+   "ref_close_date": "2026-10-28",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "2eeb2403b5b9b00c",
+   "recorded_at": "2026-10-29T00:54:46.101911+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9843011",
+   "type": "媒體報導",
+   "code": "3026",
+   "event_date": "2026-10-29",
+   "title": "禾伸堂第3季 EPS 4.36 元 是方 4.31 元",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0218,
+   "pre_vol_spike": 1.057,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-28",
+   "weight": 1.0,
+   "ref_close": 751.0,
+   "ref_close_date": "2026-10-28",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "d3fecda0a979a005",
+   "recorded_at": "2026-10-29T00:54:46.101911+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9843034",
+   "type": "媒體報導",
+   "code": "8114",
+   "event_date": "2026-10-29",
+   "title": "振樺電前三季賺逾一股本",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0056,
+   "pre_vol_spike": 2.036,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-28",
+   "weight": 0.5,
+   "ref_close": 176.0,
+   "ref_close_date": "2026-10-28",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "19f08d0bf016325c",
+   "recorded_at": "2026-10-29T00:54:46.101911+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9843388",
+   "type": "媒體報導",
+   "code": "1432",
+   "event_date": "2026-10-28",
+   "title": "大魯閣部署 AI 運動科技",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0,
+   "pre_vol_spike": 0.83,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-28",
+   "weight": 1.0,
+   "ref_close": 14.95,
+   "ref_close_date": "2026-10-28",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "accd7f70471fc32c",
+   "recorded_at": "2026-10-29T00:54:46.101911+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9843391",
+   "type": "媒體報導",
+   "code": "1907",
+   "event_date": "2026-10-28",
+   "title": "永豐餘兩家子公司擬參與永豐金現增",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0139,
+   "pre_vol_spike": 0.554,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-28",
+   "weight": 1.0,
+   "ref_close": 28.4,
+   "ref_close_date": "2026-10-28",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "1a475dc7be3efade",
+   "recorded_at": "2026-10-29T00:54:46.101911+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9843391",
+   "type": "媒體報導",
+   "code": "2890",
+   "event_date": "2026-10-28",
+   "title": "永豐餘兩家子公司擬參與永豐金現增",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0232,
+   "pre_vol_spike": 1.751,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-28",
+   "weight": 1.0,
+   "ref_close": 46.3,
+   "ref_close_date": "2026-10-28",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "9ac11793bcf8a673",
+   "recorded_at": "2026-10-29T00:54:46.101911+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5739/9843170",
+   "type": "媒體報導",
+   "code": "2368",
+   "event_date": "2026-10-28",
+   "title": "金像電、創意 認購靚",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.052,
+   "pre_vol_spike": 0.782,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-28",
+   "weight": 1.0,
+   "ref_close": 1185.0,
+   "ref_close_date": "2026-10-28",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "06e700793bffeced",
+   "recorded_at": "2026-10-29T00:54:46.101911+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5739/9843177",
+   "type": "媒體報導",
+   "code": "2454",
+   "event_date": "2026-10-28",
+   "title": "聯發科 兩檔放電",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0071,
+   "pre_vol_spike": 1.636,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-28",
+   "weight": 1.0,
+   "ref_close": 4235.0,
+   "ref_close_date": "2026-10-28",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "c0fbdcfe920840d9",
+   "recorded_at": "2026-10-29T00:54:46.101911+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5739/9843179",
+   "type": "媒體報導",
+   "code": "6805",
+   "event_date": "2026-10-28",
+   "title": "富世達 挑逾100天",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0535,
+   "pre_vol_spike": 0.723,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-28",
+   "weight": 1.0,
+   "ref_close": 2460.0,
+   "ref_close_date": "2026-10-28",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "0273ddce2833c13c",
+   "recorded_at": "2026-10-29T00:54:46.101911+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E6%97%A5%E6%9C%88%E5%85%89%E6%8A%95%E6%8E%A7%E5%85%AC%E5%8F%B8%E7%92%B0%E6%97%AD%E9%9B%BB%E5%AD%90-%E8%82%A1-%E5%85%AC%E5%8F%B8%E5%85%AC%E5%91%8A%E8%91%A3%E4%BA%8B%E6%9C%83%E6%B1%BA%E8%AD%B0%E5%8F%AC%E9%96%8B2026%E5%B9%B4%E7%AC%AC%E4%BA%8C%E6%AC%A1%E8%87%A8%E6%99%82%E8%82%A1%E6%9D%B1%E6%9C%83-145454291.html",
+   "type": "媒體報導",
+   "code": "3711",
+   "event_date": "2026-10-28",
+   "title": "【公告】日月光投控公司環旭電子(股)公司公告董事會決議召開2026年第二次臨時股東會",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0373,
+   "pre_vol_spike": 1.651,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-28",
+   "weight": 1.0,
+   "ref_close": 695.0,
+   "ref_close_date": "2026-10-28",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "72f812bce513da40",
+   "recorded_at": "2026-10-29T00:54:46.101911+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E6%97%A5%E6%9C%88%E5%85%89%E6%8A%95%E6%8E%A7%E4%BB%A3%E5%AD%90%E5%85%AC%E5%8F%B8%E7%92%B0%E6%97%AD%E9%9B%BB%E5%AD%90-%E8%82%A1-%E5%85%AC%E5%8F%B8%E5%85%AC%E5%91%8A%E8%91%A3%E4%BA%8B%E6%9C%83%E6%B1%BA%E8%AD%B0%E7%B5%82%E6%AD%A2%E5%AF%A6%E6%96%BD2026%E5%B9%B4%E5%93%A1%E5%B7%A5%E8%AA%8D%E8%82%A1%E6%AC%8A%E6%86%91%E8%AD%89%E4%BA%8B%E5%AE%9C-145452237.html",
+   "type": "媒體報導",
+   "code": "3711",
+   "event_date": "2026-10-28",
+   "title": "【公告】日月光投控代子公司環旭電子(股)公司公告董事會決議終止實施2026年員工認股權憑證事宜",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0373,
+   "pre_vol_spike": 1.651,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-28",
+   "weight": 1.0,
+   "ref_close": 695.0,
+   "ref_close_date": "2026-10-28",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "95a4e86b1f15a342",
+   "recorded_at": "2026-10-29T00:54:46.101911+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E6%97%A5%E6%9C%88%E5%85%89%E6%8A%95%E6%8E%A7%E4%BB%A3%E5%AD%90%E5%85%AC%E5%8F%B8%E7%92%B0%E6%97%AD%E9%9B%BB%E5%AD%90-%E8%82%A1-%E5%85%AC%E5%8F%B8%E5%85%AC%E5%91%8A%E8%91%A3%E4%BA%8B%E6%9C%83%E6%B1%BA%E8%AD%B0%E7%B5%82%E6%AD%A2%E5%AF%A6%E6%96%BD2026%E5%B9%B4%E5%93%A1%E5%B7%A5%E6%8C%81%E8%82%A1%E8%A8%88%E5%8A%83%E6%A1%88-145450602.html",
+   "type": "媒體報導",
+   "code": "3711",
+   "event_date": "2026-10-28",
+   "title": "【公告】日月光投控代子公司環旭電子(股)公司公告董事會決議終止實施2026年員工持股計劃案",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0373,
+   "pre_vol_spike": 1.651,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-28",
+   "weight": 1.0,
+   "ref_close": 695.0,
+   "ref_close_date": "2026-10-28",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "8c2a2009ab77931c",
+   "recorded_at": "2026-10-29T00:54:46.101911+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E6%97%A5%E6%9C%88%E5%85%89%E6%8A%95%E6%8E%A7-%E4%BB%A3%E5%AD%90%E5%85%AC%E5%8F%B8%E7%92%B0%E6%97%AD%E9%9B%BB%E5%AD%90-%E8%82%A1-%E5%85%AC%E5%8F%B8%E5%85%AC%E5%91%8A%E8%91%A3%E4%BA%8B%E6%9C%83%E6%B1%BA%E8%AD%B0%E7%B5%82%E6%AD%A2%E5%AF%A6%E6%96%BD2026%E5%B9%B4%E5%93%A1%E5%B7%A5%E6%8C%81%E8%82%A1%E8%A8%88%E5%8A%83%E6%A1%88-143900556.html",
+   "type": "媒體報導",
+   "code": "3711",
+   "event_date": "2026-10-28",
+   "title": "日月光投控 代子公司環旭電子(股)公司公告董事會決議終止實施2026年員工持股計劃案",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0373,
+   "pre_vol_spike": 1.651,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-28",
+   "weight": 1.0,
+   "ref_close": 695.0,
+   "ref_close_date": "2026-10-28",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "75aa128b33bb4df5",
+   "recorded_at": "2026-10-29T00:54:46.101911+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E6%97%A5%E6%9C%88%E5%85%89%E6%8A%95%E6%8E%A7-%E4%BB%A3%E5%AD%90%E5%85%AC%E5%8F%B8%E7%92%B0%E6%97%AD%E9%9B%BB%E5%AD%90-%E8%82%A1-%E5%85%AC%E5%8F%B8%E5%85%AC%E5%91%8A%E8%91%A3%E4%BA%8B%E6%9C%83%E6%B1%BA%E8%AD%B0%E7%B5%82%E6%AD%A2%E5%AF%A6%E6%96%BD2026%E5%B9%B4%E5%93%A1%E5%B7%A5%E8%AA%8D%E8%82%A1%E6%AC%8A%E6%86%91%E8%AD%89%E4%BA%8B%E5%AE%9C-142900454.html",
+   "type": "媒體報導",
+   "code": "3711",
+   "event_date": "2026-10-28",
+   "title": "日月光投控 代子公司環旭電子(股)公司公告董事會決議終止實施2026年員工認股權憑證事宜",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0373,
+   "pre_vol_spike": 1.651,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-28",
+   "weight": 1.0,
+   "ref_close": 695.0,
+   "ref_close_date": "2026-10-28",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "6dc8da77e8525a6c",
+   "recorded_at": "2026-10-29T00:54:46.101911+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E6%97%A5%E6%9C%88%E5%85%89%E6%8A%95%E6%8E%A7-%E4%BB%A3%E5%AD%90%E5%85%AC%E5%8F%B8%E7%92%B0%E6%97%AD%E9%9B%BB%E5%AD%90-%E8%82%A1-%E5%85%AC%E5%8F%B8%E5%85%AC%E5%91%8A%E8%91%A3%E4%BA%8B%E6%9C%83%E6%B1%BA%E8%AD%B0%E5%8F%AC%E9%96%8B2026%E5%B9%B4%E7%AC%AC%E4%BA%8C%E6%AC%A1%E8%87%A8%E6%99%82%E8%82%A1%E6%9D%B1%E6%9C%83-141900041.html",
+   "type": "媒體報導",
+   "code": "3711",
+   "event_date": "2026-10-28",
+   "title": "日月光投控 代子公司環旭電子(股)公司公告董事會決議召開2026年第二次臨時股東會",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0373,
+   "pre_vol_spike": 1.651,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-28",
+   "weight": 1.0,
+   "ref_close": 695.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
    "entry_close": null,
