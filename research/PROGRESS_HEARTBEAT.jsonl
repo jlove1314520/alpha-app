@@ -1137,3 +1137,4 @@
 {"ts": "2026-10-28T10:42:00+08:00", "item": "先.一三五-1t", "summary": "前向帳本壞行重現成立（半截／中間壞行 → step 丟 JSONDecodeError；空白帳本 → 靜默重新建倉）；run_main 失敗改寫 last_error 進 data/paper_N.json（paper_10～18），帳本不動；新自測 selftest_paper_forward_ledger_corrupt.py；處理規則另立 1t-a 提案", "status": "DONE", "cycle_id": "20261028-103102"}
 {"ts": "2026-10-28T10:58:00+08:00", "item": "先.一三五-1u", "summary": "forward_sim_watch 加帳本日期連續性（paper_10～18，只讀 date：重複／漏記交易日／壞行計數），自測 33/0，正式跑 overall=OK", "status": "DONE", "cycle_id": "20261028-103102"}
 {"ts": "2026-10-28T11:01:00+08:00", "item": "先.一三五-1v", "summary": "除權息停券推導規則（除權息日前 4～1 交易日）對 10/28 官方預告快照 9/9 一致（單日驗證），N9 除權息版標歷史可推導；零請求", "status": "DONE", "cycle_id": "20261028-103102"}
+{"ts": "2026-10-28T12:40:00+08:00", "item": "先.一三五-1（空轉補件）", "summary": "前向上限 14／13 已滿，不新增候選；補 1x（paper_10～12 自測）、1y（起跑日三方一致性）、1z（N10 上市鉅額欄位確認）三條 - [ ]", "status": "DONE", "cycle_id": "20261028-123102"}
