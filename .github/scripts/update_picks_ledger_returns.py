@@ -219,7 +219,7 @@ def main():
                 pick.pop("entry_price", None)
         print(f"先.七十七-4：進場點規則改為 {ANCHOR_RULE}，清空 {wiped} 個已回填欄位後依新規則重算")
 
-    filled = 0
+    filled = excess_fixed = 0
     skipped_stale_or_missing = 0
     skipped_no_entry = 0
     for snap in ledger["snapshots"]:
@@ -235,7 +235,15 @@ def main():
                 continue
             pick["entry_date"], pick["entry_price"] = entry_day, entry_price
             for window_key, n in RETURN_WINDOWS.items():
-                if pick["returns"].get(window_key) is not None:
+                w = pick["returns"].get(window_key)
+                if w is not None:
+                    # 先.一四〇-7：已填的值永遠不改；只有當輪大盤抓取失敗留下的 excess_vs_taiex_pct=null 會補算
+                    # （該欄本來就是回填欄位、還沒填過；大盤取同一個出場日，報酬與其他欄位不動）
+                    if isinstance(w, dict) and w.get("excess_vs_taiex_pct") is None and taiex_entry and w.get("exit_date"):
+                        taiex_exit = _lookup_taiex_on(w["exit_date"], taiex_history)
+                        if taiex_exit is not None:
+                            w["excess_vs_taiex_pct"] = round(w["return_pct"] - _compute_return_pct(taiex_entry, taiex_exit), 4)
+                            excess_fixed += 1
                     continue  # 已經回填過，鐵律：永遠不再更動
                 target_date = _trading_days_after(entry_day, n, trading_calendar)
                 if target_date is None:
@@ -304,11 +312,11 @@ def main():
                                        "出場＝其後第 N 個交易日收盤（持有恰 N 日）；舊規則用快照前的 price_date 收盤進場，已全部重算")
         meta["returns_recomputed_at"] = datetime.now(TW_TZ).isoformat()
     # 先.八十-9：data_status 每輪都會更新，所以每輪都寫檔；last_returns_backfill_at 只在真的有回填／重算時更新
-    if filled or recompute_all:
+    if filled or recompute_all or excess_fixed:
         meta["last_returns_backfill_at"] = datetime.now(TW_TZ).isoformat()
     meta["generated_at"] = datetime.now(TW_TZ).isoformat()  # 2026-09-03（P0三-三.3）回填／標註也算一次寫入
     LEDGER_PATH.write_text(json.dumps(ledger, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
-    print(f"本輪新填 {filled} 個(snapshot, code, tN)欄位（{skipped_stale_or_missing}個因出場價過期/缺失跳過、"
+    print(f"本輪新填 {filled} 個(snapshot, code, tN)欄位、超額報酬補算 {excess_fixed} 欄（{skipped_stale_or_missing}個因出場價過期/缺失跳過、"
           f"{skipped_no_entry}個因進場日當天沒有收盤跳過，留null等下次）；資料不完整批次 {n_incomplete} 個")
 
 
