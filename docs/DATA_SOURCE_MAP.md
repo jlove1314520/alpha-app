@@ -538,7 +538,7 @@ CLAUDE.md 既有規則：**原始交易所資料不得對外轉售，衍生訊�
 | ③ GitHub／社群 | 網頁搜尋「BFI84U 停券預告表 歷史資料 github」 | 沒有找到任何人累積的歷史檔 |
 | ④ 其他供應商 | FinMind `TaiwanStockMarginShortSaleSuspension` | 付費層（免費層 HTTP 400，2026-09-07 #51 查證），依鐵律標「待採購」，不繞爬 |
 
-**結論**：沒有可查歷史的免費來源 → N9 只能**前向累積**（每日存一份快照）。推導路徑：停券＝停止過戶日前 6 個營業日起 4 日（上表官方附註），除權息停券可由既有除權息事件推回；**股東會停券需要停止過戶日，來源是 MOPS（robots 全站 Disallow），推導不出來**。本次請求：TWSE openapi 2 次（含 robots）、TWSE rwd 2 次、TPEx openapi 1 次，共用 `rate_limit_state`（同源 ≥3 秒）。累積排程未掛，提案見 `PENDING_QUEUE.md` 先.一三五-1i-a。
+**結論**：沒有可查歷史的免費來源 → N9 只能**前向累積**（每日存一份快照）。推導路徑：停券＝停止過戶日前 6 個營業日起 4 日（上表官方附註），除權息停券可由既有除權息事件推回；**股東會停券需要停止過戶日，來源是 MOPS（robots 全站 Disallow），推導不出來**。本次請求：TWSE openapi 2 次（含 robots）、TWSE rwd 2 次、TPEx openapi 1 次，共用 `rate_limit_state`（同源 ≥3 秒）。~~累積排程未掛，提案見 `PENDING_QUEUE.md` 先.一三五-1i-a。~~ 2026-10-28 先.一三八-1：已掛 `market.yml` 17:13 班（`.github/scripts/fetch_margin_suspension_daily.py`，每日 2 次），累積到 `data/margin_suspension_daily/YYYY-MM-DD.json`。
 
 ## 🟢🟡 鉅額交易日成交資訊：上市可查歷史、上櫃逐筆只有當日（先.一三五-1l，2026-10-28 DevQueue 20261028-043102 查證）
 
