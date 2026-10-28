@@ -610,6 +610,13 @@ def main() -> int:
 
     now = datetime.now(TZ)
     _start_watchdog()
+    # 先.一三八-B1：平日 18:30～21:30 順手記一筆記憶體取樣（只量不殺）；自身失敗只警告（十二節）。
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from mem_profile_sample import maybe_sample
+        maybe_sample(caller="connectivity")
+    except Exception as e:  # noqa: BLE001
+        print(f"[warn] mem_profile 取樣跳過：{type(e).__name__}")
     _STAGE["name"] = "internet"
     # check_internet 內的 urllib 解析 DNS 沒有逾時上限，包一層時間上限（先.十一-三）。
     done, inet = _bounded(check_internet, 40)
