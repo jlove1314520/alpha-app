@@ -11,6 +11,10 @@ M～R 2027-01-04，任何一支追蹤程式安靜停跑都只能等人肉眼發�
   ③ 有 `last_error` → ERROR
   起跑有前置閘門者（含 `snapshot_streak_need`，目前只有 paper_12）閘門未達成前不判②，達成後以 `streak_achieved_on` 起算。
   另：檔案不存在 → MISSING；不是合法 JSON／不是物件 → UNREADABLE；都沒事 → OK。
+  帳本日期連續性（先.一三五-1u，只套 paper_10～18——共用模組 paper_forward_common「每交易日一列」；
+  paper_5～9 帳本不是每交易日一列，不判）：讀 research/data/paper_N_log.jsonl **只取每列 date 欄**，
+  ④ 同一日期 ≥2 列 → LEDGER_DUP；⑤ 第一列到最後一列之間有交易日沒列 → LEDGER_GAP（列前 5 個）；
+  ⑥ 有解析不了的行 → LEDGER_BAD_LINE（不崩、只計數）。帳本不存在＝尚未起跑，略過。主狀態優先序 ERROR＞STALE＞LATE＞④⑤⑥。
 輸出 `data/forward_sim_watch.json`。看守員自身任何例外 fail open：只印警告、exit 0（CLAUDE.md 十二節）。
 更新來源（先.一三五-1o 查證）：paper_9 走本機排程 AlphaPaper9（平日 18:30，`scripts/run_paper_9.py`）、
 paper_12 走本機排程 AlphaWarrantSnapshot（平日 17:30，`scripts/run_warrant_snapshot.ps1`），一天一次，
@@ -144,14 +148,78 @@ def check_one(path: Path, today: date, closed: set[str]) -> dict:
     return row
 
 
+LEDGER_IDS = list(range(10, 19))  # 走 paper_forward_common 每交易日一列的帳本
+
+
+def check_ledger_dates(log_path: Path, closed: set[str]) -> dict | None:
+    """只讀帳本每列 date 欄；帳本不存在回 None。自身例外由呼叫端 fail open。"""
+    if not log_path.exists():
+        return None
+    dates: list[str] = []
+    bad = 0
+    for line in log_path.read_text(encoding="utf-8", errors="replace").splitlines():
+        if not line.strip():
+            continue
+        try:
+            d = json.loads(line).get("date")
+        except Exception:
+            bad += 1
+            continue
+        if isinstance(d, str) and _parse_date(d):
+            dates.append(d[:10])
+        else:
+            bad += 1
+    seen: dict[str, int] = {}
+    for d in dates:
+        seen[d] = seen.get(d, 0) + 1
+    dups = sorted(d for d, n in seen.items() if n >= 2)
+    gaps: list[str] = []
+    if dates:
+        cur, end = _parse_date(min(dates)), _parse_date(max(dates))
+        while cur <= end:
+            if _is_trading(cur, closed) and cur.isoformat() not in seen:
+                gaps.append(cur.isoformat())
+            cur += timedelta(days=1)
+    return {"rows": len(dates), "first": min(dates) if dates else None, "last": max(dates) if dates else None,
+            "dup_days": dups[:5], "n_dup_days": len(dups), "gap_days": gaps[:5], "n_gap_days": len(gaps), "bad_lines": bad}
+
+
+def _apply_ledger(row: dict, root: Path, i: int, closed: set[str]) -> None:
+    try:
+        led = check_ledger_dates(root / "research" / "data" / f"paper_{i}_log.jsonl", closed)
+    except Exception as e:  # 十二節：這段壞掉只警告，不影響摘要檢查結果
+        print(f"[warn] forward_sim_watch：paper_{i} 帳本日期檢查失敗（略過）：{type(e).__name__}: {e}")
+        row["ledger"] = {"error": f"{type(e).__name__}"}
+        return
+    row["ledger"] = led
+    if not led:
+        return
+    found = []
+    if led["n_dup_days"]:
+        found.append("LEDGER_DUP")
+        row["issues"].append(f"帳本同一日期重複 {led['n_dup_days']} 天：{'、'.join(led['dup_days'])}")
+    if led["n_gap_days"]:
+        found.append("LEDGER_GAP")
+        row["issues"].append(f"帳本漏記交易日 {led['n_gap_days']} 天：{'、'.join(led['gap_days'])}")
+    if led["bad_lines"]:
+        found.append("LEDGER_BAD_LINE")
+        row["issues"].append(f"帳本有 {led['bad_lines']} 行解析不了")
+    if found and row["status"] == "OK":
+        row["status"] = found[0]
+
+
 def evaluate(root: Path, now: datetime) -> dict:
     today = now.astimezone(TZ).date()
     closed = _tw_closed(root)
     rows = [check_one(root / "data" / f"paper_{i}.json", today, closed) for i in PAPER_IDS]
+    for i, r in zip(PAPER_IDS, rows):
+        if i in LEDGER_IDS:
+            _apply_ledger(r, root, i, closed)
     bad = [r for r in rows if r["status"] != "OK"]
     return {
         "generated_at": now.astimezone(TZ).isoformat(timespec="seconds"),
-        "note": "前向模擬追蹤檔新鮮度＋起跑日檢查；只讀 generated_at／started／start_not_before／last_error，不讀淨值與報酬",
+        "note": "前向模擬追蹤檔新鮮度＋起跑日檢查；只讀 generated_at／started／start_not_before／last_error，"
+                "帳本（paper_10～18）只讀 date 欄查重複／漏記；不讀淨值與報酬",
         "rules": {"stale_trading_days_gt": STALE_TRADING_DAYS, "late_start_trading_days_ge": LATE_TRADING_DAYS},
         "overall": "OK" if not bad else "ALERT",
         "n_checked": len(rows),
@@ -253,6 +321,44 @@ def _selftest() -> int:
         r12 = check_one(root / "data" / "paper_12.json", now.date(), set())
         check("閘門達成後已過交易日仍未起跑 → LATE", r12["status"] == "NOT_STARTED_LATE")
         (root / "data" / "paper_12.json").unlink()
+
+        # 帳本日期連續性（先.一三五-1u）：11/03 休市
+        (root / "research" / "data").mkdir(parents=True)
+
+        def lg(i, text):
+            (root / "research" / "data" / f"paper_{i}_log.jsonl").write_text(text, encoding="utf-8")
+
+        def rows_of(ds):
+            return "".join(json.dumps({"date": d, "nav": 1}) + "\n" for d in ds)
+
+        cal_closed = {"2026-11-03"}
+        lg(10, rows_of(["2026-11-02", "2026-11-04", "2026-11-05"]))
+        led = check_ledger_dates(root / "research" / "data" / "paper_10_log.jsonl", cal_closed)
+        check("帳本正常（休市日不算漏）→ 無重複無漏記", led["n_dup_days"] == 0 and led["n_gap_days"] == 0 and led["bad_lines"] == 0)
+        lg(11, rows_of(["2026-11-02", "2026-11-04", "2026-11-04", "2026-11-05"]))
+        led = check_ledger_dates(root / "research" / "data" / "paper_11_log.jsonl", cal_closed)
+        check("重複日期 → dup_days=11/04", led["dup_days"] == ["2026-11-04"])
+        lg(13, rows_of(["2026-11-02", "2026-11-05"]))
+        led = check_ledger_dates(root / "research" / "data" / "paper_13_log.jsonl", cal_closed)
+        check("缺 11/04 → gap_days=11/04", led["gap_days"] == ["2026-11-04"] and led["n_gap_days"] == 1)
+        lg(14, rows_of(["2026-11-02", "2026-11-04"]) + '{"date": "2026-11-05", "na')
+        led = check_ledger_dates(root / "research" / "data" / "paper_14_log.jsonl", cal_closed)
+        check("最後一行半截 → 不崩、bad_lines=1", led["bad_lines"] == 1 and led["rows"] == 2)
+        check("帳本不存在 → None", check_ledger_dates(root / "research" / "data" / "paper_16_log.jsonl", cal_closed) is None)
+        lg(5, rows_of(["2026-11-02", "2026-11-05"]))  # paper_5 不在 LEDGER_IDS，不判漏記
+        (root / "research" / "data" / "paper_15_log.jsonl").mkdir()  # 讀檔丟例外 → fail open
+        res3 = run(root, now)
+        st3 = {r["file"]: r for r in (res3 or {}).get("items", [])}
+        check("整合：paper_11（摘要 UNREADABLE）帳本重複 → 主狀態維持 UNREADABLE、issues 補記重複",
+              st3["paper_11.json"]["status"] == "UNREADABLE" and any("重複" in x for x in st3["paper_11.json"]["issues"]))
+        check("整合：paper_17（摘要 OK）帳本不存在 → 仍 OK", st3["paper_17.json"]["status"] == "OK")
+        check("整合：paper_5 不做帳本檢查", "ledger" not in st3["paper_5.json"])
+        check("整合：paper_15 帳本讀檔失敗 → fail open、有 ledger.error", "error" in (st3["paper_15.json"].get("ledger") or {}))
+        lg(17, rows_of(["2026-11-02", "2026-11-05"]))
+        res4 = run(root, now)
+        st4 = {r["file"]: r for r in (res4 or {}).get("items", [])}
+        check("整合：paper_17 摘要 OK＋帳本缺日 → LEDGER_GAP", st4["paper_17.json"]["status"] == "LEDGER_GAP")
+        check("整合輸出不含 nav 值", '"nav"' not in json.dumps(res4, ensure_ascii=False))
 
         # 日曆讀不到：只排除週末，仍跑完
         (root / "data" / "trading_calendar.json").write_text("壞", encoding="utf-8")
