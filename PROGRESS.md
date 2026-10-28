@@ -1,3 +1,17 @@
+## 2026-10-28 15:01～15:4x DevQueue 20261028-150101（維運帽）：先.一三八-1／2／4 完成，補件 2 條
+
+- **等待總司令審閱：1 件**（先.一二〇-3b 前瞻台帳進場日規則提案，未變；`research/AWAITING_REVIEW.md` 等待中 1 列）。
+- **先.一三八-1**（commit cf1d280fc4）：新增 `.github/scripts/fetch_margin_suspension_daily.py`，掛 `market.yml` **只在 17:13 班**（watchdog 補救不跑），TWSE openapi BFI84U＋TPEx `tpex_margin_trading_term` 各 1 次＝每日 2 次；共用 rate_limit_state（同源 ≥3 秒、402/403/428/429 封鎖 2 小時），任一邊失敗只略過、exit 0，同日兩邊都存過不再送。輸出 `data/margin_suspension_daily/YYYY-MM-DD.json`（已進 git add，十節）；pipeline_registry 加 AlphaMarginSuspensionDaily；`C:/alpha/CLAUDE.md` 頻率清單補用量（該檔不在 git）；DATA_SOURCE_MAP 更正「未掛」。
+  - 證據：既存探測原始檔離線解析 TWSE 20／TPEx 13 筆、民國→西元正確；假 requests 測 429 封鎖、封鎖中零請求、補抓、重跑零請求、兩邊 HTML 不寫檔。**本輪沒送真實請求**（今日額度留給 17:13 班）→ ⚠️ 端到端未驗證。
+  - [自行裁量] 非 watchdog 的手動觸發也放行（照內部人轉讓步驟寫法），同日已存不再送，不會超過每日 2 次。
+- **先.一三八-2**（commit 4f8d5a6c92）：`research/forward_sim_watch.py` 掛在 market.yml「紙上追蹤看守」之後（continue-on-error、零請求），`data/forward_sim_watch.json` 進 git add；pipeline_registry 加 AlphaForwardSimWatch（監控的監控，連錯 2 班告警）。證據：selftest 33/0、正式跑 14 檔 overall=OK、pipeline_freshness 讀到 status=ok。先只寫檔、不接 App 橫幅（提案⑤）。
+- **先.一三八-4**（commit ec67aa1c51）：`update_price_history.py::fetch_tpex()` 沿用既有回應收 NextLimitUp／NextLimitDown，另寫 `data/tpex_limit_next.json`（零額外請求、price_history 格式不動、一檔都沒收到就不覆蓋、失敗只警告），已進 git add。本機累積：新增 `scripts/archive_tpex_limit_next.py` 從 git 歷史展開到 gitignore 的 `research/data/tpex_limit_next/`。證據：假回應測收集／空值略過／改名不覆蓋；暫存 git repo 測歸檔（同日取最新、壞版本略過、重跑寫 0）；selftest_whitelist_price_fill 12/0。⚠️ 端到端待 17:13 班。
+  - [自行裁量] update_price_history 只在雲端跑，git 歷史本身即每日累積；歸檔程式不掛任何排程（不新建、不改既有 wrapper），手動跑一次即補齊。
+- **冒煙**：三個 commit 前各跑一次 `node scripts/smoke_test.mjs`，皆 exit 0、179 項 [x]、0 項未過。
+- **沒做到**：先.一三八-5（四大指數累積＋git 回填 48 天）15:30 開工會超過 15:46 時限，留下一輪；之後依序 -6、-B1、-B2、-B3。
+- **補件**（DevQueue 可執行 5 條 < 6）：先.一三八-7 三項端到端驗證（標 `- [!]`，等 17:13 班跑完，預計 18:00 解除）；先.一三八-8 `data/pe_snapshot/` 自 10/22 後沒有新檔查根因（pipeline_freshness 同次另見 alpha.db 各表停在 10/22）。補後 `- [ ]` 27 條、DevQueue 可執行 6 條。
+- **BLOCKED**：無新增（先.一三八-7 為時間閘）。
+
 ## 2026-10-28 15:xx 互動視窗：收件匣 028（守門員誤擋已定案條目）——完成
 
 - **等待總司令審閱：1 件**（先.一二〇-3b，未變）
