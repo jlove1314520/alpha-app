@@ -1,3 +1,13 @@
+## 2026-10-29 06:xx DevQueue（維運帽）：空轉補件——前向模擬上限 14／14 已滿，改補 3 條維運（1ao／1ap／1aq，皆已完成）
+
+- **等待總司令審閱：2 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班（金鑰＋觸發）。
+- **上限已滿**：`research/FORWARD_CANDIDATES.md` 進行中 14／14，不新增候選、不寫 PREREG、不送 AWAITING；該檔記一行本輪補件內容。
+- **先.一三五-1ao 自測回歸總跑**：15 支前向模擬自測 14 過、1 敗——`scripts/selftest_paper_10_12.py` 還在用舊的「前收×1.095」漲停邊界，但 先.一四一-1（be3250e1）已照 PREREG 修訂 R1 改成官方漲停價。**自測過時、追蹤程式沒錯**；改成 99.00（前收 90 的官方漲停價）→true、98.95→false，重跑全部通過。
+- **先.一三五-1ap 輸出新鮮度**：18 支 `data/paper_*.json` 全部 24 小時內產生過，每支都有排程呼叫（market.yml／AlphaWarrantSnapshot／AlphaPaper9），沒有缺口。
+- **先.一三五-1aq BLOCKED 解除檢查**：先.一三六-A（模擬 I 掛排程）解除條件已成立——AlphaPaper9 排程存在、10/28 18:30 跑完結果 0（總司令 10/27 已親自註冊，條目漏同步）→ 改 - [x]。先.一三二-12（IBKR 要總司令本人登入）仍未解除，`quotes_ibkr.json` 停在 10/19。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0，179 項全過、0 FAIL。零外部請求；沒算報酬、沒登記試驗、沒碰 holdout。
+- 改了哪些檔：`scripts/selftest_paper_10_12.py`、`PENDING_QUEUE.md`、`research/FORWARD_CANDIDATES.md`、`PROGRESS.md`。
+
 ## 2026-10-29 05:05 DevQueue 20261029-043102（維運帽）：先.一四一-1／-2／-3 三項完成
 
 - **等待總司令審閱：2 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班（放 Finnhub 金鑰＋加晚上觸發）——程式本輪已寫好，等總司令本人做這兩步。

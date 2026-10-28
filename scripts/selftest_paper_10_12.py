@@ -7,7 +7,7 @@
 K 4～6 週窗基本例與 PIT；L 起跑前提（連續 10 天、缺一天重算、順延跨年）。本檔補其餘未覆蓋的事件抽取函式：
 - J：accumulate 去重／迄日只延長不縮短／壞列略過；merged_events 相接（下一交易日）合併、隔一交易日不合併、
   日曆尚未到時日曆天 ≤4 後備；make_signal 條件切點 0（=0 歸影子帳本）、流動性 1,000 萬門檻、資料不滿 20 天、
-  缺收盤 skip、不在宇宙 skip、同日依處置期間報酬由低到高再依代號、limit_up_at_entry 1.095 邊界。
+  缺收盤 skip、不在宇宙 skip、同日依處置期間報酬由低到高再依代號、limit_up_at_entry 官方漲停價邊界（2026-10-29 先.一四一-1 PREREG 修訂 R1 起，原 1.095 已拿掉）。
 - K：delta_for 窗口邊界（28／42 天含、27／43 天不含）、取窗內最近一週、None 比例略過、資料日＝再平衡日不可用；
   signal Δ 由大到小再依代號、Δ≤0 排除、不在宇宙忽略、全市場算不出 → None＋skip_reason、0050 成分欄 null／布林。
 - L：snapshot_ok 缺任一來源即 False；calls_in 只收上市認購＋上櫃 type=認購；update_appearances 首批 null、
@@ -132,8 +132,8 @@ prices = {
     "8816": series(path(100, 90), turnover=9_999_999),   # 流動性不足
     "8817": series(path(100, 90), turnover=10_000_000),  # 剛好門檻 → 收
     "8818": series(path(100, 90)),                       # 不在宇宙
-    "8820": series(path(100, 90, 98.55)),                # 進場日 98.55 ≥ 90×1.095=98.55 → 漲停 true
-    "8821": series(path(100, 90, 98.5)),                 # 98.5 < 98.55 → false
+    "8820": series(path(100, 90, 99.0)),                 # 進場日 99.0 ≥ 官方漲停價（前收 90 → 99.00）→ 漲停 true（PREREG 修訂 R1）
+    "8821": series(path(100, 90, 98.95)),                # 98.95 < 99.00（差一檔）→ false
 }
 prices["8819"] = [r_ for r_ in series(path(100, 90)) if r_["date"] != cal[ds - 1]]  # 處置起日前一日缺收盤
 prices["8822"] = series(path(100, 90))[ds - 15:]        # 處置前資料不滿 20 天
@@ -155,7 +155,7 @@ check("8822" in skips and "8822" not in mc, "J 處置前資料不滿 20 天 → 
 check("8819" in skips and "缺收盤" in skips["8819"], "J 處置起日前一日缺收盤 → skip 照實記")
 check("8818" in skips and "不在宇宙" in skips["8818"], "J 不在宇宙 → skip 照實記")
 lu = {c["code"]: c["limit_up_at_entry"] for c in main}
-check(lu.get("8820") is True and lu.get("8821") is False and lu.get("8811") is False, "J limit_up_at_entry：≥前收×1.095 才標 true")
+check(lu.get("8820") is True and lu.get("8821") is False and lu.get("8811") is False, "J limit_up_at_entry：≥官方漲停價才標 true（R1）")
 check(all(c["release_date"] == r and c["disposal_start"] == cal[ds] for c in main), "J 候選帶處置起日與解除日")
 check(J.make_signal(segs, control=False)({"px": px}, cal[r_i + 2], uni) == [], "J 只在 r 的下一交易日判斷（隔天不再出現）")
 segs_ext = segs + [{"code": "8811", "start": day, "end": cal[r_i + 4]}]

@@ -22,6 +22,8 @@
 
 2026-10-29 02:3x DevQueue 空轉補件：上限仍 14／14，本輪不新增候選、不寫 PREREG、不送 AWAITING；改補 audit_price_jumps 臨時休市核對（1al）、美股盤中報價逾期頻率統計（1am）、模擬 F／F-翼 起跑首日驗收（1an，時間閘 11/03）。
 
+2026-10-29 06:xx DevQueue 空轉補件：上限仍 14／14，本輪不新增候選、不寫 PREREG、不送 AWAITING；改補前向模擬自測回歸總跑（1ao，抓到 selftest_paper_10_12 過時並修正）、18 支模擬輸出新鮮度總查（1ap，無缺口）、BLOCKED 解除條件檢查（1aq，先.一三六-A 已解除）。
+
 | 模擬 | 程式代號 | 內容 | 試驗 | 起跑 | 判定 |
 |---|---|---|---|---|---|
 | F | paper_5 | 台指選擇權 VRP | 見 `research/paper_5_vrp_tracker.py` | 2026-11 | — |
