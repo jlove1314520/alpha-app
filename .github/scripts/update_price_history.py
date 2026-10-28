@@ -327,6 +327,32 @@ def fetch_twse() -> dict[str, dict]:
     return out
 
 
+# 先.一三八-4（已定案，Cowork 收件匣 027，提案 先.一三五-1m-a 乙）：tpex_mainboard_quotes 本來就有官方
+# 次日漲跌停價（NextLimitUp／NextLimitDown），零額外請求另存 data/tpex_limit_next.json（每班覆寫、git 歷史即每日累積），
+# 不動 price_history 格式。fetch_tpex() 順手收集到這裡；欄位缺／改名只略過（十二節）。
+TPEX_LIMIT_NEXT: dict[str, list] = {}
+TPEX_LIMIT_NEXT_PATH = REPO_ROOT / "data" / "tpex_limit_next.json"
+
+
+def write_tpex_limit_next(data_date: str | None) -> int:
+    """把本輪收集到的上櫃次日漲跌停價寫成 data/tpex_limit_next.json；沒收集到任何一檔就不覆蓋舊檔。回傳寫入檔數。"""
+    if not data_date or not TPEX_LIMIT_NEXT:
+        print("上櫃次日漲跌停價：本輪沒有任何一檔有 NextLimitUp／NextLimitDown（欄位可能改名），不覆蓋舊檔")
+        return 0
+    doc = {
+        "_note": "上櫃官方次日漲跌停價（tpex_mainboard_quotes 的 NextLimitUp／NextLimitDown）；"
+                 "data_date＝收盤資料日，價格適用於其下一個交易日。每班覆寫，git 歷史即每日累積。非投資建議。",
+        "data_date": data_date,
+        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "source": TPEX_QUOTES_URL,
+        "fields": ["limit_up_next", "limit_down_next"],
+        "n": len(TPEX_LIMIT_NEXT),
+        "rows": dict(sorted(TPEX_LIMIT_NEXT.items())),
+    }
+    TPEX_LIMIT_NEXT_PATH.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    return len(TPEX_LIMIT_NEXT)
+
+
 def fetch_tpex() -> dict[str, dict]:
     r = _get_retry(TPEX_QUOTES_URL, "tpex_openapi", timeout=30)
     r.raise_for_status()
@@ -350,6 +376,9 @@ def fetch_tpex() -> dict[str, dict]:
             "volume": _num(row.get("TradingShares")),
             "turnover": _num(row.get("TransactionAmount")),
         }
+        up, down = _num(row.get("NextLimitUp")), _num(row.get("NextLimitDown"))
+        if up is not None or down is not None:
+            TPEX_LIMIT_NEXT[code] = [up, down]
     return out
 
 
@@ -1289,6 +1318,12 @@ def main():
     except Exception as e:
         print(f"價量(TPEx) 更新失敗：{e}")
         errors.append(f"price_tpex: {e}")
+    try:
+        n_limit = write_tpex_limit_next(tpex_payload_date)
+        if n_limit:
+            print(f"上櫃次日漲跌停價：寫入 {n_limit} 檔（資料日 {tpex_payload_date}）")
+    except Exception as e:  # noqa: BLE001 -- 另存檔失敗不影響價量本身（十二節）
+        print(f"上櫃次日漲跌停價寫檔失敗（略過）：{e}")
 
     # 2026-09-17（總司令裁示【稽核.四.1】）：兩邊payload都抓到才能比較；任一邊
     # 失敗（本輪errors已有記錄）就不做這個比較，避免用「抓不到」誤判成「日期
