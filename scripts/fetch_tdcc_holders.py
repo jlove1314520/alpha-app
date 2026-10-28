@@ -149,15 +149,22 @@ def _parse_snapshot(path: Path) -> dict[str, dict]:
     return out
 
 
-def _streak(diffs: list[float]) -> int:
-    """連續同向週數：正=連漲、負=連跌、0=最新一週持平或資料不足。"""
+def _streak(diffs: list[float], gaps: list[int] | None = None) -> int:
+    """連續同向週數：正=連漲、負=連跌、0=最新一週持平或資料不足。
+
+    先.一三五-1ai（2026-10-28）：gaps[i]＝diffs[i] 兩期相隔天數；相隔 >9 天（集保缺週，那個差是兩週以上）
+    就在那裡中斷，不把多週的變化當成一週累計（門檻同 build_research.py 與 app-stock.js）。
+    """
     if not diffs:
         return 0
     sign = 1 if diffs[-1] > 0 else (-1 if diffs[-1] < 0 else 0)
     if sign == 0:
         return 0
     n = 0
-    for v in reversed(diffs):
+    for i in range(len(diffs) - 1, -1, -1):
+        v = diffs[i]
+        if gaps is not None and gaps[i] > 9:
+            break
         if (v > 0 and sign > 0) or (v < 0 and sign < 0):
             n += 1
         else:
@@ -213,6 +220,8 @@ def build_holders_json() -> int:
         latest = history[-1]
         big_ratios = [h["big_holder_ratio"] for h in history]
         diffs = [round(b - a, 4) for a, b in zip(big_ratios, big_ratios[1:])]
+        days = [datetime.strptime(h["date"], "%Y%m%d") for h in history]
+        gaps = [(b - a).days for a, b in zip(days, days[1:])]
 
         entry = {
             "name": (company_info.get(code) or {}).get("name"),
@@ -225,7 +234,7 @@ def build_holders_json() -> int:
             "total_holders": latest["total_holders"],
             "total_shares": latest["total_shares"],
             "week_change_pct": round(diffs[-1], 2) if diffs else None,
-            "streak_weeks": _streak(diffs),
+            "streak_weeks": _streak(diffs, gaps),
             "weeks_available": len(history),
             # 只留最近 12 週明細，避免檔案隨時間無限膨脹
             "history": history[-12:],
