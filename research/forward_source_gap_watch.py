@@ -59,7 +59,8 @@ def load_closed(root: Path) -> tuple[set[date], str]:
         doc = json.loads((root / "data" / "trading_calendar.json").read_text(encoding="utf-8"))
         closed: set[date] = set()
         for _y, v in (doc.get("tw") or {}).items():
-            for s in v.get("closed") or []:
+            # 先.一三五-1ah：臨時休市（unscheduled_closed，FMTQIK 確認，例：2026-10-23）也算休市
+            for s in (v.get("closed") or []) + (v.get("unscheduled_closed") or []):
                 d = _parse(str(s))
                 if d:
                     closed.add(d)

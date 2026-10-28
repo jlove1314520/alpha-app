@@ -17,7 +17,7 @@ if hasattr(sys.stdout, "reconfigure"):
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = ROOT / "research" / "forward_source_gap_watch.py"
 NOW = "2026-10-28T22:00:00"  # 週三晚上：今天算到期
-CAL = {"tw": {"2026": {"closed": ["2026-10-09", "2026-10-10", "2026-10-26"]}}}
+CAL = {"tw": {"2026": {"closed": ["2026-10-09", "2026-10-10", "2026-10-26"], "unscheduled_closed": ["2026-10-23"]}}}
 TRADING = ["2026-10-19", "2026-10-20", "2026-10-21", "2026-10-22", "2026-10-23", "2026-10-27", "2026-10-28"]
 
 ok = fail = 0
@@ -51,7 +51,7 @@ def make(root: Path, *, skip_warrant: str | None = None, skip_tdcc_week: bool = 
         (t / f"{d}.csv").write_text("x", encoding="utf-8")
     w = root / "research" / "data" / "warrant_snapshots"
     for d in TRADING:
-        if d == skip_warrant:
+        if d == skip_warrant or d == "2026-10-23":  # 10/23 臨時休市：合成資料沒有這天的快照
             continue
         (w / d).mkdir(parents=True)
         (w / d / "meta.json").write_text("{}", encoding="utf-8")
@@ -91,6 +91,7 @@ with tempfile.TemporaryDirectory() as td:
     check("mops OK、壞行計數 1", s["mops_events"]["status"] == "OK" and s["mops_events"]["bad_lines"] == 1, s["mops_events"])
     check("停資停券目錄不存在 → NOT_STARTED", s["margin_suspension"]["status"] == "NOT_STARTED")
     check("overall OK", doc["overall"] == "OK", doc["overall"])
+    check("臨時休市 10/23（unscheduled_closed）沒快照不算缺", "2026-10-23" not in s["warrant"].get("missing", []), s["warrant"])
 
     print("情境二：權證缺 10/21、TDCC 缺一週")
     r = Path(td) / "b"
