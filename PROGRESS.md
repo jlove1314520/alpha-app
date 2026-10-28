@@ -1,3 +1,18 @@
+## 2026-10-28 07:31～08:10 DevQueue 20261028-073102（維運帽）：先.一三五-1q／1r／1s／1q-a 四項完成
+
+- 等待審閱：6 件（停資停券累積、看守員掛排程、上櫃鉅額累積、上櫃次日漲跌停價、前向上限計法、**新增：先.一三五-1s-a 每日累積 SOX 收盤**）。
+- **1q（N12 可轉債向下重設公告來源，零請求）**：新增 `research/cand_n12_source_probe.py`。重大訊息歸檔 4,511 列（09-06～10-27，52 天），可辨識的向下重設 0 則；「轉換價格調整」8 則標題不寫原因，跟除權息反稀釋分不開；TPEx swagger 的 `bond_ISSBD5_data` 只有發行時轉換價。→ 開 1q-a。commit `0f71657829`。
+- **1r（N11 現金減資事件率，零請求）**：新增 `research/cand_n11_event_rate.py`。標題含減資的普通股 108 列（條目寫的 402 是 type＝增減資列數）；本公司「董事會決議現金減資」0 則，有現金減資公告的公司 2.92 家／月（寬上界 8.77），門檻 4.17 → 嚴格口徑不足，約需 34 個月。commit `5fd5f2db6f`。
+- **1s（N8 SOX／半導體名單，零請求）**：新增 `research/cand_n8_data_probe.py`。SOX 只有當日快照（sparkline 不帶日期）、沒有累積檔；半導體業 260 檔（上市 96／上櫃 111／興櫃 35／未標 16）；price_history 有 open 欄。→ 開提案 1s-a（互動視窗）。commit `9bfa91e6c4`。
+- **1q-a（N12 三來源查證，2 次請求，皆 200）**：新增 `research/probe_cb_conversion_price.py`，先登記進 `C:\alpha\CLAUDE.md` 頻率清單。TPEx ISSBD5 只有發行時轉換價；TWSE openapi 143 個端點 0 個跟可轉債有關；歷次調整只建檔在 MOPS（Disallow）。→ N12 標「公告來源不可得、暫緩」。commit `809f77faed`。
+- [自行裁量]：1q「轉換價調整未標原因」獨立成一類，不算重設也不算反稀釋；1r 未標類型只算寬上界；1s 興櫃／未標要不要納入留給 PREREG 決定；FinMind 可轉債資料集只列成變形線索，收工補件 1q-b。
+- 更正：條目／心跳上 1q、1r、1s、1q-a 原本寫的完成時間比實際時鐘早，已改成實際時間（07:41／07:43／07:44／07:55）。
+- 格式修正：1s-a 原本寫成「[維運]（互動視窗」，`find_next()` 認不出來，會被 DevQueue 誤取；改成「**…** （互動視窗」，修完後 `next` 回 NO_PENDING_ITEM→補件後是 1q-b。
+- 收工補件：只補 1 條（1q-b，來源①資料缺口）。DevQueue 可執行項低於 6 項的門檻；前向上限已滿，零之二⑤ 只准補資料缺口類，本輪沒時間把其他來源逐一盤點，照實記。
+- 沒做：不讀價格、不算報酬、不登記試驗、不碰 holdout。研究輸出都在本機 `research/data/`（不進公開 repo）。
+- 冒煙測試：每項 commit 前各跑一次 `node scripts/smoke_test.mjs`，四次都是 exit 0、179 項全 [x]、0 失敗。
+- 影響檔案：PENDING_QUEUE.md、research/FORWARD_CANDIDATES.md、research/AWAITING_REVIEW.md、research/PROGRESS_HEARTBEAT.jsonl、data/STATUS.json、PROGRESS.md、三支新腳本＋probe_cb_conversion_price.py；`C:\alpha\CLAUDE.md`（不在本 repo）。
+
 ## 2026-10-28 07:01～07:10 DevQueue 20261028-070102（維運帽）：先.一三五-1 空轉補件第三批（前向上限 14／13 已滿 → 不新增候選，改補資料缺口條目）
 
 - 等待審閱：5 件（停資停券累積、看守員掛排程、上櫃鉅額累積、上櫃次日漲跌停價、前向上限計法）。
