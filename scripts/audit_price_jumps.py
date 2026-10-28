@@ -39,7 +39,9 @@ def main() -> int:
     doc = PHS.load(ROOT / "data" / "price_history.json")
     prices = doc.get("prices") or {}
     cal = json.loads((ROOT / "data" / "trading_calendar.json").read_text(encoding="utf-8"))
-    closed = {d for y in (cal.get("tw") or {}).values() for d in (y.get("closed") or [])}
+    # 先.一三五-1al：臨時休市（unscheduled_closed，例 07-10、10-23）也要扣，否則跨該日的一般單日漲跌會被誤歸 multi_day_gap
+    closed = {d for y in (cal.get("tw") or {}).values()
+              for d in (y.get("closed") or []) + (y.get("unscheduled_closed") or [])}
     companies = json.loads((ROOT / "data" / "company_info.json").read_text(encoding="utf-8")).get("companies") or {}
     try:
         import importlib.util
