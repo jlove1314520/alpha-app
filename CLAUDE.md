@@ -158,7 +158,7 @@ log「候選池空轉」122次、最近一輪結論「三條交辦皆外部阻�
 3. **空轉補件**：QUEUE_EMPTY／GATED 連續 2 輪 → 自動做一輪「候選補件」（只限台股個股層級、優先前向版，照 先.一三二-1 格式），不准空轉超過 1 小時。
 4. 實作：`scripts/dev_queue_runner.py::_idle_fallback_prompt()`（只在沒有可執行 `- [ ]` 時啟動；同一項 24 小時內只試一次預設放行、候選補件每小時最多一次），
    自測 `scripts/selftest_dev_queue_idle_fallback.py`。要停用：把 `_idle_fallback_prompt()` 改成直接 `return False`。
-5. **前向模擬同時進行上限 13 個**（2026-10-27 Cowork 收件匣 025 B6）：名單與計數在 `research/FORWARD_CANDIDATES.md`。
+5. **前向模擬上限＝14（現有 14 支）＝滿**（2026-10-27 收件匣 025 B6 訂 13；2026-10-28 收件匣 027 A8 改：F-翼 paper_6 照實算一支，14 支全保留）：**任何一支判定或終止前不再新增登記**。名單與計數在 `research/FORWARD_CANDIDATES.md`。
    上限滿時，空轉補件**只把候選寫進該檔候選清單**，不寫可登記的 PREREG 草稿、不送 AWAITING；有模擬判定結案騰出名額，才由 Cowork 從候選清單挑。
    （候選補件提示詞已含這條：`dev_queue_runner._idle_fallback_prompt()`。）
 
