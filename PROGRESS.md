@@ -1,3 +1,14 @@
+## 2026-10-29 05:05 DevQueue 20261029-043102（維運帽）：先.一四一-1／-2／-3 三項完成
+
+- **等待總司令審閱：2 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班（放 Finnhub 金鑰＋加晚上觸發）——程式本輪已寫好，等總司令本人做這兩步。
+- **先.一四一-1 模擬 J／N 漲跌停改官方檔位版**（be3250e112）：新增 `research/official_limit.py`（上櫃先用前一交易日 TPEx 公告次日漲跌停價，其餘用 `tw_limit_price.limit_prices`，除權息日用參考價、減資恢復日用 ref_price，記 src／base_src）。paper_10 拿掉 `LIMIT_UP_RATIO`、`limit_up_at_entry`＝r+1 原始收盤 ≥ 官方漲停價；paper_14 不再呼叫核心檔 `costs.limit_status()`（核心檔未動），改原始開高低收對官方價。證據：自測 `scripts/selftest_paper_10_14_official_limit.py` 25/25；兩支帳本仍不存在；未跑追蹤、未看報酬。[自行裁量] 鎖死用四價全到價；上市／上櫃不另查市場別，只影響來源標記。
+- **先.一四一-2 每週一收盤落地核對**（8398cc931b）：`scripts/weekly_tw_close_landing_check.py` 只讀 git，判 OK／LATE／MISSING，有漏推播；掛進 `C:\alpha\run-connectivity-check.ps1`（repo 外），週一 09:00 後一週一次。首次實跑上週：4 個交易日（10/23 臨時休市不算）全 OK。自測 13/13。[自行裁量] 首次手動補跑加 --no-push；推播借 cc_stuck 類別。
+- **先.一四一-3 美股盤中本機補班**（ea0151ee0f）：`quotes_local_fallback.py --us`（台股邏輯未改），金鑰只從 .env 讀進子行程；`C:\alpha\run-quotes-fallback.ps1` 加第二行 `--us`（晚上觸發跑的是同一支 wrapper，不加就永遠不會動）。自測 16/16。⚠️ **真實 Finnhub 請求未送**（現在美東盤後），端到端要等總司令建好觸發後第一個美東盤中時段才驗得到。
+- **冒煙**：三次都 179 項全過、0 FAIL。零外部資料請求（只有 git fetch）。
+- **維運產物 data/STATUS.json**：本輪未手改——該檔由 `check_local_schedule_heartbeat.py` 每 30 分鐘自動重寫，手改會被蓋掉；本輪沒有新增雲端資料源。
+- **佇列**：DevQueue 可執行項＝0（`next`＝NO_PENDING_ITEM），`- [ ]` 19 項（≥12）、`- [!]` 61 項。可執行少於 6 項照規則應收工補件，**本輪沒補**（45 分鐘時間上限快到，補件要逐一讀來源檔，趕著做容易湊數），留給下一輪；空轉補件機制（零之二）也會接手。
+- 併發註記（十三節 5）：互動視窗同時在改 `PENDING_QUEUE.md`／`PROGRESS.md`／`CLAUDE.md`／`AWAITING_REVIEW.md` 且尚未提交；本輪三個 commit 只放進自己改的那幾行（以 HEAD 版為底套用），**沒有把互動視窗未提交的內容帶進來**。
+
 ## 2026-10-29 04:5x 互動視窗：收件匣 030（Cowork 04:20，五項小裁示）
 
 - **等待總司令審閱：2 件**（`research/AWAITING_REVIEW.md` 等待中 2 列）：①先.一三五-1ae-a 權證快照 20:30 補跑觸發（請總司令執行 `C:\alpha\add-warrant-2030-trigger.ps1`）②先.一四一-3a 美股盤中報價本機補班：在 `alpha-app\.env` 放 `FINNHUB_API_KEY`＋執行 `C:\alpha\add-quotes-us-trigger.ps1`（改排程觸發被權限擋，未繞過）。
