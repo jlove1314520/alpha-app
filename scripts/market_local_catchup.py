@@ -309,14 +309,21 @@ def commit_push(add_line, backfilled=()):
             if sh(["git", "push", "origin", "HEAD:main"], cwd=WT, timeout=600).returncode == 0:
                 return {"commit": sh(["git", "rev-parse", "--short", "HEAD"], cwd=WT).stdout.strip(), "push_try": i + 1}
             sh(["git", "fetch", "-q", "origin", "main"], cwd=WT, timeout=300)
-            if sh(["git", "rebase", "origin/main"], cwd=WT, timeout=600).returncode:
+            rb = sh(["git", "rebase", "origin/main"], cwd=WT, timeout=600)
+            rb_err = ((rb.stdout or "") + (rb.stderr or ""))[-300:]
+            if rb.returncode and re.search(r"unstaged changes|uncommitted changes|would be overwritten", rb_err):
+                # 10/28 22:28 實測 conflict_files 為空＝rebase 沒開始；推測是步驟寫了不在 git add 清單的檔（未暫存變更）
+                # 擋住 rebase。worktree 用完即丟，改帶 --autostash 重試一次。
+                rb = sh(["git", "rebase", "--autostash", "origin/main"], cwd=WT, timeout=600)
+                rb_err = "（已用 --autostash 重試）" + ((rb.stdout or "") + (rb.stderr or ""))[-300:]
+            if rb.returncode:
                 # 先.一三五-1ae（2026-10-28）：10/27～10/28 四次都只留「rebase 衝突，放棄」查不到是哪個檔，abort 前記下衝突檔名
                 try:
                     conflicts = [x for x in sh(["git", "diff", "--name-only", "--diff-filter=U"], cwd=WT).stdout.splitlines() if x][:20]
                 except Exception as e:  # noqa: BLE001 — 診斷失敗不影響 abort（十二節）
                     conflicts = [f"(讀衝突檔失敗：{type(e).__name__})"]
                 sh(["git", "rebase", "--abort"], cwd=WT)
-                return {"commit": None, "note": "rebase 衝突，放棄", "conflict_files": conflicts}
+                return {"commit": None, "note": "rebase 衝突，放棄", "conflict_files": conflicts, "rebase_msg": rb_err}
             time.sleep(5)
         return {"commit": None, "note": "push 重試 5 次失敗"}
     finally:
