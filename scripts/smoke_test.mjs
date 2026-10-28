@@ -62,6 +62,7 @@
 
 import { chromium } from "@playwright/test";
 import { launchGuarded } from "./pw_guard.mjs";
+import { memGuard } from "./smoke_mem_guard.mjs";
 import os from "node:os";
 import path from "node:path";
 
@@ -5992,6 +5993,17 @@ async function runSmokeTest(baseUrl, headless = true) {
 
 async function main() {
   const { url, headed, jsonOut } = parseArgs();
+  // 先.一三八-B3：開跑前可用記憶體 <1.5GB → 等 10 分鐘重量一次；仍不足就非 0 結束（不算通過）
+  let mem = { ok: true };
+  try {
+    mem = await memGuard();
+  } catch (e) {
+    console.log(`[記憶體保護] 守門員自身失敗（${e && e.name}），照常執行（十二節）`);
+  }
+  if (!mem.ok) {
+    console.log("=== 冒煙測試結果：記憶體不足、未執行（不算通過，不要commit） ===");
+    process.exit(3);
+  }
   let results;
   try {
     results = await runSmokeTest(url, !headed);

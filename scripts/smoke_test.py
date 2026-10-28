@@ -199,11 +199,65 @@ def run_smoke_test(base_url: str, headless: bool = True) -> dict:
     return results
 
 
+MIN_FREE_MB = 1536
+
+
+def _free_mb() -> float:
+    import ctypes
+
+    class _MS(ctypes.Structure):
+        _fields_ = [("dwLength", ctypes.c_ulong), ("dwMemoryLoad", ctypes.c_ulong),
+                    ("ullTotalPhys", ctypes.c_ulonglong), ("ullAvailPhys", ctypes.c_ulonglong),
+                    ("ullTotalPageFile", ctypes.c_ulonglong), ("ullAvailPageFile", ctypes.c_ulonglong),
+                    ("ullTotalVirtual", ctypes.c_ulonglong), ("ullAvailVirtual", ctypes.c_ulonglong),
+                    ("ullAvailExtendedVirtual", ctypes.c_ulonglong)]
+    m = _MS()
+    m.dwLength = ctypes.sizeof(_MS)
+    ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(m))
+    return m.ullAvailPhys / 1048576
+
+
+def mem_guard(read=None, sleep=None, wait_sec=None) -> dict:
+    """同 smoke_mem_guard.mjs（先.一三八-B3）。測試用環境變數 ALPHA_SMOKE_FAKE_FREEMEM_MB／ALPHA_SMOKE_MEM_WAIT_MS。
+    讀不到記憶體（非 Windows 等）視為足夠、照常跑（守門員自身失敗不擋主流程，十二節）。"""
+    import os
+    import time
+    fake = [float(x) for x in os.environ.get("ALPHA_SMOKE_FAKE_FREEMEM_MB", "").split(",") if x]
+    seq = iter(fake)
+
+    def _default():
+        if fake:
+            return next(seq, fake[-1])
+        try:
+            return _free_mb()
+        except Exception as e:  # noqa: BLE001
+            print(f"[記憶體保護] 讀不到可用記憶體（{type(e).__name__}），照常執行")
+            return float("inf")
+    read = read or _default
+    sleep = sleep or time.sleep
+    wait_sec = wait_sec if wait_sec is not None else float(os.environ.get("ALPHA_SMOKE_MEM_WAIT_MS", "600000")) / 1000
+    first = read()
+    if first >= MIN_FREE_MB:
+        return {"ok": True, "free_mb": first, "retried": False}
+    print(f"[記憶體保護] 可用實體記憶體 {first:.0f}MB < {MIN_FREE_MB}MB，等 {wait_sec / 60:.0f} 分鐘再量一次（先.一三八-B3）")
+    sleep(wait_sec)
+    second = read()
+    if second >= MIN_FREE_MB:
+        return {"ok": True, "free_mb": second, "retried": True}
+    print(f"[記憶體保護] 重量仍只有 {second:.0f}MB < {MIN_FREE_MB}MB：記憶體不足、未執行冒煙測試（不算通過）")
+    return {"ok": False, "free_mb": second, "retried": True}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--url", default="http://localhost:8792", help="本機測試伺服器位址")
     ap.add_argument("--headed", action="store_true", help="顯示瀏覽器視窗（除錯用）")
     args = ap.parse_args()
+
+    # 先.一三八-B3：開跑前可用記憶體 <1.5GB → 等 10 分鐘重量一次；仍不足就非 0 結束（不算通過）
+    if not mem_guard()["ok"]:
+        print("=== 冒煙測試結果：記憶體不足、未執行（不算通過，不要commit） ===")
+        sys.exit(3)
 
     results = run_smoke_test(args.url, headless=not args.headed)
 
