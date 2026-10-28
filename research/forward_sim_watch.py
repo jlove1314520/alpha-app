@@ -19,7 +19,7 @@ M～R 2027-01-04，任何一支追蹤程式安靜停跑都只能等人肉眼發�
 更新來源（先.一三五-1o 查證）：paper_9 走本機排程 AlphaPaper9（平日 18:30，`scripts/run_paper_9.py`）、
 paper_12 走本機排程 AlphaWarrantSnapshot（平日 17:30，`scripts/run_warrant_snapshot.ps1`），一天一次，
 generated_at 比其他支（雲端 market.yml 每日 3 班）早一班是設計如此；本機電腦沒開機連 3 個交易日就會被判 STALE。
-本程式零外部請求；尚未掛排程（掛 market.yml＋pipeline_registry 屬提案，待互動視窗核准）。
+本程式零外部請求；2026-10-28 先.一三八-2 起掛 market.yml 每班（紙上追蹤看守之後），pipeline_registry 列 AlphaForwardSimWatch。
 
 用法：python research/forward_sim_watch.py             （正式，寫 data/forward_sim_watch.json）
       python research/forward_sim_watch.py --selftest  （暫存目錄＋合成檔，不寫正式檔）

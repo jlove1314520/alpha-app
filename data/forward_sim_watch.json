@@ -1,0 +1,152 @@
+{
+ "generated_at": "2026-10-28T15:16:58+08:00",
+ "note": "前向模擬追蹤檔新鮮度＋起跑日檢查；只讀 generated_at／started／start_not_before／last_error，帳本（paper_10～18）只讀 date 欄查重複／漏記；不讀淨值與報酬",
+ "rules": {
+  "stale_trading_days_gt": 2,
+  "late_start_trading_days_ge": 1
+ },
+ "overall": "OK",
+ "n_checked": 14,
+ "n_alert": 0,
+ "items": [
+  {
+   "file": "paper_5.json",
+   "status": "OK",
+   "issues": [],
+   "generated_at": "2026-10-28T00:06:32+08:00",
+   "started": false,
+   "start_not_before": "2026-11-02",
+   "trading_days_since_generated": 0
+  },
+  {
+   "file": "paper_6.json",
+   "status": "OK",
+   "issues": [],
+   "generated_at": "2026-10-28T00:06:32+08:00",
+   "started": false,
+   "start_not_before": "2026-11-02",
+   "trading_days_since_generated": 0
+  },
+  {
+   "file": "paper_7.json",
+   "status": "OK",
+   "issues": [],
+   "generated_at": "2026-10-28T00:06:33+08:00",
+   "started": false,
+   "start_not_before": "2026-11-02",
+   "trading_days_since_generated": 0
+  },
+  {
+   "file": "paper_8.json",
+   "status": "OK",
+   "issues": [],
+   "generated_at": "2026-10-28T00:06:43+08:00",
+   "started": false,
+   "start_not_before": "2026-12-01",
+   "trading_days_since_generated": 0
+  },
+  {
+   "file": "paper_9.json",
+   "status": "OK",
+   "issues": [],
+   "generated_at": "2026-10-27T19:02:06+08:00",
+   "started": false,
+   "start_not_before": "2026-11-02",
+   "trading_days_since_generated": 1
+  },
+  {
+   "file": "paper_10.json",
+   "status": "OK",
+   "issues": [],
+   "generated_at": "2026-10-28T00:06:44+08:00",
+   "started": false,
+   "start_not_before": "2026-12-01",
+   "trading_days_since_generated": 0,
+   "ledger": null
+  },
+  {
+   "file": "paper_11.json",
+   "status": "OK",
+   "issues": [],
+   "generated_at": "2026-10-28T00:06:45+08:00",
+   "started": false,
+   "start_not_before": "2026-12-01",
+   "trading_days_since_generated": 0,
+   "ledger": null
+  },
+  {
+   "file": "paper_12.json",
+   "status": "OK",
+   "issues": [],
+   "gate": {
+    "streak_achieved_on": null,
+    "gate_deadline": "2026-11-30"
+   },
+   "generated_at": "2026-10-27T17:34:28+08:00",
+   "started": false,
+   "start_not_before": "2026-12-01",
+   "trading_days_since_generated": 1,
+   "ledger": null
+  },
+  {
+   "file": "paper_13.json",
+   "status": "OK",
+   "issues": [],
+   "generated_at": "2026-10-28T00:06:46+08:00",
+   "started": false,
+   "start_not_before": "2027-01-04",
+   "trading_days_since_generated": 0,
+   "ledger": null
+  },
+  {
+   "file": "paper_14.json",
+   "status": "OK",
+   "issues": [],
+   "generated_at": "2026-10-28T00:06:47+08:00",
+   "started": false,
+   "start_not_before": "2027-01-04",
+   "trading_days_since_generated": 0,
+   "ledger": null
+  },
+  {
+   "file": "paper_15.json",
+   "status": "OK",
+   "issues": [],
+   "generated_at": "2026-10-28T00:20:16+08:00",
+   "started": false,
+   "start_not_before": "2027-01-04",
+   "trading_days_since_generated": 0,
+   "ledger": null
+  },
+  {
+   "file": "paper_16.json",
+   "status": "OK",
+   "issues": [],
+   "generated_at": "2026-10-28T00:06:49+08:00",
+   "started": false,
+   "start_not_before": "2027-01-04",
+   "trading_days_since_generated": 0,
+   "ledger": null
+  },
+  {
+   "file": "paper_17.json",
+   "status": "OK",
+   "issues": [],
+   "generated_at": "2026-10-28T00:06:50+08:00",
+   "started": false,
+   "start_not_before": "2027-01-04",
+   "trading_days_since_generated": 0,
+   "ledger": null
+  },
+  {
+   "file": "paper_18.json",
+   "status": "OK",
+   "issues": [],
+   "generated_at": "2026-10-28T00:06:51+08:00",
+   "started": false,
+   "start_not_before": "2027-01-04",
+   "trading_days_since_generated": 0,
+   "ledger": null
+  }
+ ]
+}

@@ -676,6 +676,17 @@
       }
     },
     {
+      "task": "AlphaForwardSimWatch",
+      "purpose": "前向模擬看守員（market.yml 每班的 research/forward_sim_watch.py，監看 paper_5～18 追蹤檔；這列是監控的監控）",
+      "interval_min": 1440,
+      "artifact": "data/forward_sim_watch.json",
+      "freshness": "json_field",
+      "field": "generated_at",
+      "shift_profile": "market_yml",
+      "missed_shift_threshold": 2,
+      "note": "先.一三八-2 新增（已定案，Cowork 收件匣 027）。看守員每班都重寫檔（generated_at 每班前進），照 AlphaResearchLayer 同一套 market_yml 班次判斷：連續錯過 2 個應跑班次即告警（十一節：監控工具自己也要被監控）。"
+    },
+    {
       "task": "AlphaResearchLayer",
       "purpose": "變化雷達名單＋產業營收熱度（研究室.一，market.yml）",
       "interval_min": 1440,
