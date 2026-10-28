@@ -4,11 +4,11 @@
 - **1q-b（FinMind 可轉債文件查證，零請求）**：只讀 FinMind 官方文件頁，未打 API。逐日現行轉換價**存在**（`TaiwanStockConvertibleBondDailyOverview` 的 `ConversionPrice`＋`NextEffectiveDateOfConversionPrice`），但 8 個可轉債資料集全部「只限 backer、sponsor 會員」＝付費牆 → 標「待採購」（價格頁是前端渲染，擷取不到金額），N12 維持暫緩。commit `377adf1ea1`。
 - **1q-c（TPEx 原生源查證，1 次請求）**：本機 TPEx swagger 零請求——`bond_cb_daily` 只有券商買賣斷欄位、ISSBD 系列只有發行時轉換價；網路搜尋 2 次查無 TPEx 可轉債轉換價查詢頁；實送 1 次 `www.tpex.org.tw/zh-tw/sitemap.html`（200，無可轉債頁）。不知道端點就不盲猜，第 2 次請求不送。→ N12 資料線全線結案（MOPS Disallow、官方開放資料只有發行時轉換價、FinMind 付費）。commit `45dd92e466`。
 - [自行裁量]：1q-b 欄位雖存在但付費＝不可得，不走「歷史可得」分支、不寫判定規則草案，改補 1q-c 先找台股原生源；1q-c 的 sitemap 用 WebFetch 讀、沒經過 `tpex_www` 節流狀態檔（單次文件頁，照實記錄）；TPEx「達公布注意交易資訊標準」公告雖含最新轉換價，但只涵蓋少數債券、不分重設／反稀釋，不當來源。
-- 頻率清單：`C:lpha\CLAUDE.md`「可轉債轉換價」節補兩行（1q-b 零請求、1q-c 1 次）。
+- 頻率清單：`C:\alpha\CLAUDE.md`「可轉債轉換價」節補兩行（1q-b 零請求、1q-c 1 次）。
 - 收工補件：`- [ ]` 24 項（≥12），但 DevQueue 可執行 0 項（`next` 回 NO_PENDING_ITEM，<6）。逐一檢查來源：①`DATA_GAP_PLAN.md` 甲類全部已抓／已測；②`docs/UX_REDESIGN_PROPOSAL.md` 無未做項（只剩已處理的對比度註記）；③全檢未完成項多為互動視窗或時間閘；④BACKLOG 文書核對本週暫停；⑤研究候選因前向上限 14／13 已滿，只能寫候選清單、不寫可登記草稿，N8／N11／N12 前置都已做完。**來源已用盡，本輪不補件**，不湊數；空轉補件交給 `dev_queue_runner._idle_fallback_prompt()`。
 - 沒做：不讀價格、不算報酬、不登記試驗、不碰 holdout。原始回應／文件整理存本機 `research/data/raw/cand_n12_cb_probe/`（不進公開 repo）。
 - 冒煙測試：兩項 commit 前各跑一次 `node scripts/smoke_test.mjs`，皆 exit 0；第二次 179 PASS／0 FAIL。
-- 影響檔案：PENDING_QUEUE.md、research/FORWARD_CANDIDATES.md、research/PROGRESS_HEARTBEAT.jsonl、data/STATUS.json、PROGRESS.md；`C:lpha\CLAUDE.md`（不在 repo）。
+- 影響檔案：PENDING_QUEUE.md、research/FORWARD_CANDIDATES.md、research/PROGRESS_HEARTBEAT.jsonl、data/STATUS.json、PROGRESS.md；`C:\alpha\CLAUDE.md`（不在 repo）。
 
 ## 2026-10-28 07:31～08:10 DevQueue 20261028-073102（維運帽）：先.一三五-1q／1r／1s／1q-a 四項完成
 
