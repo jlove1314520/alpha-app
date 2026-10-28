@@ -57,6 +57,22 @@ def _tw_closed(root: Path) -> set[str]:
         return set()
 
 
+def _tw_unpublished_years(root: Path) -> set[str]:
+    """先.一三五-1af：trading_calendar 裡 published=false 的年份（官方休市日未公布，該年只能排除週末）。讀不到回空集合。"""
+    try:
+        cal = json.loads((root / "data" / "trading_calendar.json").read_text(encoding="utf-8")).get("tw") or {}
+        return {str(y) for y, v in cal.items() if isinstance(v, dict) and v.get("published") is False}
+    except Exception as e:  # noqa: BLE001 — 十二節：讀不到就當沒有未公布年份
+        print(f"[warn] forward_sim_watch：讀未公布年份失敗（略過）：{type(e).__name__}")
+        return set()
+
+
+def _unpub_note(start: date, end: date, unpublished: set[str]) -> str:
+    """[start, end] 內有落在未公布年份的平日 → 回說明字串，否則空字串。"""
+    ys = sorted({str(y) for y in range(start.year, end.year + 1)} & unpublished) if start <= end else []
+    return f"（{'、'.join(ys)} 年官方休市日未公布，只排除週末，交易日數可能高估）" if ys else ""
+
+
 def _is_trading(d: date, closed: set[str]) -> bool:
     return d.weekday() < 5 and d.isoformat() not in closed
 
@@ -90,7 +106,7 @@ def _parse_ts(s) -> datetime | None:
     return t if t.tzinfo else t.replace(tzinfo=TZ)
 
 
-def check_one(path: Path, today: date, closed: set[str]) -> dict:
+def check_one(path: Path, today: date, closed: set[str], unpublished: set[str] = frozenset()) -> dict:
     row: dict = {"file": path.name, "status": "OK", "issues": []}
     if not path.exists():
         row.update(status="MISSING", issues=["檔案不存在"])
@@ -133,13 +149,15 @@ def check_one(path: Path, today: date, closed: set[str]) -> dict:
         row["trading_days_since_generated"] = lag
         if lag > STALE_TRADING_DAYS:
             statuses.append("STALE")
-            row["issues"].append(f"generated_at 之後已過 {lag} 個交易日未更新（上限 {STALE_TRADING_DAYS}）")
+            row["issues"].append(f"generated_at 之後已過 {lag} 個交易日未更新（上限 {STALE_TRADING_DAYS}）"
+                                 + _unpub_note(gd + timedelta(days=1), today, unpublished))
     if not started and start is not None and today >= start:
         passed = _count_trading(start, today - timedelta(days=1), closed)
         row["trading_days_since_start"] = passed
         if passed >= LATE_TRADING_DAYS:
             statuses.append("NOT_STARTED_LATE")
-            row["issues"].append(f"起跑日 {start_s} 已過 {passed} 個交易日仍 started=false")
+            row["issues"].append(f"起跑日 {start_s} 已過 {passed} 個交易日仍 started=false"
+                                 + _unpub_note(start, today - timedelta(days=1), unpublished))
     # 多個狀態時取最嚴重的當主狀態，其餘留在 issues
     for s in ("ERROR", "STALE", "NOT_STARTED_LATE"):
         if s in statuses:
@@ -151,7 +169,7 @@ def check_one(path: Path, today: date, closed: set[str]) -> dict:
 LEDGER_IDS = list(range(10, 19))  # 走 paper_forward_common 每交易日一列的帳本
 
 
-def check_ledger_dates(log_path: Path, closed: set[str]) -> dict | None:
+def check_ledger_dates(log_path: Path, closed: set[str], unpublished: set[str] = frozenset()) -> dict | None:
     """只讀帳本每列 date 欄；帳本不存在回 None。自身例外由呼叫端 fail open。"""
     if not log_path.exists():
         return None
@@ -174,19 +192,21 @@ def check_ledger_dates(log_path: Path, closed: set[str]) -> dict | None:
         seen[d] = seen.get(d, 0) + 1
     dups = sorted(d for d, n in seen.items() if n >= 2)
     gaps: list[str] = []
+    unverified: list[str] = []  # 先.一三五-1af：落在休市日未公布年份的「漏記」，可能只是休市，待日曆公布再核
     if dates:
         cur, end = _parse_date(min(dates)), _parse_date(max(dates))
         while cur <= end:
             if _is_trading(cur, closed) and cur.isoformat() not in seen:
-                gaps.append(cur.isoformat())
+                (unverified if str(cur.year) in unpublished else gaps).append(cur.isoformat())
             cur += timedelta(days=1)
     return {"rows": len(dates), "first": min(dates) if dates else None, "last": max(dates) if dates else None,
-            "dup_days": dups[:5], "n_dup_days": len(dups), "gap_days": gaps[:5], "n_gap_days": len(gaps), "bad_lines": bad}
+            "dup_days": dups[:5], "n_dup_days": len(dups), "gap_days": gaps[:5], "n_gap_days": len(gaps),
+            "unverified_gap_days": unverified[:5], "n_unverified_gap_days": len(unverified), "bad_lines": bad}
 
 
-def _apply_ledger(row: dict, root: Path, i: int, closed: set[str]) -> None:
+def _apply_ledger(row: dict, root: Path, i: int, closed: set[str], unpublished: set[str] = frozenset()) -> None:
     try:
-        led = check_ledger_dates(root / "research" / "data" / f"paper_{i}_log.jsonl", closed)
+        led = check_ledger_dates(root / "research" / "data" / f"paper_{i}_log.jsonl", closed, unpublished)
     except Exception as e:  # 十二節：這段壞掉只警告，不影響摘要檢查結果
         print(f"[warn] forward_sim_watch：paper_{i} 帳本日期檢查失敗（略過）：{type(e).__name__}: {e}")
         row["ledger"] = {"error": f"{type(e).__name__}"}
@@ -201,6 +221,9 @@ def _apply_ledger(row: dict, root: Path, i: int, closed: set[str]) -> None:
     if led["n_gap_days"]:
         found.append("LEDGER_GAP")
         row["issues"].append(f"帳本漏記交易日 {led['n_gap_days']} 天：{'、'.join(led['gap_days'])}")
+    if led.get("n_unverified_gap_days"):  # 不升主狀態：日曆公布後下一班自動重判成真漏記或休市
+        row["issues"].append(f"帳本有 {led['n_unverified_gap_days']} 個平日沒列（{'、'.join(led['unverified_gap_days'])}），"
+                             "落在官方休市日未公布的年份，日曆未公布、待核")
     if led["bad_lines"]:
         found.append("LEDGER_BAD_LINE")
         row["issues"].append(f"帳本有 {led['bad_lines']} 行解析不了")
@@ -211,10 +234,11 @@ def _apply_ledger(row: dict, root: Path, i: int, closed: set[str]) -> None:
 def evaluate(root: Path, now: datetime) -> dict:
     today = now.astimezone(TZ).date()
     closed = _tw_closed(root)
-    rows = [check_one(root / "data" / f"paper_{i}.json", today, closed) for i in PAPER_IDS]
+    unpublished = _tw_unpublished_years(root)
+    rows = [check_one(root / "data" / f"paper_{i}.json", today, closed, unpublished) for i in PAPER_IDS]
     for i, r in zip(PAPER_IDS, rows):
         if i in LEDGER_IDS:
-            _apply_ledger(r, root, i, closed)
+            _apply_ledger(r, root, i, closed, unpublished)
     bad = [r for r in rows if r["status"] != "OK"]
     return {
         "generated_at": now.astimezone(TZ).isoformat(timespec="seconds"),
