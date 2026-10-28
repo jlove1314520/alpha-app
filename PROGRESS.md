@@ -1,3 +1,16 @@
+## 2026-10-28 10:31～11:08 DevQueue 20261028-103102（維運帽）：前向帳本壞行看得見（1t）、看守員帳本日期連續性（1u）、N9 除權息停券推導驗證（1v）
+
+- 等待審閱：7 件（停資停券累積、看守員掛排程、上櫃鉅額累積、上櫃次日漲跌停價、每日累積 SOX、前向上限計法、**本輪新增 先.一三五-1t-a 帳本壞行處理規則**）。
+- **先.一三五-1t**（`d1c78b6199`）：新增 `scripts/selftest_paper_forward_ledger_corrupt.py`（合成價格＋合成帳本、不印淨值），重現成立——最後一行半截／中間壞行 → `step()` 丟 `JSONDecodeError`、每班都會同樣失敗；整檔空白 → 不報錯、**靜默從頭重新建倉**（只記錄）。
+  修法（純 bug 範圍，只做「失敗看得見」）：`paper_forward_common.run_main(fn, label, out_path)` 失敗時 `record_error()` 把 `last_error`／`last_error_at` 寫進 `data/paper_N.json`（paper_10～18；paper_15 自有 main 同樣接上），`forward_sim_watch` 判 ERROR；**帳本不動**。
+  證據：新自測全部通過；`selftest_paper_forward_common.py` 全部通過；`selftest_paper_13_18.py` ALL PASS；冒煙 rc=0、0 FAIL。壞行／空白帳本怎麼處理屬判定規則，另立 **先.一三五-1t-a**（互動視窗，建議 (b) 只自動備份丟棄半截最後一行＋(c) 空白帳本停跑不重建）。
+  另（`ee77d771ff`）：1t-a 原本 `**…** [維運]（互動視窗` 格式不合 `INLINE_INTERACTIVE_TAG`，`find_next()` 會把它當 DevQueue 項取件，已改成 `**…**（互動視窗執行；[維運]；…`。
+- **先.一三五-1u**（`b189e96076`）：`research/forward_sim_watch.py` 加 `check_ledger_dates()`，paper_10～18 帳本只讀 date 欄判 LEDGER_DUP／LEDGER_GAP／LEDGER_BAD_LINE，自身例外 fail open。
+  [自行裁量] 帳本路徑用 `paper_N_log.jsonl` 命名慣例（14 支全照此命名）不 import 追蹤程式；paper_5～9 不是每交易日一列，不判漏記。證據：`--selftest` 33 過 0 失敗；正式跑 overall=OK、警示 0（全部尚未起跑）；冒煙 rc=0。輸出檔照 1k 現況不 commit。
+- **先.一三五-1v**（`3c7ecae51d`，零請求）：`research/cand_n9_exdiv_halt_derive.py`。[自行裁量] 間隔規則由快照反推：停券＝除權息交易日前第 4～前 1 個交易日。對 10/27～28 官方預告快照可比對 9 筆一致 9／9 → N9 除權息版標「歷史可推導（單日 9 筆驗證）」；其餘 24 列無對應事件（4 列非除權息原因、20 列未收錄的 ETF 下次配息／Reason 空白的上櫃列），反向 4 筆照實列。限制：單日驗證。結果 json 照 research/data 慣例只留本機。
+- `data/STATUS.json`：本輪沒有新資料源或 App 面板異動，該檔由 `check_local_schedule_heartbeat.py` 排程維護，未手改。
+- 收工時 `dev_queue_runner.py next` → NO_PENDING_ITEM（DevQueue 可取項已做完）；佇列補件交給 runner 的空轉補件（零之二③），本輪時間到不再補。BLOCKED：無。
+
 ## 2026-10-28 10:01～10:15 DevQueue 20261028-100102（維運帽）：先.一三五-1 空轉補件第四批（前向上限 14／13 已滿 → 不新增候選，改補追蹤程式／資料缺口條目）
 
 - 等待審閱：6 件（停資停券累積、看守員掛排程、上櫃鉅額累積、上櫃次日漲跌停價、每日累積 SOX、前向上限計法；本輪未新增）。
