@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 import dev_queue_runner as dq  # noqa: E402
 
-EXPECT_1AA_BLOCKED = True  # 現況；守門員改版後改 False
+EXPECT_1AA_BLOCKED = False  # 2026-10-28 收件匣 029 守門員改「動詞同句」後不再擋（原為 True）
 WORD = "hold" + "out"      # 拆開寫，避免本檔被其他掃描器當成要動用資料切分
 
 FALLBACK_1AA = (f"**先.一三五-1aa 前向追蹤程式讀 {WORD} 期間資料的方式清查（14 支 vs `ALLOWED_HOLDOUT_READERS`，零請求）** "

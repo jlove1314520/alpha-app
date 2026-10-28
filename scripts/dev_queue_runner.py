@@ -422,6 +422,12 @@ GUARD_APPROVED_WINDOW = 6
 _GUARD_STILL_NEEDS = re.compile(r"請總司令|等總司令|需總司令|待總司令|貼給總司令|本人")
 _GUARD_APPROVED_POST = re.compile(r"^(已(核准|同意|定案|裁示)|後|[：:])")
 _GUARD_INBOX_REF = re.compile(r"收件匣\s*\d{3}")
+# 2026-10-28 收件匣 029（先.一三五-1ag-a 甲）：不可逆組的資料切分保留字（hold+out）以前裸字就擋，
+# 「讀 …期間資料的方式清查」「`…_READERS` 白名單」這類只提到名詞的唯讀條目也被擋（10/28 先.一三五-1aa）。
+# 改為：同一句（以 ；;。換行 切）出現下列動詞才算不可逆；檔名、常數名、函式名這類沒有動詞的提及不算。
+# 真要解鎖的寫法（「解鎖 …跑最終檢定」「呼叫 unlock_…_once()」）照擋；守門員不是唯一防線（解鎖旗標仍要本人建立）。
+GUARD_HOLDOUT_VERB_ON = True  # 自測用開關（selftest_dev_queue_guard_holdout_verb.py 比對修前／修後），正式一律 True
+_GUARD_HOLDOUT_VERBS = re.compile(r"解鎖|擴大|動用|開封|啟用|提前|unlock|跑.{0,8}(回測|檢定)|最終檢定", re.I)
 
 
 def guard_scope(clean: str) -> str:
@@ -453,6 +459,11 @@ def _guard_hit_ignored(text: str, mt: "re.Match", irreversible: bool) -> bool:
     if irreversible and mt.group(0) in ("刪除", "清空"):
         clause = re.split(r"[，。；;、\n]", text[mt.end():])[0][:30]
         if _GUARD_SAFE_DELETE.search(clause):
+            return True
+    if irreversible and GUARD_HOLDOUT_VERB_ON and mt.group(0) == "hold" + "out":
+        a = max(text.rfind(c, 0, p) for c in "；;。\n") + 1
+        ends = [k for k in (text.find(c, mt.end()) for c in "；;。\n") if k >= 0]
+        if not _GUARD_HOLDOUT_VERBS.search(text[a:min(ends) if ends else len(text)]):
             return True
     return False
 

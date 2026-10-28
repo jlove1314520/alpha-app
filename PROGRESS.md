@@ -1,3 +1,16 @@
+## 2026-10-28 23:xx 互動視窗：收件匣 029（待審 6 件一次定案）——完成 5 件、1 件等總司令執行一次
+
+- **等待總司令審閱：2 件**（`research/AWAITING_REVIEW.md` 等待中 7→2）：①先.一三五-1ad paper_10／14 漲跌停判斷（029 未涵蓋，20:15 起）；②**新** 先.一三五-1ae-a 權證 20:30 補跑觸發——請總司令執行一次 `powershell -ExecutionPolicy Bypass -File C:\alpha\add-warrant-2030-trigger.ps1`。
+- 原文記進 PENDING_QUEUE 先.一四〇-0；條目一律寫「已定案（Cowork 收件匣 029）」。
+- **先.一二〇-3b** 丙→甲：交 DevQueue 先.一四〇-1（先查漏抓，不是漏抓才加 entry_skip_reason、移出回填候選）。
+- **先.一三八-11a 期交所大額交易人**：備份 alpha.db（`alpha.db.backup_20261028_before_029_taifex`）與 4 支程式；`fetch.get_csv_rows()` 認得 JSON、`parsers.taifex_large()` 讀英文欄位（自測 4/4）；新增 `alpha-data/backfill_taifex_large_json.py`（零請求）。重疊 4 天逐筆比對 1386/1386 全一致後，INSERT OR IGNORE 補 18 個資料日，taifex_large 資料日 12→30。
+- **先.一三八-11b-a EDGAR 外國發行人**：us-gaap 404 改試 ifrs-full 對應標籤，抓不到寫 run_log（不再靜默）；TSM 實測 96 筆（SEC 7 次請求，進記憶體資料庫，alpha.db 等下次 run_daily）。
+- **先.一三八-11c-a**：run_daily 拿掉舊「大盤融資維持率」段（App 用官方分母版，不受影響）。
+- **先.一三五-1ae-a 權證補跑**：`scripts/run_warrant_snapshot.ps1` 今天快照完整就零請求跳過、結尾跑缺期看守（實跑 exit 0）。加 20:30 觸發被權限擋，照指示不繞過，寫成 `C:\alpha\add-warrant-2030-trigger.ps1` 等總司令執行。
+- **先.一三五-1ag-a 守門員**：乙＝1aa 改寫「保留期間」放行（`- [ ]`）；甲＝資料切分保留字要跟解鎖／擴大／動用／unlock／跑回測或檢定 同句才擋。自測 holdout_verb 9/9、readonly_audit 3/0、guard 29/29、approved 10/10；故意讓偵測丟例外 → 退回整句比對（多擋、不中斷）。
+- 插曲：測試權證啟動腳本時，它內建的 git 同步卡在 rebase 半路（沒有 git 行程在跑）；先把工作目錄較新的檔案存到暫存區、`git rebase --abort`（autostash 自動還原）、再把較新檔案放回，無資料遺失。
+- 冒煙測試：見 commit 訊息（本輪沒改 index.html／App 檔）。
+
 ## 2026-10-28 22:01 DevQueue 20261028-220102（維運帽）：1ae 缺期看守、1af 2027 日曆未公布、1ag 守門員誤擋重現＋本機補班推不上的根因修正
 
 - **等待總司令審閱：7 件**（`research/AWAITING_REVIEW.md` 等待中 7 列）：①先.一二〇-3b 前瞻台帳進場日規則（13:28 起，約 9 小時）；②先.一三八-11a 期交所大額交易人解析＋回補（17:45 起）；③先.一三八-11b-a EDGAR 外國發行人；④先.一三八-11c-a 融資維持率舊腳本（17:53 起）；⑤先.一三五-1ad paper_10／14 漲跌停判斷；⑥**新** 先.一三五-1ae-a 權證快照當晚補跑＋看守掛排程（22:25 起）；⑦**新** 先.一三五-1ag-a 守門員不可逆組裸字誤擋（22:25 起）。
