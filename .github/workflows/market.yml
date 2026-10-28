@@ -111,11 +111,12 @@ jobs:
           INSIDER_HASH_KEY: ${{ secrets.INSIDER_HASH_KEY }}
         run: python .github/scripts/fetch_insider_transfer_tw.py
         continue-on-error: true
-      - name: 累積停資停券預告表（TWSE BFI84U＋TPEx tpex_margin_trading_term，各1次，只在17:13班，先.一三八-1）
+      - name: 累積停資停券預告表（TWSE BFI84U＋TPEx tpex_margin_trading_term，各1次，17:13班＋看門狗補救班，先.一三八-1／先.一四〇-15a）
         # 已定案（Cowork 收件匣 027，提案 先.一三五-1i-a）：官方只給當下預告、不能查歷史，要每日累積；每日 2 次請求。
         # 輸出 data/margin_suspension_daily/（一天一檔）已加進下方 git add 清單（十節）；共用 rate_limit_state（已在清單）。
-        # 任一邊失敗只略過、永遠 exit 0；當天兩邊都存過就不再送請求。watchdog 補救觸發不跑本步驟，維持每日 2 次。
-        if: github.event.schedule == '13 9 * * 1-5' || (github.event_name == 'workflow_dispatch' && inputs.reason != 'watchdog_tw_catchup')
+        # 任一邊失敗只略過、永遠 exit 0；當天兩邊都存過就不再送請求。
+        # 已定案（Cowork 收件匣 030，先.一四〇-15a 乙）：17:13 班常態延遲約 5 小時，看門狗補救班（17:45 後）也可跑；當天已存就零請求，每日仍 ≤2 次。
+        if: github.event.schedule == '13 9 * * 1-5' || github.event_name == 'workflow_dispatch'
         run: python .github/scripts/fetch_margin_suspension_daily.py
         continue-on-error: true
       - name: 更新SEC 13F機構持倉（僅追蹤波克夏海瑟威，免金鑰，源頭二.3第6名）

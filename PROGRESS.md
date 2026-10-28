@@ -1,3 +1,13 @@
+## 2026-10-29 04:5x 互動視窗：收件匣 030（Cowork 04:20，五項小裁示）
+
+- **等待總司令審閱：2 件**（`research/AWAITING_REVIEW.md` 等待中 2 列）：①先.一三五-1ae-a 權證快照 20:30 補跑觸發（請總司令執行 `C:\alpha\add-warrant-2030-trigger.ps1`）②先.一四一-3a 美股盤中報價本機補班：在 `alpha-app\.env` 放 `FINNHUB_API_KEY`＋執行 `C:\alpha\add-quotes-us-trigger.ps1`（改排程觸發被權限擋，未繞過）。
+- **先.一三五-1ad 採丙**：兩份 PREREG（模擬 J `docs/PREREG_DISPOSITION_RELEASE_REBOUND_FORWARD_FINAL.md`、模擬 N `docs/PREREG_STOCK_GRID_V2_RANGE_FORWARD_FINAL.md`）加「修訂 R1」改用官方檔位漲跌停價，寫明尚未起跑（帳本不存在）、不另計 N；追蹤程式改動交 DevQueue 先.一四一-1（11/30 前）。
+- **先.一四〇-15a 採乙**：`.github/workflows/market.yml` 停資停券步驟條件拿掉 watchdog 排除，看門狗補救班也可跑；腳本當天已存就零請求，每日仍 ≤2 次。CLAUDE.md 頻率清單同步。
+- **先.一四〇-16a 採甲**：DATA.md「上櫃日線成交量」節補規則：跨上市／上櫃比較量能的研究報告必寫但書。
+- **先.一四〇-18a 採甲**＋新條目 先.一四一-2（DevQueue）：每週一自動核對上週台股收盤是否當晚落地，有漏推播；掛既有排程腳本、不新建排程。
+- **先.一三五-1am-a 照建議乙、改接既有腳本**：美股分支寫進 `scripts/quotes_local_fallback.py`（DevQueue 先.一四一-3），沿用既有 AlphaQuotesFallback 排程、只加晚上時段；金鑰與觸發由總司令本人做。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0、0 項 FAIL（all_passed）。
+
 ## 2026-10-29 03:01 DevQueue 20261029-030102（維運帽）：跳空稽核補讀臨時休市、美股盤中報價缺班統計＋提案
 
 - **等待總司令審閱：6 件**（`research/AWAITING_REVIEW.md` 等待中 6 列，本輪 +1）：①先.一三五-1ad paper_10／14 漲跌停官方檔位版（10/28 20:15 起，約 7 小時）②先.一三五-1ae-a 權證快照 20:30 補跑觸發，請總司令執行一次（10/28 23:0x 起，約 4 小時）③先.一四〇-15a 停資停券放寬到看門狗補救班（10/29 01:2x 起，約 2 小時，建議乙）④先.一四〇-16a 上市／上櫃成交量口徑（約 2 小時，建議甲）⑤先.一四〇-18a 雲端看門狗跳班（約 2 小時，建議甲）⑥**新** 先.一三五-1am-a 美股盤中報價加本機補班（剛送出，建議乙；需總司令本人放 Finnhub key、建排程）。
