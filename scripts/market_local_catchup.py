@@ -310,8 +310,13 @@ def commit_push(add_line, backfilled=()):
                 return {"commit": sh(["git", "rev-parse", "--short", "HEAD"], cwd=WT).stdout.strip(), "push_try": i + 1}
             sh(["git", "fetch", "-q", "origin", "main"], cwd=WT, timeout=300)
             if sh(["git", "rebase", "origin/main"], cwd=WT, timeout=600).returncode:
+                # 先.一三五-1ae（2026-10-28）：10/27～10/28 四次都只留「rebase 衝突，放棄」查不到是哪個檔，abort 前記下衝突檔名
+                try:
+                    conflicts = [x for x in sh(["git", "diff", "--name-only", "--diff-filter=U"], cwd=WT).stdout.splitlines() if x][:20]
+                except Exception as e:  # noqa: BLE001 — 診斷失敗不影響 abort（十二節）
+                    conflicts = [f"(讀衝突檔失敗：{type(e).__name__})"]
                 sh(["git", "rebase", "--abort"], cwd=WT)
-                return {"commit": None, "note": "rebase 衝突，放棄"}
+                return {"commit": None, "note": "rebase 衝突，放棄", "conflict_files": conflicts}
             time.sleep(5)
         return {"commit": None, "note": "push 重試 5 次失敗"}
     finally:
