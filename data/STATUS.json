@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-28T08:46:00+08:00",
+  "updated_at": "2026-10-28T09:51:20.163187+08:00",
   "latest_commit": "d8acfab",
   "data_files": [
     {
@@ -12,7 +12,7 @@
     },
     {
       "path": "data/adr_premium.json",
-      "generated_at": "2026-10-27T19:29:45+00:00",
+      "generated_at": "2026-10-27T23:05:21+00:00",
       "records": 4,
       "source": "通用解析（讀 computed_at）",
       "detail": "",
@@ -28,7 +28,7 @@
     },
     {
       "path": "data/auto_heartbeat.json",
-      "generated_at": "2026-10-27T13:40:01+08:00",
+      "generated_at": "2026-10-28T09:40:01+08:00",
       "records": 40,
       "source": "通用解析（讀 updated_at）",
       "detail": "",
@@ -156,8 +156,8 @@
     },
     {
       "path": "data/events.json",
-      "generated_at": "2026-10-28T05:35:04.115853+08:00",
-      "records": 7943,
+      "generated_at": "2026-10-28T09:35:04.456802+08:00",
+      "records": 8070,
       "source": "通用解析（讀 fetched_at）",
       "detail": "",
       "status": "ok"
@@ -165,7 +165,7 @@
     {
       "path": "data/events_search.json",
       "generated_at": null,
-      "records": 7943,
+      "records": 8070,
       "source": "通用解析：檔內沒有日期欄位",
       "detail": "",
       "status": "no_date"
@@ -180,7 +180,7 @@
     },
     {
       "path": "data/factory_stability.json",
-      "generated_at": "2026-10-28T06:07:02.769143+08:00",
+      "generated_at": "2026-10-28T09:37:02.160566+08:00",
       "records": 23,
       "source": "通用解析（讀 generated_at）",
       "detail": "",
@@ -276,8 +276,8 @@
     },
     {
       "path": "data/ir_events.json",
-      "generated_at": "2026-10-28T05:35:04.115853+08:00",
-      "records": 342,
+      "generated_at": "2026-10-28T09:35:04.456802+08:00",
+      "records": 356,
       "source": "通用解析（讀 fetched_at）",
       "detail": "",
       "status": "ok"
@@ -348,7 +348,7 @@
     },
     {
       "path": "data/news.json",
-      "generated_at": "2026-10-28T05:35:04.115853+08:00",
+      "generated_at": "2026-10-28T09:35:04.456802+08:00",
       "records": 300,
       "source": "通用解析（讀 fetched_at）",
       "detail": "",
@@ -356,16 +356,16 @@
     },
     {
       "path": "data/news_evidence.json",
-      "generated_at": "2026-10-28T05:35:28.742153+08:00",
-      "records": 55736,
+      "generated_at": "2026-10-28T09:36:06.579928+08:00",
+      "records": 55811,
       "source": "通用解析（讀 meta.generated_at）",
       "detail": "",
       "status": "ok"
     },
     {
       "path": "data/news_urls.json",
-      "generated_at": "2026-10-28T05:35:21.886417+08:00",
-      "records": 55657,
+      "generated_at": "2026-10-28T09:35:58.532527+08:00",
+      "records": 55732,
       "source": "通用解析（讀 meta.generated_at）",
       "detail": "",
       "status": "ok"
@@ -620,18 +620,18 @@
     },
     {
       "path": "data/quotes_tw.json",
-      "generated_at": "2026-10-27T19:29:37+00:00",
+      "generated_at": "2026-10-28T01:45:36+00:00",
       "records": 241,
       "source": "TWSE MIS（mis.twse.com.tw，證交所公開即時行情端點）",
-      "detail": "queried=241 matched=241 trading_window=False",
+      "detail": "queried=241 matched=241 trading_window=True",
       "status": "ok"
     },
     {
       "path": "data/quotes_us.json",
-      "generated_at": "2026-10-27T19:29:44+00:00",
+      "generated_at": "2026-10-27T23:05:20+00:00",
       "records": 9,
       "source": "Finnhub /quote（免費額度，regular quote）+ yfinance Ticker.info（extended_hours：pre/post market，2026-08-27新增）",
-      "detail": "queried=9 matched=9 trading_window=True market_session=regular extended_hours_matched=9",
+      "detail": "queried=9 matched=9 trading_window=False market_session=post extended_hours_matched=9",
       "status": "ok"
     },
     {
@@ -844,7 +844,7 @@
     },
     {
       "path": "data/themes.json",
-      "generated_at": "2026-10-28T05:35:34.198099+08:00",
+      "generated_at": "2026-10-28T09:36:10.340555+08:00",
       "records": 186,
       "source": "通用解析（讀 meta.generated_at）",
       "detail": "",
@@ -1068,11 +1068,12 @@
     }
   ],
   "schedule_health": {
-    "checked_at": "2026-10-28T06:41:56+08:00",
+    "checked_at": "2026-10-28T09:51:20+08:00",
     "any_overdue": true,
     "overdue_names": [
-      "美股盤中報價（GitHub Actions quotes.yml）",
-      "美股即時報價（本機IBKR）"
+      "台股逐筆tick（本機Shioaji）",
+      "美股即時報價（本機IBKR）",
+      "美股四大指數（market.yml 21:43 UTC）"
     ],
     "known_simplification": "台股項目扣 data/trading_calendar.json 休市日（含今天疑似臨時休市，先.一三二-10b）；美股項目扣同檔 us 休市日（先.一三二-13）；美股提早收盤（半日市）扣同檔 us[年].early_close，當天收盤時刻改用它（先.一三二-13a）",
     "tw_closed_today_note": null,
@@ -1082,27 +1083,27 @@
         "file": "data/quotes_tw.json",
         "owner": "GitHub Actions",
         "status": "ok",
-        "last_data_at": "2026-10-28T03:29+08:00",
-        "expected_at_or_after": "2026-10-27T13:00+08:00",
-        "rule": "盤後/假日：需有最近一個交易日的收盤資料",
+        "last_data_at": "2026-10-28T09:45+08:00",
+        "expected_at_or_after": "2026-10-28T09:21+08:00",
+        "rule": "盤中：資料不得超過30分鐘未更新",
         "note": "每10分鐘；盤中超過30分鐘沒落地=異常"
       },
       {
         "name": "台股逐筆tick（本機Shioaji）",
         "file": "data/quotes_sinopac.json",
         "owner": "本機排程AlphaShioajiQuotes",
-        "status": "ok",
+        "status": "overdue",
         "last_data_at": "2026-10-27T13:45+08:00",
-        "expected_at_or_after": "2026-10-27T13:00+08:00",
-        "rule": "盤後/假日：需有最近一個交易日的收盤資料",
+        "expected_at_or_after": "2026-10-28T09:21+08:00",
+        "rule": "盤中：資料不得超過30分鐘未更新",
         "note": "只有使用者這台機器開機且排程在跑才會更新；乙.1冷熱分離上線後盤中不再push，只在收盤後commit一次"
       },
       {
         "name": "美股盤中報價（GitHub Actions quotes.yml）",
         "file": "data/quotes_us.json",
         "owner": "GitHub Actions",
-        "status": "overdue",
-        "last_data_at": "2026-10-28T03:29+08:00",
+        "status": "ok",
+        "last_data_at": "2026-10-28T07:05+08:00",
         "expected_at_or_after": "2026-10-28T03:30+08:00",
         "rule": "盤後/假日：需有最近一個交易日的收盤資料",
         "note": "每10分鐘（美東正常盤）；盤前盤後另有extended_hours欄位"
@@ -1131,9 +1132,9 @@
         "name": "美股四大指數（market.yml 21:43 UTC）",
         "file": "data/market_us.json",
         "owner": "GitHub Actions",
-        "status": "ok",
+        "status": "overdue",
         "last_data_at": "2026-10-28T00:03+08:00",
-        "expected_at_or_after": "2026-10-27T05:43+08:00",
+        "expected_at_or_after": "2026-10-28T05:43+08:00",
         "rule": "每個平日21:43（UTC）排程，寬限3.0小時",
         "note": "台北隔天05:43排程，寬限3小時（時刻來源：market.yml cron）"
       },
@@ -1486,8 +1487,8 @@
     ],
     "note": "本機排程管線的新鮮度。判定看的是**產出檔內部的資料時間戳**（能取得的話），不是檔案修改時間——mtime 新鮮不代表資料新鮮，alpha.db 就是 mtime 天天更新但資料停在 2026-08-21。這份與 data/audit_report.json 的 local_task_health、scripts/pipeline_inventory.py 讀同一份登錄檔。",
     "status": "ok",
-    "status_checked_at": "2026-10-27T22:41:56.662308+00:00",
-    "status_age_hours": 6.6
+    "status_checked_at": "2026-10-28T01:51:20.163187+00:00",
+    "status_age_hours": 9.7
   },
   "adjustment_anomaly_warnings": {
     "n_warnings": 6993,
@@ -1880,34 +1881,34 @@
     "2026-10-27（DevQueue 20261027-100102，先.一三五-1d）：data/events.json 只留 90 天；重大訊息（TWSE／TPEx）另由本機 AlphaNewsFallback（每 30 分鐘，scripts/news_local_fallback.py 開頭呼叫 scripts/archive_mops_events.py）以（代號、日期、標題）去重 append 到 research/data/mops_events_archive.jsonl（本機檔、不進公開 repo、零外部請求）。限制：只在這台電腦有；本機排程停擺超過 90 天仍會遺失；首次歸檔 4,377 筆、最早 2026-09-06（更早的已被 90 天視窗刷掉，無法回補）。"
   ],
   "any_overdue": true,
-  "updated_by": "DevQueue 20261028-083102（維運帽：先.一三五-1q-b／1q-c 可轉債轉換價來源查證，無資料源／面板異動）",
+  "updated_by": "scripts/check_local_schedule_heartbeat.py（local_schedule_watchdog.yml 每 30 分鐘）",
   "local_schedule_heartbeat": {
-    "checked_at": "2026-10-27T22:41:56.520502+00:00",
+    "checked_at": "2026-10-28T01:51:19.970579+00:00",
     "stall_threshold_minutes": 60,
     "track_stall_threshold_minutes": 360,
     "tracks": {
       "devqueue": {
-        "last_commit_sha": "9cae8daee0871f00014f2fa7a12a7b8d3d6f84b7",
-        "last_commit_at": "2026-10-27T22:31:09+00:00",
-        "minutes_since": 10.8,
+        "last_commit_sha": "74d67053dad3085e00074cc676248507d2c0cf78",
+        "last_commit_at": "2026-10-28T01:31:10+00:00",
+        "minutes_since": 20.2,
         "track_stalled": false
       },
       "marathon": {
         "last_commit_sha": "9209c3e5bc58374ee4676efb896a1733763f094c",
         "last_commit_at": "2026-10-20T11:15:47+00:00",
-        "minutes_since": 10766.2,
+        "minutes_since": 10955.5,
         "track_stalled": true
       },
       "hypothesis_queue": {
         "last_commit_sha": "e88765bfcdde592ff53824473125d9394524c0e2",
         "last_commit_at": "2026-10-20T11:25:16+00:00",
-        "minutes_since": 10756.7,
+        "minutes_since": 10946.1,
         "track_stalled": true
       },
       "connectivity": {
-        "last_commit_sha": "192778cd47992db07876a76ce201f9a250fee901",
-        "last_commit_at": "2026-10-27T22:07:15+00:00",
-        "minutes_since": 34.7,
+        "last_commit_sha": "7f5b30e9f5460f7f2cf13da9ff16bd48de99fdf4",
+        "last_commit_at": "2026-10-28T01:37:15+00:00",
+        "minutes_since": 14.1,
         "track_stalled": false
       },
       "market_catchup": {
@@ -1919,16 +1920,16 @@
     },
     "claude_auth": {
       "overall_status": "STALLED_3H",
-      "detail": "marathon:STALLED_3H(179.44h)",
+      "detail": "marathon:STALLED_3H(182.59h)",
       "launchers": {
         "devqueue": {
           "status": "OK",
           "last_reason": "QUEUE_EMPTY",
           "last_detail": "QUEUE_EMPTY/",
-          "last_cycle_id": "20261028-063102",
-          "last_attempt_at": "2026-10-28T05:08:49+08:00",
-          "last_ok_at": "2026-10-28T05:08:49+08:00",
-          "hours_since_last_attempt": 1.55
+          "last_cycle_id": "20261028-093102",
+          "last_attempt_at": "2026-10-28T08:53:55+08:00",
+          "last_ok_at": "2026-10-28T08:53:55+08:00",
+          "hours_since_last_attempt": 0.96
         },
         "marathon": {
           "status": "STALLED_3H",
@@ -1937,7 +1938,7 @@
           "last_cycle_id": "20261020-191357",
           "last_attempt_at": "2026-10-20T19:15:45+08:00",
           "last_ok_at": "2026-10-20T19:15:45+08:00",
-          "hours_since_last_attempt": 179.44
+          "hours_since_last_attempt": 182.59
         },
         "hypothesis_queue": {
           "status": "STALLED_3H",
@@ -1946,17 +1947,17 @@
           "last_cycle_id": "2026-10-20 19:25:14",
           "last_attempt_at": "2026-10-20T19:25:15+08:00",
           "last_ok_at": "2026-10-20T19:25:15+08:00",
-          "hours_since_last_attempt": 179.28
+          "hours_since_last_attempt": 182.43
         }
       },
-      "checked_at": "2026-10-27T22:41:56.520502+00:00"
+      "checked_at": "2026-10-28T01:51:19.970579+00:00"
     },
     "ibkr_quotes": {
       "last_commit_sha": "b9aa36967f7efd6e293b4b2c61eec1ae5c48e687",
       "last_commit_at": "2026-10-19T08:01:05+00:00",
-      "minutes_since": 12400.9,
+      "minutes_since": 12590.2,
       "file_fetched_at": "2026-10-18T11:01:05.500839+08:00",
-      "file_minutes_since": 14140.9,
+      "file_minutes_since": 14330.2,
       "note": "只記錄不判定停擺——盤外時段與IBKR Gateway每週人工登入空窗都會讓這個數字變大，那是預期行為不是故障，見本檔案docstring。2026-10-01【先.六-三】起IBKR排程盤中最多每30分鐘才commit一次（commit洪水修法），所以minutes_since在盤中落在30分鐘內是正常；file_fetched_at是已commit的quotes_ibkr.json內的抓取時間，同樣只記錄、不得拿來當停擺判定（停擺判定只看三軌）"
     },
     "stalled": false,
@@ -1966,10 +1967,10 @@
       "market_catchup"
     ],
     "judged_by": "any_of_local_heartbeats",
-    "stall_minutes": 10.8,
+    "stall_minutes": 14.1,
     "note": "本機排程最後活動時間；2026-09-27【乾.三主體第八點】裁示改為「DevQueue／Marathon／Hypothesis-queue三軌任一有新鮮心跳（≤60分鐘）即視為本機整體存活」（取代原本只看DevQueue單一訊號的版本，因為DevQueue的既有碰撞防護機制在互動視窗長時間編輯檔案時會正確YIELD但不留心跳，容易誤判——詳見PENDING_QUEUE.md查.一條目的根因分析）。個別軌道超過360分鐘另外標記track_stalled警告，不影響本機整體存活的判定，但值得單獨留意。偵測放在雲端是因為本機push被卡住時無法自己通知任何人。"
   },
-  "data_files_checked_at": "2026-10-28T06:41:56.662308+08:00",
+  "data_files_checked_at": "2026-10-28T09:51:20.163187+08:00",
   "orphan_processes": {
     "count": 0,
     "total_private_mb": 0,
