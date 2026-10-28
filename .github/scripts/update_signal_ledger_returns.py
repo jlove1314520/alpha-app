@@ -70,15 +70,28 @@ def main() -> None:
 
     pending = [s for s in sigs if any(s["returns"].get(k) is None for k in WINDOWS)]
     due = [s for s in pending if upl._trading_days_after(s["entry_date"], 5, calendar)]
-    if not due:
+    # 先.一四〇-6：報酬已填、但當輪大盤抓取失敗導致超額報酬留 null 的，之後每輪補算（報酬本身不重填）
+    need_excess = [s for s in sigs if any(isinstance(s["returns"].get(k), dict)
+                                          and s["returns"][k].get("excess_vs_taiex_pct") is None for k in WINDOWS)]
+    if not due and not need_excess:
         if entry_filled or skip_new:
             ledger["meta"]["last_returns_backfill_at"] = datetime.now(upl.TW_TZ).isoformat()
             LEDGER_PATH.write_text(json.dumps(ledger, ensure_ascii=False, indent=1, allow_nan=False), encoding="utf-8")
         print(f"進場價新填 {entry_filled} 筆、進場日無收盤新標 {skip_new} 筆（累計 {len(skipped_all)}）；沒有訊號到達 T+5（待回填 {len(pending)} 筆）")
         return
-    taiex = upl._fetch_taiex_history(min(s["entry_date"] for s in due))
+    taiex = upl._fetch_taiex_history(min(s["entry_date"] for s in due + need_excess))
 
-    filled = skipped = 0
+    filled = skipped = excess_fixed = 0
+    for s in need_excess:
+        for key, n in WINDOWS.items():
+            w = s["returns"].get(key)
+            if not isinstance(w, dict) or w.get("excess_vs_taiex_pct") is not None:
+                continue
+            target = upl._trading_days_after(s["entry_date"], n, calendar)  # 同下面首次回填：大盤取目標交易日
+            t0, t1 = taiex.get(s["entry_date"]), (taiex.get(target) if target else None)
+            if t0 and t1 is not None:
+                w["excess_vs_taiex_pct"] = round(w["return_pct"] - upl._compute_return_pct(t0, t1), 4)
+                excess_fixed += 1
     for s in due:
         for key, n in WINDOWS.items():
             if s["returns"].get(key) is not None:
@@ -98,10 +111,10 @@ def main() -> None:
                                  "exit_date": actual, "filled_at": datetime.now(upl.TW_TZ).isoformat()}
             filled += 1
 
-    if filled or entry_filled or skip_new:
+    if filled or entry_filled or skip_new or excess_fixed:
         ledger["meta"]["last_returns_backfill_at"] = datetime.now(upl.TW_TZ).isoformat()
         LEDGER_PATH.write_text(json.dumps(ledger, ensure_ascii=False, indent=1, allow_nan=False), encoding="utf-8")
-    print(f"signal_ledger 回填：進場價新填 {entry_filled} 筆、進場日無收盤新標 {skip_new} 筆（累計 {len(skipped_all)}）、報酬新填 {filled} 欄、出場價缺失/過期跳過 {skipped} 欄")
+    print(f"signal_ledger 回填：進場價新填 {entry_filled} 筆、進場日無收盤新標 {skip_new} 筆（累計 {len(skipped_all)}）、報酬新填 {filled} 欄、超額報酬補算 {excess_fixed} 欄、出場價缺失/過期跳過 {skipped} 欄")
 
 
 if __name__ == "__main__":
