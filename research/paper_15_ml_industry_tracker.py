@@ -501,6 +501,12 @@ def main(argv: list[str]) -> int:
             print(json.dumps(step(), ensure_ascii=False))
     except Exception as e:  # noqa: BLE001  十二節：自身失敗只印警告
         print(f"[warn] 模擬 O 失敗：{type(e).__name__}: {e}")
+        if not argv:
+            try:
+                import paper_forward_common as C
+                C.record_error(OUT, "模擬 O", e)  # 先.一三五-1t：失敗寫進摘要 last_error
+            except Exception as e2:  # noqa: BLE001
+                print(f"[warn] 模擬 O last_error 寫不進摘要：{type(e2).__name__}: {e2}")
         if argv and argv[0] in ("build-panel", "train"):
             return 1
     return 0

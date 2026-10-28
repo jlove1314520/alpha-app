@@ -139,4 +139,4 @@ def step() -> dict:
 
 
 if __name__ == "__main__":
-    raise SystemExit(C.run_main(step, "模擬 J"))
+    raise SystemExit(C.run_main(step, "模擬 J", ROOT / "data" / "paper_10.json"))

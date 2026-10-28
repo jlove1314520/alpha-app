@@ -13,7 +13,8 @@
   可直接餵 run_random_timing_control）。每日一列＝判定時天條一回撤用的日淨值序列。
 - step() 冪等：同一個交易日不會處理兩次（帳本最後日期之後的交易日才處理，漏跑的日子依序補，最多到 price_history 最新日）；
   起跑日前一律 NOT_STARTED（不建倉、不寫帳本，只寫摘要）。
-- 價格只讀 data/price_history（repo 既有、還原收盤），零額外外部請求。自身失敗只印警告、exit 0（十二節）。
+- 價格只讀 data/price_history（repo 既有、還原收盤），零額外外部請求。自身失敗只印警告、exit 0（十二節），
+  並把 last_error 寫進摘要檔讓 forward_sim_watch 判 ERROR（先.一三五-1t；帳本壞行不自動略過）。
 """
 from __future__ import annotations
 
@@ -399,9 +400,28 @@ def step(spec: Spec, ctx: dict | None = None, px: Px | None = None, active: set 
     return {"state": "HOLD" if not done else "PROCESSED", "day": day, "processed": done}
 
 
-def run_main(fn: Callable[[], dict], label: str) -> int:
+def record_error(out_path: Path | None, label: str, e: BaseException) -> None:
+    """追蹤失敗時把 last_error 寫進摘要檔（先.一三五-1t）：保留舊摘要其他欄位，只加 last_error／last_error_at。
+    forward_sim_watch 會把有 last_error 的摘要判 ERROR；下一次成功的 write_summary 整檔重寫，last_error 自然消失。
+    帳本一律不動（壞行怎麼處理是判定規則，見 先.一三五-1t-a）。本函式自身失敗只印警告（十二節）。"""
+    if out_path is None:
+        return
+    try:
+        doc = load_json(out_path, {})
+        if not isinstance(doc, dict):
+            doc = {}
+        doc["last_error"] = f"{type(e).__name__}: {str(e)[:200]}"
+        doc["last_error_at"] = datetime.now(TW).isoformat(timespec="seconds")
+        Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+        Path(out_path).write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
+    except Exception as e2:  # noqa: BLE001
+        print(f"[warn] {label} last_error 寫不進摘要：{type(e2).__name__}: {e2}")
+
+
+def run_main(fn: Callable[[], dict], label: str, out_path: Path | None = None) -> int:
     try:
         print(json.dumps(fn(), ensure_ascii=False))
     except Exception as e:  # noqa: BLE001 —— 十二節：自身失敗只警告
         print(f"[warn] {label} 追蹤失敗：{type(e).__name__}: {e}")
+        record_error(out_path, label, e)
     return 0
