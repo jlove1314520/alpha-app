@@ -524,7 +524,9 @@ def _tw_closed(day: str) -> bool:
         if datetime.fromisoformat(day).weekday() >= 5:
             return True
         cal = json.loads((REPO_ROOT / "data" / "trading_calendar.json").read_text(encoding="utf-8"))
-        return day in ((cal.get("tw") or {}).get(day[:4]) or {}).get("closed", [])
+        # 先.一四〇-4：臨時休市（unscheduled_closed，例 10/23）也算休市，不製造休市日列
+        yr = (cal.get("tw") or {}).get(day[:4]) or {}
+        return day in (yr.get("closed") or []) or day in (yr.get("unscheduled_closed") or [])
     except Exception as e:  # noqa: BLE001 — 日曆讀不到只降級成「只看週末」
         print(f"::warning::讀不到交易日曆，只用週末判斷休市：{type(e).__name__}")
         return False

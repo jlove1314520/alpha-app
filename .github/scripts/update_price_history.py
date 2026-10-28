@@ -720,7 +720,8 @@ def _tw_closed_days() -> set:
     """data/trading_calendar.json 的台股休市日；讀不到回空集合（只排除週末，視窗會略長，不影響正確性）。"""
     try:
         cal = json.loads(TRADING_CALENDAR_PATH.read_text(encoding="utf-8")).get("tw") or {}
-        return {d for y in cal.values() for d in ((y or {}).get("closed") or [])}
+        # 先.一四〇-4：臨時休市（unscheduled_closed，例 10/23）也不算交易日，否則回看視窗少一天
+        return {d for y in cal.values() for k in ("closed", "unscheduled_closed") for d in ((y or {}).get(k) or [])}
     except Exception as e:  # noqa: BLE001 -- 日曆讀不到只會讓視窗多幾天，不中止（十二節）
         print(f"[exright] 警告：讀不到 trading_calendar.json（{e!r}），只排除週末")
         return set()
