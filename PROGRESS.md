@@ -25,7 +25,7 @@
 - 新增 `C:\alpha\總司令待辦.md`：4 項白話做法＋不做的影響（權證觸發、美股補班＋Finnhub〔無帳號可先跳過，附免費註冊網址〕、IBKR Gateway 重新登入〔本機美股報價 10/18 11:01 起停〕、Patreon 通知信箱改址）。
 - 新增 `C:\alpha\run-owner-todo.ps1`：依序跑兩支觸發 ps1，每支先問 Y/N、失敗不中斷下一支、最後印出每項結果；不讀寫金鑰。PS 解析 0 錯。
 - 規則：以後「請總司令執行一次」同步進清單、CC 查證後才移已完成（alpha-app/CLAUDE.md、AWAITING 使用規則）。
-- **冒煙**：SMOKE_PLACEHOLDER
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0、0 項 FAIL（all_passed）。第一次 05:0x 被系統以記憶體不足中止，總司令下令重跑後通過；同時取得長期許可：記憶體不足中止→等 10 分鐘自動重跑一次，再失敗才回報（寫進 CLAUDE.md 四節）。
 
 ## 2026-10-29 04:5x 互動視窗：收件匣 030（Cowork 04:20，五項小裁示）
 
