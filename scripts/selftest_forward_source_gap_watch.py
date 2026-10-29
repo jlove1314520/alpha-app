@@ -1,6 +1,6 @@
 """自測：research/forward_source_gap_watch.py（先.一三五-1ae）。
 
-合成目錄四情境：正常、缺一期、日曆壞檔、目錄不存在 → 都要 exit 0、只降級警告（CLAUDE.md 十二節）。
+合成目錄情境：正常、缺一期、日曆壞檔、目錄不存在、融資／借券累積檔（先.一三五-1ba） → 都要 exit 0、只降級警告（CLAUDE.md 十二節）。
 零外部請求，只寫暫存目錄。
 """
 from __future__ import annotations
@@ -90,6 +90,8 @@ with tempfile.TemporaryDirectory() as td:
     check("tpex_limit_next OK", s["tpex_limit_next"]["status"] == "OK", s["tpex_limit_next"])
     check("mops OK、壞行計數 1", s["mops_events"]["status"] == "OK" and s["mops_events"]["bad_lines"] == 1, s["mops_events"])
     check("停資停券目錄不存在 → NOT_STARTED", s["margin_suspension"]["status"] == "NOT_STARTED")
+    check("融資／借券累積檔不存在 → 四源 NOT_STARTED",
+          all(s[k]["status"] == "NOT_STARTED" for k in ("margin_twse", "margin_tpex", "sbl_twse", "sbl_tpex")))
     check("overall OK", doc["overall"] == "OK", doc["overall"])
     check("臨時休市 10/23（unscheduled_closed）沒快照不算缺", "2026-10-23" not in s["warrant"].get("missing", []), s["warrant"])
 
@@ -119,6 +121,34 @@ with tempfile.TemporaryDirectory() as td:
     rc, doc, out = run(r)
     check("exit 0", rc == 0, out)
     check("全部 NOT_STARTED、不崩", doc and all(v["status"] == "NOT_STARTED" for v in doc["sources"].values()), doc)
+
+    print("情境六（先.一三五-1ba）：融資 data_dates／借券 series 鍵；借券上櫃缺 10/22")
+    r = Path(td) / "f"
+    make(r)
+    (r / "data" / "margin_by_stock_history.json").write_text(json.dumps({
+        "dates": ["20261024", "20261028"],  # 執行日鍵（含週六）不看
+        "data_dates": {"20261023": {"twse": "20261022", "tpex": None}, "20261028": {"twse": "20261027", "tpex": "20261027"},
+                       "20261024": "壞值"},
+        "series": {"1101": {"20261024": [1, 2, 3]}}}), encoding="utf-8")
+    (r / "data" / "securities_lending_sell_history.json").write_text(json.dumps({
+        "series_twse": {"2330": {"20261021": [1], "20261022": [1]}, "2317": {"20261027": [1]}},
+        "series_tpex": {"6488": {"20261021": [1], "20261027": [1]}}}), encoding="utf-8")
+    rc, doc, out = run(r)
+    s = doc["sources"]
+    check("exit 0", rc == 0, out)
+    check("margin_twse OK（起算 10/22，到期 10/27；10/23 臨時休市、10/26 休市不算）", s["margin_twse"]["status"] == "OK", s["margin_twse"])
+    check("margin_tpex 起算 10/27 → OK（data_dates 之前不算缺）", s["margin_tpex"]["status"] == "OK", s["margin_tpex"])
+    check("sbl_twse 跨代號合併 → OK", s["sbl_twse"]["status"] == "OK", s["sbl_twse"])
+    check("sbl_tpex GAP 缺 10/22", s["sbl_tpex"]["status"] == "GAP" and s["sbl_tpex"]["missing"] == ["2026-10-22"], s["sbl_tpex"])
+    check("今天 10/28 不算到期", s["sbl_twse"]["due_through"] == "2026-10-27", s["sbl_twse"])
+
+    print("情境七：借券檔壞 JSON → 只有 sbl 兩源 ERROR、其他照跑")
+    (r / "data" / "securities_lending_sell_history.json").write_text("{壞", encoding="utf-8")
+    rc, doc, out = run(r)
+    s = doc["sources"]
+    check("exit 0", rc == 0, out)
+    check("sbl_twse／sbl_tpex ERROR", s["sbl_twse"]["status"] == "ERROR" and s["sbl_tpex"]["status"] == "ERROR", s["sbl_twse"])
+    check("margin_twse 仍 OK", s["margin_twse"]["status"] == "OK", s["margin_twse"])
 
     print("情境五：--root 指到不能寫的位置（看守員自身失敗）→ 仍 exit 0")
     bad = Path(td) / "e"

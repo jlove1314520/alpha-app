@@ -1,3 +1,16 @@
+## 2026-10-29 17:4x DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；缺期看守員補模擬 Q／R 資料源＋兩支自測
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版。
+- **前向模擬上限**：14／14＝滿 → 照零之二⑤不新增候選、不寫 PREREG、不送 AWAITING，`research/FORWARD_CANDIDATES.md` 記一行本輪改補什麼。
+- **先.一三五-1ba（完成）**：`research/forward_source_gap_watch.py` 原本只看 5 個只能前向累積的源，模擬 Q（融資）／R（借券）讀的兩份累積檔沒人看。新增 4 源（融資上市／上櫃用 `data_dates` 官方資料日、借券上市／上櫃用 series 鍵）；實跑都 OK、無缺期。自測加 2 個情境，30 項全過。
+- **先.一三五-1bb（完成）**：新自測 `scripts/selftest_forward_candidates_count.py`——FORWARD_CANDIDATES 標題 14／14、表格 14 列、每支都有程式、跟看守員名單一致，8 項全過（以後計數又對不上會直接 FAIL，不用人工對）。
+- **先.一三五-1bc（完成）**：新自測 `scripts/selftest_accumulate_sbl.py`（模擬 R 唯一資料源，之前沒有自測），21 項全過，沒抓到 bug。
+- **先.一三五-1ac**：時間閘 17:40 本輪開工時還沒到、10/29 停資停券日檔還沒進來，維持 [!]，下一輪再驗。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0、179 項全過、0 FAIL。零外部請求；沒讀價格數值、沒算報酬、沒登記試驗、沒碰 holdout。
+- **[自行裁量]**：融資／借券兩源的到期日用「昨天以前最後交易日」（早班記的是前一交易日，照 mops_events 的做法），避免傍晚資料還沒進來就誤報缺期。
+- 改了哪些檔：`PENDING_QUEUE.md`（1ba／1bb／1bc [x]）、`research/FORWARD_CANDIDATES.md`、`research/forward_source_gap_watch.py`、`research/data/forward_source_gap_watch.json`、`scripts/selftest_forward_source_gap_watch.py`、`scripts/selftest_forward_candidates_count.py`（新）、`scripts/selftest_accumulate_sbl.py`（新）、`research/PROGRESS_HEARTBEAT.jsonl`、`PROGRESS.md`。
+- **下一步**：DevQueue 可執行 0 項；1ac（今晚 17:40 後）、1as（10/30）時間閘到期再驗。
+
 ## 2026-10-29 16:2x DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；模擬 P／Q／R 共用小工具自測＋模擬 Q 讀公告壞行吞資料修正
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版。

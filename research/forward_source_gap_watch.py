@@ -14,6 +14,9 @@
     檔名＝收盤資料日，每交易日
   - mops_events：research/data/mops_events_archive.jsonl 每列 date 欄，每交易日至少一則（休市日的公告不要求；
     今天不算到期）
+  - margin_twse／margin_tpex（先.一三五-1ba，模擬 Q）：data/margin_by_stock_history.json 的 data_dates 官方資料日
+    （先.一三六-B7a 起才有，之前不算缺）；sbl_twse／sbl_tpex（模擬 R）：data/securities_lending_sell_history.json
+    series 鍵（官方資料日）。四源都是每交易日、今天不算到期（早班記的是前一交易日）
 狀態：OK／GAP（起算日到最近到期日之間有缺期）／NOT_STARTED（還沒有任何一期）／ERROR（本源讀取例外）。
 權證另讀 research/data/warrant_snapshot_cycle.log，把缺期當天 launcher 的最後一行 stderr（沒有就 exit／休市行）附成 reason（讀不到就空白）。
 看守員自身任何例外 fail open：只印警告、exit 0（CLAUDE.md 十二節）。
@@ -128,6 +131,22 @@ def _mops_dates(root: Path) -> tuple[set[date] | None, int]:
     return out, bad
 
 
+def _accum_dates(root: Path, key: str) -> set[date] | None:
+    """先.一三五-1ba：模擬 Q／R 的前向累積檔，只讀日期鍵、不讀數值。
+    margin_twse／margin_tpex：data/margin_by_stock_history.json 的 data_dates（先.一三六-B7a 起才有，執行日鍵 → 官方資料日）；
+    sbl_twse／sbl_tpex：data/securities_lending_sell_history.json 的 series 鍵（累積程式用官方資料日當鍵）。"""
+    kind, mkt = key.split("_", 1)
+    f = root / "data" / ("margin_by_stock_history.json" if kind == "margin" else "securities_lending_sell_history.json")
+    if not f.exists():
+        return None
+    doc = json.loads(f.read_text(encoding="utf-8"))
+    if kind == "margin":
+        vals = {str((v or {}).get(mkt) or "") for v in (doc.get("data_dates") or {}).values() if isinstance(v, dict)}
+    else:
+        vals = {d for b in (doc.get(f"series_{mkt}") or {}).values() if isinstance(b, dict) for d in b}
+    return {d for v in vals if (d := _parse(v))}
+
+
 def _warrant_reasons(root: Path) -> dict[str, str]:
     """warrant_snapshot_cycle.log：每個 launcher 日期取最後一行 exit／休市／stderr 訊息。"""
     f = root / "research" / "data" / "warrant_snapshot_cycle.log"
@@ -204,6 +223,12 @@ def build(root: Path, now: datetime) -> dict:
         ("mops_events", "重大訊息歸檔（事件日期分布）", "research/data/mops_events_archive.jsonl",
          None, "daily", yesterday_trading),
     ]
+    # 先.一三五-1ba：模擬 Q（融資）／R（借券）讀的前向累積檔；早班記的是前一交易日，到期日照 mops 用「昨天以前最後交易日」
+    for k, lab, pth in (("margin_twse", "融資個股累積（上市資料日）", "data/margin_by_stock_history.json data_dates.twse"),
+                        ("margin_tpex", "融資個股累積（上櫃資料日）", "data/margin_by_stock_history.json data_dates.tpex"),
+                        ("sbl_twse", "借券賣出累積（上市）", "data/securities_lending_sell_history.json series_twse"),
+                        ("sbl_tpex", "借券賣出累積（上櫃）", "data/securities_lending_sell_history.json series_tpex")):
+        specs.append((k, lab, pth, (lambda k=k: _accum_dates(root, k)), "daily", yesterday_trading))
     sources = {}
     for key, label, path, finder, kind, due_end in specs:
         try:
