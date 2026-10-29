@@ -1,3 +1,16 @@
+## 2026-10-30 07:31 DevQueue 20261030-073102（維運帽）：四支管線腳本合成自測，連帶修好四個「讀不到輸入就覆寫／崩潰」的 bug，其中台帳覆寫最嚴重
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：先.一三五-1ae-a（權證快照補跑觸發，請總司令執行一次，10/28 23:0x 起）、先.一四一-3a（美股本機補班金鑰＋觸發時段，請總司令執行一次，10/29 04:5x 起）、先.一三五-1ar-a（模擬 Q／R／I 漲停判定改官方檔位版）。
+- **先.一三五-1cd 走勢線**（commit ebdcdb996b）：新 `scripts/selftest_build_sparklines.py` 22 項全過。修正前 6 項失敗——來源 JSON 損壞丟未處理例外；`prices` 是空的時候用 0 檔結果覆寫 `data/sparklines.json`。修法：讀取包 try、0 檔就 SystemExit 不寫檔。真實資料輸出到暫存檔：2954 檔、10-29，與既有檔相同。
+- **先.一三五-1cf ADR 溢價**（commit d46fb69db6）：新 `scripts/selftest_compute_adr_premium.py` 18 項全過。修正前台股收盤 0（無成交）→ `ZeroDivisionError` 整支崩潰；四檔全缺時用空 rows 覆寫。修法：價格／匯率要正有限數，全缺不寫檔。真實資料四檔溢價與既有檔完全相同。
+- **先.一三五-1cg 盤前日報**：新 `scripts/selftest_build_daily_brief.py` 25 項全過。修正前 `data_asof` 那行沒包 `_safe`，`market_tw.json` 一缺整份日報不更新（違反本檔檔頭「一塊壞只標那塊」）；輸入全缺時用空日報覆寫。修法：data_asof 包 try 留 None、盤前與週覆盤都沒有一行就不寫。真實資料核對：週覆盤相同，盤前只差「重大訊息日」因今天跑變 10-29（符合規則）。
+- **先.一三五-1ch 前瞻選股台帳**：新 `scripts/selftest_build_picks_ledger.py` 23 項全過。**修正前最嚴重**：`data/picks_ledger.json` 讀不出來時程式照常 exit 0，用「只有今天快照」的新台帳整份蓋掉 146 個歷史前瞻快照（不可逆、違反「寫入後不可回頭修改」鐵律）。修法：既有台帳讀不出來或結構不對就 SystemExit 不寫。真實台帳暫存副本重跑：146 個快照不變、新增 0。另記兩個行為疑慮（照分支只記不改，見條目）：價格日期晚於快照日目前不判 stale（實際不會觸發）；00:10 班快照日標當天、進場價用前一交易日收盤是既有慣例。
+- 四項都照各自條目分支走「純 bug 修復」；每支都把修正前版本放回去跑自測，確認自測真的抓得到 bug（不是放寬測試讓它過）。四支在 workflow 裡都已是 `continue-on-error: true`，改成非零退出不會擋後續步驟。
+- **收工補件 [自行裁量]**：開工時權威清單在 1cd 之後已無 DevQueue 可執行項（`next`＝NO_PENDING_ITEM，可執行 0＜6）。補入 先.一三五-1cf～1ck 六條（來源：資料缺口——`.github/scripts/` 底下沒有任何 selftest 引用的零外部請求管線腳本，逐支 grep 確認），本輪做掉 1cf／1cg／1ch，剩 **1ci（update_picks_ledger_returns）、1cj（update_signal_ledger_returns）、1ck（build_strategy_curves）** 給下一輪。`- [ ]` 收工時 19 項（≥12）；DevQueue 可執行剩 3 項（＜6），但同一來源還有 fetch_us_* 等十多支沒有自測，下一輪可照同一格式續補。
+- 零外部請求；沒算報酬、沒登記試驗、沒碰 holdout、沒動常駐服務與十三節核心檔案。
+- 排程寫檔稽核（十節）：沒有新增會改寫的檔案，只減少寫入（失敗時不寫）。
+- **冒煙**：1cd／1cf 提交前 `node scripts/smoke_test.mjs` 179 項 [x]、0 FAIL；1cg／1ch 提交前同一支 exit 0、179 項 [x]、0 行 FAIL 開頭。
+
 ## 2026-10-30 07:0x DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；台股盤中報價全失敗會推空檔、個股 ROE 77 檔跨缺口湊四季，兩個純 bug 修復
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）。

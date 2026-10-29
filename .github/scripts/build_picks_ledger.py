@@ -138,7 +138,17 @@ def build_snapshot(board: str, score_path: Path, quotes: dict, taiex_close: floa
 
 
 def main():
-    ledger = _load_json(OUT_PATH)
+    # 先.一三五-1ch：既有台帳存在卻讀不出來（JSON 損壞／讀取失敗）→ 停手不寫。原本 _load_json 回 {}，
+    # 接著會用「只有今天快照」的新台帳整份覆寫歷史前瞻快照（不可逆，違反鐵律「寫入後不可回頭修改」）。
+    if OUT_PATH.exists():
+        try:
+            ledger = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+        except Exception as e:  # noqa: BLE001
+            raise SystemExit(f"讀既有 {OUT_PATH} 失敗（{type(e).__name__}: {e}）——不覆寫歷史台帳，本輪不快照")
+        if not isinstance(ledger, dict) or not isinstance(ledger.get("snapshots", []), list):
+            raise SystemExit(f"既有 {OUT_PATH} 結構不對（不是 dict 或 snapshots 不是陣列）——不覆寫歷史台帳，本輪不快照")
+    else:
+        ledger = {}
     ledger.setdefault("meta", {})
     ledger.setdefault("snapshots", [])
     ledger["meta"].setdefault("created_at", datetime.now(TW_TZ).isoformat())
