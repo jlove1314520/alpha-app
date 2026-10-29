@@ -93,12 +93,21 @@ def raw_events(margin: dict, px: C.Px, exd: dict) -> list:
 def news_by_day() -> set:
     keys = set()
     try:
-        for l in NEWS.read_text(encoding="utf-8").splitlines():
-            if l.strip():
-                e = json.loads(l)
-                keys.add((str(e.get("code")), e.get("date")))
-    except (OSError, ValueError):
-        pass
+        lines = NEWS.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return keys
+    bad = 0
+    for l in lines:
+        if not l.strip():
+            continue
+        try:  # 壞行只略過那一行（先.一三五-1az：原本整段 try 會把壞行之後的列全部丟掉）
+            e = json.loads(l)
+        except ValueError:
+            bad += 1
+            continue
+        keys.add((str(e.get("code")), e.get("date")))
+    if bad:
+        print(f"[warn] {NEWS.name} 有 {bad} 行不是合法 JSON，已略過那幾行")
     return keys
 
 

@@ -1,3 +1,15 @@
+## 2026-10-29 16:2x DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；模擬 P／Q／R 共用小工具自測＋模擬 Q 讀公告壞行吞資料修正
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版。
+- **前向模擬上限**：`research/FORWARD_CANDIDATES.md` 進行中 14／14＝滿 → 照零之二⑤不新增候選、不寫 PREREG、不送 AWAITING，只在該檔記一行本輪改補什麼。
+- **先.一三五-1ax（完成）**：新增 `scripts/selftest_paper_forward_events_tools.py`——`paper_forward_events` 的 iso／row_on／prev_row／raw_ret／tindex／weekday_shift／dedupe／trading_window，加上 `paper_16.audit_status()`、`paper_17.news_by_day()`，合成資料 29 項全過；既有 `selftest_paper_13_18.py` 照過。
+- **先.一三五-1az（完成，純 bug 修復）**：`paper_17_margin_liquidation_tracker.news_by_day()` 原本整段 try 包住迴圈，只要一行壞 JSON，之後的公告就全部被安靜丟掉。改成只略過那一行並印 [warn]。現有 `mops_events_archive.jsonl` 4,798 行、壞行 0 → 修正前後結果相同（3,493 組代號×日期），不影響模擬 Q、不需 PREREG 修訂。
+- **先.一三五-1ay（新增，[!] 時間閘 2027-01-05 20:00）**：模擬 M～R 起跑首日驗收（比照 1w／1an／1aw）。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0、179 項全過、0 FAIL。零外部請求；沒算策略報酬、沒登記試驗、沒碰 holdout。
+- **[自行裁量]**：1az 動的是已登記模擬的追蹤程式，但合法資料上的行為完全不變，所以當成純 bug 修復直接做，沒有送提案；`trading_window` 以非交易日為中心時的行為只記錄（KNOWN_BEHAVIOR），不判對錯。
+- 改了哪些檔：`PENDING_QUEUE.md`（1ax／1az [x]、1ay [!]）、`research/FORWARD_CANDIDATES.md`、`research/paper_17_margin_liquidation_tracker.py`、`scripts/selftest_paper_forward_events_tools.py`（新）、`research/PROGRESS_HEARTBEAT.jsonl`、`PROGRESS.md`。
+- **下一步**：DevQueue 可執行 0 項；等今晚 17:40／18:30 和 10/30 的時間閘到期。
+
 ## 2026-10-29 14:50 DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；limit_status ±7% 影響清查＋5 支前向模擬核心函式自測
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版。
