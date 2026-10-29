@@ -265,6 +265,12 @@
     "close": 52361.58,
     "source": "git_backfill",
     "git_commit_at": "2026-10-27T13:04:24+00:00"
+   },
+   {
+    "date": "2026-10-28",
+    "close": 52475.1,
+    "source": "yfinance",
+    "fetched_at": "2026-10-29T01:16:58+00:00"
    }
   ],
   "^GSPC": [
@@ -525,6 +531,12 @@
     "close": 7676.77,
     "source": "git_backfill",
     "git_commit_at": "2026-10-27T13:04:24+00:00"
+   },
+   {
+    "date": "2026-10-28",
+    "close": 7743.98,
+    "source": "yfinance",
+    "fetched_at": "2026-10-29T01:16:58+00:00"
    }
   ],
   "^IXIC": [
@@ -785,6 +797,12 @@
     "close": 26169.38,
     "source": "git_backfill",
     "git_commit_at": "2026-10-27T13:04:24+00:00"
+   },
+   {
+    "date": "2026-10-28",
+    "close": 26549.85,
+    "source": "yfinance",
+    "fetched_at": "2026-10-29T01:16:58+00:00"
    }
   ],
   "^SOX": [
@@ -1045,14 +1063,20 @@
     "close": 11083.47,
     "source": "git_backfill",
     "git_commit_at": "2026-10-27T13:04:24+00:00"
+   },
+   {
+    "date": "2026-10-28",
+    "close": 11684.0,
+    "source": "yfinance",
+    "fetched_at": "2026-10-29T01:16:58+00:00"
    }
   ]
  },
- "updated_at": "2026-10-28T08:04:32+00:00",
+ "updated_at": "2026-10-29T01:16:58+00:00",
  "row_count": {
-  "^DJI": 43,
-  "^GSPC": 43,
-  "^IXIC": 43,
-  "^SOX": 43
+  "^DJI": 44,
+  "^GSPC": 44,
+  "^IXIC": 44,
+  "^SOX": 44
  }
 }

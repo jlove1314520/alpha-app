@@ -1,7 +1,7 @@
 {
   "meta": {
-    "generated_at": "2026-10-28T16:55:15.016095+00:00",
-    "universe_size": 1982,
+    "generated_at": "2026-10-29T01:22:58.097199+00:00",
+    "universe_size": 1985,
     "reason_categories": {
       "R1": "個股完全無此類原始資料",
       "R2": "個股有資料但數量/期數不足以計算",
@@ -14,36 +14,38 @@
   "factors": {
     "earnings_growth": {
       "label": "財報成長",
-      "coverage_pct": 0.4349,
+      "coverage_pct": 0.4343,
       "covered_count": 862,
-      "missing_count": 1120,
+      "missing_count": 1123,
       "missing_reason_breakdown": {
-        "個股完全無此類原始資料": 180,
-        "個股有資料但數量/期數不足以計算": 940
+        "個股完全無此類原始資料": 182,
+        "個股有資料但數量/期數不足以計算": 941
       }
     },
     "revenue_momentum": {
       "label": "營收動能",
-      "coverage_pct": 0.887,
-      "covered_count": 1758,
-      "missing_count": 224,
+      "coverage_pct": 0.8861,
+      "covered_count": 1759,
+      "missing_count": 226,
       "missing_reason_breakdown": {
+        "個股完全無此類原始資料": 2,
         "個股有資料但數量/期數不足以計算": 224
       }
     },
     "growth_quality": {
       "label": "成長性/未來性",
-      "coverage_pct": 0.723,
-      "covered_count": 1433,
-      "missing_count": 549,
+      "coverage_pct": 0.7224,
+      "covered_count": 1434,
+      "missing_count": 551,
       "missing_reason_breakdown": {
+        "個股完全無此類原始資料": 2,
         "個股有資料但數量/期數不足以計算": 549
       }
     },
     "chips": {
       "label": "籌碼",
       "coverage_pct": 0.9924,
-      "covered_count": 1967,
+      "covered_count": 1970,
       "missing_count": 15,
       "missing_reason_breakdown": {
         "個股完全無此類原始資料": 15
@@ -52,7 +54,7 @@
     "valuation_adj": {
       "label": "估值(成長調整)",
       "coverage_pct": 0.9985,
-      "covered_count": 1979,
+      "covered_count": 1982,
       "missing_count": 3,
       "missing_reason_breakdown": {
         "個股完全無此類原始資料": 3
@@ -60,19 +62,19 @@
     },
     "technical": {
       "label": "技術型態",
-      "coverage_pct": 0.9965,
+      "coverage_pct": 0.995,
       "covered_count": 1975,
-      "missing_count": 7,
+      "missing_count": 10,
       "missing_reason_breakdown": {
         "個股完全無此類原始資料": 1,
-        "個股有資料但數量/期數不足以計算": 2,
-        "其他（資料足夠但計算仍失敗，如虧損股/樣本不足）": 4
+        "個股有資料但數量/期數不足以計算": 3,
+        "其他（資料足夠但計算仍失敗，如虧損股/樣本不足）": 6
       }
     },
     "analyst": {
       "label": "機構行為",
       "coverage_pct": 0.9924,
-      "covered_count": 1967,
+      "covered_count": 1970,
       "missing_count": 15,
       "missing_reason_breakdown": {
         "個股完全無此類原始資料": 15
@@ -82,9 +84,9 @@
       "label": "題材/事件",
       "coverage_pct": 0.0,
       "covered_count": 0,
-      "missing_count": 1982,
+      "missing_count": 1985,
       "missing_reason_breakdown": {
-        "個股完全無此類原始資料": 1982
+        "個股完全無此類原始資料": 1985
       }
     }
   }
