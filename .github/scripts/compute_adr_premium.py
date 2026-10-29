@@ -79,6 +79,10 @@ def load_json(path: Path) -> dict:
         return {}
 
 
+def _pos(v) -> bool:
+    return isinstance(v, (int, float)) and not isinstance(v, bool) and v == v and 0 < v < float("inf")
+
+
 def main():
     quotes_us = load_json(DATA_DIR / "quotes_us.json")
     # 先.八十一-13：台股價改讀 quotes_all_tw.json（全市場盤後收盤，四檔都涵蓋）。原本讀 quotes_tw.json 只涵蓋
@@ -99,15 +103,16 @@ def main():
         ratio = info["ratio"]
         us_q = us_quotes.get(us_ticker)
         tw_q = tw_quotes.get(tw_code)
-        if not us_q or us_q.get("price") is None:
+        # 先.一三五-1cf：價格／匯率必須是正有限數——台股當天無成交收盤記 0（no_trade）時原本會除以零整支崩潰。
+        if not us_q or not _pos(us_q.get("price")):
             errors.append({"ticker": us_ticker, "reason": "美股報價缺失（data/quotes_us.json 未涵蓋此檔或尚未抓到）"})
             print(f"  ・{us_ticker}: 美股報價缺失")
             continue
-        if not tw_q or tw_q.get("close") is None:
+        if not tw_q or not _pos(tw_q.get("close")):
             errors.append({"ticker": us_ticker, "reason": f"台股 {tw_code} 報價缺失"})
             print(f"  ・{us_ticker}: 台股 {tw_code} 報價缺失")
             continue
-        if not fx_rate:
+        if not _pos(fx_rate):
             errors.append({"ticker": us_ticker, "reason": "匯率缺失（data/fx.json）"})
             print(f"  ・{us_ticker}: 匯率缺失")
             continue
@@ -130,6 +135,11 @@ def main():
             "premium_pct": round(premium_pct, 3),
         }
         print(f"  ・{us_ticker}: implied={implied_tw_price:.2f} tw={tw_price} premium={premium_pct:.2f}%")
+
+    if not rows:
+        # 先.一三五-1cf：四檔全算不出來（輸入讀不到／全缺價）時不覆寫既有檔——上一份每列都帶報價日期與匯率日期，
+        # App 照舊顯示有日期的上次結果；原本會用空 rows 蓋掉。quotes.yml 這步 continue-on-error。
+        raise SystemExit(f"四檔 ADR 全部算不出溢價——不覆寫既有 {OUT_PATH.name}：{errors}")
 
     out = {
         "computed_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
