@@ -1,3 +1,16 @@
+## 2026-10-30 02:xx DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；可借券抓取補自測，累積檔日期鍵錯位修正並用 git 歷史重建
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版。
+- **前向模擬上限**：14／14＝滿 → 照零之二⑤不新增候選、不寫 PREREG、不送 AWAITING；`research/FORWARD_CANDIDATES.md` 記本輪補件。
+- **先.一三五-1bs（新增＋完成）**：`scripts/selftest_short_lending_available.py` 1bs 段 16 項全過；修兩個缺口（純 bug 修復）：回 HTML 時 `r.json()` 直接拋例外、上市上櫃都解析不到時仍寫空快照蓋掉好的 → 都改成印原因 exit 1、不覆蓋。
+- **先.一三五-1bt（新增＋完成，純 bug 修復）**：`accumulate_short_lending_available.py` 原本用 UTC 抓取日當鍵。比對 git 歷史 95 份快照：TWT96U 收盤後隔天凌晨 01:00～07:55 才換數字，05:43 班把新數字記到前一天並蓋掉真值（10/15、10/16 數字錯）、週末／休市日多出鍵。改成 `date_key_for()`＝數字適用的台北交易時段日（09:00 後抓記當天起第一個交易日、00:xx 抓記前一天起第一個交易日、01～09 點不記）[自行裁量]；95 份快照套新規則 25 鍵零衝突。`scripts/rebuild_short_lending_history.py` 用 git 歷史重建累積檔（26 → 25 日：去掉 8 個錯鍵、補回 9/15～9/24 7 天、10/01／10/05 沒合格快照留缺口）。目前沒有程式讀這個累積檔，模擬 R 不受影響。
+- **先.一三五-1bu（新增，時間閘 10/31 07:00）**：看真排程 10/30 晚班記入 `20261030`、10/31 05:43 班略過不記。
+- **自測**：新 32 項全過；既有 `selftest_accumulate_inst_fh_sla` 23 項、`selftest_forward_accumulators_corrupt_prior` 50 項重跑全過。
+- **冒煙**：`node scripts/smoke_test.mjs` 179 項全過、0 FAIL、exit 0。零外部請求；沒讀價格算報酬、沒登記試驗、沒碰 holdout。
+- 排程寫檔稽核（十節）：沒有新增排程會改寫的檔案；`data/short_lending_available_history.json` 本來就在 `market.yml` 的 `git add` 清單。
+- 改了哪些檔：`.github/scripts/fetch_short_lending_available.py`、`.github/scripts/accumulate_short_lending_available.py`、`data/short_lending_available_history.json`（重建）、新 `scripts/selftest_short_lending_available.py`、新 `scripts/rebuild_short_lending_history.py`、`PENDING_QUEUE.md`、`research/FORWARD_CANDIDATES.md`、`research/PROGRESS_HEARTBEAT.jsonl`、本檔。
+- **下一步**：DevQueue 可執行 0 項；1as（10/30 18:30）、1bk（10/30 21:45）、1bu（10/31 07:00）時間閘到期再驗。
+
 ## 2026-10-30 00:4x DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；月營收累積、外資持股抓取補自測，模擬 G 首次建倉前營收覆蓋率查核
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版。

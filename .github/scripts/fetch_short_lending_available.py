@@ -54,7 +54,11 @@ def _to_int(s):
 def main() -> int:
     r = requests.get(URL, headers=HEADERS, timeout=20)
     r.raise_for_status()
-    rows = r.json()
+    try:
+        rows = r.json()
+    except ValueError:
+        print(f"錯誤：{URL} 回傳不是 JSON（可能是 openapi 對無效路徑回 200＋HTML 的已知地雷），不覆蓋既有檔")
+        return 1
     if not isinstance(rows, list) or not rows:
         print(f"錯誤：{URL} 回傳非預期格式或空陣列（可能是openapi.twse.com.tw對無效路徑回200+HTML的已知地雷，需人工核對）")
         return 1
@@ -70,6 +74,11 @@ def main() -> int:
         otc_vol = _to_int(row.get("GRETAIAvailableVolume"))
         if otc_code and otc_code != "_" and otc_vol is not None:
             otc[otc_code] = otc_vol
+
+    if not twse and not otc:
+        # 先.一三五-1bs：欄位名改了或整批是 "_" 時兩邊都空，寫出去會蓋掉上一份好的快照
+        print(f"錯誤：{URL} 有 {len(rows)} 列但上市／上櫃都解析不到（欄位名可能改了），不覆蓋既有檔")
+        return 1
 
     out = {
         "fetched_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
