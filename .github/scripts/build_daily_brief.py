@@ -201,11 +201,20 @@ def main():
         wl.append(f"紙上追蹤：{len(started)}／{len(weekly['paper'])} 條已啟動" +
                   ("（" + "、".join(f"{p['label']} 累計 {_sign(p.get('total_return_pct'))}" for p in started) + "）" if started else ""))
 
+    if not lines and not wl:
+        # 先.一三五-1cg：所有輸入都讀不到（盤前、週覆盤都沒有一行）→ 不覆寫既有 daily_brief.json，App 照舊顯示上一份有日期的摘要。
+        print("[warn] 盤前與週覆盤都沒有可寫的內容（輸入全讀不到）——不覆寫既有 daily_brief.json", file=sys.stderr)
+        return
+    try:
+        data_asof = ((_load("market_tw.json").get("taiex") or {}).get("sparkline_dates") or [None])[-1]
+    except Exception as e:  # noqa: BLE001 -- 先.一三五-1cg：market_tw 讀不到只讓資料日留空，其他塊照出（本檔檔頭失敗隔離）
+        print(f"[warn] data_asof 讀 market_tw.json 失敗：{type(e).__name__}: {e}", file=sys.stderr)
+        data_asof = None
     out = {
         "generated_at": now.isoformat(timespec="seconds"),
         "date": today.isoformat(),
         # 先.八十-10：前台顯示「資料日＝最後交易日」，不顯示產生時間（取加權指數走勢最後一個交易日）
-        "data_asof": ((_load("market_tw.json").get("taiex") or {}).get("sparkline_dates") or [None])[-1],
+        "data_asof": data_asof,
         "method": "固定規則摘要（不呼叫語言模型、不做市場判斷）；只讀 repo 內既有排程產物，不額外請求外部 API",
         "disclaimer": DISCLAIMER,
         "premarket": {"lines": lines, "line_dates": line_dates + [None] * (len(lines) - len(line_dates)),
