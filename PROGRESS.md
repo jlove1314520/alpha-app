@@ -1,3 +1,14 @@
+## 2026-10-30 00:4x DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；月營收累積、外資持股抓取補自測，模擬 G 首次建倉前營收覆蓋率查核
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版。
+- **前向模擬上限**：14／14＝滿 → 照零之二⑤不新增候選、不寫 PREREG、不送 AWAITING；`research/FORWARD_CANDIDATES.md` 記本輪補件。
+- **先.一三五-1bp（新增＋完成）**：`scripts/selftest_update_fundamentals_daily.py` 28 項全過——民國年月解析、仟元×1000、YoY 轉小數、HTML 地雷拋錯、同年月覆蓋與 8／26 個月保留、一邊失敗另一邊照寫。觀察（不改）：四端點全失敗仍會更新 `meta.generated_at`。
+- **先.一三五-1bq（新增＋完成）**：`scripts/selftest_fetch_foreign_holding.py` 18 項全過——ALLBUT0999、欄位名對應、最多回退 6 次、429 只送 1 次不回退並記封鎖、既有檔不覆蓋。
+- **先.一三五-1br（新增＋完成）**：`research/paper_7_revenue_coverage_precheck.py`（零請求、只計數）→ 2026-11-02 基準可算 SUE 1,454／1,985 檔（門檻 600，OK）；只靠官方可算僅 37 檔，首次建倉靠先.一一八-2b 回補檔。
+- **冒煙**：`node scripts/smoke_test.mjs` 179 項全過、0 FAIL。零外部請求；沒讀價格算報酬、沒登記試驗、沒碰 holdout。
+- 改了哪些檔：兩支新自測、`research/paper_7_revenue_coverage_precheck.py`、`research/data/paper_7_revenue_coverage_precheck.json`（research/data 不進 repo，只存本機）、`PENDING_QUEUE.md`（1bp／1bq／1br [x]）、`research/FORWARD_CANDIDATES.md`、`research/PROGRESS_HEARTBEAT.jsonl`、本檔。
+- **下一步**：DevQueue 可執行 0 項；1as（10/30 18:30）、1bk（10/30 21:45）時間閘到期再驗。
+
 ## 2026-10-29 23:xx DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；三支資料程式補自測，上櫃漲跌停歸檔整批中斷修正
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版。
