@@ -1,3 +1,15 @@
+## 2026-10-29 23:xx DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；三支資料程式補自測，上櫃漲跌停歸檔整批中斷修正
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版。
+- **前向模擬上限**：14／14＝滿 → 照零之二⑤不新增候選、不寫 PREREG、不送 AWAITING；`research/FORWARD_CANDIDATES.md` 記本輪補件。
+- **先.一三五-1bm（新增＋完成）**：`scripts/selftest_confirm_recent_closure.py` 23 項全過——交易日曆每日臨時休市確認（已過去日寫入、今天要報價檔佐證、沒確認完下一班再問、FMTQIK 失敗保留既有、跨月跨年），沒抓到 bug。
+- **先.一三五-1bn（新增＋完成，純 bug 修復）**：`scripts/archive_tpex_limit_next.py` 自測第一次 3 項 FAIL——git 歷史任一版 data_date 含 `/` 就 `FileNotFoundError` 中斷整批、`../escape` 會寫到歸檔目錄外。加「data_date 必須是 YYYY-MM-DD」當壞版本略過；修後 13 項全過，真實歸檔重跑行為不變（2 個資料日、新寫 0）。
+- **先.一三五-1bo（新增＋完成）**：`scripts/selftest_fetch_securities_lending_sell.py` 20 項全過——TWT93U 群組 B 位置取值、2330 勾稽、429 只打一次記封鎖、兩邊失敗不覆蓋既有。
+- **觀察（不改，要改屬節流行為變更、需另提案）**：`fetch_securities_lending_sell.py::fetch_tpex()` 沒有 402/403/428/429 封鎖處理，每日 3 次、量小。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0、179 項全過、0 FAIL。零外部請求；沒讀價格算報酬、沒登記試驗、沒碰 holdout。
+- 改了哪些檔：`scripts/archive_tpex_limit_next.py`、三支新自測、`PENDING_QUEUE.md`（1bm／1bn／1bo [x]）、`research/FORWARD_CANDIDATES.md`、`research/PROGRESS_HEARTBEAT.jsonl`、本檔。
+- **下一步**：DevQueue 可執行 0 項；1as（10/30 18:30）、1bk（10/30 21:45）時間閘到期再驗。
+
 ## 2026-10-29 21:5x DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；1aj 時間閘結案、融資累積檔上市資料日被晚班清空修正
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版。

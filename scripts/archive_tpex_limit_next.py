@@ -4,13 +4,14 @@
 每個版本都留在 git 歷史裡。本程式把「git 歷史各版本＋工作目錄目前這份」依 data_date 展開成
 research/data/tpex_limit_next/<data_date>.json（gitignore，不進公開 repo）：
   - 同一 data_date 有多個版本時取最新 commit 那一版（git log 由新到舊，先看到的為準）；
-  - 已存在的日期不覆寫；讀不到／壞掉的版本只略過並計數（十二節）。
+  - 已存在的日期不覆寫；讀不到／壞掉的版本（含 data_date 不是 YYYY-MM-DD）只略過並計數（十二節）。
 
 用法：python scripts/archive_tpex_limit_next.py
 """
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -57,6 +58,9 @@ def main() -> int:
             date = doc["data_date"]
             if not isinstance(doc.get("rows"), dict) or not date:
                 raise ValueError("缺 rows／data_date")
+            # 先.一三五-1bn：資料日當檔名用，格式不對（含 / 或 ..）會拋 FileNotFoundError 中斷整批、或寫到歸檔目錄外
+            if not isinstance(date, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", date):
+                raise ValueError(f"data_date 不是 YYYY-MM-DD：{date!r}")
         except Exception as e:  # noqa: BLE001
             bad += 1
             print(f"[warn] {tag} 版本格式不對，略過：{e!r}")
