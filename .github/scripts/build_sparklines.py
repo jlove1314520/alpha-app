@@ -38,7 +38,12 @@ SPARK_DAYS = 20
 def main() -> None:
     if not PHS.exists(PRICE_HISTORY_PATH):
         raise SystemExit(f"{PRICE_HISTORY_PATH} 不存在——要先跑 update_price_history.py")
-    doc = PHS.load(PRICE_HISTORY_PATH)
+    # 先.一三五-1cd：來源讀壞（JSON 損壞／讀取失敗）或 prices 是空的 → 不覆寫既有 sparklines.json，
+    # 印原因後非零退出（market.yml 這步 continue-on-error，App 照舊讀上一份有日期的走勢線）。
+    try:
+        doc = PHS.load(PRICE_HISTORY_PATH)
+    except (OSError, ValueError) as e:
+        raise SystemExit(f"讀不到 {PRICE_HISTORY_PATH}（{type(e).__name__}: {e}）——不覆寫既有 {OUT_PATH.name}")
     prices = doc.get("prices") or {}
 
     # 2026-09-17（總司令裁示【稽核.四.1修正版】(a)顯示層）：先掃一輪求出「當日
@@ -71,6 +76,9 @@ def main() -> None:
         if latest_date and last_date != latest_date:
             stale_dates[code] = last_date
             stale_count += 1
+
+    if not out:
+        raise SystemExit(f"price_history 沒有任何可畫的走勢線（{len(prices)} 檔來源）——不覆寫既有 {OUT_PATH.name}")
 
     payload = {
         "meta": {
