@@ -1,3 +1,13 @@
+## 2026-10-29 12:xx DevQueue（維運帽）：空轉補件——前向模擬上限 14／14 已滿，改補漲停判斷精度（1ar 完成；1ar-a 送審；1as／1at 入列）
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次，約 13 小時）②先.一四一-3a 美股盤中補班（金鑰＋觸發，約 8 小時）③**新增** 先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版（建議甲，24 小時未裁示照甲預設放行）。
+- **上限已滿**：不新增候選、不寫新候選 PREREG；`research/FORWARD_CANDIDATES.md` 記一行本輪內容。1ar-a 是既有模擬的實作修訂（比照 1ad），所以送 AWAITING。
+- **先.一三五-1ar 量測**（新增 `scripts/compare_locked_up_approx_vs_official.py`，零外部請求，輸出 `research/data/locked_up_approx_vs_official.json`）：212,776 列。模擬 Q／R 用的 ±10% 近似，官方鎖漲停 644 列只抓到 411、漏 233（36%）——檔位取整後漲幅不到 10% 就漏（例 1303 6/22 前收 139 一字 152.5）；模擬 I 敏感度欄多判 184、漏 260。上櫃官方公告價命中 0（歸檔目錄 0 檔，10-29 起才會有）→ 1as。
+- **入列**：1as（10/30 18:30 後重跑確認上櫃改用官方公告價）、1at（邊界合成自測）。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0、全部通過（第一次 12:09 #142 FAIL＝新聞本機補班寫到一半的暫態，等它提交 4ae945b14d 後重跑通過）。
+- 沒算報酬、沒登記試驗、沒碰 holdout、核心檔與追蹤程式一行未改。
+- 改了哪些檔：`scripts/compare_locked_up_approx_vs_official.py`（新）、`research/data/locked_up_approx_vs_official.json`（新，research/data 不進 repo、只存本機）、`PENDING_QUEUE.md`、`research/AWAITING_REVIEW.md`、`research/FORWARD_CANDIDATES.md`、`research/PROGRESS_HEARTBEAT.jsonl`、`PROGRESS.md`。
+
 ## 2026-10-29 06:xx DevQueue（維運帽）：空轉補件——前向模擬上限 14／14 已滿，改補 3 條維運（1ao／1ap／1aq，皆已完成）
 
 - **等待總司令審閱：2 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班（金鑰＋觸發）。
