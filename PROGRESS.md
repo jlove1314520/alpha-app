@@ -1,3 +1,17 @@
+## 2026-10-30 07:0x DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；台股盤中報價全失敗會推空檔、個股 ROE 77 檔跨缺口湊四季，兩個純 bug 修復
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）。
+- **前向模擬上限**：14／14＝滿 → 照零之二⑤不新增候選、不寫 PREREG、不送 AWAITING；`research/FORWARD_CANDIDATES.md` 記本輪補件。
+- **先.一三五-1cb（新增＋完成，純 bug 修復）**：`fetch_quotes_tw.py` MIS 一檔都沒抓到時，舊版先寫 `quotes:{}` 才 exit 1；`quotes.yml` commit 步驟是 `if: always()`、schema 守門員對 quotes_tw 不檢查非空 → 空檔會被推上去，App 自選股報價整片變空。改成一檔都沒抓到不寫檔（照舊非 0 結束）。新 `scripts/selftest_quotes_tw_fetch.py` 14 項全過；既有 `research/fetch_quotes_tw_test.py` 5 項照過。
+- **先.一三五-1cc（新增＋完成，純 bug 修復）**：`compute_roe_ttm` 取「淨利非 None 的最後四季」但沒檢查連續，中間缺一季就跨過缺口湊數。讀本機 `data/stock_detail.json` 實測 **77 檔**中招（例 7822 用 2023Q4／2024Q4／2026Q1／2026Q2）。改成四季不連續回 None（App 顯示「—」）；`research/build_stock_financials_history.py` 同名副本同步修。新 `scripts/selftest_stock_financials.py` 20 項全過。每班對全市場重算，下一班 market.yml 後自動更正（驗收 1ce）。
+- **先.一三五-1cd（新增，未做）**：`build_sparklines.py` 合成自測，下一輪可執行。
+- **先.一三五-1ce（新增，時間閘 10/30 18:30）**：1cc 實地驗收，不連續四季 ROE 檔數 77 → 0。
+- 零外部請求；沒讀價格算報酬、沒登記試驗、沒碰 holdout。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0，179 項 [x]、0 項未勾。
+- 排程寫檔稽核（十節）：沒有新增會改寫的檔案；`quotes_tw.json` 在 `quotes.yml` 的 `git add -A data/` 底下，`stock_detail.json` 本來就在 `market.yml` 清單。
+- 改了哪些檔：`.github/scripts/fetch_quotes_tw.py`、`.github/scripts/update_stock_financials.py`、`research/build_stock_financials_history.py`、新 `scripts/selftest_quotes_tw_fetch.py`、新 `scripts/selftest_stock_financials.py`、`PENDING_QUEUE.md`（1cb～1ce）、`research/FORWARD_CANDIDATES.md`、`research/PROGRESS_HEARTBEAT.jsonl`、本檔。
+- **下一步**：DevQueue 可執行 1 項（1cd）；1as（10/30 18:30）、1ce（10/30 18:30）、1bk（10/30 21:45）、1bu（10/31 07:00）時間閘到期再驗。
+
 ## 2026-10-30 05:xx DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；BLS／海關／工業生產／分析師評等四支抓取補自測，BLS 與分析師評等單項失敗從檔案消失修正
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版。

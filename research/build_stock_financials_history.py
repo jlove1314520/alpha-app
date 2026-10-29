@@ -122,6 +122,11 @@ def compute_roe_ttm(quarters: list[dict], equity_latest: float | None) -> float 
     last4 = [q for q in quarters if q.get("net_income_parent") is not None][-4:]
     if len(last4) < 4 or not equity_latest:
         return None
+    # 2026-10-30 先.一三五-1cc（純 bug 修復）：四季必須連續；中間某季淨利是 None 時舊版會跨過缺口
+    # 拿更早的季度湊滿四季（實測 77 檔，例 7822 用 2023Q4／2024Q4／2026Q1／2026Q2），寧可空也不寫錯值。
+    idx = [q["year"] * 4 + q["quarter"] for q in last4]
+    if idx[-1] - idx[0] != 3:
+        return None
     ttm_ni = sum(q["net_income_parent"] for q in last4)
     return round(ttm_ni / equity_latest * 100, 2)
 

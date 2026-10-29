@@ -442,10 +442,16 @@ def main():
         },
         "quotes": quotes,
     }
-    OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    OUT_PATH.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"寫入 {OUT_PATH}，{len(quotes)} 檔有報價（{n_live} 檔即時，"
-          f"{len(quotes) - n_live} 檔用昨收頂替），data_type={data_type}")
+    # 2026-10-30 先.一三五-1cb（純 bug 修復）：一檔都沒抓到時不寫檔，保留上一份。
+    # 舊版先寫空檔才 exit 1，而 quotes.yml 的 commit 步驟是 if: always()，空 quotes 會被推上去，
+    # App 自選股報價整片變空（schema 守門員對 quotes_tw 不檢查非空）。
+    if quotes:
+        OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+        OUT_PATH.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f"寫入 {OUT_PATH}，{len(quotes)} 檔有報價（{n_live} 檔即時，"
+              f"{len(quotes) - n_live} 檔用昨收頂替），data_type={data_type}")
+    else:
+        print(f"一檔報價都沒抓到，不覆寫 {OUT_PATH}（保留上一份）")
 
     if not quotes and trading_window:
         print("錯誤：交易時段內卻一檔報價都沒抓到，判定為真故障——回傳非0結束碼讓 workflow 標記失敗")
