@@ -1,3 +1,17 @@
+## 2026-10-29 19:1x DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；停資停券首日驗收＋三支前向資料累積程式自測
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版。
+- **前向模擬上限**：14／14＝滿 → 照零之二⑤不新增候選、不寫 PREREG、不送 AWAITING；`research/FORWARD_CANDIDATES.md` 記本輪補件。
+- **先.一三五-1ac（結案）**：時間閘已過；`data/margin_suspension_daily/2026-10-29.json` 上市 ok 16 筆、上櫃 ok 11 筆、警告 0（17:35 本機補跑抓、commit `13f69ef812`）。雲端 17:13 班截至 19:0x 尚未觸發（GitHub 延遲），屆時已存即零請求。
+- **先.一三五-1bd（新增＋完成）**：`scripts/selftest_margin_suspension_daily.py` 26 項全過（候選 N9 唯一資料源，原本無自測）。
+- **先.一三五-1be（新增＋完成）**：`scripts/selftest_archive_mops_events.py` 14 項全過；真實歸檔 4,798 行 0 壞行。
+- **先.一三五-1bf（新增＋完成）**：`scripts/selftest_tdcc_holders_skip.py` 24 項全過（模擬 K 資料源的同週略過、缺週中斷）。
+- 三支都沒抓到 bug；KNOWN_BEHAVIOR 兩則（停資停券檔非原子寫入、歸檔半截行後第一筆黏行但下次自癒）只記錄不改。
+- **[自行裁量]**：1ac 要求核對「rate_limit_state 各只多 1 次」做不到（該檔只留最後一分鐘計數），改以「當天檔只寫一次＋已存即零請求（1bd 自測驗過）」為證。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0、179 項全過、0 FAIL。零外部請求；沒讀價格數值、沒算報酬、沒登記試驗、沒碰 holdout。
+- 改了哪些檔：`PENDING_QUEUE.md`（1ac／1bd／1be／1bf [x]）、`research/FORWARD_CANDIDATES.md`、`research/PROGRESS_HEARTBEAT.jsonl`、三支新自測、`PROGRESS.md`。
+- **下一步**：DevQueue 可執行 0 項；1as（10/30）時間閘到期再驗。
+
 ## 2026-10-29 17:4x DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；缺期看守員補模擬 Q／R 資料源＋兩支自測
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版。
