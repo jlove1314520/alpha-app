@@ -1,3 +1,17 @@
+## 2026-10-29 14:50 DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；limit_status ±7% 影響清查＋5 支前向模擬核心函式自測
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版。
+- **前向模擬上限**：`research/FORWARD_CANDIDATES.md` 進行中 14／14＝滿 → 照零之二⑤不新增候選、不寫 PREREG、不送 AWAITING，只在該檔記一行本輪改補什麼。
+- **先.一三五-1au（完成）**：`docs/LIMIT_STATUS_PRE2015_IMPACT.md`——`costs.limit_status()` 寫死 ±10%，2015-06 前應 ±7%，逐呼叫者列期間與試驗。#468～#474、#475 全期受影響且已揭露（#475 無 ±7% 診斷數字）；**#452（1 月反轉，FAIL）14 個買進日有 5 個在 2015-06 前、沒有揭露**；#457／#458、模擬 N／P／Q／R 不受影響。偏誤方向＝成交過度樂觀，已 FAIL 者不翻轉。
+- **先.一三五-1au-a（完成）**：`run_backtest()` 46 支呼叫者清查——`factor_ic.START_DATE=2010-01-01` 家族 6 支＋b25 兩支＋weinstein 三支的 train 段約 2010-01～2015-05 受影響，val（2021～2024）不受影響；2007～2014 單發兩支全期受影響；4 支未逐行確認。**真錢 Bb-90（#418）鏈不呼叫 limit_status／run_backtest，不受影響。** 只列清單、不改判；修核心檔仍交互動視窗（先.一三三-2c-限）。
+- **先.一三五-1av（完成）**：`scripts/selftest_paper_7_13_core.py` 15 項全過——模擬 G `revenue_sue()`（G 11/02 起跑）與 pandas 同式重算一致＋5 種 None 邊界＋官方優先；模擬 M `beta_of()` 合成 1.5 倍＝1.5、`before` 當天不進視窗。
+- **先.一三五-1av-a（完成）**：`scripts/selftest_paper_8_14_15_core.py` 22 項全過——N 的 ATR Wilder 遞推／中心／漂移／還原因子手算、O 的 target_weights（前 1/4、市值權重、70%）、O／H 模型雜湊不符拒絕預測、H 首次建倉等權成本解法。未發現與 PREREG 不一致。
+- **先.一三五-1aw（新增，[!] 時間閘 2026-12-02 20:00）**：模擬 H／J／K／L 起跑首日驗收。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0、179 項全過、0 FAIL。零外部請求；沒算策略報酬、沒登記試驗、沒碰 holdout。
+- **[自行裁量]**：涵蓋表用「頂層函式名有沒有出現在任何 selftest」判斷，會漏掉間接涵蓋——所以 1av-a 先讀既有自測確認（N 的 grid_params 已被間接跑過，照實寫明）。
+- 改了哪些檔：`PENDING_QUEUE.md`（1au／1au-a／1av／1av-a 標 [x]、1aw 標 [!]）、`research/FORWARD_CANDIDATES.md`、`docs/LIMIT_STATUS_PRE2015_IMPACT.md`（新）、`scripts/selftest_paper_7_13_core.py`（新）、`scripts/selftest_paper_8_14_15_core.py`（新）、`research/PROGRESS_HEARTBEAT.jsonl`、`PROGRESS.md`。
+- **下一步**：佇列 DevQueue 可執行 0 項（其餘為時間閘／互動視窗）；今晚 17:40／18:00／18:30 幾個時間閘到期後下一輪驗收。
+
 ## 2026-10-29 13:08 DevQueue 20261029-130102（維運帽）：無可執行項——1as 時間閘未到改標 [!]
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版（建議甲，10-30 12:xx 起可預設放行）。
