@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-10-29T23:00:02.778865+08:00",
- "duration_sec": 20.0,
+ "generated_at": "2026-10-30T04:23:21.848112+08:00",
+ "duration_sec": 7.5,
  "reference": {
   "twse": {
    "ok": true,
@@ -43,9 +43,9 @@
  "total_violations": 603,
  "by_check": {
   "a_price_source": {
-   "checked": 3963,
+   "checked": 3955,
    "violations": 0,
-   "unverifiable": 4501,
+   "unverifiable": 4509,
    "note": ""
   },
   "a2_not_in_official": {
@@ -85,7 +85,7 @@
    "note": ""
   },
   "f_null_as_number": {
-   "checked": 145,
+   "checked": 144,
    "violations": 0,
    "unverifiable": 0,
    "note": ""
@@ -6676,7 +6676,7 @@
   "note": "由 scripts/check_external_connectivity.py 每 5 分鐘更新。產出檔停擺依據修改時間判定；connectivity_alerts 額外納入internet/tailscale/ibkr_gateway 這類「行程活著但連不上」的連續失敗告警（2026-09-15新增，此前只印在log沒亮燈，IBKR斷線6天才被發現就是這個缺口）。"
  },
  "self_check": {
-  "checked_at": "2026-10-29T04:23:07.763863+08:00",
+  "checked_at": "2026-10-30T04:22:08.512182+08:00",
   "ok": true,
   "checks": [
    {
@@ -6698,7 +6698,7 @@
   "note": "audit.yml 每次執行最前面跑，確認後面幾支腳本要用到的 import/常數撈得到——2026-09-10~17 因 data_audit.py 誤刪 TWSE_COMPANY 導致build_listed_universe.py 連續一週 ImportError 全滅，但audit_report.json 本身完全沒有任何紀錄，只能靠 gh run list 才查得到，這個欄位就是補這個盲點。"
  },
  "domain_blocklist_scan": {
-  "checked_at": "2026-10-29T04:23:07.763863+08:00",
+  "checked_at": "2026-10-30T04:22:08.512182+08:00",
   "domains": [
    "mopsov.twse.com.tw",
    "doc.twse.com.tw",
@@ -7043,7 +7043,7 @@
   "note": "2026-09-20合規.三：掃repo全部.py找黑名單網域硬寫字串（黑名單來源research/net_guard.py::DOMAIN_BLOCKLIST）。unguarded=True代表該檔案提到黑名單網域卻沒有`import net_guard`，是最可能重演2026-09-19 mopsov違規事件的檔案，由check_external_connectivity.py轉成local_task_health告警。"
  },
  "queue_depth_sync": {
-  "checked_at": "2026-10-29T04:23:07.763863+08:00",
+  "checked_at": "2026-10-30T04:22:08.512182+08:00",
   "ok": true,
   "detail": {
    "ok": true,
@@ -7053,7 +7053,7 @@
   "note": "2026-09-20【Q4前視與#23無法重現】四：確認兩份*_CONTINUATION_PROMPT.txt跟research/queue_depth_config.py（單一事實來源）仍然一致，避免重演2026-09-19門檻更正只同步部分位置、連續5輪沒觸發補件規則的問題。"
  },
  "reproducibility_check": {
-  "checked_at": "2026-10-29T04:23:07.763863+08:00",
+  "checked_at": "2026-10-30T04:22:08.512182+08:00",
   "ok": false,
   "detail": {
    "ok": false,
@@ -7062,18 +7062,14 @@
     "OK": 188,
     "ENV_MISSING": 41,
     "FILE_NOT_FOUND": 11,
-    "OTHER_ERROR": 2
+    "OTHER_ERROR": 1,
+    "TIMEOUT": 1
    },
    "broken": [
     {
      "module": "deep_dive_f_us_low_vol_small_tier",
      "status": "OTHER_ERROR",
      "detail": "AssertionError: this script is specifically the small-tier deep-dive; if TIER in us_factor_ic_by_size.py has been changed since, re-check before reusing"
-    },
-    {
-     "module": "stock_grid_limit7_diag",
-     "status": "OTHER_ERROR",
-     "detail": "requests.exceptions.ChunkedEncodingError: Response ended prematurely"
     }
    ]
   },
