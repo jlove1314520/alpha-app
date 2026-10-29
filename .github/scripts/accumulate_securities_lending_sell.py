@@ -48,6 +48,17 @@ def _load(p: Path, default):
         return default
 
 
+def _load_prior(p: Path):
+    """既有累積檔：不存在 → {}（首跑）；存在但讀不到／不是 JSON 物件 → None，呼叫端中止、不覆蓋（先.一三五-1bg）。"""
+    if not p.exists():
+        return {}
+    try:
+        v = json.loads(p.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return v if isinstance(v, dict) else None
+
+
 def _roc_to_iso_compact(roc: str) -> str | None:
     """"1150924" -> "20260924"（民國年+115=西元年，其餘月日照抄）。"""
     if not roc or len(roc) not in (6, 7):
@@ -87,7 +98,10 @@ def main() -> int:
     twse_date = str(snap.get("twse_date") or "")
     tpex_date = _roc_to_iso_compact(str(snap.get("tpex_date") or ""))
 
-    prior = _load(OUT, {})
+    prior = _load_prior(OUT)
+    if prior is None:
+        print(f"! {OUT.name} 存在但讀不到或不是 JSON 物件，中止（不覆蓋既有累積，先.一三五-1bg）")
+        return 1
     twse_added = tpex_added = 0
     twse_series: dict = dict(prior.get("series_twse") or {})
     tpex_series: dict = dict(prior.get("series_tpex") or {})

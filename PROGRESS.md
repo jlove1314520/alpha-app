@@ -1,3 +1,15 @@
+## 2026-10-29 20:4x DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；五支前向累積程式「壞檔被空資料覆蓋」修正＋兩支自測
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版。
+- **前向模擬上限**：14／14＝滿 → 照零之二⑤不新增候選、不寫 PREREG、不送 AWAITING；`research/FORWARD_CANDIDATES.md` 記本輪補件。
+- **先.一三五-1bg（新增＋完成，純 bug 修復）**：法人／外資持股／可融券／融資券／借券賣出五支累積程式都是 `prior = _load(OUT, {})`——累積檔存在但 JSON 壞掉時被當成首跑，寫回只剩當天，已往前累積的資料（例：法人歷史 34 天，近 60 日在 holdout 不能回補）會一次歸零且被 commit。改為：檔案不存在照舊；存在但讀不到／不是物件 → exit 1、不寫檔（market.yml 五步都有 continue-on-error，不中斷管線）。輸出格式未改。`scripts/selftest_forward_accumulators_corrupt_prior.py` 50 項全過；既有 `selftest_accumulate_sbl.py` 21 項、`selftest_margin_data_dates.py` 照舊全過。
+- **先.一三五-1bh（新增＋完成）**：`scripts/selftest_accumulate_inst_fh_sla.py` 23 項全過（名冊過濾、KEEP_DAYS=70 滾動、去重、None 略過、twse／otc 分開累積）。
+- **先.一三五-1bi（新增＋完成）**：`scripts/selftest_detect_suspected_closure.py` 19 項全過（skip 各情境、suspected 寫標記、open 只清當天標記）。
+- **[自行裁量]**：1bg 只加「壞檔不覆蓋」守門，沒順手改成 tmp＋replace 原子寫入（那是另一種改進、會動到寫檔流程，先不做）；壞檔之後該步每天 exit 1：融資券／借券兩份 `forward_source_gap_watch` 有缺期告警；**法人／外資持股／可融券三份目前沒有缺期看守**（只看得到 Actions log 的中止訊息），列為已知缺口，可作下一輪補件。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0、179 項全過、0 FAIL（第一次因我設的 300 秒逾時把瀏覽器關掉而中斷，非測試項失敗；重跑完整通過）。零外部請求；沒讀價格數值、沒算報酬、沒登記試驗、沒碰 holdout。
+- 改了哪些檔：五支 `.github/scripts/accumulate_*.py`、三支新自測、`PENDING_QUEUE.md`（1bg／1bh／1bi [x]）、`research/FORWARD_CANDIDATES.md`、`research/PROGRESS_HEARTBEAT.jsonl`、`PROGRESS.md`。十節：本輪沒有新增會改寫追蹤檔的排程步驟。
+- **下一步**：DevQueue 可執行 0 項；1as（10/30）時間閘到期再驗。
+
 ## 2026-10-29 19:1x DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；停資停券首日驗收＋三支前向資料累積程式自測
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版。

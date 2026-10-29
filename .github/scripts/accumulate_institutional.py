@@ -53,6 +53,17 @@ def _load(p: Path, default):
         return default
 
 
+def _load_prior(p: Path):
+    """既有累積檔：不存在 → {}（首跑）；存在但讀不到／不是 JSON 物件 → None，呼叫端中止、不覆蓋（先.一三五-1bg）。"""
+    if not p.exists():
+        return {}
+    try:
+        v = json.loads(p.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return v if isinstance(v, dict) else None
+
+
 def main() -> int:
     detail = _load(DETAIL, {})
     stocks = detail.get("stocks") or {}
@@ -66,7 +77,10 @@ def main() -> int:
         print(f"! listed_universe.json 只有 {len(active)} 檔，不完整，中止")
         return 1
 
-    prior = _load(OUT, {})
+    prior = _load_prior(OUT)
+    if prior is None:
+        print(f"! {OUT.name} 存在但讀不到或不是 JSON 物件，中止（不覆蓋既有累積，先.一三五-1bg）")
+        return 1
     # series[code] = {date: [foreign, trust, dealer]}
     series: dict[str, dict[str, list]] = {}
     for code, rows in (prior.get("series") or {}).items():
