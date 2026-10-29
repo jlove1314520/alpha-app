@@ -196,6 +196,10 @@ if pick:
           "Q: 上櫃代號取 tpex 資料日、上市取 twse 資料日")
     check(Q.resolve_t0(px, {**base, "data_dates": {nxt8: {"twse": "20991231"}}}, nxt8, code) is None,
           "Q: 資料日不在價格日曆 → 不出事件（不猜）")
+    # 先.一三五-1bl：前一鍵有資料日、後一鍵上市資料日是 null（晚班推不出）但數值相同 → 後一鍵當複本去掉，不多出一筆晚一天的事件
+    mm = {**base, "data_dates": {nxt8: {"twse": d0.replace("-", ""), "tpex": None}, nxt2_8: {"twse": None, "tpex": None}}}
+    ev = Q.raw_events(mm, px, exq)
+    check(len(ev) == 1 and ev[0]["t0"] == d0, "Q: 前鍵有資料日、後鍵資料日 null 且數值相同 → 只算一次、t0＝前鍵資料日")
 
 print(f"\n{'ALL PASS' if not fails else f'{len(fails)} FAIL'}（暫存目錄 {td}）")
 sys.exit(1 if fails else 0)

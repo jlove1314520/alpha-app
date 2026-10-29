@@ -89,6 +89,28 @@ def fresh_data_dates(meta: dict, now: datetime | None = None) -> dict | None:
     return out if any(out.values()) else None
 
 
+INHERIT_MIN_SAME_RATIO = 0.98
+INHERIT_MIN_CODES = 50
+
+
+def inherit_same_day_dates(dd: dict | None, prior_dd: dict | None, prior_vals: dict, new_vals: dict,
+                           tpex_codes: set) -> dict | None:
+    """本班資料日 dd 缺某一邊時，若該邊數值與同一執行日鍵較早一班幾乎相同，沿用較早一班的資料日（先.一三五-1bj）。"""
+    out = {"twse": (dd or {}).get("twse"), "tpex": (dd or {}).get("tpex")}
+    if isinstance(prior_dd, dict):
+        for side in ("twse", "tpex"):
+            if out[side] or not prior_dd.get(side):
+                continue
+            codes = [c for c in prior_vals if c in new_vals and ((c in tpex_codes) == (side == "tpex"))]
+            if len(codes) < INHERIT_MIN_CODES:
+                continue
+            same = sum(1 for c in codes if prior_vals[c] == new_vals[c])
+            if same / len(codes) >= INHERIT_MIN_SAME_RATIO:
+                out[side] = prior_dd[side]
+                print(f"  {side} 本班推不出資料日，數值與同日較早一班 {same}/{len(codes)} 相同 → 沿用 {prior_dd[side]}")
+    return out if any(out.values()) else None
+
+
 def main() -> int:
     snap = _load(SNAPSHOT, {})
     stocks = snap.get("stocks") or {}
@@ -107,6 +129,9 @@ def main() -> int:
     for code, rows in (prior.get("series") or {}).items():
         if isinstance(rows, dict):
             series[code] = dict(rows)
+
+    # 先.一三五-1bj：同一執行日鍵較早一班的數值（覆寫前留一份），用來判斷能不能沿用較早一班的資料日
+    prior_day_vals = {code: b.get(d) for code, b in series.items() if b.get(d) is not None}
 
     added = 0
     n_with_margin = 0
@@ -127,8 +152,13 @@ def main() -> int:
     tpex_codes = set(prior.get("tpex_codes") or [])
     dd = fresh_data_dates(snap.get("meta") or {})
     if dd:
-        data_dates[d] = dd
         tpex_codes |= {str(c) for c in ((snap.get("meta") or {}).get("margin_data_dates") or {}).get("tpex_codes") or []}
+    # 先.一三五-1bj：本班推不出某一邊的資料日（例：晚班 rwd 已換新、openapi 還沒換），但該邊數值跟同一執行日鍵
+    # 較早一班「幾乎完全相同」（≥98%、至少 50 檔）→ 沿用較早一班的資料日；數值有變就不沿用（避免與本班數值不一致）。
+    merged = inherit_same_day_dates(dd, (prior.get("data_dates") or {}).get(d), prior_day_vals,
+                                    {c: series[c][d] for c in series if d in series[c]}, tpex_codes)
+    if merged:
+        data_dates[d] = merged
     else:
         data_dates.pop(d, None)  # 這一班沒有可信的資料日 → 不留同一執行日鍵較早一班的值（避免與本班數值不一致）
 

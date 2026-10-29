@@ -72,5 +72,32 @@ A.main()
 out = json.loads(A.OUT.read_text(encoding="utf-8"))
 check("20261028" not in out["data_dates"] and out["tpex_codes"] == ["6488"], "本班資料日太舊 → 同執行日鍵不留 data_dates（tpex_codes 保留）")
 
+# 4. 先.一三五-1bj：晚班推不出上市資料日，數值與同日早班相同 → 沿用；數值有變 → 不沿用
+A.OUT.write_text(json.dumps({"meta": {}, "dates": [], "series": {}}), encoding="utf-8")
+stk = {f"{2000 + i}": {"margin": {"margin_balance_today": float(i), "margin_balance_prev": 1.0, "short_balance_today": 0.0}}
+       for i in range(60)}
+stk["6488"] = {"margin": {"margin_balance_today": 7.0, "margin_balance_prev": 6.0, "short_balance_today": 1.0}}
+early = {"meta": {"generated_at": "2026-10-29T09:16:00+08:00",
+                  "margin_data_dates": {"twse": "2026-10-28", "tpex": "2026-10-28", "tpex_codes": ["6488"],
+                                        "recorded_at": now.isoformat()}}, "stocks": stk}
+A.SNAPSHOT.write_text(json.dumps(early), encoding="utf-8")
+A.main()
+late = json.loads(json.dumps(early))
+late["meta"]["generated_at"] = "2026-10-29T21:25:00+08:00"
+late["meta"]["margin_data_dates"]["twse"] = None
+A.SNAPSHOT.write_text(json.dumps(late), encoding="utf-8")
+A.main()
+out = json.loads(A.OUT.read_text(encoding="utf-8"))
+check(out["data_dates"].get("20261029") == {"twse": "20261028", "tpex": "20261028"},
+      "晚班上市資料日推不出、上市 60 檔數值與早班相同 → 沿用早班 20261028")
+late["stocks"] = {c: {"margin": {**v["margin"], "margin_balance_today": v["margin"]["margin_balance_today"] + 1}}
+                  for c, v in stk.items()}
+A.SNAPSHOT.write_text(json.dumps(late), encoding="utf-8")
+A.main()
+out = json.loads(A.OUT.read_text(encoding="utf-8"))
+check(out["data_dates"].get("20261029") == {"twse": None, "tpex": "20261028"},
+      "晚班上市數值已變 → 不沿用（上市 null，上櫃照本班）")
+check(A.inherit_same_day_dates(None, None, {}, {}, set()) is None, "沒有本班也沒有早班資料日 → None")
+
 print(f"\n{'ALL PASS' if not fails else f'{len(fails)} FAIL'}（暫存目錄 {td}）")
 sys.exit(1 if fails else 0)

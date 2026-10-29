@@ -1,3 +1,16 @@
+## 2026-10-29 21:5x DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；1aj 時間閘結案、融資累積檔上市資料日被晚班清空修正
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版。
+- **前向模擬上限**：14／14＝滿 → 照零之二⑤不新增候選、不寫 PREREG、不送 AWAITING；`research/FORWARD_CANDIDATES.md` 記本輪補件。
+- **先.一三五-1aj（BLOCKED 解除→結案）**：18:00 時間閘已過，實跑歸檔＋缺期看守，停資停券日檔、上櫃漲停價歸檔兩源都由 NOT_STARTED 轉 OK。
+- **先.一三五-1bj（新增＋完成，純 bug 修復）**：同次看守員 margin_twse 仍 NOT_STARTED。查 git 歷史：09:16 班 `data_dates.20261029.twse=20261028`，21:25 班變 null（晚班 rwd 已換 10/29、openapi 還是 10/28，只有 17.7% 相同、照設計不推定），整天的上市資料日因此不見。`accumulate_margin_by_stock.py` 新增 `inherit_same_day_dates()`：本班推不出某邊資料日、但該邊數值跟同日較早一班 ≥98% 相同（至少 50 檔）才沿用；數值有變不沿用。今天早晚兩班上市 1,243 檔數值完全相同，新邏輯會保住 20261028。`scripts/selftest_margin_data_dates.py` 15 項全過（新增 3 項）。同形狀清查：外資持股／法人／借券賣出累積器用來源每筆的資料日，沒有這個問題。
+- **先.一三五-1bk（新增，BLOCKED 時間閘 10/30 21:45）**：雲端實跑後驗收 `data_dates.20261030.twse` 不是 null、margin_twse 轉 OK。
+- **先.一三五-1bl（新增＋完成）**：模擬 Q 遇「前鍵有資料日、後鍵 null 且數值相同」只算一次、t0＝前鍵資料日；`scripts/selftest_paper_13_18.py` ALL PASS。
+- **[自行裁量]**：沒回頭改雲端寫的 `data/margin_by_stock_history.json`（20261029 鍵上市 null 不影響看守員起算與模擬 Q，交給下一班自然累積）；晚班改比對 rwd 前一交易日（+1 次請求）沒做，要先提案，等 1bk 結果再說。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0、179 項全過、0 FAIL。零外部請求；沒讀價格算報酬、沒登記試驗、沒碰 holdout。
+- 改了哪些檔：`.github/scripts/accumulate_margin_by_stock.py`、`scripts/selftest_margin_data_dates.py`、`scripts/selftest_paper_13_18.py`、`PENDING_QUEUE.md`（1aj／1bj／1bl [x]、1bk [!]）、`research/FORWARD_CANDIDATES.md`、`research/PROGRESS_HEARTBEAT.jsonl`、`PROGRESS.md`。十節：沒有新增輸出檔，累積程式原本就在 market.yml allowlist。
+- **下一步**：DevQueue 可執行 0 項；1as（10/30 18:30）、1bk（10/30 21:45）時間閘到期再驗。
+
 ## 2026-10-29 20:4x DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；五支前向累積程式「壞檔被空資料覆蓋」修正＋兩支自測
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版。
