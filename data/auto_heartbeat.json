@@ -1,17 +1,7 @@
 {
  "schema": 1,
- "updated_at": "2026-10-28T13:40:02+08:00",
+ "updated_at": "2026-10-29T09:40:02+08:00",
  "events": [
-  {
-   "ts": "2026-10-09T09:05:02+08:00",
-   "task": "run",
-   "code": "NOT_TRIGGERED"
-  },
-  {
-   "ts": "2026-10-09T09:40:02+08:00",
-   "task": "run",
-   "code": "NOT_TRIGGERED"
-  },
   {
    "ts": "2026-10-09T13:40:01+08:00",
    "task": "settle",
@@ -201,6 +191,16 @@
    "ts": "2026-10-28T13:40:02+08:00",
    "task": "settle",
    "code": "NOTHING_TO_SETTLE"
+  },
+  {
+   "ts": "2026-10-29T09:05:01+08:00",
+   "task": "run",
+   "code": "FROZEN"
+  },
+  {
+   "ts": "2026-10-29T09:40:02+08:00",
+   "task": "run",
+   "code": "FROZEN"
   }
  ],
  "installed_at": "2026-10-06T17:13:09+08:00"
