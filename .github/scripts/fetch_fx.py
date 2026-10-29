@@ -67,7 +67,19 @@ def _fetch_cbc_fx() -> dict:
     header = lines[0].split(",")
     if header[:2] != ["日期", "NTD/USD"]:
         raise RuntimeError(f"央行牌告匯率 CSV 表頭不符預期：{header[:2]}")
-    last_date_raw, last_rate_raw = lines[-1].split(",")[:2]
+    # 先.一三五-1bw：由最後一行往回找第一個「日期 8 碼＋匯率可轉數字」的列——最後一行若是空值或註記，
+    # 不要因此整份退回非官方備援。
+    for ln in reversed(lines[1:]):
+        cells = ln.split(",")
+        if len(cells) >= 2 and len(cells[0].strip()) == 8 and cells[0].strip().isdigit():
+            try:
+                float(cells[1])
+            except ValueError:
+                continue
+            last_date_raw, last_rate_raw = cells[0].strip(), cells[1]
+            break
+    else:
+        raise RuntimeError("央行牌告匯率 CSV 找不到任何有效的日期＋匯率列")
     # 日期格式 YYYYMMDD（西元年，不是民國年——跟 cbc_rf_rate_client.py 的
     # A13Rate.csv 民國年月不同端點、不同格式，已實測核對此端點就是西元年）
     last_date = f"{last_date_raw[0:4]}-{last_date_raw[4:6]}-{last_date_raw[6:8]}"
@@ -104,6 +116,17 @@ def main():
             print(f"yfinance 備援也失敗：{e2}")
             payload["errors"].append(f"usd_twd(yfinance): {e2}")
             payload["usd_twd"] = None
+
+    # 先.一三五-1bw：兩個來源都失敗時，不拿 null 蓋掉上一份好的匯率（App／ADR 溢價卡會整個空掉）；
+    # 保留舊檔原封不動（含舊 fetched_at，停擺自檢看得出逾期）。沒有舊檔才照實寫 null＋錯誤原因。
+    if payload["usd_twd"] is None:
+        try:
+            prev = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            prev = None
+        if isinstance(prev, dict) and isinstance(prev.get("usd_twd"), dict) and prev["usd_twd"].get("rate") is not None:
+            print(f"兩個來源都失敗，保留既有 {OUT_PATH.name}（資料日 {prev['usd_twd'].get('date')}），不覆蓋")
+            return
 
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"寫入 {OUT_PATH}：{payload.get('usd_twd')}")

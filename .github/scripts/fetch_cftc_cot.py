@@ -64,9 +64,23 @@ def fetch_contract(code: str) -> list[dict]:
     return r.json()
 
 
+def _load_prev() -> dict:
+    """上一份輸出的 contracts（讀不到或格式不對就回空 dict）。"""
+    try:
+        prev = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    c = prev.get("contracts") if isinstance(prev, dict) else None
+    return c if isinstance(c, dict) else {}
+
+
 def main() -> int:
     out_contracts: dict[str, dict] = {}
     all_errors: list[dict] = []
+    # 先.一三五-1bx：單一合約抓取失敗／查無資料時沿用上一份該合約的歷史（標 stale），不讓它從檔案裡消失；
+    # 三檔全失敗且有舊檔時整份不覆蓋（保留舊 fetched_at，停擺自檢看得出逾期）。
+    prev_contracts = _load_prev()
+    fresh = 0
 
     for key, info in CONTRACTS.items():
         time.sleep(REQUEST_SLEEP_SEC)
@@ -75,10 +89,12 @@ def main() -> int:
         except Exception as e:
             all_errors.append({"contract": key, "reason": str(e)})
             print(f"  ・{key}: 抓取失敗 {e}")
+            _carry(key, prev_contracts, out_contracts)
             continue
         if not rows:
             all_errors.append({"contract": key, "reason": "查無資料（合約代碼可能已變更，需人工核對）"})
             print(f"  ・{key}: 查無資料")
+            _carry(key, prev_contracts, out_contracts)
             continue
         history = []
         for row in rows:
@@ -95,6 +111,12 @@ def main() -> int:
                 "open_interest": int(float(row["open_interest_all"])) if row.get("open_interest_all") else None,
             })
         history.sort(key=lambda h: h["date"])
+        if not history:
+            all_errors.append({"contract": key, "reason": "回應有列但欄位都解析不到（欄位名可能已變更，需人工核對）"})
+            print(f"  ・{key}: 欄位解析不到")
+            _carry(key, prev_contracts, out_contracts)
+            continue
+        fresh += 1
         out_contracts[key] = {
             "name": info["name"],
             "cftc_contract_market_code": info["code"],
@@ -103,6 +125,10 @@ def main() -> int:
         latest = history[-1] if history else None
         print(f"  ・{key}: {len(history)} 週，最新資料日 {latest['date'] if latest else '—'}"
               f"（淨部位 {latest['net'] if latest else '—'}）")
+
+    if fresh == 0 and prev_contracts:
+        print(f"三檔合約全部失敗，保留既有 {OUT_PATH.name}，不覆蓋")
+        return 1
 
     out = {
         "fetched_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -118,7 +144,14 @@ def main() -> int:
 
     print(f"寫入 {OUT_PATH}，{len(out_contracts)} 個合約"
           + (f"，{len(all_errors)}筆錯誤" if all_errors else ""))
-    return 0 if out_contracts else 1
+    return 0 if fresh else 1
+
+
+def _carry(key: str, prev_contracts: dict, out_contracts: dict) -> None:
+    old = prev_contracts.get(key)
+    if isinstance(old, dict) and old.get("history"):
+        out_contracts[key] = {**old, "stale": True}
+        print(f"    ↳ 沿用上一份 {key}（最新資料日 {old['history'][-1].get('date')}，標 stale）")
 
 
 if __name__ == "__main__":

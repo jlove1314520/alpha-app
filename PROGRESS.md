@@ -1,3 +1,15 @@
+## 2026-10-30 04:xx DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；期貨三大法人／匯率／CFTC 三支抓取補自測，匯率與 CFTC 失敗蓋掉好資料修正
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版。
+- **前向模擬上限**：14／14＝滿 → 照零之二⑤不新增候選、不寫 PREREG、不送 AWAITING；`research/FORWARD_CANDIDATES.md` 記本輪補件。
+- **先.一三五-1bv（新增＋完成）**：`fetch_futures_institutional.py` 自測 11 項全過（JSON／CSV＋BOM、HTML／429 不覆蓋、429 標封鎖、同日去重、留 60 日），程式未改。
+- **先.一三五-1bw（新增＋完成，純 bug 修復）**：`fetch_fx.py` ①央行 CSV 最後一行匯率空白時 `float('')` 拋例外、整份退回非官方 yfinance（舊版跑自測重現）→ 改成往回找最後一個有效列 [自行裁量]；②兩來源都失敗時寫 `usd_twd: null` 蓋掉好匯率 → 有舊檔就不覆蓋。自測 8 項全過。
+- **先.一三五-1bx（新增＋完成，純 bug 修復）**：`fetch_cftc_cot.py` 單一合約失敗時該合約從檔案消失、三檔全失敗寫空檔 → 改成沿用上一份並標 `stale: true`（各列仍帶自己的報告日）、全失敗不覆蓋。自測 7 項全過；`selftest_data_schema_guard` 重跑全過。
+- **冒煙**：`node scripts/smoke_test.mjs` 179 項全過、0 FAIL、exit 0（第一次我設 280 秒時限太短被砍、瀏覽器跟著 crash，非測試 FAIL；不設時限重跑全過）。零外部請求；沒讀價格算報酬、沒登記試驗、沒碰 holdout。
+- 排程寫檔稽核（十節）：沒有新增排程會改寫的檔案；`fx.json`／`cftc_cot.json` 本來就在 `market.yml` 清單。
+- 改了哪些檔：`.github/scripts/fetch_fx.py`、`.github/scripts/fetch_cftc_cot.py`、新 `scripts/selftest_market_macro_fetchers.py`、`PENDING_QUEUE.md`（1bv／1bw／1bx [x]）、`research/FORWARD_CANDIDATES.md`、本檔。
+- **下一步**：DevQueue 可執行 0 項；1as（10/30 18:30）、1bk（10/30 21:45）、1bu（10/31 07:00）時間閘到期再驗。
+
 ## 2026-10-30 02:xx DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；可借券抓取補自測，累積檔日期鍵錯位修正並用 git 歷史重建
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版。
