@@ -1,3 +1,16 @@
+## 2026-10-30 05:xx DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；BLS／海關／工業生產／分析師評等四支抓取補自測，BLS 與分析師評等單項失敗從檔案消失修正
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版。
+- **前向模擬上限**：14／14＝滿 → 照零之二⑤不新增候選、不寫 PREREG、不送 AWAITING；`research/FORWARD_CANDIDATES.md` 記本輪補件。
+- **先.一三五-1by（新增＋完成，純 bug 修復）**：`fetch_bls_macro.py` 單一序列失敗／查無數值時該序列從 `data/bls_macro.json` 消失、三支全失敗把舊檔洗成空 series（舊版跑自測重現）→ 改成沿用上一份並標 `stale`、全失敗保留既有檔、回傳碼看本輪實際成功數（同 1bx）。自測 13 項全過。
+- **先.一三五-1bz（新增＋完成）**：海關進出口／工業生產＋外銷訂單自測 12 項全過，10/23、10/27 補的保留上一版邏輯正確，程式未改。
+- **先.一三五-1ca（新增＋完成，純 bug 修復）**：`fetch_us_analyst_reco.py` 單檔失敗／空陣列時該檔從檔案消失、20 小時節流期間不重抓（依程式碼確認，未單獨對舊版跑）→ 沿用上一份並列進新欄位 `stale_tickers`（各檔陣列格式不變）。自測 6 項全過、金鑰不出現在輸出或檔案。
+- **自測**：新 `scripts/selftest_macro_fetchers_2.py` 31 項全過。零外部請求；沒讀價格算報酬、沒登記試驗、沒碰 holdout。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0、沒有 FAIL（我把輸出接了 `tail -15`，只看到最後 15 項全 [x] 與「結束後仍無累積的 uncaught error」，沒拿到總項數；上一輪同腳本為 179 項）。
+- 排程寫檔稽核（十節）：沒有新增排程會改寫的檔案；`bls_macro.json`／`customs_trade.json`／`industrial_production.json` 本來就在 `market.yml` 清單，`us_analyst_reco.json` 在 `quotes.yml` 的 `git add -A data/` 範圍內。
+- 改了哪些檔：`.github/scripts/fetch_bls_macro.py`、`.github/scripts/fetch_us_analyst_reco.py`、新 `scripts/selftest_macro_fetchers_2.py`、`PENDING_QUEUE.md`（1by／1bz／1ca 新增並 [x]）、`research/FORWARD_CANDIDATES.md`、`PROGRESS.md`。
+- **下一步**：DevQueue 可執行 0 項；1as（10/30 18:30）、1bk（10/30 21:45）、1bu（10/31 07:00）時間閘到期再驗。
+
 ## 2026-10-30 04:xx DevQueue 候選補件輪（維運帽）：前向 14／14 已滿不新增候選；期貨三大法人／匯率／CFTC 三支抓取補自測，匯率與 CFTC 失敗蓋掉好資料修正
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版。
