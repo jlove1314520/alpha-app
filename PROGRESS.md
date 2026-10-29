@@ -1,3 +1,18 @@
+## 2026-10-29 12:57 DevQueue 20261029-123102（維運帽）：1at 自測＋五項到期阻塞解除驗收（pe_snapshot 10-27 上櫃補回）
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版（建議甲，10-30 12:xx 起可預設放行）。
+- **權威清單首項 先.一三五-1as**：時間閘 10-30 18:30，未到，跳過不動標記（runner `next` 不認時間閘，會一直回這項）。附帶觀察：本輪跑歸檔腳本已產出 `research/data/tpex_limit_next/2026-10-28.json`，10-29 上櫃列命中的前提已具備。
+- **先.一三五-1at**（de5450da66）：新增 `scripts/selftest_locked_up_boundaries.py`，合成資料、零請求。官方檔位版 15 項全 PASS（+9.71% 一字鎖、除權息參考價、減資恢復、上櫃公告價優先＋反例）；近似版 `locked_up()` KNOWN_GAP 2 筆。[自行裁量] 規格只要求 a 型記已知差異，實測除權息日 b 型同樣漏判，一併標記。檔名不在 1ao 的 `selftest_paper_*` 樣式，之後回歸總跑要另列。
+- **先.一三八-9**（[!]→[x]）：`data/pe_snapshot/2026-10-28.json` 上市 1,085＋上櫃 871＝1,956，修正在實班生效；AlphaPeSnapshot 新鮮度 ✓。
+- **先.一三八-9a**（新補件、已做，104079d00d）：10-27 檔上櫃 0 檔，從 git 歷史 `d3c8f04b46` 的 fundamentals.json 零請求補回 871 檔，count 1,085→1,956，既有上市列全部未變。
+- **先.一三六-B7a-驗**（[!]→[x]）：融資累積檔兩邊資料日 20261028、上市 openapi／rwd 1237/1237 相同、paper_17 NOT_STARTED exit 0。[自行裁量] data_dates 只有記錄日鍵 20261029（10-28 兩班沒推上），用最新記錄判定。
+- **先.一三八-7**（[!]→[x]）：停資停券 10-28 日檔兩邊 ok（19／10 筆）、無封鎖；forward_sim_watch OK 14 檔；tpex_limit_next 991 檔，本機歸檔 1 檔。
+- **先.一三八-10**（[!]→[x]）：annotation 上線後唯一一次失敗（run 40707442076）是 exit 128 pathspec（先.一四〇-1z 已修），不是 rebase 衝突，照分支結案。[自行裁量] 更早兩班的根因已無法事後判定，不再追。
+- **冒煙**：`node scripts/smoke_test.mjs` 三次（12:38／12:47／12:54）都是 exit 0、179 項全 PASS。零外部資料請求（只有 git 與 GitHub API）；沒算報酬、沒登記試驗、沒碰 holdout、核心檔與追蹤程式一行未改。
+- **維運產物 data/STATUS.json**：本輪沒有手改。這個檔由 `check_local_schedule_heartbeat.py` 每 30 分鐘自動重寫，本輪也沒有新增資料源。
+- **佇列**：`- [ ]` 20 項（≥12），DevQueue 可執行只剩 1as（時間閘），<6。補件來源 ①BACKLOG ②UX_REDESIGN_PROPOSAL ③先.八十全檢節 ④DATA_GAP_PLAN 甲類，前幾輪已確認用盡；⑤研究候選因前向模擬 14／14 已滿，不寫 PREREG。本輪只從驗收結果衍生出 1 條（9a，已做完）→ **來源已用盡**。今晚還有幾項時間閘會到：17:13 班後的 先.一四〇-9／-10、17:40 的 1ac、18:00 的 1aj。
+- 改了哪些檔：`scripts/selftest_locked_up_boundaries.py`（新）、`data/pe_snapshot/2026-10-27.json`、`PENDING_QUEUE.md`、`research/PROGRESS_HEARTBEAT.jsonl`、`PROGRESS.md`。
+
 ## 2026-10-29 12:xx DevQueue（維運帽）：空轉補件——前向模擬上限 14／14 已滿，改補漲停判斷精度（1ar 完成；1ar-a 送審；1as／1at 入列）
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次，約 13 小時）②先.一四一-3a 美股盤中補班（金鑰＋觸發，約 8 小時）③**新增** 先.一三五-1ar-a 模擬 Q／R／I 漲停判斷改官方檔位版（建議甲，24 小時未裁示照甲預設放行）。
