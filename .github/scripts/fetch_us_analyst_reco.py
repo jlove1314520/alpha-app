@@ -45,6 +45,16 @@ def _fresh_enough(now: datetime) -> bool:
         return False
 
 
+def _load_prev_tickers() -> dict:
+    """上一份輸出的 tickers（讀不到或格式不對就回空 dict）。"""
+    try:
+        old = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    t = old.get("tickers") if isinstance(old, dict) else None
+    return t if isinstance(t, dict) else {}
+
+
 def main():
     now = datetime.now(timezone.utc)
     if _fresh_enough(now):
@@ -56,6 +66,10 @@ def main():
         sys.exit(1)
 
     tickers, failed = {}, []
+    # 先.一三五-1ca：單檔失敗時沿用上一份該檔的評等（列進 stale_tickers），不讓它從檔案消失
+    # （否則 20 小時節流期間 App 該檔評等卡整個空掉）；同 1bx（fetch_cftc_cot.py）修法。
+    prev_tickers = _load_prev_tickers()
+    fresh = 0
     for tk in US_TICKERS:
         try:
             r = requests.get(URL, params={"symbol": tk, "token": api_key}, timeout=15)
@@ -72,12 +86,21 @@ def main():
                 continue
             tickers[tk] = [{k: x.get(k) for k in ("period", "strongBuy", "buy", "hold", "sell", "strongSell")}
                            for x in rows[:KEEP_PERIODS]]
+            fresh += 1
         except Exception as e:
             failed.append({"symbol": tk, "reason": str(e).replace(api_key, "***")[:200]})
             print(f"  ・{tk} 失敗：{failed[-1]['reason']}")
         time.sleep(1.1)
 
-    if not tickers:
+    stale = []
+    for f in failed:
+        tk = f["symbol"]
+        if tk not in tickers and isinstance(prev_tickers.get(tk), list) and prev_tickers[tk]:
+            tickers[tk] = prev_tickers[tk]
+            stale.append(tk)
+            print(f"    ↳ 沿用上一份 {tk}（最新一期 {prev_tickers[tk][0].get('period')}，列進 stale_tickers）")
+
+    if fresh == 0:
         print(f"錯誤：{len(US_TICKERS)} 檔全部失敗，不覆寫既有檔案。")
         sys.exit(1)
     out = {
@@ -87,6 +110,7 @@ def main():
         "price_target": "未提供：Finnhub /stock/price-target 為付費端點（Premium required），待採購",
         "tickers": tickers,
         "failed": failed,
+        "stale_tickers": stale,
     }
     tmp = OUT_PATH.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")

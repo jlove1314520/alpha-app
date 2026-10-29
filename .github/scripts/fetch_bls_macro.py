@@ -73,9 +73,30 @@ def fetch_series(series_id: str) -> list[dict]:
     return rows
 
 
+def _load_prev() -> dict:
+    """上一份輸出的 series（讀不到或格式不對就回空 dict）。"""
+    try:
+        prev = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    s = prev.get("series") if isinstance(prev, dict) else None
+    return s if isinstance(s, dict) else {}
+
+
+def _carry(key: str, prev_series: dict, out_series: dict) -> None:
+    old = prev_series.get(key)
+    if isinstance(old, dict) and old.get("latest_date"):
+        out_series[key] = {**old, "stale": True}
+        print(f"    ↳ 沿用上一份 {key}（最新 {old['latest_date']}，標 stale）")
+
+
 def main() -> int:
     out_series: dict[str, dict] = {}
     errors: list[dict] = []
+    # 先.一三五-1by：單一序列抓取失敗／查無數值時沿用上一份該序列（標 stale），不讓它從檔案裡消失；
+    # 三支全部失敗時保留既有檔案不覆蓋（舊 fetched_at 讓停擺自檢看得出逾期）。同 1bx（fetch_cftc_cot.py）修法。
+    prev_series = _load_prev()
+    fresh = 0
 
     for key, info in SERIES.items():
         time.sleep(REQUEST_SLEEP_SEC)
@@ -84,6 +105,7 @@ def main() -> int:
         except Exception as e:
             errors.append({"series": key, "reason": str(e)})
             print(f"  ・{key}: 抓取失敗 {e}")
+            _carry(key, prev_series, out_series)
             continue
         clean = []
         for row in rows:
@@ -99,6 +121,7 @@ def main() -> int:
         if not clean:
             errors.append({"series": key, "reason": "查無可解析的數值列"})
             print(f"  ・{key}: 查無可解析數值")
+            _carry(key, prev_series, out_series)
             continue
 
         latest = clean[-1]
@@ -128,7 +151,12 @@ def main() -> int:
             entry["change_mom"] = round(latest["value"] - prev["value"], 3)
 
         out_series[key] = entry
+        fresh += 1
         print(f"  ・{key}: 最新 {latest['date']} = {latest['value']}")
+
+    if fresh == 0 and prev_series:
+        print(f"三支序列全部失敗，保留既有 {OUT_PATH.name}，不覆蓋")
+        return 1
 
     out = {
         "fetched_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -141,7 +169,7 @@ def main() -> int:
     OUT_PATH.write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
     print(f"寫入 {OUT_PATH}，{len(out_series)} 個序列" + (f"，{len(errors)}筆錯誤" if errors else ""))
-    return 0 if out_series else 1
+    return 0 if fresh else 1
 
 
 if __name__ == "__main__":
