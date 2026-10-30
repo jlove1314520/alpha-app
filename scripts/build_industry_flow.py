@@ -82,6 +82,9 @@ def main() -> int:
                          "pct": round(day_ret.get(last, 0.0) * 100, 2), "streak": streak,
                          "cum_gain_pct": round((cum - 1) * 100, 2),
                          "crowded": streak >= 3 and (cum - 1) * 100 >= 8})
+    if not out_rows:  # 先.一三五-1ct：輸入是空的／全部算不出產業 → 不寫空檔蓋掉上一版
+        print(f"[warn] 算不出任何產業（price_history {len(ph)} 檔、company_info {len(comp)} 檔），industry_flow.json 維持原狀")
+        return 0
     out_rows.sort(key=lambda r: -(r["inflow_pct"] if r["inflow_pct"] is not None else -1e9))
     doc = {"meta": {"generated_at": datetime.now(TW).isoformat(timespec="seconds"),
                     "data_date": dates[-1] if dates else None,
