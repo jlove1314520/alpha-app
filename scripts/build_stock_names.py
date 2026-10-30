@@ -19,11 +19,18 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 
+FAILED: set = set()  # 先.一三五-1cs：本輪讀不到的來源檔名
+
+
 def _load(name: str) -> dict:
     try:
-        return json.loads((DATA / name).read_text(encoding="utf-8"))
+        d = json.loads((DATA / name).read_text(encoding="utf-8"))
+        if isinstance(d, dict):
+            return d
+        raise ValueError("不是 JSON 物件")
     except (OSError, ValueError) as e:
         print(f"[warn] 讀不到 {name}（{type(e).__name__}），該部分略過")
+        FAILED.add(name)
         return {}
 
 
@@ -46,9 +53,19 @@ def main() -> int:
     if not tw:
         print("[warn] 台股名稱為空，不覆蓋既有檔")
         return 0
+    us_rows = [us[k] for k in sorted(us)]
+    if FAILED & {"us_financials.json", "us_sic.json"}:
+        # 先.一三五-1cs：美股任一來源讀不到時沿用上一版美股清單，不把美股寫成殘缺或空的（App 搜尋會整市場消失）
+        try:
+            prev_us = json.loads(OUT.read_text(encoding="utf-8")).get("us")
+        except (OSError, ValueError, AttributeError):
+            prev_us = None
+        if isinstance(prev_us, list) and prev_us:
+            print(f"[warn] 美股來源讀不到（{sorted(FAILED)}），美股清單沿用上一版 {len(prev_us)} 檔")
+            us_rows = prev_us
     doc = {"meta": {"source": "台股 data/company_info.json；美股 data/us_financials.json（SEC 名冊）＋data/us_sic.json；scripts/build_stock_names.py",
-                    "note": "repo 名單為主；查不到的代號 App 才向 FinMind 完整名單補查", "tw_count": len(tw), "us_count": len(us)},
-           "tw": tw, "us": [us[k] for k in sorted(us)]}
+                    "note": "repo 名單為主；查不到的代號 App 才向 FinMind 完整名單補查", "tw_count": len(tw), "us_count": len(us_rows)},
+           "tw": tw, "us": us_rows}
     txt = json.dumps(doc, ensure_ascii=False, separators=(",", ":"))
     try:
         if OUT.read_text(encoding="utf-8") == txt:
@@ -57,7 +74,7 @@ def main() -> int:
     except OSError:
         pass
     OUT.write_text(txt, encoding="utf-8")
-    print(f"stock_names：台股 {len(tw)} 檔、美股 {len(us)} 檔，{len(txt.encode('utf-8')) // 1024}KB")
+    print(f"stock_names：台股 {len(tw)} 檔、美股 {len(us_rows)} 檔，{len(txt.encode('utf-8')) // 1024}KB")
     return 0
 
 
