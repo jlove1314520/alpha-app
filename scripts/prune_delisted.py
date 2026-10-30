@@ -33,8 +33,12 @@ def main() -> int:
     if not UNIVERSE.exists():
         print(f"！找不到 {UNIVERSE.relative_to(ROOT)}，先跑 scripts/build_listed_universe.py")
         return 2
-    uni = json.loads(UNIVERSE.read_text(encoding="utf-8"))
-    active = set(uni.get("active") or [])
+    try:  # 先.一三五-1cq：名冊讀不出來（例如 rebase 衝突標記）不拋未處理例外、不動榜單
+        uni = json.loads(UNIVERSE.read_text(encoding="utf-8"))
+        active = set(uni.get("active") or [])
+    except (OSError, ValueError, AttributeError, TypeError) as e:
+        print(f"！{UNIVERSE.relative_to(ROOT)} 讀不出來（{type(e).__name__}: {e}），不執行過濾")
+        return 2
     if len(active) < 1000:
         # 官方端點半殘時可能只拿到幾十檔，那樣過濾會把整個榜單清空——寧可不動
         print(f"！active 清單只有 {len(active)} 檔，明顯不完整，不執行過濾（避免清空榜單）")
@@ -73,8 +77,12 @@ def main() -> int:
         if not path.exists():
             print(f"  - {name} 不存在，跳過")
             continue
-        data = json.loads(path.read_text(encoding="utf-8"))
-        stocks = data.get("stocks") or []
+        try:  # 先.一三五-1cq：單份榜單讀不出來只略過那一份，不拖垮其他份
+            data = json.loads(path.read_text(encoding="utf-8"))
+            stocks = data.get("stocks") or []
+        except (OSError, ValueError, AttributeError) as e:
+            print(f"  ！{name} 讀不出來（{type(e).__name__}: {e}），跳過不改寫")
+            continue
         kept, removed = [], []
         for row in stocks:
             code = row.get("code")
