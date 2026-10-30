@@ -1,3 +1,14 @@
+## 2026-10-31 06:3x DevQueue（維運帽）：空轉補件三條（前向模擬 14／14 已滿，不新增候選）——紙上追蹤看守員自測接進回歸＋模擬 I 排程啟動程式自測
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不變）。
+- **為什麼做這些**：佇列沒有可執行 `- [ ]`，連 2 輪 QUEUE_EMPTY；`research/FORWARD_CANDIDATES.md` 進行中 14／14＝滿，照零之二⑤不寫候選、不寫 PREREG、不送 AWAITING，改補既有模擬追蹤程式的自測缺口（逐支 grep `scripts/selftest_*.py` 找沒被引用的腳本）。
+- **先.一三五-1ei**：`research/paper_tracking_watchdog.py`（market.yml 每班）內建 `--selftest` 沒被任何 selftest 呼叫，1ao 回歸抓不到。新增 `scripts/selftest_paper_tracking_watchdog.py`：跑內建 9 情境＋補真實帳本形狀（紙.一b 實際 10/08 起跑、事件名 `month_end`；紙.一要等 11/02 資料才記 10/30），**7 項全過**，看守員本體未改、無 bug。
+- **先.一三五-1ej**：新增 `scripts/selftest_paper_9_runner.py` 測模擬 I 啟動程式 `scripts/run_paper_9.py`（tracker／commit／git 全換假的）：錯誤隔離 exit 0、提交清單只兩檔、帳本才 `add -f`，**7 項全過**，本體未改。
+- **先.一三五-1ek**：時間閘 11/02 20:00 後，驗收紙.一首次月底記帳（帳本有 10-30 monthly_rebalance、看守 OK）。
+- 影響檔案：`scripts/selftest_paper_tracking_watchdog.py`（新）、`scripts/selftest_paper_9_runner.py`（新）、`PENDING_QUEUE.md`、`research/FORWARD_CANDIDATES.md`、`PROGRESS.md`。
+- 不碰 holdout、不讀真實價格、不算報酬、不登記試驗、零外部請求。交辦佇列 DevQueue 可執行 `- [ ]` 未開始：0 條（其餘皆時間閘／BLOCKED）。
+- 冒煙：`node scripts/smoke_test.mjs` exit=0，**179 PASS／0 FAIL**。
+
 ## 2026-10-31 05:xx DevQueue 20261031-050102（維運帽）：空轉補件三條（前向模擬 14／14 已滿，不新增候選）——相依套件檢查全部查詢失敗不覆寫修正＋紙.二帳本讀寫自測
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不變）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中本機補班金鑰＋觸發時段（待總司令本人）③先.一三八-B2 記憶體報告（等 Cowork）。
