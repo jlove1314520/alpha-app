@@ -1,3 +1,20 @@
+## 2026-10-30 09:01 DevQueue 20261030-090102（維運帽）：試驗索引／新聞內文萃取／美股財報日曆／下市股剔除／月底收盤／搜尋名稱六支管線補合成自測，連帶修好讀不到就覆寫或崩潰的 bug
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：先.一三五-1ae-a（權證快照 20:30 補跑觸發，請總司令執行一次）、先.一四一-3a（美股本機補班金鑰＋觸發時段，請總司令執行一次）、先.一三五-1ar-a（模擬 Q／R／I 漲停判斷改官方檔位版）。
+- **先.一三五-1cn 試驗索引**：新 `scripts/selftest_build_trials_index.py` 23 項全過。修正前帳本不存在拋 FileNotFoundError、解析不出任何列時寫出 count=0 空索引覆寫；改為 return 1 不寫檔。真實帳本重跑 491 列、總 N 459，與既有檔只差 generated_at。
+- **先.一三五-1co 新聞內文題材句萃取**：新 `scripts/selftest_news_body_extract.py` 26 項全過（`requests.get` 換假函式）。修正前 news_urls.json／theme_keywords.json 缺或損壞時拋未處理例外；改為讀不出來 SystemExit、不送請求、不寫檔。
+- **先.一三五-1cp 美股財報日曆**：新 `scripts/selftest_fetch_earnings_calendar.py` 16 項全過（yfinance 換假模組）。修正前任一檔估計值 NaN → `allow_nan=False` 整份寫檔失敗；全失敗用空清單覆寫。改為非有限數寫 null、0 檔不寫檔。
+- **先.一三五-1cq 下市股剔除**：新 `scripts/selftest_prune_delisted.py` 20 項全過。修正前名冊損壞、或任一份 scores*.json 損壞時拋例外（後面的榜單都不過濾）；改為名冊讀不出來 rc=2 不動榜單、單份損壞只略過那份。
+- **先.一三五-1cr 月底收盤累積**：新 `scripts/selftest_build_monthly_close.py` 15 項全過。修正前既有 monthly_close.json 存在但讀不出來時當空檔重建、丟掉已累積月份；改為只在檔案不存在時從空白開始。
+- **先.一三五-1cs 搜尋名稱清單**：新 `scripts/selftest_build_stock_names.py` 14 項全過（把修正前版本放回去跑 2 項失敗）。修正前美股來源讀不到時把美股寫成空或殘缺清單；[自行裁量] 改為美股沿用上一版（台股照常更新），真實資料輸出與既有檔完全相同。
+- 每項都先跑自測、看到修正前失敗才修，沒有放寬測試。六支在 workflow 都是 continue-on-error（prune_delisted 除外，見下）。
+- **行為疑慮（只記不改，寫在各條目）**：①1co：切句不切逗號，同一句兩家公司時句型命中的題材會同時記給兩家；②1cq：audit.yml 的 prune_delisted 步驟沒有 continue-on-error，名冊不完整時刻意 rc=2 會讓 audit 後續步驟不跑——屬 workflow 變更，請互動視窗判斷。
+- **git 事故（我造成的，已處理）**：09:08 我 rebase 時別的排程正持有 index.lock，rebase 中途失敗留下 `.git/rebase-merge` 殘留；09:10 第二次 rebase 的 autostash 把本機新聞補班 09:05 剛寫、尚未提交的資料檔（events.json、events_by_code 等）收進 stash 沒套回，冒煙 #132／#142 因此 FAIL（events.json 停在 07:58、精簡版 09:05）。處理：`git rebase --quit` 清殘留（autostash 9cfcce4 已保留在 stash 清單）；只把 `data/events.json` 從 stash（004d379676）還原到工作目錄讓三檔同一班，重跑冒煙全過。其餘 events_by_code 等資料留在 stash@{0} 未還原（下一班新聞排程會重產；大量覆寫怕踩到正在寫的排程）。之後改用 `research/git_op_lock.py` 取鎖再 commit／rebase。
+- 零外部請求；沒算報酬、沒登記試驗、沒碰 holdout、沒動常駐服務與十三節核心檔案。`data/STATUS.json` 本輪沒有資料源或面板異動，不改。排程寫檔稽核（十節）：沒有新增會改寫的檔案，只減少寫入（失敗時不寫）。
+- **冒煙**：1cn 提交前 exit 0、179 項全勾；1co 提交前 exit 0、179 項全勾、0 FAIL；1cp～1cs 第一次 exit 1（#132／#142，上面那個事故）、還原 events.json 後重跑 exit 0、179 項全勾。
+- **收工補件**：DevQueue 可執行 0＜6，補入 先.一三五-1ct～1cy 六條（產業資金流、研究成績單、選股清單精簡檔、台股當日資料落地檢查、個股明細拆檔、首頁小檔拆檔），來源：資料缺口——workflow 會呼叫、沒有 selftest 引用、檔內沒有外部請求的腳本，逐支 grep 確認。
+- **下一步**：DevQueue 可執行 6 項（1ct 起）。
+
 ## 2026-10-30 08:01 DevQueue 20261030-080102（維運帽）：前瞻台帳回填／訊號台帳／策略曲線五支管線補合成自測，連帶修好兩個「讀不到就覆寫歷史」與數個崩潰 bug
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：先.一三五-1ae-a（權證快照 20:30 補跑觸發，請總司令執行一次）、先.一四一-3a（美股本機補班金鑰＋觸發時段，請總司令執行一次）、先.一三五-1ar-a（模擬 Q／R／I 漲停判斷改官方檔位版）。
