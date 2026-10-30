@@ -2,12 +2,12 @@
  "meta": {
   "created_at": "2026-10-11T14:17:33.521387+08:00",
   "schema_note": "B19 前瞻訊號台帳（非回測）：每筆在事件發生後 4 日內事前寫入，寫入後內容不可修改；entry_close 為寫入日之後第一個交易日收盤（避免前視）；returns.t5/t20/t60 由 update_signal_ledger_returns.py 只回填 null 欄位。status=待驗證線索 者不得影響任何評分。規格 research/B19_SIGNAL_LEDGER_SPEC.md。非投資建議。",
-  "last_build_at": "2026-10-30T09:26:19.275693+08:00",
-  "total_signals": 1516,
+  "last_build_at": "2026-10-30T18:22:11.230734+08:00",
+  "total_signals": 1603,
   "source": ".github/scripts/build_signal_ledger.py（讀 events.json L1＋news.json L3＋price_history.json）",
-  "last_returns_backfill_at": "2026-10-29T21:28:25.041207+08:00",
+  "last_returns_backfill_at": "2026-10-30T18:22:13.326917+08:00",
   "entry_skipped": {
-   "count": 11,
+   "count": 18,
    "reason": "進場日無收盤（停牌／無成交／未掛牌）",
    "note": "這些訊號進場日沒有收盤、不回填報酬，任何勝率／平均報酬統計的分母都要排除並揭露這個筆數（先.一四〇-1）"
   }
@@ -17718,7 +17718,9 @@
     "t5": null,
     "t20": null,
     "t60": null
-   }
+   },
+   "entry_skip_reason": "進場日無收盤（停牌／無成交／未掛牌）",
+   "entry_skip_marked_at": "2026-10-30T18:22:13.113180+08:00"
   },
   {
    "id": "e27be4f1f6d98983",
@@ -18856,7 +18858,9 @@
     "t5": null,
     "t20": null,
     "t60": null
-   }
+   },
+   "entry_skip_reason": "進場日無收盤（停牌／無成交／未掛牌）",
+   "entry_skip_marked_at": "2026-10-30T18:22:13.113218+08:00"
   },
   {
    "id": "36ad498c5c0cf2fa",
@@ -18888,7 +18892,12 @@
    "entry_close": 30.85,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 2.107,
+     "excess_vs_taiex_pct": 5.6813,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325549+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -18923,7 +18932,12 @@
    "entry_close": 2395.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -0.4175,
+     "excess_vs_taiex_pct": 3.1568,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325576+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -18958,7 +18972,12 @@
    "entry_close": 35.25,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -0.1418,
+     "excess_vs_taiex_pct": 3.4325,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325593+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -19031,7 +19050,12 @@
    "entry_close": 49.9,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 0.6012,
+     "excess_vs_taiex_pct": 4.1756,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325608+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -19066,7 +19090,12 @@
    "entry_close": 257.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -3.3074,
+     "excess_vs_taiex_pct": 0.267,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325623+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -19101,7 +19130,12 @@
    "entry_close": 224.5,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 0.4454,
+     "excess_vs_taiex_pct": 4.0198,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325638+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -19136,7 +19170,12 @@
    "entry_close": 204.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -6.8627,
+     "excess_vs_taiex_pct": -3.2884,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325653+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -19171,7 +19210,12 @@
    "entry_close": 58.75,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -4.9362,
+     "excess_vs_taiex_pct": -1.3618,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325667+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -19243,7 +19287,12 @@
    "entry_close": 50.3,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -1.9881,
+     "excess_vs_taiex_pct": 1.5863,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325681+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -19280,7 +19329,12 @@
    "entry_close": 578.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -15.917,
+     "excess_vs_taiex_pct": -12.3426,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325694+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -19317,7 +19371,12 @@
    "entry_close": 578.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -15.917,
+     "excess_vs_taiex_pct": -12.3426,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325706+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -19354,7 +19413,12 @@
    "entry_close": 578.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -15.917,
+     "excess_vs_taiex_pct": -12.3426,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325718+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -19389,7 +19453,12 @@
    "entry_close": 405.5,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -6.0419,
+     "excess_vs_taiex_pct": -2.4676,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325732+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -19535,7 +19604,12 @@
    "entry_close": 59.4,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -3.8721,
+     "excess_vs_taiex_pct": -0.2977,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325746+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -19571,7 +19645,12 @@
    "entry_close": 49.9,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 0.6012,
+     "excess_vs_taiex_pct": 4.1756,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325759+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -19678,7 +19757,12 @@
    "entry_close": 59.1,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -10.4907,
+     "excess_vs_taiex_pct": -6.9163,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325770+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -19713,7 +19797,12 @@
    "entry_close": 28.6,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -1.2238,
+     "excess_vs_taiex_pct": 2.3506,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325784+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -19750,7 +19839,12 @@
    "entry_close": 66.2,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 0.6042,
+     "excess_vs_taiex_pct": 4.1786,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325797+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -19859,7 +19953,12 @@
    "entry_close": 66.2,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 0.6042,
+     "excess_vs_taiex_pct": 4.1786,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325809+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -19894,7 +19993,12 @@
    "entry_close": 45.4,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 2.4229,
+     "excess_vs_taiex_pct": 5.9973,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325823+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -19933,7 +20037,9 @@
     "t5": null,
     "t20": null,
     "t60": null
-   }
+   },
+   "entry_skip_reason": "進場日無收盤（停牌／無成交／未掛牌）",
+   "entry_skip_marked_at": "2026-10-30T18:22:13.113510+08:00"
   },
   {
    "id": "09ed66432a668a0f",
@@ -19965,7 +20071,12 @@
    "entry_close": 24.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 4.7917,
+     "excess_vs_taiex_pct": 8.366,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325837+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -20000,7 +20111,12 @@
    "entry_close": 31.8,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -1.1006,
+     "excess_vs_taiex_pct": 2.4737,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325850+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -20035,7 +20151,12 @@
    "entry_close": 178.5,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -5.3221,
+     "excess_vs_taiex_pct": -1.7478,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325864+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -20070,7 +20191,12 @@
    "entry_close": 158.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -14.2405,
+     "excess_vs_taiex_pct": -10.6661,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325878+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -20105,7 +20231,12 @@
    "entry_close": 30.85,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 2.107,
+     "excess_vs_taiex_pct": 5.6813,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325890+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -20142,7 +20273,12 @@
    "entry_close": 66.2,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 0.6042,
+     "excess_vs_taiex_pct": 4.1786,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325902+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -20179,7 +20315,12 @@
    "entry_close": 16.9,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 1.4793,
+     "excess_vs_taiex_pct": 5.0537,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325915+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -20216,7 +20357,12 @@
    "entry_close": 16.9,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 1.4793,
+     "excess_vs_taiex_pct": 5.0537,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325927+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -20252,7 +20398,12 @@
    "entry_close": 49.9,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 0.6012,
+     "excess_vs_taiex_pct": 4.1756,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325939+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -20324,7 +20475,12 @@
    "entry_close": 2420.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.0661,
+     "excess_vs_taiex_pct": 1.5083,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325953+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -20359,7 +20515,12 @@
    "entry_close": 2420.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.0661,
+     "excess_vs_taiex_pct": 1.5083,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325965+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -20396,7 +20557,12 @@
    "entry_close": 16.9,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 1.4793,
+     "excess_vs_taiex_pct": 5.0537,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325977+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -20505,7 +20671,12 @@
    "entry_close": 248.5,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 42.4547,
+     "excess_vs_taiex_pct": 46.0291,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.325991+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -20580,7 +20751,12 @@
    "entry_close": 16.9,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 1.4793,
+     "excess_vs_taiex_pct": 5.0537,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326003+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -20615,7 +20791,12 @@
    "entry_close": 18.65,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.9491,
+     "excess_vs_taiex_pct": 0.6253,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326016+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -20652,7 +20833,12 @@
    "entry_close": 66.2,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 0.6042,
+     "excess_vs_taiex_pct": 4.1786,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326028+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -20725,7 +20911,12 @@
    "entry_close": 20.9,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 0.4785,
+     "excess_vs_taiex_pct": 4.0528,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326041+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -20761,7 +20952,12 @@
    "entry_close": 49.9,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 0.6012,
+     "excess_vs_taiex_pct": 4.1756,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326053+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -20833,7 +21029,12 @@
    "entry_close": 130.5,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 2.2989,
+     "excess_vs_taiex_pct": 5.8732,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326067+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -20866,7 +21067,12 @@
    "entry_close": 263.5,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -8.7287,
+     "excess_vs_taiex_pct": -5.1543,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326081+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -20899,7 +21105,12 @@
    "entry_close": 22.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -6.1364,
+     "excess_vs_taiex_pct": -2.562,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326094+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -20935,7 +21146,12 @@
    "entry_close": 2420.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.0661,
+     "excess_vs_taiex_pct": 1.5083,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326107+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -20971,7 +21187,12 @@
    "entry_close": 2420.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.0661,
+     "excess_vs_taiex_pct": 1.5083,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326118+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21006,7 +21227,12 @@
    "entry_close": 1625.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -17.8462,
+     "excess_vs_taiex_pct": -14.2718,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326132+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21042,7 +21268,12 @@
    "entry_close": 2420.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.0661,
+     "excess_vs_taiex_pct": 1.5083,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326144+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21115,7 +21346,12 @@
    "entry_close": 107.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 0.9346,
+     "excess_vs_taiex_pct": 4.5089,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326157+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21150,7 +21386,12 @@
    "entry_close": 154.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 3.8961,
+     "excess_vs_taiex_pct": 7.4705,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326171+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21186,7 +21427,12 @@
    "entry_close": 2420.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.0661,
+     "excess_vs_taiex_pct": 1.5083,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326183+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21221,7 +21467,12 @@
    "entry_close": 7.92,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -6.8182,
+     "excess_vs_taiex_pct": -3.2438,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326197+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21256,7 +21507,12 @@
    "entry_close": 66.2,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 0.6042,
+     "excess_vs_taiex_pct": 4.1786,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326208+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21291,7 +21547,12 @@
    "entry_close": 2.74,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -0.365,
+     "excess_vs_taiex_pct": 3.2094,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326237+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21326,7 +21587,12 @@
    "entry_close": 17.3,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -5.4913,
+     "excess_vs_taiex_pct": -1.917,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326252+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21359,7 +21625,12 @@
    "entry_close": 102.5,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -1.9512,
+     "excess_vs_taiex_pct": 1.6231,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326265+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21392,7 +21663,12 @@
    "entry_close": 51.9,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -3.0829,
+     "excess_vs_taiex_pct": 0.4915,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326279+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21425,7 +21701,12 @@
    "entry_close": 42.55,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -0.9401,
+     "excess_vs_taiex_pct": 2.6343,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326293+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21458,7 +21739,12 @@
    "entry_close": 69.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -5.0725,
+     "excess_vs_taiex_pct": -1.4981,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326306+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21491,7 +21777,12 @@
    "entry_close": 11.65,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 16.7382,
+     "excess_vs_taiex_pct": 20.3126,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326320+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21524,7 +21815,12 @@
    "entry_close": 99.2,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 42.1371,
+     "excess_vs_taiex_pct": 45.7115,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326334+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21557,7 +21853,12 @@
    "entry_close": 8.23,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -4.3742,
+     "excess_vs_taiex_pct": -0.7999,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326348+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21590,7 +21891,12 @@
    "entry_close": 34.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -6.3235,
+     "excess_vs_taiex_pct": -2.7492,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326362+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21623,7 +21929,12 @@
    "entry_close": 18.9,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -1.3228,
+     "excess_vs_taiex_pct": 2.2516,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326375+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21656,7 +21967,12 @@
    "entry_close": 300.5,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -3.3278,
+     "excess_vs_taiex_pct": 0.2466,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326389+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21689,7 +22005,12 @@
    "entry_close": 59.1,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -10.4907,
+     "excess_vs_taiex_pct": -6.9163,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326400+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21722,7 +22043,12 @@
    "entry_close": 59.1,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -10.4907,
+     "excess_vs_taiex_pct": -6.9163,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326410+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21755,7 +22081,12 @@
    "entry_close": 59.1,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -10.4907,
+     "excess_vs_taiex_pct": -6.9163,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326421+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21788,7 +22119,12 @@
    "entry_close": 59.1,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -10.4907,
+     "excess_vs_taiex_pct": -6.9163,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326431+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21821,7 +22157,12 @@
    "entry_close": 59.1,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -10.4907,
+     "excess_vs_taiex_pct": -6.9163,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326441+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21854,7 +22195,12 @@
    "entry_close": 59.1,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -10.4907,
+     "excess_vs_taiex_pct": -6.9163,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326451+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21887,7 +22233,12 @@
    "entry_close": 59.1,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -10.4907,
+     "excess_vs_taiex_pct": -6.9163,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326462+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -21959,7 +22310,12 @@
    "entry_close": 26.25,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -11.2381,
+     "excess_vs_taiex_pct": -7.6637,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326475+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22029,7 +22385,12 @@
    "entry_close": 1195.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -14.6444,
+     "excess_vs_taiex_pct": -11.07,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326490+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22099,7 +22460,12 @@
    "entry_close": 29.45,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 14.7708,
+     "excess_vs_taiex_pct": 18.3452,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326504+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22134,7 +22500,12 @@
    "entry_close": 20.35,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -1.9656,
+     "excess_vs_taiex_pct": 1.6088,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326518+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22169,7 +22540,12 @@
    "entry_close": 9.89,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.9323,
+     "excess_vs_taiex_pct": 0.6421,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326531+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22204,7 +22580,12 @@
    "entry_close": 9.89,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.9323,
+     "excess_vs_taiex_pct": 0.6421,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326544+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22239,7 +22620,12 @@
    "entry_close": 17.5,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -3.7143,
+     "excess_vs_taiex_pct": -0.1399,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326558+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22276,7 +22662,12 @@
    "entry_close": 2420.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.0661,
+     "excess_vs_taiex_pct": 1.5083,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326570+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22311,7 +22702,12 @@
    "entry_close": 58.75,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -4.9362,
+     "excess_vs_taiex_pct": -1.3618,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326583+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22346,7 +22742,12 @@
    "entry_close": 9.89,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.9323,
+     "excess_vs_taiex_pct": 0.6421,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326595+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22381,7 +22782,12 @@
    "entry_close": 9.89,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.9323,
+     "excess_vs_taiex_pct": 0.6421,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326607+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22416,7 +22822,12 @@
    "entry_close": 91.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 0.6593,
+     "excess_vs_taiex_pct": 4.2337,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326621+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22451,7 +22862,12 @@
    "entry_close": 15.4,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 5.8442,
+     "excess_vs_taiex_pct": 9.4185,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326635+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22488,7 +22904,12 @@
    "entry_close": 2420.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.0661,
+     "excess_vs_taiex_pct": 1.5083,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326647+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22523,7 +22944,12 @@
    "entry_close": 55.6,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.1583,
+     "excess_vs_taiex_pct": 1.4161,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326661+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22558,7 +22984,12 @@
    "entry_close": 7.17,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.5105,
+     "excess_vs_taiex_pct": 1.0639,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326674+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22594,7 +23025,12 @@
    "entry_close": 20.05,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -1.4963,
+     "excess_vs_taiex_pct": 2.0781,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326688+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22629,7 +23065,12 @@
    "entry_close": 16.45,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.1277,
+     "excess_vs_taiex_pct": 1.4467,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326701+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22665,7 +23106,12 @@
    "entry_close": 20.05,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -1.4963,
+     "excess_vs_taiex_pct": 2.0781,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326713+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22701,7 +23147,12 @@
    "entry_close": 59.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -12.3729,
+     "excess_vs_taiex_pct": -8.7985,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326726+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22738,7 +23189,12 @@
    "entry_close": 2420.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.0661,
+     "excess_vs_taiex_pct": 1.5083,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326738+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22775,7 +23231,12 @@
    "entry_close": 2420.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.0661,
+     "excess_vs_taiex_pct": 1.5083,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326749+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22812,7 +23273,12 @@
    "entry_close": 2420.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.0661,
+     "excess_vs_taiex_pct": 1.5083,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326761+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22849,7 +23315,12 @@
    "entry_close": 4990.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -6.3126,
+     "excess_vs_taiex_pct": -2.7383,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326774+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22886,7 +23357,12 @@
    "entry_close": 4990.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -6.3126,
+     "excess_vs_taiex_pct": -2.7383,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326786+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22921,7 +23397,12 @@
    "entry_close": 154.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 3.8961,
+     "excess_vs_taiex_pct": 7.4705,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326799+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22957,7 +23438,12 @@
    "entry_close": 20.05,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -1.4963,
+     "excess_vs_taiex_pct": 2.0781,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326810+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -22992,7 +23478,12 @@
    "entry_close": 241.5,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -26.501,
+     "excess_vs_taiex_pct": -22.9267,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326824+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -23027,7 +23518,12 @@
    "entry_close": 110.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.9091,
+     "excess_vs_taiex_pct": -17.3347,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326837+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -23062,7 +23558,12 @@
    "entry_close": 28.9,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -3.8062,
+     "excess_vs_taiex_pct": -0.2319,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326850+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -23099,7 +23600,12 @@
    "entry_close": 4990.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -6.3126,
+     "excess_vs_taiex_pct": -2.7383,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326862+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -23136,7 +23642,12 @@
    "entry_close": 4990.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -6.3126,
+     "excess_vs_taiex_pct": -2.7383,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326874+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -23171,7 +23682,12 @@
    "entry_close": 60.8,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 43.5855,
+     "excess_vs_taiex_pct": 47.1599,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326888+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -23208,7 +23724,12 @@
    "entry_close": 2420.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.0661,
+     "excess_vs_taiex_pct": 1.5083,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326900+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -23244,7 +23765,12 @@
    "entry_close": 59.0,
    "entry_date": "2026-10-21",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -12.3729,
+     "excess_vs_taiex_pct": -8.7985,
+     "exit_date": "2026-10-30",
+     "filled_at": "2026-10-30T18:22:13.326912+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -29670,7 +30196,9 @@
     "t5": null,
     "t20": null,
     "t60": null
-   }
+   },
+   "entry_skip_reason": "進場日無收盤（停牌／無成交／未掛牌）",
+   "entry_skip_marked_at": "2026-10-30T18:22:13.113748+08:00"
   },
   {
    "id": "b223a90dfdcb9c97",
@@ -37260,7 +37788,9 @@
     "t5": null,
     "t20": null,
     "t60": null
-   }
+   },
+   "entry_skip_reason": "進場日無收盤（停牌／無成交／未掛牌）",
+   "entry_skip_marked_at": "2026-10-30T18:22:13.114050+08:00"
   },
   {
    "id": "b16f7769b5b7baff",
@@ -37439,7 +37969,9 @@
     "t5": null,
     "t20": null,
     "t60": null
-   }
+   },
+   "entry_skip_reason": "進場日無收盤（停牌／無成交／未掛牌）",
+   "entry_skip_marked_at": "2026-10-30T18:22:13.114059+08:00"
   },
   {
    "id": "611533963215e0bf",
@@ -41146,7 +41678,9 @@
     "t5": null,
     "t20": null,
     "t60": null
-   }
+   },
+   "entry_skip_reason": "進場日無收盤（停牌／無成交／未掛牌）",
+   "entry_skip_marked_at": "2026-10-30T18:22:13.114637+08:00"
   },
   {
    "id": "8919b48e1a3691da",
@@ -41952,8 +42486,8 @@
    "ref_close": 293.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 277.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -41985,8 +42519,8 @@
    "ref_close": 19.75,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 19.25,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42018,8 +42552,8 @@
    "ref_close": 102.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 97.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42051,8 +42585,8 @@
    "ref_close": 63.7,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 62.9,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42084,8 +42618,8 @@
    "ref_close": 6335.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 5430.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42117,8 +42651,8 @@
    "ref_close": 343.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 326.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42150,8 +42684,8 @@
    "ref_close": 247.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 247.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42183,8 +42717,8 @@
    "ref_close": 399.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 367.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42216,8 +42750,8 @@
    "ref_close": 781.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 716.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42251,8 +42785,8 @@
    "ref_close": 1330.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1085.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42284,8 +42818,8 @@
    "ref_close": 439.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 418.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42317,8 +42851,8 @@
    "ref_close": 266.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 242.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42350,8 +42884,8 @@
    "ref_close": 37.25,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 35.3,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42383,8 +42917,8 @@
    "ref_close": 109.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 109.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42416,8 +42950,8 @@
    "ref_close": 109.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 109.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42449,8 +42983,8 @@
    "ref_close": 210.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 213.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42482,8 +43016,8 @@
    "ref_close": 275.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 277.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42515,8 +43049,8 @@
    "ref_close": 784.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 733.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42548,8 +43082,8 @@
    "ref_close": 784.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 733.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42581,8 +43115,8 @@
    "ref_close": 275.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 277.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42614,8 +43148,8 @@
    "ref_close": 272.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 256.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42647,8 +43181,8 @@
    "ref_close": 399.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 367.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42680,8 +43214,8 @@
    "ref_close": 29.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 28.2,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42713,8 +43247,8 @@
    "ref_close": 115.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 116.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42749,8 +43283,8 @@
    "ref_close": 224.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 225.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42782,8 +43316,8 @@
    "ref_close": 914.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 867.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42815,8 +43349,8 @@
    "ref_close": 48.45,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 47.65,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42851,8 +43385,8 @@
    "ref_close": 224.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 225.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42884,8 +43418,8 @@
    "ref_close": 103.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 95.4,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42920,8 +43454,8 @@
    "ref_close": 224.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 225.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42953,8 +43487,8 @@
    "ref_close": 55.7,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 50.7,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -42986,8 +43520,8 @@
    "ref_close": 15.3,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 15.15,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43019,8 +43553,8 @@
    "ref_close": 7.86,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 7.62,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43052,8 +43586,8 @@
    "ref_close": 19.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 19.55,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43085,8 +43619,8 @@
    "ref_close": 660.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 637.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43118,8 +43652,8 @@
    "ref_close": 133.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 120.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43154,8 +43688,8 @@
    "ref_close": 42.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 42.25,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43190,8 +43724,8 @@
    "ref_close": 42.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 42.25,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43226,8 +43760,8 @@
    "ref_close": 42.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 42.25,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43262,8 +43796,8 @@
    "ref_close": 42.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 42.25,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43295,8 +43829,8 @@
    "ref_close": 29.85,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 33.8,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43331,8 +43865,8 @@
    "ref_close": 42.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 42.25,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43364,8 +43898,8 @@
    "ref_close": 1100.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 989.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43397,8 +43931,8 @@
    "ref_close": 1100.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 989.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43430,8 +43964,8 @@
    "ref_close": 1100.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 989.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43463,8 +43997,8 @@
    "ref_close": 20.4,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 20.3,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43496,8 +44030,8 @@
    "ref_close": 52.7,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 54.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43529,8 +44063,8 @@
    "ref_close": 979.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 915.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43562,8 +44096,8 @@
    "ref_close": 16.35,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 16.3,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43595,8 +44129,8 @@
    "ref_close": 133.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 133.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43628,8 +44162,8 @@
    "ref_close": 56.1,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 52.9,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43661,8 +44195,8 @@
    "ref_close": 32.75,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 31.35,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43694,8 +44228,8 @@
    "ref_close": 24.35,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 24.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43727,8 +44261,8 @@
    "ref_close": 24.35,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 24.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43760,8 +44294,8 @@
    "ref_close": 10.1,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 9.9,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43793,8 +44327,8 @@
    "ref_close": 246.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 233.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43826,8 +44360,8 @@
    "ref_close": 34.3,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 34.1,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43859,8 +44393,8 @@
    "ref_close": 103.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 97.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43892,8 +44426,8 @@
    "ref_close": 25.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 24.7,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43925,8 +44459,8 @@
    "ref_close": 3200.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2820.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43958,8 +44492,8 @@
    "ref_close": 30.65,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 31.45,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -43991,8 +44525,8 @@
    "ref_close": 115.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 113.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44024,8 +44558,8 @@
    "ref_close": 540.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 578.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44057,8 +44591,8 @@
    "ref_close": 540.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 578.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44090,8 +44624,8 @@
    "ref_close": 34.05,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 33.6,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44125,8 +44659,8 @@
    "ref_close": 20.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 19.75,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44160,8 +44694,8 @@
    "ref_close": 46.55,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 50.3,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44196,8 +44730,8 @@
    "ref_close": 42.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 42.25,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44232,8 +44766,8 @@
    "ref_close": 42.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 42.25,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44407,8 +44941,8 @@
    "ref_close": 550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 486.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44442,8 +44976,8 @@
    "ref_close": 550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 486.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44477,8 +45011,8 @@
    "ref_close": 550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 486.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44512,8 +45046,8 @@
    "ref_close": 550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 486.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44547,8 +45081,8 @@
    "ref_close": 550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 486.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44582,8 +45116,8 @@
    "ref_close": 550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 486.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44617,8 +45151,8 @@
    "ref_close": 550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 486.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44652,8 +45186,8 @@
    "ref_close": 550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 486.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44687,8 +45221,8 @@
    "ref_close": 187.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 173.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44723,8 +45257,8 @@
    "ref_close": 42.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 42.25,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44758,8 +45292,8 @@
    "ref_close": 550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 486.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44793,8 +45327,8 @@
    "ref_close": 550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 486.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44828,8 +45362,8 @@
    "ref_close": 550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 486.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44865,8 +45399,8 @@
    "ref_close": 176.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 169.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44902,8 +45436,8 @@
    "ref_close": 1550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1335.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44939,8 +45473,8 @@
    "ref_close": 28.4,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 28.1,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -44976,8 +45510,8 @@
    "ref_close": 46.3,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 46.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45013,8 +45547,8 @@
    "ref_close": 1550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1335.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45048,8 +45582,8 @@
    "ref_close": 5025.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 4675.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45083,8 +45617,8 @@
    "ref_close": 5025.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 4675.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45120,8 +45654,8 @@
    "ref_close": 1550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1335.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45190,8 +45724,8 @@
    "ref_close": 5025.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 4675.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45225,8 +45759,8 @@
    "ref_close": 5025.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 4675.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45260,8 +45794,8 @@
    "ref_close": 5025.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 4675.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45297,8 +45831,8 @@
    "ref_close": 1550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1335.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45334,8 +45868,8 @@
    "ref_close": 1550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1335.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45371,8 +45905,8 @@
    "ref_close": 1550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1335.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45408,8 +45942,8 @@
    "ref_close": 176.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 169.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45445,8 +45979,8 @@
    "ref_close": 176.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 169.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45482,8 +46016,8 @@
    "ref_close": 176.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 169.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45518,8 +46052,8 @@
    "ref_close": 224.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 225.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45553,8 +46087,8 @@
    "ref_close": 55.9,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 54.4,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45589,8 +46123,8 @@
    "ref_close": 224.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 225.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45625,8 +46159,8 @@
    "ref_close": 224.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 225.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45662,8 +46196,8 @@
    "ref_close": 1550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1335.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45699,8 +46233,8 @@
    "ref_close": 1550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1335.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45736,8 +46270,8 @@
    "ref_close": 1550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1335.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45773,8 +46307,8 @@
    "ref_close": 28.4,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 28.1,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45810,8 +46344,8 @@
    "ref_close": 46.3,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 46.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45845,8 +46379,8 @@
    "ref_close": 1200.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1190.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45880,8 +46414,8 @@
    "ref_close": 77.9,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 67.1,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45917,8 +46451,8 @@
    "ref_close": 1550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1335.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45954,8 +46488,8 @@
    "ref_close": 28.4,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 28.1,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -45991,8 +46525,8 @@
    "ref_close": 46.3,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 46.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46028,8 +46562,8 @@
    "ref_close": 28.4,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 28.1,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46065,8 +46599,8 @@
    "ref_close": 46.3,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 46.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46102,8 +46636,8 @@
    "ref_close": 1550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1335.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46139,8 +46673,8 @@
    "ref_close": 1550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1335.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46176,8 +46710,8 @@
    "ref_close": 1550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1335.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46213,8 +46747,8 @@
    "ref_close": 1550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1335.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46249,8 +46783,8 @@
    "ref_close": 42.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 42.25,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46285,8 +46819,8 @@
    "ref_close": 224.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 225.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46320,8 +46854,8 @@
    "ref_close": 67.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 66.6,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46355,8 +46889,8 @@
    "ref_close": 67.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 66.6,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46390,8 +46924,8 @@
    "ref_close": 525.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 469.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46427,8 +46961,8 @@
    "ref_close": 2425.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2370.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46464,8 +46998,8 @@
    "ref_close": 28.4,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 28.1,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46501,8 +47035,8 @@
    "ref_close": 46.3,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 46.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46538,8 +47072,8 @@
    "ref_close": 28.4,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 28.1,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46575,8 +47109,8 @@
    "ref_close": 46.3,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 46.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46610,8 +47144,8 @@
    "ref_close": 1330.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1085.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46647,8 +47181,8 @@
    "ref_close": 2425.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2370.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46684,8 +47218,8 @@
    "ref_close": 2425.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2370.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46721,8 +47255,8 @@
    "ref_close": 2425.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2370.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46758,8 +47292,8 @@
    "ref_close": 4235.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 3915.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46795,8 +47329,8 @@
    "ref_close": 2425.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2370.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46832,8 +47366,8 @@
    "ref_close": 4235.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 3915.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46869,8 +47403,8 @@
    "ref_close": 2425.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2370.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46906,8 +47440,8 @@
    "ref_close": 2425.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2370.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46943,8 +47477,8 @@
    "ref_close": 4235.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 3915.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -46978,8 +47512,8 @@
    "ref_close": 477.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 454.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47048,8 +47582,8 @@
    "ref_close": 67.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 66.6,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47083,8 +47617,8 @@
    "ref_close": 5025.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 4675.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47118,8 +47652,8 @@
    "ref_close": 5025.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 4675.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47153,8 +47687,8 @@
    "ref_close": 67.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 66.6,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47223,8 +47757,8 @@
    "ref_close": 5025.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 4675.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47260,8 +47794,8 @@
    "ref_close": 2425.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2370.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47297,8 +47831,8 @@
    "ref_close": 4235.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 3915.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47333,8 +47867,8 @@
    "ref_close": 172.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 164.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47368,8 +47902,8 @@
    "ref_close": 71.3,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 66.6,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47404,8 +47938,8 @@
    "ref_close": 172.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 164.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47439,8 +47973,8 @@
    "ref_close": 51.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 50.2,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47474,8 +48008,8 @@
    "ref_close": 82.2,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 68.4,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47509,8 +48043,8 @@
    "ref_close": 90.7,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 78.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47544,8 +48078,8 @@
    "ref_close": 751.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 707.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47581,8 +48115,8 @@
    "ref_close": 176.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 169.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47616,8 +48150,8 @@
    "ref_close": 14.95,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 14.9,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47653,8 +48187,8 @@
    "ref_close": 28.4,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 28.1,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47690,8 +48224,8 @@
    "ref_close": 46.3,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 46.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47725,8 +48259,8 @@
    "ref_close": 1185.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1020.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47760,8 +48294,8 @@
    "ref_close": 4235.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 3915.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47795,8 +48329,8 @@
    "ref_close": 2460.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2385.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47830,8 +48364,8 @@
    "ref_close": 695.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 668.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47865,8 +48399,8 @@
    "ref_close": 695.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 668.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47900,8 +48434,8 @@
    "ref_close": 695.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 668.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47935,8 +48469,8 @@
    "ref_close": 695.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 668.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -47970,8 +48504,8 @@
    "ref_close": 695.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 668.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48005,8 +48539,8 @@
    "ref_close": 695.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 668.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48040,8 +48574,8 @@
    "ref_close": 695.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 668.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48073,8 +48607,8 @@
    "ref_close": 40.45,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 37.4,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48106,8 +48640,8 @@
    "ref_close": 74.4,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 73.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48139,8 +48673,8 @@
    "ref_close": 13.6,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 13.45,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48172,8 +48706,8 @@
    "ref_close": 162.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 158.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48205,8 +48739,8 @@
    "ref_close": 279.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 279.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48238,8 +48772,8 @@
    "ref_close": 70.7,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 65.1,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48271,8 +48805,8 @@
    "ref_close": 60.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 57.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48304,8 +48838,8 @@
    "ref_close": 9.2,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 9.06,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48340,8 +48874,8 @@
    "ref_close": 5025.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 4675.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48373,8 +48907,8 @@
    "ref_close": 40.35,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 38.8,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48406,8 +48940,8 @@
    "ref_close": 58.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 55.9,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48439,8 +48973,8 @@
    "ref_close": 439.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 418.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48472,8 +49006,8 @@
    "ref_close": 155.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 139.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48505,8 +49039,8 @@
    "ref_close": 56.3,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 51.3,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48538,8 +49072,8 @@
    "ref_close": 65.3,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 63.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48571,8 +49105,8 @@
    "ref_close": 62.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 56.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48604,8 +49138,8 @@
    "ref_close": 13.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 12.2,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48637,8 +49171,8 @@
    "ref_close": 48.45,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 42.55,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48670,8 +49204,8 @@
    "ref_close": 9.95,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 9.99,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48703,8 +49237,8 @@
    "ref_close": 192.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 183.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48736,8 +49270,8 @@
    "ref_close": 2035.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1755.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48769,8 +49303,8 @@
    "ref_close": 128.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 111.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48802,8 +49336,8 @@
    "ref_close": 128.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 111.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48835,8 +49369,8 @@
    "ref_close": 128.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 111.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48870,8 +49404,8 @@
    "ref_close": 28.4,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 28.1,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48903,8 +49437,8 @@
    "ref_close": 803.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 765.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48938,8 +49472,8 @@
    "ref_close": 28.4,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 28.1,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -48971,8 +49505,8 @@
    "ref_close": 42.3,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 39.25,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49004,8 +49538,8 @@
    "ref_close": 42.3,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 39.25,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49040,8 +49574,8 @@
    "ref_close": 176.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 169.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49073,8 +49607,8 @@
    "ref_close": 67.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 66.6,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49106,8 +49640,8 @@
    "ref_close": 39.35,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 47.55,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49139,8 +49673,8 @@
    "ref_close": 5565.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 4950.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49175,8 +49709,8 @@
    "ref_close": 176.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 169.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49208,8 +49742,8 @@
    "ref_close": 64.6,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 58.1,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49244,8 +49778,8 @@
    "ref_close": 1550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1335.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49279,8 +49813,8 @@
    "ref_close": 224.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 225.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49315,8 +49849,8 @@
    "ref_close": 1550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1335.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49348,8 +49882,8 @@
    "ref_close": 791.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 803.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49384,8 +49918,8 @@
    "ref_close": 1550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1335.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49417,8 +49951,8 @@
    "ref_close": 142.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 124.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49450,8 +49984,8 @@
    "ref_close": 142.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 124.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49483,8 +50017,8 @@
    "ref_close": 272.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 245.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49516,8 +50050,8 @@
    "ref_close": 362.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 336.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49622,8 +50156,8 @@
    "ref_close": 176.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 169.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49658,8 +50192,8 @@
    "ref_close": 14.95,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 14.9,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49693,8 +50227,8 @@
    "ref_close": 17.1,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 17.15,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49728,8 +50262,8 @@
    "ref_close": 55.9,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 54.4,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49763,8 +50297,8 @@
    "ref_close": 46.55,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 50.3,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49798,8 +50332,8 @@
    "ref_close": 51.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 50.2,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49833,8 +50367,8 @@
    "ref_close": 29.85,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 33.8,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49868,8 +50402,8 @@
    "ref_close": 156.5,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 160.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49904,8 +50438,8 @@
    "ref_close": 1550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1335.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49940,8 +50474,8 @@
    "ref_close": 29.25,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 27.8,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -49976,8 +50510,8 @@
    "ref_close": 5025.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 4675.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -50011,8 +50545,8 @@
    "ref_close": 71.8,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 72.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -50047,8 +50581,8 @@
    "ref_close": 14.95,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 14.9,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -50082,8 +50616,8 @@
    "ref_close": 53.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 50.3,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -50117,8 +50651,8 @@
    "ref_close": 23.8,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 23.2,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -50152,8 +50686,8 @@
    "ref_close": 2425.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2370.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -50188,8 +50722,8 @@
    "ref_close": 29.25,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 27.8,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -50223,8 +50757,8 @@
    "ref_close": 63.8,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 59.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -50259,8 +50793,8 @@
    "ref_close": 1550.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1335.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -50295,8 +50829,8 @@
    "ref_close": 5025.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 4675.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -50330,8 +50864,8 @@
    "ref_close": 224.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 225.5,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -50365,8 +50899,8 @@
    "ref_close": 1330.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1085.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -50400,8 +50934,8 @@
    "ref_close": 695.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 668.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -50435,8 +50969,8 @@
    "ref_close": 24.55,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 23.8,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -50470,8 +51004,8 @@
    "ref_close": 695.0,
    "ref_close_date": "2026-10-28",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 668.0,
+   "entry_date": "2026-10-30",
    "returns": {
     "t5": null,
     "t20": null,
@@ -54836,6 +55370,3011 @@
    "weight": 1.0,
    "ref_close": null,
    "ref_close_date": null,
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "511b66b302ba62da",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "併購",
+   "code": "4747",
+   "event_date": "2026-10-29",
+   "title": "公告本公司115年第3季自結合併損益",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.015,
+   "pre_vol_spike": 2.268,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 0.5,
+   "ref_close": 22.9,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "02dd89dd8029785d",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "併購",
+   "code": "4609",
+   "event_date": "2026-10-29",
+   "title": "公告115年09月份自結合併財務報告之 負債比率、流動比率及速動比率",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0798,
+   "pre_vol_spike": 1.081,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 4.5,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "4ac1dd43fa2c19c4",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "併購",
+   "code": "4139",
+   "event_date": "2026-10-29",
+   "title": "公告本公司115年9月份自結合併財務報告之 負債比率、流動比率及速動比率",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0203,
+   "pre_vol_spike": 0.168,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 41.95,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "ee127502462f20a5",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "增減資",
+   "code": "4131",
+   "event_date": "2026-10-29",
+   "title": "代重要子公司八億實業股份有限公司公告董事會決議辦理 現金增資發行新股",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0535,
+   "pre_vol_spike": 0.127,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-28",
+   "weight": 1.0,
+   "ref_close": 31.45,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "ce36346aa4d49806",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "併購",
+   "code": "6967",
+   "event_date": "2026-10-29",
+   "title": "公告本公司115年第三季合併自結損益",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0289,
+   "pre_vol_spike": 0.326,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 65.5,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "38152dc646cca018",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "增減資",
+   "code": "6596",
+   "event_date": "2026-10-29",
+   "title": "公告本公司董事會決議辦理現金增資發行新股",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0053,
+   "pre_vol_spike": 0.497,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 93.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "c59b08a1018a73de",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "併購",
+   "code": "3260",
+   "event_date": "2026-10-29",
+   "title": "公告本公司董事會通過民國115年第三季合併財務報告",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.079,
+   "pre_vol_spike": 2.513,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 0.5,
+   "ref_close": 346.5,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "01ba26bc1a952c61",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "併購",
+   "code": "3491",
+   "event_date": "2026-10-29",
+   "title": "公告本公司115年前三季自結合併損益資訊",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0301,
+   "pre_vol_spike": 1.216,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 1255.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "a8c974785421ca6c",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "併購",
+   "code": "3675",
+   "event_date": "2026-10-29",
+   "title": "115年度第三季合併財務報告業經董事會決議通過",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0329,
+   "pre_vol_spike": 0.381,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 266.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "37d11ec426655e4d",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "併購",
+   "code": "3523",
+   "event_date": "2026-10-29",
+   "title": "公告本公司115年9月份自結合併財務報告之公告流動比率、 速動比率及負債比率",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0327,
+   "pre_vol_spike": 3.683,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-28",
+   "weight": 0.5,
+   "ref_close": 13.3,
+   "ref_close_date": "2026-10-28",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "19ef830bd7430466",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "財務",
+   "code": "4162",
+   "event_date": "2026-10-29",
+   "title": "公告本公司115年第三季財務報告",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0018,
+   "pre_vol_spike": 0.897,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 58.2,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "d0eba6d49cb5fe31",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "處分資產",
+   "code": "6588",
+   "event_date": "2026-10-29",
+   "title": "代孫公司科沃斯先進股份有限公司公告 向關係人取得不動產使用權資產(補充 公告業經本公司股臨會決議通過)",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0177,
+   "pre_vol_spike": 0.31,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 83.4,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "6dac3c089049b108",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "併購",
+   "code": "6188",
+   "event_date": "2026-10-29",
+   "title": "公告本公司115年第3季合併財務報告",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0322,
+   "pre_vol_spike": 0.977,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 57.6,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "914c45bf4a72ae26",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "併購",
+   "code": "3529",
+   "event_date": "2026-10-29",
+   "title": "公告本公司115年第三季合併財務報告",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0433,
+   "pre_vol_spike": 0.776,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 2490.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "38f6ddce75755ea5",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "法說會",
+   "code": "4991",
+   "event_date": "2026-10-29",
+   "title": "本公司受邀參加元大證券舉辦之環宇-KY(4991)線上法人說明會",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0116,
+   "pre_vol_spike": 0.503,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 388.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "bcdd3ce3b1b3bc20",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "併購",
+   "code": "8049",
+   "event_date": "2026-10-29",
+   "title": "公告本公司董事會通過115年第三季合併財務報告",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0062,
+   "pre_vol_spike": 1.048,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 23.6,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "31bdcbabeccd09ef",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "法說會",
+   "code": "7704",
+   "event_date": "2026-10-29",
+   "title": "本公司受邀參加凱基證券舉辦之法人說明會",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.3081,
+   "pre_vol_spike": 52.457,
+   "reflected": "caution",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 0.5,
+   "ref_close": 87.3,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "23e63f9a2cfe220c",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "併購",
+   "code": "3663",
+   "event_date": "2026-10-29",
+   "title": "公告本公司董事會通過115年第3季合併財務報告",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1217,
+   "pre_vol_spike": 1.228,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 55.8,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "b7ae466d531eee2a",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "財務",
+   "code": "6270",
+   "event_date": "2026-10-29",
+   "title": "公告本公司115年度第三季自結損益",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0265,
+   "pre_vol_spike": 1.183,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 26.7,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "567e347a5b1f3475",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "訴訟",
+   "code": "4139",
+   "event_date": "2026-10-29",
+   "title": "公告本公司訴訟及非訴訟代理人異動",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0203,
+   "pre_vol_spike": 0.168,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 41.95,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "75a3adaf67624251",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "併購",
+   "code": "6690",
+   "event_date": "2026-10-29",
+   "title": "公告本公司董事會通過115年第三季合併財務報表",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0417,
+   "pre_vol_spike": 5.02,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 0.5,
+   "ref_close": 192.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "0f7aec29fde0382c",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "增減資",
+   "code": "4116",
+   "event_date": "2026-10-29",
+   "title": "代重要子公司凱圖國際股份有限公司 公告董事會決議現金增資發行新股",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0686,
+   "pre_vol_spike": 3.285,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 0.5,
+   "ref_close": 44.2,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "7200192b3fc9f0bc",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "併購",
+   "code": "5009",
+   "event_date": "2026-10-29",
+   "title": "本公司115年第三季合併財務報告業已提報董事會",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0163,
+   "pre_vol_spike": 1.047,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 31.85,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "cd0dbef0d0ae40b4",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "併購",
+   "code": "1584",
+   "event_date": "2026-10-29",
+   "title": "公告本公司115年第3季合併財務報告",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0141,
+   "pre_vol_spike": 0.633,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 17.2,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "736f575927be8330",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "併購",
+   "code": "6730",
+   "event_date": "2026-10-29",
+   "title": "公告本公司董事會通過115年第三季合併財務報告",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0306,
+   "pre_vol_spike": 0.631,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 32.15,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "837ec3aecca57749",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "併購",
+   "code": "4995",
+   "event_date": "2026-10-29",
+   "title": "公告本公司董事會通過一一五年第三季合併財務報告",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.01,
+   "pre_vol_spike": 1.224,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 43.2,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "a86a0f7d2dab2b67",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "增減資",
+   "code": "3260",
+   "event_date": "2026-10-29",
+   "title": "公告本公司董事會決議取得私募普通股",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.079,
+   "pre_vol_spike": 2.513,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 0.5,
+   "ref_close": 346.5,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "40f0485e6d436e91",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "併購",
+   "code": "3354",
+   "event_date": "2026-10-29",
+   "title": "公告本公司115年第三季合併財務報告業經董事會決議通過",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0257,
+   "pre_vol_spike": 0.431,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 51.2,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "11c9ae05b97ed4b4",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "併購",
+   "code": "3221",
+   "event_date": "2026-10-29",
+   "title": "本公司董事會通過115年第3季合併財務報告",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0696,
+   "pre_vol_spike": 0.275,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 43.2,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "f695fc6d71b5deca",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "增減資",
+   "code": "3221",
+   "event_date": "2026-10-29",
+   "title": "公告本公司董事會通過限制員工權利股票收回註銷減資基準日",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0696,
+   "pre_vol_spike": 0.275,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 43.2,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "2dc57b2d76d35c6b",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "增減資",
+   "code": "3221",
+   "event_date": "2026-10-29",
+   "title": "公告本公司董事會決議發行國內第一次無擔保可轉換公司債",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0696,
+   "pre_vol_spike": 0.275,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 43.2,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "bb78036d39e34a29",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L1",
+   "source": "TPEx 重大訊息",
+   "source_id": "https://mops.twse.com.tw/mops/web/t05st01",
+   "type": "財務",
+   "code": "6231",
+   "event_date": "2026-10-29",
+   "title": "公告本公司115年第三季自結損益",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0129,
+   "pre_vol_spike": 0.716,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-29",
+   "weight": 1.0,
+   "ref_close": 224.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "b155a28fbd158ae4",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9847583",
+   "type": "媒體報導",
+   "code": "6757",
+   "event_date": "2026-10-30",
+   "title": "台灣虎航財報／前三季獲利年增18% EPS 5.07元、賺進逾半個股本",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0209,
+   "pre_vol_spike": 0.582,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 51.6,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "9530c202df581f2f",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E8%81%AF%E7%99%BC%E7%A7%91%E8%91%A3%E4%BA%8B%E6%9C%83%E9%80%9A%E9%81%8E%E5%8F%96%E5%BE%97%E7%84%A1%E5%BD%A2%E8%B3%87%E7%94%A2-094233767.html",
+   "type": "媒體報導",
+   "code": "2454",
+   "event_date": "2026-10-30",
+   "title": "【公告】聯發科董事會通過取得無形資產",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0543,
+   "pre_vol_spike": 0.877,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 3915.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "9802f18ed1d3bbe7",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E5%85%89%E7%A6%B9%E5%9C%8B%E9%9A%9B%E8%91%A3%E4%BA%8B%E6%9C%83%E6%B1%BA%E8%AD%B0%E8%BE%A6%E7%90%86%E7%8F%BE%E9%87%91%E5%A2%9E%E8%B3%87%E7%99%BC%E8%A1%8C%E6%96%B0%E8%82%A1-%E8%A3%9C%E5%85%85%E4%BB%A3%E6%94%B6%E8%82%A1%E6%AC%BE%E5%8F%8A%E5%AD%98%E5%84%B2%E5%B0%88%E6%88%B6%E8%A1%8C%E5%BA%AB-094227717.html",
+   "type": "媒體報導",
+   "code": "6595",
+   "event_date": "2026-10-30",
+   "title": "【公告】光禹國際董事會決議辦理現金增資發行新股(補充代收股款及存儲專戶行庫)",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0014,
+   "pre_vol_spike": 1.134,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2024-12-31",
+   "weight": 1.0,
+   "ref_close": null,
+   "ref_close_date": null,
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "c02a321cac06df23",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E8%81%AF%E7%99%BC%E7%A7%91%E7%AC%AC%E4%B8%89%E5%AD%A3eps-17-5%E5%85%83-asic%E6%A5%AD%E5%8B%99%E5%82%B3%E5%BB%B6%E6%9C%9F-%E8%94%A1%E5%8A%9B%E8%A1%8C%E5%9B%9E%E6%87%89%E4%BA%86-093600681.html",
+   "type": "媒體報導",
+   "code": "2454",
+   "event_date": "2026-10-30",
+   "title": "聯發科第三季EPS 17.5元！ ASIC業務傳延期 蔡力行回應了",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0543,
+   "pre_vol_spike": 0.877,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 3915.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "60b6147c0b3f5bb7",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%89%E5%AF%B6%E7%A7%91%E6%B3%95%E8%AA%AA2%E3%80%8B%E7%B8%BD%E5%BA%A7%E9%82%B1%E6%A3%AE%E5%BD%AC%E6%A8%82%E7%9C%8B%E6%98%8E%E5%B9%B4%E7%87%9F%E9%81%8B-ai%E7%87%9F%E6%94%B6%E5%8D%A0%E6%AF%94%E6%8B%9A4%E8%87%B35%E6%88%90-093537245.html",
+   "type": "媒體報導",
+   "code": "2301",
+   "event_date": "2026-10-30",
+   "title": "光寶科法說2》總座邱森彬樂看明年營運 AI營收占比拚4至5成",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0873,
+   "pre_vol_spike": 0.881,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 240.5,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "4023710ea723059c",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9847554",
+   "type": "媒體報導",
+   "code": "1101",
+   "event_date": "2026-10-30",
+   "title": "安成生技外用新藥AC-1101獲TFDA核准執行圓禿第2a期臨床 年底開始收案",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0578,
+   "pre_vol_spike": 0.643,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 28.35,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "c72ad0eb02cca499",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9847554",
+   "type": "媒體報導",
+   "code": "6610",
+   "event_date": "2026-10-30",
+   "title": "安成生技外用新藥AC-1101獲TFDA核准執行圓禿第2a期臨床 年底開始收案",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": null,
+   "pre_vol_spike": null,
+   "reflected": "unknown",
+   "pre_volume_spike": null,
+   "reason": "價格序列不足（0<23 筆）",
+   "weight": 1.0,
+   "ref_close": null,
+   "ref_close_date": null,
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "77776fd31f12bb79",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9847542",
+   "type": "媒體報導",
+   "code": "6271",
+   "event_date": "2026-10-30",
+   "title": "同欣電財報／第3季 EPS 3.62元 AI 需求帶動第4季營收續增",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1509,
+   "pre_vol_spike": 0.564,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 197.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "c3b6999a79396bb4",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9847540",
+   "type": "媒體報導",
+   "code": "2352",
+   "event_date": "2026-10-30",
+   "title": "佳世達陳其宏宣布退休執行長職務 續任集團董事長",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.1477,
+   "pre_vol_spike": 19.991,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 0.5,
+   "ref_close": 33.8,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "42bff1f94c25722d",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E8%81%AF%E7%99%BC%E7%A7%91%E6%B0%91%E5%9C%8B115%E5%B9%B4%E4%B8%8A%E5%8D%8A%E5%B9%B4%E5%BA%A6%E4%B9%8B%E7%8F%BE%E9%87%91%E8%82%A1%E5%88%A9%E9%99%A4%E6%81%AF%E5%9F%BA%E6%BA%96%E6%97%A5-092649210.html",
+   "type": "媒體報導",
+   "code": "2454",
+   "event_date": "2026-10-30",
+   "title": "【公告】聯發科民國115年上半年度之現金股利除息基準日",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0543,
+   "pre_vol_spike": 0.877,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 3915.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "e2bb6dfaa18b8153",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E6%96%B0%E6%87%89%E6%9D%90115%E5%B9%B4%E7%AC%AC3%E5%AD%A3%E8%87%AA%E7%B5%90%E5%90%88%E4%BD%B5%E6%90%8D%E7%9B%8A-092638774.html",
+   "type": "媒體報導",
+   "code": "4749",
+   "event_date": "2026-10-30",
+   "title": "【公告】新應材115年第3季自結合併損益",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0725,
+   "pre_vol_spike": 0.814,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 678.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "b525ae9b11a67c69",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%A4%96%E8%B3%87%E8%B3%A3%E5%8D%83%E5%84%84%E5%A4%A7%E7%A0%8D0050-%E7%B6%B2%E8%A6%8B%E8%B2%B7%E8%B6%85-%E9%80%99%E6%AA%94-%E9%A9%9A-%E6%88%BF%E5%B8%82%E8%A6%81%E8%B5%B7%E9%A3%9B-092100700.html",
+   "type": "媒體報導",
+   "code": "0050",
+   "event_date": "2026-10-30",
+   "title": "外資賣千億大砍0050！ 網見買超「這檔」驚：房市要起飛？",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0296,
+   "pre_vol_spike": 0.72,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 104.95,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "8f5b3504a145ecf4",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9847456",
+   "type": "媒體報導",
+   "code": "2480",
+   "event_date": "2026-10-30",
+   "title": "敦陽科財報／前三季 EPS 達7.19元 創同期新高",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0054,
+   "pre_vol_spike": 0.507,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 184.5,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "531ad4291e2e74ff",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E8%81%AF%E7%99%BC%E7%A7%91%E6%B3%95%E8%AA%AA%E6%9C%83%E3%80%8Bai%E7%AE%97%E5%8A%9B%E6%9C%83%E6%B3%A1%E6%B2%AB%E5%8C%96%EF%BC%9F%E8%94%A1%E5%8A%9B%E8%A1%8C%EF%BC%9A%E5%A4%A0%E5%BC%B7%E7%9A%84%E6%99%B6%E7%89%87%E8%B6%8A%E6%9C%83%E5%8B%9D%E5%87%BA-082406403.html",
+   "type": "媒體報導",
+   "code": "2454",
+   "event_date": "2026-10-30",
+   "title": "聯發科法說會》AI算力會泡沫化？蔡力行：夠強的晶片越會勝出",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0543,
+   "pre_vol_spike": 0.877,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 3915.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "4d664fac28cf5912",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E8%81%AF%E7%99%BC%E7%A7%91%E6%B3%95%E8%AA%AA%E6%9C%83%E3%80%8B%E5%90%88%E4%BD%9C%E8%8B%B1%E7%89%B9%E7%88%BE%E6%81%90%E8%A2%AB%E7%89%BD%E5%88%B6%EF%BC%9F%E8%94%A1%E5%8A%9B%E8%A1%8C%EF%BC%9A%E5%8F%B0%E7%A9%8D%E9%9B%BB%E6%9C%80%E9%87%8D%E8%A6%81-081704563.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-30",
+   "title": "聯發科法說會》合作英特爾恐被牽制？蔡力行：台積電最重要",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0207,
+   "pre_vol_spike": 0.778,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 2370.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "321a44a65f023f18",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E8%81%AF%E7%99%BC%E7%A7%91%E6%B3%95%E8%AA%AA%E6%9C%83%E3%80%8B%E5%90%88%E4%BD%9C%E8%8B%B1%E7%89%B9%E7%88%BE%E6%81%90%E8%A2%AB%E7%89%BD%E5%88%B6%EF%BC%9F%E8%94%A1%E5%8A%9B%E8%A1%8C%EF%BC%9A%E5%8F%B0%E7%A9%8D%E9%9B%BB%E6%9C%80%E9%87%8D%E8%A6%81-081704563.html",
+   "type": "媒體報導",
+   "code": "2454",
+   "event_date": "2026-10-30",
+   "title": "聯發科法說會》合作英特爾恐被牽制？蔡力行：台積電最重要",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0543,
+   "pre_vol_spike": 0.877,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 3915.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "d4c66286133c96dc",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E8%81%AF%E7%99%BC%E7%A7%91%E6%B3%95%E8%AA%AA%E6%9C%83%E3%80%8B%E5%B9%ABgoogle%E5%AE%A2%E8%A3%BD%E5%8C%96ai%E6%99%B6%E7%89%87%E5%BB%B6%E6%9C%9F%EF%BC%9F%E8%94%A1%E5%8A%9B%E8%A1%8C%E9%97%A2%E8%AC%A0%EF%BC%9A%E4%B8%80%E5%88%87%E9%83%BD%E5%9C%A8%E8%BB%8C%E9%81%93%E4%B8%8A-080625212.html",
+   "type": "媒體報導",
+   "code": "2454",
+   "event_date": "2026-10-30",
+   "title": "聯發科法說會》幫Google客製化AI晶片延期？蔡力行闢謠：一切都在軌道上",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0543,
+   "pre_vol_spike": 0.877,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 3915.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "7594571bc23aeaaf",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9847332",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-30",
+   "title": "台積電綠色製造升級外氣空調箱洗滌技術節電60% 評估導入 PTFE 濾網",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0207,
+   "pre_vol_spike": 0.778,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 2370.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "a10f06e77b08cc4c",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E8%A3%9C%E5%85%85%E8%AA%AA%E6%98%8E%E7%BE%8E%E5%A5%BD%E8%AD%89%E6%96%BC115%E5%B9%B45%E6%9C%887%E6%97%A5%E5%85%AC%E5%91%8A%E7%99%BC%E8%A1%8C-%E4%BA%94%E5%B9%B4%E5%BA%A6%E7%AC%AC%E4%B8%89%E6%AC%A1%E6%9C%89%E6%93%94%E4%BF%9D%E6%AC%A1%E9%A0%86%E4%BD%8D%E6%99%AE%E9%80%9A%E5%85%AC%E5%8F%B8%E5%82%B5-080321336.html",
+   "type": "媒體報導",
+   "code": "6021",
+   "event_date": "2026-10-30",
+   "title": "【公告】補充說明美好證於115年5月7日公告發行一一五年度第三次有擔保次順位普通公司債",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0253,
+   "pre_vol_spike": 0.399,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 56.7,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "554952839440f883",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E9%9A%86%E9%8A%98%E7%B6%A0%E8%83%BD%E5%9F%B7%E8%A1%8C%E9%95%B7%E5%8F%8A%E5%89%AF%E5%9F%B7%E8%A1%8C%E9%95%B7%E7%95%B0%E5%8B%95-080217261.html",
+   "type": "媒體報導",
+   "code": "3018",
+   "event_date": "2026-10-30",
+   "title": "【公告】隆銘綠能執行長及副執行長異動",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0514,
+   "pre_vol_spike": 0.473,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 9.96,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "916754ac3bfc2409",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E5%A4%A7%E7%95%A5-ky115%E5%B9%B409%E6%9C%88%E4%BB%BD%E8%87%AA%E7%B5%90%E8%B2%A1%E5%8B%99%E5%A0%B1%E8%A1%A8%E4%B9%8B%E8%87%AA%E7%B5%90%E8%B2%A0%E5%82%B5%E6%AF%94%E7%8E%87-%E8%87%AA%E7%B5%90%E6%B5%81%E5%8B%95%E6%AF%94%E7%8E%87%E5%8F%8A%E8%87%AA%E7%B5%90%E9%80%9F%E5%8B%95%E6%AF%94%E7%8E%87-080214494.html",
+   "type": "媒體報導",
+   "code": "4804",
+   "event_date": "2026-10-30",
+   "title": "【公告】大略-KY115年09月份自結財務報表之自結負債比率、自結流動比率及自結速動比率",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": null,
+   "pre_vol_spike": null,
+   "reflected": "unknown",
+   "pre_volume_spike": null,
+   "reason": "價格序列不足（0<23 筆）",
+   "weight": 1.0,
+   "ref_close": null,
+   "ref_close_date": null,
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "b99bdb538867b5de",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E8%B7%AF%E8%BF%A6%E7%94%9F%E9%86%AB%E9%A0%90%E4%BC%B0%E6%9C%AA%E4%BE%86%E4%B8%89%E5%80%8B%E6%9C%88%E7%8F%BE%E9%87%91%E6%94%B6%E6%94%AF%E6%83%85%E5%BD%A2%E5%8F%8A%E9%8A%80%E8%A1%8C%E5%8F%AF%E4%BD%BF%E7%94%A8%E8%9E%8D%E8%B3%87%E9%A1%8D%E5%BA%A6%E6%83%85%E5%BD%A2-080212979.html",
+   "type": "媒體報導",
+   "code": "6814",
+   "event_date": "2026-10-30",
+   "title": "【公告】路迦生醫預估未來三個月現金收支情形及銀行可使用融資額度情形",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0083,
+   "pre_vol_spike": 0.827,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2024-12-31",
+   "weight": 1.0,
+   "ref_close": null,
+   "ref_close_date": null,
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "9c6956612db3c1c1",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E6%B0%B8%E8%B1%90%E6%9C%9F%E8%B2%A8-%E5%8F%B0%E9%81%94%E9%9B%BB%E6%91%9C%E8%B7%8C%E5%81%9C-%E5%A4%A7%E7%9B%A4%E9%87%8D%E6%8C%AB1157%E9%BB%9E-%E4%B8%8B%E8%B7%8C%E5%AE%B6%E6%95%B8%E9%80%BE1150%E5%AE%B6-080157192.html",
+   "type": "媒體報導",
+   "code": "2308",
+   "event_date": "2026-10-30",
+   "title": "永豐期貨：台達電摜跌停！大盤重挫1157點、下跌家數逾1150家",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1785,
+   "pre_vol_spike": 1.504,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 1335.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "ff426db615fbd14b",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9847303",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-30",
+   "title": "台積電先進封測廠廢液「以廢治廢」新突破 年創效益1,900萬元",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0207,
+   "pre_vol_spike": 0.778,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 2370.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "8d30177dca7fa829",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9847299",
+   "type": "媒體報導",
+   "code": "2301",
+   "event_date": "2026-10-30",
+   "title": "光寶科法說會／第3季、前三季獲利雙攀新高 第4季核心事業估年季雙增",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0873,
+   "pre_vol_spike": 0.881,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 240.5,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "be8a166aaf06c11e",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E8%81%AF%E7%99%BC%E7%A7%91%E6%B3%95%E8%AA%AA1-q3%E6%AF%8F%E8%82%A1%E8%B3%BA17-5%E5%85%83-%E4%B8%8A%E8%AA%BFq4%E8%B3%87%E6%96%99%E4%B8%AD%E5%BF%83%E7%87%9F%E6%94%B6%E8%87%B325%E5%84%84%E7%BE%8E%E5%85%83-%E6%9C%AC%E5%AD%A3%E6%A5%AD%E7%B8%BE%E5%AD%A3%E5%A2%9E%E4%B8%8A%E7%9C%8B32-075100050.html",
+   "type": "媒體報導",
+   "code": "2454",
+   "event_date": "2026-10-30",
+   "title": "聯發科法說1｜Q3每股賺17.5元！上調Q4資料中心營收至25億美元 本季業績季增上看32%",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0543,
+   "pre_vol_spike": 0.877,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 3915.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "b80226ca4429652e",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E5%BB%A3%E8%8F%AF-ky%E7%A8%BD%E6%A0%B8%E4%B8%BB%E7%AE%A1%E7%95%B0%E5%8B%95-075014507.html",
+   "type": "媒體報導",
+   "code": "1338",
+   "event_date": "2026-10-30",
+   "title": "【公告】廣華-KY稽核主管異動",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0379,
+   "pre_vol_spike": 1.751,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 13.95,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "068b7dba922770d0",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E5%85%86%E6%8D%B7%E7%A7%91%E6%8A%80%E8%82%A1%E7%A5%A8%E5%88%9D%E6%AC%A1%E5%89%B5%E6%96%B0%E6%9D%BF%E4%B8%8A%E5%B8%82%E5%89%8D%E7%8F%BE%E9%87%91%E5%A2%9E%E8%B3%87%E7%99%BC%E8%A1%8C%E6%96%B0%E8%82%A1%E5%A7%94%E8%A8%97%E4%BB%A3%E6%94%B6%E5%8F%8A%E5%AD%98%E5%84%B2%E5%83%B9%E6%AC%BE%E6%A9%9F%E6%A7%8B-075008954.html",
+   "type": "媒體報導",
+   "code": "6959",
+   "event_date": "2026-10-30",
+   "title": "【公告】兆捷科技股票初次創新板上市前現金增資發行新股委託代收及存儲價款機構",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0362,
+   "pre_vol_spike": 0.811,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2024-12-31",
+   "weight": 1.0,
+   "ref_close": null,
+   "ref_close_date": null,
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "96209ea79dc09634",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/ai%E5%8A%A0%E9%80%9F%E5%99%A8%E5%87%BA%E8%B2%A8%E6%94%BE%E9%87%8F-%E8%81%AF%E7%99%BC%E7%A7%91%E4%B8%8A%E4%BF%AE%E8%B3%87%E6%96%99%E4%B8%AD%E5%BF%83%E7%87%9F%E6%94%B6%E7%9B%AE%E6%A8%99-%E6%98%8E%E5%B9%B4%E6%90%B6%E5%8D%A0asic%E5%B8%82%E5%A0%B42%E6%88%90-074457039.html",
+   "type": "媒體報導",
+   "code": "2454",
+   "event_date": "2026-10-30",
+   "title": "AI加速器出貨放量！聯發科上修資料中心營收目標，明年搶占ASIC市場2成",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0543,
+   "pre_vol_spike": 0.877,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 3915.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "eab00058a4f7bcde",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9847283",
+   "type": "媒體報導",
+   "code": "2352",
+   "event_date": "2026-10-30",
+   "title": "佳世達陳其宏退休執行長職務 持續擔任董事長",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.1477,
+   "pre_vol_spike": 19.991,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 0.5,
+   "ref_close": 33.8,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "592b43b0439c0677",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9847280",
+   "type": "媒體報導",
+   "code": "2454",
+   "event_date": "2026-10-30",
+   "title": "聯發科法說會／首顆 ASIC 已經開始出貨 估本季帶入25億美元貢獻",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0543,
+   "pre_vol_spike": 0.877,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 3915.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "4944a2f60f9b6ba2",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E9%87%9D%E5%B0%8D%E8%A2%AB%E9%A7%AD%E4%BA%8B%E4%BB%B6-91app-ky%E7%A8%B1%E5%85%A8%E9%9D%A2%E8%B2%A0%E8%B2%AC-%E4%B8%A6%E5%BB%BA%E7%AB%8Bai%E6%99%82%E4%BB%A3%E8%B3%87%E5%AE%89%E6%96%B0%E9%98%B2%E8%AD%B7-074219693.html",
+   "type": "媒體報導",
+   "code": "6741",
+   "event_date": "2026-10-30",
+   "title": "針對被駭事件，91APP*-KY稱全面負責，並建立AI時代資安新防護",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0725,
+   "pre_vol_spike": 1.059,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 46.05,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "c09aeecc040254dc",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9847265",
+   "type": "媒體報導",
+   "code": "2454",
+   "event_date": "2026-10-30",
+   "title": "聯發科財報／前三季獲利763億元 EPS 47.94元",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0543,
+   "pre_vol_spike": 0.877,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 3915.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "96179439c892023f",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9847232",
+   "type": "媒體報導",
+   "code": "8477",
+   "event_date": "2026-10-30",
+   "title": "台灣創業家打造 Tokenz 入選 CB Insights 2026 Fintech 100",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0432,
+   "pre_vol_spike": 0.426,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 13.3,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "731af21aa4c574c2",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9847223",
+   "type": "媒體報導",
+   "code": "9906",
+   "event_date": "2026-10-30",
+   "title": "欣巴巴事業總裁黃烱輝 獲頒中山大學名譽管理學博士",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0625,
+   "pre_vol_spike": 0.388,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 36.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "b59c59dcdbf0cd4a",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9847164",
+   "type": "媒體報導",
+   "code": "2301",
+   "event_date": "2026-10-30",
+   "title": "光寶科財報／前3季賺183億元 EPS 8.08元、年增64% 再攀歷史新高",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0873,
+   "pre_vol_spike": 0.881,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 240.5,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "7030061930fad57e",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%89%E5%AF%B6%E7%A7%91%E6%B3%95%E8%AA%AA%E3%80%8B%E5%89%8D%E4%B8%89%E5%AD%A3%E6%AF%8F%E8%82%A1%E8%B3%BA808%E5%85%83%E5%89%B5%E6%96%B0%E9%AB%98-%E7%B8%BD%E5%BA%A7%E9%82%B1%E6%A3%AE%E5%BD%AC%EF%BC%9A%E7%AC%AC%E5%9B%9B%E5%AD%A3%E7%87%9F%E6%94%B6%E6%8B%9A%E9%9B%99%E5%A2%9E-064353027.html",
+   "type": "媒體報導",
+   "code": "2301",
+   "event_date": "2026-10-30",
+   "title": "光寶科法說》前三季每股賺8.08元創新高 總座邱森彬：第四季營收拚雙增",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0873,
+   "pre_vol_spike": 0.881,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 240.5,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "4588a7bfd73d729c",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E4%B8%AD%E5%82%91-ky%E9%87%8D%E8%A6%81%E7%87%9F%E9%81%8B%E4%B8%BB%E7%AE%A1%E7%95%B0%E5%8B%95-063307628.html",
+   "type": "媒體報導",
+   "code": "6965",
+   "event_date": "2026-10-30",
+   "title": "【公告】中傑-KY重要營運主管異動",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0322,
+   "pre_vol_spike": 0.255,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 63.2,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "0d18b1680601b86c",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E5%85%89%E5%AF%B6%E7%A7%91%E8%91%A3%E4%BA%8B%E6%9C%83%E6%B1%BA%E8%AD%B0%E9%80%9A%E9%81%8E%E9%80%8F%E9%81%8E100-%E9%96%93%E6%8E%A5%E6%8C%81%E6%9C%89%E5%AD%90%E5%85%AC%E5%8F%B8%E5%85%89%E5%AF%B6%E7%A7%91%E6%8A%80-%E6%B1%9F%E8%98%87-%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8%E8%BD%89%E6%8A%95%E8%B3%87%E5%A4%A7%E9%99%B8%E6%A1%88-063303699.html",
+   "type": "媒體報導",
+   "code": "2301",
+   "event_date": "2026-10-30",
+   "title": "【公告】光寶科董事會決議通過透過100%間接持有子公司光寶科技（江蘇）有限公司轉投資大陸案",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0873,
+   "pre_vol_spike": 0.881,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 240.5,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "e5737bba3716a1f1",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E5%85%89%E5%AF%B6%E7%A7%91%E8%91%A3%E4%BA%8B%E6%9C%83%E6%B1%BA%E8%AD%B0%E9%80%9A%E9%81%8E%E5%B0%8D%E9%96%93%E6%8E%A5%E6%8C%81%E8%82%A1100-%E5%AD%90%E5%85%AC%E5%8F%B8%E7%8F%BE%E9%87%91%E5%A2%9E%E8%B3%87%E6%A1%88-063301639.html",
+   "type": "媒體報導",
+   "code": "2301",
+   "event_date": "2026-10-30",
+   "title": "【公告】光寶科董事會決議通過對間接持股100%子公司現金增資案",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0873,
+   "pre_vol_spike": 0.881,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 240.5,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "0de0c1b247182eee",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E5%85%89%E5%AF%B6%E7%A7%91%E8%91%A3%E4%BA%8B%E6%9C%83%E6%B1%BA%E8%AD%B0%E5%88%86%E5%89%B2%E5%85%88%E9%80%B2%E5%9F%BA%E7%A4%8E%E8%A8%AD%E6%96%BD%E4%BA%8B%E6%A5%AD%E9%83%A8%E9%96%80%E6%A1%88-063259887.html",
+   "type": "媒體報導",
+   "code": "2301",
+   "event_date": "2026-10-30",
+   "title": "【公告】光寶科董事會決議分割先進基礎設施事業部門案",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0873,
+   "pre_vol_spike": 0.881,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 240.5,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "4989f5e38410071f",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E9%A8%B0%E8%BC%9D%E9%9B%BB%E5%AD%90-ky%E5%8F%97%E9%82%80%E5%8F%82%E5%8A%A0%E6%B0%B8%E8%B1%90%E9%87%91%E8%AD%89%E5%88%B8%E6%89%80%E8%88%89%E8%BE%A6%E4%B9%8B%E6%B3%95%E8%AA%AA%E6%9C%83-%E8%AA%AA%E6%98%8E115%E5%B9%B4%E7%AC%AC%E4%B8%89%E5%AD%A3%E7%87%9F%E9%81%8B%E6%88%90%E6%9E%9C-063255380.html",
+   "type": "媒體報導",
+   "code": "2890",
+   "event_date": "2026-10-30",
+   "title": "【公告】騰輝電子-KY受邀参加永豐金證券所舉辦之法說會，說明115年第三季營運成果",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0242,
+   "pre_vol_spike": 0.722,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 46.5,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "8bdcbbd256fe34f2",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E9%A8%B0%E8%BC%9D%E9%9B%BB%E5%AD%90-ky%E5%8F%97%E9%82%80%E5%8F%82%E5%8A%A0%E6%B0%B8%E8%B1%90%E9%87%91%E8%AD%89%E5%88%B8%E6%89%80%E8%88%89%E8%BE%A6%E4%B9%8B%E6%B3%95%E8%AA%AA%E6%9C%83-%E8%AA%AA%E6%98%8E115%E5%B9%B4%E7%AC%AC%E4%B8%89%E5%AD%A3%E7%87%9F%E9%81%8B%E6%88%90%E6%9E%9C-063255380.html",
+   "type": "媒體報導",
+   "code": "6672",
+   "event_date": "2026-10-30",
+   "title": "【公告】騰輝電子-KY受邀参加永豐金證券所舉辦之法說會，說明115年第三季營運成果",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1611,
+   "pre_vol_spike": 1.518,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 526.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "64f649352b590e6b",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E3%80%90%E5%8F%B0%E8%82%A110%E6%9C%88%E9%A2%A8%E9%9B%B2%E6%A6%9C%E3%80%91%E5%A4%A7%E4%B8%96%E7%A7%91%E7%8B%82%E9%A3%8687%E5%88%97%E6%B3%A8%E6%84%8F%E8%82%A1%EF%BC%81ai%E6%A6%82%E5%BF%B5%E8%82%A1%E6%84%8F%E8%97%8D%E6%BC%B2%E9%80%BE7%E6%88%90-%E4%B8%8A%E6%AB%8320%E5%A4%A7%E9%A3%86%E8%82%A1%E5%87%BA%E7%88%90-063252812.html",
+   "type": "媒體報導",
+   "code": "8099",
+   "event_date": "2026-10-30",
+   "title": "【台股10月風雲榜】大世科狂飆87%列注意股！AI概念股意藍漲逾7成 上櫃20大飆股出爐",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.5838,
+   "pre_vol_spike": 37.089,
+   "reflected": "caution",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 0.5,
+   "ref_close": 111.5,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "7b9cb96851e9e588",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E7%BE%8E%E7%A7%91%E6%8A%80%E8%82%A1%E9%87%8D%E6%8C%AB%E6%8B%96%E7%B4%AF-%E5%8F%B0%E8%82%A1%E5%A4%A7%E8%B7%8C%E9%80%BE%E5%8D%83%E9%BB%9E-%E8%81%AF%E7%99%BC%E7%A7%91-%E5%8F%B0%E9%81%94%E9%9B%BB%E6%88%90%E5%8F%8D%E5%BD%88%E9%A2%A8%E5%90%91%E7%90%83-062325276.html",
+   "type": "媒體報導",
+   "code": "2308",
+   "event_date": "2026-10-30",
+   "title": "美科技股重挫拖累，台股大跌逾千點，聯發科、台達電成反彈風向球",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1785,
+   "pre_vol_spike": 1.504,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 1335.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "8a419b921d6bcfcc",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E7%BE%8E%E7%A7%91%E6%8A%80%E8%82%A1%E9%87%8D%E6%8C%AB%E6%8B%96%E7%B4%AF-%E5%8F%B0%E8%82%A1%E5%A4%A7%E8%B7%8C%E9%80%BE%E5%8D%83%E9%BB%9E-%E8%81%AF%E7%99%BC%E7%A7%91-%E5%8F%B0%E9%81%94%E9%9B%BB%E6%88%90%E5%8F%8D%E5%BD%88%E9%A2%A8%E5%90%91%E7%90%83-062325276.html",
+   "type": "媒體報導",
+   "code": "2454",
+   "event_date": "2026-10-30",
+   "title": "美科技股重挫拖累，台股大跌逾千點，聯發科、台達電成反彈風向球",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0543,
+   "pre_vol_spike": 0.877,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 3915.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "5a15f1958ad89599",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E3%80%90%E5%8F%B0%E8%82%A110%E6%9C%88%E9%A2%A8%E9%9B%B2%E6%A6%9C%E3%80%91%E5%B7%A8%E8%99%B9%E8%B7%8C%E8%BF%916%E6%88%90%E6%9C%80%E6%85%98%EF%BC%81%E5%89%B5%E6%96%B0%E6%9C%8D%E5%8B%99%E4%B8%80%E5%BC%B5%E8%B3%A0%E9%80%BE64%E8%90%AC%E5%85%83%E6%9C%80%E5%85%87-%E4%B8%8A%E6%AB%8320%E5%A4%A7%E8%A1%B0%E8%82%A1%E5%87%BA%E7%88%90-061955823.html",
+   "type": "媒體報導",
+   "code": "7828",
+   "event_date": "2026-10-30",
+   "title": "【台股10月風雲榜】巨虹跌近6成最慘！創新服務一張賠逾64萬元最兇 上櫃20大衰股出爐",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1478,
+   "pre_vol_spike": 0.454,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 1240.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "74160a129a031d02",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E3%80%90%E5%8F%B0%E8%82%A110%E6%9C%88%E9%A2%A8%E9%9B%B2%E6%A6%9C%E3%80%91%E5%89%8D%E8%82%A1%E5%90%8E%E7%A9%8E%E5%B4%B4%E8%A1%80%E5%B4%A9%E6%AF%8F%E5%BC%B5%E7%8F%BE%E8%99%A7136%E8%90%AC%E5%85%83%E5%8F%B0%E9%81%94%E9%9B%BB%E6%91%94%E8%BF%913%E6%88%90%E3%80%81%E8%81%AF%E9%9B%BB%E4%B9%9F%E6%85%98%E7%99%BB%E6%A6%9C-061828452.html",
+   "type": "媒體報導",
+   "code": "2308",
+   "event_date": "2026-10-30",
+   "title": "【台股10月風雲榜】前股后穎崴血崩每張現虧136萬元...台達電摔近3成、聯電也慘登榜",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1785,
+   "pre_vol_spike": 1.504,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 1335.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "4bb86d2d0ef14cb8",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E3%80%90%E5%8F%B0%E8%82%A110%E6%9C%88%E9%A2%A8%E9%9B%B2%E6%A6%9C%E3%80%91%E3%80%8C%E4%B8%96%E7%B4%80%E5%A6%96%E8%82%A1%E3%80%8D%E5%86%A0%E8%A5%BF%E9%9B%BB%E7%BF%BB%E5%80%8D%E6%BC%B218%E5%80%8D%E7%A8%B1%E7%8E%8B%EF%BC%81%E5%8D%83%E9%87%91%E8%82%A1%E7%8E%89%E6%99%B6%E5%85%89%E3%80%81%E7%B4%A1%E7%B9%94%E8%82%A1%E7%8E%8B%E5%84%92%E9%B4%BB%E4%B9%9F%E5%85%A5%E6%A6%9C-061301445.html",
+   "type": "媒體報導",
+   "code": "2466",
+   "event_date": "2026-10-30",
+   "title": "【台股10月風雲榜】「世紀妖股」冠西電翻倍漲1.8倍稱王！千金股玉晶光、紡織股王儒鴻也入榜",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.4245,
+   "pre_vol_spike": 3.705,
+   "reflected": "caution",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 0.5,
+   "ref_close": 354.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "95da31282d5c9487",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E3%80%90%E5%8F%B0%E8%82%A110%E6%9C%88%E9%A2%A8%E9%9B%B2%E6%A6%9C%E3%80%91%E3%80%8C%E4%B8%96%E7%B4%80%E5%A6%96%E8%82%A1%E3%80%8D%E5%86%A0%E8%A5%BF%E9%9B%BB%E7%BF%BB%E5%80%8D%E6%BC%B218%E5%80%8D%E7%A8%B1%E7%8E%8B%EF%BC%81%E5%8D%83%E9%87%91%E8%82%A1%E7%8E%89%E6%99%B6%E5%85%89%E3%80%81%E7%B4%A1%E7%B9%94%E8%82%A1%E7%8E%8B%E5%84%92%E9%B4%BB%E4%B9%9F%E5%85%A5%E6%A6%9C-061301445.html",
+   "type": "媒體報導",
+   "code": "3406",
+   "event_date": "2026-10-30",
+   "title": "【台股10月風雲榜】「世紀妖股」冠西電翻倍漲1.8倍稱王！千金股玉晶光、紡織股王儒鴻也入榜",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0482,
+   "pre_vol_spike": 0.922,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 1085.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "188dc94bfe113e69",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/12509/9847006",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-30",
+   "title": "台股收盤／大跌1,156.5點收45,211.83點 台積電收2,370元跌1.86%",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0207,
+   "pre_vol_spike": 0.778,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 2370.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "1811099ba94d0e6d",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E7%A9%8D%E9%9B%BB%E6%9C%80%E5%BE%8C1%E5%88%86%E9%90%98%E8%A2%AB%E7%88%86%E8%B2%B7%E8%BF%91%E8%90%AC%E5%BC%B5%EF%BC%81%E8%AA%B0%E4%B8%80%E6%AC%A1%E7%A0%B8225%E5%84%84%E5%85%83%EF%BC%9F%E5%88%86%E6%9E%90%E5%B8%AB%EF%BC%9A%E5%A4%96%E8%B3%87%E5%9C%A8%E8%B3%AD%E7%9F%AD%E7%B7%9A%E5%8F%8D%E5%BD%88-054557178.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-30",
+   "title": "台積電最後1分鐘被爆買近萬張！誰一次砸225億元？分析師：外資在賭短線反彈",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0207,
+   "pre_vol_spike": 0.778,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 2370.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "59f5e28cf8d445be",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9846996",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-10-30",
+   "title": "股匯遭重擊！台股收跌1,156點創波段低點 台積電收低45元",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0207,
+   "pre_vol_spike": 0.778,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 2370.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "959e216e793274b3",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E7%84%A6%E9%BB%9E%E8%82%A1-%E5%89%8D%E4%B8%89%E5%AD%A3%E7%8D%B2%E5%88%A9%E5%89%B5%E9%AB%98-%E5%A4%96%E8%B3%87%E8%B2%B7%E7%9B%A4%E9%80%A3%E7%BA%8C-%E7%B5%B1-%E8%B6%85%E8%82%A1%E5%83%B9%E6%95%B4%E7%90%86%E5%BE%85%E6%94%BB-052514722.html",
+   "type": "媒體報導",
+   "code": "2912",
+   "event_date": "2026-10-30",
+   "title": "焦點股：前三季獲利創高＋外資買盤連續，統一超股價整理待攻",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0045,
+   "pre_vol_spike": 1.14,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 225.5,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "8969cb4ea2b2ce6e",
+   "recorded_at": "2026-10-30T18:22:11.230734+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%92%8C%E6%9A%A2%E7%A7%91%E6%8A%80%E8%BD%89%E4%B8%8A%E6%AB%83-%E9%A6%96%E6%97%A5%E8%9C%9C%E6%9C%88%E8%A1%8C%E6%83%85%E9%80%86%E9%A2%A8%E9%A3%9B-%E5%B9%B3%E5%8F%B0%E5%8C%96%E4%BD%88%E5%B1%80%E9%82%8A%E7%B7%A3ai%E5%95%86%E6%A9%9F%E5%B1%95%E5%8B%95%E8%83%BD-051420983.html",
+   "type": "媒體報導",
+   "code": "6825",
+   "event_date": "2026-10-30",
+   "title": "和暢科技轉上櫃，首日蜜月行情逆風飛，平台化佈局邊緣AI商機展動能",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": null,
+   "pre_vol_spike": null,
+   "reflected": "unknown",
+   "pre_volume_spike": null,
+   "reason": "價格序列不足（1<23 筆）",
+   "weight": 1.0,
+   "ref_close": 25.95,
+   "ref_close_date": "2026-10-30",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
    "entry_close": null,
    "entry_date": null,

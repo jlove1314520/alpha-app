@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-10-30T09:26:03.567397+08:00",
+    "generated_at": "2026-10-30T18:21:56.138645+08:00",
     "source": "yfinance Ticker.get_calendar() + get_earnings_dates()（免金鑰）",
     "coverage": "6/6 檔",
     "errors": [],
@@ -13,7 +13,7 @@
       "estimated_session": "post",
       "session_basis": "依最近一次歷史財報公布時間(2026-08-26 16:00 EDT)推估，通常在收盤後",
       "eps_estimate": 2.47325,
-      "revenue_estimate": 108976833310
+      "revenue_estimate": 108976833310.0
     },
     "AAPL": {
       "next_earnings_date": "2026-11-02",
@@ -21,15 +21,15 @@
       "estimated_session": "post",
       "session_basis": "依最近一次歷史財報公布時間(2026-07-30 16:00 EDT)推估，通常在收盤後",
       "eps_estimate": 1.98261,
-      "revenue_estimate": 113322287400
+      "revenue_estimate": 113322287400.0
     },
     "MSFT": {
       "next_earnings_date": "2027-01-27",
       "next_earnings_date_range": null,
       "estimated_session": "post",
       "session_basis": "依最近一次歷史財報公布時間(2026-10-28 16:00 EDT)推估，通常在收盤後",
-      "eps_estimate": 4.81705,
-      "revenue_estimate": 95646497200
+      "eps_estimate": 4.86024,
+      "revenue_estimate": 96627860740.0
     },
     "TSM": {
       "next_earnings_date": "2027-01-14",
@@ -37,7 +37,7 @@
       "estimated_session": "pre",
       "session_basis": "依最近一次歷史財報公布時間(2026-10-15 02:00 EDT)推估，通常在開盤前",
       "eps_estimate": 5.1641,
-      "revenue_estimate": 1705011253270
+      "revenue_estimate": 1705011253270.0
     },
     "GOOGL": {
       "next_earnings_date": "2026-10-28",
@@ -45,7 +45,7 @@
       "estimated_session": "post",
       "session_basis": "依最近一次歷史財報公布時間(2026-10-28 16:00 EDT)推估，通常在收盤後",
       "eps_estimate": 3.34146,
-      "revenue_estimate": 141536876300
+      "revenue_estimate": 141536876300.0
     },
     "AMZN": {
       "next_earnings_date": "2026-10-29",
@@ -53,7 +53,7 @@
       "estimated_session": "post",
       "session_basis": "依最近一次歷史財報公布時間(2026-10-29 16:00 EDT)推估，通常在收盤後",
       "eps_estimate": 1.9925,
-      "revenue_estimate": 202264872830
+      "revenue_estimate": 202264872830.0
     }
   }
 }
