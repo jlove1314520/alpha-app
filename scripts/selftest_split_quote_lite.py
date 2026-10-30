@@ -168,7 +168,7 @@ with tempfile.TemporaryDirectory() as td:
     check("損壞輸入經 __main__ 包裝 → exit 0", rc == 0, rc)
     check("包裝後既有小檔仍原封不動", snapshot(B.OUT_DIR) == base)
 
-    print("觀察（不計成敗）：自選股代號已不在任何來源")
+    print("情境：自選股代號已不在任何來源（先.一三五-1de）")
     sp = dict(SPARKS)
     del sp["2330"]
     qa = dict(QUOTES)
@@ -177,8 +177,9 @@ with tempfile.TemporaryDirectory() as td:
     del ci["2330"]
     setup(r, sp=sp, qa=qa, ci=ci, watch=("2330",))
     run()
-    kept = (B.OUT_DIR / "2330.json").exists()
-    print(f"  · 2330 單檔{'仍保留（舊價格留著，與 docstring「已不在任何來源裡的代號…刪掉單檔」不一致）' if kept else '已移除'}")
+    check("不在任何來源的自選股 2330 → 單檔刪除（不留過期價格）", not (B.OUT_DIR / "2330.json").exists())
+    check("其他熱門單檔照留（0050／2317／TAIEX）",
+          all((B.OUT_DIR / f"{c}.json").exists() for c in ("0050", "2317", "TAIEX")))
 
     print("情境：company_info 的 companies 是空物件（先.一三五-1dd）")
     setup(r)

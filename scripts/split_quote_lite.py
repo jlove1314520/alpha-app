@@ -131,8 +131,9 @@ def main() -> int:
     for k, recs in shards.items():
         written += _write_if_changed(SHARD_DIR / f"{k}.json", _dump(dict(sorted(recs.items()))))
     removed = 0
+    keep = hot & codes  # 先.一三五-1de：自選股／白名單代號已不在任何來源 → 照 docstring 刪單檔，不留過期價格
     for p in OUT_DIR.glob("*.json"):
-        if p.stem not in hot:
+        if p.stem not in keep:
             p.unlink()
             removed += 1
     for p in SHARD_DIR.glob("*.json"):
