@@ -157,6 +157,29 @@ def fetch_extended_hours_yf(tickers: list[str]) -> dict[str, dict]:
     return out
 
 
+def reuse_prev_sparklines(quotes: dict, prev_path: Path) -> list[str]:
+    """2026-10-30 先.一三五-1ea（純 bug 修復，比照 1ca）：yfinance 單檔沒回 20 日收盤時，舊版直接少掉
+    該檔的 sparkline 欄位（實測 10/30 14:58 UTC 班 NVDA 消失，App 美股走勢圖 quotes_us 退回路徑畫不出來）。
+    改成沿用上一份檔案的同檔 sparkline，回傳沿用的代號；讀不到上一份只降級成不沿用（十二節）。"""
+    missing = [tk for tk, q in quotes.items() if not q.get("sparkline")]
+    if not missing:
+        return []
+    try:
+        prev = (json.loads(prev_path.read_text(encoding="utf-8")).get("quotes") or {})
+    except Exception as e:
+        print(f"  - 讀上一份 sparkline 失敗，不沿用：{e}")
+        return []
+    reused = []
+    for tk in missing:
+        old = (prev.get(tk) or {}).get("sparkline") if isinstance(prev, dict) else None
+        if isinstance(old, list) and len(old) >= 2:
+            quotes[tk]["sparkline"] = old
+            reused.append(tk)
+    if reused:
+        print(f"  - sparkline 本輪沒抓到、沿用上一份：{reused}")
+    return reused
+
+
 def main():
     now_us = datetime.now(US_TZ)
     trading_window = is_us_trading_window(now_us)
@@ -221,6 +244,7 @@ def main():
                 print(f"  - {tk} sparkline 解析失敗：{e}")
     except Exception as e:
         print(f"  - sparkline 批次抓取失敗（不影響報價本身）：{e}")
+    sparkline_stale = reuse_prev_sparklines(quotes, OUT_PATH)
 
     # 2026-08-27新增（P2-新，盤前盤後）：獨立抓取，失敗不影響上面Finnhub regular
     # quote已經抓到的結果。
@@ -244,6 +268,8 @@ def main():
             "queried": len(US_TICKERS),
             "matched": len(quotes),
             "extended_hours_matched": ext_count,
+            # 先.一三五-1ea：本輪 yfinance 沒給 20 日收盤、沿用上一份的代號（App 走勢圖退回 quotes_us 時用得到）
+            "sparkline_stale_tickers": sparkline_stale,
             "extended_hours_disclaimer": (
                 "延長交易時段（盤前/盤後）流動性低、價差大，僅接受限價單，"
                 "價格常於隔日開盤反轉。"
