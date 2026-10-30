@@ -235,8 +235,12 @@ def main() -> int:
                 "import從未被發現）的根本預防。",
     }
 
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
+    # 先.一三五-1dc：報告檔寫不進去（OUT 是目錄／權限）只降級成警告、照樣回 0（十二節），不讓自檢自己拖垮 audit.yml
+    try:
+        OUT.parent.mkdir(parents=True, exist_ok=True)
+        OUT.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
+    except OSError as e:
+        print(f"::warning::稽核自檢報告寫不進 {OUT}（{type(e).__name__}: {e}），本次自檢結果只印在這裡")
 
     for r in results:
         print(("OK " if r["ok"] else "FAIL ") + r["label"] + (f"：{r['error']}" if not r["ok"] else ""))

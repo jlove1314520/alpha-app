@@ -159,12 +159,13 @@ with tempfile.TemporaryDirectory() as td:
     rc, out, err = run_main()
     check("net_guard.py 格式認不得 → 黑名單空、不拋例外", rc == 0 and report()["domain_blocklist_scan"]["domains"] == [])
 
-    print("觀察（不計成敗）：報告檔寫不進去")
+    print("情境五：報告檔寫不進去（先.一三五-1dc）")
     setup(r)
     B.OUT = r / "data" / "as_dir"
     B.OUT.mkdir(exist_ok=True)
     rc, out, err = run_main()
-    print(f"  · OUT 是目錄時：{'拋出未處理例外 ' + type(err).__name__ + '（main() 沒有最外層 try，__main__ 會非零退出）' if err else '回 ' + str(rc)}")
+    check("OUT 是目錄 → 不拋例外、回 0、印 ::warning::", err is None and rc == 0 and "::warning::稽核自檢報告寫不進" in out, (rc, err))
+    check("OUT 是目錄 → 自檢結果仍印出", "FAIL 假模組會壞" in out and "OK 假模組會過" in out)
 
 print(f"\n合計 {ok} 過、{fail} 失敗")
 sys.exit(1 if fail else 0)
