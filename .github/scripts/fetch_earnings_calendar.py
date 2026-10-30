@@ -19,6 +19,7 @@
 from __future__ import annotations
 
 import json
+import math
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -53,6 +54,15 @@ def _estimate_session(ticker: yf.Ticker) -> tuple[str, str]:
         return "unknown", f"推估失敗：{e}"
 
 
+def _num(v):
+    """先.一三五-1cp：估計值不是有限數字（NaN／inf／非數字）一律寫 null——原本 NaN 會讓 allow_nan=False 的寫檔整份失敗。"""
+    try:
+        f = float(v)
+    except (TypeError, ValueError):
+        return None
+    return f if math.isfinite(f) else None
+
+
 def fetch_one(ticker_str: str) -> dict | None:
     t = yf.Ticker(ticker_str)
     try:
@@ -70,8 +80,8 @@ def fetch_one(ticker_str: str) -> dict | None:
         "next_earnings_date_range": [d.isoformat() for d in dates] if len(dates) > 1 else None,
         "estimated_session": session,
         "session_basis": basis,
-        "eps_estimate": cal.get("Earnings Average"),
-        "revenue_estimate": cal.get("Revenue Average"),
+        "eps_estimate": _num(cal.get("Earnings Average")),
+        "revenue_estimate": _num(cal.get("Revenue Average")),
     }
 
 
@@ -86,6 +96,9 @@ def main():
         except Exception as e:
             print(f"  ・{tk} 失敗：{e}")
             errors.append(f"{tk}: {e}")
+
+    if not earnings:  # 先.一三五-1cp：全部失敗不用空清單覆寫既有輸出（market.yml 這步 continue-on-error，App 照舊讀上一份）
+        raise SystemExit(f"0/{len(US_TICKERS)} 檔有資料，不寫檔；失敗：{errors}")
 
     payload = {
         "meta": {
