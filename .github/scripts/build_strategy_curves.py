@@ -413,10 +413,19 @@ def live_line(perf: dict | None) -> dict:
 
 
 def build() -> dict:
-    px = Px(PHS.load(DATA / "price_history.json") if PHS.exists(DATA / "price_history.json") else {})
+    try:
+        px = Px(PHS.load(DATA / "price_history.json") if PHS.exists(DATA / "price_history.json") else {})
+    except Exception as e:  # noqa: BLE001
+        # 先.一三五-1ck：價格檔讀不出來就不寫檔（原本拋未處理例外）
+        raise SystemExit(f"price_history.json 讀不出來，本輪不寫 strategy_curves.json：{e}")
     if not px.cal:
         raise SystemExit("price_history.json 讀不到 0050 日線")
-    ledger = _load(DATA / "picks_ledger.json", {}) or {}
+    ledger_path = DATA / "picks_ledger.json"
+    ledger = _load(ledger_path, None)
+    if ledger_path.exists() and not isinstance(ledger, dict):
+        # 先.一三五-1ck：台帳存在但讀不出來，原本當成空台帳、三榜全變「還沒有資料」並覆寫既有曲線檔
+        raise SystemExit("picks_ledger.json 讀不出來或結構不對，本輪不寫 strategy_curves.json")
+    ledger = ledger or {}
     strategies = _load(DATA / "strategies.json", {}) or {}
     lines = [_placeholder("live_bb90", "自動投資", "live", "真錢", None, "連上電腦才看得到")]
     lines += paper_lines(px)
