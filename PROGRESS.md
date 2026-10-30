@@ -1,8 +1,19 @@
+## 2026-10-31 02:xx DevQueue 20261031-020102（維運帽）：FinMind 暖機與 IBKR 離線自測（1dy／1dz）——已實作、自測過，冒煙 #165 資料面 FAIL 未 commit
+
+- **等待總司令審閱：2 件**（沿用 `research/AWAITING_REVIEW.md`：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中報價本機補班）。
+- **上一輪失敗根因**：20261030-233102 在 1dy 跑滿 60 分鐘被砍（`dev_queue_cycle.log` reason=TIMEOUT exit=-9），沒留下自測檔；同輪做完的 1ea（sparkline 沿用）與 1ce（ROE 連續性清理）程式也沒 commit，runner 02:01「代為提交」只提交了 PENDING_QUEUE.md——**兩條標 `[x]` 但修法不在 repo、雲端仍跑舊版**（已在兩條補 ⚠️）；1dx 的 `scripts/selftest_supply_watchlist.py` 也同樣沒進 repo（補 ⚠️）。本輪重跑三支孤兒自測：1dx 27、1ea 8、1ce 22 項全過，下一輪冒煙轉綠即可各自提交。本輪兩支自測都加看門狗（120／90 秒），實際攔到一次自測自己的無窮迴圈（假 `deadline` 不逐季遞增），沒再重演逾時。
+- **先.一三五-1dy** FinMind 暖機：新增 `scripts/selftest_finmind_warmup.py` 42 項全過（零外部請求）。純 bug 修復 `research/finmind_warmup.py`：狀態檔是合法 JSON 但形狀不對時 `main()` 會拋例外、排程每輪都死 → 改成當空的（fail open）。
+- **先.一三五-1dz** IBKR 離線：新增 `scripts/selftest_ibkr_quotes_offline.py` 26 項全過（零外部連線）。純 bug 修復 `research/ibkr_quotes.py`：合約解析失敗的代號不再從檔案消失（全 null 佔位＋原因，[自行裁量] 不沿用舊價）、輸出改原子寫入。連不上時標 `connected:false`、不留舊價是文件明載設計，未改。
+- **冒煙**：`node scripts/smoke_test.mjs` rc=1，只有 #165「美股走勢圖 quotes_us 退回」FAIL——雲端 `data/quotes_us.json`（10/30 14:58 UTC，quotes.yml 約 3～4 小時才一班）NVDA 沒有 sparkline；本機補班 `scripts/quotes_local_fallback.py --us` 回 `us_no_key`（本機沒 Finnhub 金鑰、零請求）。與本輪改動無關，但照規定**未 commit 程式**；1dy／1dz 維持 `- [ ]` 並寫明下一輪步驟，避免再出現「打勾但程式不在 repo」。
+- `data/STATUS.json`：本輪沒有資料源或面板異動，未改。
+- BLOCKED：無新增。補件：DevQueue 可執行項偏少（runner 報 2 項＜6），本輪時間花在查根因，未補件，照實記錄。
+
 ## 2026-10-30 22:xx DevQueue 候選補件（維運帽）：本機排程四組無自測腳本自測（1ds／1dt／1du／1dv）
 
 - **等待總司令審閱：2 件**（本輪未異動 `research/AWAITING_REVIEW.md`，沿用：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中報價本機補班）。
 - **前向模擬上限 14／14 仍滿**：照 CLAUDE.md 零之二⑤，本輪不新增候選、不寫 PREREG、不送 AWAITING、不算報酬、不碰 holdout、不登記試驗；只在 `research/FORWARD_CANDIDATES.md` 記一行本輪補件。
-- 來源：workflow 腳本已全部有自測，改清查本機排程（`C:lphaun-*.ps1`、`scripts/run_*.ps1`）呼叫、但沒有任何 selftest 引用的 .py，取前四組；剩 finmind_warmup、paper_supply_v2、build_supply_watchlist、run_paper_9、ibkr_quotes 等可作下一輪來源。
+- 來源：workflow 腳本已全部有自測，改清查本機排程（`C:lpha
+un-*.ps1`、`scripts/run_*.ps1`）呼叫、但沒有任何 selftest 引用的 .py，取前四組；剩 finmind_warmup、paper_supply_v2、build_supply_watchlist、run_paper_9、ibkr_quotes 等可作下一輪來源。
 - **先.一三五-1ds** 經濟部 PIT 快照：7 項全過，失敗路徑都不刪改既有快照。無 bug、未改。
 - **先.一三五-1dt** 無風險利率月檔：7 項全過，三種抓取失敗都不覆蓋舊檔。無 bug、未改。
 - **先.一三五-1du** 權證每日排程本體：15 項全過，休市日零請求。疑慮只記錄：備份清單 JSON 結構不對會讓整支中斷（只有本程式自己寫，實害低）。
