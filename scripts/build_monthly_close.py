@@ -40,8 +40,11 @@ def main() -> int:
         return 0
     try:
         old = json.loads(OUT.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
+    except FileNotFoundError:
         old = {}
+    except (OSError, ValueError) as e:  # 先.一三五-1cr：既有檔存在但讀不出來，不得當空檔重建而丟掉已累積月份
+        print(f"[warn] {OUT.name} 存在但讀不出來（{type(e).__name__}），不覆寫已累積月份")
+        return 0
     closes = old.get("closes") or {}
     # 市場每月最後交易日：只看至少 500 檔都有的日期（排除只有少數檔的零星舊列）
     cnt = {}
