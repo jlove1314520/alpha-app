@@ -146,9 +146,14 @@ def report() -> int:
             r = json.loads(line)
         except ValueError:
             continue
+        # 先.一三五-1dr：缺 ts／results 不是 dict 的行略過，不讓一行壞資料拖垮整份報告
+        if not isinstance(r, dict) or not isinstance(r.get("ts"), str) or not isinstance(r.get("results") or {}, dict):
+            continue
         day = r.get("query_date", "")
         hhmm = r["ts"][11:16]
         for name, res in (r.get("results") or {}).items():
+            if not isinstance(res, dict):
+                continue
             if res.get("ok"):
                 cur = by_day.setdefault(day, {})
                 # 記錄「最早」成功時刻

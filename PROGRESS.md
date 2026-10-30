@@ -1,3 +1,14 @@
+## 2026-10-30 21:xx DevQueue 候選補件（維運帽）：最後三支無自測排程腳本自測＋TWSE 發布時間報告壞行崩潰修正（1dp／1dq／1dr）
+
+- **等待總司令審閱：2 件**（本輪未異動 `research/AWAITING_REVIEW.md`，沿用：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中報價本機補班，皆「請總司令執行一次」）。
+- **前向模擬上限 14／14 仍滿**：照 CLAUDE.md 零之二⑤，本輪不新增候選、不寫 PREREG、不送 AWAITING、不算報酬、不碰 holdout、不登記試驗；只在 `research/FORWARD_CANDIDATES.md` 記一行。
+- 來源：把所有 workflow 會呼叫的 .py 對照 selftest 引用，剩 `fetch_us_financials_sec.py`、`build_us_scores_v0.py`（us_financials.yml 每週）與 `probe_twse_publish_time.py`（本機排程）三支沒有自測。
+- **先.一三五-1dp** 美股財報抓取：17 項全過，無 bug、未改。
+- **先.一三五-1dq** 美股評分 v0：17 項全過，未改。疑慮只記錄：輸出直接覆寫、沒有先寫暫存檔再換名；commit 前有 schema 守門員會還原壞 JSON，實害低。
+- **先.一三五-1dr** TWSE 發布時間探測：`--report` 遇到一行缺 `ts` 的紀錄就整支崩潰（看不到整份報告）。純 bug 修復：這類行略過。探測本身與請求數不變。
+- 證據：新增 `scripts/selftest_us_financials_scores.py` 46 過、0 失敗（零外部請求、只用合成數字）；冒煙 `node scripts/smoke_test.mjs` rc=0，179 項全部 `[x]`。
+- BLOCKED：無新增。下一步：workflow 呼叫的腳本已全部有自測；下一輪補件需換來源（例如本機排程 ps1 呼叫的 .py）。
+
 ## 2026-10-30 19:xx DevQueue 候選補件（維運帽）：三支雲端抓取程式自測＋波克夏 13F 失敗拿空檔蓋掉修正（1dm／1dn／1do）
 
 - **等待總司令審閱：2 件**（本輪未異動 `research/AWAITING_REVIEW.md`，沿用前一輪兩件）。
