@@ -89,6 +89,19 @@ gap_far = qs([(2023, 4, 5), (2024, 4, 5), (2026, 1, 10), (2026, 2, 10)])
 check("跨年缺口（7822 型）None（1cc）", m.compute_roe_ttm(gap_far, 400) is None)
 check("最舊一季缺不影響後四季連續", m.compute_roe_ttm(qs([(2025, 2, None)]) + ok4, 400) == 10.0)
 
+# clear_stale_nonconsecutive_roe（1ce：本班沒重算的舊檔殘值）
+st = {
+    "1293": {"financials": {"roe_ttm_pct": 26.47, "quarters": qs([(2023, 2, 1), (2023, 4, 1), (2024, 2, 1), (2024, 4, 1)])}},
+    "OK": {"financials": {"roe_ttm_pct": 10.0, "quarters": ok4}},
+    "NULL": {"financials": {"roe_ttm_pct": None, "quarters": gap_far}},
+    "SHORT": {"financials": {"roe_ttm_pct": 5.0, "quarters": ok4[2:]}},
+    "BAD": {"financials": {"roe_ttm_pct": 5.0, "quarters": [{"year": "x"}, {"quarter": 1, "net_income_parent": 1}]}},
+    "NOFIN": {"institutional": {}}, "NONE": None,
+}
+cl = m.clear_stale_nonconsecutive_roe(st)
+check("舊殘值不連續／不足四季／壞列被清", cl == ["1293", "BAD", "SHORT"] and st["1293"]["financials"]["roe_ttm_pct"] is None)
+check("連續四季保留、本來 None 不動", st["OK"]["financials"]["roe_ttm_pct"] == 10.0 and st["NULL"]["financials"]["roe_ttm_pct"] is None)
+
 # research 副本行為一致
 try:
     h = load("research/build_stock_financials_history.py", "bsfh_selftest")

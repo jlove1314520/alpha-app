@@ -622,6 +622,26 @@ def compute_roe_ttm(quarters: list[dict], equity_latest: float | None) -> float 
     return round(ttm_ni / equity_latest * 100, 2)
 
 
+def clear_stale_nonconsecutive_roe(stocks: dict) -> list[str]:
+    """2026-10-30 先.一三五-1ce（純 bug 修復）：1cc 只修了「本班有重算」的檔；本班官方表沒有的代號
+    （例 1293／2311 只有半年報季度、最後一季停在 2024）沿用舊檔裡舊版跨缺口算出的 roe_ttm_pct（實測 38 檔）。
+    這裡對全檔再驗一次：近四個有淨利的季度不連續就清成 None（寧可空也不寫錯值），回傳被清掉的代號。"""
+    cleared = []
+    for code, s in stocks.items():
+        fin = (s or {}).get("financials") if isinstance(s, dict) else None
+        if not isinstance(fin, dict) or fin.get("roe_ttm_pct") is None:
+            continue
+        last4 = [q for q in (fin.get("quarters") or []) if isinstance(q, dict) and q.get("net_income_parent") is not None][-4:]
+        try:
+            idx = [int(q["year"]) * 4 + int(q["quarter"]) for q in last4]
+        except Exception:
+            idx = []
+        if len(idx) < 4 or idx[-1] - idx[0] != 3:
+            fin["roe_ttm_pct"] = None
+            cleared.append(str(code))
+    return sorted(cleared)
+
+
 def load_backfill() -> dict:
     """讀回補檔 stocks；讀不到只降級成空 dict（十二節：輔助來源失敗不得中斷主流程）。"""
     try:
@@ -769,6 +789,11 @@ def main():
         "rejected": dict(sorted(backfill_rejected.items())),
         "dropped_cumulative_as_single_codes": sorted(set(dropped_cum_as_single)),
     }
+    try:
+        payload["meta"]["roe_cleared_nonconsecutive_codes"] = clear_stale_nonconsecutive_roe(stocks)
+    except Exception as e:  # 這道清理自己出錯只記警告，不擋寫檔（十二節）
+        print(f"[warn] ROE 連續性複查失敗：{e}")
+        errors.append(f"roe_recheck: {e}")
     payload["meta"].setdefault("errors", [])
     payload["meta"]["errors"] = errors
 
