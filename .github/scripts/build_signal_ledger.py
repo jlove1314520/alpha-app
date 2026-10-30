@@ -146,11 +146,23 @@ def main() -> None:
 
     events = _load_json(EVENTS_PATH).get("events", [])
     news = _load_json(NEWS_PATH).get("news", [])
-    prices = PHS.load(PRICE_HISTORY_PATH).get("prices", {})
+    try:
+        prices = PHS.load(PRICE_HISTORY_PATH).get("prices", {})
+    except Exception as e:  # noqa: BLE001
+        # 先.一三五-1cl：價格檔讀不出來就不寫檔（原本拋未處理例外）
+        raise SystemExit(f"讀 {PRICE_HISTORY_PATH} 失敗，本輪不寫 signal_ledger.json：{e}")
     for rows in prices.values():
         rows.sort(key=lambda r: r["date"])
 
-    ledger = _load_json(LEDGER_PATH) or {}
+    # 先.一三五-1cl：既有台帳存在但讀不出來／結構不對時，原本當成空台帳、用「只有本輪新訊號」的檔整份覆寫歷史（不可逆）
+    ledger = {}
+    if LEDGER_PATH.exists():
+        try:
+            ledger = json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
+        except Exception as e:  # noqa: BLE001
+            raise SystemExit(f"既有 {LEDGER_PATH} 讀不出來，本輪不寫檔以免覆寫歷史訊號：{e}")
+        if not isinstance(ledger, dict) or not isinstance(ledger.get("signals", []), list):
+            raise SystemExit(f"既有 {LEDGER_PATH} 結構不對（不是物件或 signals 不是陣列），本輪不寫檔")
     meta = ledger.setdefault("meta", {})
     meta.setdefault("created_at", now.isoformat())
     meta["schema_note"] = ("B19 前瞻訊號台帳（非回測）：每筆在事件發生後 4 日內事前寫入，寫入後內容不可修改；entry_close 為寫入日之後第一個交易日收盤（避免前視）；"
