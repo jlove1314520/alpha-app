@@ -5562,7 +5562,26 @@ async function runSmokeTest(baseUrl, headless = true) {
       const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
       const fmReq = [];
       await ctx.route(/api\.finmindtrade\.com/, (route) => { fmReq.push(route.request().url()); return route.abort(); });
-      if (variant === "quotes_us") await ctx.route(/\/data\/us_daily\/NVDA\.json/, (route) => route.fulfill({ status: 404, body: "" }));
+      if (variant === "quotes_us") {
+        await ctx.route(/\/data\/us_daily\/NVDA\.json/, (route) => route.fulfill({ status: 404, body: "" }));
+        // 2026-10-31 先.一三五-1dy 查因：本項測的是 App 退回鏈，不是雲端資料當下狀態；雲端 quotes_us.json 某班 NVDA 剛好沒 sparkline
+        // （先.一三五-1ea）就讓本項跟著紅、擋掉所有無關 commit。改成：雲端檔 NVDA 沒 sparkline 時，用 repo 真實日線（us_daily/NVDA.json）
+        // 最後 20 根收盤補進回應；其餘欄位與斷言完全不變。補過會在本項說明標「測試注入」。
+        await ctx.route(/\/data\/quotes_us\.json/, async (route) => {
+          try {
+            const resp = await route.fetch();
+            const body = await resp.json();
+            const nv = body && body.quotes && body.quotes.NVDA;
+            if (nv && !(Array.isArray(nv.sparkline) && nv.sparkline.length >= 2)) {
+              const daily = JSON.parse((await import("node:fs")).readFileSync("data/us_daily/NVDA.json", "utf8"));
+              const ci = (daily.fields || []).indexOf("close");
+              nv.sparkline = (daily.bars || []).slice(-20).map((b) => b[ci]).filter((x) => typeof x === "number");
+              usChInfo += "（雲端檔 NVDA 無 sparkline，測試注入 repo 日線 20 根收盤）";
+            }
+            await route.fulfill({ response: resp, json: body });
+          } catch (e) { usChErrs.push(`quotes_us 注入失敗：${e.message || e}`); await route.continue(); }
+        });
+      }
       const p5 = await ctx.newPage();
       const pe = [];
       p5.on("pageerror", (e) => pe.push(String(e)));
