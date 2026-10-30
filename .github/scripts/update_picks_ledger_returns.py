@@ -191,7 +191,11 @@ def main():
         print(f"{LEDGER_PATH} 沒有快照可以回填，結束")
         return
 
-    price_history = (PHS.load(PRICE_HISTORY_PATH) if PHS.exists(PRICE_HISTORY_PATH) else {}).get("prices", {})
+    try:
+        price_history = (PHS.load(PRICE_HISTORY_PATH) if PHS.exists(PRICE_HISTORY_PATH) else {}).get("prices", {})
+    except Exception as e:  # noqa: BLE001
+        # 先.一三五-1ci：價格檔讀不出來就整輪不回填、不寫檔（原本拋未處理例外；台帳本身不受影響）
+        raise SystemExit(f"讀 {PRICE_HISTORY_PATH} 失敗，本輪不回填也不寫檔：{e}")
     calendar_series = price_history.get(CALENDAR_PROXY_CODE)
     if not calendar_series:
         print(f"  price_history.json裡沒有{CALENDAR_PROXY_CODE}，退而求其次挑資料筆數最多的任一檔當日曆代表")
@@ -234,6 +238,8 @@ def main():
                 skipped_no_entry += 1  # 進場日當天沒有收盤（停牌／資料缺）：不拿別天的價格頂替
                 continue
             pick["entry_date"], pick["entry_price"] = entry_day, entry_price
+            if not isinstance(pick.get("returns"), dict):
+                pick["returns"] = {k: None for k in RETURN_WINDOWS}  # 先.一三五-1ci：缺 returns 鍵原本 KeyError 拖垮整輪
             for window_key, n in RETURN_WINDOWS.items():
                 w = pick["returns"].get(window_key)
                 if w is not None:
