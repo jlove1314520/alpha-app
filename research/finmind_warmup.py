@@ -320,9 +320,22 @@ def _backoff_ok(mem, key, now_ts):
     m = mem.get(key)
     if not m:
         return True
-    n = int(m.get("n", 0))
+    try:
+        n = int(m.get("n", 0))
+        ts = float(m.get("ts", 0))
+    except Exception:  # noqa: BLE001  規則十二：單鍵紀錄壞掉當沒失敗過（fail open），不讓整輪崩潰
+        return True
     wait = 24 * 3600 if n >= 5 else (6 * 3600 if n >= 3 else 0)
-    return now_ts >= float(m.get("ts", 0)) + wait
+    return now_ts >= ts + wait
+
+
+def _load_fails():
+    """讀失敗記憶；狀態檔是合法 JSON 但形狀不對（頂層非物件、fails 非物件、單鍵非物件）一律當空的（先.一三五-1dy 自測抓到）。"""
+    st = _load_json(STATE_PATH, {})
+    fails = st.get("fails", {}) if isinstance(st, dict) else {}
+    if not isinstance(fails, dict):
+        return {}
+    return {k: v for k, v in fails.items() if isinstance(v, dict)}
 
 
 # ───────────────────────── 主流程 ─────────────────────────
@@ -370,7 +383,7 @@ def main(argv=None):
         print("另一輪預熱仍在執行，略過本輪。")
         return 0
     try:
-        mem = _load_json(STATE_PATH, {}).get("fails", {})
+        mem = _load_fails()
         start_ts = time.time()
         deadline_ts = start_ts + a.max_minutes * 60
         used = fails_in_row = 0
@@ -406,8 +419,11 @@ def main(argv=None):
                     stop_reason = "blocked"
                     print(f"[停止] FinMind 封鎖中，整輪結束：{msg[:120]}", flush=True)
                     break
-                m = mem.get(key, {"n": 0})
-                mem[key] = {"n": int(m.get("n", 0)) + 1, "ts": time.time(), "err": msg[:120]}
+                try:
+                    prev_n = int(mem.get(key, {}).get("n", 0))
+                except Exception:  # noqa: BLE001
+                    prev_n = 0
+                mem[key] = {"n": prev_n + 1, "ts": time.time(), "err": msg[:120]}
                 fails_in_row += 1
                 print(f"[失敗] {tag} {ds} {code}: {msg[:120]}", flush=True)
                 if fails_in_row >= 5:
