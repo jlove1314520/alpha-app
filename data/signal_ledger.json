@@ -2,8 +2,8 @@
  "meta": {
   "created_at": "2026-10-11T14:17:33.521387+08:00",
   "schema_note": "B19 前瞻訊號台帳（非回測）：每筆在事件發生後 4 日內事前寫入，寫入後內容不可修改；entry_close 為寫入日之後第一個交易日收盤（避免前視）；returns.t5/t20/t60 由 update_signal_ledger_returns.py 只回填 null 欄位。status=待驗證線索 者不得影響任何評分。規格 research/B19_SIGNAL_LEDGER_SPEC.md。非投資建議。",
-  "last_build_at": "2026-10-30T23:58:34.869668+08:00",
-  "total_signals": 1644,
+  "last_build_at": "2026-10-31T00:54:23.541289+08:00",
+  "total_signals": 1658,
   "source": ".github/scripts/build_signal_ledger.py（讀 events.json L1＋news.json L3＋price_history.json）",
   "last_returns_backfill_at": "2026-10-30T18:22:13.326917+08:00",
   "entry_skipped": {
@@ -59836,6 +59836,498 @@
    "weight": 1.0,
    "ref_close": 3915.0,
    "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "c1a62defb123a2cd",
+   "recorded_at": "2026-10-31T00:54:23.541289+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9847707",
+   "type": "媒體報導",
+   "code": "2316",
+   "event_date": "2026-10-31",
+   "title": "企業生日快樂／楠梓電 改造獲利方程式",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1424,
+   "pre_vol_spike": 0.753,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 135.5,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "03e70869c70592d6",
+   "recorded_at": "2026-10-31T00:54:23.541289+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9847708",
+   "type": "媒體報導",
+   "code": "2316",
+   "event_date": "2026-10-31",
+   "title": "企業生日快樂／楠梓電董座組千歲團 西藏登頂成功",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1424,
+   "pre_vol_spike": 0.753,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 135.5,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "c46d8893795ec48a",
+   "recorded_at": "2026-10-31T00:54:23.541289+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9847710",
+   "type": "媒體報導",
+   "code": "2316",
+   "event_date": "2026-10-31",
+   "title": "企業生日快樂／楠梓電抓住趨勢 搶高價值商機",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1424,
+   "pre_vol_spike": 0.753,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 135.5,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "13f3c60c61934611",
+   "recorded_at": "2026-10-31T00:54:23.541289+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9847769",
+   "type": "媒體報導",
+   "code": "2301",
+   "event_date": "2026-10-30",
+   "title": "光寶科前三季獲利創高 每股賺8.08元",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0873,
+   "pre_vol_spike": 0.881,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 240.5,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "f9c2398b67d32dba",
+   "recorded_at": "2026-10-31T00:54:23.541289+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9847770",
+   "type": "媒體報導",
+   "code": "2301",
+   "event_date": "2026-10-30",
+   "title": "光寶科增資越南子公司百億元",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0873,
+   "pre_vol_spike": 0.881,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 240.5,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "01202fec10b0201a",
+   "recorded_at": "2026-10-31T00:54:23.541289+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9847759",
+   "type": "媒體報導",
+   "code": "1232",
+   "event_date": "2026-10-30",
+   "title": "大統益Q3獲利創高 EPS 3.32元",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0227,
+   "pre_vol_spike": 1.588,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 157.5,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "432b04779ee21436",
+   "recorded_at": "2026-10-31T00:54:23.541289+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9847763",
+   "type": "媒體報導",
+   "code": "0050",
+   "event_date": "2026-10-30",
+   "title": "一周熱門零股／0050、聯電躍交投重心",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0296,
+   "pre_vol_spike": 0.72,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 104.95,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "a36cd5427f11a04c",
+   "recorded_at": "2026-10-31T00:54:23.541289+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9847755",
+   "type": "媒體報導",
+   "code": "020034",
+   "event_date": "2026-10-30",
+   "title": "ETN趨勢導航／元大IC設計N逆勢漲2%",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0026,
+   "pre_vol_spike": 1.756,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 15.34,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "7af910f577cbd5aa",
+   "recorded_at": "2026-10-31T00:54:23.541289+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9847766",
+   "type": "媒體報導",
+   "code": "7867",
+   "event_date": "2026-10-30",
+   "title": "特力屋上市首日小漲",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": null,
+   "pre_vol_spike": null,
+   "reflected": "unknown",
+   "pre_volume_spike": null,
+   "reason": "價格序列不足（1<23 筆）",
+   "weight": 1.0,
+   "ref_close": 44.2,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "bf5732e376e7ef43",
+   "recorded_at": "2026-10-31T00:54:23.541289+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9847864",
+   "type": "媒體報導",
+   "code": "6271",
+   "event_date": "2026-10-30",
+   "title": "同欣電新產品明年放量",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1509,
+   "pre_vol_spike": 0.564,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 197.0,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "2f0ba7e95a96e92c",
+   "recorded_at": "2026-10-31T00:54:23.541289+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5739/9847831",
+   "type": "媒體報導",
+   "code": "2408",
+   "event_date": "2026-10-30",
+   "title": "南亞科、群聯 認購夯",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0412,
+   "pre_vol_spike": 1.375,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 454.5,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "f294fd35b17034f1",
+   "recorded_at": "2026-10-31T00:54:23.541289+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E7%81%A3%E5%94%AF-%E4%BB%A3%E8%A1%A8-%E7%8E%89%E5%B1%B1%E9%87%91%E5%89%8D%E9%80%B2%E8%81%AF%E5%90%88%E5%9C%8B-cbd-cop17-143847870.html",
+   "type": "媒體報導",
+   "code": "2884",
+   "event_date": "2026-10-30",
+   "title": "台灣唯一代表! 玉山金前進聯合國\"CBD COP17\" 登藍區舞台",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.003,
+   "pre_vol_spike": 0.989,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 49.05,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "a8a2e23753b26ca2",
+   "recorded_at": "2026-10-31T00:54:23.541289+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E4%B8%AD%E9%8A%80%E7%B5%B1%E7%B1%8C%E4%B8%BB%E8%BE%A623%E5%84%84%E5%85%83%E8%81%AF%E8%B2%B8-%E6%94%AF%E6%8C%81%E5%B4%87%E5%81%89%E7%87%9F%E9%80%A0%E6%89%BF%E6%94%AC%E9%AB%98%E9%9B%84%E5%B8%82%E8%88%8A%E5%B8%82%E8%AD%B0%E6%9C%83%E9%83%BD%E6%9B%B4%E5%B7%A5%E7%A8%8B-141529653.html",
+   "type": "媒體報導",
+   "code": "2812",
+   "event_date": "2026-10-30",
+   "title": "台中銀統籌主辦23億元聯貸 支持崇偉營造承攬高雄市舊市議會都更工程",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0,
+   "pre_vol_spike": 0.59,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-10-30",
+   "weight": 1.0,
+   "ref_close": 18.6,
+   "ref_close_date": "2026-10-30",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "4e548051e102ec24",
+   "recorded_at": "2026-10-31T00:54:23.541289+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%89%B5%E9%89%85%E6%9D%90%E6%96%99-%E5%85%AC%E5%91%8A%E6%9C%AC%E5%85%AC%E5%8F%B8115%E5%B9%B4%E7%AC%AC%E4%B8%89%E5%AD%A3%E8%B2%A1%E5%8B%99%E5%A0%B1%E5%91%8A%E8%91%A3%E4%BA%8B%E6%9C%83%E5%8F%AC%E9%96%8B%E6%97%A5%E6%9C%9F-133900255.html",
+   "type": "媒體報導",
+   "code": "7918",
+   "event_date": "2026-10-30",
+   "title": "創鉅材料 公告本公司115年第三季財務報告董事會召開日期",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": null,
+   "pre_vol_spike": null,
+   "reflected": "unknown",
+   "pre_volume_spike": null,
+   "reason": "價格序列不足（0<23 筆）",
+   "weight": 1.0,
+   "ref_close": null,
+   "ref_close_date": null,
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
    "entry_close": null,
    "entry_date": null,
