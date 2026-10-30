@@ -319,7 +319,13 @@ def main() -> int:
     # 不再讀 RSS 產出的 news.json。理由：RSS 每次只給 20~50 則最新的，
     # sitemap 一次就有數千則，而且下游原本一則都沒用到——管線是斷的。
     # news.json 仍保留作為標題層證據（build_themes 的 C 級之二）。
-    urls_doc = json.loads((D / "news_urls.json").read_text(encoding="utf-8"))
+    # 先.一三五-1co：輸入（news_urls.json／題材規則檔）讀不出來時印原因結束，不拋未處理例外、不送請求、不寫檔
+    try:
+        urls_doc = json.loads((D / "news_urls.json").read_text(encoding="utf-8"))
+        kwdoc = json.loads((D / "seed" / "theme_keywords.json").read_text(encoding="utf-8"))
+        theme_kw = {tid: v["keywords"] for tid, v in (kwdoc.get("themes") or {}).items()}
+    except (OSError, ValueError, AttributeError, KeyError, TypeError) as e:
+        raise SystemExit(f"讀不到輸入（news_urls.json 或 seed/theme_keywords.json）：{type(e).__name__}: {e}；本輪不抓、不寫檔")
     news = []
     seen_url = set()
     for u in urls_doc.get("urls") or []:
@@ -331,8 +337,6 @@ def main() -> int:
             continue
         seen_url.add(url)
         news.append({"url": url, "source": u.get("source"), "title": "", "published": ""})
-    kwdoc = json.loads((D / "seed" / "theme_keywords.json").read_text(encoding="utf-8"))
-    theme_kw = {tid: v["keywords"] for tid, v in (kwdoc.get("themes") or {}).items()}
 
     from news_matcher import load_company_names, load_active_codes, match_article
     name2code, _amb = load_company_names()
