@@ -65,8 +65,15 @@ def ledger_total():
 
 
 def main():
-    rows = parse_rows()
-    n_rows, n_ref, merged = ledger_total()
+    try:  # 先.一三五-1cn：帳本讀不到不拋未處理例外、不覆寫既有輸出
+        rows = parse_rows()
+        n_rows, n_ref, merged = ledger_total()
+    except (OSError, ValueError) as e:
+        print(f"[ERROR] 讀不到試驗帳本 {LEDGER}：{e}，不寫檔")
+        return 1
+    if not rows:  # 先.一三五-1cn：解析不出任何試驗列不用空清單覆寫既有輸出
+        print("[ERROR] 帳本解析不出任何試驗列，不寫檔")
+        return 1
     if len(rows) != n_rows:
         print(f"[ERROR] trials_index 列數 {len(rows)} ≠ 帳本試驗列數 {n_rows}，不寫檔")
         return 1
