@@ -102,7 +102,7 @@ def main() -> int:
     sparks = sp_doc.get("sparklines")
     quotes = qa_doc.get("quotes")
     comps = ci_doc.get("companies")
-    if not (isinstance(sparks, dict) and isinstance(quotes, dict) and isinstance(comps, dict)) or not sparks or not quotes:
+    if not (isinstance(sparks, dict) and isinstance(quotes, dict) and isinstance(comps, dict)) or not sparks or not quotes or not comps:  # 先.一三五-1dd：companies 空也中止
         print("! 來源檔缺 sparklines／quotes／companies 或為空，中止（不寫出任何檔案）")
         return 0
     asof = (sp_doc.get("meta") or {}).get("data_asof")

@@ -180,12 +180,15 @@ with tempfile.TemporaryDirectory() as td:
     kept = (B.OUT_DIR / "2330.json").exists()
     print(f"  · 2330 單檔{'仍保留（舊價格留著，與 docstring「已不在任何來源裡的代號…刪掉單檔」不一致）' if kept else '已移除'}")
 
-    print("觀察（不計成敗）：company_info 的 companies 是空物件")
+    print("情境：company_info 的 companies 是空物件（先.一三五-1dd）")
+    setup(r)
+    run()
+    before = snapshot(B.OUT_DIR)
     setup(r, ci={})
     rc, err = run()
-    has_n = "n" in rd(B.OUT_DIR / "0050.json")
-    print(f"  · 回傳 {rc}、0050 單檔{'仍有' if has_n else '已沒有'} n 欄"
-          f"{'（未中止，公司名被整批拿掉）' if not has_n else ''}")
+    check("companies 空 → 中止、無例外", rc == 0 and err is None, (rc, err))
+    check("companies 空 → 既有小檔原封不動（公司名不被整批拿掉）",
+          snapshot(B.OUT_DIR) == before and "n" in rd(B.OUT_DIR / "0050.json"))
 
 print(f"\n合計 {ok} 過、{fail} 失敗")
 sys.exit(1 if fail else 0)
