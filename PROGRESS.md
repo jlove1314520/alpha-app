@@ -1,17 +1,18 @@
-## 2026-10-30 08:01 DevQueue 20261030-080102（維運帽）：前瞻台帳回填／訊號台帳／策略曲線四支管線補合成自測，連帶修好兩個「讀不到就覆寫歷史」與數個崩潰 bug
+## 2026-10-30 08:01 DevQueue 20261030-080102（維運帽）：前瞻台帳回填／訊號台帳／策略曲線五支管線補合成自測，連帶修好兩個「讀不到就覆寫歷史」與數個崩潰 bug
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：先.一三五-1ae-a（權證快照 20:30 補跑觸發，請總司令執行一次）、先.一四一-3a（美股本機補班金鑰＋觸發時段，請總司令執行一次）、先.一三五-1ar-a（模擬 Q／R／I 漲停判斷改官方檔位版）。
 - **先.一三五-1ci 前瞻選股台帳回填**（commit 749d7d7594）：新 `scripts/selftest_update_picks_ledger_returns.py` 40 項全過（`^TWII` 換假函式、yfinance 換會報錯的假模組，零外部請求）。修正前 pick 缺 `returns` 鍵 → `KeyError` 讓整輪所有快照都回填不到；price_history 讀不出來拋未處理例外。修法：補齊空 returns、價格檔讀不出來 SystemExit 不寫檔。真實台帳暫存副本重跑：146 快照、既有已填 3,867 欄全數不變。
 - **先.一三五-1cj 前瞻訊號台帳回填**（commit a431e6dcda）：新 `scripts/selftest_update_signal_ledger_returns.py` 31 項全過。修正前缺 meta／缺 returns 鍵 KeyError、價格檔讀不出來拋例外；同樣改為補齊或 SystemExit。真實台帳副本：1,387 筆、既有已填 458 欄不變。
 - **先.一三五-1ck 策略 vs 0050 曲線**（commit 1507ee7454）：新 `scripts/selftest_build_strategy_curves.py` 25 項全過。**修正前**：`picks_ledger.json` 讀不出來時三榜全變「還沒有資料」並覆寫 `data/strategy_curves.json`（App「跟 0050 比」卡三榜會整片消失）。修法：台帳存在但讀不出來／不是物件 → SystemExit 不寫檔（台帳不存在的新環境照舊出佔位）。真實資料重算 11 條線與現有檔完全一致。
 - **先.一三五-1cl 前瞻訊號台帳快照**（commit 203639e034）：新 `scripts/selftest_build_signal_ledger.py` 22 項全過（「今天」固定）。**修正前最嚴重**：`signal_ledger.json` 讀不出來時 exit 0，用「只有本輪新訊號」的台帳**整份蓋掉 1,387 筆歷史前瞻訊號**（不可逆，違反 B19「寫入後不可修改」）。修法：損壞／結構不對／價格檔讀不出來一律 SystemExit 不寫檔。真實台帳副本：既有 1,387 筆位元組全數不變。
-- 四項都照各自條目分支走「純 bug 修復」；每支都把修正前版本放回去跑自測，確認自測抓得到 bug（1ci／1cj 修正前 KeyError、1ck 4 項失敗、1cl 4 項失敗），不是放寬測試讓它過。四支在 market.yml 都是 `continue-on-error: true`，改成非零退出不擋後續步驟。
+- **先.一三五-1cm 「跟 0050 比」歷史段**：新 `scripts/selftest_build_strategy_history.py` 15 項全過。修正前結果檔全讀不到時用全空 lines 覆寫 `data/strategy_history.json`；改為一段都沒有就只警告不寫檔（exit 0）。真實資料重算與現有檔完全一致。
+- 五項都照各自條目分支走「純 bug 修復」；每支都把修正前版本放回去跑自測，確認自測抓得到 bug（1ci／1cj 修正前 KeyError、1ck 4 項失敗、1cl 4 項失敗、1cm 1 項失敗），不是放寬測試讓它過。五支在 market.yml 都是 `continue-on-error: true`，改成非零退出不擋後續步驟。
 - **行為疑慮（照分支只記不改，寫在各條目，請互動視窗判斷）**：①1ci：meta 缺 `returns_anchor_rule` 會觸發一次性重算、清空全部已回填欄位；②1cj：訊號台帳出場日停牌時用前 ≤10 天收盤（持有不足 N 日），與選股台帳「恰 N 日、缺就留 null」不一致；③1ck：缺價日沿用前一筆收盤沒有過期上限、紙上帳本遇壞行只用壞行之前的事件照常寫檔、strategies.json 讀不出來三榜狀態顯示「未回測」。
-- **收工補件 [自行裁量]**：1ck 做完後 `next`＝NO_PENDING_ITEM（DevQueue 可執行 0＜6）。補入 先.一三五-1cl～1cq 六條，做完 1cl 再補 1cr（來源：資料缺口——`.github/scripts/`、`scripts/` 底下 workflow 會呼叫、但沒有任何 selftest 引用的零外部請求管線腳本，逐支 grep 確認）。現在 `- [ ]` 25 項、DevQueue 可執行 6 項（1cm～1cr）。
+- **收工補件 [自行裁量]**：1ck 做完後 `next`＝NO_PENDING_ITEM（DevQueue 可執行 0＜6）。補入 先.一三五-1cl～1cq 六條，做完 1cl 再補 1cr、做完 1cm 再補 1cs（來源：資料缺口——`.github/scripts/`、`scripts/` 底下 workflow 會呼叫、但沒有任何 selftest 引用的零外部請求管線腳本，逐支 grep 確認）。做完 1cm 後再補 1cs（`scripts/build_stock_names.py`）→ `- [ ]` 25 項、DevQueue 可執行 6 項（1cn～1cs）。
 - 零外部請求；沒算報酬、沒登記試驗、沒碰 holdout、沒動常駐服務與十三節核心檔案。`data/STATUS.json` 本輪沒有資料源或面板異動，不改。
 - 排程寫檔稽核（十節）：沒有新增會改寫的檔案，只減少寫入（失敗時不寫）。
-- **冒煙**：每項提交前 `node scripts/smoke_test.mjs` exit 0，179 項 PASS、0 項 FAIL（四次）。
-- **下一步**：DevQueue 可執行 6 項（1cm 起）。
+- **冒煙**：每項提交前 `node scripts/smoke_test.mjs` exit 0，179 項 PASS、0 項 FAIL（五次）。
+- **下一步**：DevQueue 可執行 6 項（1cn 起）。
 
 ## 2026-10-30 07:31 DevQueue 20261030-073102（維運帽）：四支管線腳本合成自測，連帶修好四個「讀不到輸入就覆寫／崩潰」的 bug，其中台帳覆寫最嚴重
 

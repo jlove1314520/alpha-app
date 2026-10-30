@@ -158,6 +158,10 @@ def build() -> dict:
 
 def main() -> int:
     doc = build()
+    if not any(doc["lines"].values()) and not doc["bench_0050"]:
+        # 先.一三五-1cm：結果檔全讀不到時原本用全空的 lines 覆寫既有檔；照十二節只警告、不寫檔
+        print("WARN build_strategy_history：所有結果檔都讀不到，本輪不寫檔（保留上一版）")
+        return 0
     old = None
     try:
         old = json.loads(OUT.read_text(encoding="utf-8"))
