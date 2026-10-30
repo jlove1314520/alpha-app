@@ -67,6 +67,7 @@ commit紀錄），跟App現有TWSE來源比沒有新增價值，換成美股自�
 from __future__ import annotations
 
 import json
+import os
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -144,8 +145,23 @@ def _same_except_fetched_at(path: Path, payload: dict) -> bool:
 
 
 def _write_json_failure(path: Path, payload: dict) -> None:
+    _write_json_atomic(path, payload)
+
+
+def _write_json_atomic(path: Path, payload: dict) -> None:
+    """先.一三五-1dz（純 bug 修復）：先寫同目錄暫存檔再 os.replace，
+    避免寫到一半被砍（排程逾時／關機）留下半截 JSON，App 與 live server 讀到壞檔。"""
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
+    tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    os.replace(tmp, path)
+
+
+def _missing_quote(reason: str, **extra) -> dict:
+    """先.一三五-1dz（純 bug 修復，比照 1ca／1dj）：該檔這輪拿不到時留一筆全 null 的佔位、寫明原因，
+    不讓代號從檔案消失（消費端分不出「沒查」與「查不到」）；不沿用舊報價，避免把過期價當現價（見模組 docstring）。"""
+    return {"last": None, "bid": None, "ask": None, "close": None, "change_pct": None,
+            "data_type": "UNAVAILABLE", "missing_reason": reason, **extra}
 
 
 def _qualify_us_stock(ib: IB, symbol: str):
@@ -339,6 +355,7 @@ def main():
             contract = _qualify_us_stock(ib, symbol)
             if contract is None:
                 print(f"  [US] {symbol} 合約無法解析（qualifyContracts失敗），跳過")
+                quotes[symbol] = _missing_quote("合約無法解析（qualifyContracts失敗）", exchange="SMART")
                 continue
             ticker = _request_market_data_with_fallback(ib, contract)
             q = _extract_quote(ticker)
@@ -352,6 +369,7 @@ def main():
             if contract is None:
                 print(f"  [US指數] {meta['label']}({meta['symbol']}) 所有候選exchange都無法解析，跳過"
                       f"（見模組docstring「已知限制」，需要使用者實測後更新candidate_exchanges）")
+                quotes[us_key] = _missing_quote("所有候選exchange都無法解析", exchange=None, label=meta["label"])
                 continue
             ticker = _request_market_data_with_fallback(ib, contract)
             q = _extract_quote(ticker)
@@ -378,8 +396,7 @@ def main():
             "error": None,
             "quotes": quotes,
         }
-        OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-        OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        _write_json_atomic(OUT_PATH, payload)
         print(f"寫入 {OUT_PATH}：{len(quotes)} 檔報價")
 
         # 2026-09-15（週六.五）同一條已驗證的paper連線，順手查部位/餘額——不另開
