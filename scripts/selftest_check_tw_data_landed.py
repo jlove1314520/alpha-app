@@ -3,7 +3,8 @@
 `ROOT`／`ALARM_PATH`／`RUN_LOG_PATH` 換成暫存目錄、`--now` 固定時間、只跑 `--layer cloud`
 （本機層會 git fetch／commit／gh workflow run，不在自測裡碰）：零外部請求、不動真實 data/。
 確認：休市日（closed／unscheduled_closed／週末）不告警、20:30 前不告警、data_date 是今天不告警、不是今天才告警（exit 1＋寫告警檔）、
-同一告警不重寫、資料進來後告警改成解除、日曆讀不到照週一～五、日曆未公布附註、輸入讀不到／損壞不拋未處理例外。
+同一告警不重寫、資料進來後告警改成解除、日曆讀不到照週一～五、日曆未公布附註、輸入讀不到／損壞不拋未處理例外；
+market_tw 讀不到／損壞在交易日 20:30 後照樣告警（先.一三五-1dg）、疑似臨時休市只認 --now 那天（先.一三五-1dh）。
 """
 from __future__ import annotations
 
@@ -126,10 +127,26 @@ with tempfile.TemporaryDirectory() as td:
                  cal={"tw": {"2026": {"published": False, "closed": []}}})
     check("未公布附註寫進告警原因", a3 and "尚未公布" in a3["reason"], a3 and a3["reason"])
 
-    print("情境四：market_tw 讀不到／損壞 → 不拋未處理例外、exit 0")
-    case("market_tw 不存在", "2026-10-29T21:00:00+08:00", 0, False, data_date=False)
-    case("market_tw 損壞", "2026-10-29T21:00:00+08:00", 0, False, market_raw="{")
-    case("market_tw 頂層不是物件", "2026-10-29T21:00:00+08:00", 0, False, market_raw="[1]")
+    print("情境四（先.一三五-1dg）：market_tw 讀不到／損壞 → 交易日 20:30 後視為未落地、照樣告警；不拋未處理例外")
+    for t, kw in (("market_tw 不存在", {"data_date": False}), ("market_tw 損壞", {"market_raw": "{"}),
+                  ("market_tw 頂層不是物件", {"market_raw": "[1]"})):
+        _, a4 = case(t, "2026-10-29T21:00:00+08:00", 1, True, **kw)
+        check(f"{t}：告警原因附『讀不到／損壞』", a4 and "讀不到／損壞" in a4["reason"] and a4["market_tw_data_date"] is None,
+              a4 and a4["reason"])
+    case("market_tw 損壞、20點29 還沒到", "2026-10-29T20:29:00+08:00", 0, False, market_raw="{")
+    case("market_tw 損壞、官方休市日", "2026-10-26T21:00:00+08:00", 0, False, market_raw="{")
+    _, a5 = case("market_tw 正常停在昨天", "2026-10-29T21:00:00+08:00", 1, True, data_date="2026-10-28")
+    check("market_tw 正常時原因不帶『讀不到』（註記不殘留）", a5 and "讀不到" not in a5["reason"], a5 and a5["reason"])
+
+    print("情境五（先.一三五-1dh）：疑似臨時休市只認 --now 那天")
+    def scal(**y):
+        return {"tw": {"2026": {"published": True, "closed": [], **y}}}
+    case("疑似休市＝今天", "2026-10-29T21:00:00+08:00", 0, False, data_date="2026-10-28",
+         cal=scal(suspected_closed_today={"date": "2026-10-29"}))
+    case("疑似休市＝今天但收盤確認有成交", "2026-10-29T21:00:00+08:00", 1, True, data_date="2026-10-28",
+         cal=scal(suspected_closed_today={"date": "2026-10-29"}, suspected_closed_mismatch={"date": "2026-10-29"}))
+    case("疑似休市是昨天", "2026-10-29T21:00:00+08:00", 1, True, data_date="2026-10-28",
+         cal=scal(suspected_closed_today={"date": "2026-10-28"}))
 
 print(f"\n合計 {ok} 過、{fail} 失敗")
 sys.exit(1 if fail else 0)

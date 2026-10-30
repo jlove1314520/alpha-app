@@ -41,6 +41,9 @@ MESSAGE = "今日台股資料未進來，三層備援都沒補到"
 
 
 CAL_NOTE = {"note": ""}  # 先.一一四-1：當年官方日曆未公布時，告警文字附註（假日可能誤報）
+MTW_NOTE = {"note": ""}  # 先.一三五-1dg：market_tw.json 讀不到／損壞時，告警文字附註
+# 先.一三五-1dh：檢查時間的日期（main() 依 --now 設定）；疑似臨時休市只認這一天，沒設才用真實現在
+CHECK_DATE = {"d": None}
 
 
 def _suspected_today(y: dict, d) -> set:
@@ -48,7 +51,8 @@ def _suspected_today(y: dict, d) -> set:
     只認 date＝今天（台北）且收盤確認沒有記成「疑似卻有成交」的。"""
     iso = d.isoformat()
     s, m = y.get("suspected_closed_today"), y.get("suspected_closed_mismatch")
-    if isinstance(s, dict) and s.get("date") == iso == datetime.now(TW).date().isoformat()             and not (isinstance(m, dict) and m.get("date") == iso):
+    today = CHECK_DATE["d"] or datetime.now(TW).date()
+    if isinstance(s, dict) and s.get("date") == iso == today.isoformat()             and not (isinstance(m, dict) and m.get("date") == iso):
         return {iso}
     return set()
 
@@ -79,7 +83,16 @@ def market_tw_date(layer: str) -> str | None:
                 return json.loads(r.stdout.decode("utf-8")).get("data_date")
         except Exception as e:  # noqa: BLE001
             print(f"::warning::讀 origin/main market_tw 失敗，改讀工作目錄：{type(e).__name__}: {e}")
-    return json.loads((ROOT / "data" / "market_tw.json").read_text(encoding="utf-8")).get("data_date")
+    # 先.一三五-1dg：讀不到／損壞＝資料沒落地，回 None 交給 decide() 照原規則判（原本走例外分支、漏報）
+    try:
+        doc = json.loads((ROOT / "data" / "market_tw.json").read_text(encoding="utf-8"))
+        if not isinstance(doc, dict):
+            raise ValueError("頂層不是物件")
+        return doc.get("data_date")
+    except Exception as e:  # noqa: BLE001
+        print(f"::warning::market_tw.json 讀不到／損壞，視為未落地：{type(e).__name__}: {e}")
+        MTW_NOTE["note"] = f"（market_tw.json 讀不到／損壞：{type(e).__name__}）"
+        return None
 
 
 def decide(now: datetime, data_date: str | None) -> tuple[bool, str]:
@@ -90,7 +103,7 @@ def decide(now: datetime, data_date: str | None) -> tuple[bool, str]:
         return False, f"{today} 非交易日"
     if data_date == today.isoformat():
         return False, f"market_tw 已落地（data_date={data_date}）"
-    return True, f"{MESSAGE}（market_tw data_date={data_date}，今天 {today}）{CAL_NOTE['note']}"
+    return True, f"{MESSAGE}（market_tw data_date={data_date}，今天 {today}）{MTW_NOTE['note']}{CAL_NOTE['note']}"
 
 
 def write_alarm(now: datetime, alarm: bool, why: str, data_date: str | None, layer: str) -> bool:
@@ -145,6 +158,7 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     try:
         now = datetime.fromisoformat(a.now).astimezone(TW) if a.now else datetime.now(TW)
+        CHECK_DATE["d"], MTW_NOTE["note"] = now.date(), ""
         data_date = market_tw_date(a.layer)
         alarm, why = decide(now, data_date)
         print(f"check_tw_data_landed（{a.layer}）：{'告警' if alarm else '正常'}（{why}）")
