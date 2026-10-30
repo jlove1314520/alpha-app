@@ -127,26 +127,47 @@ def parse_infotable(xml_text: str) -> list[dict]:
     return rows
 
 
+def _load_prev_filers() -> dict:
+    """上一份輸出的 filers（讀不到／格式不對回空 dict）。先.一三五-1dm：抓取失敗的申報人沿用這裡。"""
+    try:
+        prev = json.loads(OUT_PATH.read_text(encoding="utf-8")).get("filers")
+        return prev if isinstance(prev, dict) else {}
+    except Exception:  # noqa: BLE001
+        return {}
+
+
+def _reuse_prev(key: str, prev_filers: dict, out_filers: dict) -> None:
+    """抓取失敗的申報人沿用上一份（標 stale: true），App 不會因一次失敗整張 13F 卡變空。"""
+    prev = prev_filers.get(key)
+    if isinstance(prev, dict):
+        out_filers[key] = {**prev, "stale": True}
+
+
 def main() -> int:
     out_filers: dict[str, dict] = {}
     all_errors: list[dict] = []
+    fresh = 0
+    prev_filers = _load_prev_filers()
 
     for key, info in FILERS.items():
         try:
             latest = latest_13f_accession(info["cik"])
             if not latest:
                 all_errors.append({"filer": key, "reason": "查無13F-HR申報"})
+                _reuse_prev(key, prev_filers, out_filers)
                 continue
             accession, filed_at = latest
             xml_url = find_infotable_xml(info["cik"], accession)
             if not xml_url:
                 all_errors.append({"filer": key, "reason": f"{accession}：目錄裡找不到資訊表xml"})
+                _reuse_prev(key, prev_filers, out_filers)
                 continue
             xml_text = _get(xml_url).text
             rows = parse_infotable(xml_text)
         except Exception as e:
             all_errors.append({"filer": key, "reason": str(e)})
             print(f"  ・{key}: 抓取失敗 {e}")
+            _reuse_prev(key, prev_filers, out_filers)
             continue
 
         # 2026-09-15實測發現：同一發行人常拆成多筆infoTable列（不同子公司/被授權
@@ -180,6 +201,7 @@ def main() -> int:
             "total_positions_in_filing": len(rows),
             "holdings": holdings,
         }
+        fresh += 1
         print(f"  ・{key}: 申報日{filed_at}，共{len(rows)}筆持股，命中追蹤清單{len(holdings)}檔")
 
     out = {
@@ -190,11 +212,15 @@ def main() -> int:
         "filers": out_filers,
         "errors": all_errors,
     }
+    # 先.一三五-1dm：這次一家都沒抓成功 → 不寫檔（保留上一份），回 1；workflow 該步本來就 continue-on-error。
+    if not fresh:
+        print(f"這次沒有任何申報人抓取成功（{len(all_errors)}筆錯誤），不覆寫 {OUT_PATH.name}")
+        return 1
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
     print(f"寫入 {OUT_PATH}，{len(out_filers)} 家申報人" + (f"，{len(all_errors)}筆錯誤" if all_errors else ""))
-    return 0 if out_filers else 1
+    return 0
 
 
 if __name__ == "__main__":

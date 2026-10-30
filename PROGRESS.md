@@ -1,3 +1,14 @@
+## 2026-10-30 19:xx DevQueue 候選補件（維運帽）：三支雲端抓取程式自測＋波克夏 13F 失敗拿空檔蓋掉修正（1dm／1dn／1do）
+
+- **等待總司令審閱：2 件**（本輪未異動 `research/AWAITING_REVIEW.md`，沿用前一輪兩件）。
+- **前向模擬上限 14／14 仍滿**：照 CLAUDE.md 零之二⑤，本輪不新增候選、不寫 PREREG、不送 AWAITING、不算報酬、不碰 holdout、不登記試驗；只在 `research/FORWARD_CANDIDATES.md` 記一行。
+- 來源：`.github/scripts/` 底下沒有任何 selftest 的還剩 6 支，本輪取每班會跑的三支；剩 `fetch_us_financials_sec.py`、`build_us_scores_v0.py`（us_financials.yml 每週）與一次性的 `backfill_bfi82u_amt.py`。
+- **先.一三五-1dm** `fetch_us_13f_holdings.py`：只追蹤波克夏一家，它一失敗就寫 `filers: {}` 蓋掉上一份（App 13F 卡變空到下一班）。改成失敗的申報人沿用上一份（標 `stale: true`），一家都沒成功就不寫檔、回 1（純 bug 修復；market.yml 該步本來就 `continue-on-error: true`）。
+- **先.一三五-1dn** `fetch_news_sitemap.py`：無 bug、未改。行為疑慮只記錄：兩邊 sitemap 都抓不到時，舊連結會被多標 `published_unknown`，下次抓到自動補回，無永久損失。
+- **先.一三五-1do** `build_us_screener.py`：無 bug、未改；三條失敗路徑都確認不覆蓋既有輸出。
+- 證據：新增 `scripts/selftest_us_misc_fetchers.py` 37 過、0 失敗（零外部請求、假 yfinance 只造合成價格）；冒煙 `node scripts/smoke_test.mjs` rc=0，179 項全部 `[x]`。
+- BLOCKED：無新增。下一步：剩下兩支 us_financials.yml 程式可作為下一輪補件來源。
+
 ## 2026-10-30 17:30～17:50 DevQueue 候選補件（維運帽）：美股 SEC 三支抓取程式自測＋「單檔失敗就消失／全失敗拿空檔蓋掉」修正（1dj／1dk／1dl）
 
 - **等待總司令審閱：2 件**（本輪未異動 `research/AWAITING_REVIEW.md`，沿用前一輪兩件）。
