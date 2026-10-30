@@ -30,7 +30,12 @@ def main() -> None:
     if not all_sigs:
         print(f"{LEDGER_PATH} 沒有訊號，結束")
         return
-    prices = (PHS.load(upl.PRICE_HISTORY_PATH) if PHS.exists(upl.PRICE_HISTORY_PATH) else {}).get("prices", {})
+    try:
+        prices = (PHS.load(upl.PRICE_HISTORY_PATH) if PHS.exists(upl.PRICE_HISTORY_PATH) else {}).get("prices", {})
+    except Exception as e:  # noqa: BLE001
+        # 先.一三五-1cj：價格檔讀不出來就整輪不回填、不寫檔（原本拋未處理例外）
+        raise SystemExit(f"讀 {upl.PRICE_HISTORY_PATH} 失敗，本輪不回填也不寫檔：{e}")
+    ledger.setdefault("meta", {})  # 先.一三五-1cj：缺 meta 原本在寫 entry_skipped 時 KeyError
     cal_rows = prices.get(upl.CALENDAR_PROXY_CODE) or max(prices.values(), key=len, default=[])
     calendar = sorted(r["date"] for r in cal_rows)
     if not calendar:
@@ -67,6 +72,9 @@ def main() -> None:
         "count": len(skipped_all), "reason": ENTRY_SKIP_REASON,
         "note": "這些訊號進場日沒有收盤、不回填報酬，任何勝率／平均報酬統計的分母都要排除並揭露這個筆數（先.一四〇-1）"}
     sigs = [s for s in all_sigs if s.get("entry_close") and s.get("entry_date")]
+    for s in sigs:
+        if not isinstance(s.get("returns"), dict):
+            s["returns"] = {k: None for k in WINDOWS}  # 先.一三五-1cj：缺 returns 鍵原本 KeyError 拖垮整輪
 
     pending = [s for s in sigs if any(s["returns"].get(k) is None for k in WINDOWS)]
     due = [s for s in pending if upl._trading_days_after(s["entry_date"], 5, calendar)]
