@@ -56,6 +56,7 @@ ATOM_NS = {"a": "http://www.w3.org/2005/Atom"}
 BROWSE_URL = "https://www.sec.gov/cgi-bin/browse-edgar"
 REQUEST_SLEEP_SEC = 0.2
 MAX_FILINGS_PER_TICKER = 8
+LIST_FAIL_PREFIX = "列出Form4申報失敗："
 
 TRANSACTION_CODE_LABELS = {
     "P": "公開市場買進", "S": "公開市場賣出", "A": "獎酬/授予取得",
@@ -181,7 +182,7 @@ def fetch_ticker(cik: int) -> tuple[list[dict], list[str]]:
     try:
         filings = list_recent_form4(cik)
     except Exception as e:
-        errors.append(f"列出Form4申報失敗：{e}")
+        errors.append(f"{LIST_FAIL_PREFIX}{e}")
         return transactions, errors
     for f in filings:
         try:
@@ -204,6 +205,8 @@ def main() -> int:
         print(f"錯誤：讀不到 {SIC_PATH}（需先跑 fetch_us_sic.py 產生CIK對映）")
         return 1
 
+    prev_tickers = (_load(OUT_PATH, {}) or {}).get("tickers") or {}
+    fresh_count = 0
     out_tickers: dict[str, dict] = {}
     all_errors: list[dict] = []
     for ticker, info in tickers_map.items():
@@ -213,6 +216,16 @@ def main() -> int:
             print(f"  ・{ticker}: 沒有 cik 欄位，跳過")
             continue
         txns, errs = fetch_ticker(cik)
+        stale = False
+        if errs and errs[0].startswith(LIST_FAIL_PREFIX):
+            # 先.一三五-1dk（2026-10-30）：整檔申報清單列不出來時沿用上一份該檔的交易（標 stale），
+            # 不拿空陣列蓋掉；個別申報解析失敗只是少幾筆，照舊用這次抓到的。
+            old = prev_tickers.get(ticker)
+            if isinstance(old, dict) and isinstance(old.get("transactions"), list):
+                txns, stale = old["transactions"], True
+                print(f"    ↳ 沿用上一份 {ticker}（標 stale）")
+        else:
+            fresh_count += 1
         buys = sum(1 for t in txns if t["code"] == "P")
         sells = sum(1 for t in txns if t["code"] == "S")
         out_tickers[ticker] = {
@@ -222,9 +235,15 @@ def main() -> int:
             "sell_count": sells,
             "errors": errs,
         }
+        if stale:
+            out_tickers[ticker]["stale"] = True
         print(f"  ・{ticker}: {len(txns)} 筆交易（買{buys}/賣{sells}），錯誤{len(errs)}筆")
         if errs:
             all_errors.append({"ticker": ticker, "reasons": errs})
+
+    if fresh_count == 0:
+        print(f"錯誤：沒有任何一檔列得出申報清單，保留既有 {OUT_PATH}，不覆寫")
+        return 1
 
     out = {
         "fetched_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),

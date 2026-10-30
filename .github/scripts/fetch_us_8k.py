@@ -143,6 +143,8 @@ def main() -> int:
         return 1
 
     cutoff = (datetime.now(timezone.utc) - timedelta(days=KEEP_DAYS)).strftime("%Y-%m-%d")
+    prev_tickers = (_load(OUT_PATH, {}) or {}).get("tickers") or {}
+    fresh_count = 0
     out_tickers: dict[str, dict] = {}
     all_errors: list[dict] = []
     for ticker, info in tickers_map.items():
@@ -152,7 +154,17 @@ def main() -> int:
             print(f"  ・{ticker}: 沒有 cik 欄位，跳過")
             continue
         filings, errs = fetch_ticker(cik)
-        filings = [f for f in filings if f["filed_at"] >= cutoff]
+        stale = False
+        if errs:
+            # 先.一三五-1dl（2026-10-30）：整檔列不出來時沿用上一份該檔的申報（仍套保留天數，標 stale），
+            # 不拿空陣列蓋掉——App 美股事件卡會整檔變空到下一班。
+            old = prev_tickers.get(ticker)
+            if isinstance(old, dict) and isinstance(old.get("filings"), list):
+                filings, stale = old["filings"], True
+                print(f"    ↳ 沿用上一份 {ticker}（標 stale）")
+        else:
+            fresh_count += 1
+        filings = [f for f in filings if (f.get("filed_at") or "") >= cutoff]
         filings.sort(key=lambda f: f["filed_at"], reverse=True)
         out_tickers[ticker] = {
             "cik": cik,
@@ -160,9 +172,15 @@ def main() -> int:
             "filings": filings,
             "errors": errs,
         }
+        if stale:
+            out_tickers[ticker]["stale"] = True
         print(f"  ・{ticker}: {len(filings)} 筆8-K（近{KEEP_DAYS}天），錯誤{len(errs)}筆")
         if errs:
             all_errors.append({"ticker": ticker, "reasons": errs})
+
+    if fresh_count == 0:
+        print(f"錯誤：沒有任何一檔抓成功，保留既有 {OUT_PATH}，不覆寫")
+        return 1
 
     out = {
         "fetched_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),

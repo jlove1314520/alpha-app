@@ -42,6 +42,13 @@ TICKER_MAP_URL = "https://www.sec.gov/files/company_tickers.json"
 SUBMISSIONS_URL = "https://data.sec.gov/submissions/CIK{cik}.json"
 
 
+def _load_prev():
+    try:
+        return json.loads(OUT_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
 def get_cik_map() -> dict[str, int]:
     r = requests.get(TICKER_MAP_URL, headers=HEADERS, timeout=20)
     r.raise_for_status()
@@ -88,6 +95,23 @@ def main():
             print(f"  ・{tk} 失敗：{e}")
         time.sleep(0.15)  # SEC 公平使用政策建議 ~10 req/sec 上限內，保守間隔（9檔遠低於門檻）
 
+    # 先.一三五-1dj（2026-10-30）：單檔失敗沿用上一份該檔（標 stale），不讓它從檔案消失——
+    # fetch_us_insider_trading.py／fetch_us_8k.py 都只讀這份的 tickers 當 CIK 對映，少一檔下游也跟著少一檔。
+    fresh_count = len(tickers_out)
+    prev = (_load_prev() or {}).get("tickers") or {}
+    for e in errors:
+        tk = e.get("ticker")
+        old = prev.get(tk)
+        if tk not in tickers_out and isinstance(old, dict) and old.get("cik") is not None:
+            tickers_out[tk] = {**old, "stale": True}
+            print(f"    ↳ 沿用上一份 {tk}（標 stale）")
+    tickers_out = {tk: tickers_out[tk] for tk in US_TICKERS if tk in tickers_out}
+
+    if fresh_count == 0:
+        # 一檔都沒抓到：不拿空檔（或全是舊值的檔）蓋掉上一份
+        print(f"錯誤：一檔都沒抓到，保留既有 {OUT_PATH}，不覆寫；失敗：{errors}")
+        sys.exit(1)
+
     out = {
         "fetched_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "source": "SEC EDGAR company_tickers.json（ticker→CIK）+ submissions/CIK{cik}.json（sic/sicDescription），官方免金鑰",
@@ -96,11 +120,7 @@ def main():
     }
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"寫入 {OUT_PATH}，{len(tickers_out)}/{len(US_TICKERS)} 檔成功" + (f"，失敗：{errors}" if errors else ""))
-
-    if not tickers_out:
-        print("錯誤：一檔都沒抓到")
-        sys.exit(1)
+    print(f"寫入 {OUT_PATH}，{fresh_count}/{len(US_TICKERS)} 檔成功" + (f"，失敗：{errors}" if errors else ""))
 
 
 if __name__ == "__main__":
