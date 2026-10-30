@@ -123,7 +123,11 @@ def main() -> int:
             doc[k] = fn()
         except Exception as e:  # noqa: BLE001 — 單一區塊失敗只標錯誤，不擋其他區塊（App 照樣顯示其他段）
             doc[k] = {"error": f"{type(e).__name__}: {e}"[:200]}
-    tmp = OUT.with_name(OUT.name + ".tmp")
+    if all("error" in doc[k] for k in ("trials", "autopsy", "oos")):  # 先.一三五-1cu：三段全失敗不覆寫上一版
+        print("[warn] 三個輸入全部讀不到：" + "；".join(doc[k]["error"] for k in ("trials", "autopsy", "oos"))
+              + "，research_scorecard.json 維持原狀")
+        return 0
+    tmp =OUT.with_name(OUT.name + ".tmp")
     tmp.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     tmp.replace(OUT)
     a = doc.get("autopsy") or {}
