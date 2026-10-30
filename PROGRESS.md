@@ -1,3 +1,16 @@
+## 2026-10-30 11:31～12:08 DevQueue 20261030-113102（維運帽）：四支管線腳本合成自測（1ct／1cu／1cv／1cw），三支順手修「空輸入蓋掉上一版」
+
+- **等待總司令審閱：2 件**（本輪未異動 `research/AWAITING_REVIEW.md`，沿用 10:xx 互動視窗紀錄：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班——都在 `C:/alpha/總司令待辦.md`）。
+- **先.一三五-1ct 產業資金流**（`1812751888`）：新增 `scripts/selftest_build_industry_flow.py` 34 項全過（產業成交值加總、5日÷20日−1、等權漲跌、streak／擁擠、缺產業不歸類、成分<5 不列、輸入不存在／損壞不覆寫）。命中分支：prices 或 companies 為空會寫 0 產業空檔 → 純 bug 修復：`build_industry_flow.py` 算不出產業就 warn＋維持原檔＋exit 0。真實資料 45 個產業（產出已還原、未提交）。
+- **先.一三五-1cu 研究成績單**（`6f0b3b3187`）：新增 `scripts/selftest_build_research_scorecard.py` 44 項全過。命中分支：三個輸入全讀不到仍寫出只剩 error 的檔 → 純 bug 修復：三段全失敗不覆寫。疑慮只記：結論句「已滿 N 天的選股榜全部落後」是寫死斷言；`cum_gap_pp` 為 None 會讓整段 oos 變 error。
+- **先.一三五-1cv 選股清單精簡檔**（`591da21f9c`）：新增 `scripts/selftest_build_scores_list.py` 35 項全過。命中分支：來源頂層不是物件拋 AttributeError（後面幾榜不跑）、stocks 空寫 0 列清單 → 純 bug 修復：先檢查格式，不對就 warn＋維持原檔＋rc=1＋繼續下一榜（workflow 皆 continue-on-error）。真實三榜重跑「內容沒變」。
+- **先.一三五-1cw 台股當日資料落地檢查**（`4b7da38999`）：新增 `scripts/selftest_check_tw_data_landed.py` 62 項全過，**程式未改**。疑慮只記：market_tw.json 壞掉時不告警（漏報方向）；`_suspected_today()` 不吃 `--now`。
+- **冒煙**：四項各跑一次 `node scripts/smoke_test.mjs`，皆 rc=0、0 FAIL（179 項 `[x]`）。
+- **[自行裁量]**：空輸入一律維持原檔且不改原本退出碼語意（industry_flow／scorecard exit 0、scores_list rc=1），跟各支既有「讀不到」分支一致，不中斷排程。
+- **維運帽 STATUS.json**：本輪無資料源或面板異動，未更新 `data/STATUS.json`（只加自測與防覆寫）。
+- **收工補件**：`- [ ]` 21 項（≥12）；DevQueue 可執行約 2 項（<6）。來源①資料缺口（workflow 呼叫、無自測、零外部請求）重掃已用盡——剩下 5 支（audit_preflight／build_sector_flow／split_quote_lite／split_stock_detail／watchdog_dispatch_market）都已在佇列；BACKLOG／UX 提案／全檢報告／DATA_GAP_PLAN 來源本輪時間不足（12:16 上限）未掃，**未補件**，留給下一輪。
+- **下一步**：權威清單下一項 先.一三五-1cx 個股明細拆檔合成自測（`- [ ]`，未開始）。
+
 ## 2026-10-30 10:xx 互動視窗：收件匣 032（Cowork 09:50）漲停判斷統一＋一則誤報
 
 - **等待總司令審閱：2 件**（`research/AWAITING_REVIEW.md` 等待中 2 列，本輪結案 1 列）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班（金鑰＋觸發）——兩項都在 `C:/alpha/總司令待辦.md`；10:xx 查證排程觸發與 .env 金鑰行都還沒做，清單維持未勾。
