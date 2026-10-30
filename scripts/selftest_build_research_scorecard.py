@@ -1,4 +1,4 @@
-"""自測：研究成績單 `scripts/build_research_scorecard.py`（先.一三五-1cu）。
+"""自測：研究成績單 `scripts/build_research_scorecard.py`（先.一三五-1cu；結論句勝負數＋缺差距列 先.一三五-1df）。
 
 `ROOT`／`OUT` 換成暫存目錄：零外部請求、不讀也不動真實 data/ 與 research/。
 App「研究成績單」頁唯一來源，這裡確認：總數與判定分類照 trials_index、墓園 A／B／C 統計與逐條表、
@@ -146,6 +146,35 @@ with tempfile.TemporaryDirectory() as td:
     o2 = json.loads((r2 / "data" / "research_scorecard.json").read_text(encoding="utf-8"))["oos"]
     check("winners 空", o2.get("winners") == [], o2.get("winners"))
     check("結論『目前沒有任何策略在樣本外贏過 0050』且寫最長 20 天", "目前沒有任何策略" in o2["conclusion"] and "20 個交易日" in o2["conclusion"], o2["conclusion"])
+    # 先.一三五-1df：沒有任何一條滿 60 天時不得斷言「全部落後」（最長那條其實暫時領先）
+    check("沒有滿 60 天的列 → 結論不寫『全部落後』、寫還沒有可判輸贏的", "全部落後" not in o2["conclusion"]
+          and "還沒有可判輸贏" in o2["conclusion"], o2["conclusion"])
+
+    print("情境二之一：結論句依實際勝負數（先.一三五-1df）")
+    check("部分領先：情境一寫 2 條中 1 條領先、1 條落後", "2 條中 1 條領先、1 條落後" in str(o.get("conclusion"))
+          and "全部" not in str(o.get("conclusion")), o.get("conclusion"))
+    r2a = base / "alllose"
+    build(r2a, curves_obj={"lines": [CURVES["lines"][1], CURVES["lines"][2]]})
+    run(r2a)
+    c = json.loads((r2a / "data" / "research_scorecard.json").read_text(encoding="utf-8"))["oos"]["conclusion"]
+    check("全落後：寫『1 條全部落後』", "1 條全部落後同期 0050" in c and "目前沒有任何策略" in c, c)
+    r2b = base / "allwin"
+    build(r2b, curves_obj={"lines": [CURVES["lines"][0], CURVES["lines"][2]]})
+    run(r2b)
+    c = json.loads((r2b / "data" / "research_scorecard.json").read_text(encoding="utf-8"))["oos"]["conclusion"]
+    check("全領先：寫『全部領先』且點名長跑贏、不寫落後", "全部領先" in c and "長跑贏" in c and "落後" not in c, c)
+    r2c = base / "gapnone"
+    none_line = {"id": "n", "label": "缺差距", "group": "g", "status": "live",
+                 "metrics": {"days": 90, "cum_pct": 3.0, "bench_cum_pct": None, "cum_gap_pp": None}}
+    build(r2c, curves_obj={"lines": [CURVES["lines"][1], none_line]})
+    rc, err = run(r2c)
+    o2c = json.loads((r2c / "data" / "research_scorecard.json").read_text(encoding="utf-8"))["oos"]
+    check("cum_gap_pp None：沒有未處理例外、oos 不變 error", err is None and "error" not in o2c, (repr(err), o2c))
+    byc = {x["id"]: x for x in o2c.get("lines") or []}
+    check("cum_gap_pp None：該列標缺資料、其他列照判", "缺資料" in str(byc.get("n", {}).get("judge"))
+          and byc.get("l", {}).get("judge") == "輸 0050", byc)
+    check("cum_gap_pp None：結論句註明缺資料、落後只算 1 條", "1 條缺資料" in o2c["conclusion"]
+          and "1 條全部落後" in o2c["conclusion"], o2c["conclusion"])
 
     good = (r1 / "data" / "research_scorecard.json").read_text(encoding="utf-8")
 

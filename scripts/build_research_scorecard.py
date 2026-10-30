@@ -83,20 +83,35 @@ def oos_block() -> dict:
                           "design_note": l.get("design_note"), "candidacy": l.get("candidacy")})
             continue
         days, gap = m.get("days"), m.get("cum_gap_pp")
-        judge = ("贏 0050" if gap > 0 else "輸 0050") if days >= MIN_DAYS else (
-            f"天數不足（{days} 天 < {MIN_DAYS}），{'暫時領先' if gap > 0 else '暫時落後'}，不能判斷")
+        if gap is None:  # 先.一三五-1df：差距讀不到只標該列，不讓整段 oos 變 error
+            judge = "缺資料（讀不到跟 0050 的差距）"
+        else:
+            judge = ("贏 0050" if gap > 0 else "輸 0050") if days >= MIN_DAYS else (
+                f"天數不足（{days} 天 < {MIN_DAYS}），{'暫時領先' if gap > 0 else '暫時落後'}，不能判斷")
         lines.append({"id": l.get("id"), "label": l.get("label"), "group": l.get("group"), "status": l.get("status"),
                       "start": l.get("start_date"), "as_of": l.get("as_of"), "days": days,
                       "ret_pct": m.get("cum_pct"), "bench_pct": m.get("bench_cum_pct"), "gap_pp": gap,
                       "mdd_pct": m.get("mdd_pct"), "bench_mdd_pct": m.get("bench_mdd_pct"), "judge": judge,
                       "design_note": l.get("design_note"), "candidacy": l.get("candidacy")})
-    winners = [x for x in lines if x.get("days", 0) >= MIN_DAYS and (x.get("gap_pp") or 0) > 0]
+    # 先.一三五-1df：結論句依實際勝負數產生（全落後／部分領先／全領先），不寫死「全部落後」
+    mature = [x for x in lines if x.get("days", 0) >= MIN_DAYS]
+    winners = [x for x in mature if x.get("gap_pp") is not None and x["gap_pp"] > 0]
+    losers = [x for x in mature if x.get("gap_pp") is not None and x["gap_pp"] <= 0]
+    missing = len(mature) - len(winners) - len(losers)
     longest = max((x.get("days", 0) for x in lines), default=0)
-    if winners:
-        concl = "有策略在樣本外 ≥%d 個交易日贏過 0050：%s" % (MIN_DAYS, "、".join(x["label"] for x in winners))
+    tail = f"（另有 {missing} 條缺資料）" if missing else ""
+    if winners and not losers:
+        concl = (f"已滿 {MIN_DAYS} 個交易日的 {len(winners)} 條全部領先同期 0050：" + "、".join(x["label"] for x in winners)
+                 + tail + "。")
+    elif winners:
+        concl = (f"已滿 {MIN_DAYS} 個交易日的 {len(winners) + len(losers)} 條中 {len(winners)} 條領先、{len(losers)} 條落後同期 0050；"
+                 "領先的是：" + "、".join(x["label"] for x in winners) + tail + "。")
+    elif losers:
+        concl = (f"目前沒有任何策略在樣本外贏過 0050：已滿 {MIN_DAYS} 個交易日的 {len(losers)} 條全部落後同期 0050"
+                 f"（最長 {longest} 個交易日）" + tail + "。")
     else:
         concl = (f"目前沒有任何策略在樣本外贏過 0050。最長的樣本外紀錄只有 {longest} 個交易日"
-                 f"（要 ≥{MIN_DAYS} 天才拿來判斷）；已滿 {longest} 天的選股榜全部落後同期 0050。")
+                 f"（要 ≥{MIN_DAYS} 天才拿來判斷），還沒有可判輸贏的選股榜" + tail + "。")
     return {"min_days": MIN_DAYS, "lines": lines, "winners": [x["label"] for x in winners], "conclusion": concl,
             "source": "data/strategy_curves.json（上線後的真實走勢，與同期 0050 還原含息比較）"}
 
