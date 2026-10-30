@@ -4,7 +4,8 @@
 1. 只有 commit、沒有心跳（心跳 5 小時前、人工 commit 10 分鐘前）→ 不推；
 2. 三者都超過 3 小時、佇列有可執行項目 → 推「⚠️ CC 停住」，內文附最後一個進度（commit 標題前 30 字）；
 3. 三者都超過 3 小時、DevQueue 最後一輪 QUEUE_EMPTY → 推「⏸ 佇列都在等審／等條件」（不同訊息）；
-4. 同一原因 6 小時內不重推。
+4. 同一原因 6 小時內不重推；
+5.（收件匣 032）2026-10-30 07:10～09:38 DevQueue 的「補件／合成自測／收工」commit 都算人工進度（不被當成機器提交排除）。
 跑法：python scripts/selftest_cc_push_stuck.py
 """
 import sys
@@ -61,6 +62,15 @@ st, sent = {}, []
 C.stuck(st, now, send=send)
 ok = len(sent) == 1 and sent[0][0].startswith("⏸ 佇列都在等審") and "停住" not in sent[0][0]
 check("3 QUEUE_EMPTY → 推不同訊息「⏸ 佇列都在等審／等條件」", ok, str(sent)[:200])
+
+# 5. 收件匣 032：10/30 誤報當時的 commit 標題（實際來源是 autostash 推播，見 local_git_commit；這裡守住「進度」不被誤排除）
+for subj in ("DevQueue 候選補件（先.一三五-1cb～1ce）：台股報價全失敗不推空檔、ROE 近四季跨缺口湊數修",
+             "先.一三五-1cn 試驗索引合成自測＋帳本讀不到／0 列時不覆寫既有輸出",
+             "先.一三五-1co 新聞內文題材句萃取合成自測＋輸入讀不到時不拋未處理例外",
+             "DevQueue 20261030-090102 收工：PROGRESS 紀錄＋補件 先.一三五-1ct～1cy"):
+    check("5 算人工進度：" + subj[:24], not C.MACHINE_COMMIT.search(subj))
+for subj in ("盤中報價：本機備援補抓（雲端 20 分鐘未更新，先.八十二-4）", "DevQueue cycle log 自動更新（cycle_id=20261030-090102）"):
+    check("5 仍算機器提交：" + subj[:20], bool(C.MACHINE_COMMIT.search(subj)))
 
 print(f"\n結果：{'全部通過' if not fails else '失敗 ' + str(fails)}")
 sys.exit(1 if fails else 0)

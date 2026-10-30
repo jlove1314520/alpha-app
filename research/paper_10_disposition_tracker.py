@@ -6,7 +6,7 @@ research/paper_forward_common.py，本檔只有：處置事件累積、訊號函
 - 事件來源 data/disposal_flags.json（本機 AlphaDisposalFlags 每日 18:30 產生並 commit），每次執行併進
   research/data/paper_10_events.json（12/01 前也照常累積，只累積、不建倉），零額外外部請求。
 - `limit_up_at_entry`（PREREG 修訂 R1，先.一四一-1）：r+1 原始收盤 ≥ r+1 官方漲停價（research/official_limit.py：
-  上櫃用前一日 TPEx 公告次日漲停價、缺檔或上市用 tw_limit_price 計算；除權息日基準用參考價），來源記 limit_src／limit_base。
+  上櫃用前一日 TPEx 公告次日漲停價、缺檔或上市用 official_limit.limit_prices 計算；除權息日基準用參考價），來源記 limit_src／limit_base。
 - 主帳本 research/data/paper_10_log.jsonl＋摘要 data/paper_10.json；影子帳本（處置期間報酬 ≥0）
   research/data/paper_10_control_log.jsonl＋research/data/paper_10_control.json。
 """

@@ -10,7 +10,9 @@
 - 出場（收盤判斷、次一交易日收盤賣出）：還原收盤 ≤ (1−10%) × 進場後最高還原收盤；或持有滿 60 個交易日；
   失去宇宙資格（下市／停牌）→ 可交易的第一天收盤賣出。
 - 成本：research/backtest/engine.py buy_leg_rate／sell_leg_rate（1×）。虛擬本金 100 萬。
-- limit_up_at_entry：進場日收盤相對前一日還原收盤 ≥ +9.5% 標 True（偽影家族⑪敏感度用，不改主判定）。
+- limit_up_at_entry：進場日原始收盤 ≥ 官方漲停價（`research/official_limit.py`：上櫃先用前一交易日 TPEx 公告次日漲停價、
+  其餘依檔位計算，除權息日／減資恢復日換基準）標 True（偽影家族⑪敏感度用，不改主判定）；另記 limit_up_price／limit_src。
+  收件匣 032（先.一三五-1ar-a 採甲，PREREG 修訂 R1）起取代原本「還原收盤漲幅 ≥ +9.5%」近似。
 
 **holdout 讀取限制（research/validation/holdout.py ALLOWED_HOLDOUT_READERS／RESTRICTED_LOOKBACK_DIRS）**：
 research/data/paper_9_lookback/（2025-10-28～2026-10-30 官方日檔，fetch_paper_9_lookback.py 抓）**只用來產生
@@ -46,7 +48,6 @@ HIGH_WIN, VOL_WIN = 251, 20      # 「前 251 個交易日」＋當日＝252 日
 K_VOL, TRAIL, HOLD_N, MAX_POS = 1.5, 0.10, 60, 20
 MIN_TURNOVER = 30_000_000.0
 INITIAL = 1_000_000.0
-LIMIT_UP = 0.095
 LABEL = "模擬 I 個股 252 日新高＋量能突破"
 NOTE = ("收盤創 252 日新高且成交量 ≥ 20 日均量 1.5 倍 → 隔日收盤買進；最多 20 檔、每檔淨值 1/20；"
         "從進場後最高點回落 10% 或持有滿 60 個交易日 → 隔日收盤賣出；近 20 日平均成交值 ≥3,000 萬；成本 1×")
@@ -208,6 +209,17 @@ def write_summary(log: list, extra: dict | None = None) -> None:
 
 
 # ---------------------------------------------------------------- 每日處理
+_OL = None  # official_limit.OfficialLimits，第一次進場才讀本機公告檔／除權息檔；自測可直接指定
+
+
+def _ol():
+    global _OL
+    if _OL is None:
+        from official_limit import OfficialLimits  # noqa: E402
+        _OL = OfficialLimits()
+    return _OL
+
+
 def _fac_on(series: dict, code: str, day: str) -> float:
     for row in reversed(series.get(code) or []):
         if row[0] == day:
@@ -272,12 +284,13 @@ def _day(px, series: dict, day: str, state: dict, active: set, BUY: float, SELL:
             continue
         prev_d = px.prev_trading_day(day)
         prev_v = px.raw_close_on(c, prev_d) if prev_d else None
-        prev_v = prev_v * _fac_on(series, c, day) if prev_v else None
+        lim = _ol().limits(c, day, prev_d, prev_v) if prev_v else None
         invest = min(nav / MAX_POS, cash)
         cash -= invest
         positions[c] = {"units": invest / (1 + BUY) / v, "entry_date": day, "entry_px": v, "peak_adj": v,
                         "adj_mult": 1.0, "held_days": 0, "signal_date": r["signal_date"],
-                        "limit_up_at_entry": bool(prev_v and v / prev_v - 1 >= LIMIT_UP)}
+                        "limit_up_at_entry": bool(lim and v >= lim["up"] - 1e-9),
+                        "limit_up_price": lim["up"] if lim else None, "limit_src": lim["src"] if lim else None}
         entered.append(c)
     pend_in = []
     # 3) 收盤判斷出場（明天賣）

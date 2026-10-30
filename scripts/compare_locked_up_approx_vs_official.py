@@ -8,6 +8,8 @@ A. 模擬 Q／R（paper_17／18）用的 `paper_forward_events.locked_up()`
 B. 模擬 I（paper_9）`limit_up_at_entry`：還原收盤漲幅 ≥ +9.5%
    vs 原始收盤 ≥ 官方漲停價（同 J 的修訂 R1 定義）。
 只數「判定不一致」的列數與舉例，不算任何報酬、不改任何追蹤程式。輸出 research/data/locked_up_approx_vs_official.json。
+⚠️ 收件匣 032（2026-10-30）起 `locked_up()` 已改官方檔位版、paper_9 也改了：A 組現在是官方對官方（應為 0 差異），
+B 組的近似算式只留在本檔。這支是 1ar 一次性量測的紀錄，之後不必再跑。
 非投資建議。
 """
 from __future__ import annotations

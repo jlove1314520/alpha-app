@@ -1,3 +1,14 @@
+## 2026-10-30 10:xx 互動視窗：收件匣 032（Cowork 09:50）漲停判斷統一＋一則誤報
+
+- **等待總司令審閱：2 件**（`research/AWAITING_REVIEW.md` 等待中 2 列，本輪結案 1 列）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班（金鑰＋觸發）——兩項都在 `C:/alpha/總司令待辦.md`；10:xx 查證排程觸發與 .env 金鑰行都還沒做，清單維持未勾。
+- **先.一三五-1ar-a 採甲（模擬 I 11/02 起跑前完成）**：`research/tw_limit_price.py` 規則併進 `research/official_limit.py`（前者只剩轉接殼）；模擬 Q／R 的 `paper_forward_events.locked_up()`、模擬 I 的 `limit_up_at_entry` 都改官方檔位版；三份 PREREG（Q #488、R #489、I）加修訂 R1，寫明尚未起跑、帳本不存在、不另計 N。核心檔 `costs.limit_status()` 沒動。
+  - dry-run：真實資料走 `_day()` 不寫帳本、不印淨值；注入 10 檔待進場（含 10/29 收在漲停價的 5 檔）全部進場、`limit_up_at_entry` 與官方漲停名單完全一致；五支追蹤（I／J／N／Q／R）實跑皆 NOT_STARTED、帳本都不存在。
+  - 自測 23 支全過（含新增：模擬 I 收 50.0／49.9 兩案、鎖漲停邊界 KNOWN_GAP 改斷言）。
+- **10/30 09:10「CC 停住」推播查證**：不是 no_progress。實際是 `quotes_local_fallback.py` 09:10:01 git 暫存（autostash）套回時，另一個排程在中間又推了一筆暫存，舊程式只認最上面那筆 → 沒自動清掉、推了「CC 停住：git 暫存套回失敗」。當時沒套回的 12 個檔都是機器寫的資料／狀態檔，沒有遺失人寫的內容。cc_push 的最後進度算法沒問題（09:10 算出 08:37）。
+  - 修正 `scripts/local_git_commit.py`：用雜湊在暫存清單找這筆再刪（刪前再驗一次）；推播標題改「⚠️ git 暫存套回不完整：有檔案要人看」，不再寫「CC 停住」。
+  - 自測：`selftest_autostash_restore.py` 新增競態重現 3 項＋標題 1 項、`selftest_cc_push_stuck.py` 新增 10/30 補件／自測 commit 算進度 6 項，全過。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0、0 項 FAIL（all_passed）。
+
 ## 2026-10-30 09:01 DevQueue 20261030-090102（維運帽）：試驗索引／新聞內文萃取／美股財報日曆／下市股剔除／月底收盤／搜尋名稱六支管線補合成自測，連帶修好讀不到就覆寫或崩潰的 bug
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中，本輪未增減）：先.一三五-1ae-a（權證快照 20:30 補跑觸發，請總司令執行一次）、先.一四一-3a（美股本機補班金鑰＋觸發時段，請總司令執行一次）、先.一三五-1ar-a（模擬 Q／R／I 漲停判斷改官方檔位版）。

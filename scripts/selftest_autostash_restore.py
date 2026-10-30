@@ -8,6 +8,9 @@
 3. 6 小時內第二次失敗：照寫紀錄、不再推播。
 （先.一三一-3）2c：只有「工作樹較新」→ 沒有獨有內容，自動刪這筆 stash、不推播；
 4. 機器寫檔（data/m.json）遠端較新 → 自動刪 stash、不推播；人寫的檔（情境 1 的 X.txt）遠端較新 → 保留 stash＋推播。
+（收件匣 032）1f：推播標題不再寫「CC 停住」；
+5. 別的排程在中間又推一筆 stash（這筆 autostash 不再是 stash@{0}）→ 仍用雜湊找到並刪掉這筆、另一筆原封不動、不推播
+   （2026-10-30 09:10 quotes_local_fallback 誤報的重現）。
 跑法：python scripts/selftest_autostash_restore.py
 """
 import json
@@ -75,6 +78,7 @@ with tempfile.TemporaryDirectory() as td:
     log = [json.loads(l) for l in G.AUTOSTASH_LOG.read_text(encoding="utf-8").splitlines()] if G.AUTOSTASH_LOG.exists() else []
     check("1d 寫一行失敗紀錄", len(log) == 1 and "X.txt" in log[0]["kept_remote"] and "Y.txt" in log[0]["restored"], str(log)[:160])
     check("1e 推一次 cc_stuck", len(pushes) == 1 and pushes[0][1] == "cc_stuck", str(pushes))
+    check("1f 標題是 git 暫存、不寫「CC 停住」", pushes and pushes[0][0] == G.AUTOSTASH_ALERT_TITLE and "CC 停住" not in pushes[0][0], str(pushes))
 
     # 2. stash 之後工作樹被寫成更新版
     git(a, "checkout", "-q", "--", "Y.txt"); git(a, "reset", "-q", "--hard")
@@ -103,6 +107,19 @@ with tempfile.TemporaryDirectory() as td:
           and log[-1].get("stash_dropped") is True and not git(a, "stash", "list").stdout.strip(), str(log[-1])[:200])
     check("4b 自動清除不推播", len(pushes) == 1, str(pushes))
     check("4c 情境 1（人寫的 X.txt 遠端較新）當時有保留 stash", log[0].get("stash_dropped") is False, str(log[0].get("drop_reason")))
+
+    # 5. 競態：這筆 autostash 之後別的排程又推一筆 stash → 它變成 stash@{1}
+    git(a, "stash", "clear"); git(a, "reset", "-q", "--hard")
+    w(a / "data" / "m.json", "m-autostash\n")
+    mine = git(a, "stash", "create").stdout.strip(); git(a, "stash", "store", "-m", "autostash", mine)
+    git(a, "reset", "-q", "--hard"); w(a / "data" / "m.json", "m-other-job\n")
+    other = git(a, "stash", "create").stdout.strip(); git(a, "stash", "store", "-m", "other job", other)
+    git(a, "reset", "-q", "--hard")
+    dropped, why = G._auto_drop_if_nothing_unique(mine, ["data/m.json"], [], ["data/m.json"], [])
+    left = git(a, "stash", "list", "--format=%H").stdout.split()
+    check("5a 不在 stash@{0} 也找得到並刪掉這筆", dropped and mine not in left, why)
+    check("5b 另一個排程的 stash 原封不動", left == [other], str(left))
+    check("5c 競態不推播", len(pushes) == 1, str(pushes))
 
 print(f"\n結果：{'全部通過' if not fails else '失敗 ' + str(fails)}")
 sys.exit(1 if fails else 0)

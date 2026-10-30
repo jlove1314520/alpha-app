@@ -6,7 +6,8 @@
 2. 從進場後最高還原收盤回落 ≥10% → 隔一交易日收盤賣出，exit_reason=trailing_stop；
 3. 持有滿 60 個交易日 → 隔日賣出，exit_reason=hold_days；
 4. 量不夠 1.5 倍時不產生訊號；
-5. 除權息（adj/close 比值跳動）不會被當成跌破停損。
+5. 除權息（adj/close 比值跳動）不會被當成跌破停損；
+6. limit_up_at_entry 用官方檔位漲停價（收件匣 032，PREREG 修訂 R1）：前收 45.5 → 漲停 50.0；收 50.0 標 True、收 49.9 標 False（舊 +9.5% 近似會誤標 True）。
 跑法：python scripts/selftest_paper_9_logic.py
 """
 import sys
@@ -22,6 +23,9 @@ if hasattr(sys.stdout, "reconfigure"):
 
 import paper_9_breakout_tracker as T  # noqa: E402
 from paper_forward_common import Px  # noqa: E402
+from official_limit import OfficialLimits  # noqa: E402
+
+T._OL = OfficialLimits(tpex_docs=[], exdiv={})  # 不讀本機公告檔／除權息檔（只用合成價格）
 
 
 def days(n, start=date(2027, 1, 4)):
@@ -96,6 +100,15 @@ ds, recs = run(lambda i: 100.0 if i < 299 else (118.0 if i < 320 else 113.0), la
                n=340, exdiv_at=320)
 ext = [c for r in recs for c in r["closed_trades"]]
 res.append(("D 除息不被當成跌破停損", not any(c["exit_reason"] == "trailing_stop" for c in ext)))
+
+# 情境 E／F：官方檔位漲停價（前收 45.5 → 45.5×1.1＝50.05 → 0.1 檔位向下取整＝50.0）
+for name, entry_px, expect in (("E 收 50.0＝官方漲停 → limit_up_at_entry True", 50.0, True),
+                               ("F 收 49.9（舊 +9.5% 近似會標 True）→ False", 49.9, False)):
+    ds, recs = run(lambda i, e=entry_px: 40.0 if i < 299 else (45.5 if i == 299 else e),
+                   lambda i: 3_000_000 if i == 299 else 1_000_000, n=305)
+    pos = (recs[300]["positions"] or {}).get("1101") or {}
+    res.append((name, recs[300]["entered"] == ["1101"] and pos.get("limit_up_at_entry") is expect
+                and abs((pos.get("limit_up_price") or 0) - 50.0) < 1e-9 and pos.get("limit_src") == "calc"))
 
 for n, ok in res:
     print(("PASS " if ok else "FAIL ") + n)

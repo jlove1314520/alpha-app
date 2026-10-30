@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""先.一三五-1ab 自測：research/tw_limit_price.py 上市漲跌停價計算。
+"""先.一三五-1ab 自測：上市漲跌停價計算（原 research/tw_limit_price.py，收件匣 032 起併進 research/official_limit.py）。
 
 全部用合成數字（官方文件範例＋跨級距邊界值），不讀任何真實價格、不呼叫網路。
 範例來源見 docs/DATA_SOURCE_MAP.md「上市漲跌幅與升降單位取整方向」節。
@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "research"))
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-import tw_limit_price as t  # noqa: E402
+import official_limit as t  # noqa: E402  （收件匣 032：規則已併進 official_limit）
 
 results = []
 

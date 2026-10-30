@@ -9,7 +9,7 @@
 - 收盤由上往下跌破格下緣 Lᵢ 且格位空 → 隔日開盤買一份；收盤站上 Lᵢ₊₁ → 隔日開盤賣；收盤跌破 L₋₅ → 隔日開盤全出、冷卻 20 個交易日。
 - 每格固定金額＝100 萬 ÷ 50 ÷ 10；現金不足一份不買；開盤一字漲停（買）／跌停（賣）鎖死 → 買單取消、賣單順延
   （PREREG 修訂 R1，先.一四一-1：原始開高低收對官方漲跌停價，research/official_limit.py——上櫃用前一日 TPEx 公告
-  次日漲跌停價、缺檔或上市用 tw_limit_price 以原始前收計算（除權息日用參考價）；不再呼叫核心檔 costs.limit_status()）；停牌日不成交、掛單順延；下市以最後可得價出場。
+  次日漲跌停價、缺檔或上市用 official_limit.limit_prices 以原始前收計算（除權息日用參考價）；不再呼叫核心檔 costs.limit_status()）；停牌日不成交、掛單順延；下市以最後可得價出場。
 - 影子網格（不加濾網，只記帳不判定，PREREG §4-5 控制組用）：research/data/paper_14_shadow_log.jsonl。
 - 帳本每個交易日一列（nav／cash／positions 與共用框架同格式，另含 grid_state 供下一次接續）；月初列另記
   eligible_nofilter（不看濾網會建格的股票）與 built（實際建格），判定時的濾網控制組由它抽樣。

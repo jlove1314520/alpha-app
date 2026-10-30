@@ -107,19 +107,28 @@ def _machine_written(path: str) -> bool:
 
 def _auto_drop_if_nothing_unique(stash: str, names: list, back: list, kept: list, newer: list) -> tuple[bool, str]:
     """stash 裡每個檔都已「取回」「工作樹較新」或「遠端較新且是機器寫檔」→ 沒有獨有內容，drop 這一筆。
-    只刪 stash@{0} 且它正是這次的 autostash；任何不確定或失敗都保留（十二節：寧可留著，不可誤刪）。回傳 (是否刪除, 說明)。"""
+    用雜湊找這筆 autostash 在 stash 清單的位置（收件匣 032：別的排程在中間又推了一筆 stash 時，它不再是 stash@{0}，
+    舊做法因此保留 stash 並推「CC 停住」誤報）；刪之前再確認一次該位置正是這筆。任何不確定或失敗都保留
+    （十二節：寧可留著，不可誤刪）。回傳 (是否刪除, 說明)。"""
     try:
         accounted = set(back) | set(newer) | {k for k in kept if _machine_written(k)}
         human_kept = [k for k in kept if not _machine_written(k)]
         if human_kept or set(names) - accounted:
             return False, f"stash 未刪（有人寫的檔遠端較新或未處理：{', '.join(human_kept or sorted(set(names) - accounted))[:200]}）"
-        if _g("rev-parse", "-q", "--verify", "stash@{0}").stdout.strip() != stash:
-            return False, "stash 未刪（stash@{0} 已不是這次的 autostash）"
-        if _g("stash", "drop", "-q", "stash@{0}").returncode != 0:
+        hashes = _g("stash", "list", "--format=%H").stdout.split()
+        if stash not in hashes:
+            return False, "stash 未刪（stash 清單裡找不到這次的 autostash）"
+        ref = f"stash@{{{hashes.index(stash)}}}"
+        if _g("rev-parse", "-q", "--verify", ref).stdout.strip() != stash:
+            return False, f"stash 未刪（{ref} 剛好又變動，不是這次的 autostash）"
+        if _g("stash", "drop", "-q", ref).returncode != 0:
             return False, "stash 未刪（drop 失敗）"
-        return True, "已確認沒有獨有內容，自動刪除這筆 stash（先.一三一-3）"
+        return True, f"已確認沒有獨有內容，自動刪除這筆 stash（{ref}；先.一三一-3）"
     except Exception as e:  # noqa: BLE001
         return False, f"stash 未刪（自動清除判斷出錯：{type(e).__name__}）"
+
+
+AUTOSTASH_ALERT_TITLE = "⚠️ git 暫存套回不完整：有檔案要人看"
 
 
 def _alert_autostash_failure(stash: str, back: list, kept: list, newer: list, dropped: bool = False, drop_reason: str = "") -> None:
@@ -150,7 +159,8 @@ def _alert_autostash_failure(stash: str, back: list, kept: list, newer: list, dr
         import cc_push  # noqa: PLC0415
         body = (f"git autostash 套回失敗（{rec['caller']}）：取回 {len(back)}、遠端較新 {len(kept)}、工作樹較新 {len(newer)}；"
                 f"stash {stash[:10]} 未刪，紀錄在 research/autostash_failures.jsonl")
-        cc_push._send("⚠️ CC 停住：git 暫存套回失敗", body, "cc_stuck")
+        # 收件匣 032：這是 git 暫存衝突，不是 CC 沒進度——標題不再用「CC 停住」，免得跟 no_progress 混淆
+        cc_push._send(AUTOSTASH_ALERT_TITLE, body + "（這不是 CC 停住，CC 可能仍在正常提交）", "cc_stuck")
         AUTOSTASH_ALERT_STATE.write_text(json.dumps({"last_push": time.time(), "stash": stash}), encoding="utf-8")
     except Exception as e:  # noqa: BLE001
         print(f"[local_git_commit] 警告：autostash 失敗推播失敗（{type(e).__name__}）", file=sys.stderr)

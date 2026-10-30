@@ -7,8 +7,8 @@
    b. 除權息日：基準＝前收 × factor_applied（參考價）
    c. 減資恢復買賣日：基準＝ref_price
    d. 上櫃：前一交易日 TPEx 公告的次日漲停價優先於計算值（公告日對不上才退回計算）
-② 現行 `paper_forward_events.locked_up()`（模擬 Q／R，前收 ±10%、不取整、不用參考價）把 a、b 判「沒鎖」＝**已知差異**，
-   印 KNOWN_GAP、不算 FAIL；1ar-a 採甲改版後，把 a、b 的近似版斷言改成「判鎖」。
+② `paper_forward_events.locked_up()`（模擬 Q／R）：收件匣 032（先.一三五-1ar-a 採甲）起改用同一套官方檔位版，
+   原本 a、b 的 KNOWN_GAP 改成斷言「判鎖」，四型都要跟 ① 一致。
 用法：python scripts/selftest_locked_up_boundaries.py
 非投資建議。
 """
@@ -54,15 +54,10 @@ def official(ol, code, prev_close, today_px):
     return lim, up
 
 
-def approx_info(name, code, prev_close, today_px, known_gap):
-    got = E.locked_up(px_of(code, prev_close, today_px), code, D1)
-    if known_gap and not got:
-        KNOWN.append(name)
-        print(f"KNOWN_GAP {name}：近似版 locked_up()＝False（官方檔位版＝True；1ar-a 改版後改成斷言判鎖）")
-    elif known_gap:
-        print(f"NOTE {name}：近似版已判鎖（差異消失，請把本案改成斷言）")
-    else:
-        print(f"INFO {name}：近似版 locked_up()＝{got}")
+def events_check(name, ol, code, prev_close, today_px, expect=True):
+    """模擬 Q／R 的 locked_up() 要跟官方檔位版一致（收件匣 032 起，原 KNOWN_GAP 改斷言）。"""
+    got = E.locked_up(px_of(code, prev_close, today_px), code, D1, ol=ol)
+    check(f"{name}：locked_up()＝{expect}", got == expect, f"got={got}")
 
 
 def main() -> int:
@@ -75,7 +70,8 @@ def main() -> int:
     check("a 來源 calc／基準 raw_prev_close", lim and lim["src"] == "calc" and lim["base_src"] == "raw_prev_close")
     _, up2 = official(empty, "1303", 139.0, 152.0)
     check("a 反例：152.0（差一檔）不判鎖", not up2)
-    approx_info("a 檔位取整 +9.71%", "1303", 139.0, 152.5, known_gap=True)
+    events_check("a 檔位取整 +9.71%", empty, "1303", 139.0, 152.5)
+    events_check("a 反例 152.0", empty, "1303", 139.0, 152.0, expect=False)
 
     # b. 除權息日：前收 100、factor 0.95 → 參考價 95 → 漲停 104.5（不是 110）
     ex = OfficialLimits(tpex_docs=[], exdiv={"events": {"2001": [{"ex_date": D1, "factor_applied": 0.95}]}})
@@ -84,7 +80,7 @@ def main() -> int:
     check("b 除權息：漲停 104.5 一字判鎖", lim and abs(lim["up"] - 104.5) < 1e-9 and up)
     _, up_raw = official(empty, "2001", 100.0, 104.5)
     check("b 對照：不套參考價時 104.5 不判鎖", not up_raw)
-    approx_info("b 除權息日 104.5", "2001", 100.0, 104.5, known_gap=True)
+    events_check("b 除權息日 104.5", ex, "2001", 100.0, 104.5)
 
     # c. 減資恢復買賣日：前收 8.72、ref 10.1 → 10.1 × 1.1 = 11.11 → 0.05 檔位 = 11.10
     red = OfficialLimits(tpex_docs=[], exdiv={"reductions": {"1441": [{"resume_date": D1, "ref_price": 10.1}]}})
@@ -93,7 +89,7 @@ def main() -> int:
     check("c 減資恢復：漲停 11.10 一字判鎖", lim and abs(lim["up"] - 11.1) < 1e-9 and up)
     _, up_lo = official(red, "1441", 8.72, 10.15)
     check("c 反例：10.15（未達 11.10）不判鎖", not up_lo)
-    approx_info("c 減資恢復 11.10", "1441", 8.72, 11.1, known_gap=False)
+    events_check("c 減資恢復 11.10", red, "1441", 8.72, 11.1)
 
     # d. 上櫃公告價優先：前收 50 計算值 55.0，公告 55.5 → 用 55.5
     doc = {"data_date": D0, "rows": {"6001": [55.5, 45.0]}}
@@ -106,7 +102,8 @@ def main() -> int:
     stale = OfficialLimits(tpex_docs=[{"data_date": "2026-06-18", "rows": {"6001": [55.5, 45.0]}}], exdiv={})
     lim, up = official(stale, "6001", 50.0, 55.0)
     check("d 公告日≠前一交易日 → 退回計算、來源 calc_tpex_missing", lim and lim["src"] == "calc_tpex_missing" and up, str(lim))
-    approx_info("d 上櫃公告 55.5", "6001", 50.0, 55.5, known_gap=False)
+    events_check("d 上櫃公告 55.5", tp, "6001", 50.0, 55.5)
+    events_check("d 上櫃 55.0 在公告 55.5 下", tp, "6001", 50.0, 55.0, expect=False)
 
     # 十二節：算不出 → None → 不判鎖
     check("缺前收 → None、不判鎖", empty.limits("1303", D1, D0, None) is None and lock_status(None, 1, 1, 1, 1) == (False, False))
