@@ -187,7 +187,22 @@ def main() -> int:
     companies = ci.get("companies") or {}
     uni = _load(D / "listed_universe.json", {}) or {}
     active = set(uni.get("active") or [])
-    _ph = PHS.load(D / "price_history.json") if PHS.exists(D / "price_history.json") else {}
+    # 先.一三五-1db：任一份輸入讀不到／損壞／是空的就不寫出檔案（保留上一份有日期的 sector_flow.json）。
+    # 原本會照樣寫：沒名冊 → 0 檔；沒產業別 → 0 個產業；沒價格 → 金額全空——殘缺結果蓋掉上一份好資料。
+    if not companies:
+        print("! data/company_info.json 讀不到或沒有公司資料，不寫出檔案（保留上一份）")
+        return 1
+    if not active:
+        print("! data/listed_universe.json 讀不到或名冊是空的，不寫出檔案（保留上一份）")
+        return 1
+    try:
+        _ph = PHS.load(D / "price_history.json") if PHS.exists(D / "price_history.json") else {}
+    except (OSError, ValueError) as e:
+        print(f"! data/price_history 讀取失敗（{type(e).__name__}: {e}），不寫出檔案（保留上一份）")
+        return 1
+    if not (_ph or {}).get("prices"):
+        print("! data/price_history 讀不到或沒有價格，不寫出檔案（保留上一份）")
+        return 1
     closes = _closes(_ph)
     dpx = _daily_px(_ph)
     del _ph
@@ -489,9 +504,11 @@ def _update_queue_countdown(n_dates, dates, missing, usable) -> None:
             ]
         head = txt.split(_CD_BEGIN, 1)[0]
         tail = txt.split(_CD_END, 1)[1]
-        body = "\n".join(lines)
+        # 先.一三五-1db：行尾跟著檔案走（本機 autocrlf 檢出是 CRLF），不在 CRLF 檔裡塞裸 LF
+        nl = "\r\n" if txt.split(_CD_BEGIN, 1)[1].startswith("\r\n") else "\n"
+        body = nl.join(lines)
         with open(q, "w", encoding="utf-8", newline="") as _f:
-            _f.write(head + _CD_BEGIN + "\n" + body + "\n" + _CD_END + tail)
+            _f.write(head + _CD_BEGIN + nl + body + nl + _CD_END + tail)
         print("  已更新 PENDING_QUEUE 的金流一倒數行")
     except Exception as e:  # noqa: BLE001
         # 倒數更新失敗不能影響主要產出——這只是文件同步，不是資料
