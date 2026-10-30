@@ -1,3 +1,27 @@
+## 2026-10-31 03:31 DevQueue 20261031-033102（維運帽）：查清 1dy 卡關根因（冒煙 #165 依賴雲端當班資料）→ 冒煙轉綠，補提交五項積壓修法＋六項阻塞解除結案＋B2 記憶體報告
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 2→3）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次，10/28 起）②先.一四一-3a 美股盤中報價本機補班（請總司令執行一次，10/29 起）③**先.一三八-B2 記憶體報告（本輪新送，等 Cowork 審）**。
+- **上一輪失敗根因**：不是 1dy 本身，是冒煙 #165 直接讀雲端 `data/quotes_us.json` 當班資料——10/30 14:58 UTC 班 NVDA 剛好沒 sparkline，雲端 quotes.yml 又稀疏（之後 4.5 小時沒新班），本機沒 Finnhub 金鑰補不了，於是所有無關修法（1ce、1dx、1ea、1dy、1dz）都卡在「冒煙沒過不 commit」。
+  **修法（測試本身的 bug，commit 8436228502）**：#165(b) 測的是 App 退回鏈，改成雲端檔 NVDA 沒 sparkline 時用 repo 真實日線（`data/us_daily/NVDA.json`）最後 20 根收盤補進回應，**斷言一個都沒改**，補過會在項目說明標「測試注入」。[自行裁量] 選這個而不是等雲端恢復：等不到時間點、而且資料面問題已由 1ea 在產生端修，冒煙不該被單班資料綁住。1ee（11/02 時間閘）會確認雲端恢復後不再需要注入。
+- **冒煙**：`node scripts/smoke_test.mjs` exit=0，**179 PASS／0 FAIL**（#165：「repo：本站 日線…；（雲端檔 NVDA 無 sparkline，測試注入 repo 日線 20 根收盤）quotes_us：quotes_us 近 20 日收盤」）。
+- **補提交（上一輪逾時被砍或冒煙擋下，各自一個 commit）**，提交前重跑自測：
+  - 先.一三五-1ce 財報 ROE 舊殘值清理（`selftest_stock_financials.py` 22 項過）2bd77ed8f4
+  - 先.一三五-1dx 供給吃緊清單自測（27 項過）be6e9fa23d
+  - 先.一三五-1ea 美股 sparkline 沿用上一份（8 項過）c8e8a4f43c
+  - **先.一三五-1dy（本輪指派項）** FinMind 暖機自測 42 項過＋狀態檔形狀不對不崩潰 → `- [x]` 49a2f1c8ee
+  - 先.一三五-1dz IBKR 離線自測 26 項過＋代號不消失／原子寫入 → `- [x]` 1f2d1c6bc8
+- **阻塞項解除並結案**（解除條件都已成立，全部零外部資料請求）：
+  - 先.一四〇-10 停資停券 10/29 日檔存在、10/28 未被覆寫。
+  - 先.一四〇-9 兩本台帳 excess 補算：signal_ledger null 217→0、picks_ledger 60→0，已有值被改 0 筆（基準 b8b9dd9c98）。
+  - 先.一三八-B1 記憶體取樣兩晚各 18 筆、間隔 9～11 分鐘、只記程式名與記憶體。
+  - 先.一三五-1as 上櫃官方次日漲停價：10-29 852／868（98.2%）、10-30 869／873（99.5%）改由 `tpex_official`。
+  - 先.一〇七-3 看門狗第一次真正送出 workflow_dispatch＝**2026-10-23 12:54:21Z（台北 20:54）run 39956881936 success**（github-actions[bot]）。
+- **先.一三八-B2** 記憶體報告 `research/MEM_PROFILE_REPORT_B2.md` → AWAITING：最低可用 2,680 MB（10/28，ChatGPT／Steam／Riot／富途牛牛同時開），10/29 最低 5,272 MB；Alpha 尖峰主要是冒煙 headless 瀏覽器（750～910 MB）；同分鐘重疊 18:30、19:30 兩組。建議甲＝維持現狀（24 小時預設放行＝什麼都不動）；乙＝錯開 10 分鐘（需總司令本人改排程）；丙＝另量白天。**沒改排程、沒關程式**。
+- **收工補件**（[自走補入]，前向模擬 14／14 滿，不新增候選）：1eb～1ee 四條，本輪做掉三條——1eb market.yml 10/28 補救觸發 failure＝Commit 步驟 fatal 128，已由 先.一四〇-1z 修好；1ec 暖機新版實地跑過結果 0、鎖檔釋放；1ed IBKR 三份輸出合法 JSON、無殘留暫存檔。1ee 時間閘 11/02 23:30 → `- [!]`。
+- **補件來源已用盡**：DATA_GAP_PLAN 甲類已無待抓；1ds「本機排程無自測」清單剩下的 paper_supply_v2／run_paper_9 已有自測。DevQueue 可執行項現在 0（`dev_queue_runner.py next`＝NO_PENDING_ITEM），照實記錄、沒有拿小事湊數。
+- `data/STATUS.json`：本輪沒有資料源或面板異動，未改。
+- BLOCKED 新增：先.一三五-1ee（時間閘，解除條件：台北 ≥11/02 23:30 且 `quotes_us.json` meta 出現 `sparkline_stale_tickers`）。
+
 ## 2026-10-31 02:xx DevQueue 20261031-020102（維運帽）：FinMind 暖機與 IBKR 離線自測（1dy／1dz）——已實作、自測過，冒煙 #165 資料面 FAIL 未 commit
 
 - **等待總司令審閱：2 件**（沿用 `research/AWAITING_REVIEW.md`：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中報價本機補班）。
