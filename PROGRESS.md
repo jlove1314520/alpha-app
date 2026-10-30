@@ -1,3 +1,15 @@
+## 2026-10-30 22:xx DevQueue 候選補件（維運帽）：本機排程四組無自測腳本自測（1ds／1dt／1du／1dv）
+
+- **等待總司令審閱：2 件**（本輪未異動 `research/AWAITING_REVIEW.md`，沿用：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中報價本機補班）。
+- **前向模擬上限 14／14 仍滿**：照 CLAUDE.md 零之二⑤，本輪不新增候選、不寫 PREREG、不送 AWAITING、不算報酬、不碰 holdout、不登記試驗；只在 `research/FORWARD_CANDIDATES.md` 記一行本輪補件。
+- 來源：workflow 腳本已全部有自測，改清查本機排程（`C:lphaun-*.ps1`、`scripts/run_*.ps1`）呼叫、但沒有任何 selftest 引用的 .py，取前四組；剩 finmind_warmup、paper_supply_v2、build_supply_watchlist、run_paper_9、ibkr_quotes 等可作下一輪來源。
+- **先.一三五-1ds** 經濟部 PIT 快照：7 項全過，失敗路徑都不刪改既有快照。無 bug、未改。
+- **先.一三五-1dt** 無風險利率月檔：7 項全過，三種抓取失敗都不覆蓋舊檔。無 bug、未改。
+- **先.一三五-1du** 權證每日排程本體：15 項全過，休市日零請求。疑慮只記錄：備份清單 JSON 結構不對會讓整支中斷（只有本程式自己寫，實害低）。
+- **先.一三五-1dv** 系統週報：7 項全過，真錢區塊確認沒有金額／股數欄位。疑慮只記錄：區塊讀檔失敗時 error 欄位會帶本機完整路徑進公開檔（無敏感資訊，實害低）。
+- 證據：新增 `scripts/selftest_local_sched_scripts.py` 36 過、0 失敗（零外部請求、全部合成資料）；冒煙 `node scripts/smoke_test.mjs` rc=0，179 項全部 `[x]`。
+- BLOCKED：無新增。
+
 ## 2026-10-30 21:xx DevQueue 候選補件（維運帽）：最後三支無自測排程腳本自測＋TWSE 發布時間報告壞行崩潰修正（1dp／1dq／1dr）
 
 - **等待總司令審閱：2 件**（本輪未異動 `research/AWAITING_REVIEW.md`，沿用：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中報價本機補班，皆「請總司令執行一次」）。
