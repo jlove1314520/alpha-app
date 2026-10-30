@@ -43,6 +43,11 @@ def main() -> int:
             print(f"[warn] {src.name} 讀不到（{type(e).__name__}），{dst.name} 維持原狀")
             rc = 1
             continue
+        if not isinstance(doc, dict) or not isinstance(doc.get("stocks"), list) or not doc["stocks"]:
+            # 先.一三五-1cv：格式不對／stocks 是空的 → 不寫空清單蓋掉上一版，也不讓例外中斷後面幾榜
+            print(f"[warn] {src.name} 格式不對或 stocks 是空的，{dst.name} 維持原狀")
+            rc = 1
+            continue
         txt = json.dumps(lite(doc), ensure_ascii=False, separators=(",", ":"))
         old = dst.read_text(encoding="utf-8") if dst.exists() else None
         if old != txt:
