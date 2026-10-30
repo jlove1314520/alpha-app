@@ -1,3 +1,14 @@
+## 2026-10-31 05:xx DevQueue 20261031-050102（維運帽）：空轉補件三條（前向模擬 14／14 已滿，不新增候選）——相依套件檢查全部查詢失敗不覆寫修正＋紙.二帳本讀寫自測
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不變）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次）②先.一四一-3a 美股盤中本機補班金鑰＋觸發時段（待總司令本人）③先.一三八-B2 記憶體報告（等 Cowork）。
+- **為什麼做這些**：佇列沒有可執行 `- [ ]`，連 2 輪 QUEUE_EMPTY；`research/FORWARD_CANDIDATES.md` 進行中 14／14＝滿，照零之二⑤不寫候選 PREREG、不送 AWAITING，改補本機排程腳本自測（比對 `Get-ScheduledTask Alpha*` 與 `scripts/selftest_*`，AlphaDepCheck、AlphaPaperSupplyV2 兩支還沒自測）。
+- **先.一三五-1ef（純 bug 修復）**：`scripts/check_security_updates.py` 在 PyPI 全部查詢失敗（離線／被擋）時仍寫出 `behind_count: 0`、每列 `latest: null`，蓋掉上一份真結果，設定頁看起來像「全是最新」，`run_dep_check.py` 也照樣 commit。舊版跑新自測重現 4 項 FAIL。改成全部失敗 → exit 1、保留舊檔；加 `error_count` 欄位。新自測 `scripts/selftest_dep_check.py` **11/11 過**（零外部請求、不碰真 git）。
+- **先.一三五-1eg**：`scripts/selftest_paper_supply_v2_ledger.py` 測紙.二 append-only 帳本與狀態檔讀寫，**13/13 過**，程式無缺口、未改（不讀價格、不算報酬、不碰真帳本）。
+- **先.一三五-1eh**：時間閘 11/02（週一）08:30 後，看 AlphaDepCheck 用新版真跑一次。
+- 影響檔案：`scripts/check_security_updates.py`、`scripts/selftest_dep_check.py`（新）、`scripts/selftest_paper_supply_v2_ledger.py`（新）、`PENDING_QUEUE.md`、`research/FORWARD_CANDIDATES.md`、`PROGRESS.md`。
+- 不碰 holdout、不算報酬、不登記試驗、零外部請求。交辦佇列 DevQueue 可執行 `- [ ]` 未開始：0 條（其餘皆時間閘／BLOCKED）。
+- 冒煙：`node scripts/smoke_test.mjs` exit=0，**179 PASS／0 FAIL**。
+
 ## 2026-10-31 03:31 DevQueue 20261031-033102（維運帽）：查清 1dy 卡關根因（冒煙 #165 依賴雲端當班資料）→ 冒煙轉綠，補提交五項積壓修法＋六項阻塞解除結案＋B2 記憶體報告
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 2→3）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次，10/28 起）②先.一四一-3a 美股盤中報價本機補班（請總司令執行一次，10/29 起）③**先.一三八-B2 記憶體報告（本輪新送，等 Cowork 審）**。

@@ -62,11 +62,18 @@ def main() -> int:
         mark = "有新版" if is_behind else ("查詢失敗" if err else "已是最新")
         print(f"  {pkg:<12} 目前 {cur:<12} 最新 {new or '?':<12} {mark}")
 
+    errors = sum(1 for r in rows if r["error"])
+    if rows and errors == len(rows):
+        # 先.一三五-1ef：全部查詢失敗（離線／PyPI 擋）時不覆寫——否則 behind_count=0 會讓設定頁看起來「全是最新」，
+        # 蓋掉上一份真結果。保留舊檔（舊 generated_at 看得出逾期），exit 1 讓 run_dep_check 不提交。
+        print(f"\n{errors} 個套件全部查詢失敗，保留既有 {OUT.relative_to(ROOT)} 不覆寫")
+        return 1
     doc = {
         "generated_at": datetime.now(TZ).isoformat(),
         "source": "PyPI 官方 JSON API",
         "policy": "只回報不自動升級；升級須照 CLAUDE.md 七之二 四步驗證",
         "behind_count": behind,
+        "error_count": errors,
         "packages": rows,
     }
     OUT.write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
