@@ -1,3 +1,15 @@
+## 2026-10-31 15:3x DevQueue（維運帽）：空轉補件四條（前向模擬 14／14 已滿，不新增候選）——1fb 結案＋三支無自測腳本合成自測（含一個不覆寫修正）
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不變）。
+- **為什麼做這些**：佇列沒有可執行 `- [ ]`，連 2 輪 QUEUE_EMPTY；前向模擬 14／14＝滿，照零之二⑤不寫候選、不寫 PREREG、不送 AWAITING。`scripts/*.py` 逐支 grep `selftest_*.py`，挑輸出會被排程讀到、或守過 bug 修正卻沒回歸自測的三支。
+- **先.一三五-1fb（時間閘已過，結案）**：14:22、14:57 兩筆連通性心跳 commit 都帶上 `data/seed/pipeline_registry.json`（14:22 也帶 `.pipeline_fault_state.json`），`git status` 不再常駐這兩檔；1ez 實地生效。
+- **先.一三五-1fd（純 bug 修復）**：`validate_seed_themes.py` 在官方名冊 `active` 讀到空的時，會把全部成員當壞代號剔除並**照樣覆寫** `data/seed/seed_themes_validated.json` 成全空題材（雲端 build_themes 讀這份）；名冊檔不存在則直接拋例外。改成讀不到或任一邊空 → 印原因、exit 1、不寫檔。新增 `scripts/selftest_validate_seed_themes.py`：修前 8／11、修後 **11／11 PASS**。手動工具，真檔未重跑。
+- **先.一三五-1fe**：`pipeline_inventory.py` 新增 `scripts/selftest_pipeline_inventory.py` **9／9 PASS**，本體未改。
+- **先.一三五-1ff**：`audit_price_jumps.py` 新增 `scripts/selftest_audit_price_jumps.py` **9／9 PASS**，本體未改；反向對照（假日曆拿掉 10/23 臨時休市）1al 回歸兩項確實 FAIL，自測守得住。
+- 影響檔案：`scripts/validate_seed_themes.py`、`scripts/selftest_validate_seed_themes.py`（新）、`scripts/selftest_pipeline_inventory.py`（新）、`scripts/selftest_audit_price_jumps.py`（新）、`PENDING_QUEUE.md`、`research/FORWARD_CANDIDATES.md`、`PROGRESS.md`。
+- 不碰 holdout、不讀真價格、不算報酬、不登記試驗、零外部請求。十節註記：沒有新增任何排程寫入。交辦佇列 DevQueue 可執行 `- [ ]` 未開始：0 條（其餘皆時間閘／BLOCKED）。
+- 冒煙：`node scripts/smoke_test.mjs` exit=0，**179 PASS／0 FAIL**。
+
 ## 2026-10-31 14:0x DevQueue（維運帽）：空轉補件四條（前向模擬 14／14 已滿，不新增候選）——十節本機半邊再稽核，修兩個「有寫沒提交」
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不變）。

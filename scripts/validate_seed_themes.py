@@ -36,9 +36,19 @@ TZ = timezone(timedelta(hours=8))
 
 
 def main() -> int:
-    seed = json.loads(SEED.read_text(encoding="utf-8"))
-    uni = json.loads((ROOT / "data" / "listed_universe.json").read_text(encoding="utf-8"))
+    # 先.一三五-1fd：讀不到輸入（名冊空／缺、種子空）不覆寫既有輸出——否則全部成員被當壞代號剔除，
+    # seed_themes_validated.json 會被蓋成全空，雲端 build_themes 下一班就讀到空題材（同 1el 的形狀）
+    try:
+        seed = json.loads(SEED.read_text(encoding="utf-8"))
+        uni = json.loads((ROOT / "data" / "listed_universe.json").read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        print(f"! 讀不到種子表或官方名冊（{e!r}），不覆寫 {OUT.name}")
+        return 1
     active = set(uni.get("active") or [])
+    if not active or not (seed.get("themes") or []):
+        print(f"! 官方在市名冊 {len(active)} 檔／種子題材 {len(seed.get('themes') or [])} 個，"
+              f"有一邊是空的，不覆寫 {OUT.name}")
+        return 1
     try:
         companies = json.loads(
             (ROOT / "data" / "company_info.json").read_text(encoding="utf-8")).get("companies") or {}
