@@ -1,3 +1,15 @@
+## 2026-11-01 02:3x DevQueue（維運帽）：空轉補件四條（前向模擬 14／14 已滿，不新增候選）——美國夏令時間 11/01 結束的時區檢查
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不增不減）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班（皆請總司令執行一次）③先.一三五-1fr-a git stash 殘留 7 筆可否刪除。
+- **為什麼做這些**：佇列沒有可執行 `- [ ]`、連 2 輪 QUEUE_EMPTY；前向上限滿，照零之二⑤不寫候選、不寫 PREREG、不送 AWAITING。今天美東從 UTC-4 改 UTC-5，美股盤中在台北時間整體晚一小時（EST＝台北 22:30～05:00），趁第一個 EST 交易日前檢查。
+- **先.一三五-1ga（已結案）**：全部排程腳本、workflow、前端 JS 沒有寫死美東差值（Python 用 zoneinfo＋tzdata 2025.3、前端用 Intl）；雲端 cron 與本機 IBKR 排程在 EST 下仍涵蓋盤中。無需修改。`quotes_local_fallback --us` 觸發時段（先.一四一-3a，待總司令建）要用 EST 盤中＝台北 22:30～05:00。
+- **先.一三五-1gb（已結案）**：新增 `scripts/selftest_us_dst_boundary.py`，餵台北時間給本機美股補班決策，11 項全過；既有 `selftest_quotes_local_fallback.py` 16 項照舊全過。
+- **先.一三五-1gc（已結案）**：新增 `scripts/selftest_app_zoned_dst.mjs`，從 `app.js` 原文切出 `_zonedParts`／`usMarketSession` 測盤別，10 項全過。
+- **先.一三五-1gd（待時間閘 11/03 06:30）**：EST 第一個美股交易日實地驗收（看 quotes_us 提交時間是否落在台北 22:30～05:00）。
+- 維運帽產物：`data/STATUS.json` 本輪無產出（沒有資料源或面板異動）。本體程式零修改；新增兩支自測不寫 repo 內任何追蹤檔，未新增排程寫入。
+- 不碰 holdout、不算報酬、不登記試驗、零外部請求。
+- 冒煙：`node scripts/smoke_test.mjs` exit=0，**179 PASS／0 FAIL**。
+
 ## 2026-11-01 01:0x DevQueue（維運帽）：空轉補件三條（前向模擬 14／14 已滿，不新增候選）——模擬 G 起跑前重跑、cowork_test 比對、邊序列化邊寫檔清查
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不增不減）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班（皆請總司令執行一次）③先.一三五-1fr-a git stash 殘留 7 筆可否刪除。
