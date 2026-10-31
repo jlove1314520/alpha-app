@@ -1,3 +1,13 @@
+## 2026-10-31 09:3x DevQueue（維運帽）：空轉補件四條（前向模擬 14／14 已滿，不新增候選）——連通性監測呼叫的三支監控模組自測
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不變）。
+- **為什麼做這些**：佇列沒有可執行 `- [ ]`，連 2 輪 QUEUE_EMPTY；前向模擬 14／14＝滿，照零之二⑤不寫候選、不寫 PREREG、不送 AWAITING。照十一節「監控工具自己也要被監控」，查 `check_external_connectivity.py`（AlphaConnectivity 每 30 分鐘）呼叫的模組，`pipeline_fault_ledger.py`／`check_pat_expiry.py`／`factory_stability.py` 三支都沒有自測。
+- **先.一三五-1eo／1ep／1eq**：新增 `scripts/selftest_connectivity_ledgers.py`（路徑全換暫存、不打 gh api、不碰 token），**24 項全過**，三支本體未改。只記錄不改：factory_stability 兩份輸出檔非原子寫入（呼叫端已包 try/except，30 分鐘後整份重寫）。
+- **順帶查到**：登錄檔記的 GitHub PAT 到期日＝**2026-12-14**（剩 44 天），11/30 起告警會亮；換新要總司令本人在 GitHub 設定頁做。→ 開 **1er**（時間閘 11/30）驗收告警真的亮燈並補進 `C:lpha\總司令待辦.md`。
+- 影響檔案：`scripts/selftest_connectivity_ledgers.py`（新）、`PENDING_QUEUE.md`、`research/FORWARD_CANDIDATES.md`、`PROGRESS.md`。
+- 不碰 holdout、不讀價格、不算報酬、不登記試驗、零外部請求。交辦佇列 DevQueue 可執行 `- [ ]` 未開始：0 條（其餘皆時間閘／BLOCKED）。
+- 冒煙：`node scripts/smoke_test.mjs` exit=0，**179 PASS／0 FAIL**。
+
 ## 2026-10-31 08:0x DevQueue（維運帽）：空轉補件三條（前向模擬 14／14 已滿，不新增候選）——題材庫重建讀不到輸入不覆寫修正＋自測、1bu 結案
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不變）。
