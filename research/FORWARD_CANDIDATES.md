@@ -58,6 +58,8 @@
 
 2026-10-30 21:xx DevQueue 空轉補件：上限仍 14／14，本輪不新增候選、不寫 PREREG、不送 AWAITING；改補最後三支無自測排程腳本（1dp 美股財報、1dq 美股評分 v0〔只記錄非原子寫檔疑慮〕、1dr TWSE 發布時間探測 `--report` 壞行崩潰修正〔純 bug 修復〕）。
 
+2026-11-01 06:0x DevQueue 空轉補件：上限仍 14／14，本輪不新增候選、不寫 PREREG、不送候選 AWAITING；改補重現性稽核監控盲點——1gi FILE_NOT_FOUND 11 支分類（7 支其實在 backtest／validation／.github/scripts／alpha-data，從未被 import 檢查）、1gj 雲端 ENV_MISSING 41 支按套件分類、1gk 1gf～1gi 雲端生效驗收（時間閘 11/03 06:00）。
+
 2026-11-01 02:3x DevQueue 空轉補件：上限仍 14／14，本輪不新增候選、不寫 PREREG、不送 AWAITING；改補美國夏令時間 11/01 結束的維運檢查——1ga 時區寫死清查（無寫死、無需改）、1gb 本機美股補班跨 DST 自測（11 項全過）、1gc 前端美東盤別跨 DST 自測（10 項全過）、1gd EST 第一個交易日實地驗收（時間閘 11/03 06:30）。
 
 2026-11-01 01:0x DevQueue 空轉補件：上限仍 14／14，本輪不新增候選、不寫 PREREG、不送 AWAITING；改補 1fx 模擬 G 起跑前一天營收覆蓋率重跑（OK，1,454 檔）、1fy 未追蹤 `build_research.py.cowork_test` 比對（有 33 行獨有內容，保留交 Cowork 認領）、1fz 雲端排程腳本邊序列化邊寫檔清查（2 支 5 處，風險近零，記錄不改）。

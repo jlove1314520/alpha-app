@@ -1,3 +1,15 @@
+## 2026-11-01 06:0x DevQueue（維運帽，空轉補件 先.一三五-1）：重現性稽核監控盲點補 3 條
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不增不減）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班（皆請總司令執行一次）③先.一三五-1fr-a git stash 殘留 7 筆可否刪除。
+- **前向模擬 14／14 已滿**：照 CLAUDE.md 零之二⑤不新增候選、不寫 PREREG、不送候選 AWAITING；`research/FORWARD_CANDIDATES.md` 補一行本輪紀錄。
+- **新補 3 條（PENDING_QUEUE，皆 DevQueue 可執行，零請求）**：
+  - 先.一三五-1gi `- [ ]`：重現性稽核 FILE_NOT_FOUND 11 支——本輪查證 7 支其實存在（`research/backtest/engine.py`、`research/validation/` 三支、`.github/scripts/` 兩支、`alpha-data` 兩支），`check_one()` 只找 `research/` 根目錄，所以回測引擎與成本模組**從來沒被 import 檢查過**（十一節監控盲點）；另 3 支全機找不到檔案待查 git 歷史。
+  - 先.一三五-1gj `- [ ]`：雲端 ENV_MISSING 41 支按缺哪個套件分類，只統計，不推翻先.一三二-8b 定案；單一套件涵蓋 ≥30 支才另提 audit.yml 加裝提案。
+  - 先.一三五-1gk `- [!]` 時間閘 11/03 06:00：1gf／1gg／1gh（＋1gi）在雲端稽核生效驗收。
+- [自行裁量] 本輪只寫條目、不動手修 `reproducibility_check.py`：一輪一頂帽，修法留給取件那一輪做自測。
+- 附帶發現：`PENDING_QUEUE.md` HEAD 裡已有 4 個 BEL 控制字元（``，疑似舊輪寫入時 `C:lpha` 被當跳脫字元），本輪自己寫壞的那處已修回，舊的沒動，記錄待清。
+- 冒煙測試：`node scripts/smoke_test.mjs` exit=0，179 項全 `[x]`、0 項未勾、結束時無累積 uncaught error。
+
 ## 2026-11-01 04:5x DevQueue（研究帽，cycle 20261101-043102）：stock_grid_limit7_diag 不再讓稽核 TIMEOUT
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不增不減）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班（皆請總司令執行一次）③先.一三五-1fr-a git stash 殘留 7 筆可否刪除。
