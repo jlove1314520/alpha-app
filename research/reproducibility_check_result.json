@@ -2,17 +2,16 @@
   "checked_at": null,
   "n_checked": 242,
   "by_status_count": {
-    "OK": 229,
+    "OK": 230,
     "FILE_NOT_FOUND": 11,
-    "MEM_DEFERRED": 1,
-    "TIMEOUT": 1
+    "MEM_DEFERRED": 1
   },
   "broken": [],
   "env_missing": [],
   "mem_deferred": [
     {
       "module": "run_momentum_future_board_pit_backtest",
-      "available_gb": 4.11
+      "available_gb": 4.23
     }
   ],
   "all_results": [
@@ -739,7 +738,7 @@
     {
       "module": "run_momentum_future_board_pit_backtest",
       "status": "MEM_DEFERRED",
-      "available_gb": 4.11,
+      "available_gb": 4.23,
       "note": "mem_guard 開跑前檢查記憶體不足、主動 exit 3 延後，不是腳本壞掉；記憶體夠時再驗"
     },
     {
@@ -804,8 +803,7 @@
     },
     {
       "module": "stock_grid_limit7_diag",
-      "status": "TIMEOUT",
-      "note": "10秒內未完成import，可能頂層有重度/網路操作，需要人工檢查是否應該加`if __name__ == '__main__':`保護"
+      "status": "OK"
     },
     {
       "module": "stock_grid_oneshot",
