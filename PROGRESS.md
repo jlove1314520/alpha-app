@@ -1,3 +1,16 @@
+## 2026-10-31 12:3x DevQueue（維運帽）：空轉補件四條（前向模擬 14／14 已滿，不新增候選）——1eu 結案＋三支無自測腳本合成自測
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不變）。
+- **為什麼做這些**：佇列沒有可執行 `- [ ]`，連 2 輪 QUEUE_EMPTY；前向模擬 14／14＝滿，照零之二⑤不寫候選、不寫 PREREG、不送 AWAITING。`scripts/*.py` 逐支 grep `selftest_*.py`，找出無自測引用且仍在用的三支。
+- **先.一三五-1eu（時間閘已過，結案）**：`research/external_connectivity.jsonl` 含「使用者可見」的最後一列是 11:02，之後到 12:27 約 17 輪只剩 AlphaIbkrQuotes 逾期（Gateway 卡登入，另案）；1es 修正實地生效。註：`connectivity_check.log` 是 cp950 混雜編碼，比對以 jsonl 為準。
+- **先.一三五-1ev**：收件匣 .done 推播 `inbox_done_push.py` 12 項全過（四種狀態、只推一次、改寫再推、狀態檔壞掉照推、推播例外 exit 0）。
+- **先.一三五-1ew**：前向模擬保留期讀取稽核 `audit_forward_reserved_reads.py` 11 項全過；實跑本體一次 14／14 only_signal_input，輸出檔內容不變。
+- **先.一三五-1ex**：長工作進度心跳 `long_job_progress_heartbeat.py` 7 項全過（git 全失敗也只降級、exit 0）。
+- 新增 `scripts/selftest_inbox_push_forward_audit_heartbeat.py`：**30 項全過，三支本體都沒改**。新開 **1ey**（時間閘 11/03 09:00）：模擬 G／I 起跑後帳本有資料時再跑一次稽核。
+- 影響檔案：`scripts/selftest_inbox_push_forward_audit_heartbeat.py`（新）、`PENDING_QUEUE.md`、`research/FORWARD_CANDIDATES.md`、`PROGRESS.md`。
+- 不碰 holdout、不讀價格、不算報酬、不登記試驗、零外部請求。交辦佇列 DevQueue 可執行 `- [ ]` 未開始：0 條（其餘皆時間閘／BLOCKED）。
+- 冒煙：`node scripts/smoke_test.mjs` exit=0，**179 PASS／0 FAIL**。
+
 ## 2026-10-31 11:0x DevQueue（維運帽）：空轉補件三條（前向模擬 14／14 已滿，不新增候選）——【使用者可見】阻塞誤報修正＋兩支監控模組自測
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不變）。
