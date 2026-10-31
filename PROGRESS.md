@@ -1,3 +1,14 @@
+## 2026-10-31 23:xx DevQueue（維運帽）：空轉補件三條（前向模擬 14／14 已滿，不新增候選）——stash 盤點工具自測、未追蹤檔盤點
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不增不減）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班（皆請總司令執行一次，約等 2～3 天）③先.一三五-1fr-a git stash 殘留 7 筆可否刪除（10/31 22:xx 起）。
+- **為什麼做這些**：佇列沒有可執行 `- [ ]`、連 2 輪 QUEUE_EMPTY；前向上限滿，照零之二⑤不寫候選、不寫 PREREG。
+- **先.一三五-1fu（已結案）**：新增 `scripts/selftest_inventory_autostash_residual.py`（暫存目錄另建 git repo，不碰本 repo stash），14 項全過，工具本體未改。記錄一個邊界不改：`--since` 含當秒，機器檔極少數可能 machine_stale 被判 superseded，不影響 1fr-a 結論。
+- **先.一三五-1fv（已結案）**：`git status` 長期掛著的未追蹤檔逐一查寫檔腳本——7 個本機狀態檔／心跳 log＋2 張一次性截圖，寫檔腳本都標本機用、`.gitignore` 已有同類先例 → [自行裁量] 補 9 行進 `.gitignore`（沒刪任何檔；確認沒有排程會 `git add` 它們）。`scripts/build_research.py.cowork_test` 不是本機程式寫的，不動。
+- **先.一三五-1fw（`- [!]` 時間閘 11/03 13:35）**：收件匣 033 新加的記憶體白天盤中取樣，第一次真實平日後驗收（2 天量滿自動停）。
+- 維運帽產物：`data/STATUS.json` 本輪無產出（沒有資料源或面板異動）。
+- 不碰 holdout、不算報酬、不登記試驗、零外部請求；未新增排程寫入。
+- 冒煙：`node scripts/smoke_test.mjs` exit=0，**179 PASS／0 FAIL**。
+
 ## 2026-10-31 22:xx DevQueue（維運帽）：空轉補件三條（前向模擬 14／14 已滿，不新增候選）——git stash 殘留與 autostash 衝突
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 2→3）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班（皆請總司令執行一次）③**新增 先.一三五-1fr-a**：git stash 殘留 7 筆可否刪除（刪除屬停下白名單，不適用 24 小時預設放行）。
