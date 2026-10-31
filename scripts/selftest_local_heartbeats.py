@@ -38,10 +38,17 @@ try:
     check("①上次提交 15 分鐘前 → 不提交", not calls)
     G.last_commit_age_min = lambda p: 75.0
     H.main()
-    check("①75 分鐘 → 只提交連通性監測自己的檔", calls == [("commit", ("research/external_connectivity.jsonl", "research/connectivity_check.log"))])
+    check("①75 分鐘 → 只提交連通性監測自己的檔", calls == [("commit", ("research/external_connectivity.jsonl", "research/connectivity_check.log",
+                                                                    "data/factory_stability.json", "data/factory_stability_history.jsonl",
+                                                                    "data/seed/pipeline_registry.json", "research/.pipeline_fault_state.json"))])
+    # 先.一三五-1ez：原本只比 2 檔，先.一〇九-6 加 factory_stability 兩檔後沒跟著改（一直 FAIL）；1ez 再加 fault_history 兩檔
     calls.clear(); G.last_commit_age_min = lambda p: None; sys.argv = ["x", "probe"]; H.main()
     check("①從沒提交過 → 提交探測檔", calls and calls[0][1][0] == "research/twse_publish_probe.jsonl")
     # ② 新聞補班
+    # 先.一三五-1ez：先.一三五-1d 在 main() 加了重大訊息歸檔（archive_mops_events.run，內部也呼叫 subprocess.run 讀 origin/main），
+    # 被下面的假 subprocess.run 吃到而讓 ② 誤判「有跑步驟」；這裡換成假的歸檔模組，只測補班判斷本身。
+    import types
+    sys.modules["archive_mops_events"] = types.SimpleNamespace(run=lambda revs: 0)
     ran = []
 
     class R:

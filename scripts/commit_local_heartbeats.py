@@ -24,8 +24,12 @@ THROTTLE_MIN = 30
 SETS = {
     # 先.一〇九-6（2026-10-17）：check_external_connectivity.py 每輪也重寫 data/factory_stability.json／_history.jsonl，
     # 原本不在清單裡，repo 版停在 10/14，雲端讀到過期；兩檔只有本機這支寫（.github 無寫入者）。
+    # 先.一三五-1ez（2026-10-31）：同一支每輪也經 pipeline_fault_ledger.update_fault_history() 改寫
+    # data/seed/pipeline_registry.json（fault_history）與 research/.pipeline_fault_state.json，原本不在清單裡，
+    # 10/29 起只靠別的 commit 順手帶上；兩檔只有本機這支寫（.github 無寫入者）。
     "connectivity": (["research/external_connectivity.jsonl", "research/connectivity_check.log",
-                      "data/factory_stability.json", "data/factory_stability_history.jsonl"],
+                      "data/factory_stability.json", "data/factory_stability_history.jsonl",
+                      "data/seed/pipeline_registry.json", "research/.pipeline_fault_state.json"],
                      "對外連通性監測心跳（AlphaConnectivity，每 30 分鐘提交一次）"),
     "probe": (["research/twse_publish_probe.jsonl", "research/twse_probe.log"], "TWSE 發布時間探測心跳（AlphaTwsePublishProbe）"),
 }

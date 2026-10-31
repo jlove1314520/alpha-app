@@ -1,3 +1,15 @@
+## 2026-10-31 14:0x DevQueue（維運帽）：空轉補件四條（前向模擬 14／14 已滿，不新增候選）——十節本機半邊再稽核，修兩個「有寫沒提交」
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不變）。
+- **為什麼做這些**：佇列沒有可執行 `- [ ]`，連 2 輪 QUEUE_EMPTY；前向模擬 14／14＝滿，照零之二⑤不寫候選、不寫 PREREG、不送 AWAITING。排程中、沒有自測的腳本已補完（剩下的都是一次性手動腳本），改照十節查 `git status` 常駐的已修改追蹤檔「誰寫、誰該提交」。
+- **先.一三五-1ez（純 bug 修復）**：AlphaConnectivity 每輪經 `pipeline_fault_ledger` 改寫 `data/seed/pipeline_registry.json`（fault_history）與 `research/.pipeline_fault_state.json`，但 `commit_local_heartbeats.py` 的提交清單沒列——10/29 起只靠無關 commit 順手帶上（同 先.一〇九-6 的形狀）。已補進清單。`selftest_local_heartbeats.py` 原本就 4 項 FAIL（清單比對過時＋1d 歸檔步驟沒隔離），一併修好 → 12／12 PASS。
+- **先.一三五-1fa（純 bug 修復）**：孤兒巡檢只在 PID 名單變動才提交，雲端 `STATUS.orphan_processes.checked_at` 停在 10/29（實際 10/31 03:00 有跑）。改成換日也提交（每天最多 1 個 commit）；新增 `scripts/selftest_orphan_scan_daily_commit.py` 6／6 PASS。
+- 開兩條實地驗收：**1fb**（今日 14:30 後看連通性心跳 commit 有帶 registry）、**1fc**（11/01 03:30 後看孤兒巡檢有提交）。
+- 只記錄不改：`git status` 裡其餘常駐髒檔（`data/audit_report.json`、`data/by_code/_meta.json`、`data/rate_limit_state.json` 等）都被 `dev_queue_runner.MACHINE_WRITTEN` 涵蓋、各有雲端／本機提交者，沒有再發現同形狀缺口；未逐支追完的寫手，下輪若有空再查。
+- 影響檔案：`scripts/commit_local_heartbeats.py`、`scripts/orphan_process_scan.py`、`scripts/selftest_local_heartbeats.py`、`scripts/selftest_orphan_scan_daily_commit.py`（新）、`PENDING_QUEUE.md`、`research/FORWARD_CANDIDATES.md`、`PROGRESS.md`。
+- 不碰 holdout、不讀價格、不算報酬、不登記試驗、零外部請求。十節註記：沒有新增排程寫入，只把既有寫入檔補進提交條件。交辦佇列 DevQueue 可執行 `- [ ]` 未開始：0 條（其餘皆時間閘／BLOCKED）。
+- 冒煙：`node scripts/smoke_test.mjs` exit=0，**179 PASS／0 FAIL**。
+
 ## 2026-10-31 12:3x DevQueue（維運帽）：空轉補件四條（前向模擬 14／14 已滿，不新增候選）——1eu 結案＋三支無自測腳本合成自測
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不變）。

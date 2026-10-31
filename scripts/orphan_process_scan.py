@@ -182,7 +182,10 @@ def main(commit: bool = True, notify=None) -> int:
         pass
     changed = (sorted(o["pid"] for o in old.get("orphans", [])) != sorted(o["pid"] for o in orphans) or "checked_at" not in old
                or sorted(o["pid"] for o in old.get("stuck_git", [])) != sorted(o["pid"] for o in stuck)
-               or sorted(o["pid"] for o in old.get("orphan_shells", [])) != sorted(o["pid"] for o in shells))
+               or sorted(o["pid"] for o in old.get("orphan_shells", [])) != sorted(o["pid"] for o in shells)
+               # 先.一三五-1fa（2026-10-31）：名單沒變也要每天提交一次——雲端 STATUS.orphan_processes.checked_at 讀 repo 版，
+               # 原本只在 PID 名單變動時才提交，10/30、10/31 有跑卻顯示 10/29 檢查（顯示不實）。排程每天 03:00 一次，最多每天 1 個 commit。
+               or str(old.get("checked_at", ""))[:10] != str(doc.get("checked_at", ""))[:10])
     OUT.write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"孤兒 python worker：{len(orphans)} 支，合計私有記憶體約 {doc['total_private_mb']}MB" +
           ("" if not orphans else "：" + "、".join(f"PID {o['pid']}（父 {o['parent_pid']}，{o['started']} 起）" for o in orphans)))
