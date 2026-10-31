@@ -1,3 +1,14 @@
+## 2026-10-31 17:3x DevQueue（維運帽）：空轉補件三條（前向模擬 14／14 已滿，不新增候選）——冒煙前置工具與守門員三支自測＋三個純 bug 修復
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不變）。
+- **為什麼做這些**：佇列沒有可執行 `- [ ]`（唯一的 先.一三三-2c-限 動 `research/validation/`，十三節只能互動視窗改），連 2 輪 QUEUE_EMPTY；前向模擬 14／14＝滿，照零之二⑤不寫候選、不寫 PREREG、不送 AWAITING。逐支 grep 後排程腳本已全有自測，改補「冒煙全過才 commit」這條線自己的前置工具與守門員。
+- **先.一三五-1fg（純 bug 修復）**：`ensure_smoke_server.py` 原本只看 8792 回 200 就沿用——別的工作目錄開的伺服器也會被沿用，冒煙測到別份 index.html。改成內容位元組相同才沿用，不同就 exit 1 說明。新增 `scripts/selftest_ensure_smoke_server.py` **8／8 PASS**。
+- **先.一三五-1fh（純 bug 修復）**：`scan_smoke_waits.py`（冒煙 #127）丟掉 JS 正則旗標（`/…/i` 大小寫不分的等待會漏抓），編不過的正則被空 except 吞掉。改成 i／s／m 照套、編不過印警告。新增 `scripts/selftest_scan_smoke_waits.py` **9／9 PASS**（舊版 2 項 FAIL）。真檔重掃 28 組無可疑，結果不變。
+- **先.一三五-1fi（純 bug 修復）**：`lab_weekly_intake.py` 任一代號設定缺欄位就 KeyError、整批跳出——同批通過的代號也不 commit、也沒失敗紀錄。改成逐檔隔離，只判那一檔 FAIL。新增 `scripts/selftest_lab_weekly_intake.py` **10／10 PASS**（舊版直接 KeyError）。
+- 影響檔案：`scripts/ensure_smoke_server.py`、`scripts/scan_smoke_waits.py`、`scripts/lab_weekly_intake.py`、三支新自測、`PENDING_QUEUE.md`、`research/FORWARD_CANDIDATES.md`、`PROGRESS.md`。
+- 不碰 holdout、不讀真價格、不算報酬、不登記試驗、零外部請求。十節註記：沒有新增任何排程寫入。交辦佇列 DevQueue 可執行 `- [ ]` 未開始：0 條（其餘皆時間閘／BLOCKED／限互動視窗）。
+- 冒煙：`node scripts/smoke_test.mjs` exit=0，**179 PASS／0 FAIL**。
+
 ## 2026-10-31 15:3x DevQueue（維運帽）：空轉補件四條（前向模擬 14／14 已滿，不新增候選）——1fb 結案＋三支無自測腳本合成自測（含一個不覆寫修正）
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不變）。

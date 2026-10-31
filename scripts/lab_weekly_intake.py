@@ -69,6 +69,15 @@ def problems_for(stock):
     return bad
 
 
+def _safe_problems(code, stock):
+    """先.一三五-1fi：某一檔缺欄位（例如情境少 growth）時只判這一檔 FAIL，不讓例外拖垮其他代號的判定與 commit。"""
+    try:
+        return problems_for(stock)
+    except Exception as e:
+        print(f"[warn] {code} 檢查時出錯：{e!r}")
+        return [f"檢查時出錯（設定缺欄位或格式不符）：{e!r}"]
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
@@ -89,7 +98,7 @@ def main() -> int:
             summ = [ln for ln in st.stdout.splitlines() if ln.startswith("FAIL ") or ln.strip() == "全部 PASS" or ln.strip().endswith(" FAIL")]
             print("selftest_research（全市場，僅供參考，逐檔判定見下）：" + ("；".join(summ) or "(無摘要行)"))
             stocks = json.loads((Path(tmp) / "research.json").read_text(encoding="utf-8"))["stocks"]
-            results = {c: problems_for(stocks.get(c)) for c in by}
+            results = {c: _safe_problems(c, stocks.get(c)) for c in by}
     now = datetime.now(TW).strftime("%Y-%m-%d %H:%M")
     for c in sorted(by):
         bad = results[c]

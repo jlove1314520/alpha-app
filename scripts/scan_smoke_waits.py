@@ -24,7 +24,7 @@ SMOKE = (ROOT / "scripts" / "smoke_test.mjs").read_text(encoding="utf-8")
 INDEX = (ROOT / "index.html").read_text(encoding="utf-8")
 
 WAIT_RE = re.compile(r"waitForFunction\(\s*\(\)\s*=>\s*(?P<body>.*?)\s*,\s*(?:null|undefined|\{)", re.S)
-TEST_RE = re.compile(r"/(?P<rx>(?:\\/|[^/\n])+?)/[gimsuy]*\.test\(", re.S)
+TEST_RE = re.compile(r"/(?P<rx>(?:\\/|[^/\n])+?)/(?P<flags>[gimsuy]*)\.test\(", re.S)
 ID_RE = re.compile(r"""getElementById\(\s*["'](?P<id>[\w-]+)["']\s*\)|querySelector\(\s*["']#(?P<id2>[\w-]+)["']\s*\)""")
 
 
@@ -52,6 +52,11 @@ def js_rx_to_py(rx: str) -> str:
     return rx.replace("\\/", "/")
 
 
+def js_flags_to_py(flags: str) -> int:
+    """先.一三五-1fh：JS 的 i（大小寫不分）／s（. 含換行）／m（多行）要照樣套用，否則 /abc/i 會漏抓預設文字 ABC。"""
+    return (re.I if "i" in flags else 0) | (re.S if "s" in flags else 0) | (re.M if "m" in flags else 0)
+
+
 def main() -> int:
     sus, checked = [], 0
     for wm in WAIT_RE.finditer(SMOKE):
@@ -65,10 +70,10 @@ def main() -> int:
                     continue
                 checked += 1
                 try:
-                    if re.search(js_rx_to_py(tm.group("rx")), d):
+                    if re.search(js_rx_to_py(tm.group("rx")), d, js_flags_to_py(tm.group("flags"))):
                         sus.append((line, el, tm.group("rx"), d[:60]))
-                except re.error:
-                    pass
+                except re.error as e:  # JS 語法 Python 編不過：只略過這一組並說明，不中斷掃描
+                    print(f"[warn] smoke_test.mjs:{line} /{tm.group('rx')}/ Python 編不過，略過：{e}")
     print(f"檢查了 {checked} 組（等待條件 × 元素預設文字）")
     if not sus:
         print("沒有發現「預設文字即滿足等待」的條件")
