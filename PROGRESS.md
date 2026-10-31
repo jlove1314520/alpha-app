@@ -1,3 +1,13 @@
+## 2026-10-31 18:3x DevQueue（維運帽）：空轉補件三條（前向模擬 14／14 已滿，不新增候選）——模擬 I 起跑阻塞補抓＋追蹤程式提交清單自測
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不變）。
+- **為什麼做這些**：佇列沒有可執行 `- [ ]`，連 2 輪 QUEUE_EMPTY；前向模擬 14／14＝滿，照零之二⑤不寫候選、不寫 PREREG、不送 AWAITING。排程腳本已全有自測，本輪改查 11/02 起跑的模擬 G／I 起跑前置條件。
+- **先.一三五-1fj（起跑阻塞）**：模擬 I 回看資料 `_status.json` 是 10/23 產的（range 寫到 10/30、missing 0），但檔案只到 20261023——追蹤程式要求 20261030.json 存在，**11/02 起會每天回 LOOKBACK_MISSING、不寫帳本**。先.一三二-0 ②(a)「10/30 15:00 後再跑一次」已定案但沒人跑。實跑 `research/fetch_paper_9_lookback.py`：8 次請求（上市 MI_INDEX／上櫃 otc 各 10/27～10/30，共用 `twse_mi_index`／`tpex_www` 節流，全 200；10/26 休市不抓）。現況 247 天、兩邊各 244 ok＋3 no_data、missing 0，回看完整條件實測 True。只抓資料、未算報酬，資料只在本機。
+- **先.一三五-1fk**：新增 `scripts/selftest_forward_tracker_allowlist.py`——market.yml 15 支追蹤程式＋本機 paper_9／12，每支自己編號的輸出檔都要在非註解的 git add 行／launcher 提交清單。**23／23 PASS**，現行清單無缺。初版把註解「已加進下方 git add 清單」算成提交行、反向對照漏抓，已改成跳過註解行；反向對照（拿掉 paper_7_log／paper_18_log）都抓到。
+- **先.一三五-1fl（時間閘 11/02 18:45）**：起跑日看 `paper_9_cycle.log` 不是 LOOKBACK_MISSING、commit 有 push。
+- 影響檔案：`scripts/selftest_forward_tracker_allowlist.py`（新）、`PENDING_QUEUE.md`、`research/FORWARD_CANDIDATES.md`、`PROGRESS.md`；本機（不進 repo）`research/data/paper_9_lookback/`、`C:\alpha\CLAUDE.md` 頻率清單補一行。
+- 不碰 holdout 判定、不算報酬、不登記試驗。外部請求 8 次（上面）。十節註記：沒有新增任何排程寫入。交辦佇列 DevQueue 可執行 `- [ ]` 未開始：0 條（剩 先.一三三-2c-限 屬互動視窗）。
+
 ## 2026-10-31 17:3x DevQueue（維運帽）：空轉補件三條（前向模擬 14／14 已滿，不新增候選）——冒煙前置工具與守門員三支自測＋三個純 bug 修復
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不變）。
