@@ -50,8 +50,10 @@
       "interval_min": 1440,
       "artifact": "data/quotes_sinopac.json",
       "freshness": "json_field",
-      "field": "checked_at",
-      "note": "盤中不更新是正常的，所以間隔按日計，不是按分鐘。",
+      "field": "fetched_at",
+      "shift_profile": "shioaji_close",
+      "missed_shift_threshold": 3,
+      "note": "盤中不更新是正常的，所以間隔按日計，不是按分鐘。2026-11-01 DevQueue 20261101-030102：欄位 checked_at→fetched_at（收盤快照只寫 fetched_at，checked_at 只在舊版休市寫檔出現，原設定永遠 unknown）；改用 shift_profile=shioaji_close（交易日 14:00 一班；13:45 寫檔後同日 14:00 那班必被數到，門檻 3＝連續 2 個交易日收盤沒寫才亮燈），避免連假超過 72 小時誤報。",
       "fault_history": {
         "count": 1,
         "last_fault_at": "2026-10-27T12:37:02.085161+08:00",
@@ -603,14 +605,13 @@
       "missed_shift_threshold": 3,
       "note": "2026-09-16新增。news_events.yml排程是全天候每30分鐘一次（無平日/盤中限制），interval_min=30×stall_factor=3=90分鐘門檻。總司令原話點名這條workflow「Actions排程降級」曾經發生過（15%降級病史），列為雲端監控四條之一。同日【班次數】裁示：改用shift_profile=news_30min（shift_requires_trading_day=false，因排程本身全年無休不分平假日），連續錯過3班即亮燈——換算後門檻仍是90分鐘，與舊制數字相同，這條本來就沒有「假日誤報」的問題（cron不分平假日），改用班次計數只是統一判準表達方式，不是行為變更。",
       "fault_history": {
-        "count": 148,
-        "last_fault_at": "2026-11-01T01:32:02.437680+08:00",
+        "count": 149,
+        "last_fault_at": "2026-11-01T03:02:02.452251+08:00",
         "fault_types": {
-          "stalled": 148
+          "stalled": 149
         },
         "removable": null,
         "event_log": [
-          "2026-10-28T07:02:02.839395+08:00",
           "2026-10-28T08:02:03.027271+08:00",
           "2026-10-28T09:32:02.119198+08:00",
           "2026-10-28T11:32:02.331804+08:00",
@@ -639,7 +640,8 @@
           "2026-10-31T19:02:01.871329+08:00",
           "2026-10-31T21:32:02.062035+08:00",
           "2026-11-01T00:02:02.271071+08:00",
-          "2026-11-01T01:32:02.437680+08:00"
+          "2026-11-01T01:32:02.437680+08:00",
+          "2026-11-01T03:02:02.452251+08:00"
         ]
       }
     },
