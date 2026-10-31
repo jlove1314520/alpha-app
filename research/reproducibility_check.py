@@ -67,6 +67,12 @@ KNOWN_THIRD_PARTY = frozenset({
 _MISSING_MOD_RE = re.compile(r"ModuleNotFoundError: No module named '([^']+)'")
 
 _PY_NAME_RE = re.compile(r"\b([A-Za-z_][A-Za-z0-9_]*)\.py\b")
+# 2026-11-01 先.一三五-1gg：模組頂層呼叫 mem_guard.preflight() 的腳本，可用記憶體低於開跑門檻時
+# 會 print「mem_guard.preflight：…」到 stdout 後 sys.exit(3)，stderr 空白——那是「這台機器當下記憶體
+# 不夠、延後再驗」，不是腳本壞掉，記 MEM_DEFERRED、不算 broken。
+MEM_DEFERRED_EXIT_CODE = 3
+_MEM_PREFLIGHT_MARK = "mem_guard.preflight"
+_MEM_AVAIL_GB_RE = re.compile(r"可用記憶體\s*([\d.]+)GB")
 
 
 def find_ledger_script_names() -> list[str]:
@@ -95,6 +101,13 @@ def check_one(module_name: str) -> dict:
 
     if result.returncode == 0:
         return {"module": module_name, "status": "OK"}
+
+    stdout = result.stdout or ""
+    if result.returncode == MEM_DEFERRED_EXIT_CODE and _MEM_PREFLIGHT_MARK in stdout:
+        gb = _MEM_AVAIL_GB_RE.search(stdout)
+        return {"module": module_name, "status": "MEM_DEFERRED",
+                "available_gb": float(gb.group(1)) if gb else None,
+                "note": "mem_guard 開跑前檢查記憶體不足、主動 exit 3 延後，不是腳本壞掉；記憶體夠時再驗"}
 
     stderr = result.stderr.strip()
     last_line = stderr.splitlines()[-1] if stderr else ""
@@ -262,7 +275,8 @@ def main() -> int:
         by_status.setdefault(r["status"], []).append(r)
 
     print("\n=== 結果摘要 ===")
-    for status in ("OK", "BLOCKED_BY_GUARD", "FILE_NOT_FOUND", "ENV_MISSING", "TIMEOUT", "IMPORT_ERROR", "OTHER_ERROR"):
+    for status in ("OK", "BLOCKED_BY_GUARD", "FILE_NOT_FOUND", "ENV_MISSING", "MEM_DEFERRED", "TIMEOUT",
+                   "IMPORT_ERROR", "OTHER_ERROR"):
         items = by_status.get(status, [])
         print(f"{status}: {len(items)}")
 
@@ -278,6 +292,11 @@ def main() -> int:
         print(f"\n環境缺套件、本次驗不到（{len(env_missing)}個，不算壞掉）：")
         for r in env_missing:
             print(f"  {r['module']}.py — 缺 {r['missing_package']}")
+    mem_deferred = by_status.get("MEM_DEFERRED", [])
+    if mem_deferred:  # 驗不到的照列，不隱藏
+        print(f"\n記憶體不足、mem_guard 延後、本次驗不到（{len(mem_deferred)}個，不算壞掉）：")
+        for r in mem_deferred:
+            print(f"  {r['module']}.py — 可用 {r.get('available_gb')}GB")
 
     spot_check = None
     if "--skip-rerun" not in sys.argv:
@@ -300,6 +319,7 @@ def main() -> int:
         "by_status_count": {k: len(v) for k, v in by_status.items()},
         "broken": broken,
         "env_missing": [{"module": r["module"], "missing_package": r["missing_package"]} for r in env_missing],
+        "mem_deferred": [{"module": r["module"], "available_gb": r.get("available_gb")} for r in mem_deferred],
         "all_results": results,
         "result_reproducibility_spot_check": spot_check,
     }, ensure_ascii=False, indent=2), encoding="utf-8")

@@ -4,17 +4,17 @@
   "by_status_count": {
     "OK": 229,
     "FILE_NOT_FOUND": 11,
-    "OTHER_ERROR": 1,
+    "MEM_DEFERRED": 1,
     "TIMEOUT": 1
   },
-  "broken": [
+  "broken": [],
+  "env_missing": [],
+  "mem_deferred": [
     {
       "module": "run_momentum_future_board_pit_backtest",
-      "status": "OTHER_ERROR",
-      "detail": ""
+      "available_gb": 4.11
     }
   ],
-  "env_missing": [],
   "all_results": [
     {
       "module": "adjust",
@@ -738,8 +738,9 @@
     },
     {
       "module": "run_momentum_future_board_pit_backtest",
-      "status": "OTHER_ERROR",
-      "detail": ""
+      "status": "MEM_DEFERRED",
+      "available_gb": 4.11,
+      "note": "mem_guard 開跑前檢查記憶體不足、主動 exit 3 延後，不是腳本壞掉；記憶體夠時再驗"
     },
     {
       "module": "run_score_backtest",
