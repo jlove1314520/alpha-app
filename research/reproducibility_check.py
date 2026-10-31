@@ -82,12 +82,41 @@ def find_ledger_script_names() -> list[str]:
     return names
 
 
-def check_one(module_name: str) -> dict:
-    script_path = ROOT / f"{module_name}.py"
-    if not script_path.exists():
-        return {"module": module_name, "status": "FILE_NOT_FOUND"}
+# 2026-11-01 先.一三五-1gi：帳本提到的模組不一定在 research/ 根目錄——回測引擎／成本／控制組在
+# research/ 底下的套件、訊號帳本腳本在 .github/scripts/。原本只找 research/{名}.py，這 7 支一律記
+# FILE_NOT_FOUND，等於從來沒被 import 檢查過（監控盲點）。依序再找下列位置，只 import、不改那些檔案
+# （十三節核心檔只讀可呼叫）。(目錄, 匯入名前綴, 要加進 sys.path 的目錄)
+_ALT_LOCATIONS = (
+    (ROOT / "backtest", "backtest.", None),
+    (ROOT / "validation", "validation.", None),
+    (ROOT.parent / ".github" / "scripts", "", ROOT.parent / ".github" / "scripts"),
+)
+# 帳本引用的 C:lphalpha-data 管線模組（不在本 repo，雲端也沒有）→ OUT_OF_REPO，不算 broken。
+OUT_OF_REPO_MODULES = frozenset({"fetch", "parsers"})
 
-    code = f"import sys; sys.path.insert(0, r'{ROOT}'); import {module_name}"
+
+def _locate(module_name: str) -> tuple[str, Path | None] | None:
+    """回傳 (import 名稱, 額外 sys.path)；找不到回 None。"""
+    if (ROOT / f"{module_name}.py").exists():
+        return module_name, None
+    for folder, prefix, extra in _ALT_LOCATIONS:
+        if (folder / f"{module_name}.py").exists():
+            return prefix + module_name, extra
+    return None
+
+
+def check_one(module_name: str) -> dict:
+    if module_name in OUT_OF_REPO_MODULES:
+        return {"module": module_name, "status": "OUT_OF_REPO",
+                "note": "alpha-data（C:/alpha/alpha-data）資料管線模組，不在本 repo，不在這裡驗"}
+    located = _locate(module_name)
+    if located is None:
+        return {"module": module_name, "status": "FILE_NOT_FOUND"}
+    import_name, extra_path = located
+
+    code = f"import sys; sys.path.insert(0, r'{ROOT}'); import {import_name}"
+    if extra_path is not None:
+        code = f"import sys; sys.path.insert(0, r'{extra_path}'); sys.path.insert(1, r'{ROOT}'); import {import_name}"
     try:
         result = subprocess.run(
             [sys.executable, "-c", code],
@@ -100,7 +129,10 @@ def check_one(module_name: str) -> dict:
                         f"需要人工檢查是否應該加`if __name__ == '__main__':`保護"}
 
     if result.returncode == 0:
-        return {"module": module_name, "status": "OK"}
+        out = {"module": module_name, "status": "OK"}
+        if import_name != module_name or extra_path is not None:
+            out["located_as"] = import_name if extra_path is None else f".github/scripts/{module_name}.py"
+        return out
 
     stdout = result.stdout or ""
     if result.returncode == MEM_DEFERRED_EXIT_CODE and _MEM_PREFLIGHT_MARK in stdout:
@@ -275,7 +307,7 @@ def main() -> int:
         by_status.setdefault(r["status"], []).append(r)
 
     print("\n=== 結果摘要 ===")
-    for status in ("OK", "BLOCKED_BY_GUARD", "FILE_NOT_FOUND", "ENV_MISSING", "MEM_DEFERRED", "TIMEOUT",
+    for status in ("OK", "BLOCKED_BY_GUARD", "FILE_NOT_FOUND", "OUT_OF_REPO", "ENV_MISSING", "MEM_DEFERRED", "TIMEOUT",
                    "IMPORT_ERROR", "OTHER_ERROR"):
         items = by_status.get(status, [])
         print(f"{status}: {len(items)}")

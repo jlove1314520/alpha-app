@@ -2,8 +2,9 @@
   "checked_at": null,
   "n_checked": 242,
   "by_status_count": {
-    "OK": 230,
-    "FILE_NOT_FOUND": 11,
+    "OK": 236,
+    "FILE_NOT_FOUND": 3,
+    "OUT_OF_REPO": 2,
     "MEM_DEFERRED": 1
   },
   "broken": [],
@@ -11,7 +12,7 @@
   "mem_deferred": [
     {
       "module": "run_momentum_future_board_pit_backtest",
-      "available_gb": 4.23
+      "available_gb": 4.2
     }
   ],
   "all_results": [
@@ -81,7 +82,8 @@
     },
     {
       "module": "build_signal_ledger",
-      "status": "FILE_NOT_FOUND"
+      "status": "OK",
+      "located_as": ".github/scripts/build_signal_ledger.py"
     },
     {
       "module": "build_twse_listing_dates",
@@ -129,7 +131,8 @@
     },
     {
       "module": "control_group",
-      "status": "FILE_NOT_FOUND"
+      "status": "OK",
+      "located_as": "validation.control_group"
     },
     {
       "module": "control_group_standard",
@@ -153,7 +156,8 @@
     },
     {
       "module": "costs",
-      "status": "FILE_NOT_FOUND"
+      "status": "OK",
+      "located_as": "validation.costs"
     },
     {
       "module": "crisis_gate_leveraged_bb90",
@@ -285,7 +289,8 @@
     },
     {
       "module": "engine",
-      "status": "FILE_NOT_FOUND"
+      "status": "OK",
+      "located_as": "backtest.engine"
     },
     {
       "module": "equal_weight_rebalance_control_v1",
@@ -413,7 +418,8 @@
     },
     {
       "module": "fetch",
-      "status": "FILE_NOT_FOUND"
+      "status": "OUT_OF_REPO",
+      "note": "alpha-data（C:/alpha/alpha-data）資料管線模組，不在本 repo，不在這裡驗"
     },
     {
       "module": "finra_threshold_probe",
@@ -669,7 +675,8 @@
     },
     {
       "module": "parsers",
-      "status": "FILE_NOT_FOUND"
+      "status": "OUT_OF_REPO",
+      "note": "alpha-data（C:/alpha/alpha-data）資料管線模組，不在本 repo，不在這裡驗"
     },
     {
       "module": "pead_portfolio_v1",
@@ -738,7 +745,7 @@
     {
       "module": "run_momentum_future_board_pit_backtest",
       "status": "MEM_DEFERRED",
-      "available_gb": 4.23,
+      "available_gb": 4.2,
       "note": "mem_guard 開跑前檢查記憶體不足、主動 exit 3 延後，不是腳本壞掉；記憶體夠時再驗"
     },
     {
@@ -839,7 +846,8 @@
     },
     {
       "module": "update_signal_ledger_returns",
-      "status": "FILE_NOT_FOUND"
+      "status": "OK",
+      "located_as": ".github/scripts/update_signal_ledger_returns.py"
     },
     {
       "module": "us_8k_item502_gate52",
@@ -855,7 +863,8 @@
     },
     {
       "module": "us_costs",
-      "status": "FILE_NOT_FOUND"
+      "status": "OK",
+      "located_as": "validation.us_costs"
     },
     {
       "module": "us_factor_ic",
