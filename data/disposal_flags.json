@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-10-30T18:30:01+08:00",
+  "generated_at": "2026-10-31T18:30:01+08:00",
   "errors": [],
   "supplemented": {},
   "primary": "shioaji",
@@ -16,8 +16,8 @@
   },
   "expired_dropped": 0,
   "counts": {
-   "disposal": 14,
-   "notice": 31
+   "disposal": 13,
+   "notice": 34
   },
   "note": "處置股＝交易所公告分盤撮合（每 N 分鐘撮合一次）與預收款券；注意股＝當日公布注意交易資訊。App 個股頁紅標、AI 選股候選排除處置期間內個股。非投資建議。"
  },
@@ -42,17 +42,6 @@
    "total_limit": null,
    "reason": "該有價證券之交易，連續三個營業日達本公司「公布注意交易資訊」標準，且該股票於最近三十個營業日內曾發布處置交易資訊。",
    "exchange": "TSE",
-   "source": "shioaji_punish"
-  },
-  "3287": {
-   "start": "2026-10-22",
-   "end": "2026-10-30",
-   "announced": "2026-10-21",
-   "interval": "2分鐘",
-   "unit_limit": null,
-   "total_limit": null,
-   "reason": "連續3個營業日達本中心「公布注意交易資訊」標準，且最近30個營業日內曾發布處置。",
-   "exchange": "OTC",
    "source": "shioaji_punish"
   },
   "3354": {
@@ -262,6 +251,13 @@
    "exchange": "OTC",
    "source": "shioaji_notice"
   },
+  "3595": {
+   "announced": "2026-10-30",
+   "close": 591.62,
+   "reason": "當日交易時間內加權平均成交價振幅達20.04%(第一款)。最近五個營業日（含當日）累積之最後加權平均成交價跌幅達45.62%，當日加權平均成交價為591.62元(第三款)。",
+   "exchange": "OES",
+   "source": "shioaji_notice"
+  },
   "3665": {
    "announced": "2026-10-30",
    "close": 1625.0,
@@ -372,6 +368,20 @@
    "close": 87.3,
    "reason": "最近六個營業日(含當日)累積之最後成交價漲幅達38.08%(第一款)當日之成交量較最近六十個營業日日平均成交量放大13.5倍(第三款)當日週轉率達7.74%(第四款)凱基證券公司當日受託買進該有價證券之成交量占當日該有價證券總成交量之比率為43.34%(第五款)",
    "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "7932": {
+   "announced": "2026-10-30",
+   "close": 271.75,
+   "reason": "最近五個營業日（含當日）累積之最後加權平均成交價跌幅達31.63%，當日加權平均成交價為271.75元(第三款)。",
+   "exchange": "OES",
+   "source": "shioaji_notice"
+  },
+  "7942": {
+   "announced": "2026-10-30",
+   "close": 514.17,
+   "reason": "最近五個營業日（含當日）累積之最後加權平均成交價跌幅達35.88%，當日加權平均成交價為514.17元(第三款)。",
+   "exchange": "OES",
    "source": "shioaji_notice"
   },
   "8084": {
