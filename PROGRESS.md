@@ -1,3 +1,12 @@
+## 2026-11-01 04:5x DevQueue（研究帽，cycle 20261101-043102）：stock_grid_limit7_diag 不再讓稽核 TIMEOUT
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不增不減）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班（皆請總司令執行一次）③先.一三五-1fr-a git stash 殘留 7 筆可否刪除。
+- **先.一三五-1gh（已結案，commit `676e0a67e3`）**：`research/stock_grid_limit7_diag.py` 第 8～23 行整段縮排包進 `def main()`＋`if __name__ == "__main__": main()`，計算與輸出一字不改（`git diff -w` 只多 7 行包裝）。不重跑診斷、不碰 TRIALS 登記。
+  - 證據：`python research/reproducibility_check.py --skip-rerun` → OK 230／FILE_NOT_FOUND 11／MEM_DEFERRED 1／**TIMEOUT 0**／IMPORT_ERROR 0／OTHER_ERROR 0；`reproducibility_check_result.json` by_status_count 無 TIMEOUT。FILE_NOT_FOUND 11 支（costs／engine／fetch 等在子目錄或 alpha-data 的模組名）是腳本設計上就不算錯誤的類別，不另補件。
+- **收工補件**：`- [ ]` 19 項（≥12）；DevQueue 可執行 0 項（<6），`find_next()` 回 NO_PENDING_ITEM。[自行裁量] 本輪不補：來源①～④前幾輪已逐一查過用盡、本輪無新變化；⑤研究候選受前向模擬上限 14／14 限制（零之二⑤），不寫 PREREG；本輪稽核沒有再找到壞掉的腳本可補。**來源已用盡**。
+- 研究帽產物：無新 SPEC／因子（本輪是修可重現性）。不碰 holdout、不算報酬、不登記試驗、零外部請求；未新增排程寫入。
+- 冒煙：`node scripts/smoke_test.mjs` exit=0，**179 PASS／0 FAIL**（04:43～04:48；之前一次我自加 280 秒 timeout 又與背景同跑，造成瀏覽器被關的假 FAIL，不算數，已重跑）。
+
 ## 2026-11-01 04:1x DevQueue（維運帽，cycle 20261101-040102）：reproducibility_check 不再把記憶體不足誤判成壞掉＋補件 1 條
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不增不減：先.一三五-1ae-a 權證 20:30 補跑觸發〔請總司令執行一次〕、先.一四一-3a 美股本機補班金鑰＋觸發〔請總司令執行一次〕、先.一三五-1fr-a git stash 殘留可否刪除）。
