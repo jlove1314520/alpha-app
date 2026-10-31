@@ -52,6 +52,9 @@ STALE_TRADING_DAYS_THRESHOLD = 3
 # 抓「⛔ ...（YYYY-MM-DD ...）...【使用者可見】」——時間戳在前、標籤在後，
 # 中間允許任意字元（阻塞理由的文字），但限制在同一行內，避免跨行誤配對。
 PATTERN = re.compile(r"⛔[^\n]*?（(\d{4}-\d{2}-\d{2})[^）]*）[^\n]*?【使用者可見】")
+# 2026-10-31 先.一三五-1es：阻塞解除後舊文字依三之二②不刪，只在同一行加「【已解除 YYYY-MM-DD …】」，
+# 本檢查就不再算它（原本沒有解除寫法：09-15 sparklines 那條 9 月就解除了，仍每 30 分鐘誤報一次）。
+RESOLVED = "【已解除"
 
 
 def _trading_days_since(date_str: str, now: datetime | None = None) -> int:
@@ -68,17 +71,21 @@ def _trading_days_since(date_str: str, now: datetime | None = None) -> int:
     return n
 
 
-def get_alerts() -> list[tuple[str, int]]:
-    """回傳 [(該行文字前80字, 已拖過幾個交易日), ...]，只含超過門檻的。"""
+def get_alerts(now: datetime | None = None) -> list[tuple[str, int]]:
+    """回傳 [(該行文字前80字, 已拖過幾個交易日), ...]，只含超過門檻、且沒標【已解除】的。"""
     if not PENDING_QUEUE.exists():
         return []
     text = PENDING_QUEUE.read_text(encoding="utf-8")
     alerts = []
     for line in text.splitlines():
         m = PATTERN.search(line)
-        if not m:
+        if not m or RESOLVED in line:
             continue
-        days = _trading_days_since(m.group(1))
+        try:
+            days = _trading_days_since(m.group(1), now)
+        except ValueError:  # 日期打錯（例 2026-13-40）只略過這一行，不讓整份掃描失敗（十二節）
+            print(f"  ! 【使用者可見】阻塞日期無法解析，略過：{line.strip()[:60]}")
+            continue
         if days > STALE_TRADING_DAYS_THRESHOLD:
             alerts.append((line.strip()[:80], days))
     return alerts

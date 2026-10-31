@@ -1,3 +1,14 @@
+## 2026-10-31 11:0x DevQueue（維運帽）：空轉補件三條（前向模擬 14／14 已滿，不新增候選）——【使用者可見】阻塞誤報修正＋兩支監控模組自測
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不變）。
+- **為什麼做這些**：佇列沒有可執行 `- [ ]`，連 2 輪 QUEUE_EMPTY；前向模擬 14／14＝滿，照零之二⑤不寫候選、不寫 PREREG、不送 AWAITING。續查 `check_external_connectivity.py` 呼叫的模組，`check_stale_user_visible_blocks.py`／`mem_profile_sample.py` 兩支沒有任何自測引用。
+- **先.一三五-1es（純 bug 修復）**：抓到誤報——09-15 sparklines 那條 ⛔【使用者可見】在 9/15 當天就由 `f94445b38c` 解除（今天 `data/sparklines.json` data_asof＝10-30、已更新），但這支沒有「解除」寫法，連通性監測每 30 分鐘記一次「阻塞已 33 個交易日未處理」。修法：同一行含「【已解除」就不算（舊文字保留）、日期打錯只略過那一行不讓整份掃描丟例外、`get_alerts(now)` 可注入時間；PENDING_QUEUE 該行補【已解除】標記。
+- **先.一三五-1et**：記憶體取樣 `maybe_sample` 自測 8 項全過，本體未改（10/28、10/29 已量滿、已自動停）。
+- 新增 `scripts/selftest_stale_blocks_mem_profile.py`：**13 項全過**；既有 `selftest_connectivity_ledgers.py` 24 項仍全過。開 **1eu**（時間閘 10/31 12:00）驗收連通性監測不再記這條。
+- 影響檔案：`scripts/check_stale_user_visible_blocks.py`、`scripts/selftest_stale_blocks_mem_profile.py`（新）、`PENDING_QUEUE.md`、`research/FORWARD_CANDIDATES.md`、`PROGRESS.md`。
+- 不碰 holdout、不讀價格、不算報酬、不登記試驗、零外部請求。交辦佇列 DevQueue 可執行 `- [ ]` 未開始：0 條（其餘皆時間閘／BLOCKED）。
+- 冒煙：`node scripts/smoke_test.mjs` exit=0，**179 PASS／0 FAIL**。
+
 ## 2026-10-31 09:3x DevQueue（維運帽）：空轉補件四條（前向模擬 14／14 已滿，不新增候選）——連通性監測呼叫的三支監控模組自測
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不變）。
