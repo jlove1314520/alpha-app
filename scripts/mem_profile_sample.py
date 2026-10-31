@@ -3,11 +3,14 @@
 
 平日台北 18:30～21:30 取一筆「前 15 名程式（名稱、工作集 MB）＋可用實體記憶體」，
 append 到 research/data/mem_profile_<台北日期>.jsonl（本機，不進公開 repo）。
+2026-10-31 收件匣 033（先.一三八-B2 採甲＋丙）：另加白天盤中時段——平日 09:00～13:30，寫
+research/data/mem_profile_day_<台北日期>.jsonl，同樣量滿 2 個平日自動停；晚上時段已量滿、維持停。
+兩個時段各自計天數，互不影響。
 只記程式名與記憶體，不記命令列與視窗標題（避免記到個資）。
 
 不新建本機排程：由既有每 30 分鐘的 DevQueue runner 與對外連通性監測入口順手呼叫
 maybe_sample()（兩者錯開，實際間隔約 10～30 分鐘，不是每 10 分鐘——照實降級，間隔看每列 ts）。
-同一 9 分鐘內只取一次；量滿 2 個平日（已有 2 個日期檔且今天不在其中）就自動停。
+同一 9 分鐘內只取一次；每個時段量滿 2 個平日（該時段已有 2 個日期檔且今天不在其中）就自動停。
 自身任何失敗只印一行警告、回傳 False，不影響呼叫端（十二節）。
 
 用法（手動測試）：python scripts/mem_profile_sample.py [--force]
@@ -15,6 +18,7 @@ maybe_sample()（兩者錯開，實際間隔約 10～30 分鐘，不是每 10 �
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
@@ -34,13 +38,29 @@ PS = ("$p = Get-Process | Group-Object ProcessName | ForEach-Object { [pscustomo
       "total_mb = [math]::Round($os.TotalVisibleMemorySize / 1KB, 0) } | ConvertTo-Json -Depth 4 -Compress")
 
 
-def _in_window(now: datetime) -> bool:
+# (檔名前綴, 起, 迄)：晚上＝B1 原時段；白天盤中＝收件匣 033 丙
+WINDOWS = (("mem_profile_", 18 * 60 + 30, 21 * 60 + 30),
+           ("mem_profile_day_", 9 * 60, 13 * 60 + 30))
+
+
+def _window(now: datetime) -> str | None:
+    """回傳目前時段的檔名前綴；不在任何時段（或週末）回 None。"""
     hm = now.hour * 60 + now.minute
-    return now.weekday() < 5 and 18 * 60 + 30 <= hm <= 21 * 60 + 30
+    if now.weekday() >= 5:
+        return None
+    for prefix, a, b in WINDOWS:
+        if a <= hm <= b:
+            return prefix
+    return None
 
 
-def _done(today: str) -> bool:
-    days = sorted(p.stem.replace("mem_profile_", "") for p in OUT_DIR.glob("mem_profile_*.jsonl"))
+def _in_window(now: datetime) -> bool:
+    return _window(now) is not None
+
+
+def _done(today: str, prefix: str = "mem_profile_") -> bool:
+    pat = re.compile(re.escape(prefix) + r"(\d{4}-\d{2}-\d{2})$")
+    days = sorted(m.group(1) for p in OUT_DIR.glob(prefix + "*.jsonl") if (m := pat.match(p.stem)))
     return len(days) >= DAYS_NEEDED and today not in days
 
 
@@ -48,9 +68,10 @@ def maybe_sample(force: bool = False, caller: str = "") -> bool:
     try:
         now = datetime.now(TW)
         today = now.strftime("%Y-%m-%d")
-        if not force and (not _in_window(now) or _done(today)):
+        prefix = _window(now)
+        if not force and (prefix is None or _done(today, prefix)):
             return False
-        out = OUT_DIR / f"mem_profile_{today}.jsonl"
+        out = OUT_DIR / f"{prefix or 'mem_profile_'}{today}.jsonl"
         if out.exists() and not force:
             lines = [l for l in out.read_text(encoding="utf-8").splitlines() if l.strip()]
             if lines:

@@ -135,5 +135,22 @@ clock["now"] = datetime(2026, 11, 4, 19, 0, tzinfo=TZ)
 n0 = calls["n"]
 check("已量滿 2 個平日、今天不在其中 → 自動停", mp.maybe_sample(caller="t") is False and calls["n"] == n0)
 
+# 收件匣 033（先.一三八-B2 丙）：白天盤中 09:00～13:30 另計，晚上量滿不影響白天
+calls["stdout"] = json.dumps({"free_mb": 4000, "total_mb": 16000, "top": []})
+clock["now"] = datetime(2026, 11, 4, 8, 59, tzinfo=TZ)
+check("白天：09:00 前不取樣", mp.maybe_sample(caller="t") is False and calls["n"] == n0)
+clock["now"] = datetime(2026, 11, 4, 9, 0, tzinfo=TZ)
+fd = mp.OUT_DIR / "mem_profile_day_2026-11-04.jsonl"
+check("白天：晚上已量滿仍取樣、寫 mem_profile_day_ 檔", mp.maybe_sample(caller="t") is True and fd.exists()
+      and not (mp.OUT_DIR / "mem_profile_2026-11-04.jsonl").exists())
+check("白天檔不算進晚上天數", mp._done("2026-11-05", "mem_profile_") is True
+      and mp._done("2026-11-05", "mem_profile_day_") is False)
+clock["now"] = datetime(2026, 11, 4, 13, 31, tzinfo=TZ)
+n1 = calls["n"]
+check("白天：13:30 後不取樣", mp.maybe_sample(caller="t") is False and calls["n"] == n1)
+(mp.OUT_DIR / "mem_profile_day_2026-11-05.jsonl").write_text("", encoding="utf-8")
+clock["now"] = datetime(2026, 11, 6, 10, 0, tzinfo=TZ)
+check("白天：量滿 2 個平日 → 自動停", mp.maybe_sample(caller="t") is False and calls["n"] == n1)
+
 print(f"\n合計 {total} 項，FAIL {len(fails)} 項" + (f"：{fails}" if fails else ""))
 sys.exit(1 if fails else 0)

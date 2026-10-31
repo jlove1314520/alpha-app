@@ -1,3 +1,12 @@
+## 2026-10-31 21:xx 互動視窗：收件匣 033（Cowork 20:40）兩項定案
+
+- **等待總司令審閱：2 件**（`research/AWAITING_REVIEW.md` 等待中 4→2，本輪結案 B2、1fn-a）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班（金鑰＋觸發）——都在 `C:/alpha/總司令待辦.md`，請總司令執行一次。
+- **先.一三八-B2 採甲＋丙**：不改任何排程。`scripts/mem_profile_sample.py` 加白天盤中時段（平日 09:00～13:30，寫 `research/data/mem_profile_day_<日期>.jsonl`，量滿 2 個平日自動停；晚上時段已量滿、維持停；兩時段各自計天數），沿用既有入口（DevQueue runner／AlphaConnectivity，約 10～30 分鐘一筆），只量不殺。預計 11/02、11/03 量完，報告交 先.一四四-1（DevQueue，時間閘 11/03 13:35）補進 `research/MEM_PROFILE_REPORT_B2.md` 再送 AWAITING。自測 `selftest_stale_blocks_mem_profile.py` 新增白天 5 項，18 項全過。
+- **先.一三五-1fn-a 採甲（模擬 L 12/01 起跑前完成）**：`research/paper_12_warrant_wave_tracker.py` 上市「新發行」改用掛牌名冊 `basic_twse` 第一次出現（認購、一般型），標的用同日行情代號→`data/stock_names.json` 名稱對照；對不到的照記出現日但不計入（不然日後對到那天會被誤當新發行——乾跑抓到 46 檔）。PREREG 修訂 R1（尚未起跑、帳本不存在、不另計 N）。出現日索引帶規則版本、已從快照重建。
+  - 改前／改後每日新發行檔數（`scripts/dryrun_paper_12_appearance_rule.py`，零請求、不寫帳本）：10/15 687→628、10/19 982→1,004、10/20 704→736、10/27 1,994→1,538、10/28 252→641、10/29 389→306、10/30 431→501。被標新發行、但前一份名冊早就有的上市權證：改前 2,438 檔，改後 **0 檔**。
+  - 自測 `selftest_paper_10_12.py` 新增 6 項（名冊早有晚成交不算新、牛證／認售不收、對不到照記、舊版索引重建），全過。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0，179 PASS／0 FAIL。
+
 ## 2026-10-31 20:5x DevQueue（維運帽，cycle 20261031-203102）：1fn 乾跑＋1fp 自測，收工補件 1 條
 
 - **等待總司令審閱：2 件**（工作目錄 `research/AWAITING_REVIEW.md` 等待中 2：先.一三五-1ae-a 權證補跑觸發、先.一四一-3a 美股補班金鑰＋觸發，皆「請總司令執行一次」、等待約 2 天）。本輪 20:5x 送出的 1fn-a 與 B2 已由互動視窗依收件匣 033 結案（21:xx，互動視窗那批改動在本輪收工時還沒提交，已提交的 AWAITING 仍是 4 列）。

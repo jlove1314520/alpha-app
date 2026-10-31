@@ -224,8 +224,14 @@ finally:
 snap = td / "snap"
 
 
-def mk_snap(d, twse_calls=None, tpex_issue=None, skip_source=None):
-    p = snap / d
+L._NAME2CODE = {"測試股": "8849"}  # 不讀真實 data/stock_names.json
+
+
+def mk_snap(d, twse_calls=None, tpex_issue=None, skip_source=None, basic=None, root=None):
+    """basic 未給 → 依 twse_calls 自動造掛牌名冊（認購、一般型、標的寫名稱）；收件匣 033 起上市以名冊為準。"""
+    if basic is None:
+        basic = [{"code": r["code"], "cp": "認購", "kind": "一般型", "underlying": "名" + r["underlying"]} for r in twse_calls or []]
+    p = (root or snap) / d
     p.mkdir(parents=True, exist_ok=True)
     (p / "meta.json").write_text("{}", encoding="utf-8")
     for s_ in L.SOURCES:
@@ -234,6 +240,8 @@ def mk_snap(d, twse_calls=None, tpex_issue=None, skip_source=None):
         obj = []
         if s_ == "quotes_twse_call":
             obj = twse_calls or []
+        elif s_ == "basic_twse":
+            obj = basic
         elif s_ == "issue_tpex":
             obj = tpex_issue or {}
         with gzip.open(p / f"{s_}.json.gz", "wt", encoding="utf-8") as f:
@@ -260,6 +268,31 @@ mk_snap(lc[2], [{"code": "W003", "underlying": "8841"}], {})  # 補齊後下次�
 ap = L.update_appearances(snap, ap_p)
 check(ap["warrants"]["W003"]["first_seen"] == lc[2] and ap["warrants"]["W002"]["first_seen"] == lc[1],
       "L 補齊快照後才記出現日、既有出現日不被覆寫（冪等）")
+
+# 收件匣 033（先.一三五-1fn-a，PREREG 修訂 R1）：上市以掛牌名冊 basic_twse 為準
+snap3 = td / "snap3"
+B = lambda c, u, cp="認購", kind="一般型": {"code": c, "cp": cp, "kind": kind, "underlying": u}  # noqa: E731
+mk_snap(lc[0], [], {}, basic=[B("V001", "測試股")], root=snap3)  # 首批：名冊有、沒成交
+mk_snap(lc[1], [{"code": "V001", "underlying": "8849"}], {},
+        basic=[B("V001", "測試股"), B("V002", "測試股"), B("V003", "測試股", kind="下限型；重設型-單一單價"),
+               B("V004", "測試股", cp="認售"), B("V005", "不認得的名稱"), B("V006", "名8848", kind="一般型；重設型-單一單價")],
+        root=snap3)
+mk_snap(lc[3], [{"code": "V005", "underlying": "8847"}], {}, basic=[B("V005", "不認得的名稱")], root=snap3)
+c3 = L.calls_in(lc[1], snap3)
+check(c3 == {"V001": "8849", "V002": "8849"}, f"L calls_in（R1）：名冊認購一般型、標的用同日行情或名稱對照；牛證／認售／對不到不收 {c3}")
+ap3 = L.update_appearances(snap3, td / "appear3.json")
+w3 = ap3["warrants"]
+check(w3["V001"]["first_seen"] is None, "L R1：名冊早就有、之後才第一次成交 → 不算新發行")
+check(w3["V002"]["first_seen"] == lc[1] and "V003" not in w3 and "V004" not in w3, "L R1：新掛牌一般型認購記出現日；牛證、認售不記")
+check(w3["V005"]["first_seen"] == lc[1] and w3["V005"]["underlying"] == "8847" and ap3["unmapped_by_date"][lc[1]] == 2,
+      "L R1：名冊對不到標的照記出現日、日後對到補標的不改出現日、筆數記 unmapped_by_date")
+check(ap3["meta"]["rule_version"] == L.RULE_VERSION, "L R1：索引帶規則版本")
+import json as _json  # noqa: E402
+old = {"meta": {"rule": "舊版"}, "dates_processed": [lc[0], lc[1], lc[3]], "warrants": {"V001": {"first_seen": lc[1], "underlying": "8849"}}}
+(td / "appear4.json").write_text(_json.dumps(old), encoding="utf-8")
+ap4 = L.update_appearances(snap3, td / "appear4.json")
+check(ap4["warrants"]["V001"]["first_seen"] is None and ap4["meta"]["rule_version"] == L.RULE_VERSION,
+      "L R1：舊規則版本的索引 → 從快照整份重建")
 
 
 class _FakePx:
