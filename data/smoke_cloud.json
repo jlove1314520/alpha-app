@@ -1,19 +1,14 @@
 {
- "generated_at": "2026-10-30T22:40:11.105Z",
+ "generated_at": "2026-10-31T21:52:54.759Z",
  "url": "https://jlove1314520.github.io/alpha-app",
- "all_passed": false,
+ "all_passed": true,
  "crashed": false,
  "crash_error": null,
  "total": 179,
- "passed": 178,
- "failed": 1,
- "failures": [
-  {
-   "name": "146. 減少動態效果：手機設定開啟時淡入／閃色／分頁過場／骨架／長條／開關動畫時間為 0，閃色仍會自動移除（先.九十四-5e）",
-   "detail": "0 秒動畫下 animationend 沒觸發，閃色 class 沒被移除"
-  }
- ],
+ "passed": 179,
+ "failed": 0,
+ "failures": [],
  "global_errors_final": [],
- "run_url": "https://github.com/jlove1314520/alpha-app/actions/runs/41138996277",
- "commit": "2713c825b"
+ "run_url": "https://github.com/jlove1314520/alpha-app/actions/runs/41245179560",
+ "commit": "295296a52"
 }
