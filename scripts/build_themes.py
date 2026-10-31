@@ -199,6 +199,16 @@ def main() -> int:
     if not seed:
         print(f"! 找不到 {SEED.name}，先跑 scripts/validate_seed_themes.py")
         return 1
+    # 先.一三五-1el（純 bug 修復）：輸入或既有 themes.json 讀不到時，原本當成空的照跑——
+    # 證據池變空 → 成員整批消失；既有檔讀不到 → prior_ms 空 → 之後重新出現的成員
+    # effective_from 被改成新日期，違反 append-only。改成讀不到就保留既有、不覆寫。
+    unreadable = [p.name for p in (D / "news.json", D / "events.json", D / "news_evidence.json")
+                  if _load(p) is None]
+    if OUT.exists() and _load(OUT) is None:
+        unreadable.append(OUT.name)
+    if unreadable:
+        print(f"! 讀不到 {', '.join(unreadable)}，保留既有 {OUT.name}、不覆寫")
+        return 1
     themes = seed.get("themes") or []
     kwmap, kwsrc = build_keyword_map(themes)
     patterns = load_patterns()
@@ -385,7 +395,10 @@ def main() -> int:
         "memberships": memberships,
         "blocked_reasons": blocked,
     }
-    OUT.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    # 先寫暫存再換名，寫到一半中斷不留半截檔（先.一三五-1el）
+    tmp = OUT.with_name(OUT.name + ".tmp")
+    tmp.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    tmp.replace(OUT)
 
     tn = {t["id"]: t["name"] for t in themes}
     print("=" * 66)

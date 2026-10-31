@@ -1,3 +1,14 @@
+## 2026-10-31 08:0x DevQueue（維運帽）：空轉補件三條（前向模擬 14／14 已滿，不新增候選）——題材庫重建讀不到輸入不覆寫修正＋自測、1bu 結案
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不變）。
+- **為什麼做這些**：佇列沒有可執行 `- [ ]`，連 2 輪 QUEUE_EMPTY；前向模擬 14／14＝滿，照零之二⑤不寫候選、不寫 PREREG、不送 AWAITING。逐支 grep workflow／`run-*.ps1` 呼叫的腳本，`scripts/build_themes.py` 是最後一支沒有自測的雲端排程腳本。
+- **先.一三五-1bu（時間閘已過，結案）**：`data/short_lending_available_history.json` 上市／上櫃都到 `20261030`、沒有 `20261031`。⚠️ 10/31 05:43 班到 08:05 仍未觸發（GitHub 排程延遲），「01:00～08:59 略過不記」沒實地看到 → 開 1en 補驗。
+- **先.一三五-1el（純 bug 修復）**：`build_themes.py` 原本 news／events／news_evidence 或既有 themes.json 讀不到時當空的照跑——成員會整批消失、之後重新出現的成員生效日被改掉（違反 append-only）。改成讀不到就 exit 1、不覆寫；寫檔改暫存＋換名。新增 `scripts/selftest_build_themes.py`，**24 過 0 失敗**。真實資料重跑 193 筆成員 0 消失、0 生效日變動。歷史發現：commit 0876c1a84c（10/18 本機新聞補班）有 5 筆生效日被改早一天，推測是補班時讀到舊版 themes.json 的競態，本次修正擋不到這種情況；[自行裁量] 不回改，交 Cowork 決定。
+- **先.一三五-1em／1en**：時間閘 11/01、11/03，分別驗收 1el 雲端實跑、1bu 的「略過不記」分支。
+- 影響檔案：`scripts/build_themes.py`、`scripts/selftest_build_themes.py`（新）、`PENDING_QUEUE.md`、`research/FORWARD_CANDIDATES.md`、`PROGRESS.md`。
+- 不碰 holdout、不讀價格、不算報酬、不登記試驗、零外部請求（`gh run list` 除外）。交辦佇列 DevQueue 可執行 `- [ ]` 未開始：0 條（其餘皆時間閘／BLOCKED）。
+- 冒煙：`node scripts/smoke_test.mjs` exit=0，**179 PASS／0 FAIL**（「冒煙測試結果：全部通過」）。
+
 ## 2026-10-31 06:3x DevQueue（維運帽）：空轉補件三條（前向模擬 14／14 已滿，不新增候選）——紙上追蹤看守員自測接進回歸＋模擬 I 排程啟動程式自測
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不變）。
