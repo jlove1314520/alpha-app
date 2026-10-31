@@ -1,3 +1,17 @@
+## 2026-11-01 06:31～07:0x DevQueue（維運帽，cycle 20261101-063102）：重現性稽核盲點補齊（1gi）＋雲端缺套件分類（1gj）→ 開 1gj-a 提案
+
+- **等待總司令審閱：4 件**（`research/AWAITING_REVIEW.md` 等待中 3→4）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次，10/28 23:0x 起，約 3.3 天）②先.一四一-3a 美股盤中報價本機補班放金鑰＋加觸發（請總司令執行一次，10/29 04:5x 起，約 3 天）③先.一三五-1fr-a git stash 殘留 7 筆可否刪除（10/31 22:xx 起，約 8 小時）④**新增** 先.一三五-1gj-a audit.yml 加裝 yfinance（11/01 06:5x 起，選甲／乙，建議甲；24 小時無裁示照零之二①預設放行甲）。
+- **先.一三五-1gi（已結案，commit `8f29e460f5`）**：`research/reproducibility_check.py::check_one()` 新增 `_locate()`——找不到 `research/{名}.py` 時依序找 `research/backtest/`、`research/validation/`、`.github/scripts/`；`fetch`／`parsers`（alpha-data 管線，不在本 repo）記新狀態 `OUT_OF_REPO`。只 import、沒改任何十三節核心檔。
+  - 證據：`python research/reproducibility_check.py --skip-rerun` → OK 236／**FILE_NOT_FOUND 11→3**／OUT_OF_REPO 2／MEM_DEFERRED 1／IMPORT_ERROR 0／OTHER_ERROR 0；新找到的 engine、costs、control_group、us_costs、build_signal_ledger、update_signal_ledger_returns 全部 import OK。
+  - 剩 3 支結論（不改帳本）：`ledger`＝TRIALS_LEDGER 第 403～404 行把 `selection_bias_ledger.py` 斷行，正則只抓到後半；#92 `composite_quality_revaccel_inst_lowvol_sanity`、#104 `us_factor_ic_cached_universe` 原始碼**從未進版控**（`git log --all` 無紀錄、非 gitignore），前者只剩 .pyc（已有 _v2 重寫），後者連 .pyc 都沒有。
+  - [自行裁量] `ledger` 不在程式裡特判，維持 FILE_NOT_FOUND 並在條目記明原因（硬寫例外會遮住日後真正同名缺檔）。
+  - 本輪自己差點寫壞：note 字串裡的 `C:lpha` 會被 Python 當成 ``（BEL 字元），自測時發現已改成 `C:/alpha/alpha-data`——跟上一輪附帶發現的 PENDING_QUEUE BEL 字元是同一種錯。
+- **先.一三五-1gj（已結案，commit `23603bc702`，唯讀）**：雲端 audit run 41119341424 的 log 與 `data/audit_report.json` 都沒印套件名 → 用只裝 audit.yml 6 個套件的乾淨暫存 venv 跑同一份 `check_one()`：ENV_MISSING 41（與雲端一致）＝**yfinance 31／bs4 8／sklearn 2**；同 venv 加裝 yfinance（本機 21 秒）後 ENV_MISSING 41→**2**（yfinance 會帶入 bs4）。research/*.py 無模組頂層 `yf.` 呼叫，只 import 不會送 Yahoo 請求。yfinance ≥30 支 → 照分支開 **先.一三五-1gj-a** 提案（`- [!]` AWAITING）。暫存 venv 已刪。不改 workflow。
+- **先.一三五-1gk** 仍是時間閘（11/03 06:00 後），本輪不能做。
+- **收工補件**：`- [ ]` 19 項（≥12）；`find_next()` 回 NO_PENDING_ITEM，DevQueue 可執行 0 項（<6）。[自行裁量] 本輪不再補：剩 14 分鐘不夠做來源①～⑤的查證，且上一輪（06:0x）剛做過空轉補件；交給下一輪的空轉補件機制（`_idle_fallback_prompt()`）處理。
+- 維運帽產物：`data/STATUS.json` 本輪未改（沒有資料源或面板異動，該檔由每 30 分鐘心跳排程自動更新）。零外部資料 API 請求（只有 pip 從 PyPI 裝套件到暫存 venv）。
+- 冒煙：兩次 `node scripts/smoke_test.mjs` 都 exit=0、**179 PASS／0 FAIL**（06:40～06:46、06:55～07:00）。第一次我把 `ensure_smoke_server.py` 與冒煙串在同一個指令裡，ensure 卡住沒回（伺服器其實已在跑），停掉後單獨跑冒煙即正常。
+
 ## 2026-11-01 06:0x DevQueue（維運帽，空轉補件 先.一三五-1）：重現性稽核監控盲點補 3 條
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不增不減）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班（皆請總司令執行一次）③先.一三五-1fr-a git stash 殘留 7 筆可否刪除。
