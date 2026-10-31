@@ -1,3 +1,15 @@
+## 2026-11-01 04:1x DevQueue（維運帽，cycle 20261101-040102）：reproducibility_check 不再把記憶體不足誤判成壞掉＋補件 1 條
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不增不減：先.一三五-1ae-a 權證 20:30 補跑觸發〔請總司令執行一次〕、先.一四一-3a 美股本機補班金鑰＋觸發〔請總司令執行一次〕、先.一三五-1fr-a git stash 殘留可否刪除）。
+- **先.一三五-1gg（已結案，commit `5da00b8829`）**：`research/reproducibility_check.py::check_one()` 讀 stderr 之前，先判斷 returncode==3 且 stdout 含「mem_guard.preflight」→ 新狀態 `MEM_DEFERRED`（從「可用記憶體 X.XXGB」抓 `available_gb`），不算進 broken，所以不會讓 `ok=false`；摘要迴圈和輸出 JSON 都多一份 `mem_deferred` 清單（驗不到的照列，不隱藏）。mem_guard 門檻和那些腳本都沒動。
+  - 證據①：新自測 `scripts/selftest_reproducibility_mem_deferred.py`，用暫存目錄裡的 4 支假腳本：exit 3＋mem_guard 字樣→MEM_DEFERRED（2.31GB）、真 ImportError→IMPORT_ERROR、exit 3 但沒有字樣→OTHER_ERROR、正常→OK，**全部 PASS**。
+  - 證據②：實跑 `python research/reproducibility_check.py --skip-rerun`：OK 229／FILE_NOT_FOUND 11／**MEM_DEFERRED 1**（`run_momentum_future_board_pit_backtest`，當下可用 4.11GB，低於 4.5GB 門檻——正好是上一輪看到的那個假陽性）／TIMEOUT 1／IMPORT_ERROR 0／OTHER_ERROR 0 → **broken=0**。
+  - 未驗證：`data/audit_report.json` 的 `reproducibility_check.ok` 要等下一次 audit 班次才會更新，本輪沒有手動觸發。
+- **收工補件**：`- [ ]` 19＋1＝20 項（≥12）；DevQueue 可執行 0→1 項（<6）。補 **先.一三五-1gh [研究]**：`stock_grid_limit7_diag.py` 計算全寫在模組頂層，每次稽核都 TIMEOUT，補上 `__main__` 保護（屬研究帽擁有的 research/ 檔，本輪維運帽只登記不動手）。[自行裁量] 只補這 1 條：DATA_GAP_PLAN 甲類已沒有待抓項、BACKLOG 沒有未開工的 DevQueue 項、前向模擬 14／14 已滿不寫候選（同上一輪查證）——**來源已用盡**，不湊數。
+- 權威清單其餘 `- [ ]` 都標「互動視窗執行」或要總司令操作／時間閘，DevQueue 不能接；`find_next()` 回 NO_PENDING_ITEM，下一項（1gh）是[研究]類，維運帽照規則收工。
+- 維運帽產物：`data/STATUS.json` 本輪沒有資料源或面板異動，不改（它的心跳欄位由排程每 30 分鐘自動更新）。零外部請求；沒有新增會改寫追蹤檔的排程步驟。
+- 冒煙：`node scripts/smoke_test.mjs` exit=0，**179 PASS／0 FAIL**（第一次我自己加的 280 秒 timeout 把 node 砍掉，造成瀏覽器關閉的假 FAIL；拿掉 timeout 重跑全過）。
+
 ## 2026-11-01 03:4x DevQueue（研究帽，cycle 20261101-033102）：small-tier 深挖腳本恢復可重現＋補件 1 條
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不增不減；項目同上一輪）。
