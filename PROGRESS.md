@@ -1,3 +1,15 @@
+## 2026-11-01 03:4x DevQueue（研究帽，cycle 20261101-033102）：small-tier 深挖腳本恢復可重現＋補件 1 條
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不增不減；項目同上一輪）。
+- **先.一三五-1gf（已結案）**：`research/deep_dive_f_us_low_vol_small_tier.py` 原本 import 共用模組 `us_factor_ic_by_size` 的 `TIER`（round 446 已改成 "mid"、樣本 90），頂層 `assert TIER == "small"` 必定失敗。照 `deep_dive_f_us_low_vol_mid_tier.py` 先例：本檔自有常數 `TIER="small"`、`SAMPLE_SIZE=30`、`SAMPLE_SEED=20260826_3`，`size_mod.TIER = TIER`，assert 改檢查設定生效；不改磁碟上的共用模組。
+  - 種子三處查證一致：round 100 commit `d28f1e9900` 的 `us_factor_ic_by_size.py` 第 57～59 行、本腳本 docstring「Sample」段、`TRIALS_LEDGER.md` #64。
+  - 證據：`python research/reproducibility_check.py --skip-rerun` → small_tier `OK`、IMPORT_ERROR 0；`TRIALS_LEDGER.md`／`TRIALS_REGISTRY.jsonl` git diff 為空（不重跑回測、不登記試驗、不改登記內容）。
+  - 附帶觀察：同次稽核 `run_momentum_future_board_pit_backtest` 出現 detail 空白的 OTHER_ERROR，單獨重跑 import rc=0——該腳本頂層跑 `mem_guard.preflight`（門檻 4.5GB，當下 4.52GB），記憶體不足就 exit 3、訊息印在 stdout，稽核只看 stderr 所以判成 OTHER_ERROR。屬暫時性假陽性，下一次 audit 的 `reproducibility_check.ok` 可能因此仍為 false。
+- **收工補件**：`- [ ]` 19＋1＝20 項（≥12）；DevQueue 可執行 0→1 項（<6）。補 **先.一三五-1gg [維運]**：`reproducibility_check.py` 把 mem_guard exit 3 改判 `MEM_DEFERRED`、不算 broken（純 bug 修）。[自行裁量] 只補這 1 條：DATA_GAP_PLAN 甲類已無待抓；GRAVEYARD_AUTOPSY 6.1 抽查（例：產業 ETF 相對強度）已被先前輪次補過；前向模擬 14／14 已滿不寫候選——研究來源本輪查不到新的可做項，照實記「來源已用盡」，不湊數。
+- 下一項是[維運]類，研究帽輪次照規則收工、留給下一輪換帽。
+- 研究帽產物：無新 SPEC／因子（本輪是修可重現性）。不碰 holdout、不算報酬、零外部請求；未新增排程寫入。
+- 冒煙：`node scripts/smoke_test.mjs` exit=0，**179 PASS／0 FAIL**。
+
 ## 2026-11-01 03:1x DevQueue（維運帽，cycle 20261101-030102）：Shioaji 收盤快照監控盲點修好＋補件 1 條研究項
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不增不減）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班（皆請總司令執行一次）③先.一三五-1fr-a git stash 殘留 7 筆可否刪除。

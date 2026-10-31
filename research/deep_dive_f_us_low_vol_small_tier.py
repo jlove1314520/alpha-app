@@ -56,13 +56,25 @@ from deep_dive_f_us_low_vol import (
 )
 from finmind_client import load_dev
 from us_factor_ic import load_us_sample_with_factors
-from us_factor_ic_by_size import SAMPLE_SEED, SAMPLE_SIZE, TIER, sample_tier_ids
+import us_factor_ic_by_size as size_mod
+from us_factor_ic_by_size import sample_tier_ids
 from validation import holdout
 from validation import us_costs as us_costmod
 
-assert TIER == "small", (
-    "this script is specifically the small-tier deep-dive; if TIER in "
-    "us_factor_ic_by_size.py has been changed since, re-check before reusing"
+# 先.一三五-1gf（2026-11-01）：us_factor_ic_by_size.py 的模組層 TIER 在 round 446 改成 "mid"
+# （SAMPLE_SIZE 也改成 90），原本 import 後 assert TIER == "small" 必定失敗、無法重現。
+# 比照 deep_dive_f_us_low_vol_mid_tier.py 先例：本行程內把共用模組的 TIER 改回 "small"，
+# 樣本大小／種子改用本腳本自己的常數，值取自 round 99 原始版本（commit d28f1e9900 的
+# us_factor_ic_by_size.py：TIER="small"、SAMPLE_SIZE=30、SAMPLE_SEED=20260826_3），
+# 與本檔 docstring、TRIALS_LEDGER.md #64 一致。不改磁碟上的共用模組。
+TIER = "small"
+SAMPLE_SIZE = 30
+SAMPLE_SEED = 20260826_3  # round-99's seed for TIER="small"
+size_mod.TIER = TIER
+
+assert size_mod.TIER == "small", (
+    "this script is specifically the small-tier deep-dive; monkeypatch of "
+    "us_factor_ic_by_size.TIER did not take effect"
 )
 
 

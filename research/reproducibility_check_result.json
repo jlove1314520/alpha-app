@@ -1,17 +1,17 @@
 {
   "checked_at": null,
-  "n_checked": 236,
+  "n_checked": 242,
   "by_status_count": {
-    "OK": 223,
+    "OK": 229,
     "FILE_NOT_FOUND": 11,
     "OTHER_ERROR": 1,
     "TIMEOUT": 1
   },
   "broken": [
     {
-      "module": "deep_dive_f_us_low_vol_small_tier",
+      "module": "run_momentum_future_board_pit_backtest",
       "status": "OTHER_ERROR",
-      "detail": "AssertionError: this script is specifically the small-tier deep-dive; if TIER in us_factor_ic_by_size.py has been changed since, re-check before reusing"
+      "detail": ""
     }
   ],
   "env_missing": [],
@@ -230,8 +230,7 @@
     },
     {
       "module": "deep_dive_f_us_low_vol_small_tier",
-      "status": "OTHER_ERROR",
-      "detail": "AssertionError: this script is specifically the small-tier deep-dive; if TIER in us_factor_ic_by_size.py has been changed since, re-check before reusing"
+      "status": "OK"
     },
     {
       "module": "deep_dive_f_us_low_vol_val_year_breakdown",
@@ -626,6 +625,30 @@
       "status": "OK"
     },
     {
+      "module": "paper_13_ml_low_beta_tracker",
+      "status": "OK"
+    },
+    {
+      "module": "paper_14_grid_range_tracker",
+      "status": "OK"
+    },
+    {
+      "module": "paper_15_ml_industry_tracker",
+      "status": "OK"
+    },
+    {
+      "module": "paper_16_order_win_tracker",
+      "status": "OK"
+    },
+    {
+      "module": "paper_17_margin_liquidation_tracker",
+      "status": "OK"
+    },
+    {
+      "module": "paper_18_sbl_covering_tracker",
+      "status": "OK"
+    },
+    {
       "module": "paper_6_vrp_wing_tracker",
       "status": "OK"
     },
@@ -715,7 +738,8 @@
     },
     {
       "module": "run_momentum_future_board_pit_backtest",
-      "status": "OK"
+      "status": "OTHER_ERROR",
+      "detail": ""
     },
     {
       "module": "run_score_backtest",
