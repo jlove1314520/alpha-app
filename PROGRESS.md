@@ -1,3 +1,13 @@
+## 2026-10-31 22:xx DevQueue（維運帽）：空轉補件三條（前向模擬 14／14 已滿，不新增候選）——git stash 殘留與 autostash 衝突
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 2→3）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班（皆請總司令執行一次）③**新增 先.一三五-1fr-a**：git stash 殘留 7 筆可否刪除（刪除屬停下白名單，不適用 24 小時預設放行）。
+- **為什麼做這些**：佇列沒有可執行 `- [ ]`、連 2 輪 QUEUE_EMPTY；前向上限滿，照零之二⑤不寫候選、不寫 PREREG。上一輪記「可執行類來源已用盡」，本輪從 `git stash list`（10/23 清空後又累積 7 筆）找到維運缺口。
+- **先.一三五-1fr（已結案）**：新增唯讀 `scripts/inventory_autostash_residual.py`（不 drop、不改檔，約 7 分鐘）。7 筆共 3,997 個檔版本：已被新版取代 3,972、相同 1、行都還在 1、stash 內刪除 1、機器狀態檔未提交 15、「獨有」7 檔——逐行核對全是舊時間戳（paper_10／paper_14 的 generated_at）與舊條目狀態（CLAUDE.md「上限 13」、PENDING_QUEUE 9 個條目舊寫法，條目代號都還在）。**沒有獨有內容、沒有資料遺失**。stash@{0} 沒被自動刪是因為 `research/data/paper_*.json` 被當人寫檔（寧留不刪，行為正確）。**未 drop**，送 AWAITING。
+- **先.一三五-1ft（已結案）**：`research/autostash_failures.jsonl` 10/23 12:00 後 45 筆（40 筆已自動清除）。衝突集中在 `data/rate_limit_state.json`（38／45）、連通性狀態檔、`data/by_code/_meta.json` 等多支排程共寫的機器檔，沒有人寫檔頻繁衝突。[自行裁量] 不開修正條目（改寫檔方式屬架構變更，無實害前不提）。
+- **先.一三五-1fs（`- [!]` 時間閘 11/02 18:00）**：互動視窗今晚改的模擬 L 出現日新規則（R1-basic_twse）第一次真實排程後驗收。
+- 不碰 holdout、不算報酬、不登記試驗、零外部請求；未新增任何排程寫入；新腳本是手動唯讀工具。
+- 冒煙：`node scripts/smoke_test.mjs` exit=0，**179 PASS／0 FAIL**。
+
 ## 2026-10-31 21:xx 互動視窗：收件匣 033（Cowork 20:40）兩項定案
 
 - **等待總司令審閱：2 件**（`research/AWAITING_REVIEW.md` 等待中 4→2，本輪結案 B2、1fn-a）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班（金鑰＋觸發）——都在 `C:/alpha/總司令待辦.md`，請總司令執行一次。
