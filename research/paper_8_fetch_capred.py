@@ -35,7 +35,11 @@ HOURLY_SOFT_CAP = 450  # 方案上限 600／小時，留 150 給其他排程
 def failed_ids() -> list[str]:
     out = []
     for p in sorted(PANEL_DIR.glob("*.json")):
-        err = json.loads(p.read_text(encoding="utf-8")).get("error") or ""
+        try:
+            err = json.loads(p.read_text(encoding="utf-8")).get("error") or ""
+        except (FileNotFoundError, json.JSONDecodeError) as e:  # build-panel 同時在刪檔／寫檔（比照 refresh 工具）
+            print(f"  [skip] {p.name}：{e!r}")
+            continue
         if re.search(rf"無快取 {DATASET}/", err):
             out.append(p.stem)
     return out
