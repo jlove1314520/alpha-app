@@ -113,6 +113,32 @@ def audit_yml_expected_shifts(since: datetime, until: datetime) -> list[datetime
     return sorted(out)
 
 
+def shioaji_close_expected_shifts(since: datetime, until: datetime) -> list[datetime]:
+    """Shioaji 收盤快照（`data/quotes_sinopac.json`）：交易日 14:00（Asia/Taipei）一班。
+
+    2026-11-01 DevQueue 20261101-030102（純 bug 修）：常駐行程 13:45 離開盤中迴圈後
+    `_flush_and_push(final=True)` 寫一次收盤快照（只有 `fetched_at`，沒有 `checked_at`），
+    登錄檔原本讀 `checked_at` → 永遠 unknown、真的停更也看不出來。改讀 `fetched_at` 後，
+    舊制「1440 分×3」遇到週一放假的連假（>72 小時）會誤報，所以比照 audit_yml 用交易日班次；
+    班次訂 14:00（收盤寫檔約 13:45，留 15 分鐘）。注意：上次產出（13:45）之後同一天的
+    14:00 那班一定會被數到，所以「錯過班數－1」才是真正沒寫的交易日數；登錄檔門檻訂 3
+    ＝連續 2 個交易日收盤都沒寫才亮燈。零 tick 的臨時休市日（如 10/23 颱風）不寫快照、
+    又不在 TW_HOLIDAYS_2026 → 會多數一班，門檻 3 可吸收單日。
+    """
+    out: list[datetime] = []
+    if since is None or until is None or since >= until:
+        return out
+    d = since.date() - timedelta(days=1)
+    end_d = until.date() + timedelta(days=1)
+    while d <= end_d:
+        if is_tw_trading_day(d):
+            ts = _tp(d, 14, 0)
+            if since < ts <= until:
+                out.append(ts)
+        d += timedelta(days=1)
+    return sorted(out)
+
+
 _ALL_10MIN = {0, 10, 20, 30, 40, 50}
 
 
@@ -176,6 +202,7 @@ EXPECTED_SHIFT_FUNCS = {
     "quotes_yml": quotes_yml_expected_shifts,
     "news_events_yml": news_events_yml_expected_shifts,
     "audit_yml": audit_yml_expected_shifts,
+    "shioaji_close": shioaji_close_expected_shifts,
 }
 
 

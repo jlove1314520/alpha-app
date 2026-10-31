@@ -1,3 +1,12 @@
+## 2026-11-01 03:1x DevQueue（維運帽，cycle 20261101-030102）：Shioaji 收盤快照監控盲點修好＋補件 1 條研究項
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不增不減）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班（皆請總司令執行一次）③先.一三五-1fr-a git stash 殘留 7 筆可否刪除。
+- **先.一三五-1gd**：時間閘 11/03 06:30 未到 → 照慣例改標 `- [!] 〔時間閘…〕`，本輪不做。
+- **先.一三五-1ge（已結案，純 bug 修）**：`local_task_health` 的「Shioaji 報價快照」一直是 unknown——登錄檔讀 `checked_at`，但收盤快照只寫 `fetched_at`，真的停更也看不出來（十一節：監控自己的盲點）。改讀 `fetched_at`，並新增 `shioaji_close` 班次表（台股交易日 14:00 一班、門檻 3＝連續 2 個交易日收盤沒寫才亮燈），避免連假超過 72 小時誤報。證據：該列 unknown→ok；新自測 `scripts/selftest_shioaji_close_freshness.py` 10 項全過；既有 09 月停擺回放、`selftest_local_heartbeats.py` 12 項照舊過。[自行裁量] 臨時休市（颱風）沒改成讀 `trading_calendar.json`（會動共用函式），已知颱風日＋隔天真的漏寫會提早一天亮燈，寧可多報。
+- **收工補件**：`- [ ]` 20 項（≥12）；DevQueue 可執行（含[研究]）1 項（<6）。補 **先.一三五-1gf [研究]**：`deep_dive_f_us_low_vol_small_tier.py` import 的 TIER 已改成 "mid"、頂層 assert 必定失敗，是 reproducibility_check 長期 false 的唯一原因，照同族 mid_tier 先例修（不重跑、不登記）。其餘來源（BACKLOG、UX 提案、全檢、DATA_GAP 甲類、STATUS 排程健康）都查過沒有可做的新項，來源已用盡；排程健康只剩 IBKR 待本人登入（先.一三二-12）。
+- 維運帽產物：`data/STATUS.json` 本輪無產出（沒有資料源或面板異動；改的是本機監控登錄檔）。不碰 holdout、不算報酬、不登記試驗、零外部請求；未新增排程寫入。
+- 冒煙：`node scripts/smoke_test.mjs` exit=0，**179 PASS／0 FAIL**。
+
 ## 2026-11-01 02:3x DevQueue（維運帽）：空轉補件四條（前向模擬 14／14 已滿，不新增候選）——美國夏令時間 11/01 結束的時區檢查
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不增不減）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班（皆請總司令執行一次）③先.一三五-1fr-a git stash 殘留 7 筆可否刪除。
