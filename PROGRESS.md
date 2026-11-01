@@ -1,3 +1,21 @@
+## 2026-11-01 11:31～11:5x DevQueue（維運帽，cycle 20261101-113102）：1gr 結案＋1go 阻塞解除結案＋收工補件 1gu
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3 列，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中報價本機補班 ③先.一四五-1 刪除 7 筆殘留 git stash（三件都是「請總司令執行一次」）。
+- **先.一三五-1gr（結案，commit e1ed816053）**：`research/shioaji_quotes.py` docstring 第 70 行 `C:\alpha`（非 raw，執行時 `\a`＝BEL）改成跳脫的雙反斜線，只動一個字元。
+  - **[自行裁量]**：選「改跳脫」不選「docstring 加 r 前綴」——加 r 會改變整段 docstring 其他跳脫的意義，改動面較大。
+  - 證據：AST 重掃本檔控制字元常數 1→0；`python -W error::SyntaxWarning` compile 通過。
+  - 重啟／四步驗證：非盤中 shioaji_quotes **沒有常駐行程**（排程每 2 分鐘一次短命呼叫），commit 11:38:48 之後 11:39:02 那輪已載入新檔、stderr 空。`[build] git sha=` 只在盤中登入後才印 → **這一步未驗證**，已補件 1gu 下一交易日查。`/health` 屬 alpha_live_server（不 import shioaji_quotes）：`python scripts/live_server_verify.py` 4 項全 PASS（①200 ②build sha 6de9383 與 HEAD 之間伺服器相關檔無差異 ③OPTIONS 精確來源＋allow-credentials ④stale_process＝false）。
+  - `scripts/selftest_no_control_chars.py` 加第二段：`ast` 掃 .py 字串常數的執行時值，反向驗證（非 raw `"C:\alpha"` 必中、raw 不中、`\t\n` 不中）→ 8 項全 PASS、exit 0。
+- **先.一三五-1go（`- [!]`→`- [x]`）**：阻塞條件（1gp 修完）已在上一輪成立，本輪重跑自測檔案段命中 0 行、exit 0 → 結案（commit 538f496ba1）。
+- **自己踩到同一個坑（如實記錄）**：本輪用 bash heredoc 寫 PENDING_QUEUE 補記時，這台 Git Bash 的 heredoc 把雙反斜線吃成單一個，Python 再把 `\a` 轉成 BEL、`\t\n` 轉成真的 tab＋換行——1gr 補記被切成兩行、多一個 BEL。新自測當場抓到（命中 PENDING_QUEUE.md 1 行），已修回（commit 58c900a4b4）。e1ed816053 的 commit 訊息裡「改 `C:\\alpha`」也被吃成「改 `C:\alpha`」，只是訊息文字、已 push 不改。之後寫含反斜線的內容一律先用 Write 工具寫成暫存 .py 再執行，不用 heredoc。
+- **收工補件**：`- [ ]` 21 項（≥12）；DevQueue 可執行 1→2（1gt [研究]、1gu [維運]），仍 <6。
+  - **先.一三五-1gu [維運]（新補，時間閘 11/02 09:05 後）**：下一交易日看 `shioaji_stream_stdout.log` 的 `[build]` 行 sha 是否為 e1ed816 或更新（只讀 `[build]` 行、零請求）。
+  - 其他來源都查過、沒有可做的：①BACKLOG 只剩「B23 殘留待辦」（研究類）②UX 提案未做項（深色 WCAG）已由先.一一〇-8 完成 ③「先.八十 全檢修正」節無未完成項 ④DATA_GAP_PLAN 甲類已全部抓完。另掃兩類潛在 bug：全 repo .py 的 SyntaxWarning（無效跳脫）0 處；未指定 encoding 的文字讀寫 19 處，逐一看過都是寫 ASCII 或 json.dump（預設 ensure_ascii），無害、不拿來湊數。**來源已用盡**。
+  - 附帶觀察：`- [!]` 裡有多條時間閘早已過期的互動視窗項（如先.四十九-一～五、先.五十-5〔10/08〕、先.五十七-A1b、先.五十八-A3〔10/12〕），屬互動視窗範圍，本輪不動，留給互動視窗開工時檢查。
+- 維運帽產物：`data/STATUS.json` 本輪未改（沒有資料源或面板異動）。零外部資料 API 請求。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0、179 PASS／0 FAIL（11:33 開跑，1gr 程式修改後）。
+- **下一項**：先.一三五-1gt 是 [研究]，本輪維運帽不接，留給下一輪。
+
 ## 2026-11-01 11:01～11:2x DevQueue（研究帽，cycle 20261101-110102）：1gp 分軌退路修回＋收工補件 1gt
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3 列，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次，10/28 23:0x 起，約 3.5 天）②先.一四一-3a 美股盤中補班放金鑰＋觸發（請總司令執行一次，10/29 04:5x 起，約 3.3 天）③先.一四五-1 刪除 7 筆殘留 git stash（請總司令執行一次，11/01 08:4x 起，約 2.5 小時）。
