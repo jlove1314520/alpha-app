@@ -17,6 +17,7 @@ JSON，不是手寫、不會漏。
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -1377,7 +1378,21 @@ def build_local_pipeline_health() -> dict:
 
     這支在 GitHub Actions 上也會被呼叫到，而雲端 runner 上沒有這些本機產出檔，
     所以整段包在 try 裡：拿不到就誠實標 unavailable，不要讓 STATUS.json 生不出來。
+
+    2026-11-01 DevQueue 20261101-130102 修：雲端 runner 上 `evaluate()` 並不會拋例外，
+    而是把每個本機產出檔都判成「產出檔不存在」，STATUS.json 因此掛著一份假的
+    `any_stalled: true` 停擺清單（例：10/31 09:09 雲端版列 8 條，含 alpha.db 不存在）。
+    在 GitHub Actions 上（環境變數 GITHUB_ACTIONS=true）直接回 unavailable，照上面的原設計。
     """
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        return {
+            "checked_at": datetime.now(TW_TZ).isoformat(),
+            "status": "unavailable",
+            "reason": "在 GitHub Actions runner 上執行，沒有本機產出檔",
+            "note": "在沒有本機產出檔的環境（例如 GitHub Actions runner）跑這支時，"
+                    "這一段必然取不到值，屬預期行為，不是故障。本機管線新鮮度請看本機產生的版本"
+                    "或 data/audit_report.json 的 local_task_health。",
+        }
     try:
         sys.path.insert(0, str(REPO_ROOT / "scripts"))
         from pipeline_freshness import evaluate
