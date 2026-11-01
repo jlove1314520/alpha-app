@@ -96,8 +96,9 @@ try:
             "max_price_dev_pct": 1.0, "monthly_contribution_twd": 50_000}
     pc = {c: (v, "2026-10-08") for c, v in px.items()}
     pv = A.plan_preview(sp, pcfg, pc, 650_000.0, None, now)
-    same = A.plan_orders(px, {}, 600_000, True, dev_pct=0.5)
-    check(f"⑤預覽期別 T1、預算＝總資金÷4、委託與 plan_orders(dev 0.5) 一致（{len(pv.get('orders', []))} 筆）",
+    # 2026-11-01 DevQueue 20261101-090102：先.八十二-5 起預覽與 run_month_end 都帶 dev_map（美股連結 ETF 偏離 1%），對照組同步帶上
+    same = A.plan_orders(px, {}, 600_000, True, dev_pct=0.5, dev_map=A.dev_by_code(pcfg))
+    check(f"⑤預覽期別 T1、預算＝總資金÷4、委託與 plan_orders(dev 0.5＋dev_map) 一致（{len(pv.get('orders', []))} 筆）",
           pv["label"] == "T1" and [(o["symbol"], o["qty"], o["limit_price"]) for o in pv["orders"]] == [(o["symbol"], o["qty"], o["limit_price"]) for o in same])
     check("⑤合計×1.003＝need_with_buffer；可用只回布林", abs(pv["need_with_buffer"] - pv["total"] * A.CASH_BUFFER) < 0.02
           and pv["available_ok"] in (True, False) and "available" not in json.dumps({k: v for k, v in pv.items() if k != "available_ok"}))
