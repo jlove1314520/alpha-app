@@ -1,3 +1,13 @@
+## 2026-11-01 08:4x 互動視窗：收件匣 034（Cowork 08:15）兩項定案
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 4→3）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一四五-1 刪除 7 筆殘留 git stash——都在 `C:/alpha/總司令待辦.md`（第 1、2、5 項），請總司令執行一次。
+- **先.一三五-1fr-a（刪 stash）**：刪前重跑盤點，7 筆的獨有行跟 10/31 逐行核對的一模一樣（舊時間戳、舊條目狀態），沒有新的獨有內容。互動視窗執行 `git stash drop` **被權限分類器擋下（不可逆的本機刪除），照規則不繞過**；改寫 `scripts/drop_autostash_residual.py`（刪前逐筆重檢、只准「要人看」的檔比快照少，`--dry` 乾跑 7 筆皆可刪），請總司令執行一次（先.一四五-1，已接 `run-owner-todo.ps1` 第 5 項）。
+- **為什麼 7 筆沒被自動清掉**：1 筆因 `research/data/paper_*.json` 被當人寫檔；2 筆是收件匣 032 修好前的舊判斷；1 筆是 PENDING_QUEUE.md 等人寫檔遠端較新（照設計保留）；2 筆完全沒有失敗紀錄（沒經過取回流程：.ps1 原生 pull 退路或兩個排程同時套回）；1 筆是手動暫存。
+  - 修正：MACHINE_WRITTEN 補 `research/data/paper_*.json`；`scripts/local_git_commit.py` 新增 `sweep_residual_autostash()`（commit 後持鎖、每 30 分鐘最多一次，autostash 放滿 2 小時才看，逐檔用盤點工具判定沒有獨有內容才刪、記紀錄；有獨有內容保留、判定出錯只警告）。只管 11/01 09:00 以後的 stash。
+  - 自測：`selftest_autostash_restore.py` 新增 8 項全過；相關自測 18 支中 17 支過，`selftest_claude_auth_detection.py` 1 項 FAIL（「只剩時間閘→exit 6」實得 0：讀到真實 dev_queue_cycle.log 連續空轉而觸發候選補件，跟本次修改無關，未修，照實記錄）。
+- **先.一三五-1gj-a 採甲**：交 DevQueue（`- [ ]`，改 `audit.yml` 一行加 yfinance，下一次雲端 audit 看 ENV_MISSING≤2 驗收）。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0，179 PASS／0 FAIL。
+
 ## 2026-11-01 06:31～07:0x DevQueue（維運帽，cycle 20261101-063102）：重現性稽核盲點補齊（1gi）＋雲端缺套件分類（1gj）→ 開 1gj-a 提案
 
 - **等待總司令審閱：4 件**（`research/AWAITING_REVIEW.md` 等待中 3→4）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次，10/28 23:0x 起，約 3.3 天）②先.一四一-3a 美股盤中報價本機補班放金鑰＋加觸發（請總司令執行一次，10/29 04:5x 起，約 3 天）③先.一三五-1fr-a git stash 殘留 7 筆可否刪除（10/31 22:xx 起，約 8 小時）④**新增** 先.一三五-1gj-a audit.yml 加裝 yfinance（11/01 06:5x 起，選甲／乙，建議甲；24 小時無裁示照零之二①預設放行甲）。

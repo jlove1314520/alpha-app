@@ -229,6 +229,79 @@ def pull_or_abort(timeout=180) -> int:
     return 1
 
 
+# 收件匣 034（先.一三五-1fr-a）：10/24～10/30 留下的 7 筆 autostash 有 3 筆完全沒進 _restore_failed_autostash
+# （沒有任何失敗紀錄：可能是 .ps1 的原生 `git pull --autostash` 退路、或兩個排程同時套回時只看最上面一筆），
+# 另 2 筆是收件匣 032 修好前的舊判斷。補一道事後掃描：每筆 autostash 放滿 SWEEP_MIN_AGE_SEC 後，用盤點工具
+# （inventory_autostash_residual.classify）逐檔判定，全部是 same／superseded／lines_kept／deleted_in_stash，
+# 或機器寫檔且工作樹已在 stash 之後重寫過（machine_stale）→ 沒有獨有內容，照 先.一三一-3 核准自動刪；
+# 任何一檔 unique／missing／判定出錯就保留，24 小時後再看（十二節：寧可留著，不可誤刪）。
+# SWEEP_SINCE 之前的 stash（10/31 盤點那 7 筆）不在這裡刪，交互動視窗人工處理。
+SWEEP_MIN_AGE_SEC = 2 * 3600
+SWEEP_EVERY_SEC = 30 * 60
+SWEEP_RECHECK_SEC = 24 * 3600
+SWEEP_SINCE = 1793494800  # 2026-11-01 09:00 台北
+SWEEP_STATE = ROOT / "research" / ".autostash_sweep_state.json"
+SWEEP_OK = {"same", "superseded", "lines_kept", "deleted_in_stash"}
+
+
+def sweep_residual_autostash(now: float | None = None) -> list[str]:
+    """呼叫端要持有 git_op_lock。回傳本次刪掉的 stash 雜湊。自身任何失敗只印警告、回空清單（十二節）。"""
+    import json
+    import time
+    now = time.time() if now is None else now
+    dropped: list[str] = []
+    try:
+        try:
+            st = json.loads(SWEEP_STATE.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            st = {}
+        if now - float(st.get("last_run", 0)) < SWEEP_EVERY_SEC:
+            return []
+        st["last_run"] = now
+        kept = {h: t for h, t in (st.get("kept") or {}).items()}
+        rows = [ln.split("|", 3) for ln in _g("stash", "list", "--format=%H|%ct|%ci|%gs").stdout.splitlines() if ln.count("|") >= 3]
+        live = {r[0] for r in rows}
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import inventory_autostash_residual as inv  # noqa: PLC0415
+        inv.ROOT = ROOT
+        for h, ct, ci, subj in rows:
+            if "autostash" not in subj or not ct.isdigit() or int(ct) < SWEEP_SINCE or now - int(ct) < SWEEP_MIN_AGE_SEC:
+                continue
+            if now - float(kept.get(h, 0)) < SWEEP_RECHECK_SEC:
+                continue
+            names = [n for n in _g("stash", "show", "--name-only", h).stdout.splitlines() if n.strip()]
+            bad = []
+            for n in names:
+                c, _k = inv.classify(h, ci, n)
+                if c in SWEEP_OK:
+                    continue
+                if c == "machine_stale" and (ROOT / n).stat().st_mtime > int(ct):
+                    continue
+                bad.append(f"{c}:{n}")
+            if bad or not names:
+                kept[h] = now
+                continue
+            hashes = _g("stash", "list", "--format=%H").stdout.split()
+            ref = f"stash@{{{hashes.index(h)}}}" if h in hashes else ""
+            if not ref or _g("rev-parse", "-q", "--verify", ref).stdout.strip() != h or _g("stash", "drop", "-q", ref).returncode != 0:
+                kept[h] = now
+                continue
+            dropped.append(h)
+            rec = {"at": time.strftime("%Y-%m-%dT%H:%M:%S+08:00", time.gmtime(now + 8 * 3600)), "stash": h,
+                   "caller": "sweep_residual_autostash", "files": len(names), "stash_dropped": True,
+                   "drop_reason": f"事後掃描：{len(names)} 檔都沒有獨有內容，自動刪除（{ref}；收件匣 034）"}
+            try:
+                with AUTOSTASH_LOG.open("a", encoding="utf-8") as f:
+                    f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+            except Exception:  # noqa: BLE001
+                pass
+        st["kept"] = {h: t for h, t in kept.items() if h in live and h not in dropped}
+        SWEEP_STATE.write_text(json.dumps(st, ensure_ascii=False), encoding="utf-8")
+    except Exception as e:  # noqa: BLE001
+        print(f"[local_git_commit] 警告：autostash 事後掃描失敗（{type(e).__name__}: {e}），stash 全部保留", file=sys.stderr)
+    return dropped
+
+
 def commit_paths(paths: list[str], msg: str, drop_on_conflict: bool = False, under_lock=None) -> str:
     if rebase_in_progress():
         return "repo 正在 rebase 中（別的程序留下的），本輪不動，留給人工或下一輪"
@@ -282,6 +355,7 @@ def commit_paths(paths: list[str], msg: str, drop_on_conflict: bool = False, und
         if marks.returncode == 0 and marks.stdout.strip():
             return "已 commit，但偵測到衝突標記，跳過 push：" + marks.stdout.strip().replace("\n", ", ")[:200]
         p = _g("push", "-q")
+        sweep_residual_autostash()  # 收件匣 034：仍持有鎖；自身失敗只印警告
         return "已 commit 並 push" if p.returncode == 0 else "已 commit，push 失敗（留給下一輪）"
     except Exception as e:  # noqa: BLE001
         try:

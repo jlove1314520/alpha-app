@@ -121,5 +121,50 @@ with tempfile.TemporaryDirectory() as td:
     check("5b 另一個排程的 stash 原封不動", left == [other], str(left))
     check("5c 競態不推播", len(pushes) == 1, str(pushes))
 
+    # 6.（收件匣 034）事後掃描：沒進 _restore_failed_autostash 的殘留 autostash
+    git(a, "stash", "clear"); git(a, "reset", "-q", "--hard")
+    G.SWEEP_STATE = a / "research" / ".autostash_sweep_state.json"
+    G.SWEEP_SINCE = 0
+
+    def mk(files: dict, msg="autostash") -> str:
+        for f, s in files.items():
+            w(a / f, s)
+        h = git(a, "stash", "create").stdout.strip(); git(a, "stash", "store", "-m", msg, h)
+        git(a, "reset", "-q", "--hard")
+        return h
+
+    sup = mk({"data/m.json": "m-old-stash\n"})                    # 機器寫檔，之後有 commit 動過 → 可刪
+    uniq = mk({"Y.txt": "y0\ny-unique-line\n"})                    # 人寫檔有獨有行 → 保留
+    manual = mk({"data/m.json": "m-x\n"}, msg="手動暫存")          # 不是 autostash → 不碰
+    w(a / "data" / "m.json", "m-newer-commit\n"); git(a, "commit", "-q", "-am", "m newer")
+    ct = int(git(a, "log", "-1", "--format=%ct").stdout.strip())
+    check("6a 未滿 2 小時不掃", G.sweep_residual_autostash(now=ct + 60) == [] and len(git(a, "stash", "list").stdout.splitlines()) == 3)
+    G.SWEEP_STATE.unlink(missing_ok=True)
+    got = G.sweep_residual_autostash(now=ct + G.SWEEP_MIN_AGE_SEC + 60)
+    left = git(a, "stash", "list", "--format=%H").stdout.split()
+    check("6b 機器寫檔已被新版取代 → 刪", got == [sup] and sup not in left, str(got))
+    check("6c 人寫檔有獨有行 → 保留", uniq in left)
+    check("6d 非 autostash 不碰", manual in left)
+    log = [json.loads(l) for l in G.AUTOSTASH_LOG.read_text(encoding="utf-8").splitlines()]
+    check("6e 刪除寫進紀錄", log[-1].get("caller") == "sweep_residual_autostash" and log[-1]["stash"] == sup, str(log[-1])[:160])
+    check("6f 30 分鐘內不重掃", G.sweep_residual_autostash(now=ct + G.SWEEP_MIN_AGE_SEC + 120) == [])
+    G.SWEEP_SINCE = ct + 10 ** 6
+    G.SWEEP_STATE.unlink(missing_ok=True)
+    w(a / "Y.txt", "y0\n"); git(a, "commit", "-q", "-am", "noop", "--allow-empty")
+    check("6g SWEEP_SINCE 之前的 stash 不刪（10/31 那 7 筆交人工）", G.sweep_residual_autostash(now=ct + 10 ** 5) == []
+          and uniq in git(a, "stash", "list", "--format=%H").stdout)
+    G.SWEEP_SINCE = 0
+    G.SWEEP_STATE.write_text("{不是 JSON", encoding="utf-8")
+    import inventory_autostash_residual as _inv  # noqa: E402
+    _orig = _inv.classify
+    _inv.classify = lambda *a_, **k_: (_ for _ in ()).throw(RuntimeError("壞掉"))
+    try:
+        r6 = G.sweep_residual_autostash(now=ct + 10 ** 5)
+        ok6 = True
+    except Exception:  # noqa: BLE001
+        r6, ok6 = None, False
+    _inv.classify = _orig
+    check("6h 判定出錯：不拋例外、不刪", ok6 and r6 == [] and uniq in git(a, "stash", "list", "--format=%H").stdout)
+
 print(f"\n結果：{'全部通過' if not fails else '失敗 ' + str(fails)}")
 sys.exit(1 if fails else 0)
