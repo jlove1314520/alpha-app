@@ -845,12 +845,17 @@ check("連線預算：3 個常駐＋本次＝4 條→PASS", _pf(["shioaji_quotes
 check("連線預算：4 個常駐＋本次＝5 條→FAIL", _pf(["shioaji_quotes.py", "shioaji_order_server.py", "auto_rebalance_bb90.py", "shioaji_quotes.py"])["result"] == "FAIL")
 # 3 禁止以 limit_up／limit_down 計價；00697B 極端漲跌停仍以 reference 出價並對齊級距
 _root = Path(A.__file__).resolve().parent.parent
+# 2026-11-01 先.一三五-1gm-a：改單字邊界，limit_prices／limit_up_at_entry 這類別名不再誤報（paper_10）；下面反向驗證防止掃描變成永遠不命中
+_ord_path = lambda t: bool(_re2.search(r"\bplace_order\b|\bplan_orders\b|\blimit_price\b", t))
+check("掃描反向驗證：limit_price = c.limit_up 必須命中、limit_up_at_entry／limit_prices 不得命中",
+      _ord_path("limit_price = c.limit_up") and bool(_re2.search(r"\blimit_(up|down)\b", "limit_price = c.limit_up"))
+      and not (_ord_path("x.limit_prices(); limit_up_at_entry") and _re2.search(r"\blimit_(up|down)\b", "x.limit_prices(); limit_up_at_entry")))
 _hits = []
 for _f in list((_root / "research").glob("*.py")) + list((_root / "scripts").glob("*.py")):
     if _f.name.startswith("selftest_"):
         continue
     _t = _f.read_text(encoding="utf-8", errors="ignore")
-    if ("place_order" in _t or "plan_orders" in _t or "limit_price" in _t) and _re2.search(r"limit_up|limit_down", _t):
+    if _ord_path(_t) and _re2.search(r"\blimit_(up|down)\b", _t):
         _hits.append(_f.name)
 check(f"全 repo 下單路徑不使用 limit_up／limit_down 計價（命中：{_hits or '無'}）", not _hits)
 class _Contract:
