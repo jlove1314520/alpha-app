@@ -187,7 +187,8 @@ def parse() -> list[dict]:
                      if len(x) > 6 and not TRACK_RE.match(x)
                      and x.strip().lower() != "hypothesis_queue"), c[-2][:70])
         # 先.一〇三-15：這一列引用的事前登記編號（「事前登記 #445」），用來把「事前登記＋結果」算成 1 筆
-        prereg_ref = sorted({int(m.group(1)) for m in re.finditer(r"事前登記\s*(?:列\s*)?#(\d+)", blob)} - {int(c[1])})
+        # 2026-11-01 先.一三五-1gv：#425／#428 寫的是「預登記 #423／#427」，原本沒被合併（全體 N 多算 2）；「母登記」不算。
+        prereg_ref = sorted({int(m.group(1)) for m in re.finditer(r"(?:事前|預)登記\s*(?:列\s*)?#(\d+)", blob)} - {int(c[1])})
         rows.append({
             "id": int(c[1]), "date": date, "track": track, "prereg_ref": prereg_ref,
             "name": name[:70], "factor": _pick_factor(blob, name[:40]),
