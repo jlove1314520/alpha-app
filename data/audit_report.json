@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-10-31T23:00:01.787906+08:00",
- "duration_sec": 9.7,
+ "generated_at": "2026-11-01T23:00:01.902371+08:00",
+ "duration_sec": 17.2,
  "reference": {
   "twse": {
    "ok": true,
@@ -6513,13 +6513,13 @@
   "2026-09-15（稽核二.三）e_pe 降級為 informational_only_checks：官方 BWIBBU_ALL 本益比未公開計算基礎（合併/個別、TTM窗口定義皆未載明），跟我方用 stock_detail.json 近四季EPS自行推算的值不保證同一把尺，繼續記錄差異供查閱但不計入 violation_rate/gate_pass。同一次修正了 hit() 呼叫時 ours/official 標籤反向的bug（原本把官方值標成ours、推算值標成official，順序寫反）。"
  ],
  "local_task_health": {
-  "checked_at": "2026-10-31T22:57:02.209757+08:00",
+  "checked_at": "2026-11-01T22:57:02.426454+08:00",
   "registry": "data/seed/pipeline_registry.json",
   "alert": true,
   "stalled_count": 2,
   "stalled": [
-   "AlphaIbkrQuotes：data/quotes_ibkr.json 已 19436 分鐘沒有新產出（預期每 5 分鐘，門檻 15 分鐘；JSON 欄位 fetched_at）",
-   "ibkr_gateway: 連續失敗878次（四個 API 埠全部關閉（4001/4002/7496/7497）——Gateway 若在跑多半是卡在登入畫面，需人工重登）"
+   "AlphaIbkrQuotes：data/quotes_ibkr.json 已 20876 分鐘沒有新產出（預期每 5 分鐘，門檻 15 分鐘；JSON 欄位 fetched_at）",
+   "ibkr_gateway: 連續失敗1166次（四個 API 埠全部關閉（4001/4002/7496/7497）——Gateway 若在跑多半是卡在登入畫面，需人工重登）"
   ],
   "tasks": [
    {
@@ -6529,7 +6529,7 @@
     "expected_interval_min": 1,
     "freshness": "log_last_timestamp",
     "source": "log 內最後時間戳",
-    "last_output": "2026-10-31T22:57:02+08:00",
+    "last_output": "2026-11-01T22:57:01+08:00",
     "age_min": 0.0,
     "stall_limit_min": 3,
     "status": "ok"
@@ -6541,7 +6541,7 @@
     "expected_interval_min": 2,
     "freshness": "log_last_timestamp",
     "source": "log 內最後時間戳",
-    "last_output": "2026-10-31T22:57:07+08:00",
+    "last_output": "2026-11-01T22:57:07+08:00",
     "age_min": -0.1,
     "stall_limit_min": 6,
     "status": "ok"
@@ -6552,9 +6552,14 @@
     "artifact": "data/quotes_sinopac.json",
     "expected_interval_min": 1440,
     "freshness": "json_field",
-    "source": "JSON 欄位 checked_at",
-    "status": "unknown",
-    "reason": "讀不到時間戳（JSON 欄位 checked_at）"
+    "source": "JSON 欄位 fetched_at",
+    "last_output": "2026-10-30T13:45:17.462027+08:00",
+    "age_min": 3431.7,
+    "shift_profile": "shioaji_close",
+    "missed_shifts": 1,
+    "missed_shift_threshold": 3,
+    "latest_due_shift": "2026-10-30 14:00",
+    "status": "ok"
    },
    {
     "task": "AlphaIbkrQuotes",
@@ -6563,7 +6568,7 @@
     "expected_interval_min": 5,
     "freshness": "log_last_timestamp",
     "source": "log 內最後時間戳",
-    "last_output": "2026-10-31T22:56:05+08:00",
+    "last_output": "2026-11-01T22:56:04+08:00",
     "age_min": 1.0,
     "stall_limit_min": 15,
     "status": "ok"
@@ -6576,7 +6581,7 @@
     "freshness": "json_field",
     "source": "JSON 欄位 fetched_at",
     "last_output": "2026-10-18T11:01:05.500839+08:00",
-    "age_min": 19435.9,
+    "age_min": 20875.9,
     "stall_limit_min": 15,
     "status": "stalled"
    },
@@ -6587,7 +6592,7 @@
     "expected_interval_min": 5,
     "freshness": "jsonl_last_field",
     "source": "JSONL 末筆 ts",
-    "last_output": "2026-10-31T22:52:02.130682+08:00",
+    "last_output": "2026-11-01T22:52:02.539914+08:00",
     "age_min": 5.0,
     "stall_limit_min": 15,
     "status": "ok"
@@ -6599,7 +6604,7 @@
     "expected_interval_min": 15,
     "freshness": "jsonl_last_field",
     "status": "skipped",
-    "reason": "觀察窗 13:00-20:00 之外，沒產出是正常的"
+    "reason": "台股休市日，沒產出是正常的"
    },
    {
     "task": "AlphaDevQueue",
@@ -6608,7 +6613,7 @@
     "expected_interval_min": 15,
     "freshness": "log_last_timestamp",
     "source": "log 內最後時間戳",
-    "last_output": "2026-10-31T22:31:04+08:00",
+    "last_output": "2026-11-01T22:31:05+08:00",
     "age_min": 26.0,
     "stall_limit_min": 45,
     "status": "ok"
@@ -6639,7 +6644,7 @@
     "freshness": "sqlite_max_date",
     "source": "各表 max(date)：daily_price=2026-10-30、inst_trades=2026-10-30、valuation=2026-10-30、taifex_large=20261030",
     "last_output": "2026-10-30T00:00:00+08:00",
-    "age_min": 2817.0,
+    "age_min": 4257.0,
     "stall_limit_min": 4320,
     "status": "ok"
    },
@@ -6651,7 +6656,7 @@
     "freshness": "json_field",
     "source": "JSON 欄位 generated_at",
     "last_output": "2026-10-26T08:00:05.123297+08:00",
-    "age_min": 8097.0,
+    "age_min": 9537.0,
     "stall_limit_min": 30240,
     "status": "ok"
    },
@@ -6663,7 +6668,7 @@
     "freshness": "json_field",
     "source": "JSON 欄位 meta.generated_at",
     "last_output": "2026-10-31T09:08:28.010504+08:00",
-    "age_min": 828.6,
+    "age_min": 2268.6,
     "shift_profile": "market_yml",
     "missed_shifts": 0,
     "missed_shift_threshold": 2,
@@ -6678,7 +6683,7 @@
     "freshness": "json_field",
     "source": "JSON 欄位 fetched_at",
     "last_output": "2026-10-31T01:05:50+00:00",
-    "age_min": 831.2,
+    "age_min": 2271.2,
     "shift_profile": "market_yml",
     "missed_shifts": 0,
     "missed_shift_threshold": 2,
@@ -6693,7 +6698,7 @@
     "freshness": "json_field",
     "source": "JSON 欄位 meta.generated_at",
     "last_output": "2026-10-31T09:07:46.215807+08:00",
-    "age_min": 829.3,
+    "age_min": 2269.3,
     "shift_profile": "market_yml",
     "missed_shifts": 0,
     "missed_shift_threshold": 2,
@@ -6708,7 +6713,7 @@
     "freshness": "dir_latest_json_field",
     "source": "目錄最新檔 2026-10-30.json 的 meta.date",
     "last_output": "2026-10-30T00:00:00+08:00",
-    "age_min": 2817.0,
+    "age_min": 4257.0,
     "stall_limit_min": 8640,
     "status": "ok"
    },
@@ -6720,7 +6725,7 @@
     "freshness": "dir_latest_json_field",
     "source": "目錄最新檔 2026-10-30.json 的 fetched_at",
     "last_output": "2026-10-30T09:35:21+00:00",
-    "age_min": 1761.7,
+    "age_min": 3201.7,
     "stall_limit_min": 8640,
     "status": "ok"
    },
@@ -6732,7 +6737,7 @@
     "freshness": "json_field",
     "source": "JSON 欄位 meta.generated_at",
     "last_output": "2026-10-31T09:08:09.227522+08:00",
-    "age_min": 828.9,
+    "age_min": 2268.9,
     "shift_profile": "market_yml",
     "missed_shifts": 0,
     "missed_shift_threshold": 2,
@@ -6747,7 +6752,7 @@
     "freshness": "json_field",
     "source": "JSON 欄位 fetched_at",
     "last_output": "2026-10-31T05:25:58+00:00",
-    "age_min": 571.1,
+    "age_min": 2011.1,
     "shift_profile": "quotes_yml",
     "missed_shifts": 0,
     "missed_shift_threshold": 3,
@@ -6761,12 +6766,12 @@
     "expected_interval_min": 30,
     "freshness": "json_field",
     "source": "JSON 欄位 fetched_at",
-    "last_output": "2026-10-31T21:35:04.489563+08:00",
+    "last_output": "2026-11-01T21:35:04.033696+08:00",
     "age_min": 82.0,
     "shift_profile": "news_events_yml",
     "missed_shifts": 2,
     "missed_shift_threshold": 3,
-    "latest_due_shift": "2026-10-31 22:30",
+    "latest_due_shift": "2026-11-01 22:30",
     "status": "ok"
    },
    {
@@ -6776,8 +6781,8 @@
     "expected_interval_min": 1440,
     "freshness": "json_field",
     "source": "JSON 欄位 generated_at",
-    "last_output": "2026-10-31T03:58:34.356997+08:00",
-    "age_min": 1138.5,
+    "last_output": "2026-10-31T23:00:01.787906+08:00",
+    "age_min": 1437.0,
     "shift_profile": "audit_yml",
     "missed_shifts": 0,
     "missed_shift_threshold": 2,
@@ -6791,7 +6796,7 @@
     "expected_interval_min": 1440,
     "freshness": "log_last_timestamp",
     "source": "log 內最後時間戳",
-    "last_output": "2026-10-31T18:30:06+08:00",
+    "last_output": "2026-11-01T18:30:07+08:00",
     "age_min": 266.9,
     "stall_limit_min": 4320,
     "status": "ok"
@@ -6804,7 +6809,7 @@
     "freshness": "json_field",
     "source": "JSON 欄位 meta.generated_at",
     "last_output": "2026-10-31T09:09:25+08:00",
-    "age_min": 827.6,
+    "age_min": 2267.6,
     "shift_profile": "market_yml",
     "missed_shifts": 0,
     "missed_shift_threshold": 2,
@@ -6819,7 +6824,7 @@
     "freshness": "json_field",
     "source": "JSON 欄位 generated_at",
     "last_output": "2026-10-31T09:09:19+08:00",
-    "age_min": 827.7,
+    "age_min": 2267.7,
     "shift_profile": "market_yml",
     "missed_shifts": 0,
     "missed_shift_threshold": 2,
@@ -6834,7 +6839,7 @@
     "freshness": "json_field",
     "source": "JSON 欄位 meta.generated_at",
     "last_output": "2026-10-31T09:09:25+08:00",
-    "age_min": 827.6,
+    "age_min": 2267.6,
     "shift_profile": "market_yml",
     "missed_shifts": 0,
     "missed_shift_threshold": 2,
@@ -6843,7 +6848,7 @@
    }
   ],
   "connectivity_alerts": [
-   "ibkr_gateway: 連續失敗878次（四個 API 埠全部關閉（4001/4002/7496/7497）——Gateway 若在跑多半是卡在登入畫面，需人工重登）"
+   "ibkr_gateway: 連續失敗1166次（四個 API 埠全部關閉（4001/4002/7496/7497）——Gateway 若在跑多半是卡在登入畫面，需人工重登）"
   ],
   "note": "由 scripts/check_external_connectivity.py 每 5 分鐘更新。產出檔停擺依據修改時間判定；connectivity_alerts 額外納入internet/tailscale/ibkr_gateway 這類「行程活著但連不上」的連續失敗告警（2026-09-15新增，此前只印在log沒亮燈，IBKR斷線6天才被發現就是這個缺口）。"
  },
