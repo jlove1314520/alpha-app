@@ -15,7 +15,7 @@ rows = [
     {"Name": "git-credential-manager.exe", "ProcessId": 2, "CommandLine": "git-credential-manager get", "Start": "2026-10-15T09:57:23"},
     {"Name": "python.exe", "ProcessId": 3, "CommandLine": "python.exe scripts/commit_local_heartbeats.py connectivity", "Start": "2026-10-15T09:57:17"},
     {"Name": "git.exe", "ProcessId": 4, "CommandLine": "git.exe status", "Start": "2026-10-16T15:30:00"},          # 30 分鐘，不算
-    {"Name": "python.exe", "ProcessId": 5, "CommandLine": "python.exe research\alpha_live_server.py", "Start": "2026-10-10T00:00:00"},  # 常駐服務，不算
+    {"Name": "python.exe", "ProcessId": 5, "CommandLine": "python.exe research\\alpha_live_server.py", "Start": "2026-10-10T00:00:00"},  # 常駐服務，不算
     {"Name": "git.exe", "ProcessId": 6, "CommandLine": "git.exe push", "Start": None},                            # 讀不到時間，略過
 ]
 res = O.classify_stuck_git(rows, now)

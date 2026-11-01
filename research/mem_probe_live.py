@@ -20,7 +20,7 @@ for st in s1.compare_to(s0, "traceback"):
     if st.size_diff <= 0: continue
     key = "(no repo frame)"
     for fr in st.traceback:            # 由外到內；取最內層屬於 research/ 的那一行
-        if "\alpha-app\research\\" in fr.filename and "mem_probe" not in fr.filename:
+        if "\\alpha-app\\research\\" in fr.filename and "mem_probe" not in fr.filename:
             key = f"{fr.filename.split('research')[-1]}:{fr.lineno}"
     agg[key] += st.size_diff
 tot = sum(agg.values())
