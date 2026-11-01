@@ -5518,7 +5518,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const j13bErrs = [];
   let j13bInfo = "";
   try {
-    const JARGON = "Tailscale|Access Client|\bholdout\b|\bDSR\b|天條一|(?:^|[^優首事預領原率搶爭祖起])先[.．][一二三四五六七八九十〇]+|常備\.開發|lightweight-charts|上櫃解析待修|非逐筆\s*tick";
+    const JARGON = "Tailscale|Access Client|\\bholdout\\b|\\bDSR\\b|天條一|(?:^|[^優首事預領原率搶爭祖起])先[.．][一二三四五六七八九十〇]+|常備\.開發|lightweight-charts|上櫃解析待修|非逐筆\s*tick";
     const pages = ["home", "market", "chips-market", "picks", "trade", "journal", "settings"];
     const found = [];
     for (const scr of pages) {
