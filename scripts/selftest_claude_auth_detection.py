@@ -157,6 +157,9 @@ def test_aggregator(tmpdir: Path):
     dq.QUEUE = q; dq.PROMPT_OUT = tmpdir / "prompt.txt"; dq.STATE = tmpdir / "state.json"
     dq._record_format_mismatch = lambda d: None; dq._clear_format_mismatch = lambda: None
     dq._report_order_tag_mismatches = lambda: None
+    # 2026-11-01 DevQueue 20261101-090102：空轉補件會讀真實 dev_queue_cycle.log／AWAITING_REVIEW.md，
+    # 真實環境連續空轉時會把 6／3 改成 0，自測結果跟著現場狀態漂；這裡隔離掉（另有 selftest_dev_queue_idle_fallback.py 專測）。
+    dq._idle_fallback_prompt = lambda: False
     rc = dq.build_prompt()
     check("dev_queue_runner：只剩時間閘／BLOCKED 項目 -> exit 6（GATED）", rc == 6, f"rc={rc}")
     q.write_text("# t\n\n<!-- ORDER-BEGIN -->\n<!-- ORDER-END -->\n\n- [x] **done**\n", encoding="utf-8")
