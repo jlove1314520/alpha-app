@@ -1,3 +1,14 @@
+## 2026-11-01 21:3x DevQueue（維運帽）：空轉補件 1hj／1hk／1hl
+
+- **等待總司令審閱：6 件**（`research/AWAITING_REVIEW.md` 等待中 6 列，本輪沒有變動）。
+- **前向模擬 14／14 已滿**：照零之二⑤不新增候選、不寫 PREREG、不送 AWAITING，改補研究室週更新（研究室.六-週跑）：
+  - **1hj**：10/26（週一）週跑確定沒執行（cycle log、git log 都沒有紀錄）；當週 research/lab 無新變動，沒漏資料。原因判讀：時間閘寫「每週一」不是具體日期，各輪檢查 `- [!]` 時被略過。[自行裁量] 週跑條目開頭改成「〔時間閘：2026-11-02（週一）01:00 後〕」，每次跑完改成下週一。
+  - **1hk**：`selftest_lab_weekly_intake.py` 10 項全過；十節確認 `research/lab/` 在 `MACHINE_WRITTEN` 內，雲端只讀不寫，提交範圍沒有缺口。
+  - **1hl**（時間閘 11/02 12:00）：Cowork 今晚寫入 2383／3037／3443／6274，`--dry-run` 四檔全 PASS，這是第一次真實週更新；明天驗收 commit 有沒有進來。本輪不實跑（Cowork 可能還在寫）。
+- 零外部請求；沒碰 holdout；沒算報酬；沒登記試驗；沒動十三節核心檔；沒改排程；沒動 Cowork 寫的 research/lab 檔與 `build_research.py.cowork_test`。
+- **冒煙**：結果見本 commit 訊息。
+- **BLOCKED**：無新增。
+
 ## 2026-11-01 20:xx DevQueue（維運帽）：空轉補件 1hg／1hh／1hi
 
 - **等待總司令審閱：6 件**（`research/AWAITING_REVIEW.md` 等待中 6 列，本輪沒有變動）。
