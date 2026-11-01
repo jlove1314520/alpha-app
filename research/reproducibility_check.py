@@ -91,7 +91,7 @@ _ALT_LOCATIONS = (
     (ROOT / "validation", "validation.", None),
     (ROOT.parent / ".github" / "scripts", "", ROOT.parent / ".github" / "scripts"),
 )
-# 帳本引用的 C:lphalpha-data 管線模組（不在本 repo，雲端也沒有）→ OUT_OF_REPO，不算 broken。
+# 帳本引用的 C:\alpha\alpha-data 管線模組（不在本 repo，雲端也沒有）→ OUT_OF_REPO，不算 broken。
 OUT_OF_REPO_MODULES = frozenset({"fetch", "parsers"})
 
 

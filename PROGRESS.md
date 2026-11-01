@@ -25,7 +25,7 @@
   - 證據：`python research/reproducibility_check.py --skip-rerun` → OK 236／**FILE_NOT_FOUND 11→3**／OUT_OF_REPO 2／MEM_DEFERRED 1／IMPORT_ERROR 0／OTHER_ERROR 0；新找到的 engine、costs、control_group、us_costs、build_signal_ledger、update_signal_ledger_returns 全部 import OK。
   - 剩 3 支結論（不改帳本）：`ledger`＝TRIALS_LEDGER 第 403～404 行把 `selection_bias_ledger.py` 斷行，正則只抓到後半；#92 `composite_quality_revaccel_inst_lowvol_sanity`、#104 `us_factor_ic_cached_universe` 原始碼**從未進版控**（`git log --all` 無紀錄、非 gitignore），前者只剩 .pyc（已有 _v2 重寫），後者連 .pyc 都沒有。
   - [自行裁量] `ledger` 不在程式裡特判，維持 FILE_NOT_FOUND 並在條目記明原因（硬寫例外會遮住日後真正同名缺檔）。
-  - 本輪自己差點寫壞：note 字串裡的 `C:lpha` 會被 Python 當成 ``（BEL 字元），自測時發現已改成 `C:/alpha/alpha-data`——跟上一輪附帶發現的 PENDING_QUEUE BEL 字元是同一種錯。
+  - 本輪自己差點寫壞：note 字串裡的 `C:\alpha` 會被 Python 當成 `\a`（BEL 字元），自測時發現已改成 `C:/alpha/alpha-data`——跟上一輪附帶發現的 PENDING_QUEUE BEL 字元是同一種錯。
 - **先.一三五-1gj（已結案，commit `23603bc702`，唯讀）**：雲端 audit run 41119341424 的 log 與 `data/audit_report.json` 都沒印套件名 → 用只裝 audit.yml 6 個套件的乾淨暫存 venv 跑同一份 `check_one()`：ENV_MISSING 41（與雲端一致）＝**yfinance 31／bs4 8／sklearn 2**；同 venv 加裝 yfinance（本機 21 秒）後 ENV_MISSING 41→**2**（yfinance 會帶入 bs4）。research/*.py 無模組頂層 `yf.` 呼叫，只 import 不會送 Yahoo 請求。yfinance ≥30 支 → 照分支開 **先.一三五-1gj-a** 提案（`- [!]` AWAITING）。暫存 venv 已刪。不改 workflow。
 - **先.一三五-1gk** 仍是時間閘（11/03 06:00 後），本輪不能做。
 - **收工補件**：`- [ ]` 19 項（≥12）；`find_next()` 回 NO_PENDING_ITEM，DevQueue 可執行 0 項（<6）。[自行裁量] 本輪不再補：剩 14 分鐘不夠做來源①～⑤的查證，且上一輪（06:0x）剛做過空轉補件；交給下一輪的空轉補件機制（`_idle_fallback_prompt()`）處理。
@@ -41,7 +41,7 @@
   - 先.一三五-1gj `- [ ]`：雲端 ENV_MISSING 41 支按缺哪個套件分類，只統計，不推翻先.一三二-8b 定案；單一套件涵蓋 ≥30 支才另提 audit.yml 加裝提案。
   - 先.一三五-1gk `- [!]` 時間閘 11/03 06:00：1gf／1gg／1gh（＋1gi）在雲端稽核生效驗收。
 - [自行裁量] 本輪只寫條目、不動手修 `reproducibility_check.py`：一輪一頂帽，修法留給取件那一輪做自測。
-- 附帶發現：`PENDING_QUEUE.md` HEAD 裡已有 4 個 BEL 控制字元（``，疑似舊輪寫入時 `C:lpha` 被當跳脫字元），本輪自己寫壞的那處已修回，舊的沒動，記錄待清。
+- 附帶發現：`PENDING_QUEUE.md` HEAD 裡已有 4 個 BEL 控制字元（`\a`，疑似舊輪寫入時 `C:\alpha` 被當跳脫字元），本輪自己寫壞的那處已修回，舊的沒動，記錄待清。
 - 冒煙測試：`node scripts/smoke_test.mjs` exit=0，179 項全 `[x]`、0 項未勾、結束時無累積 uncaught error。
 
 ## 2026-11-01 04:5x DevQueue（研究帽，cycle 20261101-043102）：stock_grid_limit7_diag 不再讓稽核 TIMEOUT
@@ -237,7 +237,7 @@
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3，本輪不變）。
 - **為什麼做這些**：佇列沒有可執行 `- [ ]`，連 2 輪 QUEUE_EMPTY；前向模擬 14／14＝滿，照零之二⑤不寫候選、不寫 PREREG、不送 AWAITING。照十一節「監控工具自己也要被監控」，查 `check_external_connectivity.py`（AlphaConnectivity 每 30 分鐘）呼叫的模組，`pipeline_fault_ledger.py`／`check_pat_expiry.py`／`factory_stability.py` 三支都沒有自測。
 - **先.一三五-1eo／1ep／1eq**：新增 `scripts/selftest_connectivity_ledgers.py`（路徑全換暫存、不打 gh api、不碰 token），**24 項全過**，三支本體未改。只記錄不改：factory_stability 兩份輸出檔非原子寫入（呼叫端已包 try/except，30 分鐘後整份重寫）。
-- **順帶查到**：登錄檔記的 GitHub PAT 到期日＝**2026-12-14**（剩 44 天），11/30 起告警會亮；換新要總司令本人在 GitHub 設定頁做。→ 開 **1er**（時間閘 11/30）驗收告警真的亮燈並補進 `C:lpha\總司令待辦.md`。
+- **順帶查到**：登錄檔記的 GitHub PAT 到期日＝**2026-12-14**（剩 44 天），11/30 起告警會亮；換新要總司令本人在 GitHub 設定頁做。→ 開 **1er**（時間閘 11/30）驗收告警真的亮燈並補進 `C:\alpha\總司令待辦.md`。
 - 影響檔案：`scripts/selftest_connectivity_ledgers.py`（新）、`PENDING_QUEUE.md`、`research/FORWARD_CANDIDATES.md`、`PROGRESS.md`。
 - 不碰 holdout、不讀價格、不算報酬、不登記試驗、零外部請求。交辦佇列 DevQueue 可執行 `- [ ]` 未開始：0 條（其餘皆時間閘／BLOCKED）。
 - 冒煙：`node scripts/smoke_test.mjs` exit=0，**179 PASS／0 FAIL**。
@@ -313,7 +313,7 @@
 
 - **等待總司令審閱：2 件**（本輪未異動 `research/AWAITING_REVIEW.md`，沿用：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中報價本機補班）。
 - **前向模擬上限 14／14 仍滿**：照 CLAUDE.md 零之二⑤，本輪不新增候選、不寫 PREREG、不送 AWAITING、不算報酬、不碰 holdout、不登記試驗；只在 `research/FORWARD_CANDIDATES.md` 記一行本輪補件。
-- 來源：workflow 腳本已全部有自測，改清查本機排程（`C:lpha
+- 來源：workflow 腳本已全部有自測，改清查本機排程（`C:\alpha
 un-*.ps1`、`scripts/run_*.ps1`）呼叫、但沒有任何 selftest 引用的 .py，取前四組；剩 finmind_warmup、paper_supply_v2、build_supply_watchlist、run_paper_9、ibkr_quotes 等可作下一輪來源。
 - **先.一三五-1ds** 經濟部 PIT 快照：7 項全過，失敗路徑都不刪改既有快照。無 bug、未改。
 - **先.一三五-1dt** 無風險利率月檔：7 項全過，三種抓取失敗都不覆蓋舊檔。無 bug、未改。
@@ -4071,7 +4071,7 @@ un-market-catchup.ps1` 註解同步改了心跳路徑。
 ## 2026-10-15 07:39（互動視窗）先.一百-3 研究室 README 凍結.二描述更正
 
 - 更正 `C:\alpha\pending_patches
-esearch_lab_2026-10-14inal\README_給ClaudeCode.md`「定位」：凍結.二已於 2026-10-11 解除（舊句劃線保留），但 research*.json 不得進 scores*.json、不得當選股權重照舊有效。README 在 repo 外，不 commit。
+esearch_lab_2026-10-14\final\README_給ClaudeCode.md`「定位」：凍結.二已於 2026-10-11 解除（舊句劃線保留），但 research*.json 不得進 scores*.json、不得當選股權重照舊有效。README 在 repo 外，不 commit。
 
 ## 2026-10-15 07:39（互動視窗）先.一百-2 研究室.一～七登記進權威清單最前面
 
