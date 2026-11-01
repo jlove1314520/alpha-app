@@ -1,12 +1,13 @@
 {
- "fetched_at": "2026-11-02T04:35:04.384571+08:00",
+ "fetched_at": "2026-11-02T04:52:03.506786+08:00",
  "source": "TWSE/TPEx 重大訊息＋TWSE 月營收＋既有除權息檔（全部官方端點）",
  "keep_days": 90,
  "importance_version": "v0（2026-10-18 先.一一〇-9）",
  "meta": {
   "twse_mops": {
-   "ok": false,
-   "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)"
+   "ok": true,
+   "rows": 3,
+   "kept": 3
   },
   "tpex_mops": {
    "ok": true,
@@ -107,16 +108,6 @@
    "importance": 5
   },
   {
-   "code": "8358",
-   "name": "金居",
-   "date": "2026-10-31",
-   "type": "其他",
-   "title": "代子公司COTECH DEVELOPMENT (PENANG) SDN. BHD.公告取得土地使用權資產",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
    "code": "2072",
    "name": "世紀能源",
    "date": "2026-10-31",
@@ -143,6 +134,16 @@
    "type": "其他",
    "title": "更正115年7~9月背書保證與資金貸放餘額資訊、 資金貸與及背書保證明細表資訊",
    "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "8358",
+   "name": "金居",
+   "date": "2026-10-31",
+   "type": "其他",
+   "title": "代子公司COTECH DEVELOPMENT (PENANG) SDN. BHD.公告取得土地使用權資產",
+   "source": "TPEx 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01",
    "importance": 5
   },
