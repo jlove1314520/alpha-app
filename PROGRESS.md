@@ -1,3 +1,13 @@
+## 2026-11-01 09:01～09:4x DevQueue（維運帽，cycle 20261101-090102）：audit.yml 加裝 yfinance（1gj-a）＋兩支自測修正（1gk、1gl）＋逾時自測診斷（1gm）
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3 列，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次，10/28 23:0x 起，約 3.4 天）②先.一四一-3a 美股盤中補班放金鑰＋觸發（請總司令執行一次，10/29 04:5x 起，約 3.2 天）③先.一四五-1 刪除 7 筆殘留 git stash（請總司令執行一次，11/01 08:4x 起，約 1 小時）。
+- **先.一三五-1gj-a（已定案 Cowork 收件匣 034 採甲）**：`.github/workflows/audit.yml`「安裝相依」加 `yfinance`（commit 79591de5ef）。冒煙 179 項全過 exit 0。⚠️ **雲端驗收未完成**：`gh workflow run audit.yml` 回 HTTP 401（gh 未登入），沒辦法手動觸發；改等週一 11/2 15:20 UTC（台北 23:20）排程，驗收拆成 **先.一三五-1gj-b**（`- [!]`，11/03 00:00 後自動解除，看 ENV_MISSING≤2）。[自行裁量] 拆條目，避免 1gj-a 留 `- [ ]` 讓下一輪空跑。
+- **先.一三五-1gk [自走補入]**：`selftest_claude_auth_detection.py`「只剩時間閘→exit 6」案例讀到真實 `dev_queue_cycle.log`（現場連續空轉）被空轉補件改成 0。隔離 `_idle_fallback_prompt`（另有專屬自測），斷言不變。修前 1 FAIL → 修後全過；`selftest_dev_queue_idle_fallback.py` 全過；冒煙 179 全過（commit 15e5f58891）。
+- **先.一三五-1gl [自走補入]**：本輪全量跑 173 支 `scripts/selftest_*.py`（各 90 秒上限）找到 `selftest_bb90_t1_guards.py` 22 項失敗 1：⑤預覽對照組沒帶 `dev_map`，跟不上 10/13 先.八十二-5（預覽與實際送單路徑都用 `dev_by_code`）。只改自測、不動真錢程式；修後 22 項全過，冒煙 179 全過（commit ac640a3a25）。
+- **先.一三五-1gm [自走補入]**：同次掃描兩支 90 秒逾時，放寬 360 秒重跑：`selftest_paper_8_features.py` 121 秒全過（只是慢）；`selftest_auto_rebalance.py` 84 秒 1 項 FAIL＝靜態掃描「下單路徑不得用 limit_up／limit_down 計價」**誤報** `paper_10_disposition_tracker.py`（子字串比對：`limit_prices` 命中 limit_price、`limit_up_at_entry` 命中 limit_up；該檔無下單）。時間不夠修＋冒煙，修法寫成 **先.一三五-1gm-a**（`- [ ]`，改單字邊界＋合成字串反向驗證，防止把掃描改成永遠不命中）。
+- **收工補件**：DevQueue 可執行 0→1 項（1gm-a），`- [ ]` 19→20 項（≥12）。[自行裁量] 本輪補件來源用「全量跑自測找壞掉的」（屬資料／工具缺口），比照前幾輪：BACKLOG、UX 提案、全檢、DATA_GAP 甲類都已用盡；前向模擬 14／14 滿不寫候選。除 1gm-a 外**來源已用盡**，不湊數。
+- **冒煙**：本輪三次 `node scripts/smoke_test.mjs` 皆 exit 0、179 PASS／0 FAIL。
+
 ## 2026-11-01 08:4x 互動視窗：收件匣 034（Cowork 08:15）兩項定案
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 4→3）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班（金鑰＋觸發）③先.一四五-1 刪除 7 筆殘留 git stash——都在 `C:/alpha/總司令待辦.md`（第 1、2、5 項），請總司令執行一次。
