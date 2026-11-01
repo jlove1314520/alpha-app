@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-01T13:05:03.976656+08:00",
+ "fetched_at": "2026-11-01T14:35:03.983961+08:00",
  "source": "TWSE/TPEx 重大訊息＋TWSE 月營收＋既有除權息檔（全部官方端點）",
  "keep_days": 90,
  "importance_version": "v0（2026-10-18 先.一一〇-9）",
@@ -11,8 +11,8 @@
   },
   "tpex_mops": {
    "ok": true,
-   "rows": 67,
-   "kept": 67
+   "rows": 1,
+   "kept": 1
   },
   "twse_revenue": {
    "ok": true,
@@ -25,7 +25,7 @@
    "note": "沿用既有排程產物，未額外請求"
   }
  },
- "count": 8845,
+ "count": 8846,
  "events": [
   {
    "code": "01007T",
@@ -134,6 +134,16 @@
    "type": "其他",
    "title": "更正115年7~9月背書保證與資金貸放餘額資訊、 資金貸與及背書保證明細表資訊",
    "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "8358",
+   "name": "金居",
+   "date": "2026-10-31",
+   "type": "其他",
+   "title": "代子公司COTECH DEVELOPMENT (PENANG) SDN. BHD.公告取得土地使用權資產",
+   "source": "TPEx 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01",
    "importance": 5
   },
