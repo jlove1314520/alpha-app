@@ -6,7 +6,11 @@
 
 掃 `git ls-files` 的文字檔，有 0x00～0x1f（tab／LF／CR 除外）就列出檔名行號、exit 1。
 零外部請求、唯讀。
+
+第二段（先.一三五-1gr）：檔案裡看起來正常的非 raw 字串 `"C:\\alpha"`，執行時 `\\a` 才變 BEL，
+第一段的檔案掃描抓不到；改用 `ast` 解析 .py，檢查字串常數的「執行時值」有無控制字元。
 """
+import ast
 import subprocess
 import sys
 from pathlib import Path
@@ -61,6 +65,40 @@ for f in files:
 for h in hits:
     print("  命中 " + h)
 check(f"版控文字檔無控制字元（命中 {len(hits)} 行）", not hits)
+
+
+def scan_ast(src: str) -> list[tuple[int, list[str]]]:
+    """回傳 [(行號, [控制字元十六進位...])]：字串常數執行時值含控制字元者。"""
+    out = []
+    for node in ast.walk(ast.parse(src)):
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            cs = sorted({hex(ord(c)) for c in node.value if ord(c) in BAD})
+            if cs:
+                out.append((node.lineno, cs))
+    return out
+
+
+# 反向驗證（原始碼文字用 chr(92) 組出反斜線，避免本檔自己被 AST 段命中）
+BS = chr(92)
+check("合成 AST：非 raw 的 \"C:" + BS + "alpha\" 必須命中", bool(scan_ast('p = "C:' + BS + 'alpha"')))
+check("合成 AST：raw 的 r\"C:" + BS + "alpha\" 不得命中", not scan_ast('p = r"C:' + BS + 'alpha"'))
+check("合成 AST：tab／換行跳脫不得命中", not scan_ast('p = "a' + BS + 't' + BS + 'n"'))
+
+ast_hits = []
+for f in files:
+    if not f.endswith(".py"):
+        continue
+    try:
+        src = (ROOT / f).read_text(encoding="utf-8")
+        found = scan_ast(src)
+    except (OSError, UnicodeDecodeError, SyntaxError, ValueError) as e:
+        print(f"  [warn] 略過 {f}：{type(e).__name__}")  # 無法解析不屬本測範圍
+        continue
+    for n, cs in found:
+        ast_hits.append(f"{f}:{n} {cs}")
+for h in ast_hits:
+    print("  AST 命中 " + h)
+check(f".py 字串常數執行時無控制字元（命中 {len(ast_hits)} 處）", not ast_hits)
 
 print("失敗：" + ("、".join(fails) if fails else "無"))
 sys.exit(1 if fails else 0)

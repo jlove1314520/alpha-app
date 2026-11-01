@@ -67,7 +67,7 @@ Shioaji模擬環境服務時段08:00-21:00內雖然可以登入，但非交易�
   對應顯示「即時(tick)」，見`index.html`同步更新），跟舊版snapshot時代
   的`"REALTIME"`區分開來，讓使用者看得出來這是tick串流還是快照。
 
-**掛排程**：`C:\alpha\run-shioaji-quotes-cycle.ps1`角色改變（見上方
+**掛排程**：`C:\\alpha\run-shioaji-quotes-cycle.ps1`角色改變（見上方
 架構說明），仍然由Windows工作排程器`AlphaShioajiQuotes`觸發，但改成
 「確認常駐行程存在、不存在才啟動」的啟動器邏輯，不再是每次都重新登入
 的短命呼叫。
