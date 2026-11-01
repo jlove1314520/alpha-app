@@ -1,3 +1,19 @@
+## 2026-11-01 10:01～10:4x DevQueue（維運／開發帽，cycle 20261101-100102）：1gm-a 結案＋「反斜線被寫成控制字元」一整類清查（1gn／1go／1gq／1gs）
+
+- **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3 列，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次，10/28 23:0x 起，約 3.5 天）②先.一四一-3a 美股盤中補班放金鑰＋觸發（請總司令執行一次，10/29 04:5x 起，約 3.2 天）③先.一四五-1 刪除 7 筆殘留 git stash（請總司令執行一次，11/01 08:4x 起，約 2 小時）。
+- **先.一三五-1gm-a（結案，commit 142da5f778）**：套上一輪 repo 外補丁 → repr 確認沒有 backspace 字元 → `selftest_auto_rebalance.py` exit 0，反向驗證 PASS、「下單路徑不使用 limit_up／limit_down 計價（命中：無）」→ 冒煙 179 PASS（5.5 分鐘跑完，這次沒逾時）。只改自測，沒動真錢程式。
+- **發現**：1gm-a 條目本身的 `\b` 被寫成 backspace(0x08)。全 repo 掃 `git ls-files` 文字檔的控制字元共 16 行，再用 AST 掃 .py 字串常數（非 raw 字串裡的 `\a`／`\b`，執行時才會變成控制字元）多找到 3 處，另外 grep JS 字串又找到 1 處。成因：自走輪次寫檔時，`C:\alpha` 的 `\a`、正則的 `\b`、路徑的 `\f` 被當成跳脫字元。**其中 4 處不只是字壞掉，而是檢查或篩選安靜失效**：
+  - **先.一三五-1gn（結案，62d3fedbba）**：冒煙 #72「差距欄不得帶漲跌色」的正則 `/\b(pos|neg)\b/` 兩個 `\b` 是 backspace，這條從來沒生效過。修回後冒煙 179 PASS，#72 在正則真正生效後仍過，表示畫面本來就沒問題。
+  - **先.一三五-1gq（結案，c57c647b47）**：`research/mem_probe_live.py` 第 23 行的路徑篩選因為 BEL 字元永遠不命中，記憶體探測只會回「(no repo frame)」；`selftest_orphan_stuck_git.py` 第 18 行測試資料的命令列也壞了（那條斷言不靠它）。改成 `\` 跳脫：orphan 自測 5 項全過、冒煙 179 PASS。mem_probe_live 只確認能解析、沒實跑（它會吃大量記憶體）。
+  - **先.一三五-1gs**：冒煙 #164「前台不得出現工程術語」的 JARGON 是 JS 一般字串，`\bholdout\b|\bDSR\b` 在 JS 字串裡是 backspace，自 10/16（4d85b61a78）起 holdout／DSR 兩條從來沒生效過（node 實測修前 `holdout`＝false）。改成 `\b` 後，node 用實際那行驗證：holdout／DSR 會命中、holdouts／DSRX 不命中。冒煙 exit 0、179 PASS（10:29～10:34），#164 在正則真正生效後仍過（commit eebfc9e57f）。
+  - **先.一三五-1gp（`- [ ]` 留給下一輪研究帽）**：`research/selection_bias_ledger.py` 第 129、131 行「未分軌」退路的正則 `\bfut_`／`\bf_us_|美股` 從 2026-09-07（c9c9730b06）起就沒命中過，可能影響各分軌的 N 與 Bonferroni 門檻。條目已寫好分支：先唯讀算會改判幾列，0 列就只修字元；≥1 列就重算總帳，並列出受影響的門檻，只記錄、不改歷史判定。
+- **先.一三五-1go（`- [!]`，commit 8c21f25678）**：文件裡 16 行控制字元換回原本的反斜線＋字母（CLAUDE.md 1、PENDING_QUEUE.md 4、PROGRESS.md 7、docs 2、reproducibility_check.py 註解 2），只改那個字元。新增 `scripts/selftest_no_control_chars.py`：掃版控文字檔，含 3 項反向驗證。目前只剩 1gp 那兩行，所以 exit 1 是預期的；1gp 修完 exit 0 就結案。`research/DEV_QUEUE_PROMPT.txt` 每輪由 runner 重產，來源條目修好後會自然消失，沒有手改。
+- **先.一三五-1gr（`- [ ]` 新補）**：`research/shioaji_quotes.py` 的 docstring 有一個執行時 BEL，只影響說明文字。這是常駐服務，改了要照七之二重啟＋四步驗證，所以只在非台股盤中做；同一條把 1go 的自測擴充 AST 檢查。[自行裁量] 本輪沒做：時間不夠完成重啟驗證，也不想在一輪尾端碰常駐服務。
+- **[自行裁量]**：1gq 的 commit 也帶了 1gs 條目的新增（兩者寫在同一份 PENDING_QUEUE，無法非互動地拆開提交）。寫檔一律改用 `chr()` 組字元，避免同樣的跳脫錯誤重演——本輪一開始用 heredoc 寫 `'\x08'` 取代時就沒生效。
+- **收工補件**：`- [ ]` 22 項（≥12）；DevQueue 可執行剩 1gp（研究）、1gr 共 2 項（<6）。本類清查已經找盡，其他來源①～⑤前幾輪已用盡，前向模擬 14／14 滿不寫候選：**來源已用盡**，不湊數。
+- 維運帽產物：`data/STATUS.json` 本輪未改（沒有資料源或面板異動）。零外部資料 API 請求。
+- **冒煙**：本輪 4 次 `node scripts/smoke_test.mjs` 都 exit 0、179 PASS／0 FAIL（10:02、10:10、10:22、10:29 開跑，每次約 5.5 分鐘）。
+
 ## 2026-11-01 09:01～09:4x DevQueue（維運帽，cycle 20261101-090102）：audit.yml 加裝 yfinance（1gj-a）＋兩支自測修正（1gk、1gl）＋逾時自測診斷（1gm）
 
 - **等待總司令審閱：3 件**（`research/AWAITING_REVIEW.md` 等待中 3 列，本輪未增減）：①先.一三五-1ae-a 權證 20:30 補跑觸發（請總司令執行一次，10/28 23:0x 起，約 3.4 天）②先.一四一-3a 美股盤中補班放金鑰＋觸發（請總司令執行一次，10/29 04:5x 起，約 3.2 天）③先.一四五-1 刪除 7 筆殘留 git stash（請總司令執行一次，11/01 08:4x 起，約 1 小時）。
