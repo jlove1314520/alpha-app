@@ -2497,7 +2497,7 @@ async function runSmokeTest(baseUrl, headless = true) {
       if (!r.has.includes(k)) perfErrors.push(`有成交畫面缺「${k}」：${r.has.slice(0, 160)}`);
     // 先.一〇八-2：差距欄是贏輸不是漲跌，不得帶 pos／neg（同 147）
     if (r.gapCls == null) perfErrors.push("找不到差距欄 .journal-gap");
-    else if (/(pos|neg)/.test(r.gapCls)) perfErrors.push(`差距欄仍帶漲跌色 class：${r.gapCls}`);
+    else if (/\b(pos|neg)\b/.test(r.gapCls)) perfErrors.push(`差距欄仍帶漲跌色 class：${r.gapCls}`);
     if (!r.err.includes("缺白名單")) perfErrors.push(`perf error 應顯示原因：${r.err.slice(0, 80)}`);
     if (!r.off.includes("尚未連線")) perfErrors.push(`未連線應顯示說明：${r.off.slice(0, 80)}`);
   } catch (e) { perfErrors.push(`測試本身出錯：${e.message || e}`); }
