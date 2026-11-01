@@ -126,9 +126,12 @@ def parse() -> list[dict]:
             if TRACK_RE.match(cell):
                 track = cell
                 break
-        if track == "未分軌" and re.search(r"fut_", blob):
+        # 2026-11-01 先.一三五-1gp：這兩個 `\b` 自 2026-09-07 起被寫成 backspace 字元（0x08），
+        # fut_／f_us_ 退路從沒命中過（「美股」那半邊一直有效）。修回 `\b` 時 fut_ 改只看前幾欄（同上方軌別判斷範圍）：
+        # 掃整列會把備註裡引用 `fut_basis_carry` 當教訓的台股試驗（#111／#112／#126）誤判成 FUT。
+        if track == "未分軌" and re.search(r"\bfut_", " ".join(c[2:6])):
             track = "FUT"
-        elif track == "未分軌" and re.search(r"f_us_|美股", blob):
+        elif track == "未分軌" and re.search(r"\bf_us_|美股", blob):
             track = "US"
         # 判定：**從右往左找**含判定關鍵字的那一欄。
         # 不能掃整列——第二版就是這樣寫，結果備註裡提到別筆的 FAIL 就把這一筆也判成
