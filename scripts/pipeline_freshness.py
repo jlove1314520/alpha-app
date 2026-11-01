@@ -224,10 +224,19 @@ def evaluate(now: datetime | None = None) -> tuple[list[dict], list[str]]:
                 rows.append(row)
                 continue
             limit = spec["interval_min"] * factor
+            # 2026-11-01 DevQueue 20261101-130102：有觀察窗的管線，末筆在今天開窗之前（前一個窗口的最後一筆）時，
+            # 從開窗時刻起算——舊版拿前一晚末筆算年齡，每天開窗第一次檢查（13:02）必判停擺，
+            # AlphaTwsePublishProbe 的 fault_history 因此累積 28 次假警報。開窗後超過門檻仍沒產出才算停擺。
+            judged_age = age
+            if win:
+                window_open = now.replace(hour=win[0], minute=0, second=0, microsecond=0)
+                if last < window_open:
+                    judged_age = (now - window_open).total_seconds() / 60.0
+                    row["age_from_window_open_min"] = round(judged_age, 1)
             row.update(last_output=last.isoformat(), age_min=round(age, 1),
                        stall_limit_min=limit,
-                       status="stalled" if age > limit else "ok")
-            if age > limit:
+                       status="stalled" if judged_age > limit else "ok")
+            if judged_age > limit:
                 stalled.append(
                     f'{spec["task"]}：{spec["artifact"]} 已 {age:.0f} 分鐘沒有新產出'
                     f'（預期每 {spec["interval_min"]} 分鐘，門檻 {limit} 分鐘；{how}）')
