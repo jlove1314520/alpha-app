@@ -58,6 +58,8 @@
 
 2026-10-30 21:xx DevQueue 空轉補件：上限仍 14／14，本輪不新增候選、不寫 PREREG、不送 AWAITING；改補最後三支無自測排程腳本（1dp 美股財報、1dq 美股評分 v0〔只記錄非原子寫檔疑慮〕、1dr TWSE 發布時間探測 `--report` 壞行崩潰修正〔純 bug 修復〕）。
 
+2026-11-01 18:4x DevQueue 空轉補件：上限仍 14／14，本輪不新增候選、不寫 PREREG、不送 AWAITING；改補 1hd 權證快照首週驗收機器可驗部分（漏 10/16、10/21、10/22，皆已修因）、1he 未追蹤 autostash 狀態檔進 .gitignore、1hf 過期時間閘清查（6 條，4 條建議互動視窗結案）。
+
 2026-11-01 06:0x DevQueue 空轉補件：上限仍 14／14，本輪不新增候選、不寫 PREREG、不送候選 AWAITING；改補重現性稽核監控盲點——1gi FILE_NOT_FOUND 11 支分類（7 支其實在 backtest／validation／.github/scripts／alpha-data，從未被 import 檢查）、1gj 雲端 ENV_MISSING 41 支按套件分類、1gk 1gf～1gi 雲端生效驗收（時間閘 11/03 06:00）。
 
 2026-11-01 02:3x DevQueue 空轉補件：上限仍 14／14，本輪不新增候選、不寫 PREREG、不送 AWAITING；改補美國夏令時間 11/01 結束的維運檢查——1ga 時區寫死清查（無寫死、無需改）、1gb 本機美股補班跨 DST 自測（11 項全過）、1gc 前端美東盤別跨 DST 自測（10 項全過）、1gd EST 第一個交易日實地驗收（時間閘 11/03 06:30）。

@@ -43,6 +43,8 @@ research/.alpha_live_token
 # 2026-10-07 先.四十三-二：DevQueue 殘留檔內容雜湊紀錄（本機狀態，不進 repo）
 research/.devqueue_dirty_seen.json
 research/.inbox_done_push_state.json
+# 2026-11-01 先.一三五-1he：autostash 殘留自動清除的上次執行時間（scripts/local_git_commit.py SWEEP_STATE，本機狀態，不進 repo）
+research/.autostash_sweep_state.json
 # 2026-10-07 先.四十六：Telegram 登入檔（應放在 repo 外的 secrets 資料夾，此為保險）
 *.session
 *.session-journal
