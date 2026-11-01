@@ -157,6 +157,7 @@
     },
     {
       "task": "AlphaTwsePublishProbe",
+      "tw_trading_days_only": true,
       "purpose": "實測 TWSE T86／MI_MARGN／STOCK_DAY_ALL 的實際發布時間",
       "interval_min": 15,
       "artifact": "research/twse_publish_probe.jsonl",

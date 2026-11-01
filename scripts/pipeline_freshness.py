@@ -157,6 +157,18 @@ def _last_output(spec: dict, f: Path) -> tuple[datetime | None, str]:
     return None, f"未知的 freshness 類型 {kind}"
 
 
+def _tw_closed(d) -> bool:
+    """台股休市日（週末＋data/trading_calendar.json closed／unscheduled_closed）。讀不到日曆 → False（照常判定）。"""
+    if d.weekday() >= 5:
+        return True
+    try:
+        cal = json.loads((_resolve("data/trading_calendar.json")).read_text(encoding="utf-8"))
+        y = (cal.get("tw") or {}).get(str(d.year)) or {}
+        return d.isoformat() in (set(y.get("closed") or []) | set(y.get("unscheduled_closed") or []))
+    except Exception:  # noqa: BLE001 -- 監測器自身失敗只降級（十二節）
+        return False
+
+
 def evaluate(now: datetime | None = None) -> tuple[list[dict], list[str]]:
     """逐條算出狀態，回傳 (每條的結果, 停擺告警文字)。
 
@@ -184,6 +196,12 @@ def evaluate(now: datetime | None = None) -> tuple[list[dict], list[str]]:
             retired = spec.get("retired")
             if retired:
                 row.update(status="skipped", reason=f"已停用：{retired}")
+                rows.append(row)
+                continue
+            # 2026-11-01 DevQueue 20261101-130102（先.一三五-1ha）：只在台股交易日跑的管線（登錄檔標
+            # "tw_trading_days_only": true），休市日沒產出是正常的。日曆讀不到時照常判定（_tw_closed 回 False）。
+            if spec.get("tw_trading_days_only") and _tw_closed(now.date()):
+                row.update(status="skipped", reason="台股休市日，沒產出是正常的")
                 rows.append(row)
                 continue
             win = spec.get("window_hours")

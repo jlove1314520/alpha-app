@@ -196,8 +196,29 @@ def report() -> int:
     return 0
 
 
+def tw_closed_today(cal_path: Path | None = None, today=None) -> bool:
+    """2026-11-01 DevQueue 20261101-130102（先.一三五-1ha）：台股休市日（週末＋data/trading_calendar.json
+    的 closed／unscheduled_closed）不送請求——10/31（週六）照樣跑 27 輪、每輪 4 個 TWSE 端點全「尚未發布」。
+    日曆讀不到時當成交易日照跑（fail open，CLAUDE.md 十二節；多跑一次無害）。"""
+    from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+    d = today or _dt.now(_tz(_td(hours=8))).date()
+    if d.weekday() >= 5:
+        return True
+    try:
+        cal = json.loads((cal_path or ROOT / "data" / "trading_calendar.json").read_text(encoding="utf-8"))
+        y = (cal.get("tw") or {}).get(str(d.year)) or {}
+        closed = set(y.get("closed") or []) | set(y.get("unscheduled_closed") or [])
+        return d.isoformat() in closed
+    except Exception as e:  # noqa: BLE001
+        print(f"[warn] trading_calendar 讀取失敗，照常探測：{type(e).__name__}: {e}")
+        return False
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--report", action="store_true")
     a = ap.parse_args()
+    if not a.report and tw_closed_today():
+        print("台股休市日，略過探測、不送請求（先.一三五-1ha）")
+        raise SystemExit(0)
     raise SystemExit(report() if a.report else run_probe())
