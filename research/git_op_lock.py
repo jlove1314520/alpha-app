@@ -27,7 +27,11 @@ commit->pull->push 這段收尾，直接消除「兩個 autostash 同時發生�
       # always exit 0（釋放一把已經是空的鎖不是錯誤）
 
 鎖檔（`.git_op.lock`，跟 `.marathon.lock` 同一層、同樣 gitignored，
-是暫態本機狀態不是專案歷史）格式：`pid|unix_ts|token`（舊格式 `pid|unix_ts` 仍可讀）。
+是暫態本機狀態不是專案歷史）格式：`pid|unix_ts|token|ppid=…;argv0=…`（舊格式 `pid|unix_ts`、`pid|unix_ts|token` 仍可讀）。
+
+2026-11-02 先.一三五-1hu：acquire 被擋（LOCK_HELD）時 append 一行到 research/git_op_lock.log
+（時間、持有者 pid／持鎖秒數／持有者 ppid＋argv0、被擋的呼叫者 ppid＋argv0），方便事後查「誰卡住誰」。
+只加記錄、不改鎖語意；寫檔失敗一律吞掉（十二節：守門員自己的失敗只降級，不影響回 LOCK_HELD）。
 
 2026-10-13 先.八十一-34：持有者憑證。事故：互動視窗的提交指令在 acquire 失敗後仍執行 release，把本機新聞補班
 正在持有的鎖刪掉（acquire 與 release 是兩個不同的 python 行程，無法用 pid 判斷持有者）。現在：
@@ -69,16 +73,41 @@ def _lock_token() -> str | None:
         return None
 
 
+def _lock_caller() -> str:
+    """鎖檔第 4 欄（建立者的 ppid／argv0）；舊格式 2／3 欄回空字串。"""
+    try:
+        parts = LOCK_PATH.read_text(encoding="utf-8").strip().split("|")
+        return parts[3] if len(parts) > 3 else ""
+    except OSError:
+        return ""
+
+
+def _caller_tag() -> str:
+    return f"ppid={os.getppid()};argv0={sys.argv[0] if sys.argv else ''}".replace("|", "/")
+
+
+def _log_held(pid_str: str, ts: float) -> None:
+    """記一行 LOCK_HELD；任何失敗都吞掉（十二節）。"""
+    try:
+        age = f"{time.time() - ts:.0f}s" if ts else "unknown"
+        with LEGACY_LOG.open("a", encoding="utf-8") as f:
+            f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} LOCK_HELD holder_pid={pid_str} age={age} "
+                    f"holder={_lock_caller() or 'unknown'} caller_{_caller_tag().replace(';', ' ')}\n")
+    except Exception:
+        pass
+
+
 def acquire() -> bool:
     if LOCK_PATH.exists():
         pid_str, ts = _read_lock()
         age_minutes = (time.time() - ts) / 60.0 if ts else STALE_MINUTES + 1
         if age_minutes < STALE_MINUTES:
             print(f"LOCK_HELD by {pid_str} since {ts} ({age_minutes:.1f} min ago)")
+            _log_held(pid_str, ts)
             return False
         print(f"LOCK_STALE (held by {pid_str}, {age_minutes:.1f} min old) -- recovering")
     token = secrets.token_hex(8)
-    LOCK_PATH.write_text(f"{os.getpid()}|{time.time()}|{token}", encoding="utf-8")
+    LOCK_PATH.write_text(f"{os.getpid()}|{time.time()}|{token}|{_caller_tag()}", encoding="utf-8")
     print(f"LOCK_ACQUIRED token={token}")
     return True
 
