@@ -131,5 +131,46 @@ for h in cr_hits:
     print("  單獨 CR 命中 " + h)
 check(f"版控文字檔無行中單獨 CR（命中 {len(cr_hits)} 行）", not cr_hits)
 
+
+
+# 第四段（先.一三五-1ir）：排程真正呼叫的入口腳本在 repo 外（`C:\alpha\run-*.ps1`／`register-*.ps1`／`*.bat`），
+# 不在 git ls-files 裡。用位元組掃（.bat 可能是 cp950，多位元組尾碼都 ≥0x40 不會誤判）；UTF-16 BOM 先解碼。
+# 資料夾不存在只印 [warn] 略過、不 FAIL（十二節：守門員自己的失敗只降級）。
+def scan_outside_bytes(raw: bytes) -> tuple[list[tuple[int, list[str]]], list[int]]:
+    """回傳（控制字元命中, 單獨 CR 行號）。"""
+    if raw.startswith((b"\xff\xfe", b"\xfe\xff")):
+        raw = raw.decode("utf-16").encode("utf-8")
+    ctrl = []
+    for n, line in enumerate(raw.split(b"\n"), 1):
+        cs = [hex(b) for b in line if b in BAD]
+        if cs:
+            ctrl.append((n, cs))
+    return ctrl, scan_lone_cr(raw)
+
+
+check("合成 repo 外：含 BEL 的 .ps1 必須命中",
+      bool(scan_outside_bytes(b'$p = "C:' + bytes([7]) + b'lpha"\r\n')[0]))
+check("合成 repo 外：UTF-16 BOM 的正常 .ps1 不得命中",
+      scan_outside_bytes("cd C:\\alpha\r\n".encode("utf-16")) == ([], []))
+
+OUTSIDE = ROOT.parent
+out_hits = []
+try:
+    outside_files = sorted(p for p in OUTSIDE.iterdir() if p.is_file() and p.suffix.lower() in (".ps1", ".bat"))
+except OSError as e:
+    outside_files = []
+    print(f"  [warn] 讀不到 {OUTSIDE}，略過第四段：{type(e).__name__}")
+for p in outside_files:
+    try:
+        ctrl, crs = scan_outside_bytes(p.read_bytes())
+    except (OSError, UnicodeDecodeError) as e:
+        print(f"  [warn] 略過 {p.name}：{type(e).__name__}")
+        continue
+    out_hits += [f"{p.name}:{n} {cs}" for n, cs in ctrl] + [f"{p.name}:{n} 單獨CR" for n in crs]
+for h in out_hits:
+    print("  repo 外命中 " + h)
+check(f"repo 外入口腳本 {OUTSIDE}\\*.ps1／*.bat（{len(outside_files)} 支）無控制字元與單獨 CR（命中 {len(out_hits)} 處）",
+      not out_hits)
+
 print("失敗：" + ("、".join(fails) if fails else "無"))
 sys.exit(1 if fails else 0)
