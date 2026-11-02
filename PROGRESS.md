@@ -1,3 +1,15 @@
+## 2026-11-03 00:31～00:5x DevQueue 20261103-003102（維運帽）：先.一三五-1if 紙.一股票腿改用含息報酬
+
+- **等待總司令審閱：12 件**（`research/AWAITING_REVIEW.md` 等待中 12 列，本輪沒有新增或結案）。
+- **1if（`- [x]`，7f827820b79，純 bug 修復）** `research/paper_7030_tracker.py`：新增 `_stock_growth()`——股票腿成長率＝同一版 price_history 內 adj_close(本月底)÷adj_close(上一筆帳本日期)；`_process_month_end()` 改用它，新列多記 `stock_growth`／`growth_source`；`price_0050` 仍記原始收盤，**帳本既有 2 列未改寫**。找不到上一筆帳本日期或 adj_close 缺值 → `_abort_stale(status="MISSING_ADJ_CLOSE")` 寫 last_error＋心跳 ERROR、不推進、不退回原始收盤硬算。
+  - 證據：新自測 `scripts/selftest_paper_7030_dividend.py` **16/16 PASS、exit 0**（①無除息與舊算法同②含一次除息＝原始比值×股利再投入係數、與「比值＋股利」差 <0.1%③上月底不在視窗④adj 缺值皆不推進、帳本位元組不變⑤真實 10/01→10/30 新舊比值一致）；既有 `selftest_paper_7030_duplicate.py` 11/11 PASS；真實帳本／paper_7030.json／心跳檔未被測試動到（git status 乾淨）。
+  - [自行裁量]「上月底」取上一筆帳本日期（首月即 inception 日），直接沿帳本鏈、不另推日曆月底；自測第一次 ① 淨值項 FAIL 是自測沒把再平衡成本算進舊算法對照，修自測對照式（不是放寬：仍要求差 <0.05 元）。
+  - 第一次實際受影響：0050 下次除息（估約 2027-01，未查公告）所在月底那筆。
+- **1gj-b 仍 `- [!]`**：雲端 audit 週一那班還沒跑（最新 10/30 19:56 UTC，歷來延遲到 20:00 UTC 左右），預計解除改 11/03 05:00 台北後。1ht 補一句 12/01 驗收要看新欄位。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0，179 PASS／0 FAIL。
+- **佇列**：`- [ ]` 21 條（≥12），但 DevQueue 可執行 0（其餘都是互動視窗／需總司令／時間閘）。收工補件：上一輪剛查過 BACKLOG／UX 提案／全檢／DATA_GAP 甲類皆無新可做項，本輪未再找到新來源——**來源已用盡**；前向模擬 14／14 已滿，不補研究候選。
+- 零外部請求（只 `gh run list`／`git fetch` 讀狀態）；沒碰 holdout；沒算報酬；沒登記試驗；沒動十三節核心檔；沒動常駐服務檔；`data/STATUS.json` 無異動（沒有資料源或面板異動）。
+
 ## 2026-11-02 23:31～11-03 00:1x DevQueue 20261102-233102（維運帽）：14 支前向模擬判定輸入可重建性清查＋三條後續
 
 - **等待總司令審閱：12 件**（`research/AWAITING_REVIEW.md` 等待中 12 列；本輪新增 2 列：先.一三五-1ib、1ie，皆建議甲、24 小時後照零之二預設放行）。
