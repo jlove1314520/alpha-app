@@ -1,0 +1,146 @@
+{
+ "content_updated": "2026-11-01",
+ "name": "欣興",
+ "tier": "A",
+ "headline": "Q3 營收 526.5 億創新高、毛利率 28.85%（季增 4.05pp）、本業營益率約 20%；10/27 董事會再追加長交期設備 509 億，累計約 825 億押 ABF 擴產。",
+ "thesis": {
+  "statement": "AI GPU／ASIC 載板面積與層數放大，ABF 供給吃緊帶動漲價與稼動率，欣興擴產（光復、楊梅）承接 2027–2028 需求。",
+  "confirmed_by_user": false
+ },
+ "indicators": [
+  {
+   "id": "rev3_yoy",
+   "group": "公司營運",
+   "label": "近3月營收年增",
+   "kind": "rev3_yoy",
+   "support_if": [
+    ">=",
+    0.4
+   ],
+   "review_if": [
+    "<",
+    0.15
+   ],
+   "update_from": "每月10日月營收"
+  },
+  {
+   "id": "rev3_qoq",
+   "group": "公司營運",
+   "label": "近3月營收 vs 前3月",
+   "kind": "rev3_qoq",
+   "support_if": [
+    ">=",
+    0.0
+   ],
+   "review_if": [
+    "<",
+    -0.1
+   ],
+   "update_from": "每月10日月營收"
+  },
+  {
+   "id": "gm",
+   "group": "公司營運",
+   "label": "最近一季毛利率",
+   "kind": "gm",
+   "support_if": [
+    ">=",
+    0.28
+   ],
+   "review_if": [
+    "<",
+    0.24
+   ],
+   "update_from": "季報"
+  },
+  {
+   "id": "abf_capa",
+   "group": "產業需求",
+   "label": "ABF 擴產進度",
+   "kind": "manual",
+   "status": "neutral",
+   "detail": "光復二廠下一期 2027Q2 開出、楊梅二廠 2027–2028；長交期設備累計約 825 億",
+   "asof": "2026-10-27",
+   "source": "鉅亨／Beyond Consensus",
+   "support_text": "新產能如期開出且稼動率維持 >90%",
+   "review_text": "設備交期延誤或稼動率下滑",
+   "update_from": "法說、董事會公告"
+  },
+  {
+   "id": "abf_price",
+   "group": "產業需求",
+   "label": "ABF 漲價",
+   "kind": "manual",
+   "status": "neutral",
+   "detail": "7/29 管理層稱已與客戶溝通調價；Q4 或 2027Q1 反映，法人分歧",
+   "asof": "2026-07-29",
+   "source": "BigGo 法說摘要",
+   "support_text": "Q4 毛利率 ≥32%",
+   "review_text": "毛利率回落至 28% 以下",
+   "update_from": "季報、法說"
+  }
+ ],
+ "scenario": {
+  "target_year": 2027,
+  "base": {
+   "year": 2026,
+   "assumed_monthly": 19500000000
+  },
+  "tax": 0.2,
+  "assumption_owner": "Cowork 週更新 2026-11-01，待使用者確認",
+  "scenarios": {
+   "保守": {
+    "growth": 0.15,
+    "gm": 0.27,
+    "opex": 0.09,
+    "pe": [
+     20,
+     28
+    ],
+    "basis": "漲價延後、新產能折舊壓毛利"
+   },
+   "基準": {
+    "growth": 0.3,
+    "gm": 0.34,
+    "opex": 0.085,
+    "pe": [
+     25,
+     32
+    ],
+    "basis": "ABF 漲價反映＋光復新產能 2027Q2 開出；僅本業不含業外"
+   },
+   "樂觀": {
+    "growth": 0.45,
+    "gm": 0.36,
+    "opex": 0.08,
+    "pe": [
+     30,
+     38
+    ],
+    "basis": "ABF 缺貨延續、漲價與 AI 占比 70% 以上"
+   }
+  }
+ },
+ "next_checkpoints": [
+  {
+   "date": "2026-11-10",
+   "item": "10 月營收"
+  },
+  {
+   "date": "2027-02",
+   "item": "Q4 法說（毛利率是否 ≥32%）"
+  }
+ ],
+ "known_gaps": [
+  "Q3 法說（若有）管理層原話未取得",
+  "ABF 產能單位數未揭露",
+  "業外收益波動大（Q2 89 億、Q3 26 億），情境 EPS 不含業外",
+  "日本子公司 UMJ 出售條件未定"
+ ],
+ "sources": [
+  "https://news.cnyes.com/news/id/6638686",
+  "https://vocus.cc/article/6ae2b2b0fd8978000150ef3d",
+  "https://finance.biggo.com.tw/quote/3037.TW/earnings-call/TW_3037.TW_2026-07-29"
+ ],
+ "doc_url": null
+}
