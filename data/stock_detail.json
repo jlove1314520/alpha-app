@@ -1,11 +1,9 @@
 {
   "meta": {
-    "generated_at": "2026-11-03T03:29:22.424247+08:00",
+    "generated_at": "2026-11-03T04:31:48.680780+08:00",
     "financials_source": "TWSE openapi t187ap06_L_ci(綜合損益表-一般業) + t187ap07_L_ci(資產負債表-一般業)",
     "financials_updated_count": 47,
-    "errors": [
-      "t187ap06_L_fh: https://openapi.twse.com.tw/v1/opendata/t187ap06_L_fh 回傳非 JSON（可能是無效路徑回傳的HTML，已知地雷）"
-    ],
+    "errors": [],
     "institutional_source": "TWSE T86（同一次呼叫，跟market_tw.json共用，不額外打；只保留官方上市公司清單(t187ap03_L)內的代碼，濾掉ETF/權證等非股票證券)+TPEx tpex_3insti_daily_trading（2026-08-27新增，上櫃股票；2026-10-17 起跳過 03～08 開頭 6 位數權證，ETF 仍保留）",
     "margin_source": "TWSE MI_MARGN（同一次呼叫，跟大盤融資維持率共用，不額外打；只保留官方上市公司清單(t187ap03_L)內的代碼)+TPEx tpex_mainboard_margin_balance（2026-08-27新增，上櫃股票）",
     "financials_history_backfill_note": "2026-08-27一次性回補：讀research端FinMind歷史parquet快取（TaiwanStockFinancialStatements+TaiwanStockBalanceSheet）補上季度歷史（原本daily排程只有最新一期，YoY EPS比較需要至少5季）。merge-safe：既有較新的季度資料不會被覆蓋，只補缺漏。",
@@ -13,6 +11,11 @@
     "source": "TWSE openapi t187ap06_L_ci/t187ap07_L_ci（財報）+ TWSE T86/TPEx tpex_3insti_daily_trading（三大法人）+ TWSE MI_MARGN/TPEx tpex_mainboard_margin_balance（融資融券），各由market.yml不同步驟合併寫入",
     "financials_extra_source": "TWSE openapi t187ap06/07_L_{fh,basi,bd,ins,mim}（上市金融業）＋TPEx openapi mopsfin_t187ap06/07_O_{ci,fh,basi,bd,ins,mim}（上櫃）",
     "financials_extra_stats": {
+      "t187ap06_L_fh": {
+        "rows": 1,
+        "cum": 0,
+        "quarters_updated": 0
+      },
       "t187ap06_L_basi": {
         "rows": 1,
         "cum": 0,
@@ -1193,7 +1196,7 @@
         "9960",
         "9962"
       ],
-      "recorded_at": "2026-11-03T03:33:00+08:00"
+      "recorded_at": "2026-11-03T04:34:57+08:00"
     },
     "roe_cleared_nonconsecutive_codes": []
   },
