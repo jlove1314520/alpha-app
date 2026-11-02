@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-02T18:05:04.097936+08:00",
+ "fetched_at": "2026-11-02T19:35:06.145997+08:00",
  "source": "TWSE/TPEx 重大訊息＋TWSE 月營收＋既有除權息檔（全部官方端點）",
  "keep_days": 90,
  "importance_version": "v0（2026-10-18 先.一一〇-9）",
@@ -21,11 +21,11 @@
   },
   "ex_dividend": {
    "ok": true,
-   "kept": 306,
+   "kept": 309,
    "note": "沿用既有排程產物，未額外請求"
   }
  },
- "count": 8851,
+ "count": 8854,
  "events": [
   {
    "code": "01007T",
@@ -43,6 +43,36 @@
    "date": "2026-11-06",
    "type": "除權息",
    "title": "除權息交易日",
+   "source": "TWSE 除權息",
+   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u",
+   "importance": 5
+  },
+  {
+   "code": "00946",
+   "name": "",
+   "date": "2026-11-04",
+   "type": "除權息",
+   "title": "除權息交易日（現金 0.058 元）",
+   "source": "TWSE 除權息",
+   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u",
+   "importance": 5
+  },
+  {
+   "code": "00953B",
+   "name": "",
+   "date": "2026-11-04",
+   "type": "除權息",
+   "title": "除權息交易日（現金 0.067 元）",
+   "source": "TWSE 除權息",
+   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u",
+   "importance": 5
+  },
+  {
+   "code": "00985B",
+   "name": "",
+   "date": "2026-11-04",
+   "type": "除權息",
+   "title": "除權息交易日（現金 0.053 元）",
    "source": "TWSE 除權息",
    "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u",
    "importance": 5
