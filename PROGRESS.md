@@ -1,3 +1,22 @@
+## 2026-11-02 17:31～18:0x DevQueue（維運帽）：先.一三五-1hq 查 10:45 中斷 rebase 肇事者＋修＋看守提案
+
+- **等待總司令審閱：9 件**（`research/AWAITING_REVIEW.md` 等待中 9 列；本輪新增 1 列：先.一三五-1hq-a，等 0 小時，24 小時無裁示照零之二預設放行建議的甲）。
+- **1hq 查因（零外部請求）**：肇事者＝本機報價備援 `scripts/quotes_local_fallback.py` → `local_git_commit.commit_paths(drop_on_conflict=True)`。
+  證據：reflog 10:45:16 commit「盤中報價：本機備援補抓」→ 10:45:21 `reset: moving to HEAD~1`；殘留 autostash `7c321289be` 建於 10:45:17、父節點就是那個 commit；
+  `research/quotes_local_fallback.jsonl` 10:45:22 記「pull 與遠端衝突：已 abort」。同時段其他本機排程 log 都沒有 git 動作。
+  沒收尾原因（暫存 repo 重現）：目錄只剩 `autostash` 時 `git rebase --abort` exit 1、不清目錄，舊版不看結果就回報「已 abort」。
+  git 為何會在 pull 中途只留下 autostash（第一層原因）查不到：舊版把 pull 的 stderr 丟掉了。
+- **[自行裁量] 純 bug 修復** `scripts/local_git_commit.py`（非十三節核心檔、非常駐服務檔）：abort 後仍在 rebase 且目錄**只剩 autostash** →
+  先 `git stash store` 保存、再把目錄搬到 `.git/rebase-merge.stale-時間`（不刪，同 1hp 人工做法）；有其他狀態檔就不動；pull 失敗回傳附 exit＋stderr 摘要。
+  自測 `scripts/selftest_local_git_orphan_autostash.py` 9 項全過；既有 autostash／cc_push 三支自測全過。
+- **看守提案 1hq-a**（AWAITING，甲建議）：本機 `check_external_connectivity.py` 加「rebase 目錄 >30 分鐘且無持鎖者 → local_task_health 亮燈」，只告警不刪。PENDING_QUEUE 已補 `- [!]` 條目（11/03 17:45 後可預設放行）。
+- **本輪插曲（如實記錄）**：17:43 某個排程的 `pull --autostash` 把我未提交的 `local_git_commit.py`／`AWAITING_REVIEW.md` 收進 stash@{0}、沒套回（autostash_failures.jsonl 無紀錄＝收件匣 034 說的漏網型）；
+  已用 `git show stash:路徑` 取回（不動 index、stash 未刪）。同一次也讓 17:35 本機新聞補班沒提交成功（「鎖被其他排程持有」）的 `data/events.json` 跟精簡版不同班。
+- **冒煙**：主工作樹跑 2 次都只 FAIL 132／142（就是上面那份別人未提交、不同班的 `data/events.json`，不是本次改動，App 也不讀 `local_git_commit.py`）；
+  不放寬測試，改在乾淨 worktree（HEAD＋本次 4 檔）用 8793 埠跑：**179 項全部通過**（`=== 冒煙測試結果：全部通過 ===`）。worktree 與臨時伺服器已清掉。
+  那份不一致的 events 檔留給下一輪新聞補班重寫，本輪不碰別人的資料檔。
+- `data/STATUS.json` 本輪無異動（沒有資料源或面板異動）。零外部請求；沒碰 holdout；沒登記試驗；沒動十三節核心檔；沒改排程；沒動常駐服務檔。
+
 ## 2026-11-02 17:0x DevQueue（維運帽）：到期時間閘處理＋空轉補件 1hm／1hn／1ho
 
 - **等待總司令審閱：8 件**（`research/AWAITING_REVIEW.md` 等待中 8 列；本輪新增 2 列：1hn、1ho，都已等 0 小時，24 小時無裁示照零之二預設放行建議的甲）。

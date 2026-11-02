@@ -62,6 +62,48 @@ def rebase_in_progress() -> bool:
     return (GITDIR / "rebase-merge").exists() or (GITDIR / "rebase-apply").exists()
 
 
+# 先.一三五-1hq（2026-11-02 DevQueue 20261102-173102）：11/02 10:45 本機報價備援的 pull --rebase --autostash 失敗後，
+# `.git/rebase-merge/` 只剩 `autostash` 一個檔（沒有 head-name）。這種形狀 `git rebase --abort` 會 exit 1
+# （could not read head-name）且不清目錄，舊版不看 abort 結果就回報「已 abort」，殘留 6.5 小時擋住所有 pull（1hp 人工清）。
+# 只處理「目錄裡只有 autostash」這一種 git 自己救不回的形狀：先 `git stash store` 保存，再把目錄搬到 .git/ 內備份名（不刪）。
+# 有其他狀態檔（真的 rebase 停在一半）一律不動。自身任何失敗只回傳說明字串（十二節）。
+def recover_orphan_autostash_dir() -> str:
+    try:
+        d = GITDIR / "rebase-merge"
+        if not d.is_dir() or (GITDIR / "rebase-apply").exists():
+            return ""
+        names = sorted(p.name for p in d.iterdir())
+        if names != ["autostash"]:
+            return ""
+        h = (d / "autostash").read_text(encoding="utf-8").strip()
+        if not re.fullmatch(r"[0-9a-f]{40}", h) or _g("rev-parse", "-q", "--verify", f"{h}^{{commit}}").returncode != 0:
+            return "rebase-merge 只剩 autostash 但雜湊無效，未動"
+        if h not in _g("stash", "list", "--format=%H").stdout.split():
+            s = _g("stash", "store", "-m", "保留：rebase 中斷殘留的 autostash（local_git_commit 自動保存，先.一三五-1hq）", h)
+            if s.returncode != 0:
+                return "rebase-merge 只剩 autostash，stash store 失敗，未動目錄"
+        import time  # noqa: PLC0415
+        dest = GITDIR / f"rebase-merge.stale-{time.strftime('%Y%m%d-%H%M%S')}"
+        d.rename(dest)
+        return f"rebase-merge 只剩 autostash：已存成 stash（{h[:10]}）並把目錄移到 .git/{dest.name}"
+    except Exception as e:  # noqa: BLE001
+        return f"rebase-merge 殘留檢查失敗（{type(e).__name__}）"
+
+
+def abort_rebase() -> str:
+    """`git rebase --abort`；abort 失敗且目錄只剩 autostash 時改走上面的保存＋搬移。回傳說明（成功為空字串）。"""
+    try:
+        a = _g("rebase", "--abort")
+        if not rebase_in_progress():
+            return ""
+        note = recover_orphan_autostash_dir()
+        if rebase_in_progress():
+            return f"rebase --abort 失敗（exit {a.returncode}：{(a.stderr or a.stdout).strip()[-120:]}），repo 仍在 rebase 中" + (f"；{note}" if note else "")
+        return note
+    except Exception as e:  # noqa: BLE001
+        return f"rebase --abort 流程失敗（{type(e).__name__}）"
+
+
 AUTOSTASH_LOG = ROOT / "research" / "autostash_failures.jsonl"        # append-only，MACHINE_WRITTEN 樣式內
 AUTOSTASH_ALERT_STATE = ROOT / "research" / ".autostash_alert_state.json"
 AUTOSTASH_ALERT_REPEAT_SEC = 6 * 3600
@@ -224,7 +266,9 @@ def pull_or_abort(timeout=180) -> int:
     r = pull_autostash_safe(timeout=timeout)
     if r.returncode == 0 and not rebase_in_progress():
         return 0
-    _g("rebase", "--abort")
+    note = abort_rebase()
+    if note:
+        print(f"[local_git_commit] {note}", file=sys.stderr)
     _restore_failed_autostash(before)
     return 1
 
@@ -343,14 +387,16 @@ def commit_paths(paths: list[str], msg: str, drop_on_conflict: bool = False, und
         pl = _g("pull", "-q", "--rebase", "--autostash")
         _restore_failed_autostash(stash_before)
         if pl.returncode != 0 or rebase_in_progress():
-            _g("rebase", "--abort")
+            note = abort_rebase()  # 先.一三五-1hq：看 abort 結果，不再一律回報「已 abort」
             _restore_failed_autostash(stash_before)  # abort 時才套回 autostash，套回失敗一樣要取回
+            why = (pl.stderr or pl.stdout or "").strip().replace("\n", " ")[-160:]  # 留 pull 的錯誤摘要，事後查得到原因
+            tail = f"（pull exit {pl.returncode}：{why}）" + (f"；{note}" if note else "")
             if drop_on_conflict and _g("rev-parse", "HEAD").stdout.strip() == mine:
                 _g("reset", "-q", "--soft", "HEAD~1")
                 _g("reset", "-q", "--", *existing)
                 _g("checkout", "-q", "HEAD", "--", *[p for p in existing if _g("ls-files", "--error-unmatch", p).returncode == 0])
-                return "pull 與遠端衝突：已 abort，並作廢本機這輪（產出檔還原成 HEAD 版本）"
-            return "pull 與遠端衝突：已 abort（commit 留在本機，下一輪再試）"
+                return "pull 與遠端衝突：已 abort，並作廢本機這輪（產出檔還原成 HEAD 版本）" + tail
+            return "pull 與遠端衝突：已 abort（commit 留在本機，下一輪再試）" + tail
         marks = _g("grep", "-l", "^<<<<<<< ")
         if marks.returncode == 0 and marks.stdout.strip():
             return "已 commit，但偵測到衝突標記，跳過 push：" + marks.stdout.strip().replace("\n", ", ")[:200]
@@ -360,7 +406,7 @@ def commit_paths(paths: list[str], msg: str, drop_on_conflict: bool = False, und
     except Exception as e:  # noqa: BLE001
         try:
             if rebase_in_progress():
-                _g("rebase", "--abort")
+                abort_rebase()
         except Exception:  # noqa: BLE001
             pass
         return f"提交流程失敗（{type(e).__name__}: {e}）"
