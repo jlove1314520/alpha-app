@@ -1,3 +1,15 @@
+## 2026-11-03 02:0x～02:4x DevQueue 空轉補件（維運帽）：先.一三五-1ig／1ih／1ii（＋1ij 待做）
+
+- **等待總司令審閱：12 件**（`research/AWAITING_REVIEW.md` 本輪沒有新增或結案，沿用上一輪 12）。
+- 前向模擬 14／14 已滿（零之二⑤）：**不新增候選、不寫 PREREG、不送 AWAITING**，改補維運類。`research/FORWARD_CANDIDATES.md` 記一行。
+- **1ig（`- [x]`）總司令待辦第 5 項「刪殘留 stash」先預跑**：`--dry` 超過 2 分鐘無輸出，我在逾時中止它，留下的 git 鎖（02:02:35 起約 2.5 分鐘）已用它自己的 token 放掉；stash 仍 7 筆、一筆沒刪。不拿鎖的唯讀量時：共 404 秒，**6 筆可刪、01f8b08d93 會被跳過**（CLAUDE.md 獨有行 1→2、PENDING_QUEUE 11→14，抽看都是後來改寫過的舊版）。修：每筆印進度（flush）＋開頭提示約 7 分鐘、會占 git 鎖；刪除邏輯未改。`C:lpha\總司令待辦.md` 第 5 項改寫時間與預期結果「刪 6、跳過 1」。
+- **1ih（`- [x]`，純 bug 修復）** `scripts/build_cash_flow_json.py`：快取不在 → 原本拿 0 檔空表蓋掉 `data/cash_flow.json`，改成回 1 不覆寫；只有資本支出的股票原本 `max()` 空序列讓整支中斷，改成只略過那檔。新 `scripts/selftest_build_cash_flow_json.py` **8／8 PASS**。
+- **1ii（`- [x]`）** 「快取檔讀取失敗 126 檔」全是 FinMind 回空的 0 欄位 parquet，126 個代號都不在現行上市櫃名冊（已下市／合併舊代號）→ 原因分類改「快取為空（FinMind 無資料）」。研究快取已有 83 檔 Q3 現金流，照檔頭既定手動程序試重產 `data/cash_flow.json`（1,797 → 1,798 檔、含 Q3 83 檔，schema ✓），但冒煙 #116／#131／#12 FAIL：個股小檔 `_meta` 還是舊版，App 判不一致。**已還原成 HEAD、本輪不提交**；重產改開 **1ik（`- [ ]`）** 跟 by_code 一起做。
+- **1ij（`- [ ]` 新增）** 逐行核對 01f8b08d93 多出來的獨有行，全有改寫來源才更新快照；等總司令跑完第 5 項再改。
+- **我自己出的錯（如實記錄）**：工作中誤下一次 `git stash`，把工作目錄 17 個修改收進 stash；立刻 `stash pop` 還原（`data/rate_limit_state.json` 期間被 FinMind 預熱程式重寫，保留較新的那版），stash 數回到 7，沒有遺失。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0，**179／179 通過**。過程：試重產 cash_flow 後第二次冒煙 #116／#131／#12 FAIL（小檔不一致）→ 還原 cash_flow → #131 的 `selftest_by_code.py` 把「不一致 5 處」寫進 `data/by_code/_meta.json` consistency，App 讀到才繼續報錯 → 重跑 `selftest_by_code.py`（64 檔不一致 0）→ 第四次冒煙全過。`_meta.json` 開工時就是未提交的機器輸出，本輪不提交它。
+- 零外部請求；沒碰 holdout；沒算報酬；沒登記試驗；沒動十三節核心檔；沒動常駐服務檔；`data/STATUS.json` 無異動。
+
 ## 2026-11-03 00:31～00:5x DevQueue 20261103-003102（維運帽）：先.一三五-1if 紙.一股票腿改用含息報酬
 
 - **等待總司令審閱：12 件**（`research/AWAITING_REVIEW.md` 等待中 12 列，本輪沒有新增或結案）。

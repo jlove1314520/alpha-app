@@ -67,9 +67,15 @@ def main() -> int:
     for f in files:
         code = Path(f).name.split("__")[1]
         try:
-            d = pd.read_parquet(f, columns=["date", "type", "value"])
+            d = pd.read_parquet(f)
         except Exception:
             why["快取檔讀取失敗"] += 1
+            continue
+        if d.empty:  # FinMind 回空（1ii：126 檔都是已不在上市櫃名冊的舊代號），不是讀檔失敗
+            why["快取為空（FinMind 無資料）"] += 1
+            continue
+        if not {"date", "type", "value"} <= set(d.columns):
+            why["快取缺欄位"] += 1
             continue
         d = d[d["type"].isin([CFO, CAPEX])]
         if d.empty:
@@ -78,7 +84,11 @@ def main() -> int:
         cum = {}
         for r in d.itertuples(index=False):
             cum.setdefault(str(r.date)[:10], {})[r.type] = float(r.value)
-        latest = max(k for k, v in cum.items() if CFO in v)
+        cfo_dates = [k for k, v in cum.items() if CFO in v]
+        if not cfo_dates:  # 只有資本支出沒有營業現金流：原本 max() 空序列會讓整支中斷
+            why["無營業現金流欄位"] += 1
+            continue
+        latest = max(cfo_dates)
         cfo = ttm(cum, CFO, latest)
         capex = ttm(cum, CAPEX, latest)
         if cfo is None:
@@ -90,6 +100,9 @@ def main() -> int:
             "capex_ttm": round(capex) if capex is not None else None,
             "fcf_ttm": round(cfo + capex) if capex is not None else None,
         }
+    if not stocks:  # 快取不在或全部讀不到：不拿空表蓋掉既有 data/cash_flow.json
+        print(f"[skip] 沒有任何可算的股票（快取檔 {len(files)} 個；略過 {dict(why)}），不覆寫 {OUT.name}")
+        return 1
     asof = Counter(v["as_of"] for v in stocks.values())
     out = {
         "generated_at": datetime.now(TW).isoformat(timespec="seconds"),

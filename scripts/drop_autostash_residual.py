@@ -41,8 +41,10 @@ def main() -> int:
     m = re.search(r"token=(\w+)", r.stdout or "")
     tok = m.group(1) if m else None
     done, skip = [], []
+    print(f"開始逐筆檢查 {len(snap)} 筆（含上千個檔的那筆要好幾分鐘，期間會占住 git 鎖，請等它跑完、不要關視窗）", flush=True)
     try:
-        for h, row in snap.items():
+        for i, (h, row) in enumerate(snap.items(), 1):
+            print(f"  [{i}/{len(snap)}] 檢查 {h[:10]} …", flush=True)
             hashes = _g("stash", "list", "--format=%H").stdout.split()
             if h not in hashes:
                 print(f"  已不在清單：{h[:10]}")
