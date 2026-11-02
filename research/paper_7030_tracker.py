@@ -22,7 +22,7 @@ history.json`只保留最近一段滾動窗口的0050日線（見該檔`meta`欄
 
 **再平衡與成本**：比照`survival_constraint_allocation_test.py`同一套
 `BacktestConfig`/`buy_leg_rate`/`sell_leg_rate`（ETF證交稅0.1%、手續費
-1.8折），股票腿標的0050、債券腿用`cbc_rf_rate_client`定存利率代理，
+1.8折），股票腿標的0050（先.一三五-1if 起用 adj_close 含息比值推進，price_0050 欄仍記原始收盤）、債券腿用`cbc_rf_rate_client`定存利率代理，
 月複利`(1+rf_annual_pct/100)**(1/12)`（rf_annual_pct本身已是年化定存
 利率報價，跟`survival_constraint_allocation_test.py`的日複利
 `(1+rf_pct/100)**(1/252)`是同一個年化利率、只是複利頻率配合本腳本
@@ -116,14 +116,15 @@ def _check_price_freshness(prices: list[dict], today_iso: str | None = None) -> 
     return True, ""
 
 
-def _abort_stale(reason: str, log: list[dict]) -> None:
-    """過期中止：不寫紀錄檔、不算任何淨值；把原因寫進心跳(status=ERROR)與App摘要的last_error。"""
-    print(f"::warning::紙.一中止：{reason}（不使用舊價格計算）")
+def _abort_stale(reason: str, log: list[dict], status: str = "ABORTED_STALE_PRICE", label: str = "價格過期") -> None:
+    """過期中止：不寫紀錄檔、不算任何淨值；把原因寫進心跳(status=ERROR)與App摘要的last_error。
+    先.一三五-1if：含息價缺值也走這裡（status=MISSING_ADJ_CLOSE）。"""
+    print(f"::warning::紙.一中止（{label}）：{reason}（不使用舊價格／原始收盤硬算）")
     _write_app_summary(log)
     try:
         with open(APP_SUMMARY_PATH, encoding="utf-8") as f:
             summary = json.load(f)
-        summary["last_error"] = {"status": "ABORTED_STALE_PRICE", "reason": reason,
+        summary["last_error"] = {"status": status, "reason": reason,
                                  "ts": datetime.now(TZ).isoformat()}
         with open(APP_SUMMARY_PATH, "w", encoding="utf-8") as f:
             json.dump(summary, f, ensure_ascii=False, indent=2)
@@ -131,7 +132,7 @@ def _abort_stale(reason: str, log: list[dict]) -> None:
         print(f"::warning::紙.一寫入last_error失敗（不影響中止）：{type(e).__name__}: {e}")
     with open(HEARTBEAT_PATH, "a", encoding="utf-8") as f:
         f.write(json.dumps({"ts": datetime.now(TZ).isoformat(), "item": "紙.一", "status": "ERROR",
-                            "note": f"中止（價格過期）：{reason}"}, ensure_ascii=False) + "\n")
+                            "note": f"中止（{label}）：{reason}"}, ensure_ascii=False) + "\n")
 
 
 def _find_duplicate(log: list[dict]) -> str | None:
@@ -227,9 +228,29 @@ def _process_inception(price_row: dict, rf_monthly) -> dict:
     return entry
 
 
-def _process_month_end(prev_entry: dict, price_row: dict, rf_monthly) -> dict:
-    prev_price = prev_entry["price_0050"]
-    stock_value = prev_entry["stock_value_post"] * (price_row["close"] / prev_price)
+class MissingAdjClose(Exception):
+    """先.一三五-1if：上一筆帳本日期或本月底在本次 price_history 0050 視窗裡找不到可用的 adj_close。"""
+
+
+def _stock_growth(prices: list[dict], prev_date: str, price_row: dict) -> float:
+    """先.一三五-1if（純 bug 修復）：股票腿成長率改用含息報酬＝同一版 price_history 內
+    adj_close(本月底) ÷ adj_close(上一筆帳本日期)。兩個 adj_close 都取自同一次載入，
+    之後新除息回溯調整時兩者同乘一個係數、比值不變。找不到就拋 MissingAdjClose，
+    呼叫端不推進、不退回原始收盤硬算（同新鮮度閘門精神）。"""
+    prev_row = next((r for r in prices if r["date"] == prev_date), None)
+    if prev_row is None:
+        raise MissingAdjClose(f"上一筆帳本日期 {prev_date} 不在本次 price_history 0050 視窗內"
+                              f"（視窗 {prices[0]['date'] if prices else '無'}～{prices[-1]['date'] if prices else '無'}）")
+    a0, a1 = prev_row.get("adj_close"), price_row.get("adj_close")
+    if not a0 or not a1 or a0 <= 0 or a1 <= 0:
+        raise MissingAdjClose(f"0050 adj_close 缺值或非正數（{prev_date}={a0}、{price_row['date']}={a1}）")
+    return a1 / a0
+
+
+def _process_month_end(prev_entry: dict, price_row: dict, rf_monthly, prices: list[dict]) -> dict:
+    # price_0050 仍記原始收盤（帳本既有列不改寫）；股票腿成長改用含息比值，見 _stock_growth()
+    growth = _stock_growth(prices, prev_entry["date"], price_row)
+    stock_value = prev_entry["stock_value_post"] * growth
     bond_value = prev_entry["bond_value_post"] * _bond_monthly_growth(rf_monthly, price_row["date"])
 
     total = stock_value + bond_value
@@ -259,6 +280,8 @@ def _process_month_end(prev_entry: dict, price_row: dict, rf_monthly) -> dict:
         "stock_weight_post": round(stock_value / (stock_value + bond_value), 4),
         "bond_weight_post": round(bond_value / (stock_value + bond_value), 4),
         "rebalance_trade": trade,
+        "stock_growth": round(growth, 8),
+        "growth_source": f"adj_close {prev_entry['date']}→{price_row['date']}（price_history 同一版，含息）",
     }
 
 
@@ -320,8 +343,14 @@ def run() -> dict:
         return {"processed": 0, "started": True}
 
     rf_monthly = load_risk_free_rate_series()
+    processed = 0
     for row in boundaries:
-        entry = _process_month_end(log[-1], row, rf_monthly)
+        try:
+            entry = _process_month_end(log[-1], row, rf_monthly, prices)
+        except MissingAdjClose as e:
+            _abort_stale(str(e), log, status="MISSING_ADJ_CLOSE", label="含息價缺值")
+            return {"processed": processed, "started": True, "aborted": True, "reason": str(e)}
+        processed += 1
         _append_log(entry)
         log.append(entry)
         print(f"[紙.一] 月末再平衡：{entry['date']}，淨值={entry['nav']:.2f}，"
