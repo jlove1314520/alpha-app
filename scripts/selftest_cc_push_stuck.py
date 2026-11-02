@@ -6,6 +6,7 @@
 3. 三者都超過 3 小時、DevQueue 最後一輪 QUEUE_EMPTY → 推「⏸ 佇列都在等審／等條件」（不同訊息）；
 4. 同一原因 6 小時內不重推；
 5.（收件匣 032）2026-10-30 07:10～09:38 DevQueue 的「補件／合成自測／收工」commit 都算人工進度（不被當成機器提交排除）。
+6.（收件匣 035）真的叫 claude 的輪次連 2 次 AUTH_EXPIRED → 推「⚠️ CC 登入過期，請在 Alpha CC 打 /login」；沒叫 claude 的輪次不打斷；恢復即歸零。
 跑法：python scripts/selftest_cc_push_stuck.py
 """
 import sys
@@ -71,6 +72,32 @@ for subj in ("DevQueue 候選補件（先.一三五-1cb～1ce）：台股報價�
     check("5 算人工進度：" + subj[:24], not C.MACHINE_COMMIT.search(subj))
 for subj in ("盤中報價：本機備援補抓（雲端 20 分鐘未更新，先.八十二-4）", "DevQueue cycle log 自動更新（cycle_id=20261030-090102）"):
     check("5 仍算機器提交：" + subj[:20], bool(C.MACHINE_COMMIT.search(subj)))
+
+# 6. 收件匣 035：真的叫 claude 的輪次連 2 次登入過期 → 推「⚠️ CC 登入過期，請在 Alpha CC 打 /login」
+def cyc(cid, reason, auth=None):
+    body = f"===== DevQueue cycle start: 2026-11-02 15:00:00 cycle_id={cid} =====\n"
+    if auth:
+        body += 'auth_classify: {"status": "%s", "matched": "session expired"}\n' % auth
+    return body + f"===== DevQueue cycle end: 2026-11-02 15:01:00 cycle_id={cid} reason={reason} exit=1 duration_min=1 =====\n"
+
+
+log_two = cyc("a", "OK") + cyc("b", "ERROR", "AUTH_EXPIRED") + cyc("c", "QUEUE_EMPTY") + cyc("d", "ERROR", "AUTH_EXPIRED") + cyc("e", "YIELD")
+check("6a 中間夾 QUEUE_EMPTY／YIELD 仍算連 2 次", C.auth_expired_streak(log_two) == 2, str(C.auth_expired_streak(log_two)))
+check("6b 只有 1 次不算", C.auth_expired_streak(cyc("a", "ERROR", "AUTH_EXPIRED") + cyc("b", "OK") + cyc("c", "ERROR", "AUTH_EXPIRED")) == 1)
+check("6c 趕工模式 reason=AUTH_EXPIRED 也算", C.auth_expired_streak(cyc("a", "AUTH_EXPIRED") + cyc("b", "AUTH_EXPIRED")) == 2)
+check("6d 登入恢復（最新一輪 OK）歸零", C.auth_expired_streak(log_two + cyc("f", "OK")) == 0)
+check("6e 壞輸入不拋例外", C.auth_expired_streak("亂七八糟") == 0)
+import tempfile  # noqa: E402
+lp = Path(tempfile.mkdtemp(prefix="st_auth_")) / "dq.log"
+lp.write_text(log_two, encoding="utf-8")
+setup(1, 1, 1, True)
+C.DQ_LOG = lp
+st, sent = {}, []
+send = lambda t, b, k: sent.append((t, b, k)) or {"ok": 1}  # noqa: E731
+C.stuck(st, now, send=send)
+C.stuck(st, now + timedelta(hours=1), send=send)
+auth = [x for x in sent if x[0] == C.AUTH_TITLE]
+check("6f 推一則固定標題、類別 cc_stuck、6 小時內不重推", len(auth) == 1 and auth[0][2] == "cc_stuck" and "/login" in auth[0][1], str(sent)[:200])
 
 print(f"\n結果：{'全部通過' if not fails else '失敗 ' + str(fails)}")
 sys.exit(1 if fails else 0)

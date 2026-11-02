@@ -1,3 +1,10 @@
+## 2026-11-02 22:4x 互動視窗：收件匣 035（Cowork 16:35）背景 claude 登入恢復確認
+
+- **等待總司令審閱：3 件**（不變）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班 ③先.一四五-1 刪除 7 筆殘留 git stash（`git stash list` 仍 7 筆，尚未執行）——都在 `C:/alpha/總司令待辦.md`。
+- **登入已恢復**：同一支 claude.exe、同 wrapper 旗標跑「只回 OK」→ exit 0、回 OK。DevQueue 自己已在 17:01、17:31、18:31、21:01、21:31 跑出 reason=OK 並有實際提交，所以沒有再手動觸發。這次過期從 11/01 23:01 到 11/02 15:31，真的叫 claude 的輪次連續 12 次 AUTH_EXPIRED。
+- **新增登入過期推播**：`scripts/cc_push.py` `auth_expired_streak()`——只數真的叫了 claude 的輪次，連 2 次 AUTH_EXPIRED 就推「⚠️ CC 登入過期，請在 Alpha CC 打 /login」（cc_stuck，6 小時一次）。真實 log 回放：17:01 前 12 次→會推、現在 0→不推。自測 `selftest_cc_push_stuck.py` 新增 6 項，兩支 cc_push 自測全過。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0，179 PASS／0 FAIL。
+
 ## 2026-11-02 21:3x DevQueue（維運帽）：先.一三五-1hu git 鎖記持有者＋1hv docstring 改教 token（另送 1hv-a）
 
 - **等待總司令審閱：9 件**（`research/AWAITING_REVIEW.md` 等待中 9 列；本輪新增 1 列：先.一三五-1hv-a，等 0 小時，24 小時無裁示〔11/03 21:45 後〕照零之二預設放行建議的甲）。

@@ -8,6 +8,7 @@
 - cc_stuck：超過 3 小時沒有任何進度心跳（且佇列還有未完成項）、被用量閘門擋住、DevQueue 連 3 輪錯誤結束、
   或 DevQueue 連 2 輪「有 cycle start、沒 cycle end」（收件匣 026：wrapper 每條出口都會寫 cycle end，沒寫＝中途死掉）
   → 推「⚠️ CC 停住：<原因>」；同一原因 6 小時內只推一次。
+  （收件匣 035）真的叫了 claude 的輪次連 2 次登入過期 → 另推「⚠️ CC 登入過期，請在 Alpha CC 打 /login」（同樣 6 小時一次）。
 - cc_daily：每天 22:00 後第一次 tick 推「今天做完 N 件、還剩 M 件、等你決定 K 件」。
 
 用法：python scripts/cc_push.py tick   （run-dev-queue-cycle.ps1 每輪開頭呼叫：scan＋stuck＋daily）
@@ -206,9 +207,37 @@ def silent_cycles(log_text: str, need: int = 2) -> list[tuple[str, str]]:
     return [(cid, ([ln.strip() for ln in body.splitlines() if ln.strip()] or ["（沒有任何後續紀錄）"])[-1]) for cid, body in cycles]
 
 
+# 收件匣 035：沒有真的叫 claude 的輪次（佇列空、時間閘、讓路、閘門、鎖被占）不算、也不打斷連續計數
+NO_CLAUDE_REASONS = ("QUEUE_EMPTY", "GATED", "YIELD", "CRUNCH_GATE", "USAGE_GATE", "LOCK_BUSY", "PROMPT_ERROR", "CRUNCH_YIELD")
+AUTH_TITLE = "⚠️ CC 登入過期，請在 Alpha CC 打 /login"
+
+
+def auth_expired_streak(log_text: str) -> int:
+    """最近連續幾次「真的叫了 claude」的輪次都是登入過期（auth_classify AUTH_EXPIRED 或 reason=AUTH_EXPIRED）。"""
+    parts = re.split(r"^===== DevQueue cycle start: \S+ \S+ cycle_id=(\S+) =====\r?$", log_text, flags=re.M)
+    n = 0
+    for cid, body in reversed(list(zip(parts[1::2], parts[2::2]))):
+        m = re.search(rf"DevQueue cycle end: \S+ \S+ cycle_id={re.escape(cid)} reason=(\S+)", body)
+        reason = m.group(1) if m else ""
+        if reason == "AUTH_EXPIRED" or '"status": "AUTH_EXPIRED"' in body:
+            n += 1
+        elif not reason or reason in NO_CLAUDE_REASONS:
+            continue
+        else:
+            break
+    return n
+
+
 def stuck_reasons(now: datetime) -> list[tuple[str, str]]:
     """[(原因鍵, 給人看的原因)]。"""
     out = []
+    try:
+        k = auth_expired_streak(_read(DQ_LOG))
+        if k >= 2:
+            out.append(("auth_expired", f"背景 claude 連續 {k} 次登入過期（session expired），DevQueue 叫不動；"
+                                        "請在桌面 Alpha 捷徑開的 Claude Code 打 /login 重新登入，之後每 30 分鐘排程會自動續跑"))
+    except Exception as e:  # noqa: BLE001
+        _warn(f"auth_expired_streak 失敗（{type(e).__name__}），本輪略過")
     try:
         u = json.loads(USAGE.read_text(encoding="utf-8"))
         until = u.get("limited_until")
@@ -243,7 +272,7 @@ def stuck(st: dict, now: datetime, send=_send) -> int:
     for key, text in stuck_reasons(now):
         if now.timestamp() - float(seen.get(key, 0)) < STUCK_REPEAT_SEC:
             continue
-        title = f"⏸ {text}" if key == "queue_idle" else f"⚠️ CC 停住：{text}"
+        title = f"⏸ {text}" if key == "queue_idle" else AUTH_TITLE if key == "auth_expired" else f"⚠️ CC 停住：{text}"
         r = send(title[:80], text, "cc_stuck")
         seen[key] = now.timestamp()
         n += 1
