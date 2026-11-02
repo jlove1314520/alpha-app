@@ -1,3 +1,15 @@
+## 2026-11-02 21:3x DevQueue（維運帽）：先.一三五-1hu git 鎖記持有者＋1hv docstring 改教 token（另送 1hv-a）
+
+- **等待總司令審閱：9 件**（`research/AWAITING_REVIEW.md` 等待中 9 列；本輪新增 1 列：先.一三五-1hv-a，等 0 小時，24 小時無裁示〔11/03 21:45 後〕照零之二預設放行建議的甲）。
+- **1hu（`- [x]`）**：`research/git_op_lock.py` 的 `acquire()` 被擋（LOCK_HELD）時 append 一行到 `research/git_op_lock.log`：「時間 LOCK_HELD holder_pid=… age=…s holder=ppid=…;argv0=… caller_ppid=… argv0=…」；整段 try/except 吞掉（十二節）。新建的鎖檔多第 4 欄 `ppid=…;argv0=…`，舊 2／3 欄照讀（holder=unknown）。鎖語意（5 分鐘陳舊、token release）不變；全 repo 只有這支自己解析鎖檔欄位。
+  - 證據：新自測 `scripts/selftest_git_op_lock_holder_log.py` **11/11 PASS、exit 0**（①空鎖不記、第 4 欄有值 ②被擋記一行、CLI 子行程 exit 1 ③log 目錄不存在仍回 LOCK_HELD 不丟例外 ④舊 2／3 欄照讀、token release 照常＋陳舊鎖回收不記）；既有 `selftest_git_op_lock.py` 6/6、`selftest_dev_queue_cycle_exits.py` 12/12、`selftest_local_heartbeats.py` 12/12。commit 71a4ccd665c。
+  - [自行裁量] argv0 對 CLI 呼叫永遠是 git_op_lock.py 本身，真正能辨識呼叫者的是 ppid；照交辦格式仍保留 argv0。另補 1hu-b（11/09 讀 log 驗收真實爭用紀錄，時間閘 `- [!]`）。
+- **1hv（`- [x]`）**：docstring「用法」段改成 acquire 記 token、LOCK_HELD 時不要 release、`release --token`；相容段標「⚠️ 舊用法（相容期、會被記錄，勿手打）」。grep `C:lpha` 全部 .md／.ps1／.bat／.py：教無 token release 的說明只有這兩處；三支 run-*.ps1 的 fallback 呼叫照交辦不動。11/02 18:03:58 那筆 `ppid=242440 argv0=research/git_op_lock.py`（相對路徑＝手打或互動視窗）行程已結束、查不出是誰——**提醒互動視窗／Cowork：提交時要帶 `release --token`，acquire 失敗時不要 release**。移除相容路徑寫成 1hv-a 提案（甲＝log 連續 14 天無新 legacy 記錄、最早 11/17 才改）。
+- **冒煙**：兩項各跑一次，都是 **179 PASS／0 FAIL、exit 0**。
+- **佇列**：DevQueue 可執行 `- [ ]` 剩 0（其餘 21 條 `- [ ]` 都是互動視窗／需總司令）。到期時間閘：1gj-b 要 11/03 00:00 後、1af-a 12/15、先.一二三-4 要等 00878／00940 公告（11/02 尚無，沒查網路）。收工補件：BACKLOG／UX 提案沒有新的可做項（🔄 標記都是已核對過的舊文字），只補 1hu-b 一條，其餘**來源已用盡**；前向模擬 14／14 已滿，不補候選。
+- 零外部請求；沒碰 holdout；沒算報酬；沒登記試驗；沒動十三節核心檔；沒改排程；沒動常駐服務檔；`data/STATUS.json` 無異動（沒有資料源或面板異動）。
+- **BLOCKED**：新增 1hv-a（等 Cowork 審）、1hu-b（時間閘 11/09）。
+
 ## 2026-11-02 20:5x DevQueue（維運帽）：空轉補件（先.一三五-1）——4 條到期時間閘結案＋git 鎖盤點
 
 - **等待總司令審閱：8 件**（`research/AWAITING_REVIEW.md` 等待中 8 列，本輪沒有新增或結案）。
