@@ -100,5 +100,36 @@ for h in ast_hits:
     print("  AST 命中 " + h)
 check(f".py 字串常數執行時無控制字元（命中 {len(ast_hits)} 處）", not ast_hits)
 
+
+# 第三段（先.一三五-1io）：行中間的單獨 CR。`read_text()` 預設把單獨 CR 當換行吃掉，第一段看不到；
+# 實例：run_warrant_snapshot.ps1 的 "$repoDir\research" 被寫成 $repoDir＋CR＋esearch，Test-Path 永遠假。
+def scan_lone_cr(raw: bytes) -> list[int]:
+    """回傳含「後面不是 LF 的 CR」的行號。"""
+    out = []
+    for n, line in enumerate(raw.split(b"\n"), 1):
+        body = line[:-1] if line.endswith(b"\r") else line
+        if b"\r" in body:
+            out.append(n)
+    return out
+
+
+check("合成：路徑中間的單獨 CR 必須命中", bool(scan_lone_cr(b'x = "$repoDir' + bytes([13]) + b'esearch"\r\n')))
+check("合成：CRLF 與 LF 換行不得命中", not scan_lone_cr(b"a\r\nb\nc\r\n"))
+
+cr_hits = []
+for f in files:
+    # 存檔的官方原始回應 HTML（research/*_probe*.html）本來就含單獨 CR，不是我們寫的程式；只掃程式與文件
+    if not (f.endswith(tuple(e for e in EXTS if e != ".html")) or f == "index.html"):
+        continue
+    try:
+        raw = (ROOT / f).read_bytes()
+    except OSError:
+        continue  # 已刪檔不屬本測範圍
+    for n in scan_lone_cr(raw):
+        cr_hits.append(f"{f}:{n}")
+for h in cr_hits:
+    print("  單獨 CR 命中 " + h)
+check(f"版控文字檔無行中單獨 CR（命中 {len(cr_hits)} 行）", not cr_hits)
+
 print("失敗：" + ("、".join(fails) if fails else "無"))
 sys.exit(1 if fails else 0)

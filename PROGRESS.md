@@ -1,3 +1,12 @@
+## 2026-11-03 05:2x～05:5x DevQueue 空轉補件（維運帽）：先.一三五-1io（已做）＋補件 1ip／1iq／1ir
+
+- **等待總司令審閱：12 件**（`research/AWAITING_REVIEW.md` 本輪沒有新增或結案）。
+- 前向模擬 14／14 已滿，照零之二⑤不新增候選、不寫 PREREG、不送 AWAITING，改補維運類。
+- **1io（`- [x]`，純 bug 修復）** `scripts/run_warrant_snapshot.ps1` 第 30 行 `$repoDir\research` 在 10/28 af575c3c13e 被寫成「$repoDir＋CR 控制字元＋esearch」，「今天已有快照就零請求跳過」永遠判斷不到（目前未多送請求：20:30 觸發尚未建、Python 端自己也會判「快照已存在」）。改回反斜線，PowerShell 實測 11/02 路徑 Test-Path＝True。`selftest_no_control_chars.py` 加第三段「行中單獨 CR」（原本用 read_text 會把單獨 CR 當換行吃掉）；反向驗證：還原舊檔時命中第 30 行；存檔官方原始回應 `research/*_probe*.html` 不掃。
+- **補件**：1ip（時間閘 11/03 18:00：11/02 鎖逾時沒送的 `paper_12.json`／`warrant_backup_status.json` 有沒有隨 11/03 班次送出）、1iq（git_op_lock 爭用頻率普查）、1ir（控制字元自測涵蓋 repo 外 `C:\alpha\run-*.ps1`）。
+- **我自己出的錯（如實記錄）**：①寫條目時又踩跳脫字元陷阱（BEL×5、單獨 CR×4、tab×1），新自測當場抓到，已逐位元組換回；②寫本段時 shell 雙引號裡的反引號被當指令替換，誤多跑了一次冒煙測試（唯讀、無副作用），本段改用檔案寫入。
+- 冒煙 `node scripts/smoke_test.mjs`：179 PASS／0 FAIL、exit 0。零外部請求；沒碰 holdout；沒算報酬；沒登記試驗；沒動十三節核心檔；`data/STATUS.json` 無異動。
+
 ## 2026-11-03 03:01～03:2x DevQueue 20261103-030102（維運帽）：先.一三五-1ij／1ik／1il＋補件 1im／1in
 
 - **等待總司令審閱：12 件**（`research/AWAITING_REVIEW.md` 本輪沒有新增或結案）。

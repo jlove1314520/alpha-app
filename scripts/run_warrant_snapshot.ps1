@@ -27,7 +27,7 @@ $env:PYTHONIOENCODING = "utf-8"
 $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 Add-Content -Path $logPath -Value "`n===== warrant_snapshot launcher: $ts =====" -Encoding utf8
 $today = Get-Date -Format "yyyy-MM-dd"
-$metaPath = "$repoDiresearch\data\warrant_snapshots\$today\meta.json"
+$metaPath = "$repoDir\research\data\warrant_snapshots\$today\meta.json"
 $complete = $false
 if (Test-Path $metaPath) {
     try { $complete = -not ((Get-Content -Raw -Encoding UTF8 $metaPath | ConvertFrom-Json).partial) }
