@@ -1,3 +1,15 @@
+## 2026-11-02 23:0x DevQueue（維運帽）：空轉補件——模擬 G 首次建倉核對、策略曲線 90 日視窗問題（1hw～1ia）
+
+- **等待總司令審閱：10 件**（`research/AWAITING_REVIEW.md` 等待中 10 列；本輪新增 1 列：先.一三五-1hx，等 0 小時，24 小時無裁示〔11/03 23:15 後〕照零之二預設放行甲）。
+- 前向模擬 14／14 已滿：照零之二⑤不新增候選、不寫 PREREG、不送候選 AWAITING；不碰 holdout、不算報酬、不登記試驗。
+- **1hw（`- [x]`）** 模擬 G 11/02 首次建倉 `universe_n`＝568 拆解：active 2,152 → 非普通股 166、無收盤 41、成交值不足 20 筆 4、20 日均成交值 <3,000 萬 1,175、SUE 算不出 197、通過 569，再剔營收過舊 1＝568；當天成交值欄位缺漏 0 檔——是流動性門檻本來就擋掉，不是資料缺漏。
+- **1hx（`- [!]` 提案，送 AWAITING）** `build_strategy_curves.py` 每次只用 90 日價格從頭重算，`Px.idx()` 精確比對建倉日——建倉日滾出視窗整條線就消失、App 顯示成「XX 開始」。三榜線預估 2027-01 中旬、模擬 A 約 2027-02 開始消失〔估計〕；模擬 G 的 PREREG 天條一（期間回撤）靠這條曲線，兩年後算不出。建議甲＝曲線增量累積。
+- **1hy（`- [ ]`）** 14 支追蹤程式「判定數字能否在判定日重建」清查，下一輪做。
+- **1hz（`- [x]`）** `data/strategy_curves.json` git 歷史有 29 版（10/11 起），舊點可還原，不另建快照排程；本機另存一份 `research/data/strategy_curves_snapshots/2026-11-02.json`（gitignored）。
+- **1ia（`- [x]`，純 bug 修復）** 新自測 `scripts/selftest_strategy_curves_window.py` 9／9 PASS；抓到帳本事件缺金額時淨值全 0 → `_line()` 除以 0 不在 try 內 → 整份曲線檔這班不寫。修法：`paper_lines()` 加一道起點淨值檢查（5 行）。拿掉修法 4 項 FAIL、加回全過；真實資料實跑 exit 0、內容未變。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0，179 PASS／0 FAIL。
+- 影響檔案：`.github/scripts/build_strategy_curves.py`、`scripts/selftest_strategy_curves_window.py`（新）、`PENDING_QUEUE.md`、`research/AWAITING_REVIEW.md`、`research/FORWARD_CANDIDATES.md`、`PROGRESS.md`。
+
 ## 2026-11-02 22:4x 互動視窗：收件匣 035（Cowork 16:35）背景 claude 登入恢復確認
 
 - **等待總司令審閱：3 件**（不變）：①先.一三五-1ae-a 權證 20:30 補跑觸發 ②先.一四一-3a 美股盤中補班 ③先.一四五-1 刪除 7 筆殘留 git stash（`git stash list` 仍 7 筆，尚未執行）——都在 `C:/alpha/總司令待辦.md`。

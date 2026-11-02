@@ -368,6 +368,11 @@ def paper_lines(px: Px) -> list:
             built = (nav_line_from_log(evs, px) if vk == "nav_log" else paper_line_from_log(evs, px, vk, rf_doc=rf)) if evs else None
         except Exception as e:  # noqa: BLE001 -- 單一紙上追蹤壞掉只影響自己那條線（十二節）
             print(f"[warn] {label} 曲線失敗：{type(e).__name__}: {e}")
+        if built and built.get("nav") and not built["nav"][0] > 0:
+            # 先.一三五-1ia：帳本事件缺 values_post／nav 時起點淨值是 0，下面 _line() 歸一化會除以 0，
+            # 而 _line() 不在上面的 try 裡——原本一條壞線會讓整份 strategy_curves.json 這班不寫（十二節）
+            print(f"[warn] {label} 曲線失敗：起點淨值 {built['nav'][0]} 不是正數（帳本事件缺金額），本條改顯示未起跑")
+            built = None
         if not built or len(built["dates"]) < 1:
             why = PLANNED_WHY.get(id_, "")
             out.append(_placeholder(id_, label, "paper", "模擬中", planned, f"{planned[5:].replace('-', '/')} 開始" + (f"（{why}）" if why else ""),
