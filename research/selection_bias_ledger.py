@@ -191,6 +191,7 @@ def parse() -> list[dict]:
         prereg_ref = sorted({int(m.group(1)) for m in re.finditer(r"(?:事前|預)登記\s*(?:列\s*)?#(\d+)", blob)} - {int(c[1])})
         rows.append({
             "id": int(c[1]), "date": date, "track": track, "prereg_ref": prereg_ref,
+            "col3": c[3].strip(),  # 帳本第 3 欄原文（KNOWN_DUPLICATE_ROWS 用，軌別解析後會變「未分軌」）
             "name": name[:70], "factor": _pick_factor(blob, name[:40]),
             "verdict": verdict, "verdict_raw": blob[-90:],
             "percentile": float(pm.group(1)) if pm else None,
@@ -293,7 +294,13 @@ def main() -> int:
     # 改寫判定欄，仍計入總N，排除出有效N。見TRIALS_LEDGER.md #389
     # 後方更正說明。
     KNOWN_DUPLICATE_IDS = {335, 336, 337, 387, 388, 389}  # 見TRIALS_LEDGER.md #337/#389後方更正說明
-    duplicate_rows = [r for r in rows if r["id"] in KNOWN_DUPLICATE_IDS]
+    # 2026-11-02 先.一三五-1gw-a [預設放行]（甲）：#94 帳本兩列是同一次試驗
+    # （TW 列 53324bfc3b 先寫，hypothesis_queue 列 ef14642642 同支程式同組數字再寫一次，
+    # 見 UNTRACKED_TRIALS_AUDIT.md 4.1）。用（編號, 第 3 欄）只排除後寫那列，
+    # 不能把 94 放進 KNOWN_DUPLICATE_IDS（會兩列都排除，少算 1 變多扣 1）。
+    KNOWN_DUPLICATE_ROWS = {(94, "hypothesis_queue")}
+    duplicate_rows = [r for r in rows if r["id"] in KNOWN_DUPLICATE_IDS
+                      or (r["id"], r["col3"]) in KNOWN_DUPLICATE_ROWS]
 
     # 2026-09-23總司令裁示【修正兩個系統性錯誤＋兩件待審閱結案】修.一：
     # exit_rule_lab.py的重入邏輯bug（未持倉時enter_today=True無條件成立，
@@ -384,6 +391,10 @@ def main() -> int:
                   "`KNOWN_DUPLICATE_IDS`明確列出試驗編號才是真的把它們排除出有效N，"
                   "散文本身不會自動生效，這是動工中自我糾錯，不是總司令發現才修）：")
         for r in sorted(duplicate_rows, key=lambda x: x["id"]):
+            if r["id"] == 94:
+                L.append(f"- #{r['id']}（{r['date']}，{r['col3']} 列）{r['name'][:60]}——與"
+                         f"同編號 TW 列（piotroski_fscore_gate_v1）重複，見UNTRACKED_TRIALS_AUDIT.md 4.1")
+                continue
             L.append(f"- #{r['id']}（{r['date']}，{r['track']}）{r['name'][:60]}——與"
                      f"#332/#333/#334重複，見TRIALS_LEDGER.md對應位置更正說明")
         L.append("")

@@ -5838,9 +5838,13 @@ async function runSmokeTest(baseUrl, headless = true) {
     const ids = await page.evaluate(() => [...document.querySelectorAll("#strategy-monitor-list [data-sid]")].map(x => x.getAttribute("data-sid")));
     for (const id of ["paper_1", "paper_3", "paper_4", "paper_1b", "paper_2", "paper_5", "paper_7"]) if (!ids.includes(id)) pgErrs.push(`監控台缺 ${id}`);
     await page.click('#strategy-monitor-list [data-sid="paper_7"]');
-    await page.waitForFunction(() => /不倒填|還沒有持股|讀不到/.test((document.querySelector('#strategy-monitor-list [data-sid="paper_7"] [data-holdings-src]') || {}).textContent || ""), null, { timeout: 8000 }).catch(() => {});
+    await page.waitForFunction(() => /不倒填|還沒有持股|讀不到|共 \d+ 檔/.test((document.querySelector('#strategy-monitor-list [data-sid="paper_7"] [data-holdings-src]') || {}).textContent || ""), null, { timeout: 8000 }).catch(() => {});
     const t1 = await page.evaluate(() => (document.querySelector('#strategy-monitor-list [data-sid="paper_7"] [data-holdings-src]') || {}).textContent || "");
-    if (!/持股明細/.test(t1) || !/不倒填|還沒有持股/.test(t1)) pgErrs.push(`未開始時持股區文字不對：${t1.slice(0, 60)}`);
+    // 2026-11-02：模擬 G 已照設計在 11/02 第一次再平衡，真實檔變成「已開始」——①改依真實檔狀態檢查（未開始→不倒填原因；已開始→列出持股＋共 N 檔）。
+    const realG = await page.evaluate(() => fetch("data/paper_7.json", { cache: "no-store" }).then(r => r.json()).catch(() => null));
+    if (realG && realG.started && Array.isArray(realG.holdings) && realG.holdings.length) {
+      if (!/持股明細/.test(t1) || !t1.includes(`共 ${realG.holdings.length} 檔`)) pgErrs.push(`已開始（真實檔）時持股區文字不對：${t1.slice(0, 60)}`);
+    } else if (!/持股明細/.test(t1) || !/不倒填|還沒有持股/.test(t1)) pgErrs.push(`未開始時持股區文字不對：${t1.slice(0, 60)}`);
     const fake = { started: true, last_rebalance: "2027-01-04", next_rebalance_month: "2027-04", last_entered: ["1101", "2330"], last_exited: [],
       holdings: [{ code: "2330", name: "台積電", weight_pct: 50, rank_at_rebalance: 1, rev_month: "2026-11", since: "2027-01-04" },
                  { code: "1101", name: "台泥", weight_pct: 50, rank_at_rebalance: 2, rev_month: "2026-11", since: "2027-01-04" }] };

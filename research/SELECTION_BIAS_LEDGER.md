@@ -1,6 +1,6 @@
 # SELECTION_BIAS_LEDGER.md — 跨輪次選擇偏誤總帳
 
-**自動產生**：`research/selection_bias_ledger.py`（2026-11-01 12:22）。
+**自動產生**：`research/selection_bias_ledger.py`（2026-11-02 18:31）。
 每新增候選就重跑一次。做法比照 Cybex `_r436_selection_bias_ledger.py`，
 **只抄方法不抄參數**（Cybex 的閾值來自加密市場，對台股零效力）。
 
@@ -12,7 +12,7 @@
 | 口徑 | N | Bonferroni 門檻（α=0.05 單邊） |
 |---|---:|---:|
 | **全體（總N，含IRREPRODUCIBLE／已知重複登記／已知因bug失真）** | 457 | 99.9891 百分位 |
-| **有效N（排除IRREPRODUCIBLE1筆＋已知重複登記6筆＋已知因bug失真8筆）** | 442 | 99.9887 百分位 |
+| **有效N（排除IRREPRODUCIBLE1筆＋已知重複登記7筆＋已知因bug失真8筆）** | 441 | 99.9887 百分位 |
 | 分軌 FUT | 52 | 99.9038 百分位 |
 | 分軌 TW | 235 | 99.9787 百分位 |
 | 分軌 US | 77 | 99.9351 百分位 |
@@ -22,6 +22,7 @@
 - #319（2026-09-20，TW）portfolio_multifactor_v2 A/B_ic_weighted/quarterly 2026-08-2
 
 **已知重複登記列表**（2026-09-23實測發現：自走軌道與互動視窗CC近乎同時各自重判同一個PENDING_QUEUE條目，自走軌道未先查既有帳本就重跑，跟CC的#332/#333/#334登記了完全相同的分析。自走軌道事後在notes欄加了更正說明但那只是散文，`parse()`不會讀notes語意排除任何列——這裡改用`KNOWN_DUPLICATE_IDS`明確列出試驗編號才是真的把它們排除出有效N，散文本身不會自動生效，這是動工中自我糾錯，不是總司令發現才修）：
+- #94（2026-09-03，hypothesis_queue 列）`#23 Piotroski F-score當價值榜排雷閘門`（核心比較，接續#93地基）——與同編號 TW 列（piotroski_fscore_gate_v1）重複，見UNTRACKED_TRIALS_AUDIT.md 4.1
 - #335（2026-09-23，TW）event_driven_sue_earnings_e1_rejudge_b_p90——與#332/#333/#334重複，見TRIALS_LEDGER.md對應位置更正說明
 - #336（2026-09-23，TW）event_driven_sue_earnings_e1_rejudge_c_right_tail——與#332/#333/#334重複，見TRIALS_LEDGER.md對應位置更正說明
 - #337（2026-09-23，TW）event_driven_sue_earnings_e1_rejudge_volatility_matched_cont——與#332/#333/#334重複，見TRIALS_LEDGER.md對應位置更正說明
