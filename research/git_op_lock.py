@@ -21,10 +21,10 @@ commit->pull->push 這段收尾，直接消除「兩個 autostash 同時發生�
 
 用法（PowerShell 呼叫端，見三支 .ps1 的 git 收尾段落）：
     python research/git_op_lock.py acquire
-      # exit 0 + "LOCK_ACQUIRED" if free
-      # exit 1 + "LOCK_HELD by <pid> since <ts>" if held by someone else
-    python research/git_op_lock.py release
-      # always exit 0（釋放一把已經是空的鎖不是錯誤）
+      # exit 0 + "LOCK_ACQUIRED token=<16位hex>" if free（記下 token，release 時要帶）
+      # exit 1 + "LOCK_HELD by <pid> since <ts>" if held by someone else（這時不要 release！）
+    python research/git_op_lock.py release --token <token>
+      # always exit 0（釋放一把已經是空的鎖不是錯誤；token 不符印 LOCK_NOT_OWNER 不刪）
 
 鎖檔（`.git_op.lock`，跟 `.marathon.lock` 同一層、同樣 gitignored，
 是暫態本機狀態不是專案歷史）格式：`pid|unix_ts|token|ppid=…;argv0=…`（舊格式 `pid|unix_ts`、`pid|unix_ts|token` 仍可讀）。
@@ -40,7 +40,7 @@ commit->pull->push 這段收尾，直接消除「兩個 autostash 同時發生�
     python research/git_op_lock.py release --token <token>
       # token 相符才刪鎖；不符（鎖已被別人持有）印 "LOCK_NOT_OWNER" 不刪，exit 0
     python research/git_op_lock.py release
-      # 舊用法（相容期）：照舊刪鎖，但記一行到 research/git_op_lock.log，方便找出還沒改的呼叫端
+      # ⚠️ 舊用法（相容期、會被記錄，勿手打）：照舊刪鎖——可能刪掉別人正持有的鎖，但記一行到 research/git_op_lock.log，方便找出還沒改的呼叫端
 """
 from __future__ import annotations
 

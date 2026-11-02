@@ -20,7 +20,7 @@
 - N=0時「等待中」表格留表頭但清空列，不得整份刪除本檔案。
 - 2026-10-29（收件匣 031）：凡「請總司令執行一次」（要總司令本人在電腦或手機上動手）的項目，除了列 AWAITING，也同步加進 `C:\alpha\總司令待辦.md`（白話、每項一行做法、寫不做的影響）；能用腳本做的接進 `C:\alpha\run-owner-todo.ps1`（每支先問 Y/N、失敗不中斷）。總司令做完後由 CC 查證（看排程／資料檔／log，不看金鑰內容）再打勾移到「已完成」，同時 AWAITING 結案。
 
-## 等待中（目前：8件）
+## 等待中（目前：9件）
 
 | 項目 | 完成時間 | 等待審閱內容 | 等待時長 |
 |---|---|---|---|
@@ -32,6 +32,7 @@
 | 先.一三五-1hn DevQueue 認得「到期時間閘」並為它開一輪（**甲（建議）**／乙／丙） | 2026-11-02 17:1x | 先.一三五-1hm 量到：到期的 `- [!]` 時間閘最久等了 16 小時沒人做（runner 只認 `- [ ]`，只有候選補件輪會看 `- [!]`，補件提示詞又沒叫人先處理到期閘；11/01 23:01～11/02 15:31 補件輪還全被 claude 登入過期擋掉）。甲＝`_idle_fallback_prompt()` 最前面加「到期時間閘」提示詞，取件規則不動。24 小時無裁示照零之二預設放行甲。 | 0 小時 |
 | 先.一三五-1ho Shioaji 盤後輪次覆蓋 stdout、`[build] git sha=` 證據每天 13:3x 後消失（**甲（建議）**／乙） | 2026-11-02 17:1x | 啟動腳本盤後每 2 分鐘覆蓋 `research/shioaji_stream_stdout.log`，七之二重啟版本核對事後查不到（1gu 今天因此驗不到，已改時間閘 11/03 盤中）。甲＝`shioaji_quotes.py` 印 `[build]` 時另 append 到 `research/shioaji_build_history.log`（動常駐服務檔，要照七之二四步重啟驗證，只能盤前／盤中做）。24 小時無裁示照零之二預設放行甲。 | 0 小時 |
 | 先.一三五-1hq-a 本機看守「`.git/rebase-merge`／`rebase-apply` 殘留」（**甲（建議）**／乙／丙） | 2026-11-02 17:4x | 查因（1hq）：11/02 10:45 本機報價備援 `quotes_local_fallback.py` → `local_git_commit.commit_paths()` 的 `pull --rebase --autostash` 失敗，目錄只剩 `autostash`；這形狀 `git rebase --abort` 會 exit 1 不清目錄，舊版不看結果就回報「已 abort」，殘留 6.5 小時擋住所有 pull（1hp 人工清）。肇事點已直接修（純 bug 修復）。另提看守：每 5 分鐘本機 `check_external_connectivity.py` 加一項「rebase 目錄存在 >30 分鐘且 git_op_lock 沒有持鎖者 → 併入 local_task_health 亮燈」，只告警不自動刪、自身失敗只印警告（十二節）。甲（建議）＝掛 `check_external_connectivity.py`（本機、已有亮燈與 App 橫幅）；乙＝掛 `git_op_lock.py acquire`（只印在呼叫端 log，沒人看）；丙＝掛雲端 `check_local_schedule_heartbeat.py`（雲端看不到本機 `.git/`，做不到）。照零之二，24 小時內無裁示 DevQueue 照甲實作＋自測。 | 剛送出 |
+| 先.一三五-1hv-a 移除 `git_op_lock.py release` 無 token 相容路徑（**甲（建議）**／乙／丙） | 2026-11-02 21:4x | 1hv 已把 docstring 改成教 `--token`；全專案只剩三支 wrapper fallback 與手打會走無 token release（11/02 18:03 有一筆相對路徑手打）。甲＝`git_op_lock.log` 連續 14 天無新 legacy 記錄（最早 11/17）才改成無 token 不刪鎖；乙＝現在改；丙＝永久保留。24 小時無裁示（11/03 21:45 後）照甲預設放行。 | 0 小時 |
 
 ## 等前置條件（不需總司令動作，不計入等待中）
 
