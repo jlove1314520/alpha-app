@@ -1,3 +1,15 @@
+## 2026-11-03 07:3x～07:5x DevQueue 空轉補件（維運帽）：到期時間閘 1dw／1ee／1gj-b 結案＋補件 1is（已做）／1it／1iu（已做）
+
+- **等待總司令審閱：12 件**（`research/AWAITING_REVIEW.md` 本輪沒有新增或結案）。
+- 前向模擬 14／14 已滿，照零之二⑤不新增候選、不寫 PREREG、不送 AWAITING，改補維運類；`research/FORWARD_CANDIDATES.md` 補一行本輪紀錄。
+- **1dw（`- [x]`）** `stock_detail.json` `roe_ttm_pct` 四季不連續 38→**0**（非 null 862→824）。
+- **1ee（`- [x]`）** `quotes_us.json` 9 檔 sparkline 皆 20 點、`sparkline_stale_tickers` 欄位存在；冒煙 165 不再需要測試注入。
+- **1gj-b（`- [x]`，[自行裁量] 結案）** 雲端 audit 11/02 班（23:08Z）ENV_MISSING 41→**3**、broken 0。多出的 1 支是 `run_momentum_future_board_pit_backtest` 缺 statsmodels——原本被 yfinance 遮住的第二層缺口，不是新壞掉；照 8b 定案不改 workflow。
+- **1is（`- [x]`，監控盲點修正）** `scripts/audit_preflight.py` 把 `env_missing` 清單一併寫進 `data/audit_report.json`（原本只有件數，雲端 log 我們讀不到 HTTP 403）；`selftest_audit_preflight.py` 加 1 項，25 過 0 失敗。
+- **1iu（`- [x]`）** 乾淨 venv 裝齊 scikit-learn＋statsmodels 重跑 242 支：ENV_MISSING **0**，沒有第三層。本機 adr_premium_gate 冷啟動 TIMEOUT 非腳本問題。
+- **1it（`- [!]` 時間閘 11/04 09:00）** 1is 雲端生效驗收。
+- 冒煙 `node scripts/smoke_test.mjs`：179 PASS／0 FAIL、exit 0。外部請求只有 gh API（自家 repo）與 pip 安裝到暫存 venv（用完已刪）；沒碰 holdout；沒算報酬；沒登記試驗；沒動十三節核心檔；`data/STATUS.json` 無異動。
+
 ## 2026-11-03 06:01～06:3x DevQueue 20261103-060102（維運帽）：先.一三五-1iq／1ir／1gd 完成，1gk 順延，1ip 時間閘未到
 
 - **等待總司令審閱：12 件**（`research/AWAITING_REVIEW.md` 本輪沒有新增或結案）。

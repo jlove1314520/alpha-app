@@ -71,7 +71,8 @@ def setup(root: Path, net_guard=NET_GUARD, sync=True, repro="ok", report=None) -
         broken = [] if repro == "ok" else ["research/x.py"]
         rp.write_text("import json, pathlib\n"
                       f"pathlib.Path(__file__).with_name('reproducibility_check_result.json').write_text("
-                      f"json.dumps({{'broken': {broken!r}, 'n_checked': 3}}))\n", encoding="utf-8")
+                      f"json.dumps({{'broken': {broken!r}, 'n_checked': 3, "
+                      f"'env_missing': [{{'module': 'm', 'missing_package': 'sklearn'}}]}}))\n", encoding="utf-8")
     if report is not None:
         B.OUT.write_text(report, encoding="utf-8")
     elif B.OUT.exists():
@@ -122,6 +123,9 @@ with tempfile.TemporaryDirectory() as td:
     check("queue_depth_sync ok", d.get("queue_depth_sync", {}).get("ok") is True)
     check("reproducibility_check ok、n_checked=3",
           d.get("reproducibility_check", {}).get("ok") is True and d["reproducibility_check"]["detail"].get("n_checked") == 3)
+    check("reproducibility_check 帶出 env_missing 清單（先.一三五-1is）",
+          d["reproducibility_check"]["detail"].get("env_missing") == [{"module": "m", "missing_package": "sklearn"}],
+          d["reproducibility_check"]["detail"].get("env_missing"))
 
     print("情境二：全部 import 都過")
     setup(r)

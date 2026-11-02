@@ -168,8 +168,11 @@ def run_reproducibility_check() -> dict:
                                             "reproducibility_check_result.json"}
         data = json.loads(result_path.read_text(encoding="utf-8"))
         broken = data.get("broken", [])
+        # 2026-11-03 先.一三五-1is：一併帶出 env_missing 清單（模組＋缺的套件）。原本只留件數，
+        # 雲端 log 我們讀不到（HTTP 403），ENV_MISSING 從 2 變 3 時無從得知是哪一支。
         return {"ok": len(broken) == 0, "n_checked": data.get("n_checked", 0),
-                "by_status_count": data.get("by_status_count", {}), "broken": broken}
+                "by_status_count": data.get("by_status_count", {}), "broken": broken,
+                "env_missing": data.get("env_missing", [])}
     except subprocess.TimeoutExpired:
         return {"ok": False, "error": "reproducibility_check.py超過5分鐘未完成"}
     except Exception as e:  # noqa: BLE001
