@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated_at": "2026-10-31T09:08:00.930565+08:00",
+    "generated_at": "2026-11-02T18:11:39.115646+08:00",
     "last_fetch_count": 11,
-    "reductions_generated_at": "2026-10-31T09:08:08.059503+08:00"
+    "reductions_generated_at": "2026-11-02T18:11:46.645949+08:00"
   },
   "events": {
     "01010T": [
@@ -1456,6 +1456,16 @@
         "factor_applied": 0.9961439588688946,
         "factor_applied_before_official": 0.9962724935732648,
         "official_source": "TWSE TWT49U"
+      },
+      {
+        "ex_date": "2026-11-04",
+        "cash": 0.058,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.0,
+        "rights_price": 0.0,
+        "type": "息",
+        "first_seen": "2026-11-02",
+        "applied": false
       }
     ],
     "00953B": [
@@ -1482,6 +1492,16 @@
         "factor_applied": 0.9926160337552742,
         "factor_applied_before_official": 0.9929324894514768,
         "official_source": "TWSE TWT49U"
+      },
+      {
+        "ex_date": "2026-11-04",
+        "cash": 0.067,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.0,
+        "rights_price": 0.0,
+        "type": "息",
+        "first_seen": "2026-11-02",
+        "applied": false
       }
     ],
     "00985B": [
@@ -1508,6 +1528,16 @@
         "factor_applied": 0.9940298507462686,
         "factor_applied_before_official": 0.9947263681592039,
         "official_source": "TWSE TWT49U"
+      },
+      {
+        "ex_date": "2026-11-04",
+        "cash": 0.053,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.0,
+        "rights_price": 0.0,
+        "type": "息",
+        "first_seen": "2026-11-02",
+        "applied": false
       }
     ],
     "6924": [
@@ -2947,7 +2977,10 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-10-15",
-        "applied": false
+        "applied": true,
+        "official_factor": 0.8956158663883089,
+        "official_source": "TWSE TWT49U",
+        "factor_applied": 0.8956158663883089
       }
     ],
     "1784": [
