@@ -15,6 +15,7 @@
 - **冒煙**：主工作樹跑 2 次都只 FAIL 132／142（就是上面那份別人未提交、不同班的 `data/events.json`，不是本次改動，App 也不讀 `local_git_commit.py`）；
   不放寬測試，改在乾淨 worktree（HEAD＋本次 4 檔）用 8793 埠跑：**179 項全部通過**（`=== 冒煙測試結果：全部通過 ===`）。worktree 與臨時伺服器已清掉。
   那份不一致的 events 檔留給下一輪新聞補班重寫，本輪不碰別人的資料檔。
+- **18:02 補記**：18:02 補記（同輪）：修補當場實戰觸發一次——本輪自己推送前 `python scripts/local_git_commit.py pull`，遠端沒有新 commit，pull 仍落到「目錄只剩 autostash」，新程式自動存 stash（7bb34f0bbc，之後照 先.一三一-3 確認無獨有內容自動刪）並把目錄移到 `.git/rebase-merge.stale-20261102-180159`，接著 push 成功。線索：失敗點應在最後的 autostash 套回階段（工作樹當時有約 1,810 個別人未提交的機器檔），不是 rebase 本身——**未證實**，實作 1hq-a 時順便讓 `pull_or_abort()` 也記下 pull 的 stderr 才能確認。
 - `data/STATUS.json` 本輪無異動（沒有資料源或面板異動）。零外部請求；沒碰 holdout；沒登記試驗；沒動十三節核心檔；沒改排程；沒動常駐服務檔。
 
 ## 2026-11-02 17:0x DevQueue（維運帽）：到期時間閘處理＋空轉補件 1hm／1hn／1ho
