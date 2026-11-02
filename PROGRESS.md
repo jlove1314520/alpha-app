@@ -1,8 +1,19 @@
+## 2026-11-03 03:01～03:2x DevQueue 20261103-030102（維運帽）：先.一三五-1ij／1ik／1il＋補件 1im／1in
+
+- **等待總司令審閱：12 件**（`research/AWAITING_REVIEW.md` 本輪沒有新增或結案）。
+- **1ij（`- [!]` 時間閘）** 殘留 stash 01f8b08d93 獨有行逐行核對：CLAUDE.md 2 行、PENDING_QUEUE.md 14 行，**16 行全部找得到改寫它的 commit**（`git log -S`；兩行是同一行尾端被追加文字，改用追加文字查到 c3c5aa50495、3598d7a8ad8），沒有遺失內容；兩行 stash 自己未提交的內容（前向上限 13、先.一三六-A `[x]`）已由後續 commit 進 main。證據存本機 `research/data/autostash_residual_20261101_01f8b08d93_check.json`（research/data 在 gitignore，同快照）。03:01 時 `git stash list` 仍 7 筆（總司令待辦第 5 項還沒跑），照時間閘**不改快照**；解除條件＝stash 只剩那 1 筆 → 快照 CLAUDE.md 1→2、PENDING_QUEUE.md 11→14。提案 `--dry` 不拿鎖另開 1in。commit edc79495b97。
+- **1ik（`- [x]`）** 現金流量表摘要帶入 Q3：`build_cash_flow_json.py` 1,798 檔（Q3 2026-09-30 **84 檔**、Q2 1,705）＋`build_by_code.py` 87 個小檔＋_meta.json；逐檔比對 HEAD 只有 cash_flow 段變動；schema guard 0 不通過；冒煙 358 PASS／0 FAIL（#116／#131／#12 PASS）。[自行裁量]：data/ 另有 5 個排程輸出未提交，字面上不符前提，但都不是 build_by_code 的輸入，走主路徑、只 add cash_flow＋by_code。commit ab614eaa6b2。
+- **1il（`- [x]`）** 「缺上年累計無法算 TTM」6 檔＝1701、5383、6404、6457、6514、8420：快取最新季都停在 2024 年內、全不在現行名冊＝已下市／合併，記結論、不改程式。
+- **補件（[自走補入]，DevQueue 可執行 0＜6）**：1il（已做）、1im（時間閘 11/15 起，Q3 截止後補抓現金流快取並重產）、1in（互動視窗提案：`--dry` 不拿 git 鎖，甲建議）。來源只剩本輪發現，其他補件來源本輪沒有翻，照實記錄。
+- **順手修（純 bug）**：`PENDING_QUEUE.md` 7 處、`PROGRESS.md` 2 處 BEL 控制字元（`C:\alpha` 被當成 `\a`）換回反斜線字母，`selftest_no_control_chars.py` 由 FAIL 8 行轉「失敗：無」。
+- **我自己出的錯（如實記錄）**：跟上一輪同一個錯——工作中誤下一次 `git stash -q`，立刻 `stash pop`；期間 `data/rate_limit_state.json` 被排程重寫擋住 pop，[自行裁量] 以較新那版為主、FinMind `calls_by_minute` 兩版同分鐘次數相加（多算偏保守），stash 回到 7 筆、無新增殘留。此檔仍未提交（排程輸出）。
+- 零外部請求；沒碰 holdout；沒算報酬；沒登記試驗；沒動十三節核心檔；沒動常駐服務檔；`data/STATUS.json` 無異動。阻塞項（71 筆 `- [!]`）本輪只檢查 1ij 自己的時間閘，沒有逐筆掃。
+
 ## 2026-11-03 02:0x～02:4x DevQueue 空轉補件（維運帽）：先.一三五-1ig／1ih／1ii（＋1ij 待做）
 
 - **等待總司令審閱：12 件**（`research/AWAITING_REVIEW.md` 本輪沒有新增或結案，沿用上一輪 12）。
 - 前向模擬 14／14 已滿（零之二⑤）：**不新增候選、不寫 PREREG、不送 AWAITING**，改補維運類。`research/FORWARD_CANDIDATES.md` 記一行。
-- **1ig（`- [x]`）總司令待辦第 5 項「刪殘留 stash」先預跑**：`--dry` 超過 2 分鐘無輸出，我在逾時中止它，留下的 git 鎖（02:02:35 起約 2.5 分鐘）已用它自己的 token 放掉；stash 仍 7 筆、一筆沒刪。不拿鎖的唯讀量時：共 404 秒，**6 筆可刪、01f8b08d93 會被跳過**（CLAUDE.md 獨有行 1→2、PENDING_QUEUE 11→14，抽看都是後來改寫過的舊版）。修：每筆印進度（flush）＋開頭提示約 7 分鐘、會占 git 鎖；刪除邏輯未改。`C:lpha\總司令待辦.md` 第 5 項改寫時間與預期結果「刪 6、跳過 1」。
+- **1ig（`- [x]`）總司令待辦第 5 項「刪殘留 stash」先預跑**：`--dry` 超過 2 分鐘無輸出，我在逾時中止它，留下的 git 鎖（02:02:35 起約 2.5 分鐘）已用它自己的 token 放掉；stash 仍 7 筆、一筆沒刪。不拿鎖的唯讀量時：共 404 秒，**6 筆可刪、01f8b08d93 會被跳過**（CLAUDE.md 獨有行 1→2、PENDING_QUEUE 11→14，抽看都是後來改寫過的舊版）。修：每筆印進度（flush）＋開頭提示約 7 分鐘、會占 git 鎖；刪除邏輯未改。`C:\alpha\總司令待辦.md` 第 5 項改寫時間與預期結果「刪 6、跳過 1」。
 - **1ih（`- [x]`，純 bug 修復）** `scripts/build_cash_flow_json.py`：快取不在 → 原本拿 0 檔空表蓋掉 `data/cash_flow.json`，改成回 1 不覆寫；只有資本支出的股票原本 `max()` 空序列讓整支中斷，改成只略過那檔。新 `scripts/selftest_build_cash_flow_json.py` **8／8 PASS**。
 - **1ii（`- [x]`）** 「快取檔讀取失敗 126 檔」全是 FinMind 回空的 0 欄位 parquet，126 個代號都不在現行上市櫃名冊（已下市／合併舊代號）→ 原因分類改「快取為空（FinMind 無資料）」。研究快取已有 83 檔 Q3 現金流，照檔頭既定手動程序試重產 `data/cash_flow.json`（1,797 → 1,798 檔、含 Q3 83 檔，schema ✓），但冒煙 #116／#131／#12 FAIL：個股小檔 `_meta` 還是舊版，App 判不一致。**已還原成 HEAD、本輪不提交**；重產改開 **1ik（`- [ ]`）** 跟 by_code 一起做。
 - **1ij（`- [ ]` 新增）** 逐行核對 01f8b08d93 多出來的獨有行，全有改寫來源才更新快照；等總司令跑完第 5 項再改。
@@ -60,7 +71,7 @@
 - **1hu（`- [x]`）**：`research/git_op_lock.py` 的 `acquire()` 被擋（LOCK_HELD）時 append 一行到 `research/git_op_lock.log`：「時間 LOCK_HELD holder_pid=… age=…s holder=ppid=…;argv0=… caller_ppid=… argv0=…」；整段 try/except 吞掉（十二節）。新建的鎖檔多第 4 欄 `ppid=…;argv0=…`，舊 2／3 欄照讀（holder=unknown）。鎖語意（5 分鐘陳舊、token release）不變；全 repo 只有這支自己解析鎖檔欄位。
   - 證據：新自測 `scripts/selftest_git_op_lock_holder_log.py` **11/11 PASS、exit 0**（①空鎖不記、第 4 欄有值 ②被擋記一行、CLI 子行程 exit 1 ③log 目錄不存在仍回 LOCK_HELD 不丟例外 ④舊 2／3 欄照讀、token release 照常＋陳舊鎖回收不記）；既有 `selftest_git_op_lock.py` 6/6、`selftest_dev_queue_cycle_exits.py` 12/12、`selftest_local_heartbeats.py` 12/12。commit 71a4ccd665c。
   - [自行裁量] argv0 對 CLI 呼叫永遠是 git_op_lock.py 本身，真正能辨識呼叫者的是 ppid；照交辦格式仍保留 argv0。另補 1hu-b（11/09 讀 log 驗收真實爭用紀錄，時間閘 `- [!]`）。
-- **1hv（`- [x]`）**：docstring「用法」段改成 acquire 記 token、LOCK_HELD 時不要 release、`release --token`；相容段標「⚠️ 舊用法（相容期、會被記錄，勿手打）」。grep `C:lpha` 全部 .md／.ps1／.bat／.py：教無 token release 的說明只有這兩處；三支 run-*.ps1 的 fallback 呼叫照交辦不動。11/02 18:03:58 那筆 `ppid=242440 argv0=research/git_op_lock.py`（相對路徑＝手打或互動視窗）行程已結束、查不出是誰——**提醒互動視窗／Cowork：提交時要帶 `release --token`，acquire 失敗時不要 release**。移除相容路徑寫成 1hv-a 提案（甲＝log 連續 14 天無新 legacy 記錄、最早 11/17 才改）。
+- **1hv（`- [x]`）**：docstring「用法」段改成 acquire 記 token、LOCK_HELD 時不要 release、`release --token`；相容段標「⚠️ 舊用法（相容期、會被記錄，勿手打）」。grep `C:\alpha` 全部 .md／.ps1／.bat／.py：教無 token release 的說明只有這兩處；三支 run-*.ps1 的 fallback 呼叫照交辦不動。11/02 18:03:58 那筆 `ppid=242440 argv0=research/git_op_lock.py`（相對路徑＝手打或互動視窗）行程已結束、查不出是誰——**提醒互動視窗／Cowork：提交時要帶 `release --token`，acquire 失敗時不要 release**。移除相容路徑寫成 1hv-a 提案（甲＝log 連續 14 天無新 legacy 記錄、最早 11/17 才改）。
 - **冒煙**：兩項各跑一次，都是 **179 PASS／0 FAIL、exit 0**。
 - **佇列**：DevQueue 可執行 `- [ ]` 剩 0（其餘 21 條 `- [ ]` 都是互動視窗／需總司令）。到期時間閘：1gj-b 要 11/03 00:00 後、1af-a 12/15、先.一二三-4 要等 00878／00940 公告（11/02 尚無，沒查網路）。收工補件：BACKLOG／UX 提案沒有新的可做項（🔄 標記都是已核對過的舊文字），只補 1hu-b 一條，其餘**來源已用盡**；前向模擬 14／14 已滿，不補候選。
 - 零外部請求；沒碰 holdout；沒算報酬；沒登記試驗；沒動十三節核心檔；沒改排程；沒動常駐服務檔；`data/STATUS.json` 無異動（沒有資料源或面板異動）。
