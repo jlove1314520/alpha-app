@@ -191,5 +191,27 @@ with tempfile.TemporaryDirectory() as td:
     check("帳本壞行不拋例外、不拖垮其他線", err is None and code == 0
           and line(json.loads(out.read_text(encoding="utf-8")), "board_value")["started"] is True, (code, err))
 
+print("[8] 月底記帳日不重複計算當天漲跌（先.一三五-1jh：模擬 C 2026-10-30 曲線 −6.67%＝帳本 −3.48% 再乘一次）")
+_px8 = B.Px({"prices": {"0050": [{"date": "2026-10-28", "close": 108.65, "adj_close": 108.65},
+                                 {"date": "2026-10-29", "close": 107.25, "adj_close": 107.25},
+                                 {"date": "2026-10-30", "close": 104.95, "adj_close": 104.95},
+                                 {"date": "2026-11-02", "close": 104.1, "adj_close": 104.1}],
+                        "00631L": [{"date": "2026-10-28", "close": 36.88, "adj_close": 36.88},
+                                   {"date": "2026-10-29", "close": 35.89, "adj_close": 35.89},
+                                   {"date": "2026-10-30", "close": 34.16, "adj_close": 34.16},
+                                   {"date": "2026-11-02", "close": 33.83, "adj_close": 33.83}]}})
+_ev8 = [{"date": "2026-10-28", "event": "inception", "rebalance_cost": 1.0, "values_post": {"0050": 500.0, "00631L": 500.0}},
+        # 帳本 10/30 月底：已用 10/30 收盤估值＋再平衡（values_post 是 10/30 收盤後的價值）
+        {"date": "2026-10-30", "event": "month_end", "values_post": {"0050": 470.0, "00631L": 470.0}}]
+_l8 = B.paper_line_from_log(_ev8, _px8)
+_n8 = dict(zip(_l8["dates"], _l8["nav"]))
+check("月底記帳日淨值＝帳本 values_post 合計（不再乘當天漲跌）", abs(_n8.get("2026-10-30", 0) - 940.0) < 1e-6, _n8)
+check("隔天照常用價格推進", abs(_n8.get("2026-11-02", 0) - (470 * 104.1 / 104.95 + 470 * 33.83 / 34.16)) < 1e-6, _n8)
+check("記帳日仍記成分最大漲跌幅（冒煙 #88 用）", _l8["comp"][2] > 4.8, _l8["comp"])
+# 帳本事件落在非交易日（例：月底是週六）→ 下一個交易日要照常推進（事件價值是前一交易日收盤估的）
+_ev8b = [_ev8[0], {"date": "2026-10-31", "event": "month_end", "values_post": {"0050": 470.0, "00631L": 470.0}}]
+_n8b = dict(zip(*[B.paper_line_from_log(_ev8b, _px8)[k] for k in ("dates", "nav")]))
+check("事件日非交易日 → 下一交易日照常推進", abs(_n8b.get("2026-11-02", 0) - (470 * 104.1 / 104.95 + 470 * 33.83 / 34.16)) < 1e-6, _n8b)
+
 print(f"\n合計 {ok} 過 / {fail} 失敗")
 sys.exit(1 if fail else 0)

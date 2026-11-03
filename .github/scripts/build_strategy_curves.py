@@ -277,8 +277,11 @@ def paper_line_from_log(events: list, px: Px, value_key: str = "values_post", bo
     pending_fee = False
     for j in range(i_start, len(px.cal)):
         d = px.cal[j]
+        reset_on_d = False  # 先.一三五-1jh：當天有帳本事件時，事件價值已是當天收盤後的估值
         while k < len(ev) and ev[k]["date"] <= d:
             e = ev[k]
+            if e["date"] == d:
+                reset_on_d = True
             if value_key == "legacy_7030":
                 hold = {BENCH: e["stock_value_post"], "BOND": e["bond_value_post"]}
             else:
@@ -296,12 +299,15 @@ def paper_line_from_log(events: list, px: Px, value_key: str = "values_post", bo
             mx = 0.0
             for s in list(hold):
                 if s in ("BOND", "CASH"):  # 先.八十-12：現金也按一個月定存利率逐日計息（與紙.一債券腿同一資料源）
+                    if reset_on_d:  # 先.一三五-1jh：帳本當天的價值已含利息，不再計一次
+                        continue
                     days = (date.fromisoformat(d) - date.fromisoformat(dp)).days
                     hold[s] *= (1 + _rf_daily(rf_doc, d)) ** days
                 elif s != "CASH":
                     p0, p1 = px.close_le(s, dp), px.close_le(s, d)
                     if p0 and p1:
-                        hold[s] *= p1 / p0
+                        if not reset_on_d:  # 先.一三五-1jh：帳本當天的價值已用當天收盤估過，不再乘一次當天漲跌
+                            hold[s] *= p1 / p0
                         mx = max(mx, abs(p1 / p0 - 1))
             comp.append(round(mx * 100, 4))
         else:
