@@ -4866,7 +4866,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("145. 模擬 F 賣波動：自測全過、分頁與「只是研究／不提請真錢」標示、研究成績單含權證不做說明（先.九十一-1／-5-1）", pfErrs.length === 0, pfErrs.join("; ") || pfInfo);
 
   // 146.【先.九十四-5e】減少動態效果：reducedMotion=reduce 時 .rise／.flash-up／.screen.active／骨架／長條的動畫時間與過場時間為 0，
-  // 閃色 class 照常被 animationend 移除；對照組（一般模式）.rise 動畫時間必須 >0，避免測試恆真。
+  // 減少動態時 App 不加閃色、一般模式閃色會被 animationend 移除（先.一三五-1kd-b）；對照組（一般模式）.rise 動畫時間必須 >0，避免測試恆真。
   const rmErrs = [];
   let rmInfo = "";
   try {
@@ -4894,18 +4894,42 @@ async function runSmokeTest(baseUrl, headless = true) {
       for (const k of ["rise", "flash-up", "skel-line", "bar-fill"]) if (!r[k] || r[k].a !== "0s") rmErrs.push(`.${k} 動畫時間應為 0s：${JSON.stringify(r[k])}`);
       if (!r.switch || r.switch.t !== "0s") rmErrs.push(`.switch 過場時間應為 0s：${JSON.stringify(r.switch)}`);
       if (!r.screen || r.screen.a !== "0s") rmErrs.push(`.screen.active 淡入應為 0s：${JSON.stringify(r.screen)}`);
-      const flashGone = await p2.evaluate(async () => {
-        const el = document.createElement("span"); document.body.appendChild(el);
-        el.classList.add("flash-up");
-        el.addEventListener("animationend", () => el.classList.remove("flash-up", "flash-down"), { once: true });
-        await new Promise(res => setTimeout(res, 300));
-        const gone = !el.classList.contains("flash-up"); el.remove(); return gone;
-      });
-      if (!flashGone) rmErrs.push("0 秒動畫下 animationend 沒觸發，閃色 class 沒被移除");
-      rmInfo = `對照組 .rise=${normal.rise && normal.rise.a}；減少動態 .rise=${r.rise && r.rise.a}`;
+      // 先.一三五-1kd-b：原本這裡自建 span、自己掛 animationend，測的是瀏覽器對 0 秒動畫的事件時序（雲端 headless 13 班壞 11 班），
+      // 不是 App 的程式路徑。App 的 flashPriceEls() 在減少動態時本來就不加閃色（先.九十六-R4），改成直接呼叫 App 函式實測：
+      // 減少動態→價格變動後不得有 flash class；對照組（一般模式）→同一操作必須加上 flash class、且之後被 animationend 移除。
+      const flashProbe = async (waitRemove) => {
+        if (typeof flashPriceEls !== "function" || typeof PREV_QUOTE_PRICES === "undefined") return { err: "找不到 App 的 flashPriceEls／PREV_QUOTE_PRICES" };
+        const host = document.createElement("div"); host.id = "smk146-flash-host";
+        host.innerHTML = '<span data-flash-code="SMK146" data-flash-value="100">100</span>';
+        document.body.appendChild(host);
+        const el = host.firstChild;
+        try {
+          delete PREV_QUOTE_PRICES.SMK146;
+          flashPriceEls("#smk146-flash-host");           // 第一次只記住價格
+          el.dataset.flashValue = "101";
+          flashPriceEls("#smk146-flash-host");           // 價格變動
+          const added = el.classList.contains("flash-up") || el.classList.contains("flash-down");
+          let removed = null;
+          if (waitRemove && added) {
+            const t0 = Date.now();
+            while (Date.now() - t0 < 3000 && (el.classList.contains("flash-up") || el.classList.contains("flash-down"))) await new Promise(r => setTimeout(r, 100));
+            removed = !(el.classList.contains("flash-up") || el.classList.contains("flash-down"));
+          }
+          return { added, removed };
+        } finally { delete PREV_QUOTE_PRICES.SMK146; host.remove(); }
+      };
+      const flashNormal = await page.evaluate(flashProbe, true);
+      const flashReduced = await p2.evaluate(flashProbe, false);
+      if (flashNormal.err || flashReduced.err) rmErrs.push(`閃色檢查無法執行：${flashNormal.err || flashReduced.err}`);
+      else {
+        if (!flashNormal.added) rmErrs.push("對照組（一般模式）價格變動後應加上閃色 class，實際沒有（測試可能恆真）");
+        else if (!flashNormal.removed) rmErrs.push("對照組（一般模式）閃色 class 3 秒內沒被 animationend 移除");
+        if (flashReduced.added) rmErrs.push("減少動態時價格變動仍加上閃色 class");
+      }
+      rmInfo = `對照組 .rise=${normal.rise && normal.rise.a}；減少動態 .rise=${r.rise && r.rise.a}；閃色 一般模式 加上=${flashNormal.added}／移除=${flashNormal.removed}、減少動態 加上=${flashReduced.added}`;
     } finally { await ctx.close(); }
   } catch (e) { rmErrs.push(`測試本身出錯：${e.message || e}`); }
-  record("146. 減少動態效果：手機設定開啟時淡入／閃色／分頁過場／骨架／長條／開關動畫時間為 0，閃色仍會自動移除（先.九十四-5e）", rmErrs.length === 0, rmErrs.join("; ") || rmInfo);
+  record("146. 減少動態效果：手機設定開啟時淡入／閃色／分頁過場／骨架／長條／開關動畫時間為 0，減少動態時不閃色、一般模式閃色會自動移除（先.九十四-5e／先.一三五-1kd-b）", rmErrs.length === 0, rmErrs.join("; ") || rmInfo);
 
   // 147.【先.九十四-5f】「跟 0050 差多少」改中性色＋領先／落後文字：該欄不得帶 pos／neg（漲跌色只留給真實漲跌）。
   const vsGapErrs = [];
