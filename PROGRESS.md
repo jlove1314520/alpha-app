@@ -1,3 +1,13 @@
+## 2026-11-03 17:0x DevQueue（維運帽，cycle 20261103-170102）：1jq 清查只改時間戳的追蹤檔寫入者——修 selection_bias_ledger 的 SELECTION_BIAS_LEDGER.md
+
+- **等待總司令審閱：13 件**（`research/AWAITING_REVIEW.md` 本輪沒有新增或結案）。
+- **1jq（`- [x]`，commit `dfe84f7`）** 零外部請求、只讀清查：從 workflows／`run-*.ps1`／`scripts/run_*.ps1`／`.vbs`／`Get-ScheduledTask Alpha*`／`dev_queue_runner.py` 收集約 190 個排程或例行呼叫的腳本名，靜態篩出「會寫檔＋含時間戳＋提到非 MACHINE_WRITTEN 追蹤檔」41 支，逐支看真正寫入目標。結果：只剩 `research/selection_bias_ledger.py` 的 `research/SELECTION_BIAS_LEDGER.md` 每跑一次都只改「自動產生（時間）」那行（1jp 只修了 TRIALS_LEDGER 那行）→ 純 bug 修復：除時間那行外內容相同就不回寫；`scripts/selftest_selection_bias_ledger_no_churn.py` 加 ④⑤，新版 9／9、HEAD 舊版 8／9（④ FAIL）；用真實檔重跑後 SBL.md／TRIALS_LEDGER.md 皆乾淨。其餘（trial_registry、dev_queue_runner／crunch／cc_push、nightly_six_runner、build_sector_flow、claude_launcher_heartbeat…）都是內容必變、或已被 workflow／cycle log 提交、或不進版控，清單寫在 PENDING_QUEUE 1jq 條目下方。
+- **11/02 是誰**：cycle `20261102-183102`（commit `7fc2fbd`，先.一三五-1gw-a）跑了 selection_bias_ledger，只 add 了 SBL.md，TRIALS_LEDGER.md 只改日期那筆留在工作目錄（1jp 已還原）。
+- [自行裁量] SBL.md 開頭時間語意改成「內容最後一次變動的計算時間」；`research/data/selection_bias_ledger.json` 不進版控，照常每次寫。
+- 冒煙 `node scripts/smoke_test.mjs`：179 PASS／0 FAIL、exit 0（17:0x）。
+- **佇列**：`dev_queue_runner.py next` 回 NO_PENDING_ITEM；`- [ ]` 21 條（≥12）都是互動視窗／需總司令；最早到期時間閘 1ip 今天 18:00。收工補件：BACKLOG／UX 提案／全檢／DATA_GAP 甲類前幾輪已確認無新可做項，**來源已用盡**；前向模擬 14／14 已滿，不補研究候選（交給 runner 空轉補件）。
+- 外部請求：0（只有 git push）。沒碰 holdout、沒登記試驗、沒改十三節核心檔。`data/STATUS.json` 本輪無資料源或面板異動，未改。
+
 ## 2026-11-03 16:3x DevQueue 空轉補件（維運帽）：前向模擬 14／14 已滿，補 1jp（已做）＋1jq（待辦）＋1jr（時間閘）
 
 - **等待總司令審閱：13 件**（`research/AWAITING_REVIEW.md` 本輪沒有新增或結案）。
