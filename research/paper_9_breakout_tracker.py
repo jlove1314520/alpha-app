@@ -271,7 +271,7 @@ def _day(px, series: dict, day: str, state: dict, active: set, BUY: float, SELL:
         v = px_today(c)
         if v is not None:
             return v
-        prev = [r for r in px.rows.get(c) or [] if r["date"] < day and r.get("close") is not None]
+        prev = [r for r in px.rows.get(c) or [] if r["date"] < day and r.get("close") is not None and float(r["close"]) > 0]
         return float(prev[-1]["close"]) if prev else p["entry_px"]
 
     nav = sum(p["units"] * last_px(c, p) for c, p in positions.items()) + cash

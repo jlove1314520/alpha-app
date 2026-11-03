@@ -63,10 +63,12 @@ class Px:
         self.idx = {c: {r["date"]: i for i, r in enumerate(rs)} for c, rs in prices.items() if rs}
         self.calendar = sorted({r["date"] for rs in prices.values() for r in rs})
 
+    # price_history 以 close=0（adj_close=0）表示當天零成交（2026-09-23 零價格稽核），不是價格 0；
+    # 一律視為「當天無價」，否則會以 0 計值／以 0 賣出／除以零（先.一三五-1iy 真實資料實測模擬 O 除以零）。
     @staticmethod
     def _v(r):
         v = r.get("adj_close") if r.get("adj_close") is not None else r.get("close")
-        return float(v) if v is not None else None
+        return float(v) if v is not None and float(v) > 0 else None
 
     def close_on(self, code: str, d: str):
         i = (self.idx.get(code) or {}).get(d)
@@ -77,7 +79,7 @@ class Px:
         if i is None:
             return None
         v = self.rows[code][i].get("close")
-        return float(v) if v is not None else None
+        return float(v) if v is not None and float(v) > 0 else None
 
     def close_le(self, code: str, d: str):
         best = None
