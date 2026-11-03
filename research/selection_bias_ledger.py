@@ -496,7 +496,12 @@ def main() -> int:
                 f"（{now.strftime('%Y-%m-%d')} 由 `research/selection_bias_ledger.py` 自動計算並回寫；"
                 "**不要手動改這個數字**——它自 2026-08-23 起被手動寫死成 37 而實際已成長數倍，"
                 "害後續所有多重比較校正用了錯的分母。分軌分母見 `SELECTION_BIAS_LEDGER.md`。）")
-    txt2 = re.sub(r"\*\*目前累積總數（可統計檢定的試驗）：\d+\*\*（[^）]*）", new_line, txt, count=1)
+    # 先.一三五-1jp：N 沒變就不回寫——原本每跑一次就把日期改成今天，TRIALS_LEDGER.md 不在
+    # dev_queue_runner.MACHINE_WRITTEN 裡，只改日期的變更常被留在工作目錄沒提交（11/02 實例）。
+    # 日期因此代表「N 最後一次變動的計算日」。
+    m_old = re.search(r"\*\*目前累積總數（可統計檢定的試驗）：(\d+)\*\*", txt)
+    same_n = bool(m_old) and int(m_old.group(1)) == n_all
+    txt2 = txt if same_n else re.sub(r"\*\*目前累積總數（可統計檢定的試驗）：\d+\*\*（[^）]*）", new_line, txt, count=1)
     if txt2 != txt:
         LEDGER.write_text(txt2, encoding="utf-8", newline="\n")
         print(f"已回寫 TRIALS_LEDGER 累積總數：{n_all}")

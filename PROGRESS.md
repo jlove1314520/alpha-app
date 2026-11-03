@@ -1,3 +1,12 @@
+## 2026-11-03 16:3x DevQueue 空轉補件（維運帽）：前向模擬 14／14 已滿，補 1jp（已做）＋1jq（待辦）＋1jr（時間閘）
+
+- **等待總司令審閱：13 件**（`research/AWAITING_REVIEW.md` 本輪沒有新增或結案）。
+- 照零之二⑤：上限滿，不新增候選、不寫 PREREG、不送候選 AWAITING；`research/FORWARD_CANDIDATES.md` 記一行本輪紀錄。
+- **1jp（`- [x]`，純 bug 修復）** 開工 `git status` 發現 `research/TRIALS_LEDGER.md` 自 11/02 起有未提交變更，只是開頭日期 11-01→11-02、N 同為 457——`research/selection_bias_ledger.py` 每跑一次就改日期，而這個檔不在 `dev_queue_runner.MACHINE_WRITTEN`。改成 N 沒變就不回寫；新增 `scripts/selftest_selection_bias_ledger_no_churn.py` 6／6 過（HEAD 舊版 5／6，抓得到原問題）；工作目錄那筆只改日期的變更已還原。[自行裁量] 日期語意改為「N 最後一次變動日」。
+- **1jq（`- [ ]`）** 清查其他「只改時間戳就回寫追蹤檔」的程式（初篩約 40 支）＋查 11/02 是誰跑了沒提交。**1jr（時間閘 11/05 09:00）** 實地驗收。
+- 冒煙 `node scripts/smoke_test.mjs`：179 PASS／0 FAIL、exit 0（16:4x）。
+- 外部請求：0（只有 git push）。沒碰 holdout、沒登記試驗、沒算報酬、沒改十三節核心檔。`data/STATUS.json` 本輪無異動。
+
 ## 2026-11-03 15:0x DevQueue 空轉補件（維運帽）：前向模擬 14／14 已滿，補 1jm（已做）＋1jn／1jo（時間閘）
 
 - **等待總司令審閱：13 件**（`research/AWAITING_REVIEW.md` 本輪沒有新增或結案）。
