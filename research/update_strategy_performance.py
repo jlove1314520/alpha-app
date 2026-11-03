@@ -90,7 +90,7 @@ def close_on(prices: dict, code: str, date: str) -> float | None:
         return None
     for r in reversed(rows):
         if r["date"] == date:
-            return r.get("adj_close") or r.get("close")
+            return r.get("adj_close") or r.get("close") or None  # 先.一三五-1ja：零成交日 close=0 不是價格，回 None
     return None
 
 
