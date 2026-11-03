@@ -1,3 +1,12 @@
+## 2026-11-03 15:0x DevQueue 空轉補件（維運帽）：前向模擬 14／14 已滿，補 1jm（已做）＋1jn／1jo（時間閘）
+
+- **等待總司令審閱：13 件**（`research/AWAITING_REVIEW.md` 本輪沒有新增或結案）。
+- 照零之二⑤：上限滿，不新增候選、不寫 PREREG、不送候選 AWAITING；改補既有模擬追蹤（`research/FORWARD_CANDIDATES.md` 記一行）。
+- **1jm（`- [x]`）** 模擬 G（paper_7）`rebalance()` 一律以收盤成交、沒接 `official_limit.py`；用 `OfficialLimits().limits()`＋`lock_status()` 查 11/02 建倉 20 檔：上櫃 8 檔 TPEx 公告價、上市 12 檔計算價，**鎖漲停 0、收在漲停價 0、鎖跌停 0**，建倉現實可成交。[自行裁量] 只查不改（G 的 PREREG #456 沒寫漲跌停處理，改屬 PREREG 修訂）。
+- **1jn（時間閘 2027-02-01）** 每次再平衡複查進出場鎖死；有鎖死才寫修訂提案送 AWAITING。**1jo（時間閘 11/04 09:00）** 非再平衡日 `as_of_date` 推進、帳本仍 1 列。
+- 冒煙 `node scripts/smoke_test.mjs`：179 PASS／0 FAIL、exit 0（15:1x）。
+- 外部請求：0（只有 git push）。沒碰 holdout、沒登記試驗、沒算報酬、沒改十三節核心檔。`data/STATUS.json` 本輪無異動。
+
 ## 2026-11-03 13:3x～13:4x DevQueue 空轉補件（維運帽）：前向模擬 14／14 已滿，處理到期時間閘 1fw／一四四-1／1jc，補 1jj（已做）＋1jk／1jl（時間閘）
 
 - **等待總司令審閱：13 件**（新增 先.一四四-1 記憶體白天盤中報告，甲（建議）維持現狀／乙 DevQueue 盤中不跑冒煙；已等 0 小時）。
