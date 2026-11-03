@@ -2292,7 +2292,8 @@
       out._src='repo';
       return out;
     }
-    const px=await fm('TaiwanStockPrice',code,fmStart||_d(35));
+    // 先.一三五-1jd：FinMind 也以 open/max/min/close 全 0 記零成交日（本機快取 0054 實測 104 列），不是價格，去掉
+    const px=(await fm('TaiwanStockPrice',code,fmStart||_d(35))).filter(p=>!(typeof p.close==='number'&&p.close<=0));
     px._src='finmind';
     return px;
   }
@@ -4918,7 +4919,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-24.0728';
+  const APP_VERSION='2026-11-03.1050';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

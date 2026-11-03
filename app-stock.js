@@ -587,7 +587,7 @@
     // 只向 FinMind 要「最早缺的那個月」起的日線（原本固定 430 天）
     if(need.length){const f=need[0];px=await fm('TaiwanStockPrice',code,mkey(f.revenue_year,f.revenue_month)+'-01');if(currentCode!==code)return}
     const fmAt=(y,m)=>{
-      const inMonth=px.filter(p=>{const d=p.date.split('-');return +d[0]===y&&+d[1]===m});
+      const inMonth=px.filter(p=>{const d=p.date.split('-');return +d[0]===y&&+d[1]===m&&p.close>0});  // 先.一三五-1jd：零成交日 close=0 不是月底價
       return inMonth.length?inMonth[inMonth.length-1].close:null;
     };
     const priceAt=(y,m)=>{const v=mc[mkey(y,m)];return v!=null?v:fmAt(y,m)};
