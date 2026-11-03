@@ -22,11 +22,17 @@ SAMPLES = [
     ("- [ ] **評.B-2 單發**（互動視窗執行中 2026-10-13 10:00）", True),
     ("- [ ] **常備.開發-99 某項**（互動視窗或DevQueue皆可）", False),
     ("- [ ] **常備.開發-98 某項**", False),
+    # 2026-11-04（DevQueue cycle 20261104-033101）：代號與「（互動視窗」之間夾 [產品]／[研究] 標籤
+    ("- [ ] **先.一四八-3 P2 首頁** [產品]（互動視窗執行；已定案）", True),
+    ("- [ ] **先.一四七-1 草稿** [研究]（DevQueue 可執行）", False),
 ]
 res = []
 for line, want in SAMPLES:
     got = bool(D.INLINE_INTERACTIVE_TAG.search(line))
     res.append((f"DevQueue 判定：{line[:40]}… → {'互動視窗專屬' if want else '可接'}", got == want))
+# item_class 必須讓互動視窗註記優先於 [產品] 標籤（原本先比對 [產品] 回傳「產品」，被 DevQueue 接走）
+_c = D.item_class("- [ ] **先.一四八-3 P2 首頁** [產品]（互動視窗執行；已定案）")
+res.append((f"item_class：[產品]（互動視窗執行 → {_c}（應為互動視窗）", _c == "互動視窗"))
 for name in ("HYPOTHESIS_QUEUE_CONTINUATION_PROMPT.txt", "MARATHON_CONTINUATION_PROMPT.txt"):
     txt = (ROOT / "research" / name).read_text(encoding="utf-8")
     res.append((f"{name} 有「互動視窗專屬」規則", "互動視窗專屬" in txt and "（互動視窗執行" in txt))

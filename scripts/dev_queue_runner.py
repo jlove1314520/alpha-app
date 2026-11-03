@@ -796,7 +796,9 @@ def _entry_key_class(entry: str) -> tuple[str, str]:
 INLINE_CLASS_TAG = re.compile(r"\*\*[^*]+\*\*\s*(\[研究\]|\[產品\])")
 # 2026-10-13（cycle 20261013-103102）：標題內含「*」（如 scores*_list、Alpha*）時 [^*]+ 對不上，
 # 先.八十一-18／-27 被誤判成債務派給 DevQueue；改成非貪婪 .+? 允許標題內出現單一星號
-INLINE_INTERACTIVE_TAG = re.compile(r"\*\*.+?\*\*\s*（互動視窗(?!或)")
+# 2026-11-04（DevQueue cycle 20261104-033101）：允許代號與「（互動視窗」之間夾一個 [產品]／[研究] 標籤，
+# 例：`**先.一四八-3 ...** [產品]（互動視窗執行；...`——原本先比對 [產品] 就回傳「產品」，被誤派給 DevQueue。
+INLINE_INTERACTIVE_TAG = re.compile(r"\*\*.+?\*\*\s*(?:\[[^\]]+\]\s*)?（互動視窗(?!或)")
 
 
 def item_class(text: str) -> str:
@@ -842,11 +844,12 @@ def item_class(text: str) -> str:
             return "互動視窗"
     except Exception:  # noqa: BLE001 -- 守門員自身失敗只降級，fail open
         pass
+    # 互動視窗註記優先於 [產品]／[研究] 標籤（2026-11-04 修：兩者並存時原本回傳「產品」）
+    if INLINE_INTERACTIVE_TAG.search(text):
+        return "互動視窗"
     m = INLINE_CLASS_TAG.search(text)
     if m:
         return "研究" if m.group(1) == "[研究]" else "產品"
-    if INLINE_INTERACTIVE_TAG.search(text):
-        return "互動視窗"
     key = item_key(text)
     for entry in _explicit_order():
         entry_key, cls = _entry_key_class(entry)
