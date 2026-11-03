@@ -59,7 +59,8 @@ def main() -> None:
             continue
         px, actual, stale = upl._lookup_price_on(s["code"], nxt, prices)
         if stale or px is None or actual != nxt:
-            own_days = {r["date"] for r in prices.get(s["code"]) or []}
+            # 先.一三五-1ja：零成交日（close=0）不算有價，進場日零成交照停牌一樣標略過，不是永遠等下輪
+            own_days = {r["date"] for r in prices.get(s["code"]) or [] if (r.get("close") or 0) > 0}
             if own_days and max(own_days) > nxt and nxt not in own_days:
                 s["entry_skip_reason"] = ENTRY_SKIP_REASON
                 s["entry_skip_marked_at"] = datetime.now(upl.TW_TZ).isoformat()

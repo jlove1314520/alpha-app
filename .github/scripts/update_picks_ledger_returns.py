@@ -158,10 +158,11 @@ def _lookup_price_on(code: str, date: str, price_history: dict[str, list[dict]])
     rows = price_history.get(code)
     if not rows:
         return None, None, True
+    # 先.一三五-1ja：零成交日記 close=0（no_trade），不是價格；當成當天無價，照停牌一樣往前找最近一筆
     exact = next((r for r in rows if r["date"] == date), None)
-    if exact is not None and exact.get("close") is not None:
+    if exact is not None and exact.get("close") is not None and exact["close"] > 0:
         return exact["close"], date, False
-    candidates = [r for r in rows if r["date"] <= date and r.get("close") is not None]
+    candidates = [r for r in rows if r["date"] <= date and r.get("close") is not None and r["close"] > 0]
     if not candidates:
         return None, None, True
     best = max(candidates, key=lambda r: r["date"])
