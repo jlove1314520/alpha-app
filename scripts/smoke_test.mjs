@@ -3811,6 +3811,8 @@ async function runSmokeTest(baseUrl, headless = true) {
     if (!(ph.meta.splits_applied || []).includes("00631L@2026-03-31x22.0")) rsErrs.push("meta.splits_applied 缺 00631L 紀錄");
     const cv = readJsonRetry(fsx, "data/strategy_curves.json");
     for (const x of cv.lines.filter(x => x.group === "paper" && x.started)) {
+      // 先.一三五-1ji：選擇權線（模擬 F／F-翼，帳本逐日 nav）沒有還原權息／建倉手續費這種口徑，改驗期交所估值說明
+      if (/台指選擇權/.test(x.note)) { if (!/期交所收盤重估/.test(x.note) || !/最後結算價/.test(x.note)) rsErrs.push(`${x.id} 選擇權線 note 缺估值口徑：${x.note}`); continue; }
       if (!/還原權息/.test(x.note) || !/現金與定存按一個月定存利率計息/.test(x.note) || !/建倉已扣手續費/.test(x.note)) rsErrs.push(`${x.id} note 缺口徑說明：${x.note}`);
     }
     const p1 = cv.lines.find(x => x.id === "paper_1");
