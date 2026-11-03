@@ -266,6 +266,9 @@ def pull_or_abort(timeout=180) -> int:
     r = pull_autostash_safe(timeout=timeout)
     if r.returncode == 0 and not rebase_in_progress():
         return 0
+    # 先.一三五-1hq-a：記下 pull 自己的錯誤摘要（11/02 第一層原因就是因為 stderr 被丟掉才查不到）
+    why = (r.stderr or r.stdout or "").strip().replace("\n", " ")[-200:]
+    print(f"[local_git_commit] pull 失敗（exit {r.returncode}）：{why or '無輸出'}", file=sys.stderr)
     note = abort_rebase()
     if note:
         print(f"[local_git_commit] {note}", file=sys.stderr)

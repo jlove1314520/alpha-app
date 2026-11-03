@@ -35,6 +35,7 @@ import re
 import socket
 import subprocess
 import sys
+import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
@@ -534,6 +535,48 @@ def check_launcher_encoding_alerts() -> list[str]:
         return []
 
 
+REBASE_RESIDUE_MIN = 30  # 分鐘：rebase 目錄存在超過這麼久、且沒有活著的持鎖者才告警
+
+
+def check_rebase_residue_alerts(git_dir: Path | None = None, lock_path: Path | None = None,
+                                now_ts: float | None = None) -> list[str]:
+    """2026-11-03（先.一三五-1hq-a 甲，[預設放行]）：`.git/rebase-merge`／`rebase-apply` 殘留會擋住
+    所有排程的 pull（11/02 殘留 6.5 小時才被人工清掉，見 先.一三五-1hp／1hq）。條件＝目錄存在、
+    目錄 mtime 超過 REBASE_RESIDUE_MIN 分鐘、且 `research/.git_op.lock` 不存在或持鎖也超過同樣時間
+    （有人正在合法 rebase 就不吵）。只告警、不自動刪；自身任何失敗只印警告回空清單（十二節）。
+    """
+    try:
+        git_dir = git_dir if git_dir is not None else ROOT / ".git"
+        lock_path = lock_path if lock_path is not None else ROOT / "research" / ".git_op.lock"
+        now_ts = now_ts if now_ts is not None else time.time()
+        limit = REBASE_RESIDUE_MIN * 60
+        if not git_dir.is_dir():
+            return []
+        lock_age = None
+        if lock_path.exists():
+            try:
+                lock_age = now_ts - float(lock_path.read_text(encoding="utf-8").strip().split("|")[1])
+            except (ValueError, IndexError, OSError):
+                lock_age = now_ts - lock_path.stat().st_mtime
+        if lock_age is not None and lock_age <= limit:
+            return []
+        out = []
+        for name in ("rebase-merge", "rebase-apply"):
+            d = git_dir / name
+            if not d.is_dir():
+                continue
+            age = now_ts - d.stat().st_mtime
+            if age > limit:
+                files = ",".join(sorted(x.name for x in d.iterdir())[:6])
+                out.append(f"git 有中斷的 rebase 殘留 .git/{name}（{age / 60:.0f} 分鐘、無持鎖者，"
+                           f"內容：{files or '空'}），所有排程的 pull 會被擋；"
+                           f"請互動視窗確認後處理（可先跑 python scripts/local_git_commit.py pull）")
+        return out
+    except Exception as e:  # noqa: BLE001
+        print(f"  ! rebase 殘留自檢失敗（{type(e).__name__}: {e}），本輪跳過這項自檢")
+        return []
+
+
 def check_domain_blocklist_alerts() -> list[str]:
     """2026-09-20（合規.三，總司令裁示【緊急·合規】）：讀`audit_preflight.py`
     寫進`data/audit_report.json`的`domain_blocklist_scan`欄位，把
@@ -661,7 +704,7 @@ def main() -> int:
     # 教總司令看第三個地方。
     task_stalls = (task_stalls + check_stale_user_visible_blocks() + check_pat_expiry_alerts()
                    + check_devqueue_format_mismatch_alerts() + check_domain_blocklist_alerts()
-                   + check_launcher_encoding_alerts())
+                   + check_launcher_encoding_alerts() + check_rebase_residue_alerts())
     publish_task_health(now, task_rows, task_stalls, conn_alerts)
     record["local_tasks"] = {"stalled": task_stalls, "checked": len(task_rows)}
     for msg in task_stalls:

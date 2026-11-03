@@ -1,3 +1,11 @@
+## 2026-11-03 18:0x DevQueue（維運帽）：**[預設放行]** 先.一三五-1hq-a 甲——本機看守 `.git/rebase-merge` 殘留
+
+- **等待總司令審閱：11 件**（`research/AWAITING_REVIEW.md` 等待中 11 列；本輪結案 1 列：先.一三五-1hq-a，[預設放行]）。
+- **為什麼**：1hq-a 送 AWAITING 已等 24.4 小時沒有 Cowork 裁示，不屬零之二排除類別（無 holdout／真錢／刪除／密碼／付費資料／門檻），照草稿標的「甲（建議）」執行。**Cowork 可推翻，推翻時照 PREREG 修訂規則處理**（還原＝刪 `check_rebase_residue_alerts()` 與 main() 串接一處）。
+- **改了什麼**：`scripts/check_external_connectivity.py` 加 `check_rebase_residue_alerts()`，每 5 分鐘跟著連通性監測跑：`.git/rebase-merge`／`rebase-apply` 存在超過 30 分鐘、且 `research/.git_op.lock` 不存在或持鎖也超過 30 分鐘 → 併入 task_stalls 亮燈（App 橫幅看得到）。只告警、不自動刪；自身任何失敗只印警告回空清單（十二節）。順手照 1hq 補記讓 `scripts/local_git_commit.py::pull_or_abort()` 失敗時印 pull 的 exit 與 stderr，下次查得到第一層原因。
+- **驗證**：`scripts/selftest_rebase_residue_alert.py` 10/10（含「看守自己拋例外 → fail open」）；既有 4 支 git 相關自測全過；真 repo 目前無殘留；實跑 `check_external_connectivity.py` 主流程完整跑完。冒煙 `node scripts/smoke_test.mjs`：179 PASS／0 FAIL、exit 0。
+- 外部請求：0（只有 git push）。沒碰 holdout、沒登記試驗、沒改十三節核心檔、沒動常駐服務檔。`data/STATUS.json` 無資料源或面板異動，未改。
+
 ## 2026-11-03 17:3x DevQueue（維運帽）：**[預設放行]** 先.一三五-1ho 甲——Shioaji `[build]` 版本號另寫歷史檔
 
 - **等待總司令審閱：12 件**（`research/AWAITING_REVIEW.md` 等待中 12 列；本輪結案 1 列：先.一三五-1ho，[預設放行]）。
