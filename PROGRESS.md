@@ -1,3 +1,17 @@
+## 2026-11-03 09:31～10:05 DevQueue 20261103-093102（維運帽）：1ix 結案、1iy 用真實累積檔試跑 12 支前向追蹤並修好零成交日 close=0 被當價格、1iz 結案、補件 1iz／1ja／1jb
+
+- **等待總司令審閱：12 件**（`research/AWAITING_REVIEW.md` 本輪沒有新增或結案）。
+- **1ix（`- [x]`）** 未完成條目寫「`gh run view --log`／`/logs`」的：除本條外 0 條；程式端沒有任何一支下載 job log（`watchdog_dispatch_market.py`／`log_dispatch_delay.py` 只用 `gh run list` 中繼資料，`check_pat_expiry.py` 用 `gh api -i user` 表頭，`market.yml` 兩處是歷史註解）→ 不需總司令補 PAT 權限。commit `e68419c`。
+- **1iy（`- [x]`，純 bug 修復）** paper_7～18 都不直接打外部端點，只讀本機累積檔。把 repo 內真實累積檔整條餵進去（起跑日提前到 09-01、帳本寫暫存資料夾、只看事件計數、不印淨值報酬）：H／J／K／L／M／N／O／P／Q／R 中 **模擬 O 在 `_day_weighted` 除以零崩潰**。根因：price_history 以 close=0 記零成交日，`paper_forward_common.Px` 把 0 當價格；同形狀也會讓 `_mark` 以 0 計值、模擬 I（已起跑）以 0 元出場／誤觸移動停損（I 帳本目前零持股，未受影響）。修 `Px._v`／`raw_close_on`（≤0＝無價）＋`paper_9_breakout_tracker.last_px`。新自測 `scripts/selftest_forward_zero_close.py` 修正前 8 FAIL、修正後 9/9 PASS；既有 9 支 paper 自測全過；修後 12 支重跑全 OK。commit `4fd69eb`。
+  - [自行裁量] 模擬 I 持股遇零成交日改走既有「今天沒價＝停牌→lost_universe」分支（PREREG 既有規則，未新增規則）。
+  - 附帶觀察：模擬 L 權證快照連續 10 日門檻尚未達成（最快 11/09 收盤後），已補 1jb 時間閘追蹤。
+- **1iz（`- [x]`）** price_history「收盤＝0 但量>0」402 列：官方日檔快取涵蓋 185 列，185/185 官方開高低收皆 null → 慣例（零股／盤後量），寫進 `DATA.md`。commit `267dd3f`。
+- **1ja（`- [ ]`，第 1 批）** 其他讀 price_history close 的程式約 45 支，清單與優先順序（真錢 `auto_rebalance_bb90.py` 第一）已記在條目，下一輪從頭續查；本輪未修任何程式。
+- **補件**：1iz、1ja（可執行）＋1jb（時間閘 11/10 18:00）。來源皆為本輪 1iy 發現；`docs/UX_REDESIGN_PROPOSAL.md`、`research/DATA_GAP_PLAN.md` 甲類已無未做項。可執行項仍低於 6（目前 1ja 一條），其餘來源已用盡。
+- **我自己出的錯**：寫條目時 `C:\alpha` 又被吃成 BEL 控制字元（2 處，含 1ix 註記），已用 `chr(92)` 修好。
+- 冒煙 `node scripts/smoke_test.mjs`：179 項 `[x]`、0 FAIL、exit 0（1ix、1iy、1iz 各跑一次）。
+- 外部請求：0（只有 git push）。沒碰 holdout、沒登記試驗、沒改十三節核心檔。`data/STATUS.json` 本輪無資料源或面板異動，未改。
+
 ## 2026-11-03 09:0x～09:3x DevQueue 空轉補件（維運帽）：到期時間閘 1en／1ey／1gu 結案＋抓到並修好模擬 F／F-翼解析崩潰（1iv）＋補件 1iw／1ix／1iy
 
 - **等待總司令審閱：12 件**（`research/AWAITING_REVIEW.md` 本輪沒有新增或結案）。
