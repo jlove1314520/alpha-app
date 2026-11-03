@@ -158,7 +158,9 @@ def main() -> int:
         for n, by in other.items():
             if code in by:
                 doc[n] = by[code]
-        rows = ph.get(code) or []
+        # 先.一三五-1ja：零成交日 price_history 記 open/high/low/close 全 0（no_trade），不是價格；不放進個股日線
+        # （否則 App K 線掉到 0、當天漲跌算成 −100%）。取「最近 60 個有價的交易日」。
+        rows = [r for r in (ph.get(code) or []) if not (isinstance(r.get("close"), (int, float)) and r["close"] <= 0)]
         if rows:
             doc["price"] = [[r.get(c) for c in PRICE_COLS] for r in rows[-PRICE_DAYS:]]
         if code in company:
