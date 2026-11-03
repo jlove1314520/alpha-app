@@ -1,5 +1,5 @@
 {
- "checked_at": "2026-11-03T03:00:01+08:00",
+ "checked_at": "2026-11-04T03:00:01+08:00",
  "count": 0,
  "total_private_mb": 0,
  "orphans": [],
@@ -7,47 +7,6 @@
  "source": "scripts/orphan_process_scan.py（AlphaOrphanScan 每日 03:00）",
  "stuck_git": [],
  "stuck_git_note": "跑超過 2 小時的 git／git-credential-manager／心跳提交 python；只列出，不自動結束",
- "orphan_shells": [
-  {
-   "pid": 61832,
-   "parent_pid": 73604,
-   "name": "bash.exe",
-   "started": "2026-10-16T10:03:30",
-   "age_hours": 424.9,
-   "children": 1
-  },
-  {
-   "pid": 64336,
-   "parent_pid": 83720,
-   "name": "bash.exe",
-   "started": "2026-10-16T19:28:01",
-   "age_hours": 415.5,
-   "children": 1
-  },
-  {
-   "pid": 65072,
-   "parent_pid": 49448,
-   "name": "bash.exe",
-   "started": "2026-10-16T07:04:04",
-   "age_hours": 427.9,
-   "children": 1
-  },
-  {
-   "pid": 73864,
-   "parent_pid": 69432,
-   "name": "bash.exe",
-   "started": "2026-10-16T12:01:55",
-   "age_hours": 423.0,
-   "children": 1
-  },
-  {
-   "pid": 76044,
-   "parent_pid": 80560,
-   "name": "bash.exe",
-   "started": "2026-10-16T16:02:33",
-   "age_hours": 419.0,
-   "children": 1
-  }
- ],
+ "orphan_shells": [],
  "orphan_shells_note": "父行程已不存在、跑超過 2 小時的 bash.exe（多半是舊工作階段背景啟動的冒煙伺服器）；只列出，不自動結束"
 }
