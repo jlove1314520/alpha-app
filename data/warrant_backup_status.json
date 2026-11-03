@@ -1,8 +1,8 @@
 {
- "generated_at": "2026-10-30T17:37:53+08:00",
- "last_snapshot_date": "2026-10-30",
- "snapshot_days": 8,
- "snapshot_mb": 29.4,
+ "generated_at": "2026-11-03T17:37:41+08:00",
+ "last_snapshot_date": "2026-11-03",
+ "snapshot_days": 10,
+ "snapshot_mb": 36.1,
  "last_backup_at": "2026-10-29T17:44:33+08:00",
  "last_backup_file": "warrant_snapshots_2026-10-27_2026-10-29.zip",
  "backed_up_days": 7,
@@ -10,9 +10,9 @@
  "schedule": "本機排程 AlphaWarrantSnapshot：交易日 17:30 快照、每 7 天備份一次",
  "note": "先.九十五-2。快照與備份都只存本機，不進 repo。非投資建議。",
  "last_failure": {
-  "date": "2026-10-23",
-  "exit": 3,
-  "reason": "[驗證不過，不寫檔；原始回應保留在 C:\\alpha\\alpha-app\\research\\data\\warrant_snapshots\\_raw\\2026-10-23] quotes_twse_call 為空；quotes_twse_put 為空；quotes_tpex 為空；underlying_tpex 為空",
-  "at": "2026-10-23T17:31:36+08:00"
+  "date": "2026-11-03",
+  "exit": 4,
+  "reason": "{\"date\": \"2026-11-03\", \"counts\": {\"basic_twse\": 47587, \"issue_tpex\": 12436, \"quotes_twse_call\": 36789, \"quotes_twse_put\": 2365, \"quotes_tpex\": 12551, \"underlying_tpex\": 347}, \"failed_sources\": {\"tpex_basic\": \"連線中斷，重試一次仍失敗（ChunkedEncodingError: Response ended prematurely）\"}, \"missing_files\": [\"basic_",
+  "at": "2026-11-03T17:37:40+08:00"
  }
 }
