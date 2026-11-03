@@ -54,7 +54,9 @@ def _prev_close_before(day: str, sym: str, price_doc: dict) -> float | None:
         c = None
         for r in rows:
             if r["date"] < day:
-                c = AB._num(r["close"])
+                v = AB._num(r["close"])
+                if v and v > 0:  # 先.一三五-1ja：零成交日 close=0 不是價格，沿用前一筆真實收盤
+                    c = v
             else:
                 break
         return c or None
