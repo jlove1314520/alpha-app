@@ -93,7 +93,23 @@ jobs:
             echo "稽核結果與上次相同，不產生 commit"
           else
             git commit -m "資料稽核：更新 audit_report.json 與在市名冊（每晚排程）"
-            git push
+            # 2026-11-04 先.一三五-1ka（純 bug 修復）：11/03 那班（run 41718634417，UTC 21:05）在這一步 exit 1——
+            # checkout 是 05:01 的 eabd1416，跑到 push 時遠端已被新聞排程（05:05、05:07）推過，非 fast-forward 被拒，
+            # 整班稽核結果白丟。十節「副帶發現」早就記過 audit.yml 沒有重試迴圈；照 quotes.yml 同一套做法補上。
+            pushed=0
+            for i in 1 2 3 4 5; do
+              if git push; then echo "push成功（第${i}次嘗試）"; pushed=1; break; fi
+              echo "push失敗，可能跟其他寫入者撞在一起，第${i}次，fetch+rebase後重試"
+              git stash push --include-untracked -m ci-leftovers || true
+              git fetch origin main
+              git rebase origin/main || { echo "::warning::audit.yml rebase 衝突，放棄自動解決"; git rebase --abort; exit 1; }
+              sleep $((RANDOM % 6 + 3))
+            done
+            if [ "$pushed" != 1 ]; then
+              # run log 要 admin 權限才能讀，重試耗盡寫 annotation，跟 rebase 衝突那條分得開
+              echo "::warning::audit.yml push 重試 5 次仍失敗：$(git status -sb | head -1)"
+              exit 1
+            fi
           fi
 
       - name: 稽核未通過就讓這個 job 顯示紅燈
