@@ -1,3 +1,16 @@
+## 2026-11-04 01:31 DevQueue 20261104-013101（維運帽）：先.一四七-2 美股報價空檔覆蓋好資料——查因＋純 bug 修復
+
+- **等待總司令審閱：9 件**（`research/AWAITING_REVIEW.md` 等待中 9 列，本輪未新增／未結案）。
+- **查因**：`.github/scripts/fetch_quotes_us.py` 舊版不論有沒有抓到報價都先寫 `data/quotes_us.json` 再 exit 1；`quotes.yml` 該步 `continue-on-error`、commit 步驟 `if: always()` → 11/03 16:02 UTC 那班 Finnhub 9 檔全失敗時，一份 `quotes={}` 空檔被提交，蓋掉 12:43 UTC 那版好資料（9/9）。
+- **歷史**：近 7 天 git 31 版只有 1 版空（`46f58e3801d`）＝偶發；但到本輪仍是最新版（雲端排程 16:01 UTC 後還沒有下一班）。
+- **查不到的部分照實寫**：雲端 job log 要 admin 權限（`gh run view --log` 回 403），9 檔失敗的直接原因（HTTP 錯誤或報價 0）無法確認。
+- **修法（純 bug 修復，七節「失敗不覆蓋」）**：新 `write_quotes_file()`——quotes 為空就不寫檔、保留上一版、印 GitHub `::warning` 告警，仍 exit 1；有報價才寫檔。
+- **自測**：先寫 `scripts/selftest_quotes_us_empty_no_overwrite.py`（修前 FAIL、修後 7/7 PASS）；既有 `selftest_quotes_us_sparkline.py` 8/8、`selftest_quotes_local_fallback.py` 16/16 PASS。零外部請求。
+- **維運產物**：`data/STATUS.json` known_limitations 補一條（含發現 STATUS 對 0 筆仍標 ok，待查未修）。
+- **[自行裁量]**：repo 裡現在那份空檔不手動回填舊版（12:43 UTC 盤前資料已過時，下一班雲端或本機補班會蓋掉）。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0，全套全過（含 #178 前向看板）。
+- **佇列**：權威清單下一項 先.一四七-1 是 [研究] 類，本輪戴維運帽，照九節收工留給下一輪。`- [ ]` 21 項（≥12）；非研究、未標互動視窗的條目名目上 8 項（多數為時間閘驗收），**[自行裁量] 判定 ≥6、本輪不補件**。BLOCKED 項本輪未逐條複查（時間閘類多已過期、需互動視窗處理）。
+
 ## 2026-11-04 00:5x 互動視窗（開發帽）：收件匣 036 A——研究室「前向模擬」看板（先.一四七-0）
 
 - **等待總司令審閱：9 件**（`research/AWAITING_REVIEW.md` 等待中 9 列，本輪未新增；B 段上線規則草稿已交 DevQueue 先.一四七-1，寫完才送 AWAITING）。

@@ -180,6 +180,20 @@ def reuse_prev_sparklines(quotes: dict, prev_path: Path) -> list[str]:
     return reused
 
 
+def write_quotes_file(out: dict, path: Path) -> bool:
+    """2026-11-04 先.一四七-2（純 bug 修復，CLAUDE.md 七節「失敗不覆蓋」）：舊版不論有沒有抓到報價都先寫檔、
+    再 exit 1；雲端 workflow 的 commit 步驟是 if: always()，結果 11/03 16:02 UTC 那班 Finnhub 9 檔全失敗時，
+    一份 quotes={} 的空檔把上一版好資料蓋掉並提交（App 美股現價退回 repo 日線）。
+    改成：quotes 為空就不寫檔、保留上一版，印 GitHub ::warning:: 告警，回 False；有報價才寫檔回 True。"""
+    if not (out.get("quotes") or {}):
+        print("::warning title=美股報價全數失敗::Finnhub 本班 0 檔成功，保留上一版 "
+              f"{path.name}、不覆蓋（先.一四七-2）")
+        return False
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
+    return True
+
+
 def main():
     now_us = datetime.now(US_TZ)
     trading_window = is_us_trading_window(now_us)
@@ -277,9 +291,8 @@ def main():
         },
         "quotes": quotes,
     }
-    OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    OUT_PATH.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"寫入 {OUT_PATH}，{len(quotes)}/{len(US_TICKERS)} 檔成功" + (f"，失敗：{failed}" if failed else "")
+    written = write_quotes_file(out, OUT_PATH)
+    print(f"{'寫入' if written else '未寫入（保留上一版）'} {OUT_PATH}，{len(quotes)}/{len(US_TICKERS)} 檔成功" + (f"，失敗：{failed}" if failed else "")
           + f"，目前{'在' if trading_window else '不在'}交易時段（美東時間 {now_us.strftime('%Y-%m-%d %H:%M:%S')}）")
 
     if not quotes and trading_window:
