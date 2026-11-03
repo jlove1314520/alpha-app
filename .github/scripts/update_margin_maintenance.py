@@ -399,7 +399,7 @@ def closes_from_price_history(day: str) -> dict[str, float]:
         for row in reversed(rows[-15:]):
             if str(row.get("date") or "")[:10] == day:
                 px = _num(row.get("close"))
-                if px is not None:
+                if px is not None and px > 0:  # 先.一三五-1ja：零成交日記 close=0，不是價格；當缺價（計入覆蓋率），不以 0 元計擔保品
                     out[code] = px
                 break
     return out
