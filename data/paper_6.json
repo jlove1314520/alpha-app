@@ -3,7 +3,7 @@
  "started": true,
  "start": "2026-11-02",
  "note": "紙上追蹤：鐵蝴蝶（賣價平跨式＋買 ±500 點保護翼），每組最大虧損＝淨值 3%；真錢版暫不啟用（本金門檻，先.一一八-1）",
- "generated_at": "2026-11-04T01:05:25+08:00",
+ "generated_at": "2026-11-04T01:12:44+08:00",
  "nav": 100.0,
  "last_date": "2026-11-02",
  "max_drawdown_pct": 0.0,
@@ -31,5 +31,36 @@
   "note": "鐵蝴蝶 1 組：賣 k 的 call／put、買 k+500 call／k−500 put；本金＝最大虧損÷3%"
  },
  "n_closed": 0,
- "n_stops": 0
+ "n_stops": 0,
+ "prereg": "docs/PREREG_paper_f_wing.md",
+ "trial_no": 455,
+ "trial_basis": null,
+ "start_not_before": "2026-11-02",
+ "judge_after": "2027-10-21",
+ "judge_after_estimated": true,
+ "judge": "滿 12 個結算月後判一次：12 個月累積淨報酬 > 0 且 > 同期 0050 含息、期間淨值最大回撤 ≤50%、停損照規則觸發",
+ "board": {
+  "as_of": "2026-11-02",
+  "start": "2026-11-02",
+  "nav_start": 100.0,
+  "nav_series": [
+   [
+    "2026-11-02",
+    100.0
+   ]
+  ],
+  "bench_0050": [
+   [
+    "2026-11-02",
+    0.95125742
+   ]
+  ],
+  "bench_0050_tr_pct": 0.0,
+  "bench_from": "2026-11-02",
+  "bench_to": "2026-11-02",
+  "bench_source": "research/data/bench_0050_tr.jsonl（price_history 0050 還原收盤相鄰日比值累乘）",
+  "max_drawdown_pct": 0.0,
+  "n_holdings": 1,
+  "nav_rebased_return_pct": 0.0
+ }
 }
