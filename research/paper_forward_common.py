@@ -374,6 +374,16 @@ def _day_event(spec: Spec, px: Px, day: str, state: dict, ctx: dict, active: set
             "candidates_n": len(cands), "positions": positions}
 
 
+def _board(series, n_holdings, start) -> dict:
+    """先.一四七-0（收件匣 036 A）：App 前向模擬看板欄位；失敗只降級成 error 欄（十二節）。"""
+    try:
+        import forward_board as FB
+        return FB.safe_board(series, n_holdings=n_holdings, start=start)
+    except Exception as e:  # noqa: BLE001
+        print(f"[paper_forward_common] 警告：看板欄位失敗（{type(e).__name__}: {e}）")
+        return {"error": f"{type(e).__name__}: {e}"}
+
+
 def write_summary(spec: Spec, px: Px | None, log: list, extra: dict | None = None) -> None:
     names = {}
     for row in (load_json(ROOT / "data" / "stock_names.json", {}) or {}).get("tw") or []:
@@ -407,6 +417,7 @@ def write_summary(spec: Spec, px: Px | None, log: list, extra: dict | None = Non
                     "total_return_pct": round((nav / INITIAL - 1) * 100, 2), "max_drawdown_pct": round(mdd * 100, 2),
                     "n_closed_trades": n_closed, "cash": ev.get("cash"), "holdings": sorted(hold, key=lambda h: h["code"]),
                     "last_event": ev.get("event")})
+        doc["board"] = _board([(e.get("date"), e.get("nav")) for e in log], len(hold), log[0].get("date"))
     spec.out_path.parent.mkdir(parents=True, exist_ok=True)
     spec.out_path.write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
 

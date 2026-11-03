@@ -43,7 +43,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(mq.addEventListener)mq.addEventListener('change',h);else if(mq.addListener)mq.addListener(h)}
 })();
 </script>
-<link rel="stylesheet" href="app.css?v=2026-11-03.1342">
+<link rel="stylesheet" href="app.css?v=2026-11-04.0110">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -872,6 +872,14 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <section class="screen" id="scr-lab">
     <div style="font-size:22px;font-weight:700;letter-spacing:-.01em;margin-bottom:4px">研究室</div>
     <div class="note" id="lab-top-line" data-ui-keep style="margin:0 0 10px;color:var(--caution);font-weight:600">研究紀錄與變化偵測，不是買賣建議</div>
+    <!-- 先.一四七-0（2026-11-04，Cowork 收件匣 036 A）：前向模擬看板——14 支前向紙上追蹤，每支讀 data/paper_N.json
+         （追蹤程式寫的 board 欄：近 30 日淨值、同期 0050 含息、最大跌幅），前端不寫死數字；一支缺檔只顯示「資料尚未產生」。 -->
+    <div class="card" id="lab-forward-card" style="margin-bottom:10px">
+      <h3>前向模擬</h3>
+      <div class="note" data-ui-keep style="color:var(--caution);font-weight:600">紙上追蹤、虛擬帳戶，不是真的交易</div>
+      <div class="note" id="lab-forward-summary" data-ui-keep style="margin-top:4px">載入中…</div>
+      <div id="lab-forward-list"><div class="skel-line w80"></div><div class="skel-line w60"></div></div>
+    </div>
     <div class="card" id="lab-deep-card">
       <h3>深度研究</h3>
       <div id="lab-deep-list"><div class="skel-line w80"></div><div class="skel-line w60"></div></div>
@@ -1612,6 +1620,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-11-03.1342"></script>
+<script src="app.js?v=2026-11-04.0110"></script>
 </body>
 </html>

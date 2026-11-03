@@ -223,6 +223,27 @@ def append(rec):
         f.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
 
+def board_meta(log, prereg: str, trial_no, trial_basis=None, judge: str | None = None) -> dict:
+    """先.一四七-0（收件匣 036 A）：App 前向模擬看板欄位（F／F-翼 共用）。判定日＝起跑月起第 12 個月合約到期日之後
+    （PREREG「滿 12 個結算月後判一次」；每月合約依進場規則可能不同，故標 judge_after_estimated）。失敗只降級（十二節）。"""
+    out = {"prereg": prereg, "trial_no": trial_no, "trial_basis": trial_basis, "start_not_before": START}
+    try:
+        y, m = int(START[:4]), int(START[5:7]) + 11
+        y, m = y + (m - 1) // 12, (m - 1) % 12 + 1
+        out["judge_after"] = (third_wednesday(f"{y}{m:02d}") + timedelta(days=1)).isoformat()
+        out["judge_after_estimated"] = True
+        out["judge"] = judge or ("前向判定條文未另訂（本支依據回測試驗通過、只做紙上追蹤、不提請真錢）；"
+                                 "判定時點暫比照模擬 F-翼「滿 12 個結算月後判一次」")
+        pos = next((r for r in reversed(log) if r.get("event") in ("entry", "settle", "stop")), None)
+        n_hold = 1 if pos and pos.get("event") == "entry" else 0
+        import forward_board as FB
+        out["board"] = FB.safe_board([(r.get("date"), r.get("nav")) for r in log], n_holdings=n_hold, start=START)
+    except Exception as e:  # noqa: BLE001
+        print(f"[paper_5] 警告：看板欄位失敗（{type(e).__name__}: {e}）")
+        out["board"] = {"error": f"{type(e).__name__}: {e}"}
+    return out
+
+
 def write_summary(log, started, extra=None):
     nav = log[-1]["nav"] if log else 100.0
     pos = next((r for r in reversed(log) if r["event"] in ("entry", "settle")), None)
@@ -230,7 +251,10 @@ def write_summary(log, started, extra=None):
            "generated_at": datetime.now(TW).isoformat(timespec="seconds"),
            "nav": round(nav, 4), "last_date": log[-1]["date"] if log else None,
            "open_position": (pos if pos and pos["event"] == "entry" else None),
-           "n_settled": sum(1 for r in log if r["event"] == "settle"), **(extra or {})}
+           "n_settled": sum(1 for r in log if r["event"] == "settle"),
+           **board_meta(log, "docs/PREREG_txo_vrp_2002_2014_FINAL.md", None, 444), **(extra or {})}
+    if doc.get("board") and doc["board"].get("max_drawdown_pct") is not None:
+        doc["max_drawdown_pct"] = doc["board"]["max_drawdown_pct"]
     OUT.write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
 
 

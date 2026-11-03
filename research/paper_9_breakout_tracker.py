@@ -183,6 +183,16 @@ def _append(rec: dict) -> None:
         f.write(json.dumps({"logged_at": datetime.now(TW).isoformat(timespec="seconds"), **rec}, ensure_ascii=False) + "\n")
 
 
+def _board(series, n_holdings, start) -> dict:
+    """先.一四七-0（收件匣 036 A）：App 前向模擬看板欄位；失敗只降級成 error 欄（十二節）。"""
+    try:
+        import forward_board as FB
+        return FB.safe_board(series, n_holdings=n_holdings, start=start)
+    except Exception as e:  # noqa: BLE001
+        print(f"[paper_9] 警告：看板欄位失敗（{type(e).__name__}: {e}）")
+        return {"error": f"{type(e).__name__}: {e}"}
+
+
 def write_summary(log: list, extra: dict | None = None) -> None:
     doc = {"label": LABEL, "note": NOTE, "prereg": "docs/PREREG_STOCK_BREAKOUT_252H_FINAL.md", "trial_no": 463,
            "start_not_before": START_NOT_BEFORE, "judge_after": JUDGE_AFTER, "started": bool(log),
@@ -204,6 +214,7 @@ def write_summary(log: list, extra: dict | None = None) -> None:
                     "holdings": sorted(({"code": c, "since": p.get("entry_date"), "limit_up_at_entry": p.get("limit_up_at_entry")}
                             for c, p in (ev.get("positions") or {}).items()), key=lambda h: h["code"]),
                     "pending_entries": ev.get("pending_entries") or [], "pending_exits": ev.get("pending_exits") or []})
+        doc["board"] = _board([(e.get("date"), e.get("nav")) for e in log], len(ev.get("positions") or {}), log[0].get("date"))
     Path(OUT).parent.mkdir(parents=True, exist_ok=True)
     Path(OUT).write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
 

@@ -5573,11 +5573,16 @@ async function runSmokeTest(baseUrl, headless = true) {
           try {
             const resp = await route.fetch();
             const body = await resp.json();
+            // 先.一四七-0（2026-11-04）：1dy 只補了「有 NVDA 沒 sparkline」，11/03 16:02 UTC 雲端檔 quotes 整個是空的（Finnhub matched 0）
+            // → NVDA 這一格不存在，注入沒觸發、本項跟著紅。同一理由補上：缺 NVDA 就建一格只放 sparkline（資料本身的問題另開 先.一四七-2 追）。
+            if (body && body.quotes && !body.quotes.NVDA) { body.quotes.NVDA = {}; usChInfo += "（雲端檔沒有 NVDA 這格）"; }
             const nv = body && body.quotes && body.quotes.NVDA;
             if (nv && !(Array.isArray(nv.sparkline) && nv.sparkline.length >= 2)) {
               const daily = JSON.parse((await import("node:fs")).readFileSync("data/us_daily/NVDA.json", "utf8"));
               const ci = (daily.fields || []).indexOf("close");
               nv.sparkline = (daily.bars || []).slice(-20).map((b) => b[ci]).filter((x) => typeof x === "number");
+              // 先.一四七-0：缺 NVDA 整格時也沒有 quote_time（App 靠它回推 20 根收盤的日期）→ 用 repo 日線最後一根的日期（美東收盤後）
+              if (!nv.quote_time && (daily.bars || []).length) nv.quote_time = Math.floor(Date.parse(daily.bars[daily.bars.length - 1][0] + "T21:00:00Z") / 1000);
               usChInfo += "（雲端檔 NVDA 無 sparkline，測試注入 repo 日線 20 根收盤）";
             }
             await route.fulfill({ response: resp, json: body });
@@ -5997,6 +6002,62 @@ async function runSmokeTest(baseUrl, headless = true) {
     }
   } catch (e) { ltdErrs.push(`測試本身出錯：${e.message || e}`); }
   record("177. 美股最後交易日扣半日市：11/27 14:00 美東算今天、正常日 14:00 算前一交易日（先.一三二-13f）", ltdErrs.length === 0, ltdErrs.join("; "));
+
+  // 178. 先.一四七-0（收件匣 036 A）研究室「前向模擬」看板：14 張卡、壞檔只壞自己、點開有走勢與持股、用詞守門、可點 ≥44px
+  const fwdErrs = []; let fwdInfo = "";
+  try {
+    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+    try {
+      const p = await ctx.newPage();
+      const pe = []; p.on("pageerror", (e) => pe.push(String(e.message || e)));
+      // 故意弄壞兩支：paper_12 回 404、paper_13 回不是 JSON → 只有那兩張顯示「資料尚未產生」
+      await p.route(/\/data\/paper_12\.json/, (r) => r.fulfill({ status: 404, body: "nope" }));
+      await p.route(/\/data\/paper_13\.json/, (r) => r.fulfill({ status: 200, contentType: "application/json", body: "{壞掉" }));
+      await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+      await p.evaluate(() => go("lab"));
+      await p.waitForFunction(() => document.querySelectorAll("#lab-forward-list .fwd-row").length >= 14, null, { timeout: 20000 }).catch(() => {});
+      const a = await p.evaluate(() => {
+        const rows = [...document.querySelectorAll("#lab-forward-list .fwd-row")];
+        const lab = document.getElementById("scr-lab"), fc = document.getElementById("lab-forward-card"), dc = document.getElementById("lab-deep-card");
+        const toggles = [...document.querySelectorAll("#lab-forward-list .fwd-toggle")];
+        return { n: rows.length, states: rows.map((r) => r.dataset.fwd + ":" + r.dataset.fwdState),
+          missingTxt: rows.filter((r) => r.dataset.fwdState === "missing").map((r) => r.textContent.includes("資料尚未產生")),
+          summary: (document.getElementById("lab-forward-summary") || {}).textContent || "",
+          before: !!(fc && dc && lab.contains(fc) && fc.getBoundingClientRect().top < dc.getBoundingClientRect().top),
+          minH: Math.min(...toggles.map((b) => b.getBoundingClientRect().height)), text: fc ? fc.innerText : "",
+          deepOk: document.querySelectorAll("#lab-deep-list .lab-deep").length > 0 };
+      });
+      if (a.n !== 14) fwdErrs.push(`卡片 ${a.n} 張（應 14）`);
+      const miss = a.states.filter((s) => s.endsWith(":missing")).map((s) => s.split(":")[0]).sort().join(",");
+      if (miss !== "paper_12,paper_13") fwdErrs.push(`壞檔隔離：顯示資料尚未產生的是「${miss}」`);
+      if (a.missingTxt.some((x) => !x)) fwdErrs.push("壞檔那張沒寫「資料尚未產生」");
+      if (!/^共 14 支：進行中 \d+、未起跑 \d+、已判定 \d+、資料尚未產生 2$/.test(a.summary)) fwdErrs.push(`摘要「${a.summary}」`);
+      if (!a.before) fwdErrs.push("前向模擬卡不在深度研究之前");
+      if (!(a.minH >= 44)) fwdErrs.push(`可點區最小高度 ${a.minH}px（應 ≥44）`);
+      if (!a.deepOk) fwdErrs.push("深度研究卡被連帶弄壞");
+      const bad = (a.text.match(/#\d{3}\b|先[.．][一二三四五六七八九十〇]+|\bMDD\b|天條一|\b[\w-]+\.py\b|AI 選股|推薦/g) || []);
+      if (bad.length) fwdErrs.push(`前台禁用詞：${[...new Set(bad)].join("、")}`);
+      // 點開第一張「進行中」：要有走勢圖（或「要累積 2 個交易日」說明）、持股區、淨值與 0050 數字
+      const run = a.states.find((s) => s.endsWith(":run"));
+      if (run) {
+        const k = run.split(":")[0];
+        await p.evaluate((k) => document.querySelector(`#lab-forward-list .fwd-row[data-fwd="${k}"] .fwd-toggle`).click(), k);
+        const d = await p.evaluate((k) => { const r = document.querySelector(`#lab-forward-list .fwd-row[data-fwd="${k}"]`), det = r.querySelector(".fwd-detail");
+          return { open: det && !det.hidden, chart: !!det.querySelector("svg[data-fwd-chart]") || /累積 2 個交易日/.test(det.textContent), hold: /持股|持有/.test(det.textContent),
+            nums: /淨值 [\d.]+（[+−-]?[\d.]+%）/.test(r.textContent) && /同期 0050 含息/.test(r.textContent) && /最大跌幅/.test(r.textContent) }; }, k);
+        if (!d.open || !d.chart || !d.hold) fwdErrs.push(`${k} 點開：展開 ${d.open}、走勢 ${d.chart}、持股 ${d.hold}`);
+        if (!d.nums) fwdErrs.push(`${k} 進行中卡缺淨值／0050／最大跌幅`);
+      } else fwdErrs.push("沒有任何「進行中」的卡（資料檔 started 全為 false？）");
+      // 回撤警示：把一支的最大跌幅改成 −42%，該卡要紅色
+      await p.evaluate(() => { const d = JSON.parse(JSON.stringify(FWD_DOCS.paper_7 || FWD_DOCS.paper_9)); d.max_drawdown_pct = -42; d.started = true;
+        const host = document.createElement("div"); host.id = "fwd-dd-probe"; host.innerHTML = _fwCard("probe", d); document.body.appendChild(host); });
+      const dd = await p.evaluate(() => document.querySelector('#fwd-dd-probe [data-fwd-dd]')?.dataset.fwdDd || "");
+      if (dd !== "alert") fwdErrs.push(`最大跌幅 −42% 應紅色警示，實得「${dd}」`);
+      if (pe.length) fwdErrs.push(`pageerror ${pe.slice(0, 2).join(" | ")}`);
+      fwdInfo = `14 卡（${a.summary}）、壞檔 2 支只壞自己、點開 ${run ? run.split(":")[0] : "—"} 有走勢與持股、−42% 紅色、最小可點 ${a.minH}px`;
+    } finally { await ctx.close(); }
+  } catch (e) { fwdErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("178. 研究室前向模擬看板：14 張卡、壞檔只顯示「資料尚未產生」、點開有近 30 日走勢＋持股、回撤 40% 紅色、可點 ≥44px、無禁用詞（先.一四七-0）", fwdErrs.length === 0, fwdErrs.join("; ") || fwdInfo);
 
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"

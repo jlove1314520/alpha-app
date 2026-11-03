@@ -224,12 +224,37 @@ def _next_rebalance_month(day: str) -> str:
             return f"{y}-{m:02d}"
 
 
+def board_from_rebalances(px: Px | None, log: list, day: str | None, n_holdings: int | None) -> dict:
+    """先.一四七-0（收件匣 036 A）：App 前向模擬看板欄位（G／H 共用）。帳本只記再平衡，每日淨值用 price_history
+    從最近一次再平衡的 values_post 推（受 90 日價格視窗限制，只供看板近 30 日與目前回撤顯示，**不是判定用數字**，
+    判定用的期間回撤見 先.一三五-1hx）。失敗只降級（十二節）。"""
+    try:
+        import forward_board as FB
+        if not log or not px or not day:
+            return FB.safe_board([], n_holdings=n_holdings)
+        d0 = log[0]["date"]
+        cal = sorted({r["date"] for rs in (px.rows.get("0050") or [],) for r in rs if d0 <= r["date"] <= day})
+        series = []
+        for d in cal:
+            ev = [e for e in log if e["date"] <= d][-1]
+            series.append((d, sum(current_values(px, ev, d).values())))
+        b = FB.safe_board(series, n_holdings=n_holdings, start=d0)
+        b["series_note"] = "每日淨值由再平衡持股×收盤推算（價格只留約 90 個交易日），僅供看板顯示"
+        return b
+    except Exception as e:  # noqa: BLE001
+        print(f"[paper_7] 警告：看板欄位失敗（{type(e).__name__}: {e}）")
+        return {"error": f"{type(e).__name__}: {e}"}
+
+
 def write_summary(px: Px | None, log: list, extra: dict | None = None) -> None:
     names = {}
     for row in (_load(ROOT / "data" / "stock_names.json", {}) or {}).get("tw") or []:
         if row:
             names[row[0]] = row[1]
     doc = {"label": LABEL, "note": NOTE, "start_not_before": START_NOT_BEFORE, "started": bool(log),
+           "prereg": "docs/PREREG_paper_g_revsurprise.md", "trial_no": 456,
+           # 先.一四七-0：PREREG「滿 24 個月＝8 次再平衡後判一次；修訂後約 2028-11」→ 起跑日＋24 個月，標估計
+           "judge_after": "2028-11-02", "judge_after_estimated": True,
            "generated_at": datetime.now(TW).isoformat(timespec="seconds"),
            "judge": "滿 24 個月（8 次再平衡）判一次：扣 1× 成本年化 > 0050 含息、兩年中至少一年贏 0050、期間回撤 ≤50%（天條一）",
            "known_limit": "f_revenue_surprise 最近一次重驗 #404 FAIL（百分位 87.0，門檻 98.33）；只有 8 次再平衡，統計上很弱",
@@ -253,6 +278,9 @@ def write_summary(px: Px | None, log: list, extra: dict | None = None) -> None:
                                          "since": entry_date.get(c)} for c, v in vals.items()],
                                        key=lambda h: (h["rank_at_rebalance"] or 9999)),
                     "last_entered": ev.get("entered") or [], "last_exited": ev.get("exited") or []})
+        doc["board"] = board_from_rebalances(px, log, day, len(vals))
+        if doc["board"].get("max_drawdown_pct") is not None:
+            doc["max_drawdown_pct"] = doc["board"]["max_drawdown_pct"]
     OUT.write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
 
 

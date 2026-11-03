@@ -572,6 +572,9 @@ def write_summary(extra: dict | None = None) -> None:
         pass
     log = read_log()
     doc = {"label": LABEL, "note": NOTE, "start_not_before": START_NOT_BEFORE, "started": bool(log),
+           "prereg": "docs/PREREG_paper_h_ml_forward.md", "trial_no": 459,
+           # 先.一四七-0：PREREG「滿 24 個月＝24 次再平衡後判一次」→ 起跑日＋24 個月，標估計（PREREG 文字寫約 2028-11）
+           "judge_after": "2028-12-01", "judge_after_estimated": True,
            "generated_at": datetime.now(TW).isoformat(timespec="seconds"),
            "model_frozen": bool(meta.get("model_sha256")), "model_sha256": meta.get("model_sha256"),
            "features_used_n": len(meta.get("features_used") or []) or None,
@@ -653,7 +656,8 @@ def _holdings_extra(px, log: list) -> dict:
                                  "rank_at_rebalance": (picks.get(c) or {}).get("rank")} for c, v in vals.items()],
                                key=lambda h: (h["rank_at_rebalance"] or 9999)),
             "last_entered": ev.get("entered") or [], "last_exited": ev.get("exited") or [],
-            "last_feature_coverage": ev.get("feature_coverage")}
+            "last_feature_coverage": ev.get("feature_coverage"),
+            "board": G.board_from_rebalances(px, log, day, len(vals))}
 
 
 def main(argv: list[str]) -> int:

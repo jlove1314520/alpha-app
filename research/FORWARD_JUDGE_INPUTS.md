@@ -41,6 +41,7 @@
    - `research/data/paper_7030_log.jsonl`（紙.一）：每月一筆 `price_0050`＝**原始收盤**、不含息。
    - `data/strategy_history.json`：0050 逐月只到 2026-09-30，不再更新；`data/strategy_curves.json` 灰線也是 90 日價格算的。
    - `data/ex_dividend_events.json`：目前最早 ex_date 2026-08-26、沒有 0050 這一檔的事件，是否長期保留舊事件**本輪未查證**。
+   - **2026-11-04 更新（先.一三五-1ib 甲 [預設放行]）**：已建 `research/data/bench_0050_tr.jsonl`（`research/bench_0050_tr.py`，market.yml 每班 append-only 累乘，起點 2026-06-23＝1.0，每個交易日一列 `tr_index`）。判定時取起跑日與判定日的 `tr_index` 比值即同期 0050 含息報酬。③ 的來源缺口自此補上（序列連續性要靠排程持續跑；斷檔時腳本會告警不硬接）。
 4. **F／F-翼漏跑不補**：期交所選擇權日報只有當天，那一天沒跑到就永久缺點；MDD 會漏掉那天的盤中最低。屬於既知設計（PREREG 寫「前進式只能用當天資料」），本輪只記錄、不另開條目。
 
 ## 副帶發現（不在本條範圍，照實記錄）

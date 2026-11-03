@@ -166,6 +166,12 @@ jobs:
           python scripts/backfill_price_history_gaps.py || echo "::warning::price_history 缺日補齊未完成"
           python scripts/selftest_price_history_gaps.py || echo "::warning::price_history 仍有全市場缺日"
         continue-on-error: true
+      # 先.一三五-1ib 甲（2026-11-04 [預設放行]）：0050 含息日序列持續累積（前向模擬判定比「同期 0050 含息」用）。
+      # 讀 price_history 同一版 adj_close 相鄰日比值，append-only 累乘；零外部請求、自身失敗只警告（十二節）。
+      # 本 step 新增會改寫 research/data/bench_0050_tr.jsonl，已加進下方 git add -f 清單（十節）。
+      - name: 累積 0050 含息日序列（零額外請求，先.一三五-1ib）
+        run: python research/bench_0050_tr.py
+        continue-on-error: true
       # 先.一二一-3（2026-10-20）：從 accumulate_institutional.py 後面移到這裡。原本排在 update_price_history.py 之前，
       # price_history 還沒有法人最新日的收盤 → est_amount 用前一天收盤、逆勢買超／20 日均價價差算不出來。
       # 中間的匯率／外資持股兩步不讀寫 sector_flow.json，順序互不影響；仍在 build_by_code 之前，零額外請求。
@@ -504,6 +510,7 @@ jobs:
           git add -f research/data/paper_7_log.jsonl 2>/dev/null || true
           git add -f research/data/paper_8_log.jsonl 2>/dev/null || true
           git add -f research/data/paper_8_taiex_closes.json 2>/dev/null || true
+          git add -f research/data/bench_0050_tr.jsonl 2>/dev/null || true
           for f in paper_10_log.jsonl paper_10_control_log.jsonl paper_10_events.json paper_10_control.json paper_11_log.jsonl paper_13_log.jsonl paper_14_log.jsonl paper_14_shadow_log.jsonl paper_14_shadow.json paper_15_log.jsonl paper_16_log.jsonl paper_17_log.jsonl paper_18_log.jsonl; do git add -f research/data/$f 2>/dev/null || true; done
           # 先.一三八-6：前向帳本最後一行半截時 paper_forward_common.read_log 會把原檔備份到這個資料夾（十節，備份要進 repo 才能還原）
           git add -f research/data/ledger_corrupt_backup/ 2>/dev/null || true

@@ -56,7 +56,8 @@ def write_summary(log, started, extra=None):
            "last_date": log[-1]["date"] if log else None, "max_drawdown_pct": round(mdd * 100, 2),
            "open_position": (pos if pos and pos["event"] == "entry" else None),
            "n_closed": sum(1 for r in log if r["event"] in ("settle", "stop")),
-           "n_stops": sum(1 for r in log if r["event"] == "stop"), **(extra or {})}
+           "n_stops": sum(1 for r in log if r["event"] == "stop"),
+           **B.board_meta(log, "docs/PREREG_paper_f_wing.md", 455, judge="滿 12 個結算月後判一次：12 個月累積淨報酬 > 0 且 > 同期 0050 含息、期間淨值最大回撤 ≤50%、停損照規則觸發"), **(extra or {})}
     OUT.write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
