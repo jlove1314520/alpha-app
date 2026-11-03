@@ -1,3 +1,17 @@
+## 2026-11-03 10:31～11:0x DevQueue 20261103-103102（維運帽）：1ja 結案——讀 price_history 的上線程式逐支查零成交日 close=0，修 11 支＋前端 FinMind 退回分支（1jd），補 1jc（收盤後）
+
+- **等待總司令審閱：12 件**（`research/AWAITING_REVIEW.md` 本輪沒有新增或結案）。
+- **1ja（`- [x]`，純 bug 修復）** 上一輪說清單「已記在條目」其實沒寫進去，本輪從頭 grep。零成交列＝開高低收與還原價全 0、量>0、`no_trade: True`，全庫 3,648 列／286 檔。上線／產 App 資料的程式 23 支：
+  - 已有防呆 9 支（含真錢 `auto_rebalance_bb90.load_prev_closes`：最後一列 0 → 缺價 → 拒單，fail closed）；`data_audit` 是比對官方用，0 會判不一致＝正確方向，不改。
+  - **修 11 支、各一個 commit**：策略曲線 `build_strategy_curves`（3f61725cbfa）、選股榜／訊號帳報酬查價（cc1da9f15eb）、訊號帳反映度除以零（2a743805577）、融資維持率擔保品（e8b6473cfc8）、動能分數價格類因子（ea6dfc2be1f）、MA60 突破顯示（af77ca18859）、月底股價（3c94191c033）、類股資金流（562b3831a0a）、策略績效（1db766d3c87）、自動交易覆盤前收（b31502167f2）、**App 個股日線小檔 `build_by_code`**（514fcfd57ad；線上 235 檔共 2,493 列 0 元價會讓 K 線掉到 0、當天漲跌 −100%）。
+  - 證據：新自測 `scripts/selftest_zero_close_consumers.py` 修前各項 FAIL（例：訊號帳 ZeroDivisionError、月底價 `{'2026-09': 0.0}`）、修後 19/19 PASS；相關既有自測 8 支全過；`build_by_code` 用真實資料（只讀）輸出到暫存資料夾：0 元列 0、2330 價格列與線上相同。正式 `data/by_code/` 等下一班 market.yml 重產。
+  - 十三節核心檔不直接讀 `data/price_history`，不需提案。
+  - [自行裁量] `auto_ledger_view`（日誌頁真錢帳本估值）同形狀，但它是 live server 相依檔、改了要重啟＋七之二驗證；現在盤中、Bb-90 白名單是 ETF 幾乎不會零成交 → 本輪退回不上線，補 **1jc**（時間閘 11/03 13:35 後）。
+- **1jd（`- [x]`，純 bug 修復）** FinMind 實打 1 次回 402（額度滿，不重試）；改讀本機研究快取證實 FinMind 也以 0 記零成交日（0054 有 104 列）。`app.js::twPxRepoFirst` FinMind 分支、`app-stock.js` 月底股價 `fmAt` 去掉 close≤0。
+- 冒煙 `node scripts/smoke_test.mjs`：1ja 179 PASS／0 FAIL、exit 0；1jd 179 PASS／0 FAIL、exit 0。
+- **補件**：1jc（時間閘）、1jd（已做）。來源都是本輪發現；其餘補件來源前一輪已記為用盡，可執行項仍不足 6，照實記錄。
+- 外部請求：FinMind 1 次（402）＋git push。沒碰 holdout、沒登記試驗、沒改十三節核心檔、沒重啟常駐服務。`data/STATUS.json` 本輪無資料源或面板異動，未改。
+
 ## 2026-11-03 09:31～10:05 DevQueue 20261103-093102（維運帽）：1ix 結案、1iy 用真實累積檔試跑 12 支前向追蹤並修好零成交日 close=0 被當價格、1iz 結案、補件 1iz／1ja／1jb
 
 - **等待總司令審閱：12 件**（`research/AWAITING_REVIEW.md` 本輪沒有新增或結案）。
