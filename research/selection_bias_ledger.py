@@ -486,7 +486,16 @@ def main() -> int:
               f"｜跨軌重複 {len(cross)} 個")
         return 0
 
-    OUT_MD.write_text(md, encoding="utf-8", newline="\n")
+    # 先.一三五-1jq：除了「自動產生（時間）」那行之外內容都沒變就不回寫——SELECTION_BIAS_LEDGER.md 是追蹤檔、
+    # 不在 dev_queue_runner.MACHINE_WRITTEN，只改時間的變更會留在工作目錄沒提交（同 1jp 形狀）。
+    # 時間因此代表「內容最後一次變動的計算時間」。OUT_JSON 不進版控，照常寫。
+    stamp_re = re.compile(r"^\*\*自動產生\*\*：`research/selection_bias_ledger\.py`（[^）]*）。$", re.M)
+    try:
+        old_md = OUT_MD.read_text(encoding="utf-8")
+    except OSError:
+        old_md = None
+    if old_md is None or stamp_re.sub("", old_md) != stamp_re.sub("", md):
+        OUT_MD.write_text(md, encoding="utf-8", newline="\n")
     OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
     OUT_JSON.write_text(json.dumps(payload, ensure_ascii=False, indent=1), encoding="utf-8")
 

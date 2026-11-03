@@ -2,7 +2,7 @@
 
 真實帳本複製到暫存目錄，LEDGER／OUT_MD／OUT_JSON 全換暫存路徑：零外部請求、不動真實帳本與輸出檔。
 守住：①N 沒變（只是換一天重跑）→ 帳本位元組不變（原本每天把日期改成今天，追蹤檔長期留在工作目錄沒提交）；
-②N 變了 → 數字與日期都更新；③--check 不寫任何檔。
+②N 變了 → 數字與日期都更新；③--check 不寫任何檔；④⑤（先.一三五-1jq）SELECTION_BIAS_LEDGER.md 只有時間那行不同不重寫、內容變了照常重寫。
 """
 from __future__ import annotations
 
@@ -69,6 +69,20 @@ with tempfile.TemporaryDirectory() as td:
     m2 = PAT.search(led.read_text(encoding="utf-8"))
     check("N 變了 → 數字回寫成實算值", bool(m2) and int(m2.group(1)) == n_now, m2 and m2.group(1))
     check("N 變了 → 日期改成今天（不是 2000-01-01）", bool(m2) and m2.group(2) != "2000-01-01", m2 and m2.group(2))
+
+    # ④（先.一三五-1jq）SELECTION_BIAS_LEDGER.md 只有「自動產生（時間）」那行不同 → 不得回寫
+    stamp = re.compile(r"(\*\*自動產生\*\*：`research/selection_bias_ledger\.py`（)[^）]*(）。)")
+    md_txt = S.OUT_MD.read_text(encoding="utf-8")
+    check("SBL.md 找得到「自動產生（時間）」那行", bool(stamp.search(md_txt)))
+    S.OUT_MD.write_text(stamp.sub(r"\g<1>2000-01-01 00:00\g<2>", md_txt, count=1), encoding="utf-8", newline="\n")
+    before_md = S.OUT_MD.read_bytes()
+    run([])
+    check("SBL.md 內容沒變 → 位元組不變（時間不被改成現在）", S.OUT_MD.read_bytes() == before_md)
+    # ⑤ 內容真的不同 → 照常重寫
+    S.OUT_MD.write_text(md_txt + "\n殘留舊內容\n", encoding="utf-8", newline="\n")
+    run([])
+    check("SBL.md 內容變了 → 重寫（舊內容消失、時間不是 2000-01-01）",
+          "殘留舊內容" not in S.OUT_MD.read_text(encoding="utf-8") and "2000-01-01 00:00" not in S.OUT_MD.read_text(encoding="utf-8"))
 
     # ③ --check 不寫檔
     led.write_text(wrong, encoding="utf-8", newline="\n")
