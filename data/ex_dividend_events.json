@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated_at": "2026-11-03T11:09:32.832276+08:00",
+    "generated_at": "2026-11-03T18:14:25.260582+08:00",
     "last_fetch_count": 11,
-    "reductions_generated_at": "2026-11-03T11:09:40.302661+08:00"
+    "reductions_generated_at": "2026-11-03T18:14:34.535639+08:00"
   },
   "events": {
     "01010T": [
@@ -1344,7 +1344,10 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-10-30",
-        "applied": false
+        "applied": true,
+        "official_factor": 0.9940286624203821,
+        "official_source": "TWSE TWT49U",
+        "factor_applied": 0.9940286624203821
       }
     ],
     "00984D": [
@@ -1380,7 +1383,10 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-10-30",
-        "applied": false
+        "applied": true,
+        "official_factor": 0.9907597535934292,
+        "official_source": "TWSE TWT49U",
+        "factor_applied": 0.9907597535934292
       }
     ],
     "2530": [
@@ -1429,7 +1435,10 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-10-30",
-        "applied": false
+        "applied": true,
+        "official_factor": 0.9836829836829836,
+        "official_source": "TWSE TWT49U",
+        "factor_applied": 0.9836829836829836
       }
     ],
     "00946": [
@@ -3033,6 +3042,16 @@
         "applied": true,
         "factor_applied": 0.9954268292682927,
         "note": "adj_close 已由 scripts/fix_backfill_exdiv.py 以官方係數重算（至 2026-10-15），只補記帳、不再乘"
+      },
+      {
+        "ex_date": "2026-11-03",
+        "official_factor": 0.9956490210297317,
+        "pre_close": 13.79,
+        "ref_price": 13.73,
+        "source": "TPEx exDailyQ",
+        "first_seen": "2026-11-03",
+        "applied": true,
+        "factor_applied": 0.9956490210297317
       }
     ],
     "00959B": [
@@ -3046,6 +3065,16 @@
         "applied": true,
         "factor_applied": 0.9942660550458715,
         "note": "adj_close 已由 scripts/fix_backfill_exdiv.py 以官方係數重算（至 2026-10-15），只補記帳、不再乘"
+      },
+      {
+        "ex_date": "2026-11-03",
+        "official_factor": 0.9944629014396458,
+        "pre_close": 9.03,
+        "ref_price": 8.98,
+        "source": "TPEx exDailyQ",
+        "first_seen": "2026-11-03",
+        "applied": true,
+        "factor_applied": 0.9944629014396458
       }
     ],
     "00966B": [
@@ -3059,6 +3088,16 @@
         "applied": true,
         "factor_applied": 0.9945987654320988,
         "note": "adj_close 已由 scripts/fix_backfill_exdiv.py 以官方係數重算（至 2026-10-15），只補記帳、不再乘"
+      },
+      {
+        "ex_date": "2026-11-03",
+        "official_factor": 0.9948415622697125,
+        "pre_close": 13.57,
+        "ref_price": 13.5,
+        "source": "TPEx exDailyQ",
+        "first_seen": "2026-11-03",
+        "applied": true,
+        "factor_applied": 0.9948415622697125
       }
     ],
     "00983B": [
@@ -3072,6 +3111,16 @@
         "applied": true,
         "factor_applied": 0.9958362248438584,
         "note": "adj_close 已由 scripts/fix_backfill_exdiv.py 以官方係數重算（至 2026-10-15），只補記帳、不再乘"
+      },
+      {
+        "ex_date": "2026-11-03",
+        "official_factor": 0.9961114711600777,
+        "pre_close": 15.43,
+        "ref_price": 15.37,
+        "source": "TPEx exDailyQ",
+        "first_seen": "2026-11-03",
+        "applied": true,
+        "factor_applied": 0.9961114711600777
       }
     ],
     "00984B": [
@@ -3085,6 +3134,16 @@
         "applied": true,
         "factor_applied": 0.9947124917382684,
         "note": "adj_close 已由 scripts/fix_backfill_exdiv.py 以官方係數重算（至 2026-10-15），只補記帳、不再乘"
+      },
+      {
+        "ex_date": "2026-11-03",
+        "official_factor": 0.9949558638083228,
+        "pre_close": 15.86,
+        "ref_price": 15.78,
+        "source": "TPEx exDailyQ",
+        "first_seen": "2026-11-03",
+        "applied": true,
+        "factor_applied": 0.9949558638083228
       }
     ],
     "00986B": [
@@ -3098,6 +3157,16 @@
         "applied": true,
         "factor_applied": 0.9956474428726878,
         "note": "adj_close 已由 scripts/fix_backfill_exdiv.py 以官方係數重算（至 2026-10-15），只補記帳、不再乘"
+      },
+      {
+        "ex_date": "2026-11-03",
+        "official_factor": 0.9979188345473465,
+        "pre_close": 9.61,
+        "ref_price": 9.59,
+        "source": "TPEx exDailyQ",
+        "first_seen": "2026-11-03",
+        "applied": true,
+        "factor_applied": 0.9979188345473465
       }
     ],
     "020035": [
