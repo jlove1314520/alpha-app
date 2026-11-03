@@ -77,6 +77,12 @@ Stooq 免費 key（需人工過 CAPTCHA）。兩者都需要總司令親自領�
 - 個股新聞只比對標題裡的代號與官方名稱（`news_matcher`），覆蓋率有限；存檔沒有某檔＝近 14 天沒有點名它的新聞，不是錯誤。
 - 10/01～10/11、10/14 的新聞在先.一〇四-1 修好排序前就被擠掉，存檔也補不回。
 
+## 🟢 price_history 的 close=0＝當天沒有一般交易收盤，不是價格 0（2026-11-03 先.一三五-1iz）
+
+- `data/price_history` 以 `close=0.0`、`adj_close=0.0`（開高低也是 0）記「一般交易整天沒成交」的日子：全期 3,648 列，其中 402 列 `volume`>0（量都很小，例：4581 2026-09-08 434 股、成交值 21,180 元）。
+- 核對（零請求）：模擬 I 回看期官方全市場日檔快取（`research/data/paper_9_lookback/`，TWSE MI_INDEX／TPEx otc，2025-10-28～2026-10-30）內這類列共 185 列，**185/185 官方開高低收都是 null**；有量是零股／盤後的量，不是漏抓收盤。
+- **消費端一律把 close≤0 當「當天無價」**（往前找最近有價日計值、不得以 0 成交或除以它）。前向追蹤共用框架已照做（`research/paper_forward_common.py::Px`，先.一三五-1iy）；其他消費端清查見 先.一三五-1ja。
+
 ## 🟢 上櫃日線成交量＝一般交易整股，不含零股／盤後定價（2026-10-29 先.一四〇-12）
 
 - `data/price_history` 上櫃的 `volume`／`turnover` 取自 TPEx openapi `tpex_mainboard_quotes`（`TradingShares`／`TransactionAmount`，`update_price_history.py::fetch_tpex()`）。
