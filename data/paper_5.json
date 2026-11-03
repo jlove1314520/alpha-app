@@ -1,12 +1,27 @@
 {
  "label": "模擬 F 賣波動",
- "started": false,
+ "started": true,
  "start": "2026-11-02",
  "note": "學界已知現象（選擇權賣方賺波動率風險溢酬）、只是研究；不提請真錢（先.九十一-1）",
- "generated_at": "2026-10-31T09:08:58+08:00",
+ "generated_at": "2026-11-03T09:07:03+08:00",
  "nav": 100.0,
- "last_date": null,
- "open_position": null,
- "n_settled": 0,
- "why_not_started": "2026-11 起從當月真實資料開始記，不倒填"
+ "last_date": "2026-11-02",
+ "open_position": {
+  "logged_at": "2026-11-03T09:07:03+08:00",
+  "date": "2026-11-02",
+  "event": "entry",
+  "contract": "202611",
+  "expiry": "2026-11-18",
+  "strike": 44900.0,
+  "taiex": 44920.14,
+  "call": 1250.0,
+  "put": 910.0,
+  "premium": 2160.0,
+  "premium_net": 2153.84,
+  "capital": 2246007.0,
+  "nav_at_entry": 100.0,
+  "nav": 100.0,
+  "note": "賣出價平跨式 1 組（1 倍名目、持有到期、滑價每口 1 點）"
+ },
+ "n_settled": 0
 }

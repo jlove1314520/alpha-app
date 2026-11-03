@@ -74,5 +74,20 @@ with tempfile.TemporaryDirectory() as td:
     s = json.loads(T.OUT.read_text(encoding="utf-8"))
     ok(s["started"] and s["label"] == "模擬 F 賣波動" and "只是研究" in s["note"], "摘要含標籤與「只是研究」註記")
 
+# 先.一三五-1iv：openapi 實際回 JSON 陣列（英文欄位），與 CSV 解析結果必須相同
+def chain_json(day, rows):
+    return "﻿" + json.dumps([{"Date": day.replace("-", ""), "Contract": "TXO", "ContractMonth(Week)": cm, "StrikePrice": str(k),
+                               "CallPut": cp, "Open": "-", "Close": str(last), "SettlementPrice": str(last),
+                               "TradingHalt": "", "TradingSession": sess} for cm, k, cp, last, sess in rows]
+                             + [{"Date": day.replace("-", ""), "Contract": "CAO", "ContractMonth(Week)": "202611", "StrikePrice": "250",
+                                 "CallPut": "買權", "Close": "-", "SettlementPrice": "52.5", "TradingSession": "一般"}], ensure_ascii=False)
+
+
+_rows = [("202611", 30000, "買權", 300, "一般"), ("202611", 30000, "賣權", 280, "一般"),
+         ("202611W2", 30000, "買權", 100, "一般"), ("202611", 30000, "買權", 999, "盤後"), ("202612", 30500, "賣權", "-", "一般")]
+ok(T.parse_opt(chain_json("2026-11-02", _rows)) == T.parse_opt(chain("2026-11-02", _rows)), "JSON 格式與 CSV 格式解析結果相同")
+_d, _c = T.parse_opt(chain_json("2026-11-02", _rows))
+ok(_d == "2026-11-02" and set(_c) == {"202611", "202612"} and _c["202611"][30000.0]["C"] == (300.0, 300.0), "JSON：只留 TXO 月合約一般時段")
+
 print("合計", len(fails), "項失敗" if fails else "全過")
 sys.exit(1 if fails else 0)

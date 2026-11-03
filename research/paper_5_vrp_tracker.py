@@ -160,8 +160,17 @@ def _num(s):
 
 
 def parse_opt(text: str):
-    """回傳 (資料日, {contract_month: {strike: {'C': (last, settle), 'P': ...}}})，只留 TXO 月合約一般時段。"""
-    rows = list(csv.reader(io.StringIO(text.lstrip("﻿"))))
+    """回傳 (資料日, {contract_month: {strike: {'C': (last, settle), 'P': ...}}})，只留 TXO 月合約一般時段。
+
+    2026-11-03 先.一三五-1iv：openapi 實際回 JSON 陣列（英文欄位，content-type octet-stream），
+    原本只認中文表頭 CSV，11/02 起跑後每班 ValueError '日期' is not in list。兩種格式都收，欄位一一對應。"""
+    text = text.lstrip("﻿")
+    if text.lstrip().startswith("["):
+        keys = ("Date", "Contract", "ContractMonth(Week)", "StrikePrice", "CallPut", "Close", "SettlementPrice", "TradingSession")
+        hdr = ["日期", "契約", "到期月份(週別)", "履約價", "買賣權", "最後成交價", "結算價", "交易時段"]
+        rows = [hdr] + [[str(o.get(k) or "") for k in keys] for o in json.loads(text) if isinstance(o, dict)]
+    else:
+        rows = list(csv.reader(io.StringIO(text)))
     hdr = rows[0]
     ix = {k: hdr.index(k) for k in ("日期", "契約", "到期月份(週別)", "履約價", "買賣權", "最後成交價", "結算價", "交易時段")}
     out, day = {}, None

@@ -1,14 +1,35 @@
 {
  "label": "模擬 F-翼 賣波動（有保護翼）",
- "started": false,
+ "started": true,
  "start": "2026-11-02",
  "note": "紙上追蹤：鐵蝴蝶（賣價平跨式＋買 ±500 點保護翼），每組最大虧損＝淨值 3%；真錢版暫不啟用（本金門檻，先.一一八-1）",
- "generated_at": "2026-10-31T09:08:58+08:00",
+ "generated_at": "2026-11-03T09:07:03+08:00",
  "nav": 100.0,
- "last_date": null,
+ "last_date": "2026-11-02",
  "max_drawdown_pct": 0.0,
- "open_position": null,
+ "open_position": {
+  "logged_at": "2026-11-03T09:07:03+08:00",
+  "date": "2026-11-02",
+  "event": "entry",
+  "contract": "202611",
+  "expiry": "2026-11-18",
+  "strike": 44900.0,
+  "wing": 500,
+  "taiex": 44920.14,
+  "legs": {
+   "short_call": 1250.0,
+   "short_put": 910.0,
+   "long_call": 950.0,
+   "long_put": 770.0
+  },
+  "premium_net": 428.12,
+  "max_loss_ntd": 3594.0,
+  "lots": 1,
+  "capital": 119800.0,
+  "nav_at_entry": 100.0,
+  "nav": 100.0,
+  "note": "鐵蝴蝶 1 組：賣 k 的 call／put、買 k+500 call／k−500 put；本金＝最大虧損÷3%"
+ },
  "n_closed": 0,
- "n_stops": 0,
- "why_not_started": "2026-11 起從當月真實資料開始記，不倒填"
+ "n_stops": 0
 }

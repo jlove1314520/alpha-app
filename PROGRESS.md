@@ -1,3 +1,16 @@
+## 2026-11-03 09:0x～09:3x DevQueue 空轉補件（維運帽）：到期時間閘 1en／1ey／1gu 結案＋抓到並修好模擬 F／F-翼解析崩潰（1iv）＋補件 1iw／1ix／1iy
+
+- **等待總司令審閱：12 件**（`research/AWAITING_REVIEW.md` 本輪沒有新增或結案）。
+- 前向模擬 14／14 已滿，照零之二⑤不新增候選、不寫 PREREG、不送 AWAITING；`research/FORWARD_CANDIDATES.md` 補一行本輪紀錄。
+- **1en（`- [x]`）** 台北 01:00～08:59 的 market.yml 有 11/03 03:27、04:30 兩班；雲端 job log 回 HTTP 403 讀不到，改用 git 證據：兩班只改 `short_lending_available.json`，累積檔 `generated_at` 仍 11/02 10:10Z、日期停在 20261102，沒有多記當天 → 符合 1bt 規則。
+- **1ey（`- [x]`）** `audit_forward_reserved_reads.py`：paper_7／paper_9 帳本各 1 列 min=2026-11-02，14／14 only_signal_input。
+- **1gu（`- [x]`）** Shioaji stdout `[build] git sha=a79a332`，e1ed816 是它的祖先。
+- **1iv（`- [x]`，純 bug 修復）** 模擬 F／F-翼 11/02 起跑後每班崩潰：期交所 `DailyMarketReportOpt` 實回 JSON 陣列（英文欄位），`parse_opt()` 只認中文 CSV 表頭 → `ValueError: '日期' is not in list`，workflow 該步 continue-on-error 吞掉，看守員亮 NOT_STARTED_LATE。改成 JSON／CSV 都收；`selftest_paper_5.py` 加 2 項（0 失敗）、`selftest_paper_6_7.py` 0 失敗。**[自行裁量]** 期交所最新資料日仍是 11/02，用同一份回應在本機各跑 1 次：F、F-翼 都在 11/02 建倉 202611／44900；前向看守 overall=OK、警示 0。Cowork 可推翻（刪兩帳本這 1 列即還原）。
+- **補件**：1iw（時間閘 11/04 09:00，雲端班次生效驗收）、1ix（雲端 log 讀不到 → 未完成條目改寫替代證據）、1iy（前向追蹤自測的假資料 vs 真實端點格式對照，優先 12/01 起跑的 H／J／K／L）。
+- **我自己出的錯（如實記錄）**：寫條目時 `C:\alpha` 又變成 BEL 控制字元（工具層把雙反斜線吃成一個），控制字元自測抓到 2 行，已改用 `chr(92)` 修好。
+- 冒煙 `node scripts/smoke_test.mjs`：179 PASS／0 FAIL、exit 0。
+- 外部請求：期交所 openapi `DailyMarketReportOpt` 1 次＋`DailyMarketReportFut` 1 次（`taifex_openapi` 共用節流，皆 200）、gh API（自家 repo）。沒碰 holdout；沒登記試驗；本輪自己沒算報酬（只讓既有追蹤程式照 PREREG 記了建倉）。
+
 ## 2026-11-03 07:3x～07:5x DevQueue 空轉補件（維運帽）：到期時間閘 1dw／1ee／1gj-b 結案＋補件 1is（已做）／1it／1iu（已做）
 
 - **等待總司令審閱：12 件**（`research/AWAITING_REVIEW.md` 本輪沒有新增或結案）。
