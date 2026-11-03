@@ -160,6 +160,12 @@ def _reset_relative_strength_stats() -> None:
         RELATIVE_STRENGTH_ALIGN_STATS[f"misaligned_start_date_{prefix}"] = 0
 
 
+def _priced_rows(price_rows: list[dict]) -> list[dict]:
+    """先.一三五-1ja：去掉零成交日（close=0／adj_close=0，no_trade）——那不是價格，當天視為無價。"""
+    return [r for r in price_rows
+            if (r.get("close") or 0) > 0 and (r.get("adj_close") is None or (r.get("adj_close") or 0) > 0)]
+
+
 def _relative_strength_leg(
     stock_by_date: dict[str, float], taiex_vals: list[float], taiex_dates: list[str],
     window_len: int, stat_prefix: str,
@@ -523,10 +529,13 @@ def build_rows() -> pd.DataFrame:
         price_rows = price_history.get(code) or []
         industry = industry_map.get(code)
 
-        rel_strength = _relative_strength(price_rows, taiex_20d, taiex_20d_dates, taiex_60d, taiex_60d_dates)
+        # 先.一三五-1ja：零成交日 price_history 記 close=0／adj_close=0（no_trade），不是價格；用價格的三個因子略過這些列
+        # （當天無價），否則相對強度／創新高算成 −100%、量價配合度把 0 當暴跌。成交金額類（量能突破、流動性）照原樣。
+        px_rows = _priced_rows(price_rows)
+        rel_strength = _relative_strength(px_rows, taiex_20d, taiex_20d_dates, taiex_60d, taiex_60d_dates)
         vol_breakout = _volume_breakout(price_rows)
-        new_high = _new_high_breakout(price_rows)
-        vp_raw, vp_flags = _volume_price_coordination(price_rows)
+        new_high = _new_high_breakout(px_rows)
+        vp_raw, vp_flags = _volume_price_coordination(px_rows)
         # 2026-08-28新增（使用者原話，逐字照抄）：「創新高但量價配合度低（無量
         # 創高/高檔爆量）→創新高因子的分數打折，不讓假突破拿高分——寧可漏掉，
         # 不要騙自己」。只在「真的創了新高(new_high>0)且量價配合度數字為負
