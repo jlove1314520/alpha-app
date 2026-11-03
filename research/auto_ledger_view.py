@@ -47,7 +47,9 @@ def _close_on_or_before(rows: list, d: str):
     c = None
     for r in rows:
         if r["date"] <= d:
-            c = AB._num(r["close"])
+            v = AB._num(r["close"])
+            if v is not None and v > 0:  # 先.一三五-1jc：零成交日 close=0 不當價格，沿用前一筆真實收盤
+                c = v
         else:
             break
     return c
@@ -92,6 +94,10 @@ def ledger_view(base: Path | None = None, price_doc: dict | None = None, today: 
     asof_d = date.fromisoformat(as_of)
     wk0 = (asof_d - timedelta(days=asof_d.weekday())).isoformat()  # 本週一
     last = {c: _close_on_or_before(series[c], as_of) for c in AB.WHITELIST}
+    if any(last[c] is None for c in AB.WHITELIST):  # 只剩零成交列＝等同缺價（同上，不以 0 估值）
+        out["pnl"] = {"error": "price_history 缺白名單標的收盤價，無法估值"}
+        out["perf"] = {"error": "price_history 缺白名單標的收盤價，無法畫績效對照"}
+        return out
     cost = val = val_wk_prev = cost_wk = 0.0
     for r in fills:
         sym, q, d = r.get("symbol"), AB._filled(r), str(r.get("ts", ""))[:10]

@@ -141,10 +141,16 @@ USP = load("update_strategy_performance", "research/update_strategy_performance.
 check("零成交日回 None", USP.close_on({"9999": [row("2026-10-01", 50), zero("2026-10-02")]}, "9999", "2026-10-02") is None)
 
 print("auto_trading_review._prev_close_before")
-# auto_ledger_view._close_on_or_before 同形狀，但它是 live server 相依檔（改了要重啟＋七之二驗證），另案於收盤後處理（先.一三五-1jc）
 ATR = load("auto_trading_review", "research/auto_trading_review.py")
 _pd = {"prices": {"0050": [row("2026-10-01", 50), zero("2026-10-02")]}}
 check("前收沿用前一筆真實收盤", ATR._prev_close_before("2026-10-03", "0050", _pd) == 50, ATR._prev_close_before("2026-10-03", "0050", _pd))
+
+print("auto_ledger_view._close_on_or_before（先.一三五-1jc：日誌頁真錢帳本估值）")
+ALV = load("auto_ledger_view", "research/auto_ledger_view.py")
+_rows = [row("2026-10-01", 50), zero("2026-10-02"), row("2026-10-05", 52)]
+check("零成交日沿用前一筆真實收盤（不以 0 估值）", ALV._close_on_or_before(_rows, "2026-10-02") == 50, ALV._close_on_or_before(_rows, "2026-10-02"))
+check("之後的真實收盤照常取", ALV._close_on_or_before(_rows, "2026-10-05") == 52)
+check("只有零成交列 → None（交給呼叫端既有缺價處理）", ALV._close_on_or_before([zero("2026-10-02")], "2026-10-02") is None)
 
 print("paper_1b_tracker／paper_3_tracker._closes（先.一三五-1je）")
 for _nm, _rel in (("paper_1b_tracker", "research/paper_1b_tracker.py"), ("paper_3_tracker", "research/paper_3_tracker.py")):

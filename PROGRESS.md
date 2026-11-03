@@ -1,3 +1,15 @@
+## 2026-11-03 13:3x～13:4x DevQueue 空轉補件（維運帽）：前向模擬 14／14 已滿，處理到期時間閘 1fw／一四四-1／1jc，補 1jj（已做）＋1jk／1jl（時間閘）
+
+- **等待總司令審閱：13 件**（新增 先.一四四-1 記憶體白天盤中報告，甲（建議）維持現狀／乙 DevQueue 盤中不跑冒煙；已等 0 小時）。
+- 照零之二⑤：上限滿，不新增候選、不寫 PREREG、不送候選 AWAITING；改處理到期時間閘＋補既有模擬／App 的維運。
+- **1fw（`- [x]`）** 記憶體白天取樣 11/02、11/03 各 27 筆、09:01～13:22、入口只有 connectivity／dev_queue_runner；量滿停止條件讀程式確認，實際行為由 1jk 11/04 驗。
+- **先.一四四-1（`- [x]`，送 AWAITING）** `research/MEM_PROFILE_REPORT_B2.md` 加「白天盤中」一節：最低可用 2,977 MB（11/02 09:01 開盤前）／3,613 MB（11/03 10:42 冒煙當下），白天沒有比晚上緊；唯一可見 Alpha 尖峰仍是冒煙瀏覽器（< 1 GB）。未改排程、未關程式。
+- **1jc（`- [x]`，純 bug 修復）** `research/auto_ledger_view._close_on_or_before`（日誌頁真錢帳本估值）只收 close>0；只剩零成交列時回既有「缺收盤價」錯誤，不以 0 估值。自測 `selftest_zero_close_consumers` 修前 2 FAIL、修後 26/26；`selftest_auto_ledger_view` 22/0。live server 依七之二重啟驗證。
+- **1jj（`- [x]`，純 bug 修復）** `app.js::resolveQuote` 全市場盤後收盤層把 close=0 當價格（42 檔、全是 2018～2020 舊日期的下市槓桿 ETF，會顯示「02/03收盤 0」），改成只收 > 0、交給下一層。
+- **1jk（時間閘 11/04 13:35）** 白天取樣量滿自動停；**1jl（時間閘 11/04 09:00）** 1jj／1jc 線上生效驗收。
+- 冒煙 `node scripts/smoke_test.mjs`：179 PASS／0 FAIL、exit 0（13:41）。
+- 外部請求：0（只有 git push）。沒碰 holdout、沒登記試驗、沒改十三節核心檔。`data/STATUS.json` 本輪無資料源或面板異動，未改。
+
 ## 2026-11-03 12:0x～12:2x DevQueue 空轉補件（維運帽）：前向模擬 14／14 已滿，補 1je／1jf（已做）＋1jg（時間閘）；冒煙抓到 1jh 策略曲線月底重複計算、1ji 冒煙過時，皆已修
 
 - **等待總司令審閱：12 件**（`research/AWAITING_REVIEW.md` 本輪沒有新增或結案）。

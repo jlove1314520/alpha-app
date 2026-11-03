@@ -752,7 +752,8 @@
 
     if(!us){
       const a=QUOTES_ALL_TW_CACHE&&QUOTES_ALL_TW_CACHE.quotes?QUOTES_ALL_TW_CACHE.quotes[code]:null;
-      if(a&&a.close!=null){
+      // 先.一三五-1jj：close=0 是零成交（目前 42 檔、全是 2018～2020 舊日期的下市槓桿 ETF），不當價格，交給下一層 sparklines
+      if(a&&a.close!=null&&a.close>0){
         // 2026-09-17（稽核.四.1修正版(a)）：a.is_stale=true代表這筆的as_of落後大盤
         // 當日最大日期（例如TWSE payload還沒更新），change_pct是這檔自己前後兩個
         // 交易日的真實漲跌沒有錯，但拿「舊日期的漲跌」當「今天的漲跌」顯示會誤導，
@@ -4919,7 +4920,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-11-03.1050';
+  const APP_VERSION='2026-11-03.1342';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
