@@ -1,3 +1,15 @@
+## 2026-11-04 04:3x DevQueue（維運帽）：先.一三五-1ie 全宇宙每日價格月檔＋重大訊息標題歸檔進 repo [預設放行]
+
+- **等待總司令審閱：10 件**（本輪結案 1 件：先.一三五-1ie [預設放行]；未新增）。
+- **為什麼**：零之二 24 小時預設放行——1ie 提案等了 28.5 小時沒有 Cowork 裁示，作者標的建議選項是**甲**，內容不涉及 holdout／真錢／刪除／密碼／付費資料／關卡門檻。**Cowork 可推翻，推翻時照 PREREG 修訂規則處理。**
+- **做了什麼**：
+  ①新 `scripts/archive_universe_daily.py`（唯讀、零外部請求）：從 `data/price_history/` git 歷史（58 版）串出全宇宙每月日線 → `research/data/universe_daily/YYYY-MM.json.gz`（每檔每天：原始收盤、含息日報酬；每天取最晚含該日的版本，下市股照收）。已補 2026-07～10，每月 0.35～0.42 MB（2,411～2,439 檔），讀 58 版約 2 分鐘。
+  ②掛進 `scripts/news_local_fallback.py::archive_commit()`（AlphaNewsFallback 每 30 分鐘，已存在就跳過，所以每月 1 號後第一班才真的做事；不新建排程）；同一處把 `research/data/mops_events_archive.jsonl`（5,440 列，只有 TWSE／TPEx 公開重大訊息，無個資）每 ≥20 小時提交一次。research/data/ 被 gitignore，所以在 git 鎖內用 `add -f`。
+  ③`dev_queue_runner.MACHINE_WRITTEN` 加 universe_daily 路徑樣式（十節）。
+- **證據**：月檔原始收盤與目前 price_history 重疊日 0 筆不一致；含息日報酬空值 7 月 231／8 月 268／9 月 161／10 月 11 筆（新上市首日或版本視窗起點）。`selftest_news_fallback_order.py` 6／6 PASS；失敗注入（提交拋例外、git 讀不到）只記警告、主流程照跑（十二節）。冒煙 181 項全過。
+- **[自行裁量]**：起始月訂 2026-07（最早版本 90 日視窗的第一個完整月）；標題歸檔提交頻率訂 ≥20 小時一次，避免每 30 分鐘一筆 commit。
+- **BLOCKED**：無新增。
+
 ## 2026-11-04 04:01～04:2x DevQueue（研究帽，cycle 20261104-040101）：先.一四七-1 部署規則草稿送 Cowork 審
 
 - **等待總司令審閱：11 件**（新增 1 件：先.一四七-1 部署規則草稿，剛送出；其餘 10 件同上一輪）。

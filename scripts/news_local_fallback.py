@@ -128,6 +128,32 @@ def ensure_split_same_batch(env, run=None) -> str:
         return f"[warn] 同班檢查失敗（{type(e).__name__}: {e}），照常提交"
 
 
+MOPS_ARCHIVE = "research/data/mops_events_archive.jsonl"
+ARCHIVE_COMMIT_MIN = 20 * 60  # 標題歸檔最多約一天提交一次，不跟著每 30 分鐘一班
+
+
+def archive_commit() -> None:
+    """先.一三五-1ie 甲（2026-11-04 [預設放行]）：前向判定素材進 repo，不只留本機硬碟／git 歷史。
+    ① 全宇宙每日價格月檔（scripts/archive_universe_daily.py，每月 1 號後第一班補上個月，冪等）；
+    ② 重大訊息標題歸檔（全是 TWSE／TPEx 公開重大訊息，無個資），距上次提交 ≥20 小時才提交。
+    research/data/ 被 gitignore，所以在鎖內先 git add -f。自身失敗只記 log（十二節）。"""
+    try:
+        import archive_universe_daily as U
+        paths = U.run()
+        if paths:
+            log(f"全宇宙月檔：新寫 {paths}")
+        age = G.last_commit_age_min(MOPS_ARCHIVE)
+        if (ROOT / MOPS_ARCHIVE).exists() and (age is None or age >= ARCHIVE_COMMIT_MIN):
+            paths.append(MOPS_ARCHIVE)
+        if not paths:
+            return
+        res = G.commit_paths(paths, "前向判定素材存檔：全宇宙每日價格月檔／重大訊息標題歸檔（先.一三五-1ie 甲）",
+                             under_lock=lambda: G._g("add", "-f", "--", *[p for p in paths if (ROOT / p).exists()]))
+        log("  素材存檔提交：" + res)
+    except Exception as e:  # noqa: BLE001
+        log(f"[warn] 素材存檔失敗：{type(e).__name__}: {e}")
+
+
 def main() -> int:
     why = preflight_ok()
     if why:
@@ -141,6 +167,7 @@ def main() -> int:
         log(f"重大訊息歸檔：新增 {A.run(['origin/main'])} 筆")
     except Exception as e:  # noqa: BLE001
         log(f"[warn] 重大訊息歸檔失敗：{type(e).__name__}: {e}")
+    archive_commit()
     if age is not None and age < STALE_MIN:
         log(f"雲端 news.json {age:.0f} 分鐘前更新，不需補班")
         return 0

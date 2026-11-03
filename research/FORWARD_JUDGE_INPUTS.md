@@ -58,4 +58,5 @@
   - **相鄰日含息報酬（同版 adj_close 比值）**：最早→中間 218 檔日不一致、中間→最新 **0**。不一致集中在 2026-08-26（`ex_dividend_events.json` 最早 first_seen 那天）與個別減資／分割（如 5904 08-10 比值 0.11→1.1、00685L 07-07）——是**舊版還沒套到除權息事件、後來版本修正**，不是資料打架。
 - 結論：**可以從 git 歷史重建**，規則是「每一天的報酬取最後一個同時含 t−1 與 t 的版本」（最晚修正的值）；只要任兩個相鄰被選版本的視窗有重疊（90 日視窗、每 ≤60 個交易日取一版即可），整段日線就能串起來。風險：git 歷史若被壓縮改寫（filter-repo／squash）就斷；所以另提「定期串一次存檔」的維運提案（先.一三五-1ie）。
 - 模擬 P 標題精準度稽核素材：`research/data/mops_events_archive.jsonl`（5,286 列，本機 `scripts/news_local_fallback.py` → `archive_mops_events.py` 長期歸檔）**只在本機、不進 repo**（`research/data/` 被 gitignore、也不在任何 add -f 清單）；本機硬碟壞掉就沒了。一併寫進 1ie 提案。另記：`paper_16` 在雲端 `market.yml` 跑時讀不到這份歸檔、只靠 `data/events.json` 當下快照——本輪未查快照涵蓋幾天、會不會漏事件（留給 1ie 一併查）。
+- **1ie 甲 [預設放行]（2026-11-04 04:3x）**：判定時的全宇宙日線改讀 `research/data/universe_daily/YYYY-MM.json.gz`（`scripts/archive_universe_daily.py` 從 git 歷史串出、每月自動補上個月、進 repo），不必再臨時串 git 歷史；已有 2026-07～10。格式 `codes[代號] = [[日期, 原始收盤, 含息日報酬或 null], ...]`。重大訊息標題歸檔 `research/data/mops_events_archive.jsonl` 也已進 repo（約每天提交一次）。paper_16 雲端只讀 `data/events.json` 快照：快照涵蓋約 2.5 個月、每日 3 班，排程停擺不到 2 個月不會漏事件。Cowork 可推翻。
 - 1id 結果：確實漏算（原始收盤逐月相乘、全檔無股利處理），目前影響 0（起跑後未除息），修法 先.一三五-1if，期限 2027-01 月底記帳前。

@@ -128,6 +128,7 @@ MACHINE_WRITTEN = [
     re.compile(r"^research/\.[^/]+$"),        # .pid / .lock / .*_state.json 等隱藏狀態檔
     re.compile(r"^research/DEV_QUEUE_PROMPT\.txt$"),  # 本專案每輪重寫的提示檔
     re.compile(r"^research/lab/"),            # 研究室.一（先.一百）：Cowork 每週日寫入深度研究設定／說法紀錄，由研究室.六驗證後提交
+    re.compile(r"^research/data/universe_daily/[^/]+\.json\.gz$"),  # 先.一三五-1ie 甲：全宇宙每日價格月檔（news_local_fallback 每月 1 號後第一班寫、當班提交）
     re.compile(r"^research/data/paper_[^/]+\.json$"),  # 收件匣 034：前向模擬追蹤程式每輪重寫的狀態檔（paper_10_control／paper_14_shadow…）；10/30 18:30 autostash 因它們被當人寫檔而沒自動清
 ]
 
