@@ -1,3 +1,16 @@
+## 2026-11-04 06:5x DevQueue（維運帽，cycle 20261104-063101）：1kc 查因＝與本機新聞補班同檔 rebase 衝突，提案送審＋補 1kd
+
+- **等待總司令審閱：11 件**（新增 先.一三五-1kc-a；`research/AWAITING_REVIEW.md` 等待中表格 11 列，一致）。
+- **做了什麼**：
+  ①**1kc（唯讀查因，零外部資料請求）**：news_events.yml 10/21、10/25、10/30 三班都是 `fetch` job 的 Commit 步驟失敗（`gh api .../runs/{id}/jobs`）。三班的 job 開始～Commit 步驟之間，都有一筆本機補班 commit 落到 main：`3cf8b9247dc`（10/21 06:09:57Z，1,738 個新聞事件檔）、`244893b9f4c`（10/25 12:36:40Z，1,766 個）、`f81b2970d3c`（10/30 13:12:59Z，1,823 個），全在雲端 `git add` 清單內；同時段其他 commit（連通性心跳、DevQueue log、STATUS 心跳）都不碰這些檔。→ 判定為**同檔 rebase 衝突**，補重試救不了。本機 `news_local_fallback.py` 的 commit 前複查擋不到「雲端正在跑、還沒 commit」。
+  ②依分支寫提案 `docs/NEWS_COMMIT_CONFLICT_1KC.md`：**甲（建議）**雲端 rebase 衝突時 abort、印警告、exit 0（以 main 上本機版為準），並補非衝突 push 重試；乙 本機補班先查雲端有沒有正在跑的班；丙 兩者。送 AWAITING，接續項 **先.一三五-1kc-a**（`- [!]`，2026-11-05 06:5x 起適用 24 小時預設放行照甲）。commit `8be6dc8808d`。
+  ③收工補件 **先.一三五-1kd**：`gh run list` 清點 10/21 起各 workflow 失敗班——market.yml 4／37 沒人查過；quotes／smoke_cloud／tw_data_landed_check／us_financials 因 GitHub API 額度用盡（22:50Z 403）沒數到，一併交給 1kd。
+- **[自行裁量]**：run log 回 403（PAT 無 admin），**錯誤原文沒看到**，「CONFLICT」由時間窗＋檔案重疊推得；10/25 那班本機 commit 時間比雲端 job 開始早 18 秒，推斷 push 落地在雲端 checkout 之後（無法直接確認 push 時間）。
+- **BLOCKED**：1kd 本輪做不了——GitHub API 額度用盡，約台北 07:50 重置；條目維持 `- [ ]`，做法第一步就是先查 `gh api rate_limit`。
+- **補件**：DevQueue 可執行項補件後 1 項（1kd），仍低於 6；BACKLOG 未完成項、DATA_GAP_PLAN 甲類都已用盡，本週暫停文書核對類，研究候選留給研究帽輪次——**來源已用盡**（只補到 1 條）。
+- **維運帽必交產物**：本輪沒有改資料源或面板，`data/STATUS.json` 無需更新（本輪無產出，原因：只做查因與提案）。
+- **冒煙測試**：`node scripts/smoke_test.mjs` exit 0，181 項 [x]、0 項 [ ]、無 FAIL 列。
+
 ## 2026-11-04 06:0x DevQueue（維運帽，cycle 20261104-060102）：空轉補件——1gk 結案＋1ka audit.yml push 重試（純 bug 修復）
 
 - **等待總司令審閱：10 件**（本輪未新增、未結案 AWAITING 項目；同上一輪）。
