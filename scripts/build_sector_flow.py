@@ -122,7 +122,7 @@ def _closes(price_history: dict) -> dict:
     for code, rows in (price_history.get("prices") or {}).items():
         if rows:
             c = rows[-1].get("close")
-            if isinstance(c, (int, float)):
+            if isinstance(c, (int, float)) and c > 0:  # 先.一三五-1ja：最新一天零成交記 close=0，不當價格
                 out[code] = float(c)
     return out
 
@@ -139,7 +139,8 @@ def _daily_px(price_history: dict) -> dict:
         for r in (rows or [])[-40:]:
             c, a = r.get("close"), r.get("adj_close")
             a = a if isinstance(a, (int, float)) else c
-            if isinstance(c, (int, float)) and isinstance(a, (int, float)) and r.get("date"):
+            # 先.一三五-1ja：零成交日 close=0／adj_close=0 不是價格，照缺價列處理（不入均價、下一列不拿它當前一天）
+            if isinstance(c, (int, float)) and isinstance(a, (int, float)) and c > 0 and a > 0 and r.get("date"):
                 m[str(r["date"]).replace("-", "")] = (float(c), float(a), prev)
                 prev = float(a)
             else:
