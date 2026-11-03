@@ -100,6 +100,8 @@
 
 2026-11-03 16:3x DevQueue 空轉補件：上限仍 14／14，本輪不新增候選、不寫 PREREG、不送候選 AWAITING；改補 selection_bias_ledger 總 N 沒變也改 TRIALS_LEDGER.md 日期修正（1jp，純 bug 修復＋自測）、同形狀「只改時間戳就回寫追蹤檔」清查（1jq）、1jp 實地驗收（1jr，時間閘 11/05）。
 
+2026-11-03 19:3x DevQueue 空轉補件：上限仍 14／14，本輪不新增候選、不寫 PREREG、不送候選 AWAITING；改處理到期時間閘（1hs、1ip 權證狀態檔 11/03 已送出，結案）並補只能前向累積資料源的缺口——1js 上櫃次日漲跌停歸檔沒有排程呼叫（已補跑＋掛進權證排程，純 bug 修復）、1jt 融資累積檔上櫃 10/29 被同鍵晚班蓋掉（查因；1jt-a 改法提案送 AWAITING，建議甲）、1ju／1jv 時間閘驗收（11/04）；順手修 PENDING_QUEUE／PROGRESS 3 行 `C:\alpha` 被寫成控制字元。
+
 | 模擬 | 程式代號 | 內容 | 試驗 | 起跑 | 判定 |
 |---|---|---|---|---|---|
 | F | paper_5 | 台指選擇權 VRP | 見 `research/paper_5_vrp_tracker.py` | 2026-11 | — |

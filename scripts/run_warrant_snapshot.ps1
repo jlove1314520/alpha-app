@@ -41,6 +41,14 @@ if ($complete) {
     if (-not $out) { Add-Content -Path $logPath -Value "WARN: python produced no output (exit=$LASTEXITCODE)" -Encoding utf8 }
 }
 try {
+    # xian.135-1js: expand data\tpex_limit_next.json git history into research\data\tpex_limit_next\ (zero requests)
+    # before the gap watch reads it; this archive had no scheduled caller, so days went missing.
+    $arc = & $pythonExe scripts\archive_tpex_limit_next.py 2>&1
+    Add-Content -Path $logPath -Value ("[tpex limit archive exit=$LASTEXITCODE] " + (($arc | Select-Object -Last 1) -join " ")) -Encoding utf8
+} catch {
+    Add-Content -Path $logPath -Value "WARN: tpex limit archive failed: $($_.Exception.Message)" -Encoding utf8
+}
+try {
     $gap = & $pythonExe research\forward_source_gap_watch.py 2>&1
     Add-Content -Path $logPath -Value ("[gap watch exit=$LASTEXITCODE] " + (($gap | Select-Object -Last 3) -join " | ")) -Encoding utf8
 } catch {

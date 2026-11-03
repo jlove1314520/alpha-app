@@ -1,3 +1,14 @@
+## 2026-11-03 19:3x DevQueue（維運帽）：空轉補件——前向累積資料源缺口（1js 修、1jt 查因＋1jt-a 提案）＋到期時間閘 1hs／1ip 結案
+
+- **等待總司令審閱：12 件**（`research/AWAITING_REVIEW.md` 等待中 12 列；本輪新增 1 列：先.一三五-1jt-a，建議甲，11/04 19:35 後可預設放行）。
+- **前向模擬上限 14／14＝滿**：照零之二⑤不新增候選、不寫 PREREG、不送候選 AWAITING；改補維運類。
+- **到期時間閘**：1hs、1ip——權證排程 11/03 17:37 commit cc2325b2917 已送出 `data/warrant_backup_status.json`（最後快照 11/03），結案。
+- **1js（純 bug 修復）**：缺期看守員報上櫃次日漲跌停 11/02 GAP。查因：`scripts/archive_tpex_limit_next.py` 沒有任何排程呼叫，本機歸檔停在 10/30（資料仍在 git 歷史，沒掉）。手動補跑（新寫 11/02、11/03 兩檔），並在 `scripts/run_warrant_snapshot.ps1` 看守員前加一段獨立 try/catch 跑歸檔（失敗只記 WARN）。語法剖析 0 錯、CRLF 一致。實地驗收 1ju（11/04 18:00）。
+- **1jt（查因）**：融資個股累積檔上櫃 10/29 缺。逐版讀 git 歷史：10/29 上櫃數字只在 edd9bc46bee 等 3 版，10/30 台北 23:59 班把執行日鍵 20261030 從 tpex＝20261029 覆寫成 20261030。根因是「執行日鍵、同鍵後班覆寫」遇上上櫃同日晚上就公布當日資料。改法有多種 → 1jt-a 提案（甲：另存依資料日逐股表＋git 歷史回補，舊 series 不動）。預測驗證 1jv（11/04 09:00）。影響模擬 Q（2027-01-04 起跑）輸入。
+- **順手修**：PENDING_QUEUE 2 行、PROGRESS 1 行裡的 `C:\alpha` 在前幾輪寫入時被當成 `\a` 控制字元（BEL），`selftest_no_control_chars.py` 原本 FAIL 3 行，改回後全過。
+- 外部請求：0。沒碰 holdout、沒算報酬、沒登記試驗、沒改十三節核心檔、沒動常駐服務檔。`data/STATUS.json` 無異動。
+- 冒煙測試：`node scripts/smoke_test.mjs` exit 0，179 項 `[x]` 全過、0 項未過（含 #12 全程無累積 uncaught error）。
+
 ## 2026-11-03 18:0x DevQueue（維運帽）：**[預設放行]** 先.一三五-1hq-a 甲——本機看守 `.git/rebase-merge` 殘留
 
 - **等待總司令審閱：11 件**（`research/AWAITING_REVIEW.md` 等待中 11 列；本輪結案 1 列：先.一三五-1hq-a，[預設放行]）。
@@ -13,7 +24,7 @@
 - **改了什麼**：`research/shioaji_quotes.py` `run_stream_daemon()` 印 `[build] git sha=` 後，另 append「時間 pid=… [build] …」到 `research/shioaji_build_history.log`（只追加、不會被盤後輪次覆蓋；整段 try/except，寫檔失敗只印警告，常駐服務照跑＝十二節）；`.gitignore` 加該檔。
 - **驗證**：py_compile OK；抽出該段合成測試：正常寫兩次得兩行、目標路徑是目錄時只印警告不拋例外。冒煙 `node scripts/smoke_test.mjs`：179 PASS／0 FAIL、exit 0。
 - ⚠️ **七之二重啟核對未做**：盤後守護行程沒在跑（查無 shioaji_quotes 行程），沒有可重啟的對象；11/04 盤前排程啟動時自然載入新版。核對拆 **先.一三五-1ho-b**（時間閘 11/04 09:05～13:20：歷史檔 sha＝本 commit、`/health` stale_process=false）。
-- PENDING_QUEUE 1ho 原文在「`C:lpha`」處截斷（當初寫入時 `` 被當成控制字元），已在條目註明並補上 AWAITING 的建議選項原文。
+- PENDING_QUEUE 1ho 原文在「`C:\alpha`」處截斷（當初寫入時 `\a` 被當成控制字元），已在條目註明並補上 AWAITING 的建議選項原文。
 - 外部請求：0（只有 git push）。沒碰 holdout、沒登記試驗、沒改十三節核心檔。`data/STATUS.json` 無資料源或面板異動，未改。
 
 ## 2026-11-03 17:0x DevQueue（維運帽，cycle 20261103-170102）：1jq 清查只改時間戳的追蹤檔寫入者——修 selection_bias_ledger 的 SELECTION_BIAS_LEDGER.md
