@@ -465,6 +465,7 @@
   .sdot.g{background:#1aa876;box-shadow:0 0 0 3px rgba(26,168,118,.18)}
   .sdot.y{background:#fab219;box-shadow:0 0 0 3px rgba(250,178,25,.18)}
   .sdot.gr{background:var(--dot-off)}
+  .sdot.r{background:var(--critical);box-shadow:0 0 0 3px rgba(216,92,92,.2)}  /* 先.一四八-1 資料過期 */
   .wl-src-dot{margin-left:6px;vertical-align:middle;cursor:pointer}
   .wl-detail{font-size:10px;color:var(--ink-3);padding:2px 2px 6px;line-height:1.5}
   .idx-strip{display:flex;gap:var(--sp-2);overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 0 6px;-webkit-overflow-scrolling:touch;scrollbar-width:none}

@@ -9,12 +9,12 @@
    ——完全不呼叫 respondWith()，讓瀏覽器照平常方式直接打網路，成功拿新資料、
    失敗就是網路錯誤，由 App 的 fetch 呼叫端（index.html 的 fm()）自己顯示
    「連線失敗，請重試」，不會被這裡默默塞舊資料進去。 */
-const CACHE = 'alpha-v2026-11-04.0110'; // 2026-08-28起改用時間戳格式，由.git/hooks/pre-commit在每次commit時自動改寫
+const CACHE = 'alpha-v2026-11-04.0208'; // 2026-08-28起改用時間戳格式，由.git/hooks/pre-commit在每次commit時自動改寫
 // 2026-10-11 常備.開發-20：index.html 的 CSS／JS 拆成 app.css／app.js，一併列為外殼，離線仍可開啟。
 // index.html 以 app.css?v=…／app.js?v=… 引用；isShellRequest 只比對路徑（不含查詢字串），
 // 離線回退用 ignoreSearch 讓安裝時預快取的無查詢字串版本也對得上。
 // 2026-10-11 常備.開發-20 丙案：分頁程式拆到 app-<頁>.js（點到該頁才載入），一併列為外殼預快取，離線仍可切換各頁。
-const SHELL_URLS = ['./', './index.html', './app.css', './app.js', './app-shared.js', './app-market.js', './app-picks.js', './app-stock.js', './app-trade.js', './app-journal.js', './app-settings.js', './manifest.webmanifest', './icon192.png', './icon512.png', './icon512-maskable.png'];
+const SHELL_URLS = ['./', './index.html', './app.css', './app.js', './app-shared.js', './app-market.js', './app-picks.js', './app-stock.js', './app-trade.js', './app-journal.js', './app-settings.js', './app-lab.js', './manifest.webmanifest', './icon192.png', './icon512.png', './icon512-maskable.png'];
 
 // 2026-10-11 先.六十九-1：外殼改「快取優先、背景更新」。
 // - 外殼（SHELL_URLS）一律先回這一版快取，開 App 不必等網路；版本＝CACHE 常數。
@@ -32,7 +32,11 @@ const SHELL_URLS = ['./', './index.html', './app.css', './app.js', './app-shared
 const LIB_URLS = ['https://cdn.jsdelivr.net/npm/lightweight-charts@5.2.1/dist/lightweight-charts.standalone.production.js'];
 const DATA_CACHE = 'alpha-data-v1';  // 與外殼版本無關：換版不清掉資料，讓第二次開永遠有東西先顯示
 const DATA_EXCLUDE = /\/data\/price_history(\.json$|\/)/;  // 先.八十二-1：拆檔資料夾也不進快取
+// 先.一四八-1（2026-11-04，收件匣 037 P0）：新版 SW 裝好就立即接手（skipWaiting＋activate 的 clients.claim），
+// 頁面收到 controllerchange 自動重載一次。原因：舊做法「裝好後等待、使用者點提示或完全關掉 App 才換」，
+// iPhone 主畫面 App 切走再切回只是恢復暫停的頁面、不算關掉，等待中的新版永遠不接手——總司令手機 11/04 還在跑 10/15 外殼。
 self.addEventListener('install', e => {
+  self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE).then(c =>
       // 逐一快取，單一檔案失敗不會讓整個安裝失敗
@@ -69,7 +73,7 @@ self.addEventListener('fetch', e => {
 
   if (url.origin === self.location.origin && /\/data\/[^?]*\.json$/.test(url.pathname) && !DATA_EXCLUDE.test(url.pathname)) {
     if (e.request.cache === 'no-store' || e.request.cache === 'reload') return;  // 要最新的：直通網路
-    e.respondWith(dataSWR(e));
+    e.respondWith(dataNetFirst(e));
     return;
   }
 
@@ -98,7 +102,41 @@ self.addEventListener('fetch', e => {
   );
 });
 
-// 資料檔 stale-while-revalidate（先.八十一-8）。快取鍵＝路徑（去掉 ?t= 這類破快取參數）。
+// 先.一四八-1（收件匣 037 P0）：資料檔改「網路優先、3 秒逾時才用快取」。網路 3 秒內回來就用新的並存快取；
+// 逾時或失敗才回上次存的（帶 x-alpha-from-cache，頁面照舊標「上次資料」），網路晚到時照舊存起來並通知頁面重畫。
+// 舊的 stale-while-revalidate（dataSWR，先.八十一-8）保留在下面供對照，不再使用。
+const DATA_NET_TIMEOUT_MS = 3000;
+async function dataNetFirst(e) {
+  const url = new URL(e.request.url);
+  const key = new Request(url.origin + url.pathname);
+  const c = await caches.open(DATA_CACHE);
+  const hit = await c.match(key);
+  let served = false;
+  const net = fetch(e.request).then(async r => {
+    if (r.ok) {
+      const body = await r.clone().arrayBuffer();
+      const h = new Headers(r.headers);
+      h.set('x-alpha-cached-at', new Date().toISOString());
+      await c.put(key, new Response(body, { status: r.status, statusText: r.statusText, headers: h })).catch(() => {});
+      if (served) {  // 已先回舊存檔 → 新的到了通知頁面重畫
+        const list = await self.clients.matchAll({ type: 'window' });
+        list.forEach(cl => cl.postMessage({ type: 'DATA_UPDATED', path: url.pathname }));
+      }
+    }
+    return r;
+  });
+  if (!hit) return net;
+  const timer = new Promise(res => setTimeout(() => res(null), DATA_NET_TIMEOUT_MS));
+  const first = await Promise.race([net.then(r => (r.ok ? r : null)).catch(() => null), timer]);
+  if (first) return first;
+  served = true;
+  e.waitUntil(net.catch(() => {}));
+  const h = new Headers(hit.headers);
+  h.set('x-alpha-from-cache', '1');
+  return new Response(await hit.blob(), { status: hit.status, statusText: hit.statusText, headers: h });
+}
+
+// 資料檔 stale-while-revalidate（先.八十一-8，已停用、保留對照）。快取鍵＝路徑（去掉 ?t= 這類破快取參數）。
 async function dataSWR(e) {
   const url = new URL(e.request.url);
   const key = new Request(url.origin + url.pathname);

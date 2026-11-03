@@ -2,8 +2,8 @@
 // 做法：把外殼檔複製到暫存目錄，用本檔內建的小型靜態伺服器提供（資料檔一律 404，與本測試無關），然後：
 //   ①第一次開啟 → SW 安裝、接管，外殼進快取
 //   ②在「舊版快取」塞一份竄改過的 index.html（模擬手機殘留的舊安裝）
-//   ③改暫存目錄的 sw.js 版本號（模擬發布新版）→ reg.update() → 新 SW 在背景裝好並「等待」
-//   ④頁面必須顯示「有新版」提示條；點下去（applyNewVersion）→ 新 SW 接手並自動重載
+//   ③改暫存目錄的 sw.js 版本號（模擬發布新版）→ reg.update()
+//   ④先.一四八-1 起：新 SW 裝好立即接手（不等待、不靠提示條），頁面自動重載一次
 //   ⑤重載後：由新版 SW 接管、舊版快取被刪除、畫面不是竄改內容、APP_VERSION 正常
 import fs from "node:fs";
 import http from "node:http";
@@ -55,16 +55,15 @@ export async function checkSwUpdateFlow(browser) {
     const newCache = "alpha-v9999-12-31.2359";
     const swp = path.join(dir, "sw.js");
     fs.writeFileSync(swp, fs.readFileSync(swp, "utf8").replace(/const CACHE = 'alpha-v[^']*'/, `const CACHE = '${newCache}'`));
-    const st = await page.evaluate(async () => {
-      const reg = await navigator.serviceWorker.getRegistration();
-      await reg.update();
-      for (let i = 0; i < 150 && !reg.waiting; i++) await new Promise(r => setTimeout(r, 100));
-      await new Promise(r => setTimeout(r, 200));
-      return { waiting: !!reg.waiting, banner: getComputedStyle(document.getElementById("new-version-banner")).display };
-    });
-    out.waiting = st.waiting; out.banner = st.banner;
-    // ④ 點提示條 → 新 SW 接手 → 自動重載
-    await Promise.all([page.waitForEvent("load", { timeout: 20000 }), page.evaluate(() => applyNewVersion())]);
+    // ③④ 先.一四八-1（收件匣 037 P0）：新版 SW 裝好立即接手（skipWaiting）→ 頁面收到 controllerchange 自動重載一次，不用點提示條
+    await page.evaluate(() => { window.__swMarker = "before-update"; });
+    await Promise.all([
+      page.waitForEvent("load", { timeout: 20000 }),
+      page.evaluate(() => navigator.serviceWorker.getRegistration().then((reg) => reg.update())).catch(() => {}),  // 重載會中斷這個 evaluate，正常
+    ]);
+    const st = { waiting: await page.evaluate(async () => !!(await navigator.serviceWorker.getRegistration()).waiting),
+                 reloaded: await page.evaluate(() => window.__swMarker !== "before-update") };
+    out.waiting = st.waiting; out.reloaded = st.reloaded;
     await page.waitForFunction(() => typeof window.__ALPHA_BOOT_MS === "number", null, { timeout: 20000 });
     // ⑤ 驗證
     const after = await page.evaluate(async () => ({
@@ -73,7 +72,7 @@ export async function checkSwUpdateFlow(browser) {
       swUrl: navigator.serviceWorker.controller && navigator.serviceWorker.controller.scriptURL,
     }));
     Object.assign(out, after, { newCache });
-    out.ok = st.waiting && st.banner === "block" && after.controlled && after.keys.includes(newCache) && !after.keys.includes(oldCache) && !after.body && !!after.ver;
+    out.ok = !st.waiting && st.reloaded && after.controlled && after.keys.includes(newCache) && !after.keys.includes(oldCache) && !after.body && !!after.ver;
     return out;
   } finally {
     await ctx.close();

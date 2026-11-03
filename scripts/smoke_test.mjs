@@ -65,6 +65,7 @@ import { launchGuarded } from "./pw_guard.mjs";
 import { memGuard } from "./smoke_mem_guard.mjs";
 import os from "node:os";
 import path from "node:path";
+import fs from "node:fs";  // 先.一四八-1 #179 讀 sw.js
 
 const TABS = ["home", "market", "picks", "trade", "journal", "settings", "lab"];  // 先.一一二：加研究室（日誌／設定仍可用 go() 進入）
 
@@ -379,12 +380,12 @@ async function runSmokeTest(baseUrl, headless = true) {
     const r = await checkSwUpdateFlow(browser);
     staleCachePassed = !!r.ok;
     staleCacheResult = staleCachePassed
-      ? `通過：舊版快取（${r.oldCache}，含竄改內容）→ 發布新版後 SW 等待中、提示條顯示 → 點擊換版 → 只剩 ${r.newCache}、畫面為真內容（APP_VERSION=${r.ver}）`
-      : `失敗：${JSON.stringify({ waiting: r.waiting, banner: r.banner, keys: r.keys, fake: r.body, controlled: r.controlled })}`;
+      ? `通過：舊版快取（${r.oldCache}，含竄改內容）→ 發布新版後 SW 立即接手、頁面自動重載 → 只剩 ${r.newCache}、畫面為真內容（APP_VERSION=${r.ver}）`
+      : `失敗：${JSON.stringify({ waiting: r.waiting, reloaded: r.reloaded, keys: r.keys, fake: r.body, controlled: r.controlled })}`;
   } catch (e) {
     staleCacheResult = `執行時發生例外：${e.message || e}`;
   }
-  record("9. 舊版快取殘留竄改內容時，發布新版→背景安裝→提示條→點擊換版→舊快取刪除、顯示真內容（先.六十九-1 快取優先）", staleCachePassed, staleCacheResult);
+  record("9. 舊版快取殘留竄改內容時，發布新版→新 SW 立即接手→頁面自動重載→舊快取刪除、顯示真內容（先.六十九-1／先.一四八-1）", staleCachePassed, staleCacheResult);
 
   // 11.【2026-08-28新增】pull-to-refresh手勢——用合成的touch事件模擬「在#main
   // 頂端往下拉超過門檻再放開」，確認會觸發實際網路請求（跟check 8驗證按鈕
@@ -3949,9 +3950,14 @@ async function runSmokeTest(baseUrl, headless = true) {
       const p2 = await ctx.newPage();
       await p2.goto(`${baseUrl}/index.html`, { waitUntil: "domcontentloaded", timeout: 30000 });
       await p2.waitForFunction(() => !!(navigator.serviceWorker && navigator.serviceWorker.controller), null, { timeout: 20000 }).catch(() => null);
+      // 先.一四八-1（收件匣 037 P0）：改「網路優先、3 秒逾時才用存檔」——網路正常時拿新的（不帶存檔標記）；離線時才回存檔＋提示
+      const a0 = await p2.evaluate(async () => (await fetch("data/market_tw.json?t=" + Date.now(), { cache: "default" })).headers.get("x-alpha-from-cache"));
+      if (a0) swrErrs.push("網路正常時不該回存檔（應網路優先）");
+      await ctx.setOffline(true);
       const r = await p2.evaluate(async () => {
+        window.__alphaMemDrop && window.__alphaMemDrop(new URL("data/market_tw.json", location.href).pathname);
         const a = await fetch("data/market_tw.json?t=" + Date.now(), { cache: "default" });
-        const b = await fetch("data/market_tw.json?t=" + Date.now(), { cache: "no-store" });
+        const b = await fetch("data/market_tw.json?t=" + Date.now(), { cache: "no-store" }).catch(() => ({ headers: new Headers() }));
         await new Promise(res => setTimeout(res, 600));
         const line = document.getElementById("data-stale-line");
         const keys = await caches.keys();
@@ -3960,14 +3966,15 @@ async function runSmokeTest(baseUrl, headless = true) {
         return { a: a.headers.get("x-alpha-from-cache"), aAt: a.headers.get("x-alpha-cached-at"), b: b.headers.get("x-alpha-from-cache"),
                  line: line && !line.hidden ? line.textContent : "", keys, ph };
       });
-      if (r.a !== "1" || !r.aAt) swrErrs.push(`第二次開的資料回應應帶 x-alpha-from-cache 與存檔時間：${r.a}／${r.aAt}`);
+      await ctx.setOffline(false);
+      if (r.a !== "1" || !r.aAt) swrErrs.push(`離線時資料回應應改回存檔並帶 x-alpha-from-cache 與存檔時間：${r.a}／${r.aAt}`);
       if (r.b) swrErrs.push("cache:'no-store' 不該走存檔");
       if (!/先顯示上次存的資料/.test(r.line)) swrErrs.push(`首頁缺「先顯示上次存的資料」提示：${r.line}`);
       if (!r.keys.includes("alpha-data-v1")) swrErrs.push("沒有資料快取 alpha-data-v1");
       if (r.ph) swrErrs.push("price_history（單檔或拆檔）不該進資料快取");
     } finally { await ctx.close(); }
   } catch (e) { swrErrs.push(`測試本身出錯：${e.message || e}`); }
-  record("115. SW 資料檔先顯示上次存檔、背景更新：回應帶存檔標記、首頁顯示「上次資料」提示、no-store 直通網路（先.八十一-8）", swrErrs.length === 0, swrErrs.join("; "));
+  record("115. SW 資料檔網路優先、離線／逾時才回存檔：存檔回應帶標記、首頁顯示「上次資料」提示、no-store 直通網路（先.八十一-8／先.一四八-1）", swrErrs.length === 0, swrErrs.join("; "));
 
   // 116.【2026-10-13 先.八十一-9】個股頁／選股頁每檔小檔：個股頁 2330 不再下載整份 fundamentals／scores／events／holders／
   // institutional_history／sector_flow 與 FinMind 名稱清單，但各卡片仍有內容（本益比、千張大戶、外資持股、選股理由含同產業百分位）；
@@ -6057,6 +6064,50 @@ async function runSmokeTest(baseUrl, headless = true) {
       fwdInfo = `14 卡（${a.summary}）、壞檔 2 支只壞自己、點開 ${run ? run.split(":")[0] : "—"} 有走勢與持股、−42% 紅色、最小可點 ${a.minH}px`;
     } finally { await ctx.close(); }
   } catch (e) { fwdErrs.push(`測試本身出錯：${e.message || e}`); }
+  // 179. 先.一四八-1（收件匣 037 P0）：資料過期要亮紅、不准綠色即時連線；強制更新不碰 localStorage、不解除 SW 註冊；SW 立即接手＋資料網路優先
+  const p0Errs = []; let p0Info = "";
+  try {
+    const sw = fs.readFileSync("sw.js", "utf8");
+    if (!/install'[\s\S]{0,400}self\.skipWaiting\(\)/.test(sw)) p0Errs.push("sw.js install 沒有 skipWaiting");
+    if (!/e\.respondWith\(dataNetFirst\(e\)\)/.test(sw) || !/DATA_NET_TIMEOUT_MS = 3000/.test(sw)) p0Errs.push("sw.js 資料檔不是網路優先 3 秒逾時");
+    // (a) market_tw.json 停在 10/14 → 紅條＋卡片標紅＋狀態列紅點
+    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+    try {
+      const p = await ctx.newPage();
+      await p.route(/\/data\/market_tw\.json/, async (r) => { const resp = await r.fetch(); const b = await resp.json(); b.data_date = "2026-10-14"; if (b.taiex) b.taiex.data_date = "2026-10-14"; await r.fulfill({ response: resp, json: b }); });
+      await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+      await p.waitForFunction(() => { const e = document.getElementById("data-stale-alert"); return e && !e.hidden; }, null, { timeout: 15000 }).catch(() => {});
+      const a = await p.evaluate(() => ({ alert: (document.getElementById("data-stale-alert") || {}).textContent || "", hidden: (document.getElementById("data-stale-alert") || {}).hidden,
+        sum: (document.getElementById("home-status-summary") || {}).textContent || "", dot: (document.getElementById("home-status-dot") || {}).className || "",
+        chip: (document.querySelector(".data-stale-chip") || {}).textContent || "",
+        btnH: (document.querySelector("#data-stale-alert button") || { getBoundingClientRect: () => ({ height: 0 }) }).getBoundingClientRect().height }));
+      if (a.hidden !== false || !/資料過期 \d+ 天：台股資料停在 10\/14/.test(a.alert)) p0Errs.push(`紅條「${a.alert}」hidden=${a.hidden}`);
+      if (!/資料過期/.test(a.sum) || /即時/.test(a.sum) || !/\br\b/.test(a.dot)) p0Errs.push(`狀態列「${a.sum}」點=${a.dot}`);
+      if (!/資料過期 \d+ 天/.test(a.chip)) p0Errs.push(`今日摘要卡沒標紅（${a.chip}）`);
+      if (!(a.btnH >= 44)) p0Errs.push(`強制更新按鈕高 ${a.btnH}`);
+      p0Info = `過期：「${a.alert.replace("強制更新", "").trim()}」、狀態列「${a.sum}」`;
+      // (b) 資料是新的 → 不顯示紅條
+      await p.unroute(/\/data\/market_tw\.json/);
+      await p.evaluate(() => { window.__ALPHA_FETCH_MEMCACHE_OFF = true; return checkDataFreshness(); });
+      if (await p.evaluate(() => { const e = document.getElementById("data-stale-alert"); return e && !e.hidden; })) p0Errs.push("資料是新的仍顯示過期紅條");
+    } finally { await ctx.close(); }
+    // (c) 強制更新：清快取、保留 localStorage 與 SW 註冊（允許 SW 的獨立 context）
+    const ctx2 = await page.context().browser().newContext({ viewport: { width: 393, height: 852 } });
+    try {
+      const p = await ctx2.newPage();
+      await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+      await p.waitForFunction(() => navigator.serviceWorker && navigator.serviceWorker.controller, null, { timeout: 20000 }).catch(() => {});
+      await p.evaluate(() => localStorage.setItem("smoke_p0_keep", "自選股假資料"));
+      await p.evaluate(() => forceUpdateApp());
+      await p.waitForTimeout(1500); await p.waitForLoadState("load");
+      const c = await p.evaluate(async () => ({ keep: localStorage.getItem("smoke_p0_keep"), reg: !!(await navigator.serviceWorker.getRegistration()) }));
+      if (c.keep !== "自選股假資料") p0Errs.push("強制更新後 localStorage 不見了");
+      if (!c.reg) p0Errs.push("強制更新把 SW 註冊解除了（推播訂閱會一起丟）");
+      await p.evaluate(() => localStorage.removeItem("smoke_p0_keep"));
+    } finally { await ctx2.close(); }
+  } catch (e) { p0Errs.push(`測試本身出錯：${e.message || e}`); }
+  record("179. 資料過期：紅條＋卡片標紅＋狀態列不准綠；資料新就不顯示；強制更新保留自選股與 SW 註冊；SW 立即接手＋資料網路優先（先.一四八-1）", p0Errs.length === 0, p0Errs.join("; ") || p0Info);
+
   record("178. 研究室前向模擬看板：14 張卡、壞檔只顯示「資料尚未產生」、點開有近 30 日走勢＋持股、回撤 40% 紅色、可點 ≥44px、無禁用詞（先.一四七-0）", fwdErrs.length === 0, fwdErrs.join("; ") || fwdInfo);
 
   const finalErrors = await page.evaluate(
