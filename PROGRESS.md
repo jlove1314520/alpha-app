@@ -1,3 +1,15 @@
+## 2026-11-03 12:0x～12:2x DevQueue 空轉補件（維運帽）：前向模擬 14／14 已滿，補 1je／1jf（已做）＋1jg（時間閘）；冒煙抓到 1jh 策略曲線月底重複計算、1ji 冒煙過時，皆已修
+
+- **等待總司令審閱：12 件**（`research/AWAITING_REVIEW.md` 本輪沒有新增或結案）。
+- 照零之二⑤：上限滿，不新增候選、不寫 PREREG、不送候選 AWAITING；改補既有模擬追蹤程式。
+- **1je（`- [x]`，純 bug 修復）** `research/paper_1b_tracker._closes`、`research/paper_3_tracker._closes` 把 adj_close=0（零成交日）收成 0 元價（會以 0 計值／除以零），目前 5 檔 ETF 視窗內沒有零成交列、尚未受影響；`.github/scripts/build_picks_ledger.build_snapshot` 報價 close=0（今天 42 檔）會記 0 元快照價→改 None。自測 `scripts/selftest_zero_close_consumers.py` 修前 20 過 3 失敗、修後 23/23；`selftest_build_picks_ledger.py` 23/0。
+- **1jf（`- [x]`）** 1ja 第 1 批清單漏歸類的 6 支：paper_7030／paper_supply_v2／paper_forward_events 已有防呆；fetch_market_tw 不讀個股收盤；alpha_live_server 即 1jc（收盤後）；build_picks_ledger 併 1je。
+- **1jg（時間閘 11/04 09:00）** 1je 雲端生效驗收。
+- **1jh（`- [x]`，純 bug 修復）** 雲端 11:11 第一次寫入模擬 B／C／D 的 10/30 月底記帳後，策略曲線把事件當天的漲跌又乘一次：模擬 C 10/30 畫成 84.36（−6.67%），帳本是 87.41（−3.48%），冒煙 #88 擋下。新舊兩版程式本機重跑都是 84.36，不是上一輪 1ja 造成。修 `build_strategy_curves.paper_line_from_log`：事件當天直接用帳本價值、不再乘當天漲跌／利息。修後模擬 C 87.41＝帳本、B 94.96、D 96.69；自測 [8] 修前 2 FAIL、修後 29/0。本機重產 `data/strategy_curves.json`。
+- **1ji（`- [x]`）** 冒煙 #110 要求所有已起跑紙上線寫「還原權息／定存計息／建倉手續費」，模擬 F（選擇權）11/03 起跑後必 FAIL；改成選擇權線驗期交所估值說明。[自行裁量] 冒煙屬開發帽檔案，不修就無法 commit，照前例當純 bug 修復。
+- 冒煙 `node scripts/smoke_test.mjs`：第一次 177 PASS／2 FAIL（#88、#110，原因如上）；修後 179 PASS／0 FAIL、exit 0。
+- 外部請求：0（只有 git push）。沒碰 holdout、沒登記試驗、沒改十三節核心檔、沒重啟常駐服務。`data/STATUS.json` 本輪無資料源或面板異動，未改。
+
 ## 2026-11-03 10:31～11:0x DevQueue 20261103-103102（維運帽）：1ja 結案——讀 price_history 的上線程式逐支查零成交日 close=0，修 11 支＋前端 FinMind 退回分支（1jd），補 1jc（收盤後）
 
 - **等待總司令審閱：12 件**（`research/AWAITING_REVIEW.md` 本輪沒有新增或結案）。
