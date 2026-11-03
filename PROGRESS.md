@@ -1,3 +1,13 @@
+## 2026-11-03 17:3x DevQueue（維運帽）：**[預設放行]** 先.一三五-1ho 甲——Shioaji `[build]` 版本號另寫歷史檔
+
+- **等待總司令審閱：12 件**（`research/AWAITING_REVIEW.md` 等待中 12 列；本輪結案 1 列：先.一三五-1ho，[預設放行]）。
+- **為什麼**：1ho 送 AWAITING 已等 24.4 小時沒有 Cowork 裁示，不屬零之二排除類別（無 holdout／真錢／刪除／密碼／付費資料／門檻），照草稿標的「甲（建議）」執行。**Cowork 可推翻，推翻時照 PREREG 修訂規則處理**（還原＝刪 `shioaji_quotes.py` 那段＋`.gitignore` 一行）。
+- **改了什麼**：`research/shioaji_quotes.py` `run_stream_daemon()` 印 `[build] git sha=` 後，另 append「時間 pid=… [build] …」到 `research/shioaji_build_history.log`（只追加、不會被盤後輪次覆蓋；整段 try/except，寫檔失敗只印警告，常駐服務照跑＝十二節）；`.gitignore` 加該檔。
+- **驗證**：py_compile OK；抽出該段合成測試：正常寫兩次得兩行、目標路徑是目錄時只印警告不拋例外。冒煙 `node scripts/smoke_test.mjs`：179 PASS／0 FAIL、exit 0。
+- ⚠️ **七之二重啟核對未做**：盤後守護行程沒在跑（查無 shioaji_quotes 行程），沒有可重啟的對象；11/04 盤前排程啟動時自然載入新版。核對拆 **先.一三五-1ho-b**（時間閘 11/04 09:05～13:20：歷史檔 sha＝本 commit、`/health` stale_process=false）。
+- PENDING_QUEUE 1ho 原文在「`C:lpha`」處截斷（當初寫入時 `` 被當成控制字元），已在條目註明並補上 AWAITING 的建議選項原文。
+- 外部請求：0（只有 git push）。沒碰 holdout、沒登記試驗、沒改十三節核心檔。`data/STATUS.json` 無資料源或面板異動，未改。
+
 ## 2026-11-03 17:0x DevQueue（維運帽，cycle 20261103-170102）：1jq 清查只改時間戳的追蹤檔寫入者——修 selection_bias_ledger 的 SELECTION_BIAS_LEDGER.md
 
 - **等待總司令審閱：13 件**（`research/AWAITING_REVIEW.md` 本輪沒有新增或結案）。

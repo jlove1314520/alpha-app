@@ -1654,8 +1654,18 @@ def run_stream_daemon() -> None:
                 _sha = _head[:7]
         except OSError:
             _sha = "unknown"
-        print(f"[build] git sha={_sha}　原始碼修改時間="
-              f"{datetime.fromtimestamp(os.path.getmtime(__file__), TW_TZ).isoformat()}", flush=True)
+        _build_line = (f"[build] git sha={_sha}　原始碼修改時間="
+                       f"{datetime.fromtimestamp(os.path.getmtime(__file__), TW_TZ).isoformat()}")
+        print(_build_line, flush=True)
+        # 2026-11-03 先.一三五-1ho（甲，[預設放行]）：啟動腳本盤後每 2 分鐘用
+        # -RedirectStandardOutput 覆蓋 shioaji_stream_stdout.log，13:3x 後上面那行
+        # 就被蓋掉，七之二的版本核對事後查不到。另 append 一份歷史檔（只追加不覆蓋）；
+        # 寫檔失敗只印警告，不影響常駐服務（十二節）。
+        try:
+            with open(Path(__file__).resolve().parent / "shioaji_build_history.log", "a", encoding="utf-8") as _bf:
+                _bf.write(f"{datetime.now(TW_TZ).isoformat(timespec='seconds')} pid={os.getpid()} {_build_line}\n")
+        except Exception as _e:
+            print(f"[build] 警告：寫入 shioaji_build_history.log 失敗（{type(_e).__name__}: {_e}），略過", flush=True)
         if RECORDER is None:
             print(f"[tick落地] 停用：tick_recorder import失敗（{_TICK_RECORDER_IMPORT_ERROR}）", flush=True)
         else:
