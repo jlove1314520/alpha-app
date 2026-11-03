@@ -1,3 +1,12 @@
+## 2026-11-03 22:0x DevQueue（維運帽）：[預設放行] 先.一三五-1hv-a 照建議甲（時間閘），14 天重算到 11/17
+
+- **等待總司令審閱：11 件**（`research/AWAITING_REVIEW.md` 等待中 12→11 列；1hv-a 移到「已結案審閱紀錄」並標 [預設放行]）。
+- **[預設放行]**（零之二，等 24.4 小時無 Cowork 裁示，不屬排除類別）：採作者建議**甲**＝等 `research/git_op_lock.log` 連續 14 天沒有新的無 token release 才把它改成不刪鎖。Cowork 可推翻，推翻時照修訂規則處理（本條非 PREREG、不涉試驗 N）。
+- **執行甲的檢查**：log 自 11/02 起有 2 筆 legacy release；第 2 筆 **11/03 05:59:20**（ppid=273580、相對路徑）落在 DevQueue cycle 20261103-053101 內、該輪 commit 19e56908e9c 後 6 秒 → 推斷是**背景 CC 自己手打的無 token release**（[自行裁量]，行程已結束無法直接確認）。依甲重算 14 天：**最早 2026-11-17 06:00** 後、期間無新 legacy 行才實作（程式＋三支 wrapper fallback＋自測）。條目維持 `- [!]` 時間閘。
+- **提醒所有 CC**：提交時 `acquire` 的 token 要帶進 `release --token`；LOCK_HELD 時不要 release。
+- 本輪未改任何程式；外部請求 0（只有 git push）。沒碰 holdout、沒登記試驗、沒改十三節核心檔、沒動常駐服務檔。`data/STATUS.json` 無異動。
+- 冒煙測試：commit 前 `node scripts/smoke_test.mjs` exit 0，179 項 `[x]` 全過、0 項未過（含 #12 全程無累積 uncaught error）；第一次呼叫因與伺服器檢查串在同一條管線、只回 exit 1 沒有任何測試輸出，分開重跑即正常。`selftest_no_control_chars.py` 全過。
+
 ## 2026-11-03 21:3x～22:0x DevQueue（維運帽）：融資累積檔遺失盤點收尾——1jy 同鍵覆寫遺失 6 天、1jz 從沒抓到過 1 天
 
 - **等待總司令審閱：12 件**（`research/AWAITING_REVIEW.md` 等待中 12 列；本輪未新增列，只在 先.一三五-1jt-a 那一列補了回補範圍）。
