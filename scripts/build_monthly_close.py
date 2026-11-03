@@ -58,7 +58,8 @@ def main() -> int:
             month_end[d[:7]] = d
     last_day = max(month_end.values()) if month_end else ""
     for code, rows in ph.items():
-        by_date = {r.get("date"): r.get("close") for r in rows if r.get("date") and r.get("close") is not None}
+        # 先.一三五-1ja：零成交日記 close=0（no_trade），不是價格；月底那天零成交＝該月沒有月底價，不寫 0
+        by_date = {r.get("date"): r.get("close") for r in rows if r.get("date") and (r.get("close") or 0) > 0}
         mm = {m: by_date[d] for m, d in month_end.items() if d in by_date}
         if not mm:
             continue
