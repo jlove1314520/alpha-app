@@ -95,7 +95,8 @@ def _closes(prices: dict, sym: str) -> dict:
         v = r.get("adj_close")
         if v is None:
             v = r.get("close")
-        if v is not None:
+        # 先.一三五-1je：price_history 以 0 記零成交日（DATA.md），0 不是價格，當天不入序列
+        if v is not None and float(v) > 0:
             out[r["date"]] = float(v)
     return out
 

@@ -146,5 +146,26 @@ ATR = load("auto_trading_review", "research/auto_trading_review.py")
 _pd = {"prices": {"0050": [row("2026-10-01", 50), zero("2026-10-02")]}}
 check("前收沿用前一筆真實收盤", ATR._prev_close_before("2026-10-03", "0050", _pd) == 50, ATR._prev_close_before("2026-10-03", "0050", _pd))
 
+print("paper_1b_tracker／paper_3_tracker._closes（先.一三五-1je）")
+for _nm, _rel in (("paper_1b_tracker", "research/paper_1b_tracker.py"), ("paper_3_tracker", "research/paper_3_tracker.py")):
+    _M = load(_nm, _rel)
+    _cl = _M._closes({"00697B": [row("2026-10-01", 40), zero("2026-10-02"), row("2026-10-05", 41)]}, "00697B")
+    check(f"{_nm} 零成交日不進價格序列（不以 0 計值／不除以零）", "2026-10-02" not in _cl and _cl.get("2026-10-05") == 41, _cl)
+
+print("build_picks_ledger.build_snapshot（先.一三五-1je：報價檔 close=0 也是零成交）")
+import json as _json  # noqa: E402
+import tempfile as _tf  # noqa: E402
+BPL = load("build_picks_ledger", ".github/scripts/build_picks_ledger.py")
+with _tf.TemporaryDirectory() as _td:
+    _sp = Path(_td) / "scores.json"
+    _sp.write_text(_json.dumps({"meta": {"data_asof": "2026-10-02"}, "stocks": [
+        {"code": "9999", "name": "零成交", "rank": 1, "total_score": 1},
+        {"code": "1111", "name": "有成交", "rank": 2, "total_score": 1}]}), encoding="utf-8")
+    _q = {"9999": {"close": 0.0, "date": "2026-10-02"}, "1111": {"close": 20.0, "date": "2026-10-02"}}
+    _snap = BPL.build_snapshot("test", _sp, _q, None)
+    _pk = {p["code"]: p for p in (_snap or {}).get("picks", [])}
+    check("報價 close=0 不記成 0 元快照價", (_pk.get("9999") or {}).get("close_price", "x") is None, _pk.get("9999"))
+    check("有成交的照常記價", (_pk.get("1111") or {}).get("close_price") == 20.0, _pk.get("1111"))
+
 print(f"\n合計 {ok} 項通過、{fail} 項失敗")
 sys.exit(1 if fail else 0)

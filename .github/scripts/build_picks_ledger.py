@@ -102,6 +102,8 @@ def build_snapshot(board: str, score_path: Path, quotes: dict, taiex_close: floa
         code = s["code"]
         q = quotes.get(code) or {}
         price, price_date, stale = q.get("close"), q.get("date"), False
+        if price is not None and float(price) <= 0:  # 先.一三五-1je：報價檔 close=0＝當天零成交，不是 0 元
+            price, price_date = None, None
         # 2026-08-28新增（本機實測抓到的真案例：6452查到2020-08-17的收盤價，
         # 是quotes_all_tw.json/price_history.json對這檔股票的FinMind快取
         # 極度過期——跟B23發現的日曆缺口同一種根因，只是更嚴重）。「今日
