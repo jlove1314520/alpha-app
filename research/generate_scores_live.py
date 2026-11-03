@@ -217,6 +217,8 @@ def _ma_breakout(price_rows: list[dict]) -> float | None:
     先.八十四-4（2026-10-13）：這是只供顯示的舊指標（ma60_breakout_x_volume_index），不進 technical 分數；
     technical 分數自 先.八十一-37 起由 live_factors.technical() 以還原權息收盤計算。
     需要至少 MA_WINDOW(60) 筆資料才算，不足時誠實回傳None。"""
+    # 先.一三五-1ja：零成交日記 close=0（no_trade），不是價格；略過，否則 MA60 被拉低、最後一天零成交算成 −100%
+    price_rows = [r for r in price_rows if (r.get("close") or 0) > 0]
     if len(price_rows) < MA_WINDOW:
         return None
     rows = sorted(price_rows, key=lambda r: r["date"])
