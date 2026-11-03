@@ -108,7 +108,8 @@ def _cross_validate(c: dict, all_l1_events: list[dict], news_cands: list[dict]) 
 
 
 def _reflected(code: str, event_date: str, prices: dict) -> dict:
-    rows = [r for r in prices.get(code, []) if r.get("close") is not None and r["date"] <= event_date]
+    # 先.一三五-1ja：零成交日記 close=0（no_trade），不是價格；略過，否則 run_before 除以 0 或算成 −100%
+    rows = [r for r in prices.get(code, []) if r.get("close") is not None and r["close"] > 0 and r["date"] <= event_date]
     need = max(RUN_BEFORE_DAYS, VOL_AVG_DAYS + 2) + 1
     if len(rows) < need:
         return {"run_before": None, "pre_vol_spike": None, "reflected": "unknown",
@@ -130,7 +131,7 @@ def _ref_price(code: str, today: str, prices: dict) -> tuple[float | None, str |
     """寫入當下已知的最新收盤，只當參考（看寫入時價位），不拿來算報酬——它可能早於事件本身
     （週末寫入時是上週收盤），用它當進場價會把事件反應算進報酬，是前視。進場價由回填腳本
     取「寫入日之後第一個交易日收盤」，見規格第 4 節。"""
-    rows = [r for r in prices.get(code, []) if r.get("close") is not None and r["date"] <= today]
+    rows = [r for r in prices.get(code, []) if r.get("close") is not None and r["close"] > 0 and r["date"] <= today]  # 先.一三五-1ja
     if not rows:
         return None, None
     best = rows[-1]
