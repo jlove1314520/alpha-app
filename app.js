@@ -944,7 +944,7 @@
     dotEl.style.background=dot;
     bEl.textContent=label;
     // 2026-08-28 P0-a 根治：.tm=美東現在時間(每秒更新)，非 fetched_at。
-    tmEl.textContent=z.hhmmss.slice(0,5);
+    tmEl.textContent='美東 '+z.hhmmss.slice(0,5);  // 先.一四八-2（UX 稽核）：美股膠囊的時間是美東時間，原本沒標、台北半夜看到 13:09 會以為是資料時間
   }
   // ── 2026-09-06（健檢.一）交易日曆 ───────────────────────────────────────────
   // 問題：診斷橫幅原本用「rolling 24 小時」判斷資料過舊，所以每逢週末與國定假日
@@ -2960,7 +2960,7 @@
     if(!d&&twCache&&twCache.fetched_at)d=new Date(twCache.fetched_at);
     if(!d||isNaN(d))return '收盤（日期不明）'+stale;
     const z=_zonedParts(d,'Asia/Taipei'),n=_zonedParts(new Date(),'Asia/Taipei');
-    const md=String(z.m).padStart(2,'0')+'-'+String(z.d).padStart(2,'0');
+    const md=String(z.m).padStart(2,'0')+'/'+String(z.d).padStart(2,'0');  // 先.一四八-2：日期一律 MM/DD（原本 MM-DD 與同一行「資料 11/04」混用）
     const dayDiff=Math.round((Date.UTC(n.y,n.m-1,n.d)-Date.UTC(z.y,z.m-1,z.d))/86400000);
     return (dayDiff<=0?'今日收盤':(dayDiff===1?'昨日收盤':'前次收盤'))+`（${md}）`+stale;
   }
@@ -4960,7 +4960,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-11-04.0208';
+  const APP_VERSION='2026-11-04.0230';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

@@ -463,7 +463,8 @@
   function renderPicks(json){
     const meta=json.meta||{};
     const covTxt=meta.universe_size?`（涵蓋 ${(json.stocks||[]).length}/${meta.universe_size} 檔全市場宇宙）`:'';
-    document.getElementById('picks-asof-line').textContent='資料基準日 '+(meta.data_asof||'—')+' · 樣本 '+(json.stocks||[]).length+' 檔'+covTxt;
+    // 先.一四八-2（UX 稽核）：data_asof 是排程執行日（11/04 01:05 跑的榜單寫 11/04），放在頁首會被讀成「11/04 的資料」；改寫榜單產生時間，資料基準日留在方法論頁
+    document.getElementById('picks-asof-line').textContent='榜單產生 '+(meta.generated_at?String(meta.generated_at).slice(5,16).replace('-','/').replace('T',' '):(meta.data_asof||'—'))+' · 樣本 '+(json.stocks||[]).length+' 檔'+covTxt;
     const weightNoteEl=document.getElementById('picks-weight-note');
     if(weightNoteEl){
       const noteByEngine={

@@ -425,8 +425,10 @@ async function runSmokeTest(baseUrl, headless = true) {
     return new Intl.DateTimeFormat("en-US", { timeZone: tz, hour12: false, hour: "2-digit", minute: "2-digit" }).format(new Date());
   }
   function minutesDiff(hhmmA, hhmmB) {
-    const [ha, ma] = hhmmA.split(":").map(Number);
-    const [hb, mb] = hhmmB.split(":").map(Number);
+    // 先.一四八-2：美股膠囊改成「美東 HH:MM」，只取 HH:MM 比
+    const hm = (x) => (String(x).match(/\d{1,2}:\d{2}/) || ["0:0"])[0];
+    const [ha, ma] = hm(hhmmA).split(":").map(Number);
+    const [hb, mb] = hm(hhmmB).split(":").map(Number);
     let diff = Math.abs((ha * 60 + ma) - (hb * 60 + mb));
     return Math.min(diff, 1440 - diff); // 跨日邊界（例如23:59 vs 00:00）取較小值
   }
@@ -1092,9 +1094,9 @@ async function runSmokeTest(baseUrl, headless = true) {
       const tpex = rows.find(r => r.textContent.includes("櫃買指數"));
       return { tpexSrc: tpex ? tpex.querySelector(".nm > span")?.textContent : null, heat: document.getElementById("heat-datatime")?.textContent || "", idx: document.getElementById("idx-datatime")?.textContent || "" };
     });
-    if (!info.tpexSrc || !/收盤（\d{2}-\d{2}）/.test(info.tpexSrc)) idxDateErrors.push(`櫃買指數列來源標示沒有帶收盤日期：「${info.tpexSrc}」`);
-    if (!/收盤（\d{2}-\d{2}）/.test(info.heat)) idxDateErrors.push(`類股熱力圖時間標示沒有帶收盤日期：「${info.heat}」`);
-    if (!/收盤（\d{2}-\d{2}）/.test(info.idx)) idxDateErrors.push(`大盤指數時間標示沒有帶收盤日期：「${info.idx}」`);
+    if (!info.tpexSrc || !/收盤（\d{2}\/\d{2}）/.test(info.tpexSrc)) idxDateErrors.push(`櫃買指數列來源標示沒有帶收盤日期：「${info.tpexSrc}」`);
+    if (!/收盤（\d{2}\/\d{2}）/.test(info.heat)) idxDateErrors.push(`類股熱力圖時間標示沒有帶收盤日期：「${info.heat}」`);
+    if (!/收盤（\d{2}\/\d{2}）/.test(info.idx)) idxDateErrors.push(`大盤指數時間標示沒有帶收盤日期：「${info.idx}」`);
   } catch (e) {
     idxDateErrors.push(`測試本身出錯：${e.message || e}`);
   }
@@ -5792,7 +5794,7 @@ async function runSmokeTest(baseUrl, headless = true) {
     const r = await page.evaluate(() => typeof twCloseDateLabel === "function"
       ? [twCloseDateLabel({ data_date: "2026-10-16", fetched_at: "2026-10-16T23:54:44+00:00" }), twCloseDateLabel({ taiex: { date: "20261016" }, fetched_at: "2026-10-16T23:54:44+00:00" })] : null);
     if (!r) cdErrs.push("twCloseDateLabel 未載入");
-    else r.forEach((x, i) => { if (!/（10-16）/.test(x)) cdErrs.push(`例 ${i + 1}：${x}`); });
+    else r.forEach((x, i) => { if (!/（10\/16）/.test(x)) cdErrs.push(`例 ${i + 1}：${x}`); });
   } catch (e) { cdErrs.push(`測試本身出錯：${e.message || e}`); }
   record("170. 首頁收盤日標籤以資料日為準、不被抓檔時間蓋掉（先.一一二 驗收順手修）", cdErrs.length === 0, cdErrs.join("; "));
 

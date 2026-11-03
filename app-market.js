@@ -244,7 +244,10 @@
     // 2026-09-02新增：市場頁「籌碼」精簡入口卡（#chips-entry-inst）跟這裡是
     // 同一份資料的兩種呈現，不重新fetch，直接複寫同樣的文字/顏色。
     const ee=document.getElementById('chips-entry-inst');
-    if(ee){ee.textContent=te.textContent;ee.style.color=te.style.color}
+    if(ee){ee.textContent=te.textContent;ee.style.color=te.style.color;
+      // 先.一四八-2（UX 稽核）：標籤原本寫死「（今日）」，實際是法人資料日（常是前一交易日）
+      try{const lab=ee.parentElement&&ee.parentElement.querySelector('span'),dd=String(((MARKET_TW_CACHE||{}).institutional||{}).date||'');
+        if(lab&&/^\d{8}$/.test(dd))lab.textContent=`三大法人合計（${dd.slice(4,6)}/${dd.slice(6,8)}）`}catch(e){console.warn('[chips-entry label]',e)}}
   }
   // 先.五十三-A2：主數字、三條線、圖表、入口卡一律用對齊籌碼K的 ratio_pct_ck；沒有 ck（校準檔缺失）才退回本站原值
   function marginVal(h){return h&&h.ratio_pct_ck!=null?h.ratio_pct_ck:(h?h.ratio_pct:null)}
