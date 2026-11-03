@@ -268,6 +268,13 @@ def paper_line_from_log(events: list, px: Px, value_key: str = "values_post", bo
     if not ev:
         return None
     i_start = px.idx(ev[0]["date"])
+    if i_start is None and px.cal and ev[0]["date"] < px.cal[0]:
+        # 先.一三五-1hx 甲：建倉日已滾出 90 日價格視窗 → 從視窗內第一個帳本事件（再平衡等，價值已是當天估值）重算，
+        # 之前的點由 apply_freeze() 用上一版曲線凍結沿用、在這個事件日接縫
+        ev = [e for e in ev if e["date"] >= px.cal[0]]
+        if not ev:
+            return None
+        i_start = px.idx(ev[0]["date"])
     if i_start is None:
         return None
     dates, nav, comp = [], [], []
@@ -328,6 +335,8 @@ def nav_line_from_log(events: list, px: Px):
     ev = sorted([e for e in events if e.get("date") and e.get("nav") is not None], key=lambda e: (e["date"], e.get("logged_at", "")))
     if not ev:
         return None
+    if px.cal and ev[0]["date"] < px.cal[0]:
+        ev = [e for e in ev if e["date"] >= px.cal[0]] or ev  # 先.一三五-1hx 甲：視窗外的點由 apply_freeze() 凍結沿用
     i_start = px.idx(ev[0]["date"])
     if i_start is None:
         return None
@@ -410,6 +419,79 @@ def paper_lines(px: Px) -> list:
     return out
 
 
+# ---------- 二之一、視窗外舊點凍結（先.一三五-1hx 甲，2026-11-04 [預設放行]） ----------
+# price_history 每檔只留 90 個交易日，每班從頭重算會讓建倉日滾出視窗的線整條消失（模擬 G／H 判天條一要期間回撤）。
+# 做法：上一版 strategy_curves.json 裡「起點已在價格視窗之前」的線，接縫日以前的點凍結沿用，接縫日起用這班重算的點，
+# 並把重算段等比例縮放到接縫日的舊值（同一天淨值接續，所以接縫那天的日報酬就是舊曲線那天的日報酬、不會跳點）。
+# 接縫日＝重算段第 WARMUP 個點：三榜前 HOLD 天在場批次不滿（視窗前進場的批次已無價格），不拿來接；紙上追蹤用重算起點。
+# 上一版起點仍在視窗內（例如算法更正讓起點變晚）就完全用重算，不沿用舊點。
+WARMUP = {"board": HOLD, "paper": 0}
+
+
+def freeze_merge(prev: dict, new: dict, win_start: str):
+    """回傳接好的線；接不上回 None（呼叫端決定怎麼處理）。prev／new 都是 _line() 格式。"""
+    pd_, nd = prev.get("dates") or [], new.get("dates") or []
+    if not pd_ or not nd or pd_[0] >= win_start or nd[0] <= pd_[0]:
+        return new
+    pos = {d: i for i, d in enumerate(pd_)}
+    seam = next((d for d in nd[WARMUP.get(new.get("group"), 0):] if d in pos), None)
+    if seam is None:
+        return None
+    ip, inew = pos[seam], nd.index(seam)
+    if not (new["nav"][inew] > 0 and new["bench"] and new["bench"][inew] > 0):
+        return None
+    kn, kb = prev["nav"][ip] / new["nav"][inew], prev["bench"][ip] / new["bench"][inew]
+    ln = dict(new)
+    ln["dates"] = pd_[:ip] + nd[inew:]
+    ln["nav"] = prev["nav"][:ip] + [round(v * kn, 4) for v in new["nav"][inew:]]
+    ln["bench"] = prev["bench"][:ip] + [round(v * kb, 4) for v in new["bench"][inew:]]
+    pc, nc = prev.get("comp_max_abs_pct") or [], new.get("comp_max_abs_pct") or []
+    ln["comp_max_abs_pct"] = pc[:ip] + nc[inew:] if len(pc) == len(pd_) and len(nc) == len(nd) else []
+    ln["start_date"] = ln["dates"][0]
+    ln["metrics"] = metrics(ln["nav"], ln["bench"])
+    ln["frozen_before"] = seam
+    ln["note"] = (new.get("note") or "") + f"；{seam[5:].replace('-', '/')} 以前的點沿用先前算好的（價格只留 90 個交易日）"
+    return ln
+
+
+def apply_freeze(lines: list, prev_doc: dict | None, px: Px) -> list:
+    prev_by = {l.get("id"): l for l in ((prev_doc or {}).get("lines") or []) if isinstance(l, dict)}
+    win = px.cal[0]
+    out = []
+    for ln in lines:
+        prev = prev_by.get(ln.get("id"))
+        if ln.get("group") not in WARMUP or not prev or not prev.get("dates") or prev["dates"][0] >= win:
+            out.append(ln)
+            continue
+        try:
+            merged = freeze_merge(prev, ln, win) if ln.get("dates") else None
+        except Exception as e:  # noqa: BLE001 -- 接縫失敗只影響這一條（十二節）
+            print(f"[warn] {ln.get('label')} 凍結接縫失敗：{type(e).__name__}: {e}")
+            merged = None
+        if merged is None:
+            # 視窗內接不上（重算不出或接縫日不在舊曲線）→ 整條沿用上一版、不更新，並寫明，不讓已跑幾個月的線變回「還沒開始」
+            print(f"[warn] {ln.get('label')} 重算段接不上舊曲線，本班沿用上一版（到 {prev['dates'][-1]}）")
+            keep = dict(prev)
+            keep["frozen_note"] = f"價格視窗內接不上，曲線停在 {prev['dates'][-1]}（舊點沿用）"
+            merged = keep
+        out.append(merged)
+    return out
+
+
+def load_prev(path: Path) -> dict | None:
+    """上一版曲線檔。存在但讀不出來 → 不覆蓋（凍結的舊點只存在那裡；可從 git 歷史還原）。"""
+    if not path.exists():
+        return None
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(doc, dict) or not isinstance(doc.get("lines"), list):
+            raise ValueError("結構不對（沒有 lines 陣列）")
+        return doc
+    except (OSError, ValueError) as e:
+        raise SystemExit(f"[告警] 上一版 {path.name} 讀不出來（{e}），本輪不覆蓋——凍結舊點只在這份檔裡，"
+                         f"請從 git 歷史還原（git log -- data/strategy_curves.json）")
+
+
 # ---------- 三、真錢 Bb-90（本機伺服器呼叫） ----------
 def live_line(perf: dict | None) -> dict:
     """perf＝auto_ledger_view.perf_series() 的輸出（nav/bench 皆為「市值÷投入」比值）。只回百分比曲線，不回金額。"""
@@ -425,7 +507,7 @@ def live_line(perf: dict | None) -> dict:
     return ln
 
 
-def build() -> dict:
+def build(prev_doc: dict | None = None) -> dict:
     try:
         px = Px(PHS.load(DATA / "price_history.json") if PHS.exists(DATA / "price_history.json") else {})
     except Exception as e:  # noqa: BLE001
@@ -458,6 +540,7 @@ def build() -> dict:
                            note=f"每天快照後第一個收盤買進前 20 名、各放 {HOLD} 個交易日，同時 {HOLD} 批各佔五分之一；已扣手續費與證交稅"
                                 + (f"；{inc} 批有個股缺進出場收盤（停牌或資料缺），該批只算有價的個股" if inc else ""),
                            extra={"n_batches": r["n_batches"], "incomplete_batches": inc}))
+    lines = apply_freeze(lines, prev_doc, px)  # 先.一三五-1hx 甲
     return {"meta": {"generated_at": datetime.now(TZ).isoformat(timespec="seconds"), "source": ".github/scripts/build_strategy_curves.py",
                      "bench": BENCH, "bench_note": "灰線是同期 0050",
                      "price_asof": px.cal[-1], "correction": CORRECTION,
@@ -470,16 +553,12 @@ def build() -> dict:
 
 
 def main() -> int:
-    doc = build()
+    o = load_prev(OUT) or {}
+    doc = build(o)
     s = json.dumps(doc, ensure_ascii=False, separators=(",", ":"))
-    old = OUT.read_text(encoding="utf-8") if OUT.exists() else ""
-    try:
-        o = json.loads(old) if old else {}
-        if o.get("lines") == doc["lines"]:
-            print("strategy_curves.json 內容未變，不重寫")
-            return 0
-    except ValueError:
-        pass
+    if o.get("lines") == doc["lines"]:
+        print("strategy_curves.json 內容未變，不重寫")
+        return 0
     OUT.write_text(s, encoding="utf-8")
     sys.stdout.reconfigure(encoding="utf-8")
     for ln in doc["lines"]:
