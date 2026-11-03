@@ -86,7 +86,9 @@ class Px:
     def __init__(self, doc: dict):
         self.rows = {}
         for c, rs in (doc.get("prices") or {}).items():
-            rs = sorted((r for r in rs if r.get("close") is not None), key=lambda r: r["date"])
+            # 先.一三五-1ja：零成交日 price_history 記 close=0／adj_close=0（no_trade），不是價格，整列略過＝當天無價
+            rs = sorted((r for r in rs if r.get("close") is not None and r["close"] > 0
+                         and (r.get("adj_close") is None or r["adj_close"] > 0)), key=lambda r: r["date"])
             m, f = {}, 1.0
             for r in reversed(rs):
                 if r.get("adj_close") is not None and r["close"]:
