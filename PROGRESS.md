@@ -1,3 +1,16 @@
+## 2026-11-04 07:2x DevQueue（維運帽→開發帽，cycle 20261104-070101）：1kd workflow 失敗班清點＋market／quotes 衝突提案、冒煙第 146 項改測 App 路徑、gh token 失效登記
+
+- **等待總司令審閱：13 件**（新增 先.一三五-1kd-a 衝突提案、先.一三五-1kd-e 請總司令提供新 PAT；`research/AWAITING_REVIEW.md` 等待中表格 13 列，一致）。
+- **做了什麼**：
+  ①**1kd（維運，唯讀、零外部資料請求；`gh api` 共 28 次）**：10/21 起失敗班＝market 4、quotes 1、smoke_cloud 11、tw_data_landed_check 0、us_financials 0。market 10/28 14:35Z 是 exit 128（先.一四〇-1z 已修）；market 10/21、10/27、10/28 00:50Z＋quotes 10/30 都是 Commit 步驟 exit 1，每個失敗窗 main 上都有人 push 同一批檔（by_code、PENDING_QUEUE／trials_index、PENDING_QUEUE／STATUS／PROGRESS_HEARTBEAT、本機報價備援 quotes_tw.json）→ 推論 rebase 衝突、重試救不了 → 提案 `docs/MARKET_QUOTES_COMMIT_CONFLICT_1KD.md`（market **甲（建議）**衝突時共用追蹤檔取 main、資料檔取雲端後繼續 rebase，不丟整班；quotes **甲（建議）**比照 1kc-a）送 AWAITING（1kd-a，11/05 07:1x 起 24 小時預設放行）。純 bug 修復：quotes.yml rebase 衝突路徑補 `::warning::` 衝突檔名（market 已有）。commit `e69efbefe77`。
+  ②**1kd-b（開發）**：雲端冒煙第 146 項 13 班壞 11 班，原子檢查自建 span 測的是瀏覽器 0 秒動畫事件時序；改成直接呼叫 App `flashPriceEls()`：減少動態不得加閃色、對照組一般模式必須加上且 3 秒內移除（防恆真，沒有放寬）。commit `63c2bc8f535`；雲端驗收排 1kd-c（時間閘 11/05 08:00 後）。
+  ③**1kd-e（維運）**：本機 `gh` token 失效（`gh auth status`），本機叫雲端複查 10/27 起 HTTP 401；git push 不受影響。需總司令提供新 PAT → AWAITING＋`C:lpha\總司令待辦.md` 第 7 項。commit `49e0d479b0e`。
+- **[自行裁量]**：market 三班早於衝突 annotation 上線、run log 要 admin，「CONFLICT」由時間窗＋檔案重疊推得；quotes 那班由「沒有重試耗盡 warning＋2 秒結束」推得走的是衝突路徑。1kd-b 沒另做「拿掉 App 防線看測試會不會紅」的反向驗證（時間不夠），以對照組加上=true 確認測試路徑有在跑。gh 改用未登入額度查（公開 repo 讀中繼資料足夠），沒有去讀 Windows 認證區的 PAT 給 gh 用。
+- **BLOCKED**：1kd-a 等 Cowork 審（24 小時預設放行）；1kd-c 時間閘 11/05 08:00；1kd-e 等總司令新 PAT。
+- **補件**：本輪自行補入 1kd-a／1kd-b／1kd-c／1kd-e 四條；收工時 DevQueue 可執行項 0（`dev_queue_runner.py next`→NO_PENDING_ITEM），仍低於 6；來源照上一輪紀錄（BACKLOG 未完成項、DATA_GAP_PLAN 甲類）已用盡、本輪未重掃，本週暫停文書類，研究候選留給研究帽輪次。
+- **維運帽必交產物**：`data/STATUS.json` updated_at／updated_by 已更新（無資料源／面板異動）。
+- **冒煙測試**：`node scripts/smoke_test.mjs` 兩次都 exit 0、「全部通過」——07:12:32（1kd）、07:21:41（1kd-b 後；第 146 項輸出「閃色 一般模式 加上=true／移除=true、減少動態 加上=false」）。
+
 ## 2026-11-04 06:5x DevQueue（維運帽，cycle 20261104-063101）：1kc 查因＝與本機新聞補班同檔 rebase 衝突，提案送審＋補 1kd
 
 - **等待總司令審閱：11 件**（新增 先.一三五-1kc-a；`research/AWAITING_REVIEW.md` 等待中表格 11 列，一致）。
