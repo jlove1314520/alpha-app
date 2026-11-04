@@ -762,11 +762,62 @@ def is_batch_item(text: str) -> bool:
     return bool(BATCH_ITEM_TAG.search(text))
 
 
+# 先.一三五-1kj 甲（收件匣 039 定案；與 1hn 合併）：到期的 `- [!]` 時間閘最久等了 16 小時沒人做（只認 `- [ ]`）。
+# 找不到 `- [ ]` 時，再掃一次 `- [!]`：只認行首標準格式〔時間閘：YYYY-MM-DD（週X）HH:MM 後…〕，只有日期＝當天 00:00；
+# 時間窗（09:05～13:20）、行中時間閘、事件條件一律不認。台北時間已過 → 機器直接把那行改回 `- [ ]`（不靠模型記得改），再照常取件。
+# 解析或寫檔失敗一律當未到期（fail open，十二節）。
+TIME_GATE_LINE = re.compile(r"^- \[!\] 〔時間閘：(\d{4}-\d{2}-\d{2})（週.）(?:(\d{1,2}):(\d{2}) ?)?後[〕（]")
+
+
+def _expired_time_gate_indices(lines: list[str], now: datetime | None = None) -> list[int]:
+    try:
+        now = now or datetime.now(TZ)
+        fenced = _fenced_line_indices(lines)
+        out = []
+        for i, ln in enumerate(lines):
+            if i in fenced:
+                continue
+            m = TIME_GATE_LINE.match(ln)
+            if not m:
+                continue
+            try:
+                t = datetime.strptime(f"{m.group(1)} {m.group(2) or '00'}:{m.group(3) or '00'}", "%Y-%m-%d %H:%M").replace(tzinfo=TZ)
+            except ValueError:
+                continue
+            if now >= t:
+                out.append(i)
+        return out
+    except Exception as e:  # noqa: BLE001
+        _safe_print(f"WARN_DETECTOR_CRASHED: expired_time_gate failed ({type(e).__name__})")
+        return []
+
+
+def _reopen_expired_time_gates(now: datetime | None = None) -> int:
+    """把到期時間閘的 `- [!]` 改回 `- [ ]`，回傳改了幾行。自身失敗回 0。"""
+    try:
+        lines = _lines()
+        idx = _expired_time_gate_indices(lines, now)
+        if not idx:
+            return 0
+        stamp = (now or datetime.now(TZ)).strftime("%Y-%m-%d %H:%M")
+        for i in idx:
+            lines[i] = lines[i].replace("- [!]", "- [ ]", 1) + f"　〔{stamp} 時間閘已到，DevQueue 自動轉回待辦（先.一三五-1kj）〕"
+        QUEUE.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
+        _record_runner_write("PENDING_QUEUE.md")
+        _safe_print(f"TIME_GATE_REOPENED: {len(idx)} 項到期時間閘轉回 - [ ]")
+        return len(idx)
+    except Exception as e:  # noqa: BLE001
+        _safe_print(f"WARN_DETECTOR_CRASHED: reopen_expired_time_gates failed ({type(e).__name__})")
+        return 0
+
+
 def find_next() -> tuple[int, str] | None:
     """find_next 的輪替外殼：上一輪派的是分批項，這一輪若又輪到分批項就改拿下一個
     非分批的可執行條目；沒有其他可執行條目才回頭做分批工作。
     輪替邏輯自身失敗只降級（CLAUDE.md 十二節）：回傳未輪替的原結果。"""
     nxt = _find_next_base()
+    if nxt is None and _reopen_expired_time_gates():
+        nxt = _find_next_base()
     try:
         if nxt is None or not is_batch_item(nxt[1]):
             return nxt
@@ -1127,8 +1178,12 @@ def research_hat_block(crunch: bool) -> str:
 # (b) QUEUE_EMPTY／GATED 連續 2 輪 → 這一輪做「候選補件」（只限台股個股層級、優先前向版，照 先.一三二-1 格式），不准空轉超過 1 小時。
 AWAIT_FILE = ROOT / "research" / "AWAITING_REVIEW.md"
 DEFAULT_RELEASE_HOURS = 24
+# 先.一四九-1（收件匣 039）：原本整列比對 → 說明欄的順帶字眼（「Disable、不刪除」「claude 登入過期」「門檻 99.98 百分位」）
+# 讓 1hb／1hn／1gt 等提案過了 24 小時也從沒被放行。改成：強排除字（holdout／真錢／實盤）照舊比整列；
+# 其餘排除字只比「項目」欄（要總司令動手的列，項目欄一律寫「請總司令」）；「門檻」改只認關卡門檻。
+DEFAULT_RELEASE_EXCLUDE_ROW = re.compile(r"holdout|保留資料|真錢|實盤")
 DEFAULT_RELEASE_EXCLUDE = re.compile(
-    r"holdout|保留資料|真錢|實盤|下單|刪除|清除|drop|不可逆|密碼|登入|本人|親手|請總司令|付費|採購|門檻|GATE\d|非阻塞")
+    r"holdout|保留資料|真錢|實盤|下單|刪除|清除|drop|不可逆|密碼|登入|本人|親手|請總司令|付費|採購|關卡門檻|通過門檻|GATE\d|violation_rate|非阻塞")
 _AWAIT_TIME = re.compile(r"(20\d\d-\d\d-\d\d) (\d\d):(\d|x)(\d|x)")
 
 
@@ -1149,7 +1204,7 @@ def _default_release_candidates(now: datetime | None = None, text: str | None = 
             mm = (m.group(3) if m.group(3) != "x" else "0") + (m.group(4) if m.group(4) != "x" else "0")
             t = datetime.strptime(f"{m.group(1)} {m.group(2)}:{mm}", "%Y-%m-%d %H:%M").replace(tzinfo=TZ)
             age = (now - t).total_seconds() / 3600
-            if age >= DEFAULT_RELEASE_HOURS and not DEFAULT_RELEASE_EXCLUDE.search(ln):
+            if age >= DEFAULT_RELEASE_HOURS and not DEFAULT_RELEASE_EXCLUDE_ROW.search(ln) and not DEFAULT_RELEASE_EXCLUDE.search(cells[0]):
                 out.append((cells[0], round(age, 1)))
         return out
     except Exception as e:  # noqa: BLE001
