@@ -1,3 +1,14 @@
+## 2026-11-05 05:1x DevQueue 20261105-043102（維運帽）先.一四九-1／一四九-2 提案＋1kh-l 乙部分
+
+- **等待總司令審閱：16 件**（`research/AWAITING_REVIEW.md` 等待中表格 16 列；本輪新增 2 件：先.一四九-1、先.一四九-2，皆剛送出、24 小時後照零之二預設放行甲）。
+- **先.一四九-1 個股 K 線 3 年日線改由 repo 提供**（747c2352eab）：提案 `docs/PROPOSAL_KLINE_3Y_REPO.md`。零外部請求實測：by_code price 60 根；price_history 2,967 檔近 3 年中位數 90 根；本機官方日檔快取 `research/data/paper_9_lookback` 有 2025-10-28～2026-10-30 各 247 日，可零請求組 1 年；1 年逐檔 25.0MB（gzip 7.0MB），3 年約 75MB。[自行裁量] repo pack 已 998MiB，原甲「每日改寫全部逐檔」會讓 git 歷史暴增，改成年分檔（過去年凍結、當年每週補、最近 60 日沿用 by_code）；回補約 1,032 次，落在既有 twse_mi_index／tpex_www 節流規則內。條目標 `- [!]`。
+- **先.一四九-2 沒連電腦時自選股日內分時**（7324fd97157）：提案 `docs/PROPOSAL_INTRADAY_TW_OFFLINE.md`。本機熱檔 `.live_state_sinopac.json` 11/04 有 49 代號當日 1 分K；甲＝新腳本每 15 分鐘只匯出自選股＋加權／櫃買到 `data/intraday_tw/`，零新增外部請求、不動 shioaji_quotes.py。自選股代號本來就在公開的 quotes_sinopac.json。條目標 `- [!]`。
+- **先.一四九-1 待審 11 件（第 2 批）**（70086f2f297）：1kh-l 丙的乙部分——`generate_status_json.py::build_data_files()` 省略預設 source／空 detail，讀取端 5 支逐支確認不讀這兩欄；data_files 33.2→30.4KB（heartbeat 每 30 分鐘重算即生效，本輪未手動重產 STATUS.json）。[自行裁量] 只省略「通用解析（讀 generated_at）」這一種，其他通用字串保留免歧義。條目維持 `- [ ]`，尚餘 1kh-l 甲、1jt-a 甲、1kd-a 甲、1kh-e 甲（1gt 乙留研究輪）。
+- **冒煙**：三次皆 `node scripts/smoke_test.mjs` exit 0、0 FAIL（184 項）。
+- **維運產物**：data/STATUS.json 本輪未手動改（由 heartbeat／market.yml 重產）；`scripts/data_schema_guard.py` 直接執行只印說明、未實際驗 STATUS（未驗證）。
+- **佇列**：`- [ ]` 27 項（≥12，不補件）；BLOCKED 未逐項重查解除條件（時間不足，下一輪補）。
+- **下一輪**：接「待審 11 件」第 3 批（1kh-l 甲 → 1jt-a 甲 → 1kd-a 甲 → 1kh-e 甲）。
+
 ## 2026-11-05 04:1x DevQueue 20261105-040102（研究帽）先.一五〇-1 收尾：推播＋打勾
 
 - **等待總司令審閱：10 件**（本輪未新增；沿用 research/AWAITING_REVIEW.md）。
