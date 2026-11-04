@@ -44,9 +44,11 @@ def main():
     fams, bench, meta = [], None, None
     for f in files:
         d = json.loads(f.read_text(encoding="utf-8"))
+        if not isinstance(d, dict) or "families" not in d:  # 略過引擎格斷點檔（_cells.json）
+            continue
         bench = bench or d.get("benchmark_0050")
         meta = meta or d
-        fams += [x for x in d["families"] if "best_by_calmar" in x]
+        fams += [x for x in d.get("families", []) if "best_by_calmar" in x]
     fams.sort(key=lambda f: (not f["best_by_calmar"]["violates_survival"], f["best_by_calmar"]["calmar"]), reverse=True)
     L = []
     L.append("# REAUDIT_OPTIMIZED.md — 墓園重審：最優化版本總表（先.一五〇-1，Cowork 收件匣 039 已定案）\n")
