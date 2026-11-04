@@ -20,7 +20,7 @@
 - N=0時「等待中」表格留表頭但清空列，不得整份刪除本檔案。
 - 2026-10-29（收件匣 031）：凡「請總司令執行一次」（要總司令本人在電腦或手機上動手）的項目，除了列 AWAITING，也同步加進 `C:\alpha\總司令待辦.md`（白話、每項一行做法、寫不做的影響）；能用腳本做的接進 `C:\alpha\run-owner-todo.ps1`（每支先問 Y/N、失敗不中斷）。總司令做完後由 CC 查證（看排程／資料檔／log，不看金鑰內容）再打勾移到「已完成」，同時 AWAITING 結案。
 
-## 等待中（目前：13件）
+## 等待中（目前：14件）
 
 | 項目 | 完成時間 | 等待審閱內容 | 等待時長 |
 |---|---|---|---|
@@ -36,6 +36,7 @@
 | 先.一四七-1 「前向通過後怎麼上線」部署規則草稿（Cowork 審；**真錢相關、不適用 24 小時預設放行**） | 2026-11-04 04:1x | `docs/DEPLOYMENT_PLAYBOOK_DRAFT.md`：①資金分段 10%／30%／60%／80%（佔原 0050 部位，各階段停留 3／6／12 個月、每階都要裁示、回撤 −20% 停晉級／−30% 退一階／−40% 退回紙上、帳戶 −45% 降股票）；②只換 0050，00646／00697B 不換，每次增量分 4 個月；③多支同時通過寫死**等權**（風險平價要估 24 筆月報酬的波動度，誤差大、會加碼短期低波動）；④風控層 beta ≤1.0、單檔 ≤策略 10%／帳戶 2%、產業 30%、現金 5%／10%、流動性 5%，引用 V1／ML 單發出處；⑤八節逐條對照。待判：用帳戶回撤代替 regime 閘門是否滿足最高投資原則 3、O 的產業上限例外。 | 剛送出 |
 | 先.一三五-1kc-a news_events.yml 與本機新聞補班同檔 rebase 衝突處理（**甲（建議）**／乙／丙） | 2026-11-04 06:5x | 1kc 查因：10/21、10/25、10/30 三班 Commit 失敗都是本機補班同時寫同一批 1,700 多個 news/events 檔造成的 rebase 衝突，補重試救不了。甲＝雲端衝突時放棄本班 exit 0＋警告（含非衝突 push 重試）；乙＝本機補班查雲端進行中就跳過；丙＝兩者。詳 `docs/NEWS_COMMIT_CONFLICT_1KC.md`；24 小時無裁示照甲預設放行 | 0 小時 |
 | 先.一三五-1kd-a market.yml／quotes.yml Commit 步驟 rebase 衝突處理（market **甲（建議）**逐檔取捨／乙／丙；quotes **甲（建議）**比照 1kc-a） | 2026-11-04 07:1x | 1kd 查因：market 10/21、10/27、10/28 三班與 quotes 10/30 一班 Commit 失敗，失敗窗內都有人 push 同一批檔（共用追蹤檔 PENDING_QUEUE／STATUS／PROGRESS_HEARTBEAT／trials_index／by_code，或本機報價備援 quotes_tw.json），推論 rebase 衝突；market 衝突會丟整班資料。詳 `docs/MARKET_QUOTES_COMMIT_CONFLICT_1KD.md`；24 小時無裁示照甲預設放行 | 0 小時 |
+| 先.一三五-1kh-e 雲端報價／新聞停擺被本機備援遮住，停擺自檢要不要另看雲端那一手（**甲（建議）**／乙／丙） | 2026-11-04 11:4x | 1kh-d 掃描：`data/quotes_tw.json`、`data/news.json` 的 fetched_at 雲端與本機備援都會刷新，雲端沒有專屬欄位，所以 AlphaQuotesTW／AlphaNewsEvents 那兩條在雲端停擺時不會亮燈。本機證據：`research/quotes_local_fallback.jsonl` 歷來 decision＝fetched 178 次、skip_cloud_fresh 163 次（本機補抓比雲端準時還多）。甲＝registry 另加兩條看備援心跳（近 2 個交易日盤中補抓比例過半即判「雲端被遮住」，需 pipeline_freshness 認一種新格式，可還原）；乙＝雲端腳本寫 `meta.cloud_fetched_at`、本機備援保留不覆蓋，registry 改看它（動雲端 workflow 腳本）；丙＝維持現狀（資料新鮮才是目的）。24 小時無裁示照零之二預設放行甲 | 0 小時 |
 | 先.一三五-1kd-e 本機 gh 重新登入：提供新 GitHub PAT（**請總司令執行一次**） | 2026-11-04 07:2x | `gh auth status`「The token in default is invalid」；本機 `check_tw_data_landed` 叫雲端複查 10/27 起每次 HTTP 401，查 Actions 只剩未登入 60 次／小時。git push 用的 Windows 認證區 PAT 不受影響。已加進 `C:\alpha\總司令待辦.md` 第 7 項 | 0 小時 |
 
 ## 等前置條件（不需總司令動作，不計入等待中）
