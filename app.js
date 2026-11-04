@@ -1936,7 +1936,9 @@
       +`</svg>`;
   }
   // 當日曲線的標籤：今天就寫「今日」，隔日開盤前顯示的是前一交易日，就直接標日期。
-  function intradayTagText(code){
+  // 先.一四八-4 修：原名 intradayTagText 與下方 intradayTagText(iq,us) 同名，後者（函式宣告提升）把這支蓋掉，
+  // 自選股日內線標籤因此長期顯示「· 盤中 延遲約NaN分」而不是「今日」。改名。
+  function sparkIntradayTag(code){
     const c=LIVE_KB[code];
     const d=c&&c.tradeDate?String(c.tradeDate):null;
     if(!d)return '今日';
@@ -1945,17 +1947,20 @@
   }
   const SPARK_PLACEHOLDER='<span class="sparkwrap"></span>';  // 沒線也留同寬空位，每列一樣高、欄位不位移
   // 回傳{html,mode}：mode='today'(即時1分K)/'20d'/''(無)
-  function rowSparkline(code,fallback20d,up,prevClose){
+  function rowSparkline(code,fallback20d,up,prevClose,intradayOnly){
     // 2026-09-06（實測.二.2）當日 1 分K 優先，且以前收為基線。
     // 不再要求 LIVE.connected——只要 /live/kbars 查得到（含未訂閱代號走 api.kbars()）
     // 就畫當日曲線；查不到才退回 20 日日線並照舊標「20日」。
     const kb=LIVE_KB[code];
     if(kb&&kb.closes&&kb.closes.length>=2){
       const html=sparkBaseline(kb.closes,prevClose);
-      if(html)return {html:`<span class="sparkwrap">${html}<em>${intradayTagText(code)}</em></span>`,mode:'today'};
+      if(html)return {html:`<span class="sparkwrap">${html}<em>${sparkIntradayTag(code)}</em></span>`,mode:'today'};
     }
     // 2026-09-05：優先用全市場 sparklines.json（涵蓋上市＋上櫃約2827檔）；
     // fallback20d 是 quotes_tw.json 裡的舊欄位，留著當它還在時的備援，之後會整個消失。
+    // 先.一四八-4（收件匣 037／038 P3，總司令：「日內線圖不要用 20 日」）：自選股列只畫日內分時，
+    // 拿不到當日 1 分K（電腦沒連線、美股沒有日內來源）就照實標「無日內資料」，不改畫 20 日。
+    if(intradayOnly)return {html:'<span class="sparkwrap sparkwrap-none"><em style="font-size:10px;line-height:1.2;color:var(--ink-4);text-align:center">無日內資料</em></span>',mode:'none'};
     const marketWide=sparkFor(code);
     const closes=(marketWide&&marketWide.length>=2)?marketWide:((fallback20d&&fallback20d.length>=2)?fallback20d:null);
     if(closes)return {html:sparkWithTag(closes,up,'20日'),mode:'20d'};
@@ -2141,7 +2146,7 @@
       const mktOpenNow=us?isUsTradingWindowNow():isTwTradingWindowNow();
       const dotCls=!mktOpenNow?'gr':((iq&&(iq.source==='sinopac'||iq.source==='ibkr')&&!iq.isTodayClose&&/REALTIME/.test(iq.data_type||''))?'g':(iq&&!iq.isTodayClose?'y':'gr'));
       const meta=`${code}${us?' · 美股':''}<span class="sdot ${dotCls} wl-src-dot" data-wl-dot="${code}" title="點一下看資料來源" onclick="event.stopPropagation();toggleWlDetail('${code}')"></span>`;
-      const sp=rowSparkline(code,rawQ&&rawQ.sparkline,chg>=0,q.prev_close).html;  // 2026-09-06實測.二：當日曲線（前收基線）→ 退回20日
+      const sp=rowSparkline(code,rawQ&&rawQ.sparkline,chg>=0,q.prev_close,true).html;  // 先.一四八-4：自選股只畫日內  // 2026-09-06實測.二：當日曲線（前收基線）→ 退回20日
       // 2026-09-06（實測.三）漲跌停：優先用合約值，沒有即時源時用前收推算
       const lim=limitPrices(code,q.prev_close,iq);
       const limSt=limitState(price,lim);
@@ -4972,7 +4977,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-11-04.1512';
+  const APP_VERSION='2026-11-04.1838';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

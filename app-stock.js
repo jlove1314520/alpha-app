@@ -1054,6 +1054,126 @@
   function _destroyStockChart(){if(STOCK_CHART.chart){try{STOCK_CHART.chart.remove()}catch(e){console.warn('[destroyStockChart]',e)}}STOCK_CHART.chart=null;STOCK_CHART.series=null;STOCK_CHART.costLine=null}
   // lightweight-charts的時間軸一律以UTC顯示，這裡把台北時間加8小時偏移，讓刻度顯示台北時間（常見做法）。
   function _minuteBarToLwc(b){return {time:Math.floor(new Date(b.t+':00+08:00').getTime()/1000)+8*3600,open:b.o,high:b.h,low:b.l,close:b.c}}
+  // ══════ 先.一四八-4（2026-11-04，收件匣 037／038 P3）個股 K 線：區間／日週月K／均線／成交量／均價線／查價線 ══════
+  // 總司令：「K 線要拉長一點時間線，加上均價線，查價線」。
+  // - 區間：1月／3月／6月（預設）／1年／3年；週期：日K／週K／月K（由日線合併：開＝第一天開、收＝最後一天收、高低取極值、量加總）。
+  // - 台股長歷史：repo 小檔只有近約 60 日，打開個股時向 FinMind 補抓 3 年日線一次（每檔 1 次請求，fm() 有記憶體快取；原始未還原股價），
+  //   同一天以 repo 為準。美股照七節不拿台灣資料商當主來源：只用 repo 日線，資料不夠長時照實寫「只有近 N 日」。
+  // - 均線 MA5／20／60（用目前週期的收盤算，缺就是缺、不外插）；1分K 模式改畫均價線（當日 VWAP＝Σ(1分K收盤×量)÷Σ量）。
+  // - 查價線：函式庫內建十字線（手機按住拖曳），圖上方一列顯示該根的日期、開高低收、量、均線值；放開後回到最新一根。
+  const KX={range:'6M',period:'D',long:{},longState:{},ma:{},vol:null,vwap:null,lastBars:[],lastIntraday:[],maData:{},vwapMap:null};
+  const KX_RANGES=[['1M','1月',21],['3M','3月',63],['6M','6月',126],['1Y','1年',250],['3Y','3年',750]];
+  const KX_PERIODS=[['D','日K',1],['W','週K',5],['M','月K',21]];
+  const KX_MA=[[5,'#c9974a'],[20,'#5b8def'],[60,'#9b6bd6']];
+  function kxDailyFromRows(rows,us){
+    return (rows||[]).filter(r=>!r._closeOnly).map(r=>us?{time:r.date,open:r.Open,high:r.High,low:r.Low,close:r.Close,volume:r.Volume}
+      :{time:r.date,open:r.open,high:r.max,low:r.min,close:r.close,volume:r.Trading_Volume})
+      .filter(x=>x.time&&x.close!=null&&x.open!=null&&x.high!=null&&x.low!=null&&x.close>0);
+  }
+  function kxMerged(code){
+    const base=STOCK_CHART.code===code?kxDailyFromRows(STOCK_CHART.rawRows,STOCK_CHART.us):[];
+    const long=KX.long[code]||[];
+    if(!long.length)return base;
+    const m=new Map(long.map(x=>[x.time,x]));base.forEach(x=>m.set(x.time,x));  // 同一天以 repo 為準
+    return [...m.values()].sort((a,b)=>a.time<b.time?-1:1);
+  }
+  function kxAggregate(daily,period){
+    if(period==='D')return daily;
+    const key=t=>{if(period==='M')return t.slice(0,7);const d=new Date(t+'T00:00:00Z'),wd=(d.getUTCDay()+6)%7;return new Date(d.getTime()-wd*864e5).toISOString().slice(0,10)};
+    const out=[];let cur=null,k=null;
+    for(const x of daily){const kk=key(x.time);
+      if(kk!==k){if(cur)out.push(cur);k=kk;cur={time:x.time,open:x.open,high:x.high,low:x.low,close:x.close,volume:x.volume||0}}
+      else{cur.high=Math.max(cur.high,x.high);cur.low=Math.min(cur.low,x.low);cur.close=x.close;cur.volume+=(x.volume||0)}}
+    if(cur)out.push(cur);
+    return out;
+  }
+  function kxMA(bars,n){const out=[];let sum=0;for(let i=0;i<bars.length;i++){sum+=bars[i].close;if(i>=n)sum-=bars[i-n].close;if(i>=n-1)out.push({time:bars[i].time,value:+(sum/n).toFixed(4)})}return out}
+  function kxVWAP(bars){let pv=0,v=0;const out=[];for(const b of bars){const vol=+b.v||0;if(vol>0&&b.c!=null){pv+=b.c*vol;v+=vol}if(v>0)out.push({time:_minuteBarToLwc(b).time,value:+(pv/v).toFixed(4)})}return out}
+  function _kxMin(b){const x=_minuteBarToLwc(b);x.volume=b.v!=null?+b.v:null;return x}
+  async function kxEnsureLong(code,us){
+    if(us||KX.long[code]||KX.longState[code]==='loading')return;
+    if(KX.blockUntil&&Date.now()<KX.blockUntil){KX.longState[code]='fail';return}  // 剛失敗過（402 額度上限等）：30 分鐘內不再打，不排隊不重試
+    KX.longState[code]='loading';
+    try{
+      const px=(await fm('TaiwanStockPrice',code,_d(1100))).filter(p=>typeof p.close==='number'&&p.close>0);
+      if(!px.length)throw new Error('查無較長日線（fm 失敗時回空陣列）');  // 不能把「抓不到」標成「已補上」
+      KX.long[code]=px.map(r=>({time:r.date,open:r.open,high:r.max,low:r.min,close:r.close,volume:r.Trading_Volume}));
+      KX.longState[code]='ok';
+    }catch(e){KX.longState[code]='fail';KX.blockUntil=Date.now()+30*60*1000;console.warn('[kxEnsureLong]',code,e)}  // FinMind 失敗（額度／離線）時只用 repo 短歷史，畫面寫明；fm 有自己的失敗提示，不重複記錯誤
+  }
+  function kxToolbar(show){
+    const el=document.getElementById('kline-toolbar');if(!el)return;
+    if(!show){el.innerHTML='';return}
+    const btn=(on,label,js)=>`<button type="button" class="kx-btn${on?' on':''}" onclick="${js}">${label}</button>`;
+    el.innerHTML=`<div class="kx-row">${KX_RANGES.map(([k,l])=>btn(KX.range===k,l,`kxSet('range','${k}')`)).join('')}</div>`+
+      `<div class="kx-row">${KX_PERIODS.map(([k,l])=>btn(KX.period===k,l,`kxSet('period','${k}')`)).join('')}</div>`;
+  }
+  function kxSet(kind,v){try{KX[kind]=v;kxDraw()}catch(e){console.warn('[kxSet]',e);recordGlobalError('kxSet',e)}}
+  function kxInfo(bar,lines){
+    const el=document.getElementById('kline-info');if(!el)return;
+    if(!bar){el.textContent='';return}
+    const us=STOCK_CHART.us,f=v=>v==null?'—':(us?'$':'')+nf(v);
+    const d=STOCK_CHART.mode==='intraday'?(typeof bar.time==='number'?new Date((bar.time-8*3600)*1000).toISOString().slice(11,16):''):String(bar.time).replace(/-/g,'/');
+    const vol=bar.volume!=null?`量 ${nf(Math.round(us||STOCK_CHART.mode==='intraday'?bar.volume:bar.volume/1000))}${us?'':' 張'}`:'';
+    el.innerHTML=`<b>${_uiEsc(d)}</b>　開 ${f(bar.open)}　高 ${f(bar.high)}　低 ${f(bar.low)}　收 <b>${f(bar.close)}</b>　${vol}`+
+      (lines&&lines.length?`<br>${lines.map(([n,c,v])=>`<span style="color:${c}">${typeof n==='number'?'MA'+n:n} ${v==null?'—':nf(v)}</span>`).join('　')}`:'');
+  }
+  function kxMaLines(t){return KX_MA.map(([n,c])=>[n,c,KX.maData&&KX.maData[n]?KX.maData[n].get(t):null])}
+  function kxDraw(){
+    const code=STOCK_CHART.code,chart=STOCK_CHART.chart,series=STOCK_CHART.series;if(!chart||!series||!code)return;
+    if(STOCK_CHART.mode==='intraday')return;
+    const daily=kxMerged(code);
+    if(!daily.length||STOCK_CHART.closeOnly){series.setData(STOCK_CHART.daily);chart.timeScale().fitContent();kxToolbar(false);return}
+    const bars=kxAggregate(daily,KX.period);
+    series.setData(bars.map(b=>({time:b.time,open:b.open,high:b.high,low:b.low,close:b.close})));
+    const up=_cssVar('--up','#ff5257'),down=_cssVar('--down','#24c98a');
+    if(KX.vol)KX.vol.setData(bars.map(b=>({time:b.time,value:b.volume||0,color:(b.close>=b.open?up:down)+'66'})));
+    KX.lastBars=bars;KX.maData={};
+    KX_MA.forEach(([n])=>{const d=kxMA(bars,n);KX.maData[n]=new Map(d.map(x=>[x.time,x.value]));if(KX.ma[n])KX.ma[n].setData(d)});
+    if(KX.vwap)KX.vwap.setData([]);
+    const per=(KX_PERIODS.find(p=>p[0]===KX.period)||[0,0,1])[2],days=(KX_RANGES.find(r=>r[0]===KX.range)||[0,0,126])[2];
+    const n=Math.max(5,Math.ceil(days/per));
+    chart.timeScale().setVisibleLogicalRange({from:Math.max(0,bars.length-n)-0.5,to:bars.length-0.5});
+    kxToolbar(true);
+    const last=bars[bars.length-1];kxInfo(last,kxMaLines(last.time));
+    const span=`${daily[0].time.replace(/-/g,'/')}～${daily[daily.length-1].time.replace(/-/g,'/')}`;
+    const st=KX.longState[code];
+    const longTxt=STOCK_CHART.us?`美股日線只有近 ${daily.length} 個交易日（本站 Yahoo 財經已收盤日線）`
+      :(st==='ok'?'較早的日線由 FinMind 補（原始未還原股價）':(st==='loading'?'較長的歷史載入中…':(st==='fail'?`較長的歷史暫時抓不到，只有近 ${daily.length} 日`:'')));
+    const short=daily.length<days*0.8?`（要看的區間比手上資料長，只畫得出 ${daily.length} 日）`:'';
+    const kn=document.getElementById('kline-note');if(kn)kn.textContent=`資料 ${span}${short}${longTxt?'｜'+longTxt:''}｜按住圖拖曳看每一根的價格`;
+  }
+  function kxIntraday(bars){
+    KX.lastIntraday=bars;
+    Object.values(KX.ma||{}).forEach(s=>s.setData([]));
+    const vw=kxVWAP(bars);KX.vwapMap=new Map(vw.map(x=>[x.time,x.value]));
+    if(KX.vwap)KX.vwap.setData(vw);
+    const up=_cssVar('--up','#ff5257'),down=_cssVar('--down','#24c98a');
+    if(KX.vol)KX.vol.setData(bars.map(b=>({time:_minuteBarToLwc(b).time,value:+b.v||0,color:((b.c>=b.o)?up:down)+'66'})));
+    kxToolbar(false);
+    const kn=document.getElementById('kline-note');if(kn)kn.textContent=vw.length?'金色虛線＝當日均價（成交量加權）｜按住圖拖曳看每一分鐘的價格':'這批 1 分K 沒有成交量，算不出均價線';
+    const lb=bars[bars.length-1];if(lb)kxInfo(_kxMin(lb),vw.length?[['均價',_cssVar('--accent','#c9974a'),vw[vw.length-1].value]]:null);
+  }
+  function kxAttach(chart,series){
+    const LWC=window.LightweightCharts;
+    KX.ma={};KX_MA.forEach(([n,c])=>{KX.ma[n]=chart.addSeries(LWC.LineSeries,{color:c,lineWidth:1.5,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false})});
+    KX.vol=chart.addSeries(LWC.HistogramSeries,{priceFormat:{type:'volume'},priceScaleId:'kx-vol',priceLineVisible:false,lastValueVisible:false});
+    chart.priceScale('kx-vol').applyOptions({scaleMargins:{top:0.8,bottom:0.02}});
+    KX.vwap=chart.addSeries(LWC.LineSeries,{color:_cssVar('--accent','#c9974a'),lineWidth:2,lineStyle:(LWC.LineStyle&&LWC.LineStyle.Dashed!=null)?LWC.LineStyle.Dashed:2,priceLineVisible:false,lastValueVisible:true,title:'均價'});
+    chart.subscribeCrosshairMove(param=>{
+      try{
+        const intra=STOCK_CHART.mode==='intraday';
+        const b=param&&param.time!=null&&param.seriesData?param.seriesData.get(series):null;
+        if(!b){  // 放開手指：回到最新一根
+          if(intra){const lb=KX.lastIntraday[KX.lastIntraday.length-1];if(lb)kxInfo(_kxMin(lb),KX.vwapMap&&KX.vwapMap.size?[['均價',_cssVar('--accent','#c9974a'),[...KX.vwapMap.values()].pop()]]:null)}
+          else{const lb=KX.lastBars[KX.lastBars.length-1];if(lb)kxInfo(lb,kxMaLines(lb.time))}
+          return}
+        if(intra){const m=KX.lastIntraday.map(_kxMin).find(x=>x.time===b.time);
+          kxInfo({time:b.time,open:b.open,high:b.high,low:b.low,close:b.close,volume:m?m.volume:null},KX.vwapMap?[['均價',_cssVar('--accent','#c9974a'),KX.vwapMap.get(b.time)]]:null)}
+        else{const m=KX.lastBars.find(x=>x.time===b.time);kxInfo({time:b.time,open:b.open,high:b.high,low:b.low,close:b.close,volume:m?m.volume:null},kxMaLines(b.time))}
+      }catch(e){console.warn('[kxCrosshair]',e)}
+    });
+  }
   function renderStockChart(code,rows,us){
     const el=document.getElementById('trend-chart');if(!el)return;
     if(STOCK_CHART.code!==code){STOCK_CHART.userPickedMode=false;STOCK_CHART.mode='daily'}
@@ -1082,9 +1202,11 @@
         .catch(e=>{console.warn('[renderStockChart:ensureLwc]',e);recordGlobalError('renderStockChart:ensureLwc',e)});
       return;
     }
-    _destroyStockChart();el.innerHTML='';el.style.height='220px';
+    _destroyStockChart();el.innerHTML='';el.style.height='300px';  // 先.一四八-4：220→300，放得下均線與成交量
     const LWC=window.LightweightCharts;
-    const chart=LWC.createChart(el,{width:el.clientWidth||320,height:220,
+    const chart=LWC.createChart(el,{width:el.clientWidth||320,height:300,
+      crosshair:{mode:(LWC.CrosshairMode&&LWC.CrosshairMode.Normal!=null)?LWC.CrosshairMode.Normal:0},  // 先.一四八-4 查價線：十字線跟著手指
+      localization:{locale:'zh-TW',dateFormat:'yyyy/MM/dd'},  // 十字線底下的日期用 2026/09/15，不是「15 9月 '26」
       layout:{background:{type:'solid',color:'transparent'},textColor:_cssVar('--ink-3','#9aa0a6')},
       grid:{vertLines:{color:'rgba(128,128,128,.12)'},horzLines:{color:'rgba(128,128,128,.12)'}},
       // 先.九十五-R8：左下 TradingView 標誌（Apache-2.0 授權要求保留署名，不移除）約 19px 高，
@@ -1098,7 +1220,8 @@
     if(closeOnly)STOCK_CHART.daily=STOCK_CHART.daily.map(x=>({time:x.time,value:x.close,close:x.close}));
     const series=closeOnly?chart.addSeries(LWC.LineSeries,{color:_cssVar('--accent','#d4a84b'),lineWidth:2})
       :chart.addSeries(LWC.CandlestickSeries,{upColor:up,downColor:down,borderVisible:false,wickUpColor:up,wickDownColor:down});
-    STOCK_CHART.chart=chart;STOCK_CHART.series=series;
+    STOCK_CHART.chart=chart;STOCK_CHART.series=series;STOCK_CHART.closeOnly=closeOnly;
+    _safeSync('renderStockChart:kxAttach',()=>kxAttach(chart,series));
     // 2026-09-06（實測.三.2）盤中 K 線畫兩條漲跌停虛線。
     // 這是 K 線圖上最有用的一條參考線：看得到今天離鎖住還有多遠，比只看一個數字直觀。
     // 只在算得出來時畫（TSE/OTC 4 位數普通股或有合約值），ETF 與興櫃不畫，
@@ -1114,7 +1237,9 @@
         lineWidth:1,lineStyle:style,axisLabelVisible:true,title:'跌停 '+lim.down});
     });
     if(STOCK_CHART.mode==='intraday'){loadIntradayBars(code)}
-    else{series.setData(STOCK_CHART.daily);chart.timeScale().fitContent()}
+    else{_safeSync('kxDraw',kxDraw);
+      if(!us&&!closeOnly)kxEnsureLong(code,us).then(()=>{if(STOCK_CHART.code===code&&STOCK_CHART.chart===chart)_safeSync('kxDraw:long',kxDraw)})
+        .catch(e=>console.warn('[kxEnsureLong]',e))}
   }
   async function loadIntradayBars(code){
     try{
@@ -1127,12 +1252,14 @@
       if(STOCK_CHART.series&&STOCK_CHART.code===code&&STOCK_CHART.mode==='intraday'){
         STOCK_CHART.chart.applyOptions({timeScale:{timeVisible:true}});
         STOCK_CHART.series.setData(STOCK_CHART.intraday);STOCK_CHART.chart.timeScale().fitContent();
+        // 先.一四八-4：1分K 模式不畫均線，改畫當日均價線（VWAP）；成交量用 1 分K 量
+        _safeSync('kxIntraday',()=>kxIntraday(d.bars||[]));
       }
       setTxt('trend-note',`1分K：本機 Shioaji tick 聚合（${d.mode}，${(d.bars||[]).length} 根，${d.hot_file_status==='hot-file'?'即時更新中':'非即時：常駐行程未在跑或已收盤'}）`);
     }catch(e){
       if(!e.honest501){console.warn('[loadIntradayBars]',e);recordGlobalError('loadIntradayBars',e)}  // 501 是已知的設計狀態，不記成錯誤
       STOCK_CHART.mode='daily';STOCK_CHART.userPickedMode=false;
-      if(STOCK_CHART.series){STOCK_CHART.chart.applyOptions({timeScale:{timeVisible:false}});STOCK_CHART.series.setData(STOCK_CHART.daily);STOCK_CHART.chart.timeScale().fitContent()}
+      if(STOCK_CHART.series){STOCK_CHART.chart.applyOptions({timeScale:{timeVisible:false}});_safeSync('kxDraw:fallback',kxDraw)}
       renderTrendModeToggle(false);
       setTxt('trend-note',e.honest501?e.message:'1分K取得失敗（'+(e.message||e)+'），改顯示日線');
     }
@@ -1145,7 +1272,7 @@
   function setTrendMode(k){
     STOCK_CHART.mode=k;STOCK_CHART.userPickedMode=true;
     if(k==='intraday'){loadIntradayBars(STOCK_CHART.code)}
-    else if(STOCK_CHART.series){STOCK_CHART.chart.applyOptions({timeScale:{timeVisible:false}});STOCK_CHART.series.setData(STOCK_CHART.daily);STOCK_CHART.chart.timeScale().fitContent();setTxt('trend-note',STOCK_CHART.dailyNote||'')}
+    else if(STOCK_CHART.series){STOCK_CHART.chart.applyOptions({timeScale:{timeVisible:false}});_safeSync('kxDraw:mode',kxDraw);setTxt('trend-note',STOCK_CHART.dailyNote||'')}
     renderTrendModeToggle(true);
   }
   // ══════ 2026-09-15（P0產品.三）技術型態分頁：MA/成交量開關疊加 ══════

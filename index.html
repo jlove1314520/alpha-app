@@ -43,7 +43,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(mq.addEventListener)mq.addEventListener('change',h);else if(mq.addListener)mq.addListener(h)}
 })();
 </script>
-<link rel="stylesheet" href="app.css?v=2026-11-04.1512">
+<link rel="stylesheet" href="app.css?v=2026-11-04.1838">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -625,7 +625,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div class="subscreen active" id="sub-ov">
       <div class="card">
         <h3 style="display:flex;justify-content:space-between;align-items:center"><span>走勢</span><span class="mkt-toggle" id="trend-mode-toggle" style="padding:2px"></span></h3>
-        <div id="trend-chart"><div class="skel-block" style="height:220px"></div></div>
+        <!-- 先.一四八-4（收件匣 037／038 P3）：查價資訊列（按住圖拖曳時顯示該根日期、開高低收、量、均線／均價）＋區間／週期按鈕＋資料區間說明 -->
+        <div class="num" id="kline-info" data-ui-keep style="min-height:34px;font-size:var(--fs-xs);line-height:1.5;color:var(--ink-2);margin:-2px 0 4px"></div>
+        <div id="trend-chart"><div class="skel-block" style="height:300px"></div></div>
+        <div id="kline-toolbar"></div>
+        <div class="note" id="kline-note" data-ui-keep style="margin-top:4px"></div>
         <div class="note" id="trend-note" data-ui-explain>來源：日收盤價</div>
       </div>
       <div class="card">
@@ -1620,6 +1624,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-11-04.1512"></script>
+<script src="app.js?v=2026-11-04.1838"></script>
 </body>
 </html>

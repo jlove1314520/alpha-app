@@ -559,8 +559,12 @@ async function runSmokeTest(baseUrl, headless = true) {
       const wl = JSON.parse(localStorage.getItem("alpha_wl") || "[]");
       if (!wl.includes("2330")) { wl.push("2330"); localStorage.setItem("alpha_wl", JSON.stringify(wl)); }
       INTRADAY_TW = null;
+      // 先.一四八-4：自選股小圖只畫日內分時 → 這條防線改餵當日 1 分K（不再餵 20 日）
+      const z = _zonedParts(new Date(), "Asia/Taipei");
+      LIVE_KB["2330"] = { at: Date.now(), closes: [990, 995, 993, 1000, 998], lastT: null, tradeDate: `${z.y}-${String(z.m).padStart(2, "0")}-${String(z.d).padStart(2, "0")}`, mode: "smoke" };
     });
     await page.evaluate(() => window.go("home"));
+    await page.evaluate(() => hydrateHome());  // 已在首頁時 go("home") 不一定重畫，直接重畫一次
     await page.waitForTimeout(1500);
     const wlPolyline = await page.evaluate(() => {
       const el = document.getElementById("wl-list");
@@ -571,6 +575,7 @@ async function runSmokeTest(baseUrl, headless = true) {
     });
     if (!wlPolyline.found) chartBlankErrors.push(`自選股sparkline：${wlPolyline.reason}`);
     else if (!wlPolyline.points || !wlPolyline.points.trim()) chartBlankErrors.push(`自選股sparkline：polyline存在但points屬性是空字串`);
+    await page.evaluate(() => { delete LIVE_KB["2330"]; });
     await page.unroute("**/data/quotes_tw.json**");
 
     // 16b. 策略監控台權益曲線（spark()）。先.八十-6 起監控台改讀 data/strategy_curves.json 的 nav（原 strategies.json::forward_paper 已停用）
@@ -1119,13 +1124,14 @@ async function runSmokeTest(baseUrl, headless = true) {
       const row = [...document.querySelectorAll("#wl-list .swipe-row")].find(r => r.querySelector('[data-flash-code="2330"]'));
       return { hasSpark: !!row?.querySelector("svg.spark polyline"), tag: row?.querySelector(".sparkwrap em")?.textContent || null };
     });
-    if (!info.hasSpark) sparkTagErrors.push("餵了20點sparkline但自選股列沒有畫出走勢線");
-    if (info.tag !== "20日") sparkTagErrors.push(`離線時走勢線標籤應為「20日」，實際「${info.tag}」`);
+    // 先.一四八-4（收件匣 037／038）：總司令「日內線圖不要用 20 日」→ 沒有日內資料時不畫線、標「無日內資料」
+    if (info.hasSpark) sparkTagErrors.push("沒有日內資料卻畫了走勢線（應不畫 20 日）");
+    if (info.tag !== "無日內資料") sparkTagErrors.push(`沒有日內資料時應標「無日內資料」，實際「${info.tag}」`);
     await page.unroute("**/data/quotes_tw.json**");
   } catch (e) {
     sparkTagErrors.push(`測試本身出錯：${e.message || e}`);
   }
-  record("28. 未連即時源時自選股走勢線必須標「20日」（即時時為當日1分K標「今日」，端到端另驗）",
+  record("28. 未連即時源時自選股小圖不畫 20 日、標「無日內資料」（有當日1分K標「今日」見 #36；先.一四八-4）",
     sparkTagErrors.length === 0, sparkTagErrors.join("; "));
 
   // 29.【2026-09-04新增，四修.四】「資料過舊」與「即時連線中」不得同頁矛盾：
@@ -1248,24 +1254,34 @@ async function runSmokeTest(baseUrl, headless = true) {
     await page.evaluate(() => { try { localStorage.removeItem("alpha_live_url"); localStorage.removeItem("alpha_live_token"); } catch (e) {} LIVE.connected = false; });
     await page.evaluate(() => window.go("home"));
     await page.waitForTimeout(1800);
-    const bad = await page.evaluate(async () => {
-      const r = await fetch("data/quotes_tw.json?t=" + Date.now());
-      const q = r.ok ? ((await r.json()).quotes || {}) : {};
-      const out = [];
-      for (const row of document.querySelectorAll("#wl-list .swipe-row")) {
-        const code = row.querySelector("[data-flash-code]")?.dataset.flashCode;
-        if (!code || !q[code]) continue;
-        const hist = (q[code].sparkline || []).length;
-        const drawn = !!row.querySelector("svg.spark polyline");
-        if (hist >= 2 && !drawn) out.push({ code, hist, err: q[code].sparkline_error });
-      }
+    // 先.一四八-4（收件匣 037／038 P3）：自選股小圖只畫日內分時。沒連電腦（拿不到當日 1 分K）→ 每列標「無日內資料」、不准再畫 20 日；
+    // 注入一檔當日 1 分K 後重畫 → 那一列要畫出分時線＋平盤虛線，標「今日」。
+    const none = await page.evaluate(() => [...document.querySelectorAll("#wl-list .swipe-row")].map((row) => ({
+      code: row.querySelector("[data-flash-code]")?.dataset.flashCode || "", txt: row.innerText, line: !!row.querySelector("svg.spark polyline") })));
+    const withQuote = none.filter((r) => r.code);
+    if (!withQuote.length) sparkGateErrors.push("自選股沒有任何有報價的列可檢查");
+    for (const r of withQuote) {
+      if (/20日/.test(r.txt)) sparkGateErrors.push(`${r.code} 還在畫 20 日走勢`);
+      if (!r.line && !/無日內資料/.test(r.txt)) sparkGateErrors.push(`${r.code} 沒有日內線也沒標「無日內資料」`);
+    }
+    const inj = await page.evaluate(async () => {
+      const row = [...document.querySelectorAll("#wl-list .swipe-row")].find((x) => x.querySelector("[data-flash-code]") && !isUS(x.querySelector("[data-flash-code]").dataset.flashCode));
+      if (!row) return { skip: true };
+      const code = row.querySelector("[data-flash-code]").dataset.flashCode;
+      const z = _zonedParts(new Date(), "Asia/Taipei"), today = `${z.y}-${String(z.m).padStart(2, "0")}-${String(z.d).padStart(2, "0")}`;
+      LIVE_KB[code] = { at: Date.now(), closes: [100, 101, 99.5, 102, 101.5], lastT: null, tradeDate: today, mode: "smoke" };
+      const prevCfg = LIVE.configured; LIVE.configured = true;
+      try { await hydrateHome(); } finally { LIVE.configured = prevCfg; }
+      const r2 = [...document.querySelectorAll("#wl-list .swipe-row")].find((x) => x.querySelector(`[data-flash-code="${code}"]`));
+      const out = { code, line: !!(r2 && r2.querySelector("svg.spark polyline")), base: !!(r2 && r2.querySelector("svg.spark line[stroke-dasharray]")), tag: r2 ? r2.querySelector(".sparkwrap em")?.textContent : "" };
+      delete LIVE_KB[code]; await hydrateHome();
       return out;
     });
-    if (bad.length) sparkGateErrors.push(`有歷史價卻沒畫走勢線：${JSON.stringify(bad)}`);
+    if (!inj.skip && (!inj.line || !inj.base || inj.tag !== "今日")) sparkGateErrors.push(`注入日內 1 分K 後 ${inj.code}：分時線 ${inj.line}、平盤線 ${inj.base}、標籤「${inj.tag}」`);
   } catch (e) {
     sparkGateErrors.push(`測試本身出錯：${e.message || e}`);
   }
-  record("36. 自選股有 ≥2 筆歷史價就必須畫出走勢線（沒畫＝FAIL，不管根因是解析/快取/渲染）",
+  record("36. 自選股小圖只畫日內分時：沒日內資料標「無日內資料」、不畫 20 日；有當日 1 分K 畫分時線＋平盤線（先.一四八-4）",
     sparkGateErrors.length === 0, sparkGateErrors.join("; "));
 
   // 37.【2026-09-05新增，新一.6】評分頁不得再出現「需要新聞/供應鏈連動分析，下一輪實作」這類
@@ -4396,7 +4412,8 @@ async function runSmokeTest(baseUrl, headless = true) {
         const m = t.match(/(?:repo|本站) ?(\d+)\/(\d+) 個月/);
         if (!m || +m[1] < 1) mcErrs.push(`${blockFm ? "[擋FinMind] " : ""}營收圖沒標 repo 月底股價（${t}）`);
         const need = m ? +m[2] - +m[1] : 0;
-        const starts = fmReq.map(u => (u.match(/start_date=(\d{4}-\d\d-\d\d)/) || [])[1]).filter(Boolean);
+        const starts = fmReq.map(u => (u.match(/start_date=(\d{4}-\d\d-\d\d)/) || [])[1]).filter(Boolean)
+          .filter(s => Math.abs((Date.now() - Date.parse(s)) / 86400000 - 1100) > 2);  // 先.一四八-4：K 線 3 年長歷史（_d(1100)）是另一個功能的請求，不算營收圖的
         if (!blockFm) {
           if (need === 0 && starts.length) mcErrs.push("repo 已涵蓋 8 個月仍向 FinMind 要日線");
           // 2026-10-16（DevQueue 20261016-140101）：先.一〇四-8 圖改 13 個月後，最早缺月本來就可能在 400 天前
@@ -6130,6 +6147,43 @@ async function runSmokeTest(baseUrl, headless = true) {
       fwdInfo = `14 卡（${a.summary}）、壞檔 2 支只壞自己、點開 ${run ? run.split(":")[0] : "—"} 有走勢與持股、−42% 紅色、最小可點 ${a.minH}px`;
     } finally { await ctx.close(); }
   } catch (e) { fwdErrs.push(`測試本身出錯：${e.message || e}`); }
+  // 180. 先.一四八-4（收件匣 037／038 P3）個股 K 線：區間 5 鈕＋週期 3 鈕（≥44px、預設 6月／日K）、MA5／20／60、查價線（游標移到圖上資訊列跟著變）、
+  // 週K 根數少於日K、均價線（VWAP）算法、FinMind 失敗時不寫成「已補上」
+  const kxErrs = []; let kxInfoTxt = "";
+  try {
+    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 1100 }, serviceWorkers: "block" });
+    try {
+      const p = await ctx.newPage(); const pe = []; p.on("pageerror", (e) => pe.push(String(e.message || e)));
+      await p.route(/api\.finmindtrade\.com/, (r) => r.fulfill({ status: 402, body: "{}" }));  // 冒煙不打外部；同時驗「抓不到」的照實說明
+      await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+      await p.evaluate(() => openStock("2330"));
+      await p.waitForFunction(() => document.querySelectorAll("#kline-toolbar .kx-btn").length === 8, null, { timeout: 25000 }).catch(() => {});
+      await p.waitForTimeout(1500);
+      const a = await p.evaluate(() => ({ btns: [...document.querySelectorAll("#kline-toolbar .kx-btn")].map((x) => x.textContent + (x.classList.contains("on") ? "*" : "")),
+        minH: Math.min(...[...document.querySelectorAll("#kline-toolbar .kx-btn")].map((x) => x.getBoundingClientRect().height)),
+        info: document.getElementById("kline-info").innerText, note: document.getElementById("kline-note").innerText, nD: KX.lastBars.length,
+        ma: [5, 20, 60].map((n) => KX.maData[n] && KX.maData[n].size) }));
+      if (a.btns.join(",") !== "1月,3月,6月*,1年,3年,日K*,週K,月K") kxErrs.push(`按鈕 ${a.btns.join(",")}`);
+      if (!(a.minH >= 44)) kxErrs.push(`按鈕高 ${a.minH}px`);
+      if (!/開\s.+高\s.+低\s.+收\s.+量\s/.test(a.info) || !/MA5\s/.test(a.info)) kxErrs.push(`資訊列「${a.info}」`);
+      if (!(a.ma[0] > 0 && a.ma[1] > 0)) kxErrs.push(`均線點數 ${a.ma}`);
+      if (/較早的日線由/.test(a.note) || !/抓不到/.test(a.note)) kxErrs.push(`FinMind 402 時說明「${a.note}」`);
+      const box = await (await p.$("#trend-chart")).boundingBox();
+      await p.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.5); await p.waitForTimeout(300);
+      const hv = await p.evaluate(() => document.getElementById("kline-info").innerText);
+      if (hv === a.info) kxErrs.push("游標移到圖上，資訊列沒有變（查價線沒接上）");
+      await p.mouse.move(2, 2);
+      await p.evaluate(() => kxSet("period", "W")); const nW = await p.evaluate(() => KX.lastBars.length);
+      if (!(nW > 0 && nW < a.nD)) kxErrs.push(`週K ${nW} 根、日K ${a.nD} 根`);
+      await p.evaluate(() => kxSet("period", "D"));
+      const vw = await p.evaluate(() => kxVWAP([{ t: "2026-11-04 09:01", c: 10, v: 100 }, { t: "2026-11-04 09:02", c: 20, v: 300 }]).map((x) => x.value));
+      if (vw.join(",") !== "10,17.5") kxErrs.push(`均價線算法 ${vw}`);
+      if (pe.length) kxErrs.push(`pageerror ${pe.slice(0, 2).join(" | ")}`);
+      kxInfoTxt = `按鈕 ${a.btns.join(" ")}、日K ${a.nD} 根／週K ${nW} 根、查價列跟著游標變、VWAP=${vw}`;
+    } finally { await ctx.close(); }
+  } catch (e) { kxErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("180. 個股 K 線：區間 1月～3年＋日週月K（≥44px、預設 6月／日K）、MA5／20／60、查價線、均價線算法、FinMind 抓不到照實說明（先.一四八-4）", kxErrs.length === 0, kxErrs.join("; ") || kxInfoTxt);
+
   // 179. 先.一四八-1（收件匣 037 P0）：資料過期要亮紅、不准綠色即時連線；強制更新不碰 localStorage、不解除 SW 註冊；SW 立即接手＋資料網路優先
   const p0Errs = []; let p0Info = "";
   try {

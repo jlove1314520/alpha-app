@@ -635,3 +635,8 @@ details.ui-more[open]>summary{color:var(--ink-2)}
    並維持畫在齒輪之上，點小點仍是開告警、點齒輪仍是開設定。 */
 #alert-hub-dot{z-index:1}
 #alert-hub-dot::before{display:none}
+
+/* 先.一四八-4（收件匣 037／038 P3）個股 K 線區間／週期按鈕：可點 ≥44px、手機一列放得下 */
+.kx-row{display:flex;gap:6px;margin-top:6px}
+.kx-btn{flex:1 1 0;min-width:0;min-height:44px;border:1px solid rgba(var(--fg-rgb),.1);border-radius:10px;background:transparent;color:var(--ink-2);font-size:var(--fs-sm);cursor:pointer;padding:0 4px}
+.kx-btn.on{background:var(--gold-grad);color:#1c1a16;border-color:transparent;font-weight:600}
