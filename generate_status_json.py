@@ -650,6 +650,16 @@ def describe_generic(path: Path) -> dict:
                     break
             if found_val:
                 break
+        # 先.一三五-1kh-u：events_search.json 的日期在 top.fetched_at、insider_transfer_tw_history.json 在
+        # meta.last_run.fetched_at，原本沒認到 → no_date。只在前面都找不到時才看，不改既有檔案的判讀結果。
+        if not found_val:
+            for scope_name, scope in (("top", d.get("top")),
+                                      ("meta.last_run", (d.get("meta") or {}).get("last_run") if isinstance(d.get("meta"), dict) else None)):
+                if isinstance(scope, dict):
+                    iso = _parse_generic_time(scope.get("fetched_at"))
+                    if iso:
+                        found_key, found_val = f"{scope_name}.fetched_at", iso
+                        break
         # 先.一〇九-31：累積式序列（例：tx_futures_history.json）沒有頂層日期，改讀 rows 最後一筆的 date
         rows = d.get("rows")
         if not found_val and isinstance(rows, list) and rows and isinstance(rows[-1], dict):
