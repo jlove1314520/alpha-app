@@ -40,3 +40,11 @@
 - 真停擺（A）4 列：`listed_universe` 已有修法、等今晚驗收；IBKR 三檔等總司令本人登入（已在總司令待辦）。**不另開重複條目**，只補一條驗收條目（listed_universe 今晚 audit 班）。
 - C 類 2 列：純 bug 修復，開條目讓 `describe_generic()` 多認 `top` 範圍與 `meta.last_run.fetched_at`（不改門檻）。
 - B 類 4 列＋D 類 6 列：要改成 static 或調門檻＝改既有判定設定，依零之一不自己動，寫成提案由 Cowork 裁示（另開條目寫提案）。
+
+## 補節：`data/app_errors_summary.json`（先.一三五-1kh-v3，DevQueue 20261105-070102，只讀）
+
+- **寫入者**：`research/app_errors.py::summary_if_stale()`，只在本機常駐服務 `alpha_live_server.py` 收到 `POST /errors`（App 有排隊的錯誤要送）或 `GET /errors/summary`（設定頁「近 7 日 App 錯誤數」卡打開時）才觸發；檔案日期不是今天才重建。沒有任何排程會寫它。
+- **為什麼停在 10-17 00:04**：檔案 `generated_at`＝2026-10-17T00:04、`total_7d=0`；原始紀錄 `research/data/app_errors.jsonl` 0 bytes、同一時間（重建時順手修剪）。目前這次服務啟動以來的 `research/alpha_live_server_stdout.log`（4,814 筆請求）**沒有任何一筆 `/errors`**（最多是 `/health` 4,721 筆）。＝這段期間 App 沒有錯誤要回報、也沒人打開設定頁那張卡（或打開時沒連上本機服務）。**寫入路徑沒壞，是「沒人觸發」**；不重啟服務、未改 `alpha_live_server.py`。
+- **雲端 STATUS 不會有這列**：`.gitignore` 第 103 行排除、git 未追蹤；`git ls-files --others --ignored --exclude-standard data/*.json` 只列出這一個檔。
+- **本機 STATUS 會誤列**：`generate_status_json.py::build_data_files()` 用 `DATA_DIR.glob("*.json")` 掃磁碟，不分追蹤與否 → 本機手動跑時多一列、且必然 stale（門檻 24 小時，檔案只在有人觸發時才更新）。這是本機 STATUS 跟雲端 STATUS 不一致的來源之一，不是資料停擺。
+- **後續**：開提案條目 先.一三五-1kh-v3a（甲：`build_data_files` 跳過被 .gitignore 排除的檔＝結構性、之後新的本機檔也不會混進來；乙：只把這個檔列 `GENERIC_SKIP_STALE`＝static；丙：不改）。建議甲。
