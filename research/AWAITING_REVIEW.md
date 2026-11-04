@@ -20,7 +20,7 @@
 - N=0時「等待中」表格留表頭但清空列，不得整份刪除本檔案。
 - 2026-10-29（收件匣 031）：凡「請總司令執行一次」（要總司令本人在電腦或手機上動手）的項目，除了列 AWAITING，也同步加進 `C:\alpha\總司令待辦.md`（白話、每項一行做法、寫不做的影響）；能用腳本做的接進 `C:\alpha\run-owner-todo.ps1`（每支先問 Y/N、失敗不中斷）。總司令做完後由 CC 查證（看排程／資料檔／log，不看金鑰內容）再打勾移到「已完成」，同時 AWAITING 結案。
 
-## 等待中（目前：17件）
+## 等待中（目前：16件）
 
 | 項目 | 完成時間 | 等待審閱內容 | 等待時長 |
 |---|---|---|---|
@@ -40,7 +40,6 @@
 | 先.一三五-1kh-l STATUS.json 瘦身（甲／乙／**丙（建議）**） | 2026-11-04 16:1x | `docs/PROPOSAL_STATUS_JSON_SLIM.md`：現檔 76.8KB、30 天前 60KB、11/01 曾到 90KB（本機版 local_pipeline_health 13KB）；甲 known_limitations 舊 10 條移 docs 省 4.4KB，乙 data_files 省略通用 source／空 detail 省 7.0KB，丙合計省 11.4KB→約 65KB。不改 #65 門檻。24 小時無裁示照丙預設放行 | 0 小時 |
 | 先.一三五-1kh-o app.js 再拆分壓首頁首次載入（**甲（建議）**／乙／丙） | 2026-11-04 16:3x | `docs/PROPOSAL_APPJS_SPLIT.md`：首頁首次載入 330.5KB（門檻 350KB）；app.js gzip 147KB、首頁只執行到 44.5%；其他 8 支 app-*.js 已延後載入。甲：方法頁／策略曲線／回測圖／研究室專用函式搬進延後載入檔，估省 gzip 8～12KB（未實測）。不改 350KB 門檻。24 小時無裁示照甲預設放行 | 0 小時 |
 | 先.一三五-1kh-s 首頁費半膠囊「本機IBKR逾期」手機看不到（**甲（建議）**／乙／丙） | 2026-11-04 17:2x | `docs/PROPOSAL_HOME_CAPSULE_SOURCE_TAG.md`：逾期但資料日不落後時，來源字樣只在 title、手機只剩灰點；甲＝膠囊名稱旁加既有 `.stale-tag` 小字「收盤」，乙＝膠囊帶下加一行註記，丙＝維持現狀。驗收用冒煙模擬＋390 寬自動截圖，不要求總司令截圖。24 小時無裁示照甲預設放行（零之二）。 | 0 小時 |
-| 先.一三五-1kh-v data_files 每週／一次性／無日期檔改個別門檻或 static（**甲（建議）**／乙／丙） | 2026-11-04 18:1x | `docs/PROPOSAL_DATA_FILES_STATIC_THRESHOLDS.md`：STATUS data_files 每天 10 列固定亮 stale／no_date（1kh-t 盤點 B 類 4＋D 類 6），蓋住真停擺。甲＝holders、tw50_constituents 給 192 小時；financials／revenue_backfill、capital_reduction 兩檔、news_yield_sample、price_history_index_legacy、paper_order_log 列 static；stock_names 不列 static、改產生端加 `meta.generated_at`。乙＝全列 static（會藏住三個定期檔的真停擺，不建議）；丙＝維持。24 小時無裁示照零之二預設放行甲 | 0 小時 |
 
 ## 等前置條件（不需總司令動作，不計入等待中）
 
@@ -49,6 +48,7 @@
 | （目前無） | | | |
 
 ## 已結案審閱紀錄
+- 2026-11-04 18:2x 收件匣 039（先.一四九-1）：先.一三五-1kh-v 採甲 → DevQueue 20261104-180102 已實作 STALE_HOURS／GENERIC_SKIP_STALE（stock_names 另條 1kh-x）（結案）。
 - 2026-11-04 18:2x 收件匣 039（先.一四九-1）：先.一三五-1hn 與 1kj 同一件、照 1kj 甲做一次（見上一行），不另做提示詞版（結案）。
 - 2026-11-04 18:2x 收件匣 039（先.一四九-1）：先.一三五-1kj 採甲（與 1hn 合併）→ DevQueue 20261104-180102 已實作：find_next() 找不到 - [ ] 時把到期標準時間閘由機器轉回 - [ ]（selftest_dev_queue_time_gate.py）（結案）。
 - 2026-11-04 04:3x DevQueue [預設放行]（零之二，等 28.5 小時無 Cowork 裁示）：先.一三五-1ie 照作者建議甲——新 `scripts/archive_universe_daily.py`（唯讀、零外部請求，從 `data/price_history/` git 歷史串出全宇宙每月 close＋含息日報酬，`research/data/universe_daily/YYYY-MM.json.gz`，每月約 0.35～0.42 MB），已補 2026-07～10 四個月並 add -f；掛 `scripts/news_local_fallback.py`（每 30 分鐘、冪等，每月 1 號後第一班補上個月），同一處把 `research/data/mops_events_archive.jsonl`（全是 TWSE／TPEx 公開重大訊息，欄位無個資）約每 20 小時提交一次。Cowork 可推翻，推翻時照 PREREG 修訂規則處理。

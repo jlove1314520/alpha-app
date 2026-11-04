@@ -77,6 +77,9 @@ STALE_HOURS = {
     "data/monthly_close.json": 96,  # 讀 meta.last_trading_day（視為當日 18:00），跨週末＋1 天緩衝；長假會誤報
     "data/tx_futures_history.json": 120,  # 讀 rows 最後一筆交易日；TAIFEX 結構性落後一個交易日（先.一〇九-1），週四資料要撐到下週一 17:43 班，約 96 小時，再加 1 天緩衝
     "data/status_lite.json": 6,  # 先.一三五-1kh-j：local_schedule_watchdog.yml 每 30 分鐘重產（GitHub 排程常延遲，給 6 小時）
+    # 先.一三五-1kh-v（收件匣 039 定案甲）：每週檔給 8 天，超過才算真停擺
+    "data/holders.json": 192,  # TDCC 每週一次；AlphaTdccHolders 每日查、同週已存就略過
+    "data/tw50_constituents.json": 192,  # market.yml 每班呼叫、未滿 6 天略過（每週約 1 次）
     "data/orphan_scan.json": 48,  # AlphaOrphanScan 每日 03:00（checked_at）  # 先.一〇九-7：AlphaDepCheck 每週一 08:00（scripts/run_dep_check.py 跑完即 commit）
 }
 
@@ -606,6 +609,12 @@ GENERIC_SKIP_STALE = {  # 設定檔／一次性對照表：內容不隨時間過
     "theme_official_site_evidence_draft.json", "company_product_evidence.json",  # 草稿，人工整理才更新
     "non_etf_research_lines.json",  # 先.一一六-4：研究線進度，進度變動時人工更新
     "tw_data_alarm.json",  # 先.一一三-A3：只在告警／解除時寫
+    # 先.一三五-1kh-v（收件匣 039 定案甲）：一次性回補／研究產出／舊檔，沒有排程；日後若改排程產生要移出這裡
+    "financials_backfill.json", "revenue_backfill.json",  # 手動分批一次性回補
+    "capital_reduction_gap_candidates.json", "capital_reduction_verified.json",  # 2026-09 一次性研究產出
+    "news_yield_sample.json",  # scripts/measure_news_yield.py 手動量測
+    "price_history_index_legacy.json",  # 10/16 舊檔搬移，無產生者
+    "paper_order_log.json",  # 測試下單紀錄，只在下單測試時才寫
 }
 
 
