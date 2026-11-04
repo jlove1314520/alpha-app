@@ -99,6 +99,38 @@ r2 = F6.step(today=date(2026, 11, 2), opt_text=chain("2026-11-02", rows))
 check(r1["state"] == "ENTRY" and n1 == 1, "F-翼：合成鏈起跑日進場、寫 1 列")
 check(r2["state"] == "NO_NEW_DAY" and lines(F6.LOG) == n1, "F-翼：同一資料日重跑不新增列（冪等）")
 
+# 先.一三五-1ki：停損後同月不再進場、下月首個交易日重新進場（gate 9 absorbing state 檢查）。
+# PREREG docs/PREREG_paper_f_wing.md 第 23 行「停損後當月不再進場」。只看事件與狀態，不看任何淨值／損益數字。
+def _mkt(pairs):
+    B.MARKET.write_text(json.dumps({"taiex": {"close": pairs[-1][1], "data_date": pairs[-1][0],
+                                              "sparkline_dates": [d for d, _ in pairs], "sparkline": [c for _, c in pairs]}}),
+                        encoding="utf-8")
+
+
+def _events():
+    return [json.loads(l)["event"] for l in F6.LOG.read_text(encoding="utf-8").splitlines() if l.strip()]
+
+
+_mkt([("2026-11-02", 30020.0), ("2026-11-03", 30400.0)])  # 收盤超出 k±250 → 依規則停損
+r3 = F6.step(today=date(2026, 11, 3), opt_text=chain("2026-11-03", rows))
+check(r3["state"] == "CLOSED" and _events()[-1] == "stop", "F-翼：持倉中收盤超出 k±250 → 寫 stop")
+_mkt([("2026-11-03", 30400.0), ("2026-11-04", 30010.0)])
+r4 = F6.step(today=date(2026, 11, 4), opt_text=chain("2026-11-04", rows))
+check(r4["state"] == "FLAT" and _events()[-1] == "flat", "F-翼：停損後同月下一交易日 → 只寫 flat、不再 entry")
+_mkt([("2026-11-04", 30010.0), ("2026-11-05", 30000.0)])
+F6.step(today=date(2026, 11, 5), opt_text=chain("2026-11-05", rows))
+check(_events().count("entry") == 1, "F-翼：停損當月之後幾天仍不再進場（entry 只有起跑那一筆）")
+rows12 = [("202612", 30000, "買權", 320), ("202612", 30000, "賣權", 300),
+          ("202612", 30500, "買權", 90), ("202612", 29500, "賣權", 80)]
+_mkt([("2026-11-05", 30000.0), ("2026-12-01", 30010.0)])
+r5 = F6.step(today=date(2026, 12, 1), opt_text=chain("2026-12-01", rows12))
+last = json.loads(F6.LOG.read_text(encoding="utf-8").splitlines()[-1])
+check(r5["state"] == "ENTRY" and last["event"] == "entry" and last["contract"] == "202612",
+      "F-翼：次月第一個交易日重新進場、合約＝次月（停損不是永久空手）")
+s6 = json.loads(F6.OUT.read_text(encoding="utf-8"))
+check(s6.get("n_stops") == 1 and s6.get("n_closed") == 1 and (s6.get("open_position") or {}).get("contract") == "202612",
+      "F-翼：摘要 n_stops=1、n_closed=1、持倉＝次月新部位")
+
 # ── 模擬 G（paper_7）──
 G.LOG, G.OUT = td / "p7_log.jsonl", td / "p7.json"
 check(G.START_NOT_BEFORE == "2026-11-02" and G.REBAL_MONTHS == (2, 5, 8, 11), "G：正式起跑日 2026-11-02、再平衡 2／5／8／11 月")
