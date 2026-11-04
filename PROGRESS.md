@@ -1,3 +1,16 @@
+## 2026-11-04 10:3x DevQueue（維運帽，cycle 20261104-103101）：1jl 線上生效驗收結案、1kh 稽核報告多寫入者查核＋2 個讀者純 bug 修
+
+- **等待總司令審閱：13 件**（本輪沒有新增 AWAITING；`research/AWAITING_REVIEW.md` 未改）。
+- **做了什麼（資料端點 0 次外部請求；`git fetch` 1 次）**：
+  ①**先.一三五-1jl（結案）**：`origin/main` 的 `app.js` 第 757 行含 `a.close>0`、`APP_VERSION`／`sw.js` CACHE＝`2026-11-04.0230`；live server 啟動 sha＝831b585（11/04 00:02，在 1jc 的 e16f042 之後），`auto_ledger_view` 啟動雜湊＝現行已修檔，`scripts/live_server_verify.py` 4/4 PASS；修後與修前 `ledger_view()` 整份輸出完全相同、`total_pct`＝−9.69%（不是 −100%）。
+  ②**先.一三五-1kh（結案，純 bug 修）**：`audit_report.json` 三個寫入者——本機 23:00 `data_audit.py` 會保留雲端欄位原樣（不丟、不改），但會刷新頂層 `generated_at`。週報 `scripts/build_weekly_report.py::sec_system_health` 拿頂層時間判斷自檢新不新 → 改看 `self_check.checked_at`，超過 48 小時就降為 warn 並在摘要加註。新自測 `scripts/selftest_weekly_self_check_age.py`：修前 1 FAIL、修後 4/4。App 稽核卡只讀同一個寫入者的欄位，不用改。
+  ③**先.一三五-1kh-b（結案，純 bug 修）**：停擺自檢清單 `data/seed/pipeline_registry.json` 的 AlphaDataAudit（雲端 audit.yml）同樣看頂層 `generated_at`，雲端停擺會被本機每晚寫入遮住 → 改看 `self_check.checked_at`。`pipeline_freshness.evaluate()` 實跑結果：ok，missed_shifts＝1（雲端 11/03 23:20 班如實顯示沒落地），再缺一班就告警。
+- **[自行裁量]**：1jl ② `/auto/ledger` 不帶 token 會回 401，改在本機同一個程序裡比對新舊模組（token 只存在總司令裝置，不去讀）。1kh-b 改完後本機每晚寫入者就沒人監控 → 另補 1kh-c 登記它；沒有在本輪硬加，因為還沒查到排程名。
+- **補件**：新增 1kh-c（本機稽核每晚排程登記進停擺清單）、1kh-d（全掃多寫入者 json_field 條目）。收工時 `- [ ]` 有 27 項（≥12），但 DevQueue 可執行的只有 4 項（1ki／1kj／1kh-c／1kh-d），**沒達到 6 項**：BACKLOG.md 未完成項都已在 10/17 核對過、標了現況，DATA_GAP_PLAN 甲類這輪沒找到未做的 → **這兩個來源已用盡**。本週撞過用量上限，文書核對類暫停，所以沒有拿那類來湊。
+- **沒做完**：1ki（paper_6 停損路徑自測）留給下一輪——剩下的時間不夠把合成案例做完並驗證。
+- **BLOCKED**：1it／1kb 時間閘 11/05 09:00；1kd-c 11/05 08:00；1kd-e 等總司令提供新 PAT。
+- **冒煙測試**：1jl 後 exit 0、0 FAIL；1kh 後 exit 0、0 FAIL；1kh-b 後 exit 0、181 項 [x]、0 FAIL。
+
 ## 2026-11-04 10:0x DevQueue（維運帽，空轉補件 先.一三五-1）：11/04 到期時間閘驗收 4 條結案＋1kh／1ki／1kj 補件
 
 - **等待總司令審閱：13 件**（本輪沒有新增 AWAITING；`research/AWAITING_REVIEW.md` 等待中表格未改）。
