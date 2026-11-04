@@ -5294,6 +5294,46 @@ async function runSmokeTest(baseUrl, headless = true) {
     r2Info = `${r.tw}；${r.us}；無 crons：${r.fb}`;
   } catch (e) { r2Errs.push(`測試本身出錯：${e.message || e}`); }
   record("152. 診斷橫幅下次排程時間讀 market.yml 實際 cron（經 STATUS.json），不寫死（先.九十五-R2）", r2Errs.length === 0, r2Errs.join("; ") || r2Info);
+  // 180.【2026-11-04 先.一三五-1kh-k】首頁改讀小檔 data/status_lite.json（先.一三五-1kh-i）：
+  // ①小檔與 STATUS.json 的三個欄位一致（小檔每 30 分鐘才重產，source_updated_at 落後 STATUS >60 分鐘才算不一致）；
+  // ②小檔 404 時 ensureStatusLite() 退回整份 STATUS.json，仍拿得到 market.yml crons（fail open）。
+  const liteErrs = [];
+  let liteInfo = "";
+  try {
+    const fsl = await import("node:fs");
+    const st = JSON.parse(fsl.readFileSync("data/STATUS.json", "utf8"));
+    const lite = JSON.parse(fsl.readFileSync("data/status_lite.json", "utf8"));
+    const lagMin = (new Date(st.updated_at) - new Date(lite.source_updated_at)) / 60000;
+    const pickWf = d => JSON.stringify(((d.workflows || []).find(w => /market\.yml$/.test(w.file || "")) || {}).crons || null);
+    const pickFund = d => ((d.data_files || []).find(x => x.path === "data/fundamentals.json") || {}).generated_at || null;
+    const pickCa = d => JSON.stringify((d.local_schedule_heartbeat || {}).claude_auth || null);
+    const diffs = [];
+    if (pickWf(st) !== pickWf(lite)) diffs.push("market.yml crons");
+    if (pickFund(st) !== pickFund(lite)) diffs.push("fundamentals generated_at");
+    if (pickCa(st) !== pickCa(lite)) diffs.push("claude_auth");
+    if (pickWf(lite) === "null") liteErrs.push("小檔沒有 market.yml crons");
+    if (diffs.length && !(lagMin <= 60)) liteErrs.push(`小檔與 STATUS.json 不一致（${diffs.join("、")}），小檔落後 ${Math.round(lagMin)} 分鐘`);
+    const fb = await page.evaluate(async () => {
+      if (typeof ensureStatusLite !== "function") return { err: "ensureStatusLite 不存在" };
+      const okDoc = await (STATUS_LITE_P = null, ensureStatusLite());
+      return { okLite: !!(okDoc && okDoc._note), n: okDoc && Array.isArray(okDoc.workflows) ? okDoc.workflows.length : -1 };
+    });
+    if (fb.err) liteErrs.push(fb.err);
+    else if (!fb.okLite) liteErrs.push("小檔正常時 ensureStatusLite() 沒有回小檔");
+    await page.route("**/data/status_lite.json**", route => route.fulfill({ status: 404, body: "not found" }));
+    const fb2 = await page.evaluate(async () => {
+      STATUS_LITE_P = null; STATUS_DOC_P = null;
+      const d = await ensureStatusLite();
+      const w = d && Array.isArray(d.workflows) ? d.workflows.find(x => /market\.yml$/.test(x.file || "")) : null;
+      return { isLite: !!(d && d._note), crons: w && Array.isArray(w.crons) ? w.crons.length : 0, label: marketScheduleLabel(d, "tw") };
+    });
+    await page.unroute("**/data/status_lite.json**");
+    await page.evaluate(() => { STATUS_LITE_P = null; });
+    if (fb2.isLite) liteErrs.push("小檔 404 仍回小檔（快取沒清？）");
+    if (!(fb2.crons > 0)) liteErrs.push(`小檔 404 後退回整份 STATUS.json 仍拿不到 crons：${JSON.stringify(fb2)}`);
+    liteInfo = `一致（落後 ${Math.round(lagMin)} 分鐘${diffs.length ? "，差異在容忍內：" + diffs.join("、") : ""}）；404 退回整份：${fb2.crons} 個 cron、${fb2.label}`;
+  } catch (e) { liteErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("180. 首頁 STATUS 小檔 status_lite.json 與 STATUS.json 一致，小檔讀不到時退回整份（先.一三五-1kh-k）", liteErrs.length === 0, liteErrs.join("; ") || liteInfo);
 
   // 157.【先.九十六-R4】減少動態：系統設 reducedMotion=reduce 時，JS 捲動不平滑、價格不加閃爍 class、CSS 動畫時長為 0；
   // 一般模式（主頁面）仍平滑捲動與閃爍。另做原始碼檢查：app*.js 不得再直接寫 behavior:'smooth'（一律走 uiScrollIntoView）。
