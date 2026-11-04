@@ -6,10 +6,10 @@
 - **先.一三五-1kh-m ✅（commit ac5c390e006）IBKR 逾期 17 天的誠實標示**：Playwright 實測市場頁美股四列可見「本機IBKR逾期→Yahoo每日收盤快照」、資料日 11-03（美東最近收盤）；首頁膠囊灰點＋title。判定有標示、非 bug，未改程式。`[自行裁量]` 首頁 title 手機看不到，另補提案條目 1kh-s。
 - **先.一三五-1kh-n ✅（commit 255e83e57e8）PENDING_QUEUE 控制字元守門**：`dev_queue_runner.py::mark_blocked()` 寫入前用 `_sanitize_ctrl_chars()` 把 BEL 等換成可見跳脫文字、CR／LF 換空白、自己出錯只警告（十二節）。自測 `scripts/selftest_dev_queue_block_ctrlchars.py` 6 項 PASS；既有 idle_fallback 10/10、guard_approved、guard 29 項照過。`git grep -P` 全掃文件：PROGRESS.md 1 處 BEL 已修回（PENDING_QUEUE 0 處）。照實記錄：本輪第一版用 heredoc 多層跳脫，把字面控制字元寫進了 .py（同一成因現場重現），已 `git checkout` 還原、改用 ord 數字重寫。
 - **先.一三五-1kh-o ✅（commit 5ae07835f09）app.js 拆分提案**：`docs/PROPOSAL_APPJS_SPLIT.md`。V8 coverage：app.js 332,518 字元首頁只執行 44.5%，其他 8 支 app-*.js 首頁都沒載入。建議甲（方法頁／策略曲線／回測圖搬延後載入檔，估省 gzip 8～12KB，未實測）。`[自行裁量]` 丙的 320KB 預警線現況已超過，改建議「距門檻 <15KB 只提示」。
-- **先.一三五-1kh-p ⏳ 第 1 段（查證完成、未實作，維持 `- [ ]`）**：三份日誌都分辨得出（scheduler.log 有 `task=`、0905／0940 靠時刻；Telegram 靠 08／20 時；catchup jsonl 晚班有 `layer: late_1930`），逐支 line_filter 規格已寫進條目，下一輪照做。
+- **先.一三五-1kh-p ✅（同輪第 2 段做完）停擺自檢逐支判斷**：`pipeline_freshness.py` 加選填 `line_filter`／`line_exclude`；registry 44→50 條（AutoRun 五支、Telegram 兩班、MarketCatchup 兩班各自一條）。真實日誌逐支結果皆 ok（0905→09:05、0940→09:40…）。`[自行裁量]` 自測另開 `scripts/selftest_pipeline_freshness_line_filter.py`（8 項 PASS），因 inventory 自測不經 `_last_output()`。冒煙 16:30～16:38 182 PASS／0 FAIL。
 - **收工補件**：DevQueue 可執行（非研究）只剩 3 項 → 補 1kh-r（STATUS.json CRLF 寫入者，①資料錯）、1kh-s（首頁膠囊逾期字樣提案，②畫面）、1kh-t（data_files 8 stale／8 no_date 逐列判斷，①資料缺口），來源都是本輪實測；補後 6 項、`- [ ]` 29 項。
 - **冒煙測試**：16:03～16:11 exit 0、182 PASS／0 FAIL；1kh-n 改程式後 16:18～16:26 exit 0、182 PASS／0 FAIL（#78 首頁首次載入 330.5KB）。1kh-l／1kh-m／1kh-o 只改文件。
-- **BLOCKED／未做**：1kh-h1 仍等總司令重裝 IB Gateway。下一輪從 1kh-p 實作接續。
+- **BLOCKED／未做**：1kh-h1 仍等總司令重裝 IB Gateway。下一輪從 1kh-q 接續。
 
 ## 2026-11-04 15:01～15:40 DevQueue 20261104-150101（維運帽）
 

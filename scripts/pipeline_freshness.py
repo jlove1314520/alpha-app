@@ -97,6 +97,22 @@ def _dig(doc, path: str):
     return cur
 
 
+def _filter_lines(spec: dict, text: str) -> str:
+    """先.一三五-1kh-p：選填 line_filter（正規式，必須符合）／line_exclude（正規式，不得符合）。
+    兩個都沒寫就原樣回傳（既有條目行為不變）。正規式寫錯只降級成警告、照原文處理（十二節）。"""
+    inc, exc = spec.get("line_filter"), spec.get("line_exclude")
+    if not inc and not exc:
+        return text
+    try:
+        ri = re.compile(inc) if inc else None
+        rx = re.compile(exc) if exc else None
+        return "\n".join(ln for ln in text.splitlines()
+                         if (ri is None or ri.search(ln)) and (rx is None or not rx.search(ln)))
+    except re.error as e:
+        print(f"::warning::{spec.get('task')} line_filter 正規式錯誤，照原文處理：{e}")
+        return text
+
+
 def _last_output(spec: dict, f: Path) -> tuple[datetime | None, str]:
     """回傳 (最後產出時間, 這個時間是怎麼來的)。"""
     kind = spec.get("freshness", "mtime")
@@ -114,6 +130,8 @@ def _last_output(spec: dict, f: Path) -> tuple[datetime | None, str]:
             size = fh.tell()
             fh.seek(max(0, size - 65536))
             tail = fh.read().decode("utf-8", errors="replace")
+        # 先.一三五-1kh-p：多支排程共用一份日誌時，用選填 line_filter／line_exclude 只取屬於這一支的行
+        tail = _filter_lines(spec, tail)
         hits = _LOG_TS_RE.findall(tail)
         best = None
         for d, t, tz in hits:
@@ -133,9 +151,9 @@ def _last_output(spec: dict, f: Path) -> tuple[datetime | None, str]:
         field = spec["field"]
         return _parse_ts(_dig(doc, field)), f"目錄最新檔 {files[-1].name} 的 {field}"
     if kind == "jsonl_last_field":
-        lines = [ln for ln in f.read_text(encoding="utf-8").splitlines() if ln.strip()]
+        lines = [ln for ln in _filter_lines(spec, f.read_text(encoding="utf-8")).splitlines() if ln.strip()]
         if not lines:
-            return None, "JSONL 為空"
+            return None, "JSONL 為空（或沒有符合 line_filter 的列）"
         field = spec["field"]
         return _parse_ts(_dig(json.loads(lines[-1]), field)), f"JSONL 末筆 {field}"
     if kind == "sqlite_max_date":

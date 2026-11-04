@@ -562,14 +562,13 @@
       "missed_shift_threshold": 3,
       "note": "2026-09-16新增。quotes.yml實際排程是每10分鐘一次但集中在盤中/美股時段（UTC 0-5、8-23，週二~週六0-1時額外覆蓋），平日UTC 6-7時（台北14:00-16:00）刻意沒有排程（台股已收盤、美股未開盤的空窗）。舊制用寬鬆的interval_min=60（×stall_factor=3=180分鐘）容忍這個已知空窗。同日【班次數】裁示：改用shift_profile=quotes_tw_10min（只以台股盤中09:00-13:30、交易日曆判定的班次為單位，14:00-16:00空窗不在班次表內，天然不會誤報），連續錯過3班（30分鐘）即亮燈，比舊制180分鐘更敏感也不受假日日曆誤導。",
       "fault_history": {
-        "count": 105,
-        "last_fault_at": "2026-11-04T12:12:01.847236+08:00",
+        "count": 106,
+        "last_fault_at": "2026-11-04T16:22:02.413422+08:00",
         "fault_types": {
-          "stalled": 105
+          "stalled": 106
         },
         "removable": null,
         "event_log": [
-          "2026-10-22T18:32:02.093330+08:00",
           "2026-10-22T22:12:02.679459+08:00",
           "2026-10-23T02:42:02.010420+08:00",
           "2026-10-23T06:02:02.366336+08:00",
@@ -598,7 +597,8 @@
           "2026-11-03T16:22:02.476896+08:00",
           "2026-11-04T00:32:01.896437+08:00",
           "2026-11-04T06:02:02.387530+08:00",
-          "2026-11-04T12:12:01.847236+08:00"
+          "2026-11-04T12:12:01.847236+08:00",
+          "2026-11-04T16:22:02.413422+08:00"
         ]
       }
     },
@@ -823,13 +823,25 @@
     },
     {
       "task": "AlphaMarketCatchup",
-      "purpose": "market.yml 本機補班檢查（週一～五 17:30＋19:30 兩支排程 AlphaMarketCatchup／AlphaMarketCatchupLate 共用，scripts/market_local_catchup.py）",
+      "purpose": "market.yml 本機補班檢查・17:30 班（scripts/market_local_catchup.py；晚班列帶 layer=late_1930，本條排除）",
       "tw_trading_days_only": true,
       "interval_min": 1440,
       "artifact": "research/market_local_catchup.jsonl",
       "freshness": "jsonl_last_field",
       "field": "ts",
-      "note": "先.一三五-1kh-g（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。兩支排程寫同一份 jsonl（layer 欄區分），合為一條：任一支有跑就不算停擺，所以單獨一支停掉抓不到——[自行裁量] 接受，因兩支是同一件事的早晚兩班。只證明有觸發，不證明有補成功（result 欄另看）。"
+      "note": "先.一三五-1kh-p（2026-11-04 DevQueue 20261104-160102）：原本多支合一條，改成逐支用 line_filter／line_exclude 只看自己那一班的行。 原條目說明：先.一三五-1kh-g（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。兩支排程寫同一份 jsonl（layer 欄區分），合為一條：任一支有跑就不算停擺，所以單獨一支停掉抓不到——[自行裁量] 接受，因兩支是同一件事的早晚兩班。只證明有觸發，不證明有補成功（result 欄另看）。",
+      "line_exclude": "\"layer\": \"late_1930\""
+    },
+    {
+      "task": "AlphaMarketCatchupLate",
+      "purpose": "market.yml 本機補班檢查・19:30 晚班（只看 layer=late_1930 的列）",
+      "tw_trading_days_only": true,
+      "interval_min": 1440,
+      "artifact": "research/market_local_catchup.jsonl",
+      "freshness": "jsonl_last_field",
+      "field": "ts",
+      "note": "先.一三五-1kh-p（2026-11-04 DevQueue 20261104-160102）：原本多支合一條，改成逐支用 line_filter／line_exclude 只看自己那一班的行。 原條目說明：先.一三五-1kh-g（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。兩支排程寫同一份 jsonl（layer 欄區分），合為一條：任一支有跑就不算停擺，所以單獨一支停掉抓不到——[自行裁量] 接受，因兩支是同一件事的早晚兩班。只證明有觸發，不證明有補成功（result 欄另看）。",
+      "line_filter": "\"layer\": \"late_1930\""
     },
     {
       "task": "AlphaMarginCkCheck",
@@ -852,12 +864,53 @@
     },
     {
       "task": "AlphaAutoRun0905",
-      "purpose": "真錢 Bb-90 自動交易排程（AlphaAutoRun0905／AlphaAutoRun0940／AlphaAutoSettle1340／AlphaAutoWatchRun／AlphaAutoWatchSettle 五支共用同一份 scheduler.log）——只看有沒有觸發",
+      "purpose": "真錢 Bb-90 自動交易排程・09:05 下單班（五支共用 scheduler.log，用 line_filter 只看 task=… 那一行）——只看有沒有觸發",
       "tw_trading_days_only": true,
       "interval_min": 1440,
       "artifact": "research/data/auto_trading/scheduler.log",
       "freshness": "log_last_timestamp",
-      "note": "先.一三五-1kh-h（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。五支排程每次執行都寫『[ISO 時間] task=run／settle／watchdog-run… exit=N』，合一條：只要有一支跑就不算停擺，單獨一支停掉抓不到（[自行裁量] 接受，pipeline_freshness 沒有按行過濾的判準，要分支得改監測器，另案）。只讀日誌，不碰、不觸發任何下單程式。日誌 UTF-8、.gitignore。目前策略資金凍結中（每次寫 FROZEN），本條只證明排程活著。"
+      "note": "先.一三五-1kh-p（2026-11-04 DevQueue 20261104-160102）：原本多支合一條，改成逐支用 line_filter／line_exclude 只看自己那一班的行。 原條目說明：先.一三五-1kh-h（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。五支排程每次執行都寫『[ISO 時間] task=run／settle／watchdog-run… exit=N』，合一條：只要有一支跑就不算停擺，單獨一支停掉抓不到（[自行裁量] 接受，pipeline_freshness 沒有按行過濾的判準，要分支得改監測器，另案）。只讀日誌，不碰、不觸發任何下單程式。日誌 UTF-8、.gitignore。目前策略資金凍結中（每次寫 FROZEN），本條只證明排程活著。",
+      "line_filter": "T09:0\\d:\\d\\d\\] task=run\\b"
+    },
+    {
+      "task": "AlphaAutoRun0940",
+      "purpose": "真錢 Bb-90 自動交易排程・09:40 下單班（五支共用 scheduler.log，用 line_filter 只看 task=… 那一行）——只看有沒有觸發",
+      "tw_trading_days_only": true,
+      "interval_min": 1440,
+      "artifact": "research/data/auto_trading/scheduler.log",
+      "freshness": "log_last_timestamp",
+      "note": "先.一三五-1kh-p（2026-11-04 DevQueue 20261104-160102）：原本多支合一條，改成逐支用 line_filter／line_exclude 只看自己那一班的行。 原條目說明：先.一三五-1kh-h（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。五支排程每次執行都寫『[ISO 時間] task=run／settle／watchdog-run… exit=N』，合一條：只要有一支跑就不算停擺，單獨一支停掉抓不到（[自行裁量] 接受，pipeline_freshness 沒有按行過濾的判準，要分支得改監測器，另案）。只讀日誌，不碰、不觸發任何下單程式。日誌 UTF-8、.gitignore。目前策略資金凍結中（每次寫 FROZEN），本條只證明排程活著。",
+      "line_filter": "T09:[3-5]\\d:\\d\\d\\] task=run\\b"
+    },
+    {
+      "task": "AlphaAutoSettle1340",
+      "purpose": "真錢 Bb-90 自動交易排程・13:40 結算班（五支共用 scheduler.log，用 line_filter 只看 task=… 那一行）——只看有沒有觸發",
+      "tw_trading_days_only": true,
+      "interval_min": 1440,
+      "artifact": "research/data/auto_trading/scheduler.log",
+      "freshness": "log_last_timestamp",
+      "note": "先.一三五-1kh-p（2026-11-04 DevQueue 20261104-160102）：原本多支合一條，改成逐支用 line_filter／line_exclude 只看自己那一班的行。 原條目說明：先.一三五-1kh-h（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。五支排程每次執行都寫『[ISO 時間] task=run／settle／watchdog-run… exit=N』，合一條：只要有一支跑就不算停擺，單獨一支停掉抓不到（[自行裁量] 接受，pipeline_freshness 沒有按行過濾的判準，要分支得改監測器，另案）。只讀日誌，不碰、不觸發任何下單程式。日誌 UTF-8、.gitignore。目前策略資金凍結中（每次寫 FROZEN），本條只證明排程活著。",
+      "line_filter": "\\] task=settle\\b"
+    },
+    {
+      "task": "AlphaAutoWatchRun",
+      "purpose": "真錢 Bb-90 自動交易排程・看門狗下單檢查（五支共用 scheduler.log，用 line_filter 只看 task=… 那一行）——只看有沒有觸發",
+      "tw_trading_days_only": true,
+      "interval_min": 1440,
+      "artifact": "research/data/auto_trading/scheduler.log",
+      "freshness": "log_last_timestamp",
+      "note": "先.一三五-1kh-p（2026-11-04 DevQueue 20261104-160102）：原本多支合一條，改成逐支用 line_filter／line_exclude 只看自己那一班的行。 原條目說明：先.一三五-1kh-h（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。五支排程每次執行都寫『[ISO 時間] task=run／settle／watchdog-run… exit=N』，合一條：只要有一支跑就不算停擺，單獨一支停掉抓不到（[自行裁量] 接受，pipeline_freshness 沒有按行過濾的判準，要分支得改監測器，另案）。只讀日誌，不碰、不觸發任何下單程式。日誌 UTF-8、.gitignore。目前策略資金凍結中（每次寫 FROZEN），本條只證明排程活著。",
+      "line_filter": "\\] task=watchdog-run\\b"
+    },
+    {
+      "task": "AlphaAutoWatchSettle",
+      "purpose": "真錢 Bb-90 自動交易排程・看門狗結算檢查（五支共用 scheduler.log，用 line_filter 只看 task=… 那一行）——只看有沒有觸發",
+      "tw_trading_days_only": true,
+      "interval_min": 1440,
+      "artifact": "research/data/auto_trading/scheduler.log",
+      "freshness": "log_last_timestamp",
+      "note": "先.一三五-1kh-p（2026-11-04 DevQueue 20261104-160102）：原本多支合一條，改成逐支用 line_filter／line_exclude 只看自己那一班的行。 原條目說明：先.一三五-1kh-h（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。五支排程每次執行都寫『[ISO 時間] task=run／settle／watchdog-run… exit=N』，合一條：只要有一支跑就不算停擺，單獨一支停掉抓不到（[自行裁量] 接受，pipeline_freshness 沒有按行過濾的判準，要分支得改監測器，另案）。只讀日誌，不碰、不觸發任何下單程式。日誌 UTF-8、.gitignore。目前策略資金凍結中（每次寫 FROZEN），本條只證明排程活著。",
+      "line_filter": "\\] task=watchdog-settle\\b"
     },
     {
       "task": "AlphaIbkrGateway",
@@ -895,11 +948,21 @@
     },
     {
       "task": "AlphaTelegram0815",
-      "purpose": "Telegram 頻道讀取（AlphaTelegram0815／AlphaTelegram2015 每日兩班共用，research/telegram_reader.py）",
-      "interval_min": 720,
+      "purpose": "Telegram 頻道讀取・早班 08:15（兩班共用 runner 日誌，用行首時刻分班，research/telegram_reader.py）",
+      "interval_min": 1440,
       "artifact": "C:/alpha/telegram_export/sinopac_api/_runner.log",
       "freshness": "log_last_timestamp",
-      "note": "先.一三五-1kh-h（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。兩班寫同一份 runner 日誌（C:/alpha/run-telegram-reader.ps1 的 $outDir，repo 外），每次寫『[ISO 時間] exit=N』，合一條：interval 720×3＝36 小時，兩班都停約一天半才亮燈，只停一班抓不到。日誌 UTF-8。"
+      "note": "先.一三五-1kh-p（2026-11-04 DevQueue 20261104-160102）：原本多支合一條，改成逐支用 line_filter／line_exclude 只看自己那一班的行。 日誌沒有班次名，以行首時間戳的小時分班（實測 08 時 28 行、20 時 26 行，另有 18／23 時零星手動執行歸到晚班）；interval 由 720 改 1440（每支一天一次）。原條目說明：先.一三五-1kh-h（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。兩班寫同一份 runner 日誌（C:/alpha/run-telegram-reader.ps1 的 $outDir，repo 外），每次寫『[ISO 時間] exit=N』，合一條：interval 720×3＝36 小時，兩班都停約一天半才亮燈，只停一班抓不到。日誌 UTF-8。",
+      "line_filter": "^\\[\\d{4}-\\d{2}-\\d{2}T(0[5-9]|1[01]):"
+    },
+    {
+      "task": "AlphaTelegram2015",
+      "purpose": "Telegram 頻道讀取・晚班 20:15（兩班共用 runner 日誌，用行首時刻分班，research/telegram_reader.py）",
+      "interval_min": 1440,
+      "artifact": "C:/alpha/telegram_export/sinopac_api/_runner.log",
+      "freshness": "log_last_timestamp",
+      "note": "先.一三五-1kh-p（2026-11-04 DevQueue 20261104-160102）：原本多支合一條，改成逐支用 line_filter／line_exclude 只看自己那一班的行。 日誌沒有班次名，以行首時間戳的小時分班（實測 08 時 28 行、20 時 26 行，另有 18／23 時零星手動執行歸到晚班）；interval 由 720 改 1440（每支一天一次）。原條目說明：先.一三五-1kh-h（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。兩班寫同一份 runner 日誌（C:/alpha/run-telegram-reader.ps1 的 $outDir，repo 外），每次寫『[ISO 時間] exit=N』，合一條：interval 720×3＝36 小時，兩班都停約一天半才亮燈，只停一班抓不到。日誌 UTF-8。",
+      "line_filter": "^\\[\\d{4}-\\d{2}-\\d{2}T(1[2-9]|2[0-3]):"
     },
     {
       "task": "AlphaWeeklyReport",
