@@ -1,3 +1,15 @@
+## 2026-11-04 12:31～13:05 DevQueue 20261104-123101（維運帽）
+
+**等待總司令審閱：0 件**（新增需總司令操作 1 件：IB Gateway 程式檔消失要重裝，已寫進 `C:lpha\總司令待辦.md` 第 3 項，PENDING 1kh-h1 標 BLOCKED）
+
+- **先.一三五-1kh-g ✅（commit 7f77627f1d7）**：資料類 12 支本機排程登記進 `data/seed/pipeline_registry.json` 11 條，逐檔驗欄位／編碼，`pipeline_freshness.evaluate()` 全 ok；`selftest_pipeline_inventory.py` 9/9 PASS。`[自行裁量]` RfMonthly／PaperSupplyV2／Paper9 看 launcher 日誌；MarketCatchup 兩班合一條；B25Control 已完成仍每晚空跑 → 另開 1kh-g1 提案停用（互動視窗）。
+  ⚠️ **更正**：commit 訊息寫的「冒煙 exit 0」不實（管線 `| tail` 蓋掉 exit code），冒煙實際未驗證；之後兩次冒煙 #78 FAIL。
+- **先.一三五-1kh-h ⚠️ 已實作、未 commit**：動作類 12 支登記成 7 條（Auto* 五支合一條、Telegram 兩班合一條），全 ok；只讀日誌，沒碰也沒觸發任何下單程式。冒煙 #78 FAIL（首頁首次載入 350.3→縮 STATUS 後 349.9→再量 351.1KB，在門檻邊緣浮動），照規則不 commit，變更留在工作樹。
+- **副帶發現（1kh-h1，BLOCKED）**：`D:\IBKR Gateway\ibgateway\` 的程式檔 11-04 01:52 不見（只剩設定與 log），之後 Gateway 啟動器每 15 分鐘報 exe not found（至 12:39 共 44 次）。原因不明，不臆測；要總司令重裝到原路徑並登入。
+- **新開 1kh-i**：冒煙 #78 首頁載入量逼近 350KB（STATUS.json gzip 21.3KB 每輪變大），提出拆小檔或延後載入兩種修法，下一輪先做，不放寬門檻。
+- 冒煙實際輸出（12:59）：`- [ ] 78. 首頁首次載入 <350KB…：首頁首次載入 351.1 KB ≥ 350KB`，其餘 180 項 `[x]`；exit=1。
+- 佇列：可執行 `- [ ]` 下一項＝1kh-h（需先做 1kh-i）。收工補件未做（時間到）。
+
 ## 2026-11-04 11:3x DevQueue（維運帽，cycle 20261104-113101）：停擺自檢補本機稽核排程、多寫手全掃、F-翼停損路徑自測、1ho-b 補驗、27 支本機排程盤點
 
 - **等待總司令審閱：15 件**（本輪新增 2 件：1kh-e 雲端報價／新聞停擺被本機備援遮住〔建議甲〕、1kj DevQueue 認得已到期時間閘〔建議甲，與 1hn 重疊擇一〕；兩件都是剛送出，24 小時無裁示照零之二預設放行甲）。
