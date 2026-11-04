@@ -21,7 +21,7 @@ TOP20 = [
     (7, "#282 產業金流加速度輪動（#73）", "16.86%", "產業輪動（台股）", "F9（第 2 批，2015～2024，`research/backtest/` 引擎，同 F8 抽樣宇宙）"),
     (8, "#430 R1 信用利差閘門", "15.13%", "ETF＋閘門", "F6"),
     (9, "#413 美股趨勢槓桿", "13.47%", "ETF 擇時", "F4"),
-    (10, "#16／#17 f_quality_roe_stability 多空", "13.2%", "個股多空（台股）", "待第二批（含放空腿但書）"),
+    (10, "#16／#17 f_quality_roe_stability 多空", "13.2%", "個股多空（台股）", "F13（第 2 批，2015～2024，只做多頭半邊，同 F8 抽樣宇宙）"),
     (11, "#414／#243 0050 趨勢槓桿", "11.15%", "ETF 擇時", "F3"),
     (12, "#416 趨勢 1.5×／0.5× 跨市場", "5.46%", "ETF 擇時", "F3／F4 格子內含 L＝1.5、空頭曝險 0.5（相乘後為 0.75×，不完全相同）"),
     (13, "#247 已實現波動度 regime", "4.43%", "ETF 擇時", "F5"),
@@ -55,7 +55,7 @@ def main():
     L.append("> **性質：樣本內最優化（描述性），不是判定。** 每一列都是「在 2003-07～2024-12 這段資料上掃參數後挑最好的一組」，"
              "所以數字**一定偏樂觀**（挑格子本身就是過擬合來源）；下一步照方針直接上紙上測試，用前向數據說話。"
              "2025 以後資料（holdout）本批完全沒讀。非投資建議。\n")
-    L.append(f"資料期間：{meta['data_start']}～{meta['data_end']}；產生：{meta['generated_at']}；程式 `research/reaudit_optimized_batch1.py`（F1～F6）、`research/reaudit_optimized_batch2_tx.py`（F7，台指期連續合約，期間同樣從 2003-07-01 起以對齊無風險利率資料）、`research/reaudit_optimized_batch2_ssu.py`（F8，台股個股，期間 2015-01～2024-12，同 #133 抽樣宇宙 300 檔）、`research/reaudit_optimized_batch2_sector.py`（F9，同 F8 宇宙與期間）、`research/reaudit_optimized_batch2_breadth.py`（F10，期間 2010-12-31～2024-12-31，廣度暖身後才有訊號）、`research/reaudit_optimized_batch2_margin.py`（F11，期間 2013-11-25～2024-12-31，融資餘額 2012-05 起、暖身 52 週）、`research/reaudit_optimized_batch2_weinstein.py`（F12，同 F8 宇宙與期間）。**注意：各家族期間不同，綜合分數跨家族比較要看期間**（F1～F7 從 2003-07、F8／F9／F12 從 2015、F10 從 2011、F11 從 2013-11）。**曲線 png 與明細 JSON 在本機 `research/data/`（該目錄依 .gitignore 不進公開 repo），連結只在本機有效。**\n")
+    L.append(f"資料期間：{meta['data_start']}～{meta['data_end']}；產生：{meta['generated_at']}；程式 `research/reaudit_optimized_batch1.py`（F1～F6）、`research/reaudit_optimized_batch2_tx.py`（F7，台指期連續合約，期間同樣從 2003-07-01 起以對齊無風險利率資料）、`research/reaudit_optimized_batch2_ssu.py`（F8，台股個股，期間 2015-01～2024-12，同 #133 抽樣宇宙 300 檔）、`research/reaudit_optimized_batch2_sector.py`（F9，同 F8 宇宙與期間）、`research/reaudit_optimized_batch2_breadth.py`（F10，期間 2010-12-31～2024-12-31，廣度暖身後才有訊號）、`research/reaudit_optimized_batch2_margin.py`（F11，期間 2013-11-25～2024-12-31，融資餘額 2012-05 起、暖身 52 週）、`research/reaudit_optimized_batch2_weinstein.py`（F12，同 F8 宇宙與期間）、`research/reaudit_optimized_batch2_roe.py`（F13，同 F8 宇宙與期間）。**注意：各家族期間不同，綜合分數跨家族比較要看期間**（F1～F7 從 2003-07、F8／F9／F12／F13 從 2015、F10 從 2011、F11 從 2013-11）。**曲線 png 與明細 JSON 在本機 `research/data/`（該目錄依 .gitignore 不進公開 repo），連結只在本機有效。**\n")
     L.append("## 0. 總表（依綜合分數＝年化報酬÷|最大回撤| 排名；MDD 超過 50% 的排最後並標天條一）\n")
     L.append("| 排名 | 家族 | 最好的一組參數 | 年化 | MDD | Sharpe | 勝率 | 交易次數 | 綜合分數 | 掃描格數（多重比較參考） | 曲線 |")
     L.append("|---|---|---|---|---|---|---|---|---|---|---|")
@@ -111,6 +111,7 @@ def main():
              "**不含 2008**；防禦曝險 0.25 不歸零所以只算 5 筆、勝率 100% 沒有意義；2,304 格挑出來，過擬合風險高。"
              "只開 1×、無止損時最好的一組（12 週、去槓桿、月頻）年化 +15.7%、MDD −21.3%，和 0050 同期 +15.5%／−34.0% 比，主要好處在回撤。\n"
              "- F12（Weinstein 第二階段）：同 F8 引擎、宇宙、成本與融資假設；還原收盤 > MA_n 且 MA_n 比 10 日前高、以 60 日報酬排序，可選大盤 200 日均線閘門；引擎第一層出場線同步改成 MA_n。最好的一組沒開大盤閘門、2× 融資、組合止損 10%；2× 以上融資在台股個股屬實務上限邊緣，追繳以權益歸零近似（偏樂觀）；宇宙為抽樣 300 檔、存活者偏誤未完全排除。\n"
+             "- F13（ROE 穩定度）：同 F8 引擎、宇宙、成本與融資假設；#16／#17 原版是十分位多空，這裡只做多頭半邊（放空腿借券成本未接真實資料，依放空腿硬規則不做），所以和原版 13.2% 的多空價差不能直接比。原版數字含放空腿，屬資料缺陷、不得採信。槓桿在這個家族沒有幫助（報酬低於融資利率 6.5%，加槓桿反而變差）。\n"
              "- 美股（VTI）結論附但書：**存活者偏誤未完全修正：已下市股約 97%（抽樣 55／57）無價格來源。**（VTI 為指數 ETF，影響較小，但書照附。）\n")
     out = HERE / "REAUDIT_OPTIMIZED.md"
     out.write_text("\n".join(L) + "\n", encoding="utf-8")
