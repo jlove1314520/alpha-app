@@ -1,7 +1,7 @@
 {
  "_note": "由 scripts/build_status_lite.py 從 data/STATUS.json 抽出首頁用的欄位；完整內容看 STATUS.json",
- "source_updated_at": "2026-11-04T19:45:09.561260+08:00",
- "generated_at": "2026-11-04T11:45:17+00:00",
+ "source_updated_at": "2026-11-05T01:17:17.274447+08:00",
+ "generated_at": "2026-11-04T17:17:24+00:00",
  "workflows": [
   {
    "file": ".github/workflows/market.yml",
@@ -30,20 +30,18 @@
      "comment": "台北隔日 05:43 — 美股班次"
     }
    ],
-   "last_run": "2026-11-04T11:39:08Z",
+   "last_run": "2026-11-04T17:11:18Z",
    "last_status": "in_progress",
    "today_runs": {
-    "date_tw": "2026-11-04",
-    "total": 2,
-    "in_progress": 1,
-    "success": 1
+    "date_tw": "2026-11-05",
+    "total": 0
    }
   }
  ],
  "data_files": [
   {
    "path": "data/fundamentals.json",
-   "generated_at": "2026-11-04T19:43:09.507110+08:00",
+   "generated_at": "2026-11-05T01:15:35.714587+08:00",
    "records": 2607,
    "source": "起始種子=research端FinMind快取整理；此後累積更新=TWSE openapi(BWIBBU_ALL/t187ap05_L)",
    "detail": "ratios_updated=1088 revenue_updated=1088 errors=[]",
