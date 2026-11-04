@@ -73,7 +73,7 @@ powershell -ExecutionPolicy Bypass -File C:\alpha\convert-tasks-to-s4u.ps1 -Reve
 | `AlphaIbkrQuotes` | 美股報價（IBKR Gateway） | 每 5 分鐘 ＋ 登入時 | `research/ibkr_quotes_cycle.log`、`data/quotes_ibkr.json` |
 | `AlphaIbkrGateway`（**2026-09-17新增，尚待註冊**，見下方說明） | 確保 IB Gateway 程式本身有開著（不能自動輸入帳密，只負責把程式打開等在登入畫面） | 每 15 分鐘 ＋ 登入時（延遲 1 分） | `research/ibkr_gateway_cycle.log` |
 | `AlphaConnectivity` | 對外連通性監測 ＋ 常駐工作停擺自檢 | 每 5 分鐘 ＋ 登入時（延遲 1 分） | `research/external_connectivity.jsonl`、`data/audit_report.json` 的 `local_task_health` |
-| `AlphaTwsePublishProbe` | 實測 TWSE T86／MI_MARGN／STOCK_DAY_ALL 的實際發布時間 | **每日** 13:30 起每 15 分鐘、共 6.5 小時 ＋ 登入時（延遲 2 分） | `research/twse_probe.log`、`research/twse_publish_probe.jsonl` |
+| `AlphaTwsePublishProbe`（**2026-11-04 已停用**，見第七節） | 實測 TWSE T86／MI_MARGN／STOCK_DAY_ALL 的實際發布時間 | **每日** 13:30 起每 15 分鐘、共 6.5 小時 ＋ 登入時（延遲 2 分） | `research/twse_probe.log`、`research/twse_publish_probe.jsonl` |
 | `AlphaDevQueue` | 開發任務佇列自走輪次 | 每 15 分鐘 ＋ 登入時 | `research/dev_queue_cycle.log` |
 | `AlphaMarathon` | 研究馬拉松自走輪次 | 每 6 小時（00:05／06:05／12:05／18:05）＋ 登入時（延遲 5 分）〔先.二十八，2026-10-06 由每 30 分鐘降頻〕 | `research/marathon_cycle.log`、`research/MARATHON_STATE.md` |
 | `AlphaHypothesisQueue` | 假設佇列自走輪次 | 每 6 小時（00:05／06:05／12:05／18:05）＋ 登入時（延遲 3 分）〔先.二十八，2026-10-06 由每 30 分鐘降頻〕 | `research/hypothesis_queue_cycle.log` |
@@ -268,3 +268,14 @@ Select-Object -ExpandProperty Triggers`確認`StartBoundary`是15:00、
 用量上限：滾動 1 小時 450 次（官方免費註冊額度 600 次，留 150 給其他排程）。
 **回報頻率**：覆蓋率維持 100% 期間不再逐輪回報；只有覆蓋率下降或 `blocked=true` 才回報。
 查看：`python research/finmind_warmup.py --status`。
+
+## 七、`AlphaTwsePublishProbe` 停用（2026-11-04，先.一四九-1／收件匣 039 定案 先.一三五-1hb 乙）
+
+- **做法**：`Disable-ScheduledTask`（未刪除，可用 `Enable-ScheduledTask -TaskName AlphaTwsePublishProbe` 恢復）；停用前設定匯出到
+  `C:lpha	ask_trigger_backup\AlphaTwsePublishProbe_20261104_before_disable.xml`。`data/seed/pipeline_registry.json` 該列加 `retired`，停擺自檢不再判它。
+- **結論（1hb `--report` 零請求整理，44 個查詢日、1,095 筆）**：
+  - **T86（三大法人）最早取得時間穩定在台北 16:15～16:45**（26 個有資料日）。這題已答完。
+  - 管線實際用的 openapi `STOCK_DAY_ALL` 在 13:30～20:00 視窗內**一次都沒翻到當天**（`payload_date` 全停在前一交易日，例 10/30 20:00 仍是 10/29）——
+    這個視窗結構上量不到它的真正發布時間；要量得另開「15:00～隔日 10:00」視窗（1hb 丙案，未採）。
+- 停用後每交易日少約 108 次 TWSE 請求。
+
