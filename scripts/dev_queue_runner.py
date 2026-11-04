@@ -875,6 +875,36 @@ def item_key(text: str) -> str:
     return m.group(1).strip() if m else text[:60].strip()
 
 
+# 先.一三五-1kh-n（2026-11-04）：PENDING_QUEUE 曾出現 BEL（路徑 C:＋反斜線＋alpha 被傳成單一反斜線，
+# Python 字串裡「反斜線 a」就變成 BEL）。寫入前把控制字元換成看得見的跳脫文字；
+# CR／LF 在單行條目裡會把一列拆成兩列，換成空白；TAB 保留。
+# 十二節：這段自己出錯只印警告、照原文寫入（fail open），不得讓 block 指令失敗。
+# 用 ord 數字寫對照表，避免原始碼本身再踩一次跳脫字元的坑。
+_CTRL_NAMES = {7: "a", 8: "b", 11: "v", 12: "f"}
+
+
+def _ctrl_visible(ch: str) -> str:
+    o = ord(ch)
+    if o in (10, 13):
+        return " "
+    return chr(92) + _CTRL_NAMES.get(o, f"x{o:02x}")
+
+
+def _sanitize_ctrl_chars(text: str) -> tuple[str, int]:
+    """回傳（清理後文字, 換掉幾個字元）。"""
+    try:
+        bad = {c for c in text if (ord(c) < 32 and ord(c) != 9) or ord(c) == 127}
+        if not bad:
+            return text, 0
+        n = sum(1 for c in text if c in bad)
+        out = "".join(_ctrl_visible(c) if c in bad else c for c in text)
+        print(f"::warning::PENDING_QUEUE 寫入內容含 {n} 個控制字元，已換成可見文字（先.一三五-1kh-n）")
+        return out, n
+    except Exception as e:  # noqa: BLE001 — 守門員自己失敗只降級
+        print(f"::warning::控制字元清理失敗，照原文寫入：{type(e).__name__}: {e}")
+        return text, 0
+
+
 def mark_blocked(reason: str) -> int:
     nxt = find_next()
     if nxt is None:
@@ -883,8 +913,8 @@ def mark_blocked(reason: str) -> int:
     idx, text = nxt
     lines = _lines()
     stamp = datetime.now(TZ).strftime("%Y-%m-%d %H:%M")
-    lines[idx] = (text.replace("- [ ]", "- [!]", 1)
-                  + f"　**⛔ 自走中止（{stamp}）**：{reason}")
+    lines[idx], _ = _sanitize_ctrl_chars(text.replace("- [ ]", "- [!]", 1)
+                                         + f"　**⛔ 自走中止（{stamp}）**：{reason}")
     QUEUE.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
     _record_runner_write("PENDING_QUEUE.md")
     st = _load_state()

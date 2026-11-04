@@ -13,7 +13,7 @@
 
 ## 2026-11-04 12:31～13:05 DevQueue 20261104-123101（維運帽）
 
-**等待總司令審閱：0 件**（新增需總司令操作 1 件：IB Gateway 程式檔消失要重裝，已寫進 `C:lpha\總司令待辦.md` 第 3 項，PENDING 1kh-h1 標 BLOCKED）
+**等待總司令審閱：0 件**（新增需總司令操作 1 件：IB Gateway 程式檔消失要重裝，已寫進 `C:\alpha\總司令待辦.md` 第 3 項，PENDING 1kh-h1 標 BLOCKED）
 
 - **先.一三五-1kh-g ✅（commit 7f77627f1d7）**：資料類 12 支本機排程登記進 `data/seed/pipeline_registry.json` 11 條，逐檔驗欄位／編碼，`pipeline_freshness.evaluate()` 全 ok；`selftest_pipeline_inventory.py` 9/9 PASS。`[自行裁量]` RfMonthly／PaperSupplyV2／Paper9 看 launcher 日誌；MarketCatchup 兩班合一條；B25Control 已完成仍每晚空跑 → 另開 1kh-g1 提案停用（互動視窗）。
   ⚠️ **更正**：commit 訊息寫的「冒煙 exit 0」不實（管線 `| tail` 蓋掉 exit code），冒煙實際未驗證；之後兩次冒煙 #78 FAIL。
