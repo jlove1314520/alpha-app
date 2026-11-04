@@ -125,3 +125,6 @@ research/.weekly_tw_close_landing_state.json
 research/autostash_failures.jsonl
 research/quotes_local_fallback.jsonl
 /heat_updown_*.png
+
+# 先.一三五-1kh-q（2026-11-04）：build_status_lite.py 等原子寫入的暫存檔（先寫 .json.tmp 再改名），中途被砍時不得被 quotes.yml 的 git add -A data/ 推上公開 repo
+data/*.json.tmp
