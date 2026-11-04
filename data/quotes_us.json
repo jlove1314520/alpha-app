@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-11-04T01:40:42+00:00",
+  "fetched_at": "2026-11-04T06:04:33+00:00",
   "source": "Finnhub /quote（免費額度，regular quote）+ yfinance Ticker.info（extended_hours：pre/post market，2026-08-27新增）",
   "meta": {
     "trading_window": false,
@@ -7,9 +7,7 @@
     "queried": 9,
     "matched": 9,
     "extended_hours_matched": 9,
-    "sparkline_stale_tickers": [
-      "MSFT"
-    ],
+    "sparkline_stale_tickers": [],
     "extended_hours_disclaimer": "延長交易時段（盤前/盤後）流動性低、價差大，僅接受限價單，價格常於隔日開盤反轉。"
   },
   "quotes": {
@@ -23,7 +21,6 @@
       "open": 207.96,
       "quote_time": 1793739600,
       "sparkline": [
-        239.24,
         237.47,
         230.48,
         229.28,
@@ -42,10 +39,11 @@
         215.38,
         213.66,
         204.64,
-        202.06
+        202.06,
+        206.69
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 206.69,
           "prev_close": 202.06,
@@ -72,7 +70,6 @@
       "open": 325.58,
       "quote_time": 1793739600,
       "sparkline": [
-        333.63,
         336.67,
         340.42,
         336.64,
@@ -91,10 +88,11 @@
         343.83,
         348.91,
         344.63,
-        338.32
+        338.32,
+        331.9
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 331.9,
           "prev_close": 338.32,
@@ -143,7 +141,7 @@
         520.99
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 520.99,
           "prev_close": 507.12,
@@ -170,7 +168,6 @@
       "open": 404.99,
       "quote_time": 1793739600,
       "sparkline": [
-        482.3,
         472.2,
         457.99,
         453.31,
@@ -189,10 +186,11 @@
         439.51,
         431.81,
         406.13,
-        398.63
+        398.63,
+        404.8
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 404.8,
           "prev_close": 398.63,
@@ -219,7 +217,6 @@
       "open": 280.23,
       "quote_time": 1793739600,
       "sparkline": [
-        347.68,
         350.5,
         348.29,
         351.66,
@@ -238,10 +235,11 @@
         324.89,
         283.82,
         279.84,
-        278.99
+        278.99,
+        280.03
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 280.03,
           "prev_close": 278.99,
@@ -268,7 +266,6 @@
       "open": 248.59,
       "quote_time": 1793739600,
       "sparkline": [
-        256.29,
         259.92,
         254.06,
         262.43,
@@ -287,10 +284,11 @@
         254.6,
         243.79,
         240.35,
-        245.63
+        245.63,
+        250.69
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 250.69,
           "prev_close": 245.63,
@@ -317,7 +315,6 @@
       "open": 16.32,
       "quote_time": 1793739600,
       "sparkline": [
-        23.19,
         23.31,
         22.82,
         22.96,
@@ -336,10 +333,11 @@
         18.82,
         18.04,
         16.68,
-        16.39
+        16.39,
+        16.4
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 16.4,
           "prev_close": 16.39,
@@ -366,7 +364,6 @@
       "open": 38.805,
       "quote_time": 1793739600,
       "sparkline": [
-        46.78,
         45.76,
         45.26,
         46.43,
@@ -385,10 +382,11 @@
         43.92,
         44.55,
         39.5,
-        39.17
+        39.17,
+        39.05
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 39.05,
           "prev_close": 39.17,
@@ -415,7 +413,6 @@
       "open": 48.9,
       "quote_time": 1793739600,
       "sparkline": [
-        46.08,
         45.78,
         46.2,
         45.99,
@@ -434,10 +431,11 @@
         48.15,
         48.55,
         48.99,
-        48.91
+        48.91,
+        48.63
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 48.63,
           "prev_close": 48.91,
