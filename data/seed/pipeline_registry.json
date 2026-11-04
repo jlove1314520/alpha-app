@@ -659,7 +659,8 @@
       "interval_min": 1440,
       "artifact": "data/audit_report.json",
       "freshness": "json_field",
-      "field": "generated_at",
+      "field": "self_check.checked_at",
+      "field_note": "先.一三五-1kh-b（2026-11-04）：原看頂層 generated_at，但本機 23:00 稽核每晚排程（data_audit.py）也會刷新它，雲端 audit.yml 停擺會被遮住；self_check 只有 audit.yml 第一步 audit_preflight.py 寫。",
       "shift_profile": "audit_yml",
       "missed_shift_threshold": 2,
       "note": "2026-09-16新增，2026-09-17（總司令裁示【停擺】查核）補上shift_profile：原本沒被納入前一天的班次數轉換，停留在interval×3=3天門檻，導致data_audit.py因TWSE_COMPANY ImportError連續兩個交易日（09-16/09-17）沒有產出時舊判準沒亮燈（要等第3天）——這正是總司令這次抓到的落差，已修復ImportError（見同日commit）並補上shift_profile=audit_yml，交易日連續錯過2班（2天）即亮燈。**注意**：本條監控的是`audit_report.json`頂層的`generated_at`（data_audit.py每晚稽核寫入），跟`local_task_health`區塊自己的`checked_at`（check_external_connectivity.py每5分鐘更新）是同一份檔案裡的兩個不同欄位，不要混淆。"
