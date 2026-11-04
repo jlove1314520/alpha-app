@@ -3,9 +3,9 @@
  "started": true,
  "start": "2026-11-02",
  "note": "學界已知現象（選擇權賣方賺波動率風險溢酬）、只是研究；不提請真錢（先.九十一-1）",
- "generated_at": "2026-11-04T02:08:19+08:00",
- "nav": 100.0,
- "last_date": "2026-11-02",
+ "generated_at": "2026-11-04T09:46:24+08:00",
+ "nav": 99.2405,
+ "last_date": "2026-11-03",
  "open_position": {
   "logged_at": "2026-11-03T09:07:03+08:00",
   "date": "2026-11-02",
@@ -32,28 +32,36 @@
  "judge_after_estimated": true,
  "judge": "前向判定條文未另訂（本支依據回測試驗通過、只做紙上追蹤、不提請真錢）；判定時點暫比照模擬 F-翼「滿 12 個結算月後判一次」",
  "board": {
-  "as_of": "2026-11-02",
+  "as_of": "2026-11-03",
   "start": "2026-11-02",
   "nav_start": 100.0,
   "nav_series": [
    [
     "2026-11-02",
     100.0
+   ],
+   [
+    "2026-11-03",
+    99.2405
    ]
   ],
   "bench_0050": [
    [
     "2026-11-02",
     0.95125742
+   ],
+   [
+    "2026-11-03",
+    0.91927471
    ]
   ],
-  "bench_0050_tr_pct": 0.0,
+  "bench_0050_tr_pct": -3.36,
   "bench_from": "2026-11-02",
-  "bench_to": "2026-11-02",
+  "bench_to": "2026-11-03",
   "bench_source": "research/data/bench_0050_tr.jsonl（price_history 0050 還原收盤相鄰日比值累乘）",
-  "max_drawdown_pct": 0.0,
+  "max_drawdown_pct": -0.76,
   "n_holdings": 1,
-  "nav_rebased_return_pct": 0.0
+  "nav_rebased_return_pct": -0.76
  },
- "max_drawdown_pct": 0.0
+ "max_drawdown_pct": -0.76
 }
