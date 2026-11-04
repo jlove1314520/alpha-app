@@ -849,6 +849,66 @@
       "artifact": "research/tw_data_landed_check.log",
       "freshness": "mtime",
       "note": "先.一三五-1kh-g（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。日誌行沒有時間戳，用 mtime；cmd >> 寫入（非 UTF-16），檔案在 .gitignore，git 不會改 mtime。"
+    },
+    {
+      "task": "AlphaAutoRun0905",
+      "purpose": "真錢 Bb-90 自動交易排程（AlphaAutoRun0905／AlphaAutoRun0940／AlphaAutoSettle1340／AlphaAutoWatchRun／AlphaAutoWatchSettle 五支共用同一份 scheduler.log）——只看有沒有觸發",
+      "tw_trading_days_only": true,
+      "interval_min": 1440,
+      "artifact": "research/data/auto_trading/scheduler.log",
+      "freshness": "log_last_timestamp",
+      "note": "先.一三五-1kh-h（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。五支排程每次執行都寫『[ISO 時間] task=run／settle／watchdog-run… exit=N』，合一條：只要有一支跑就不算停擺，單獨一支停掉抓不到（[自行裁量] 接受，pipeline_freshness 沒有按行過濾的判準，要分支得改監測器，另案）。只讀日誌，不碰、不觸發任何下單程式。日誌 UTF-8、.gitignore。目前策略資金凍結中（每次寫 FROZEN），本條只證明排程活著。"
+    },
+    {
+      "task": "AlphaIbkrGateway",
+      "purpose": "IBKR Gateway 啟動器（登入時＋每 15 分鐘，C:/alpha/run-ibkr-gateway-cycle.ps1）",
+      "interval_min": 15,
+      "artifact": "research/ibkr_gateway_cycle.log",
+      "freshness": "log_last_timestamp",
+      "note": "先.一三五-1kh-h（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。只證明啟動器有觸發，不證明 Gateway 有登入／有在跑——報價是否真的進來看 AlphaIbkrQuotes 的 data/quotes_ibkr.json。日誌 UTF-8、.gitignore。2026-11-04 01:54 起啟動器每次都寫『gateway exe not found at D:\\IBKR Gateway\\ibgateway\\ibgateway.exe』（見先.一三五-1kh-h1），本條仍會是 ok。"
+    },
+    {
+      "task": "AlphaNightlySix",
+      "purpose": "夜間六項批次（每日 02:00 起每 20 分鐘、持續 4 小時，research/nightly_six_runner.py）",
+      "interval_min": 1440,
+      "artifact": "research/nightly6_task.log",
+      "freshness": "mtime",
+      "note": "先.一三五-1kh-h（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。日誌由 PowerShell 寫成 UTF-16，log_last_timestamp 解不出，用 mtime；檔案在 .gitignore，git 不會改 mtime。只證明有觸發。"
+    },
+    {
+      "task": "AlphaOrphanScan",
+      "purpose": "孤兒行程巡檢（每日 03:00，scripts/orphan_process_scan.py）→ data/orphan_scan.json",
+      "interval_min": 1440,
+      "artifact": "data/orphan_scan.json",
+      "freshness": "json_field",
+      "field": "checked_at",
+      "note": "先.一三五-1kh-h（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。checked_at 每次巡檢都寫（0 筆也寫）。不用 research/orphan_scan.log（UTF-16）。"
+    },
+    {
+      "task": "AlphaPhoneRegression",
+      "purpose": "手機版畫面回歸（每日 22:30，scripts/phone_regression.py）→ research/data/phone_regression/",
+      "interval_min": 1440,
+      "artifact": "research/data/phone_regression/log.jsonl",
+      "freshness": "jsonl_last_field",
+      "field": "ts",
+      "note": "先.一三五-1kh-h（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。盤點表標『產出待查』，查程式得每次執行 append 一筆 ts（頁數、秒數、問題數）到 log.jsonl（.gitignore）。"
+    },
+    {
+      "task": "AlphaTelegram0815",
+      "purpose": "Telegram 頻道讀取（AlphaTelegram0815／AlphaTelegram2015 每日兩班共用，research/telegram_reader.py）",
+      "interval_min": 720,
+      "artifact": "C:/alpha/telegram_export/sinopac_api/_runner.log",
+      "freshness": "log_last_timestamp",
+      "note": "先.一三五-1kh-h（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。兩班寫同一份 runner 日誌（C:/alpha/run-telegram-reader.ps1 的 $outDir，repo 外），每次寫『[ISO 時間] exit=N』，合一條：interval 720×3＝36 小時，兩班都停約一天半才亮燈，只停一班抓不到。日誌 UTF-8。"
+    },
+    {
+      "task": "AlphaWeeklyReport",
+      "purpose": "每週報告（每週一 20:00，scripts/build_weekly_report.py）→ data/weekly_report.json",
+      "interval_min": 10080,
+      "artifact": "data/weekly_report.json",
+      "freshness": "json_field",
+      "field": "generated_at",
+      "note": "先.一三五-1kh-h（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。週更，門檻 3 週。不用 research/data/weekly_report_cycle.log（同樣只週更，資料層欄位較準）。"
     }
   ],
   "github_pat_expiry": {
