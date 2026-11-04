@@ -1,3 +1,16 @@
+## 2026-11-04 15:01～15:40 DevQueue 20261104-150101（維運帽）
+
+**等待總司令審閱：15 件**（本輪新增 0 件；清單見 `research/AWAITING_REVIEW.md`「等待中」）
+
+- **先.一三五-1kh-i ✅（commit 04360518da6）冒煙 #78 首頁首次載入 351→330KB**：首頁只用 STATUS.json 三個欄位（market.yml crons／fundamentals generated_at／claude_auth），新增 `scripts/build_status_lite.py` 抽成 `data/status_lite.json`（gzip 約 1.2KB），由 `check_local_schedule_heartbeat.py`（watchdog 每 30 分）與 `generate_status_json.py`（market.yml）寫完 STATUS 後呼叫（失敗只警告）；兩支 workflow 的 git add 已加小檔（十節）。`app.js` 新增 `ensureStatusLite()`，讀不到退回整份。350KB 門檻沒動。`[自行裁量]` 選①不選②（延後載入只是把下載挪出 8 秒量測窗外，等於繞過門檻）。
+- **先.一三五-1kh-h ✅（commit da7264b319a）**：registry 7 條其實已在 13:02 被連通性心跳自動 commit `e4da112ea48` 掃進去（當時冒煙未過，照實記錄）；本輪補 commit 盤點表「1kh-h 登記結果」與 STATUS.json known_limitations。15:13 重跑 `pipeline_freshness.evaluate()` 7 條全 ok、`selftest_pipeline_inventory.py` 9/9 PASS。只讀日誌，沒觸發任何下單程式。
+- **補件（commit a69f676dad4，收工前再補 2 條）**：DevQueue 可執行項原為 0 → 補 1kh-j～q 共 8 條（①資料缺口／錯 5、②畫面 3），來源都是本輪實測。同 commit 修 PENDING_QUEUE 兩處 `C:\alpha` 被寫成 `C:`＋BEL 響鈴字元＋`lpha`（純 bug 修復）。**成因本輪實測到**：工具把字面雙反斜線傳成單一反斜線，Python 字串裡的反斜線 a 就變成 BEL——根因修法排在 1kh-n。
+- **先.一三五-1kh-j ✅（commit 6f6b5fbf64e）**：`[自行裁量]` 小檔不進 pipeline_registry（那份只收本機排程），改進雲端資料檔既有兩道防線：`generate_status_json.py` STALE_HOURS 6 小時（`build_data_files()` 實跑 ok）、`data_schema_guard.py` SCHEMAS（現檔 0 錯、壞格式被擋）。
+- **先.一三五-1kh-k ✅（commit 120811a81bf）**：冒煙新增第 180 項，比對小檔與 STATUS.json，並用 page.route 讓小檔 404 驗退回路徑。實測「一致（落後 0 分鐘）；404 退回整份：3 個 cron、台股收盤後 17:13（補救 18:41）」。
+- **照實記錄一個副作用**：做 1kh-i 時用 Python 預設模式讀寫 PENDING_QUEUE，原本 5 行裡夾著的單獨 CR 被拆成換行（文字沒少，只是後半段變成新的一行，都是 `[x]`／`[!]` 條目的補記，不影響 find_next）。之後改用 `newline=''` 讀寫，並在寫入前檢查控制字元。
+- **冒煙測試**：1kh-i 後 exit 0、181 PASS／0 FAIL（#78 330.3KB）；1kh-j 後 exit 0、181 PASS／0 FAIL（#78 330.5KB）；1kh-k 後 exit 0、182 PASS／0 FAIL。
+- **BLOCKED／未做**：1kh-h1 仍等總司令重裝 IB Gateway（AlphaIbkrQuotes 已 24,732 分鐘沒新報價）。佇列 `- [ ]` 30 項；DevQueue 可執行下一項＝1kh-l（STATUS.json 瘦身提案），接著 1kh-m／n／o／p／q——時間到，留給下一輪。
+
 ## 2026-11-04 12:31～13:05 DevQueue 20261104-123101（維運帽）
 
 **等待總司令審閱：0 件**（新增需總司令操作 1 件：IB Gateway 程式檔消失要重裝，已寫進 `C:lpha\總司令待辦.md` 第 3 項，PENDING 1kh-h1 標 BLOCKED）
