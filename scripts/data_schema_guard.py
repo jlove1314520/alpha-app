@@ -57,6 +57,8 @@ _MG = "meta.generated_at"
 SCHEMAS: dict[str, dict] = {
     # 首頁／系統
     "data/STATUS.json": _S(ts="updated_at", req={"data_files": "list", "workflows": "list"}),
+    # 先.一三五-1kh-j：首頁讀的 STATUS 小檔（scripts/build_status_lite.py）
+    "data/status_lite.json": _S(ts="generated_at", req={"data_files": "list", "workflows": "list", "local_schedule_heartbeat": "dict"}),
     "data/adjustment_anomalies.json": _S(req={"n_warnings": "int", "warnings": "list"}),
     "data/audit_report.json": _S(req={"violation_rate": "num|null", "universe": "int"}),
     "data/auto_heartbeat.json": _S(ts="updated_at", req={"events": "list"}),
