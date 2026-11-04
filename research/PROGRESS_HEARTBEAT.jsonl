@@ -1198,3 +1198,6 @@
 {"ts": "2026-11-04T19:55:55.959523+08:00", "item": "先.一五〇-1", "note": "第2批之一 F7 台指期均線擇時最優化完成，尚餘 11 家族"}
 {"ts": "2026-11-04T20:50:18.521385+08:00", "item": "先.一五〇-1", "note": "第2批之二 F8 融券使用率最優化腳本完成、引擎格跑到一半（斷點存本機），下一輪續"}
 {"ts": "2026-11-04T22:10:00+08:00", "cycle_id": "20261104-213102", "item": "先.一五〇-1", "step": "F8 融券使用率最優化完成（描述性，不寫 TRIALS_LEDGER）", "files": ["research/REAUDIT_OPTIMIZED.md", "research/reaudit_report.py"]}
+{"ts": "2026-11-04T23:16:00+08:00", "cycle_id": "20261104-223825", "item": "先.一五〇-1", "step": "F9 產業金流加速度＋F10 全市場廣度最優化完成（描述性，不寫 TRIALS_LEDGER）", "files": ["research/REAUDIT_OPTIMIZED.md", "research/reaudit_report.py", "research/reaudit_optimized_batch2_sector.py", "research/reaudit_optimized_batch2_breadth.py"]}
+{"ts": "2026-11-05T01:08:00+08:00", "cycle_id": "20261105-010102", "item": "先.一五〇-1", "step": "F11 全市場融資餘額 regime 最優化完成（描述性，不寫 TRIALS_LEDGER）；#283 判不適用（重建驗證非策略）", "files": ["research/REAUDIT_OPTIMIZED.md", "research/reaudit_report.py", "research/reaudit_optimized_batch2_margin.py"]}
+{"ts": "2026-11-05T01:15:00+08:00", "cycle_id": "20261105-010102", "item": "先.一五〇-1", "step": "F12 Weinstein 第二階段最優化完成（描述性，不寫 TRIALS_LEDGER）", "files": ["research/REAUDIT_OPTIMIZED.md", "research/reaudit_report.py", "research/reaudit_optimized_batch2_weinstein.py"]}
