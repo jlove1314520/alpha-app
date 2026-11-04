@@ -64,3 +64,19 @@
 | AlphaTwDataCheck | research/tw_data_landed_check.log mtime | 1440×3，tw_trading_days_only | ok（11-03 20:30） | 日誌行沒時間戳，用 mtime |
 
 所有 log 都查過：UTF-8（有 BOM 或純 ASCII）、在 `.gitignore`，git 不會改 mtime。
+
+## 1kh-h 登記結果（2026-11-04 DevQueue 20261104-123101）
+
+動作類 12 支登記成 registry 7 條（共用同一份日誌的合一條），登記當下 `pipeline_freshness.evaluate()` 全 ok：
+
+| 排程 | 看什麼 | 判準 | 結果 |
+|---|---|---|---|
+| AlphaAutoRun0905／0940、AutoSettle1340、AutoWatchRun／WatchSettle（合一條，task 名用 AlphaAutoRun0905） | research/data/auto_trading/scheduler.log 最後時間戳 | 1440×3，tw_trading_days_only | ok（11-04 09:55，FROZEN） |
+| AlphaIbkrGateway | research/ibkr_gateway_cycle.log 最後時間戳 | 15×3 | ok（啟動器有跑；但 01:54 起報 exe not found，見 1kh-h1） |
+| AlphaNightlySix | research/nightly6_task.log mtime（UTF-16） | 1440×3 | ok（11-04 06:00） |
+| AlphaOrphanScan | data/orphan_scan.json `checked_at` | 1440×3 | ok（11-04 03:00） |
+| AlphaPhoneRegression | research/data/phone_regression/log.jsonl 末筆 `ts` | 1440×3 | ok（11-03 22:30） |
+| AlphaTelegram0815／2015（合一條） | C:/alpha/telegram_export/sinopac_api/_runner.log 最後時間戳 | 720×3 | ok（11-04 08:22） |
+| AlphaWeeklyReport | data/weekly_report.json `generated_at` | 10080×3 | ok（11-01 20:00） |
+
+真錢相關只讀日誌，沒有執行、觸發任何下單程式。至此盤點表 27 支：登記 24（1kh-c 前已有 0，1kh-g 12 支、1kh-h 12 支）、代管 2（QuotesFallback／NewsFallback，1kh-e）、不必登記 1（CoworkInbox 停用）。
