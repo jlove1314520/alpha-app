@@ -20,7 +20,7 @@
 - N=0時「等待中」表格留表頭但清空列，不得整份刪除本檔案。
 - 2026-10-29（收件匣 031）：凡「請總司令執行一次」（要總司令本人在電腦或手機上動手）的項目，除了列 AWAITING，也同步加進 `C:\alpha\總司令待辦.md`（白話、每項一行做法、寫不做的影響）；能用腳本做的接進 `C:\alpha\run-owner-todo.ps1`（每支先問 Y/N、失敗不中斷）。總司令做完後由 CC 查證（看排程／資料檔／log，不看金鑰內容）再打勾移到「已完成」，同時 AWAITING 結案。
 
-## 等待中（目前：15件）
+## 等待中（目前：16件）
 
 | 項目 | 完成時間 | 等待審閱內容 | 等待時長 |
 |---|---|---|---|
@@ -39,6 +39,7 @@
 | 先.一三五-1kh-s 首頁費半膠囊「本機IBKR逾期」手機看不到（**甲（建議）**／乙／丙） | 2026-11-04 17:2x | `docs/PROPOSAL_HOME_CAPSULE_SOURCE_TAG.md`：逾期但資料日不落後時，來源字樣只在 title、手機只剩灰點；甲＝膠囊名稱旁加既有 `.stale-tag` 小字「收盤」，乙＝膠囊帶下加一行註記，丙＝維持現狀。驗收用冒煙模擬＋390 寬自動截圖，不要求總司令截圖。24 小時無裁示照甲預設放行（零之二）。 | 0 小時 |
 | 先.一三五-1kh-v2 supply_watchlist 在 STATUS 的判法（**甲（建議）**／乙／丙） | 2026-11-04 18:3x | `docs/PROPOSAL_SUPPLY_WATCHLIST_THRESHOLD.md`：檔案內容沒變就不改寫，`meta.as_of`＝最後一次內容變動日（近 6 次 commit 間隔 1～16 天），STATUS 用它判新鮮度結構上不準；真正每晚 23:00 有跑的證據在 `research/data/supply_watchlist_cycle.log`，但 registry 沒有任何一條看它。甲＝列 static（同 strategy_history.json 先例）＋registry 加 AlphaSupplyWatchlist 看 log；乙＝門檻 30 小時（內容沒變仍天天亮）；丙＝每晚寫 generated_at（每晚多一個 commit）。24 小時無裁示照零之二預設放行甲 | 0 小時 |
 | 先.一四九-1 個股 K 線 6 個月～3 年日線改由 repo 提供（**甲（建議）**／乙／丙） | 2026-11-05 04:4x | `docs/PROPOSAL_KLINE_3Y_REPO.md`：by_code price 只有 60 根、price_history 每檔中位數 90 根，本機 FinMind 402；本機已有官方日檔快取 1 年（2025-10-28～2026-10-30）可零請求組出。實測 1 年逐檔 25MB（gzip 7MB），3 年約 75MB。repo pack 已 998MiB，每日改寫全部逐檔會暴增，所以甲＝`data/kline/<年>/<代號>.json` 年分檔、過去年凍結、當年每週補一次、最近 60 日沿用 by_code；回補 2023-11～2025-10 官方全市場日檔約 1,032 次（同 V1 節流規則，先寫 CLAUDE.md 再跑）。乙＝by_code 拉到 250 日（只到 1 年、每日膨脹更大）；丙＝維持 FinMind。24 小時無裁示照零之二預設放行甲 | 0 小時 |
+| 先.一四九-2 沒連電腦時自選股日內分時的來源（**甲（建議）**／乙／丙） | 2026-11-05 04:5x | `docs/PROPOSAL_INTRADAY_TW_OFFLINE.md`：本機熱檔 `.live_state_sinopac.json` 已有當日 1 分K（11/04 實測 49 代號、中位數 272 根）。甲＝新腳本每 15 分鐘從熱檔匯出自選股＋加權／櫃買到 `data/intraday_tw/YYYY-MM-DD.json` 推送（零新增外部請求、不動 shioaji_quotes.py、每日約 19 commit、收盤約 85KB；自選股代號本來就在公開的 quotes_sinopac.json）；App 連不到本機才讀它。乙＝雲端報價點 append（每 10 分鐘一點、常延遲）；丙＝維持「無日內資料」。24 小時無裁示照零之二預設放行甲 | 0 小時 |
 
 ## 等前置條件（不需總司令動作，不計入等待中）
 
