@@ -2,18 +2,19 @@
 
 > **性質：樣本內最優化（描述性），不是判定。** 每一列都是「在 2003-07～2024-12 這段資料上掃參數後挑最好的一組」，所以數字**一定偏樂觀**（挑格子本身就是過擬合來源）；下一步照方針直接上紙上測試，用前向數據說話。2025 以後資料（holdout）本批完全沒讀。非投資建議。
 
-資料期間：2003-07-01～2024-12-31；產生：2026-11-04T19:34:18；程式 `research/reaudit_optimized_batch1.py`。**曲線 png 與明細 JSON 在本機 `research/data/`（該目錄依 .gitignore 不進公開 repo），連結只在本機有效。**
+資料期間：2003-07-01～2024-12-31；產生：2026-11-04T19:34:18；程式 `research/reaudit_optimized_batch1.py`（F1～F6）、`research/reaudit_optimized_batch2_tx.py`（F7，台指期連續合約，期間同樣從 2003-07-01 起以對齊無風險利率資料）。**曲線 png 與明細 JSON 在本機 `research/data/`（該目錄依 .gitignore 不進公開 repo），連結只在本機有效。**
 
 ## 0. 總表（依綜合分數＝年化報酬÷|最大回撤| 排名；MDD 超過 50% 的排最後並標天條一）
 
 | 排名 | 家族 | 最好的一組參數 | 年化 | MDD | Sharpe | 勝率 | 交易次數 | 綜合分數 | 掃描格數（多重比較參考） | 曲線 |
 |---|---|---|---|---|---|---|---|---|---|---|
 | 1 | F2 #426 危機閘門 × 槓桿 Bb-90（月均線／絕對動能閘門） | mix=B，w_eq=0.85，safe=IEF，gate=MA6m，L=1.0，stop=0.1 | +10.1% | -17.9% | 1.05 | +64.0% | 25 | 0.57 | 1344（其中 244 格 MDD>50%） | [png](data/reaudit_curves/batch1_F2.png) |
-| 2 | F6 #430 R1 信用利差閘門（BAA10Y） | spread_ma_months=18，w_eq=0.7，L=1.0，stop=None | +8.1% | -16.3% | 0.86 | +71.4% | 14 | 0.50 | 96（其中 23 格 MDD>50%） | [png](data/reaudit_curves/batch1_F6.png) |
-| 3 | F1 #418／#425 Bb-90 核心配置（0050／VTI＋債／現金） | mix=B，w_eq=0.5，safe=IEF，L=1.0，stop=0.1 | +6.8% | -16.9% | 0.99 | +80.0% | 5 | 0.40 | 576（其中 329 格 MDD>50%） | [png](data/reaudit_curves/batch1_F1.png) |
-| 4 | F3 #414 0050 趨勢槓桿（日均線） | ma_days=50，bear_exposure=0.5，L=3.0，stop=0.1 | +13.7% | -45.6% | 0.54 | +48.1% | 104 | 0.30 | 160（其中 84 格 MDD>50%） | [png](data/reaudit_curves/batch1_F3.png) |
-| 5 | F5 #247 已實現波動度 regime（0050） | vol_win=60，hi_vol_exposure=0.25，L=1.0，stop=None | +6.9% | -23.9% | 0.58 | +100.0% | 1 | 0.29 | 144（其中 49 格 MDD>50%） | [png](data/reaudit_curves/batch1_F5.png) |
-| 6 | F4 #413 美股趨勢槓桿（VTI 台幣計，日均線） | ma_days=250，bear_exposure=0.5，L=1.0，stop=None | +7.0% | -33.4% | 0.54 | +100.0% | 1 | 0.21 | 160（其中 108 格 MDD>50%） | [png](data/reaudit_curves/batch1_F4.png) |
+| 2 | F7 #244／#250～#252 台指期均線擇時（TX 連續合約） | ma_days=100，bear_exposure=0.0，L=1.0，stop=None | +10.8% | -21.2% | 0.83 | +25.2% | 115 | 0.51 | 240（其中 115 格 MDD>50%） | [png](data/reaudit_curves/batch2_F7.png) |
+| 3 | F6 #430 R1 信用利差閘門（BAA10Y） | spread_ma_months=18，w_eq=0.7，L=1.0，stop=None | +8.1% | -16.3% | 0.86 | +71.4% | 14 | 0.50 | 96（其中 23 格 MDD>50%） | [png](data/reaudit_curves/batch1_F6.png) |
+| 4 | F1 #418／#425 Bb-90 核心配置（0050／VTI＋債／現金） | mix=B，w_eq=0.5，safe=IEF，L=1.0，stop=0.1 | +6.8% | -16.9% | 0.99 | +80.0% | 5 | 0.40 | 576（其中 329 格 MDD>50%） | [png](data/reaudit_curves/batch1_F1.png) |
+| 5 | F3 #414 0050 趨勢槓桿（日均線） | ma_days=50，bear_exposure=0.5，L=3.0，stop=0.1 | +13.7% | -45.6% | 0.54 | +48.1% | 104 | 0.30 | 160（其中 84 格 MDD>50%） | [png](data/reaudit_curves/batch1_F3.png) |
+| 6 | F5 #247 已實現波動度 regime（0050） | vol_win=60，hi_vol_exposure=0.25，L=1.0，stop=None | +6.9% | -23.9% | 0.58 | +100.0% | 1 | 0.29 | 144（其中 49 格 MDD>50%） | [png](data/reaudit_curves/batch1_F5.png) |
+| 7 | F4 #413 美股趨勢槓桿（VTI 台幣計，日均線） | ma_days=250，bear_exposure=0.5，L=1.0，stop=None | +7.0% | -33.4% | 0.54 | +100.0% | 1 | 0.21 | 160（其中 108 格 MDD>50%） | [png](data/reaudit_curves/batch1_F4.png) |
 | 對照 | 0050 買進持有（含息） | — | +11.6% | -55.8% | 0.64 | — | — | 0.21 | — | — |
 
 ### 同一家族裡「MDD≤50% 前提下年化最高」的一組（給想看報酬上限的人）
@@ -21,6 +22,7 @@
 | 家族 | 參數 | 年化 | MDD | Sharpe | 交易次數 |
 |---|---|---|---|---|---|
 | F2 | mix=B，w_eq=0.85，safe=IEF，gate=MA6m，L=3.0，stop=0.2 | +22.8% | -46.7% | 0.98 | 26 |
+| F7 | ma_days=100，bear_exposure=0.5，L=2.0，stop=0.2 | +21.6% | -48.3% | 0.83 | 20 |
 | F6 | spread_ma_months=18，w_eq=0.7，L=3.0，stop=None | +20.3% | -46.3% | 0.78 | 14 |
 | F1 | mix=B，w_eq=0.9，safe=IEF，L=2.0，stop=0.1 | +15.6% | -41.6% | 0.87 | 42 |
 | F3 | ma_days=50，bear_exposure=0.5，L=3.0，stop=0.1 | +13.7% | -45.6% | 0.54 | 104 |
@@ -52,7 +54,7 @@
 | 17 | #249 全市場融資餘額 regime | 1.38% | ETF 擇時（需融資資料） | 待第二批 |
 | 18 | #11／#393 Weinstein 第二階段 | 1.05% | 個股（台股） | 待第二批 |
 | 19 | #283 core_tilt 市值前 50 | 1.0% | 個股組合 | 待第二批 |
-| 20 | #244／#250～#252 台指期 200MA | 0.25% | 期貨擇時 | 待第二批 |
+| 20 | #244／#250～#252 台指期 200MA | 0.25% | 期貨擇時 | F7（第 2 批） |
 
 ## 2. 回測規則（照實算）
 

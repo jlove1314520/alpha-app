@@ -31,7 +31,7 @@ TOP20 = [
     (17, "#249 全市場融資餘額 regime", "1.38%", "ETF 擇時（需融資資料）", "待第二批"),
     (18, "#11／#393 Weinstein 第二階段", "1.05%", "個股（台股）", "待第二批"),
     (19, "#283 core_tilt 市值前 50", "1.0%", "個股組合", "待第二批"),
-    (20, "#244／#250～#252 台指期 200MA", "0.25%", "期貨擇時", "待第二批"),
+    (20, "#244／#250～#252 台指期 200MA", "0.25%", "期貨擇時", "F7（第 2 批）"),
 ]
 
 
@@ -53,7 +53,7 @@ def main():
     L.append("> **性質：樣本內最優化（描述性），不是判定。** 每一列都是「在 2003-07～2024-12 這段資料上掃參數後挑最好的一組」，"
              "所以數字**一定偏樂觀**（挑格子本身就是過擬合來源）；下一步照方針直接上紙上測試，用前向數據說話。"
              "2025 以後資料（holdout）本批完全沒讀。非投資建議。\n")
-    L.append(f"資料期間：{meta['data_start']}～{meta['data_end']}；產生：{meta['generated_at']}；程式 `research/reaudit_optimized_batch1.py`。**曲線 png 與明細 JSON 在本機 `research/data/`（該目錄依 .gitignore 不進公開 repo），連結只在本機有效。**\n")
+    L.append(f"資料期間：{meta['data_start']}～{meta['data_end']}；產生：{meta['generated_at']}；程式 `research/reaudit_optimized_batch1.py`（F1～F6）、`research/reaudit_optimized_batch2_tx.py`（F7，台指期連續合約，期間同樣從 2003-07-01 起以對齊無風險利率資料）。**曲線 png 與明細 JSON 在本機 `research/data/`（該目錄依 .gitignore 不進公開 repo），連結只在本機有效。**\n")
     L.append("## 0. 總表（依綜合分數＝年化報酬÷|最大回撤| 排名；MDD 超過 50% 的排最後並標天條一）\n")
     L.append("| 排名 | 家族 | 最好的一組參數 | 年化 | MDD | Sharpe | 勝率 | 交易次數 | 綜合分數 | 掃描格數（多重比較參考） | 曲線 |")
     L.append("|---|---|---|---|---|---|---|---|---|---|---|")
