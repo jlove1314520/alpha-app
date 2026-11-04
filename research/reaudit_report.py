@@ -32,6 +32,8 @@ TOP20 = [
     (18, "#11／#393 Weinstein 第二階段", "1.05%", "個股（台股）", "F12（第 2 批，2015～2024，`research/backtest/` 引擎，同 F8 抽樣宇宙）"),
     (19, "#283 core_tilt 市值前 50", "1.0%", "重建 0050 吻合度驗證（非策略）", "不適用，跳過並遞補（同 #171）"),
     (20, "#244／#250～#252 台指期 200MA", "0.25%", "期貨擇時", "F7（第 2 批）"),
+    (21, "#445／#446 core_tilt v2 成分內傾斜（遞補 #171）", "−0.92%（超額）", "重建 0050 成分內傾斜", "F17（第 2 批，2013-06～2024，同 #446 量尺，含反向）"),
+    (22, "#232／#383 零股委託簿失衡度組合（遞補 #283）", "−1.79%（alpha）", "個股組合（台股）", "F18（第 2 批，2020-10-26～2024，同原版抽樣宇宙與引擎）"),
 ]
 
 
@@ -55,7 +57,7 @@ def main():
     L.append("> **性質：樣本內最優化（描述性），不是判定。** 每一列都是「在 2003-07～2024-12 這段資料上掃參數後挑最好的一組」，"
              "所以數字**一定偏樂觀**（挑格子本身就是過擬合來源）；下一步照方針直接上紙上測試，用前向數據說話。"
              "2025 以後資料（holdout）本批完全沒讀。非投資建議。\n")
-    L.append(f"資料期間：{meta['data_start']}～{meta['data_end']}；產生：{meta['generated_at']}；程式 `research/reaudit_optimized_batch1.py`（F1～F6）、`research/reaudit_optimized_batch2_tx.py`（F7，台指期連續合約，期間同樣從 2003-07-01 起以對齊無風險利率資料）、`research/reaudit_optimized_batch2_ssu.py`（F8，台股個股，期間 2015-01～2024-12，同 #133 抽樣宇宙 300 檔）、`research/reaudit_optimized_batch2_sector.py`（F9，同 F8 宇宙與期間）、`research/reaudit_optimized_batch2_breadth.py`（F10，期間 2010-12-31～2024-12-31，廣度暖身後才有訊號）、`research/reaudit_optimized_batch2_margin.py`（F11，期間 2013-11-25～2024-12-31，融資餘額 2012-05 起、暖身 52 週）、`research/reaudit_optimized_batch2_weinstein.py`（F12，同 F8 宇宙與期間）、`research/reaudit_optimized_batch2_roe.py`（F13，同 F8 宇宙與期間）、`research/reaudit_optimized_batch2_ml.py`（F14，同 F8 宇宙與期間，模型訓練資料 2011 起）、`research/reaudit_optimized_batch2_us_lowvol.py`（F15，美股，2011-01～2024-12）、`research/reaudit_optimized_batch2_us_value.py`（F16，美股，同 F15）。**注意：各家族期間不同，綜合分數跨家族比較要看期間**（F1～F7 從 2003-07、F8／F9／F12～F14 從 2015、F10 從 2011、F11 從 2013-11、F15／F16 從 2011）。**曲線 png 與明細 JSON 在本機 `research/data/`（該目錄依 .gitignore 不進公開 repo），連結只在本機有效。**\n")
+    L.append(f"資料期間：{meta['data_start']}～{meta['data_end']}；產生：{meta['generated_at']}；程式 `research/reaudit_optimized_batch1.py`（F1～F6）、`research/reaudit_optimized_batch2_tx.py`（F7，台指期連續合約，期間同樣從 2003-07-01 起以對齊無風險利率資料）、`research/reaudit_optimized_batch2_ssu.py`（F8，台股個股，期間 2015-01～2024-12，同 #133 抽樣宇宙 300 檔）、`research/reaudit_optimized_batch2_sector.py`（F9，同 F8 宇宙與期間）、`research/reaudit_optimized_batch2_breadth.py`（F10，期間 2010-12-31～2024-12-31，廣度暖身後才有訊號）、`research/reaudit_optimized_batch2_margin.py`（F11，期間 2013-11-25～2024-12-31，融資餘額 2012-05 起、暖身 52 週）、`research/reaudit_optimized_batch2_weinstein.py`（F12，同 F8 宇宙與期間）、`research/reaudit_optimized_batch2_roe.py`（F13，同 F8 宇宙與期間）、`research/reaudit_optimized_batch2_ml.py`（F14，同 F8 宇宙與期間，模型訓練資料 2011 起）、`research/reaudit_optimized_batch2_us_lowvol.py`（F15，美股，2011-01～2024-12）、`research/reaudit_optimized_batch2_us_value.py`（F16，美股，同 F15）、`research/reaudit_optimized_batch2_coretilt.py`（F17，重建臺灣50 量尺，2013-06～2024-12）、`research/reaudit_optimized_batch2_oddlot.py`（F18，2020-10-26～2024-12，TWTC7U 起點）。**注意：各家族期間不同，綜合分數跨家族比較要看期間**（F1～F7 從 2003-07、F8／F9／F12～F14 從 2015、F10 從 2011、F11 從 2013-11、F15／F16 從 2011、F17 從 2013-06、F18 從 2020-10）。**曲線 png 與明細 JSON 在本機 `research/data/`（該目錄依 .gitignore 不進公開 repo），連結只在本機有效。**\n")
     L.append("## 0. 總表（依綜合分數＝年化報酬÷|最大回撤| 排名；MDD 超過 50% 的排最後並標天條一）\n")
     L.append("| 排名 | 家族 | 最好的一組參數 | 年化 | MDD | Sharpe | 勝率 | 交易次數 | 綜合分數 | 掃描格數（多重比較參考） | 曲線 |")
     L.append("|---|---|---|---|---|---|---|---|---|---|---|")
@@ -121,6 +123,13 @@ def main():
              "勝率＝換股期組合報酬>0 的比例、交易次數＝被換出的個股筆數（個股逐筆損益未追蹤）。"
              "F15 最好的一組（20 日波動、50 檔、月換、1×、止損 10%）年化 +13.3%／MDD −15.5%，**低於同宇宙等權 +21.8%**，好處只在回撤。"
              "F16 的 B/M 用 `us_factors_value.book_value_per_share_pit()`（SEC XBRL，本機快取 246/246 命中、零新請求），期末 158 檔有值，2011 年前後 XBRL 覆蓋較少。\n"
+             "- F17（core_tilt v2）：完全沿用 #446 的量尺與 A_4pass 分數、tilt() 映射、成本（`round_trip_cost_pct()` 按單邊換手）、總報酬（含息）；"
+             "只把傾斜幅度（2／5／10／20pp）、產業偏離上限（3pp／不設）、再平衡間隔（21／63 日）與方向（順向／反向）拿來掃。"
+             "交易次數＝權重重設次數、勝率＝各重設期間報酬>0 比例。對照組是不傾斜的重建臺灣50（同量尺、1×）。量尺本身缺自由流通係數、台積電權重偏低約 7pp。"
+             "**F17 的重點：傾斜本身沒有加分**——最好的一組（原版 2pp、63 日、1×、止損 10%）年化 +14.8%／MDD −23.2%，"
+             "但不傾斜臂套同樣 10% 止損是 +15.6%／−24.4%（綜合分數 0.64，幾乎一樣、年化更高）；不加止損時傾斜 +14.0% 也輸不傾斜 +14.4%。改善全來自組合止損，不是因子傾斜。\n"
+             "- F18（零股失衡）：同原版 `odd_lot_imbalance_portfolio_v1.py` 的分數與流動性下限、原版抽樣宇宙與 `research/backtest/` 引擎；兩個方向都掃；"
+             "期間只有約 4 年（TWTC7U 2020-10-26 起），不含 2008／2015／2018 空頭。\n"
              "- 美股（VTI）結論附但書：**存活者偏誤未完全修正：已下市股約 97%（抽樣 55／57）無價格來源。**（VTI 為指數 ETF，影響較小，但書照附；F15／F16 是個股，影響大。）\n")
     out = HERE / "REAUDIT_OPTIMIZED.md"
     out.write_text("\n".join(L) + "\n", encoding="utf-8")
