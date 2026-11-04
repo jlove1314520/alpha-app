@@ -1,3 +1,18 @@
+## 2026-11-04 17:01～17:4x DevQueue 20261104-170102（維運帽；本輪提示允許非[研究]類，1kh-s 為[開發]提案）
+
+**等待總司令審閱：18 件**（本輪新增 1 件：1kh-s 首頁費半膠囊逾期字樣提案〔建議甲〕；清單見 `research/AWAITING_REVIEW.md`「等待中」）。
+
+- **先.一三五-1kh-q ✅（commit 7d92c77d911）.gitignore 擋 `data/*.json.tmp`**：既有規則只有 `data/rate_limit_state.json.*.tmp`。`git check-ignore -v data/status_lite.json.tmp` → `.gitignore:130`；`data/status_lite.json`／`quotes_tw.json` 沒被擋；`git ls-files -ci --exclude-standard data` 空。
+- **先.一三五-1kh-r ✅（commit acd86c16d22）STATUS.json CRLF**：查證結果是**公開 repo 本來就是 LF**（`i/lf w/crlf`、HEAD 0 個 CR），本機 CRLF 來自系統層 `core.autocrlf=true` checkout。兩支寫入者都在 Linux runner 跑。[自行裁量] 仍補 `newline="
+"` 防 Windows 本機手動跑寫成 CRLF（實測 default→`{
+`）；未重產 STATUS.json（雲端排程產物）。.gitattributes 另開 1kh-z 提案。
+- **先.一三五-1kh-s ✅（commit 61273e372c2）首頁膠囊逾期字樣提案**：`docs/PROPOSAL_HOME_CAPSULE_SOURCE_TAG.md`，甲＝名稱旁加既有 `.stale-tag` 小字「收盤」。只在 Yahoo 資料日不落後時才會「看起來正常＋只有灰點」。24 小時無裁示照甲預設放行。
+- **先.一三五-1kh-t ✅（commit ca2dba518b8）data_files 16 列盤點**：`docs/DATA_FILES_STALE_AUDIT_20261104.md`。真停擺 4 列：listed_universe（audit.yml 11/03 班 Commit 失敗，run 41718634417，1ka 已修→1kh-w 驗收）、IBKR 三檔（Gateway，總司令待辦第 3 項）；每週／一次性 4 列；有日期沒認到 2 列；真無日期 6 列。未改門檻。
+- **先.一三五-1kh-u ✅（本段同 commit 前一筆）`describe_generic()` 認 `top.fetched_at`／`meta.last_run.fetched_at`**：130 檔前後比對只變 events_search、insider_transfer_tw_history 兩列（no_date → 有日期），其餘 128 列相同。
+- **收工補件**：DevQueue 可執行（非研究）只剩 3 項 → 補 1kh-x（stock_names 加 generated_at，①）、1kh-y（data/ 子目錄暫存檔 .gitignore 盤點，①）、1kh-z（data/*.json 工作目錄 LF 提案，①）。另本輪中途已補 1kh-v（static／門檻提案）、1kh-w（今晚 audit 驗收，時間閘 11/05 00:00）。補件只排 ①②③（本週撞過用量上限，暫停 ④）。
+- **冒煙測試**：1kh-q 17:01～17:08 exit 0、0 FAIL；1kh-r 17:11～17:17 exit 0、182 PASS／0 FAIL（#65 STATUS 76.8KB、#180 status_lite 一致）；1kh-s／t 17:18～17:25 exit 0、182 PASS／0 FAIL；1kh-u 17:28～17:35 exit 0、182 PASS／0 FAIL。
+- **BLOCKED／未做**：1kh-h1 仍等總司令重裝 IB Gateway。下一輪從 1kh-v 接續（1kh-w 有時間閘）。
+
 ## 2026-11-04 16:01～16:4x DevQueue 20261104-160102（維運帽；本輪提示允許非[研究]類，1kh-m／1kh-o 為[開發]項）
 
 **等待總司令審閱：17 件**（本輪新增 2 件：1kh-l STATUS.json 瘦身提案〔建議丙〕、1kh-o app.js 拆分提案〔建議甲〕；清單見 `research/AWAITING_REVIEW.md`「等待中」）
