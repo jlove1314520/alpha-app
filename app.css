@@ -640,3 +640,11 @@ details.ui-more[open]>summary{color:var(--ink-2)}
 .kx-row{display:flex;gap:6px;margin-top:6px}
 .kx-btn{flex:1 1 0;min-width:0;min-height:44px;border:1px solid rgba(var(--fg-rgb),.1);border-radius:10px;background:transparent;color:var(--ink-2);font-size:var(--fs-sm);cursor:pointer;padding:0 4px}
 .kx-btn.on{background:var(--gold-grad);color:#1c1a16;border-color:transparent;font-weight:600}
+/* 先.一四八-3（收件匣 037／038 P2）首頁「大盤」壓成一列三格：不橫向捲、不畫 20 日小圖（看走勢到市場頁） */
+#scr-home #home-idx-rows{overflow-x:visible;scroll-snap-type:none}
+#scr-home #home-idx-rows .idx-cap{flex:1 1 0;min-width:0}
+#scr-home #home-idx-rows .idx-cap .spark,#scr-home #home-idx-rows .idx-cap .sparkwrap,#scr-home #home-idx-rows .idx-cap svg{display:none}
+#scr-home #home-idx-rows .idx-cap .cv{font-size:15px}
+#scr-home #home-idx-rows .idx-cap:nth-child(n+4){display:none}  /* 首頁只留加權、櫃買、台指期；費半等到市場頁看 */
+#scr-home #home-idx-rows .idx-cap .cp span{display:none}  /* 「20日／今日」是小圖的標籤，首頁不畫小圖就不顯示 */
+#scr-home #home-idx-rows .idx-cap .cv{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:clip;letter-spacing:-.02em}

@@ -30,7 +30,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 (function(){
   var mq=null;
   try{mq=window.matchMedia?window.matchMedia('(prefers-color-scheme: light)'):null}catch(e){console.warn('[theme] matchMedia 不可用',e)}
-  window.alphaThemePref=function(){try{var v=localStorage.getItem('alpha_theme');return v==='light'||v==='dark'?v:'system'}catch(e){console.warn('[theme] 讀偏好失敗',e);return 'system'}};
+  // 先.一四八-3（收件匣 037／038 P2，總司令喜歡淺色）：沒選過＝淺色；選過「跟隨系統」或「深色」照舊
+  window.alphaThemePref=function(){try{var v=localStorage.getItem('alpha_theme');return v==='system'||v==='dark'?v:'light'}catch(e){console.warn('[theme] 讀偏好失敗',e);return 'light'}};
   window.alphaApplyTheme=function(){
     var p=window.alphaThemePref(),light=p==='light'||(p==='system'&&!!(mq&&mq.matches));
     document.documentElement.setAttribute('data-theme',light?'light':'dark');
@@ -43,7 +44,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(mq.addEventListener)mq.addEventListener('change',h);else if(mq.addListener)mq.addListener(h)}
 })();
 </script>
-<link rel="stylesheet" href="app.css?v=2026-11-04.1838">
+<link rel="stylesheet" href="app.css?v=2026-11-04.1922">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -125,10 +126,17 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     </div>
 
     <!-- 先.一〇四-4（2026-10-16）首頁順序：今日摘要 → 自選股 → 今日事件（＋自選股動態）→ 跟 0050 比 → 我的資產／自動投資這一期（連上電腦時）→ 盤前日報（收合）→ 沒連線提示（頁尾小字） -->
+    <!-- 先.一四八-3（2026-11-04，收件匣 037／038 P2）首頁只留四塊：今天要注意的事 → 大盤一行 → 自選股 → 前向模擬一行摘要。
+         今日事件／自選股動態／盤前日報 → 市場頁；跟 0050 比 → 交易・策略；我的資產／自動投資這一期 → 交易・機器人；研究室變化雷達入口拿掉（研究室在底部導覽）。 -->
+    <!-- 先.一四八-3：今天要注意的事（buildHomeFocus：資料過期、模擬跌幅接近上限、模擬看守告警、自選股大漲大跌／漲跌停、自選股今天的重訊與除權息；沒有就「今天沒事」） -->
+    <div class="card" id="home-focus-card">
+      <h3>今天要注意</h3>
+      <div id="home-focus-list"><div class="skel-line w80"></div></div>
+    </div>
     <div class="card">
-      <h3>今日摘要</h3>
+      <h3>大盤</h3>
       <!-- 先.一〇四-4：加權／櫃買／台指期／費半＋一句話（固定規則組字，不做判斷） -->
-      <div class="note" id="home-idx-sentence" style="margin:-2px 0 8px;color:var(--ink-2)"></div>
+      <div class="note" id="home-idx-sentence" hidden style="margin:-2px 0 8px;color:var(--ink-2)"></div>
       <div class="idx-strip" id="home-idx-rows"><div class="skel-block" style="height:52px;width:100%"></div></div>
       <div class="note" id="home-idx-datatime"></div>
     </div>
@@ -144,70 +152,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" style="margin-top:6px;font-size:10px">來源小點：<span class="sdot g" style="width:6px;height:6px"></span> 即時 · <span class="sdot y" style="width:6px;height:6px"></span> 延遲 · <span class="sdot gr" style="width:6px;height:6px"></span> 盤後／收盤，點小點看說明</div>
     </div>
 
-    <div class="card" id="home-events-card" hidden>
-      <h3>今日事件</h3>
-      <div id="today-events"></div>
-    </div>
-    <!-- 先.一一二-3：研究室入口（N＝變化雷達「綜合變化」符合條件的檔數，research_radar.json meta.list_totals） -->
-    <div class="cta-line" id="home-lab-line" hidden onclick="go('lab')"></div>
-
-    <!-- 2026-09-15（開發佇列自走，承接自競品一）「我的持股事件」卡：自選股與真錢持股
-    （先.八十一-11 起不含研究策略／模擬持股）的events.json/news.json依時間排一條流，
-    點開跳個股頁。跟上面「今日事件」卡不同——那張只顯示21天內美股財報日期，
-    這張是已發生事件/新聞的回顧流，範圍也不同（含台股）。無事件時整張卡隱藏
-    （比照home-ai-card的既有做法），不畫空狀態佔位。 -->
-    <div class="card" id="home-my-events-card" hidden>
-      <h3>自選股動態</h3>
-      <div id="my-holdings-events"></div>
-    </div>
-
-    <!-- 2026-10-11 先.六十八：「策略 vs 0050」（取代「我們 vs 0050」）。資料 data/strategy_curves.json
-    （build_strategy_curves.py，選股三榜改重疊組合法）＋本機 /auto/strategy_line（真錢 Bb-90）。
-    判讀文字為固定規則（<60 交易日「尚不足以判斷」），由 Python 端 metrics() 產生，前端不自行推論。 -->
-    <!-- 先.八十一-7：下方卡片捲到才載——這個哨兵真的進入畫面才抓 strategy_curves／history、我的持股事件 -->
+    <!-- 先.一四八-3：前向模擬一行摘要（讀 data/paper_*.json，點了到研究室看板） -->
+    <div class="cta-line" id="home-fwd-line" onclick="go('lab')">前向模擬：載入中…</div>
     <div id="home-lazy-sentinel" style="height:1px"></div>
-    <div class="card" id="strategy-curves-card">
-      <h3>跟 0050 比</h3>
-      <!-- 先.七十-5：卡頂固定一句（總司令裁示原文，靜態文字，不隨資料變動） -->
-      <div class="note" id="sc-positioning" style="margin:0 0 8px;padding:6px 8px;border-radius:8px;background:rgba(127,127,127,.08);color:var(--ink-2)">守回檔的策略大漲時會落後 0050，這是設計；看滿 60 個交易日與最大跌幅</div>
-      <div id="sc-tabs" style="display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;padding-bottom:2px"></div>
-      <div id="sc-body"><div class="note" style="color:var(--ink-3)">載入中…</div></div>
-    </div>
-
-    <!-- 先.七十二-B5（2026-10-11）：「我的資產與今日損益」合成一張卡（原總資產卡 home-asset-card、持股損益卡 home-pos-card
-         改成卡內區塊，id 保留）。電腦沒連線時整張卡與「自動投資這一期」都收起，只顯示一行 #home-offline-line。 -->
-    <div class="card" id="home-money-card">
-      <h3>我的資產 <span class="more" onclick="go('settings')">設定 →</span></h3>
-      <div class="cta-line" id="home-broker-cta" onclick="go('settings')" style="margin:0 0 6px">連上電腦才看得到 →</div>
-      <div id="home-asset-card" hidden>
-        <div class="num" id="home-asset-total" data-ntd="0" style="font-size:22px;font-weight:700"></div>
-      <div class="note" id="home-asset-detail" style="margin-top:6px;line-height:1.7"></div>
-      <div class="note" style="margin-top:6px;font-size:10px;color:var(--ink-4)">概算，以券商回報為準</div>
-      </div>
-      <div id="home-pos-card" style="margin-top:6px">
-        <div id="home-pos-body" class="note">連上電腦才看得到</div>
-      </div>
-    </div>
-
-    <!-- 常備.開發-11（2026-10-11）：真錢執行總覽卡。只讀本機 /auto/status＋/auto/ledger（token 必檢、去識別化），
-         不具任何下單或切換模式能力。顯示本期（T1～T4／月底）送單日、送出筆數、成交比例、目標與實際權重偏離、下一期；
-         未入金／緊急停止／拒單時用白話說明原因。計算邏輯在 autoPeriodSummary()（純函式，selftest 抽出驗三態）。 -->
-    <div class="card" id="home-exec-card">
-      <h3>自動投資這一期 <span class="more" onclick="go('trade')">交易頁 →</span></h3>
-      <div id="home-exec-body" class="note">連上電腦才看得到</div>
-    </div>
-
-    <!-- 常備.開發-2（2026-10-11）：讀 data/daily_brief.json（.github/scripts/build_daily_brief.py 固定規則產生，
-         不呼叫語言模型、不做市場判斷）。讀到才顯示，讀不到維持隱藏。 -->
-    <div class="card ai-card" id="home-ai-card" hidden>
-      <!-- 先.一〇四-4：盤前日報預設收合 -->
-      <details id="home-ai-details"><summary class="ai-tag" style="cursor:pointer">✦ 盤前日報 · 規則摘要</summary>
-      <div class="note" id="home-ai-body"></div>
-      </details>
-    </div>
-
     <!-- 先.一〇四-3：沒連上電腦時「我的資產／自動投資」只剩頁尾一行小字（不再佔第一屏） -->
-    <div class="note" id="home-offline-line" hidden onclick="go('settings')" style="text-align:center;font-size:11px;margin:14px 0 0;cursor:pointer;color:var(--ink-3)">我的資產、自動投資：連上電腦才看得到 →</div>
+    <div class="note" id="home-offline-line" hidden onclick="go('trade')" style="text-align:center;font-size:11px;margin:14px 0 0;cursor:pointer;color:var(--ink-3)">我的資產、自動投資：連上電腦才看得到 →</div>
     <!-- 2026-08-28新增（使用者要求：手機第五次回報時鐘/資料卡舊，最大嫌疑是SW快取
          舊版index.html——首頁底部固定顯示版本號，讓使用者一眼比對手機是不是新版，
          不用進設定頁翻）。 -->
@@ -225,6 +174,30 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <span class="press refresh-btn" onclick="refreshTap(this,'market-updated-tm',async()=>{fmClearCache();await hydrateMarket()})">重新整理</span>
     </div>
     <div class="note" id="market-poll-note" style="margin-bottom:8px;color:var(--ink-3)"></div>
+    <!-- 先.一四八-3：以下三張由首頁搬來（盤前日報、今日事件、自選股動態），id 與載入函式不變 -->
+    <!-- 常備.開發-2（2026-10-11）：讀 data/daily_brief.json（.github/scripts/build_daily_brief.py 固定規則產生，
+         不呼叫語言模型、不做市場判斷）。讀到才顯示，讀不到維持隱藏。 -->
+    <div class="card ai-card" id="home-ai-card" hidden>
+      <!-- 先.一〇四-4：盤前日報預設收合 -->
+      <details id="home-ai-details"><summary class="ai-tag" style="cursor:pointer">✦ 盤前日報 · 規則摘要</summary>
+      <div class="note" id="home-ai-body"></div>
+      </details>
+    </div>
+
+    <div class="card" id="home-events-card" hidden>
+      <h3>今日事件</h3>
+      <div id="today-events"></div>
+    </div>
+    <!-- 2026-09-15（開發佇列自走，承接自競品一）「我的持股事件」卡：自選股與真錢持股
+    （先.八十一-11 起不含研究策略／模擬持股）的events.json/news.json依時間排一條流，
+    點開跳個股頁。跟上面「今日事件」卡不同——那張只顯示21天內美股財報日期，
+    這張是已發生事件/新聞的回顧流，範圍也不同（含台股）。無事件時整張卡隱藏
+    （比照home-ai-card的既有做法），不畫空狀態佔位。 -->
+    <div class="card" id="home-my-events-card" hidden>
+      <h3>自選股動態</h3>
+      <div id="my-holdings-events"></div>
+    </div>
+
 
     <!-- 台股 -->
     <div id="market-tw-panel">
@@ -926,6 +899,30 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
          台股真錢只有一個引擎：本機 Bb-90 自動再平衡（auto_rebalance_bb90.py），此卡唯讀 /auto/status；
          緊急停止與否決窗取消統一在設定頁「自動交易（Bb-90）」卡，這裡不放第二個開關。 -->
     <div class="subscreen active" id="trade-sub-bots">
+    <!-- 先.一四八-3：以下兩張由首頁搬來（我的資產、自動投資這一期），id 與載入函式不變 -->
+    <!-- 先.七十二-B5（2026-10-11）：「我的資產與今日損益」合成一張卡（原總資產卡 home-asset-card、持股損益卡 home-pos-card
+         改成卡內區塊，id 保留）。電腦沒連線時整張卡與「自動投資這一期」都收起，只顯示一行 #home-offline-line。 -->
+    <div class="card" id="home-money-card">
+      <h3>我的資產 <span class="more" onclick="go('settings')">設定 →</span></h3>
+      <div class="cta-line" id="home-broker-cta" onclick="go('settings')" style="margin:0 0 6px">連上電腦才看得到 →</div>
+      <div id="home-asset-card" hidden>
+        <div class="num" id="home-asset-total" data-ntd="0" style="font-size:22px;font-weight:700"></div>
+      <div class="note" id="home-asset-detail" style="margin-top:6px;line-height:1.7"></div>
+      <div class="note" style="margin-top:6px;font-size:10px;color:var(--ink-4)">概算，以券商回報為準</div>
+      </div>
+      <div id="home-pos-card" style="margin-top:6px">
+        <div id="home-pos-body" class="note">連上電腦才看得到</div>
+      </div>
+    </div>
+
+    <!-- 常備.開發-11（2026-10-11）：真錢執行總覽卡。只讀本機 /auto/status＋/auto/ledger（token 必檢、去識別化），
+         不具任何下單或切換模式能力。顯示本期（T1～T4／月底）送單日、送出筆數、成交比例、目標與實際權重偏離、下一期；
+         未入金／緊急停止／拒單時用白話說明原因。計算邏輯在 autoPeriodSummary()（純函式，selftest 抽出驗三態）。 -->
+    <div class="card" id="home-exec-card">
+      <h3>自動投資這一期 <span class="more" onclick="go('trade')">交易頁 →</span></h3>
+      <div id="home-exec-body" class="note">連上電腦才看得到</div>
+    </div>
+
     <div class="card bot" id="bot-bb90-card" data-mkt="TW">
       <div class="bot-top">
         <div class="nm"><b>自動投資</b><span>台股 · 永豐 · 真錢，下單前 30 分鐘可取消</span></div>
@@ -959,6 +956,18 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
     <div class="subscreen" id="trade-sub-strategy">
       <div class="note" style="text-align:center;background:rgba(250,178,25,.08);border:1px solid rgba(250,178,25,.25);border-radius:10px;padding:8px;margin-bottom:12px;color:var(--warn)">⚠ 模擬，不是真的交易</div>
+      <!-- 先.一四八-3：「跟 0050 比」由首頁搬來，id 與載入函式不變 -->
+    <!-- 2026-10-11 先.六十八：「策略 vs 0050」（取代「我們 vs 0050」）。資料 data/strategy_curves.json
+    （build_strategy_curves.py，選股三榜改重疊組合法）＋本機 /auto/strategy_line（真錢 Bb-90）。
+    判讀文字為固定規則（<60 交易日「尚不足以判斷」），由 Python 端 metrics() 產生，前端不自行推論。 -->
+    <div class="card" id="strategy-curves-card">
+      <h3>跟 0050 比</h3>
+      <!-- 先.七十-5：卡頂固定一句（總司令裁示原文，靜態文字，不隨資料變動） -->
+      <div class="note" id="sc-positioning" style="margin:0 0 8px;padding:6px 8px;border-radius:8px;background:rgba(127,127,127,.08);color:var(--ink-2)">守回檔的策略大漲時會落後 0050，這是設計；看滿 60 個交易日與最大跌幅</div>
+      <div id="sc-tabs" style="display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;padding-bottom:2px"></div>
+      <div id="sc-body"><div class="note" style="color:var(--ink-3)">載入中…</div></div>
+    </div>
+
       <!-- 2026-09-27新增（紙.一，總司令裁示【新.二結案＋紙.一＋查.二放行】）：
       0050/定存70/30前進式紙上追蹤虛擬帳戶。目的是驗證排程/資料/再平衡流程
       正確性，不是證明績效——跟下面strategy-list(選股策略上架前測)是不同性質
@@ -1624,6 +1633,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-11-04.1838"></script>
+<script src="app.js?v=2026-11-04.1922"></script>
 </body>
 </html>

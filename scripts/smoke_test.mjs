@@ -186,7 +186,7 @@ async function runSmokeTest(baseUrl, headless = true) {
 
   await page.goto(`${baseUrl}/index.html`, { waitUntil: "networkidle", timeout: 20000 });
   // 先.八十一-7：首頁下方卡片改成捲到才載；冒煙其餘檢查需要資料，開頁後立刻全部載入（量測首次載入的 measure_first_load.mjs 不呼叫）
-  await page.evaluate(() => { if (typeof uiLoadLazyAll === "function") uiLoadLazyAll(); });
+  await page.evaluate(() => { if (typeof uiLoadLazyAll === "function") uiLoadLazyAll(); if (typeof loadStrategyCurvesCard === "function") loadStrategyCurvesCard(); });
   await page.waitForTimeout(800);
   await page.waitForTimeout(1500);
 
@@ -3193,9 +3193,10 @@ async function runSmokeTest(baseUrl, headless = true) {
         return [...document.querySelectorAll("#scr-home *")].indexOf(el); };
       const h3 = (t) => [...document.querySelectorAll("#scr-home .card h3")].find(h => h.textContent.trim().startsWith(t));
       // 先.一〇四-4（2026-10-16）新順序：狀態列→今日摘要→自選股→今日事件→跟 0050 比→我的資產→自動投資這一期→盤前日報→沒連線提示（頁尾）
-      const order = [pos("#home-status-strip"), pos(h3("今日摘要") && h3("今日摘要").closest(".card")),
-        pos(h3("自選股") && h3("自選股").closest(".card")), pos("#home-events-card"), pos("#strategy-curves-card"),
-        pos("#home-money-card"), pos("#home-exec-card"), pos("#home-ai-card"), pos("#home-offline-line")];
+      // 先.一四八-3（收件匣 037／038 P2）首頁只留：狀態列→今天要注意→大盤→自選股→前向模擬一行→沒連線提示（頁尾）；其他卡搬到市場／交易頁
+      const order = [pos("#home-status-strip"), pos("#home-focus-card"), pos(h3("大盤") && h3("大盤").closest(".card")),
+        pos(h3("自選股") && h3("自選股").closest(".card")), pos("#home-fwd-line"), pos("#home-offline-line")];
+      if (["home-events-card", "strategy-curves-card", "home-money-card", "home-exec-card", "home-ai-card"].some((id) => document.querySelector("#scr-home #" + id))) order.push(-2);  // 搬走的卡不得還在首頁
       const vis = (id) => { const e = document.getElementById(id); return !!(e && !e.hidden && getComputedStyle(e).display !== "none" && e.getBoundingClientRect().height > 0); };
       const out = { order, offlineLine: vis("home-offline-line"), money: vis("home-money-card"), exec: vis("home-exec-card"),
         liveConfigured: !!(window.LIVE && LIVE.configured && LIVE.url) };
@@ -3276,8 +3277,10 @@ async function runSmokeTest(baseUrl, headless = true) {
   const scfErrs = [];
   let scfInfo = "";
   try {
-    await page.evaluate(() => { const b = document.querySelector('nav#nav button[data-scr="home"]'); if (b) b.click(); });
-    await page.waitForTimeout(300);
+    // 先.一四八-3（收件匣 037／038 P2）：「跟 0050 比」搬到交易・策略
+    await page.evaluate(() => { go("trade"); if (typeof loadStrategyCurvesCard === "function") loadStrategyCurvesCard(); const b = document.querySelector('#trade-tabs button[data-sub="strategy"]'); if (b) b.click(); });
+    await page.waitForFunction(() => typeof SC_DATA !== "undefined" && SC_DATA && SC_DATA.lines && SC_DATA.lines.length, null, { timeout: 20000 }).catch(() => {});
+    await page.waitForTimeout(500);
     const r = await page.evaluate(() => {
       const out = {};
       // 冷啟動預設值（卡片第一次畫出時的分頁）
@@ -3931,23 +3934,21 @@ async function runSmokeTest(baseUrl, headless = true) {
       await p2.goto(`${baseUrl}/index.html`, { waitUntil: "networkidle", timeout: 30000 });
       await p2.waitForTimeout(1500);
       const before = urls.slice();
-      const sen = await p2.evaluate(() => { const s = document.getElementById("home-lazy-sentinel"); return s ? { top: s.getBoundingClientRect().top, h: innerHeight } : null; });
-      if (!sen) lzErrs.push("找不到 #home-lazy-sentinel");
-      else if (sen.top < sen.h) lzErrs.push(`測試前提不成立：哨兵頂端 ${sen.top.toFixed(1)} 已在畫面內（視窗高 ${sen.h}），需改用更矮的視窗`);
+      // 先.一四八-3（收件匣 037／038 P2）：「跟 0050 比」搬到交易・策略、自選股動態搬到市場頁 → 首頁完全不抓 news／strategy_history；進交易頁才抓
       const n = (re, arr) => arr.filter(u => re.test(u.split("?")[0])).length;
-      if (n(/\/data\/news\.json$/, before)) lzErrs.push("沒捲動就抓了 news.json");
-      if (n(/\/data\/strategy_history\.json$/, before)) lzErrs.push("沒捲動就抓了 strategy_history.json");
+      await p2.mouse.wheel(0, 900); await p2.waitForTimeout(1200);
+      const afterScroll = urls.slice();
+      if (n(/\/data\/news\.json$/, afterScroll)) lzErrs.push("首頁（含捲到底）抓了 news.json");
+      if (n(/\/data\/strategy_history\.json$/, afterScroll)) lzErrs.push("首頁（含捲到底）抓了 strategy_history.json");
       if (n(/\/sw\.js$/, before) > 1) lzErrs.push(`首次載入 sw.js 被抓 ${n(/\/sw\.js$/, before)} 次`);
-      await p2.mouse.wheel(0, 900);  // 真的捲動（觸發捲動事件），不是直接跳位
-      await p2.waitForTimeout(300);
-      await p2.evaluate(() => document.getElementById("strategy-curves-card").scrollIntoView());
-      await p2.waitForTimeout(2500);
-      if (!n(/\/data\/strategy_history\.json$/, urls)) lzErrs.push("捲到「跟 0050 比」後仍沒抓 strategy_history.json");
+      await p2.evaluate(() => go("trade"));
+      await p2.waitForFunction(() => !!(SC_DATA && SC_DATA.lines && SC_DATA.lines.length), null, { timeout: 15000 }).catch(() => {});
+      if (!n(/\/data\/strategy_history\.json$/, urls)) lzErrs.push("進交易頁後仍沒抓 strategy_history.json");
       const has = await p2.evaluate(() => !!(SC_DATA && SC_DATA.lines && SC_DATA.lines.length));
-      if (!has) lzErrs.push("捲到後「跟 0050 比」沒有畫出資料");
+      if (!has) lzErrs.push("進交易頁後「跟 0050 比」沒有畫出資料");
     } finally { await ctx.close(); }
   } catch (e) { lzErrs.push(`測試本身出錯：${e.message || e}`); }
-  record("114. 首頁下方卡片捲到才載（news／strategy_history 捲動前不抓）、首次載入 sw.js 不重複（先.八十一-7）", lzErrs.length === 0, lzErrs.join("; "));
+  record("114. 首頁不抓 news／strategy_history（自選股動態在市場頁、跟 0050 比在交易頁，進去才抓）、首次載入 sw.js 不重複（先.八十一-7／先.一四八-3）", lzErrs.length === 0, lzErrs.join("; "));
 
   // 115.【2026-10-13 先.八十一-8 裁示④】SW 對 data/*.json「先顯示上次資料、背景更新」：第二次開時 data 回應帶 x-alpha-from-cache、
   // 首頁顯示「先顯示上次存的資料（… 存），背景更新中」；cache:'no-store' 照舊直通網路（不帶標頭）；price_history 不進快取。
@@ -4113,7 +4114,7 @@ async function runSmokeTest(baseUrl, headless = true) {
       const bad = [];
       p.on("response", (r) => { if (/events_by_code\//.test(r.url()) && r.status() === 404) bad.push(r.url().replace(/\?.*$/, "")); });
       await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
-      await p.evaluate(() => { if (typeof uiLoadLazyAll === "function") uiLoadLazyAll(); });
+      await p.evaluate(() => go("market"));  // 先.一四八-3：自選股動態卡搬到市場頁，進市場頁才載
       await p.waitForFunction(() => { const c = document.getElementById("home-my-events-card"); const el = document.getElementById("my-holdings-events"); return c && !c.hidden && el && /不含研究策略/.test(el.textContent || ""); }, null, { timeout: 25000 }).catch(() => null);
       const st = await p.evaluate(() => {
         const el = document.getElementById("my-holdings-events");
@@ -4298,7 +4299,7 @@ async function runSmokeTest(baseUrl, headless = true) {
     try {
       const p = await ctx.newPage();
       await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
-      await p.evaluate(() => { if (typeof uiLoadLazyAll === "function") uiLoadLazyAll(); });
+      await p.evaluate(() => { if (typeof uiLoadLazyAll === "function") uiLoadLazyAll(); if (typeof loadStrategyCurvesCard === "function") loadStrategyCurvesCard(); });
       await p.waitForFunction(() => typeof SC_DATA !== "undefined" && SC_DATA && SC_DATA.lines && document.querySelector("#sc-body .sc-method"), null, { timeout: 25000 }).catch(() => null);
       const r = await p.evaluate(() => {
         const m = (document.querySelector("#sc-body .sc-method") || {}).textContent || "";
@@ -4860,7 +4861,7 @@ async function runSmokeTest(baseUrl, headless = true) {
     try {
       const p = await ctx.newPage();
       await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
-      await p.evaluate(() => { if (typeof uiLoadLazyAll === "function") uiLoadLazyAll(); });
+      await p.evaluate(() => { if (typeof uiLoadLazyAll === "function") uiLoadLazyAll(); if (typeof loadStrategyCurvesCard === "function") loadStrategyCurvesCard(); });
       await p.waitForFunction(() => typeof SC_DATA !== "undefined" && SC_DATA && SC_DATA.lines, null, { timeout: 25000 }).catch(() => null);
       const r = await p.evaluate(() => {
         const tabs = typeof SC_TABS !== "undefined" ? SC_TABS.map(x => x[0]) : [];
@@ -5084,8 +5085,13 @@ async function runSmokeTest(baseUrl, headless = true) {
     await page.evaluate(() => { localStorage.removeItem("alpha_theme"); alphaApplyTheme(); });
     await page.emulateMedia({ colorScheme: "dark" });
     await page.waitForTimeout(100);
+    let s0 = await st();
+    // 先.一四八-3（收件匣 037／038 P2，總司令喜歡淺色）：沒選過＝淺色，系統深色也是淺色；選「跟隨系統」才跟系統
+    if (s0.pref !== "light" || s0.t !== "light") thErrs.push(`沒選過時預設應為淺色（系統深色也一樣）：${JSON.stringify(s0)}`);
+    await page.evaluate(() => { localStorage.setItem("alpha_theme", "system"); alphaApplyTheme(); });
+    await page.waitForTimeout(100);
     let s1 = await st();
-    if (s1.pref !== "system" || s1.t !== "dark") thErrs.push(`預設應跟隨系統（系統深色→dark）：${JSON.stringify(s1)}`);
+    if (s1.pref !== "system" || s1.t !== "dark") thErrs.push(`選跟隨系統時（系統深色）應為 dark：${JSON.stringify(s1)}`);
     await page.emulateMedia({ colorScheme: "light" });
     await page.waitForTimeout(100);
     let s2 = await st();
@@ -5133,8 +5139,7 @@ async function runSmokeTest(baseUrl, headless = true) {
       if (r.long !== "<b>X</b>") acErrs.push("80 天不應收合");
       if (!/已 0 天／需 60 天/.test(r.none)) acErrs.push("沒有天數應視為 0 天收合");
     }
-    await page.evaluate(() => go("home"));
-    await page.evaluate(() => document.getElementById("strategy-curves-card")?.scrollIntoView());
+    await page.evaluate(() => { go("trade"); if (typeof loadStrategyCurvesCard === "function") loadStrategyCurvesCard(); });  // 先.一四八-3：跟 0050 比搬到交易・策略
     await page.waitForTimeout(2500);
     const dom = await page.evaluate(() => {
       const c = document.getElementById("strategy-curves-card");
@@ -5751,6 +5756,7 @@ async function runSmokeTest(baseUrl, headless = true) {
     const LIGHT = { "--ink-4": "#736c61", "--up-deep": "#b81d22", "--critical": "#b52a2a", "--caution": "#b0362d" };
     for (const theme of ["dark", "light"]) {
       const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block", colorScheme: theme });
+      await ctx.addInitScript((t) => { try { localStorage.setItem("alpha_theme", t); } catch (e) {} }, theme);  // 先.一四八-3：預設改淺色，明確指定主題
       const p6 = await ctx.newPage();
       try {
         await p6.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
@@ -5854,10 +5860,11 @@ async function runSmokeTest(baseUrl, headless = true) {
       if (l.radarInPicks || l.heatInMarket || !l.link) navErrs.push(`選股頁仍有雷達 ${l.radarInPicks}、市場頁仍有熱度 ${l.heatInMarket}、市場頁連結 ${l.link}`);
       // 首頁入口
       await p7.evaluate(() => go("home"));
-      await p7.waitForFunction(() => { const e = document.getElementById("home-lab-line"); return e && !e.hidden; }, null, { timeout: 15000 }).catch(() => {});
-      const hl = await p7.evaluate(() => { const e = document.getElementById("home-lab-line"), ev = document.getElementById("home-events-card");
-        return { txt: e && !e.hidden ? e.textContent : "", after: !!(e && ev && (ev.compareDocumentPosition(e) & Node.DOCUMENT_POSITION_FOLLOWING)) }; });
-      if (!/^研究室：今天 \d+ 檔有新變化 →$/.test(hl.txt) || !hl.after) navErrs.push(`首頁研究室入口「${hl.txt}」在今日事件之後 ${hl.after}`);
+      // 先.一四八-3（收件匣 037／038 P2）：首頁研究室入口改成「前向模擬一行摘要」，在自選股之後、點了到研究室
+      await p7.waitForFunction(() => /^前向模擬 \d+ 支/.test((document.getElementById("home-fwd-line") || {}).textContent || ""), null, { timeout: 15000 }).catch(() => {});
+      const hl = await p7.evaluate(() => { const e = document.getElementById("home-fwd-line"), wl = document.getElementById("wl-list");
+        return { txt: e ? e.textContent : "", after: !!(e && wl && (wl.compareDocumentPosition(e) & Node.DOCUMENT_POSITION_FOLLOWING)), old: !!document.getElementById("home-lab-line") }; });
+      if (!/^前向模擬 14 支：進行中 \d+、未起跑 \d+/.test(hl.txt) || !hl.after || hl.old) navErrs.push(`首頁前向模擬一行「${hl.txt}」在自選股之後 ${hl.after}、舊研究室入口還在 ${hl.old}`);
       // 直接 openStock 的名稱
       await p7.evaluate(() => openStock("3324"));
       await p7.waitForFunction(() => (document.getElementById("sh-name") || {}).textContent !== "3324", null, { timeout: 15000 }).catch(() => {});
@@ -6147,6 +6154,44 @@ async function runSmokeTest(baseUrl, headless = true) {
       fwdInfo = `14 卡（${a.summary}）、壞檔 2 支只壞自己、點開 ${run ? run.split(":")[0] : "—"} 有走勢與持股、−42% 紅色、最小可點 ${a.minH}px`;
     } finally { await ctx.close(); }
   } catch (e) { fwdErrs.push(`測試本身出錯：${e.message || e}`); }
+  // 181. 先.一四八-3（收件匣 037／038 P2）首頁「今天要注意」：模擬最大跌幅 ≥40% 紅、資料過期排第一、什麼都沒有寫「今天沒事」；每列可點 ≥44px；預設淺色
+  const fcErrs = []; let fcInfo = "";
+  try {
+    for (const mode of ["bad", "calm"]) {
+      const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block", colorScheme: "dark" });
+      try {
+        const p = await ctx.newPage();
+        if (mode === "bad") {
+          await p.route(/\/data\/paper_7\.json/, async (r) => { try { const resp = await r.fetch(); const b = await resp.json(); b.max_drawdown_pct = -42.3; await r.fulfill({ response: resp, json: b }); } catch (e) { await r.continue().catch(() => {}); } });
+          await p.route(/\/data\/market_tw\.json/, async (r) => { try { const resp = await r.fetch(); const b = await resp.json(); b.data_date = "2026-10-14"; if (b.taiex) b.taiex.data_date = "2026-10-14"; await r.fulfill({ response: resp, json: b }); } catch (e) { await r.continue().catch(() => {}); } });
+        } else {
+          await p.route(/\/data\/paper_[0-9a-z]+\.json/, async (r) => { try { const resp = await r.fetch(); const b = await resp.json(); b.max_drawdown_pct = 0; if (b.board) b.board.max_drawdown_pct = 0; b.judge_after = "2099-01-01"; b.start_not_before = "2020-01-01"; await r.fulfill({ response: resp, json: b }); } catch (e) { await r.continue().catch(() => {}); } });
+          await p.route(/\/data\/paper_tracking_watch\.json/, (r) => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ status: "OK", items: [] }) }));
+          await p.addInitScript(() => { try { localStorage.setItem("alpha_wl", "[]"); localStorage.removeItem("alpha_wl_lists"); } catch (e) {} });
+        }
+        await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+        if (mode === "calm") await p.evaluate(() => { WL.length = 0; return buildHomeFocus(); });
+        await p.waitForFunction(() => document.getElementById("home-focus-list")?.hasAttribute("data-focus-n"), null, { timeout: 20000 }).catch(() => {});
+        await p.waitForTimeout(mode === "bad" ? 2500 : 300);
+        if (mode === "bad") await p.evaluate(() => buildHomeFocus());
+        const r = await p.evaluate(() => ({ theme: document.documentElement.getAttribute("data-theme"),
+          items: [...document.querySelectorAll("#home-focus-list .focus-item")].map((x) => ({ lv: x.dataset.lv, t: x.innerText.trim(), h: x.getBoundingClientRect().height })),
+          txt: document.getElementById("home-focus-list").innerText }));
+        if (mode === "bad") {
+          if (r.theme !== "light") fcErrs.push(`沒選過主題時應為淺色（系統深色），實得 ${r.theme}`);
+          if (!r.items.length || r.items[0].lv !== "alert" || !/資料過期/.test(r.items[0].t)) fcErrs.push(`資料過期沒有排第一：${JSON.stringify(r.items.slice(0, 2))}`);
+          if (!r.items.some((x) => x.lv === "alert" && /模擬 G 最大跌幅 -42\.3%/.test(x.t))) fcErrs.push(`模擬 G 跌幅 -42.3% 沒列紅色：${JSON.stringify(r.items.map((x) => x.t))}`);
+          if (r.items.some((x) => !(x.h >= 44))) fcErrs.push("有列高度 <44px");
+          fcInfo += `異常時 ${r.items.length} 列（第一列「${r.items[0] ? r.items[0].t : ""}」）`;
+        } else {
+          if (r.items.length || !/今天沒事/.test(r.txt)) fcErrs.push(`沒事時應寫「今天沒事」：${r.txt.slice(0, 80)}`);
+          fcInfo += "；沒事時「今天沒事」";
+        }
+      } finally { await ctx.close(); }
+    }
+  } catch (e) { fcErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("181. 首頁「今天要注意」：資料過期排第一、模擬跌幅 ≥40% 紅色、沒事寫「今天沒事」、每列 ≥44px、預設淺色（先.一四八-3）", fcErrs.length === 0, fcErrs.join("; ") || fcInfo);
+
   // 180. 先.一四八-4（收件匣 037／038 P3）個股 K 線：區間 5 鈕＋週期 3 鈕（≥44px、預設 6月／日K）、MA5／20／60、查價線（游標移到圖上資訊列跟著變）、
   // 週K 根數少於日K、均價線（VWAP）算法、FinMind 失敗時不寫成「已補上」
   const kxErrs = []; let kxInfoTxt = "";

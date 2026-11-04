@@ -367,10 +367,12 @@
     const gear=document.getElementById('hdr-settings');if(gear)gear.classList.toggle('on',name==='settings');
     document.getElementById('main').scrollTo(0,0);
     if(name==='home')_safeAsync('hydrateHome',hydrateHome);
-    if(name==='market')_safeAsync('hydrateMarket',hydrateMarket);
+    if(name==='market'){_safeAsync('hydrateMarket',hydrateMarket);
+      _safeAsync('loadHomeBrief',loadHomeBrief);_safeAsync('loadMyHoldingsEvents',loadMyHoldingsEvents);  // 先.一四八-3：由首頁搬到市場頁
+      if(!document.getElementById('today-events')?.children.length)_safeAsync('loadTodayEvents',loadTodayEvents)}
     if(name==='chips-market')_safeAsync('loadChipsMarketDetail',loadChipsMarketDetail);
     if(name==='picks')_safeAsync('hydratePicks',hydratePicks);
-    if(name==='trade')_safeSync('onTradeInit',onTradeInit);
+    if(name==='trade'){_safeSync('onTradeInit',onTradeInit);_safeAsync('loadStrategyCurvesCard',loadStrategyCurvesCard)}  // 先.一四八-3：跟 0050 比搬到交易・策略
     if(name==='journal'){_safeSync('renderJournalChips',renderJournalChips);_safeAsync('loadWeeklyBrief',loadWeeklyBrief);_safeAsync('loadSysWeekly',loadSysWeekly);_safeAsync('loadJournalLedger',loadJournalLedger);_safeAsync('loadResearchScorecard',loadResearchScorecard)}
     if(name==='report')_safeSync('renderReport',renderReport);
     if(name==='settings')_safeSync('hydrateSettings',hydrateSettings);
@@ -2054,6 +2056,80 @@
     q.forEach(([n,f])=>_safeAsync(n,f));
   }
   window.uiLoadLazyAll=uiLoadLazyAll;
+  // ══════ 先.一四八-3（2026-11-04，收件匣 037／038 P2）首頁「今天要注意」＋前向模擬一行摘要 ══════
+  // 總司令：「打開就知道今天要注意什麼」。只列規則判得出來、資料檔裡就有的事，不做買賣判斷：
+  //   紅＝資料過期、模擬最大跌幅 ≥40%；黃＝模擬最大跌幅 ≥30%、模擬看守告警、自選股今天漲跌 ≥5%；藍＝自選股今天／明天的重訊、除權息、法說、模擬明天起跑或 30 天內判定。
+  //   全部沒有 → 「今天沒事」，並寫出檢查了哪些東西（讓人知道不是壞掉才空白）。
+  // 資料：data/paper_*.json（14 支前向＋4 支模擬帳戶，共約 27KB）、data/paper_tracking_watch.json、首頁已載好的自選股報價與今日事件。
+  const FOCUS_FWD=['paper_5','paper_6','paper_7','paper_8','paper_9','paper_10','paper_11','paper_12','paper_13','paper_14','paper_15','paper_16','paper_17','paper_18'];
+  const FOCUS_OLD=['paper_7030','paper_1b','paper_3','paper_4'];
+  const FOCUS_DD_WARN=30,FOCUS_DD_ALERT=40;
+  var TODAY_EV_ROWS=[];
+  let _focusDocsP=null;
+  function _focusDocs(){
+    if(!_focusDocsP)_focusDocsP=Promise.allSettled(FOCUS_FWD.concat(FOCUS_OLD).map(k=>fetch('data/'+k+'.json?t='+Math.floor(Date.now()/600000)).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})
+      .then(d=>({k,d}))))
+      .then(rs=>rs.map((r,i)=>r.status==='fulfilled'&&r.value.d&&r.value.d.label?r.value:{k:FOCUS_FWD.concat(FOCUS_OLD)[i],d:null}));
+    setTimeout(()=>{_focusDocsP=null},5*60*1000);  // 5 分鐘後下次重畫重抓
+    return _focusDocsP;
+  }
+  function _focusShort(label){const m=String(label||'').match(/^模擬\s*[A-Z](-翼)?/);return m?m[0].replace(/\s+/,' '):uiPlain(String(label||'').replace(/[（(].*$/,''))}
+  function _focusMdd(d){const b=d&&d.board&&!d.board.error?d.board:{};const v=d&&d.max_drawdown_pct!=null?+d.max_drawdown_pct:(b.max_drawdown_pct!=null?+b.max_drawdown_pct:null);return isFinite(v)?v:null}
+  function _ymdAdd(ymd,n){const d=new Date(ymd+'T12:00:00Z');return new Date(d.getTime()+n*864e5).toISOString().slice(0,10)}
+  async function buildHomeFocus(){
+    const el=document.getElementById('home-focus-list');if(!el)return;
+    const today=_evYmd(new Date()),tomorrow=_ymdAdd(today,1),items=[];
+    const md=x=>`${+String(x).slice(5,7)}/${+String(x).slice(8,10)}`;
+    if(DATA_STALE)items.push({lv:'alert',txt:`資料過期 ${DATA_STALE.days} 天：台股資料停在 ${md(DATA_STALE.date)}`,act:'forceUpdateApp()'});
+    const docs=await _focusDocs();
+    for(const {k,d} of docs){
+      if(!d)continue;
+      const nm=_focusShort(d.label),fwd=FOCUS_FWD.includes(k),go_=fwd?"go('lab')":"journalToTrade('strategy')";
+      const mdd=_focusMdd(d);
+      if(mdd!=null&&Math.abs(mdd)>=FOCUS_DD_ALERT)items.push({lv:'alert',txt:`${nm} 最大跌幅 ${mdd.toFixed(1)}%（上限 50%）`,act:go_});
+      else if(mdd!=null&&Math.abs(mdd)>=FOCUS_DD_WARN)items.push({lv:'warn',txt:`${nm} 最大跌幅 ${mdd.toFixed(1)}%，接近上限 50%`,act:go_});
+      if(fwd&&!d.started&&d.start_not_before===tomorrow)items.push({lv:'info',txt:`${nm} 明天起跑`,act:go_});
+      if(fwd&&!d.started&&d.start_not_before===today)items.push({lv:'info',txt:`${nm} 今天起跑`,act:go_});
+      const dj=d.judge_after?Math.round((Date.parse(d.judge_after)-Date.parse(today))/864e5):null;
+      if(fwd&&dj!=null&&dj>=0&&dj<=30)items.push({lv:'info',txt:`${nm} ${dj?dj+' 天後':'今天'}到判定日`,act:go_});
+    }
+    try{const r=await fetch('data/paper_tracking_watch.json?t='+Math.floor(Date.now()/600000));if(r.ok){const w=await r.json();
+      if(w&&w.status==='ERROR')(w.items||[]).slice(0,3).forEach(i=>items.push({lv:'warn',txt:uiPlain(String(i.msg||'模擬追蹤檢查有異常')),act:"journalToTrade('strategy')"}))}}
+    catch(e){console.warn('[buildHomeFocus:watch]',e)}
+    for(const code of WL){
+      try{const q=resolveQuote(code,isUS(code));if(!q||q.change_pct==null||q.is_stale)continue;const p=+q.change_pct;
+        if(Math.abs(p)>=5)items.push({lv:'warn',txt:`${nameOf(code)||code} 今天 ${p>0?'+':''}${p.toFixed(2)}%`,act:`openStock('${_uiEsc(code)}')`})}
+      catch(e){console.warn('[buildHomeFocus:quote]',code,e)}
+    }
+    try{await Promise.race([TODAY_EV_READY,new Promise(r=>setTimeout(r,4000))])}catch(e){console.warn('[buildHomeFocus:ev]',e)}
+    (TODAY_EV_ROWS||[]).filter(r=>r.mine&&(r.date===today||r.date===tomorrow)).slice(0,6)
+      .forEach(r=>items.push({lv:'info',txt:`${r.name||r.code} ${r.kind}（${r.date===today?'今天':'明天'}）${r.note&&r.kind==='重訊'?'：'+String(r.note).slice(0,24):''}`,act:`openStock('${_uiEsc(r.code)}')`}));
+    const order={alert:0,warn:1,info:2},col={alert:'var(--critical)',warn:'var(--warn)',info:'var(--accent)'};
+    items.sort((a,b)=>order[a.lv]-order[b.lv]);
+    el.setAttribute('data-focus-n',String(items.length));
+    if(!items.length){el.innerHTML='<div style="font-size:var(--fs-md);font-weight:600;padding:4px 0">今天沒事</div>'+
+      '<div class="note" style="margin:2px 0 0">看過：資料新鮮度、14 支前向模擬與 4 個模擬帳戶的跌幅、自選股漲跌與今明兩天的事件</div>';return}
+    el.innerHTML=items.map(it=>`<div class="row focus-item" data-lv="${it.lv}" role="button" tabindex="0" style="cursor:pointer;min-height:44px;display:flex;align-items:center;gap:10px" onclick="${it.act}">`+
+      `<span class="sdot" style="background:${col[it.lv]};flex:none"></span><span style="flex:1;line-height:1.4">${_uiEsc(it.txt)}</span><span style="color:var(--ink-4)">›</span></div>`).join('');
+  }
+  async function loadHomeFwdLine(){
+    const el=document.getElementById('home-fwd-line');if(!el)return;
+    const docs=(await _focusDocs()).filter(x=>FOCUS_FWD.includes(x.k));
+    const ok=docs.filter(x=>x.d),run=ok.filter(x=>x.d.started&&!x.d.verdict),done=ok.filter(x=>x.d.verdict);
+    let worst=null;run.forEach(x=>{const m=_focusMdd(x.d);if(m!=null&&(worst==null||m<worst.m))worst={m,n:_focusShort(x.d.label)}});
+    el.textContent=`前向模擬 ${FOCUS_FWD.length} 支：進行中 ${run.length}、未起跑 ${ok.length-run.length-done.length}${done.length?'、已判定 '+done.length:''}`+
+      (worst&&worst.m<0?`｜跌最深 ${worst.n} ${worst.m.toFixed(1)}%`:'')+(ok.length<FOCUS_FWD.length?`｜${FOCUS_FWD.length-ok.length} 支資料尚未產生`:'')+' →';
+  }
+  // 先.一四八-3：「跟 0050 比」卡（原首頁 uiLazyHome，搬到交易・策略後改由 go('trade') 第一次進入時載入）
+  let _scCardLoaded=false;
+  async function loadStrategyCurvesCard(){
+    if(_scCardLoaded)return;_scCardLoaded=true;
+    await (async()=>{
+      // 先.一〇四-4：開始載入後 20 秒仍是「載入中」就改講原因＋重試（逾時本身另由 loadStrategyCurves 15 秒中止）
+      const t=setTimeout(()=>{try{const b=document.getElementById('sc-body');if(b&&/載入中/.test(b.textContent||''))b.innerHTML='<div class="note" style="color:var(--ink-3)">還在載入（已等 20 秒，可能是網路慢） <span class="press" style="text-decoration:underline;cursor:pointer" onclick="retryStrategyCurves()">重試</span></div>'}catch(e){console.warn('[sc watchdog]',e)}},20000);
+      try{await Promise.allSettled([loadStrategyCurves(),loadStrategyHistory()]);renderStrategyCurves()}finally{clearTimeout(t)}
+    })();
+  }
   async function hydrateHome(){
     _safeSync('renderWLTabs',renderWLTabs);  // 常備.開發-8
     const el=document.getElementById('wl-list');if(!el)return;
@@ -2068,18 +2144,13 @@
     if(runId!==HYDRATE_HOME_SEQ)return;
     _safeAsync('loadHomeIndex',loadHomeIndex);
     _safeAsync('loadTodayEvents',loadTodayEvents);
-    _safeAsync('loadHomeLabLine',loadHomeLabLine);  // 先.一一二-3
-    _safeAsync('loadHomeBrief',loadHomeBrief);  // 常備.開發-2 盤前日報（規則摘要）
-    uiLazyHome('loadMyHoldingsEvents',loadMyHoldingsEvents);  // 2026-09-15 開發佇列自走；先.八十一-7 捲到才載
+    // 先.一四八-3（收件匣 037／038 P2）：研究室入口、盤前日報、自選股動態搬離首頁（後兩者到市場頁才載，見 go()）
+    _safeAsync('loadHomeFwdLine',loadHomeFwdLine);
     _safeAsync('loadAutoTrading',loadAutoTrading);
     // 先.八十一-7：破億試算在設定頁，設定頁 hydrateSettings 自己會呼叫 renderBtPath，首頁不再提早抓 strategy_history
     _safeAsync('loadHomeExecCard',loadHomeExecCard);  // 常備.開發-11 真錢執行總覽卡（唯讀）
     _safeAsync('loadHomeBrokerCard',loadHomeBrokerCard);  // 2026-09-15 開發佇列自走，週六.五：總資產卡吃/live/positions+/live/balance真數字
-    uiLazyHome('loadStrategyCurves',async()=>{
-      // 先.一〇四-4：開始載入後 20 秒仍是「載入中」就改講原因＋重試（逾時本身另由 loadStrategyCurves 15 秒中止）
-      const t=setTimeout(()=>{try{const b=document.getElementById('sc-body');if(b&&/載入中/.test(b.textContent||''))b.innerHTML='<div class="note" style="color:var(--ink-3)">還在載入（已等 20 秒，可能是網路慢） <span class="press" style="text-decoration:underline;cursor:pointer" onclick="retryStrategyCurves()">重試</span></div>'}catch(e){console.warn('[sc watchdog]',e)}},20000);
-      try{await Promise.allSettled([loadStrategyCurves(),loadStrategyHistory()]);renderStrategyCurves()}finally{clearTimeout(t)}
-    });  // 先.六十八；先.八十一-7 捲到才載
+    // 先.一四八-3：「跟 0050 比」搬到交易・策略，到交易頁才載（loadStrategyCurvesCard，見 go()）
     await loadIntradayQuotes();
     if(!WL.length){el.innerHTML='<div class="note" style="padding:14px 2px">尚無自選股，點右上「管理」搜尋加入</div>';return}
     // 2026-09-06（實測.一）三份檔案一起備妥再畫：sparklines（走勢線＋回退鏈最後一層）、
@@ -2087,6 +2158,7 @@
     // 下市還是我們沒接好）。用 allSettled，任一份失敗只是少一層，不能讓整個首頁不畫。
     // 常備.開發-20（先.六十七）：sparklines／quotes_all_tw 改由上面 ensureQuoteLite 只抓自選股各自的小檔（已在名稱前備妥）
     await Promise.allSettled([ensureQuoteLite(WL),ensureListedUniverse()]);
+    _safeAsync('buildHomeFocus',buildHomeFocus);  // 先.一四八-3：自選股報價備妥後算「今天要注意」
     // 2026-09-06（實測.二）改成 LIVE.configured：當日曲線現在不需要 SSE 已連線，
     // /live/kbars 對未訂閱代號會走 api.kbars() 查詢，只要 live server 連得上就有線。
     if(LIVE.configured){mergeLiveKbarsLast();await Promise.allSettled(WL.filter(c=>!isUS(c)).map(getLiveCloses))}  // 2026-09-04四修.三
@@ -2420,6 +2492,7 @@
         rows.push({date:String(info.next_earnings_date).slice(0,10),kind:'美股財報',code,name:nameOf(code)||code,note:{pre:'盤前',post:'盤後'}[info.estimated_session]||'',mine:WL.includes(code)});
       });
       TODAY_EV_KEYS=new Set(rows.filter(r=>r.kind==='重訊').map(r=>r.code+'|'+r.note));
+      TODAY_EV_ROWS=rows;  // 先.一四八-3：首頁「今天要注意」挑自選股今天／明天的事件
       const card=document.getElementById('home-events-card');
       if(!rows.length){el.innerHTML='<div class="note">近期沒有自選股或全市場的除權息、法說、重訊與美股財報</div>';if(card)card.hidden=true;return}
       if(card)card.hidden=false;
@@ -3776,6 +3849,7 @@
     const graceOk=exp===todayTw&&prevTd&&dd>=prevTd;
     DATA_STALE=(dd&&exp&&dd<exp&&!graceOk)?{days:Math.round((Date.parse(exp)-Date.parse(dd))/86400000),date:dd,exp,fromCache:r.headers.get('x-alpha-from-cache')==='1'}:null;
     renderDataStaleAlert();renderHomeStatusSummary();
+    if(DATA_STALE)_safeAsync('buildHomeFocus:stale',buildHomeFocus);  // 先.一四八-3：過期要進「今天要注意」
   }
   function _prevTwTradingDay(ymd){
     try{let d=new Date(ymd+'T12:00:00Z');do{d=new Date(d.getTime()-86400000)}while(d.getUTCDay()===0||d.getUTCDay()===6||TW_HOLIDAYS.has(d.toISOString().slice(0,10)));return d.toISOString().slice(0,10)}
@@ -4977,7 +5051,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-11-04.1838';
+  const APP_VERSION='2026-11-04.1922';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
