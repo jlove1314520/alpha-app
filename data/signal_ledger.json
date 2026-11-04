@@ -2,8 +2,8 @@
  "meta": {
   "created_at": "2026-10-11T14:17:33.521387+08:00",
   "schema_note": "B19 前瞻訊號台帳（非回測）：每筆在事件發生後 4 日內事前寫入，寫入後內容不可修改；entry_close 為寫入日之後第一個交易日收盤（避免前視）；returns.t5/t20/t60 由 update_signal_ledger_returns.py 只回填 null 欄位。status=待驗證線索 者不得影響任何評分。規格 research/B19_SIGNAL_LEDGER_SPEC.md。非投資建議。",
-  "last_build_at": "2026-11-05T01:16:33.297428+08:00",
-  "total_signals": 2284,
+  "last_build_at": "2026-11-05T02:18:41.392514+08:00",
+  "total_signals": 2285,
   "source": ".github/scripts/build_signal_ledger.py（讀 events.json L1＋news.json L3＋price_history.json）",
   "last_returns_backfill_at": "2026-11-04T19:44:19.058032+08:00",
   "entry_skipped": {
@@ -84261,6 +84261,41 @@
    "anchor_trade_date": "2026-11-04",
    "weight": 0.5,
    "ref_close": 189.0,
+   "ref_close_date": "2026-11-04",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "677b937bae8ed3c5",
+   "recorded_at": "2026-11-05T02:18:41.392514+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%AE%8F%E7%A2%81%E9%81%8A%E6%88%B2-%E5%89%B5-%E4%BB%A3%E5%AD%90%E5%85%AC%E5%8F%B8winking-studios-limited%E5%85%AC%E5%91%8A%E5%BA%AB%E8%97%8F%E8%82%A1%E5%9F%B7%E8%A1%8C%E6%83%85%E5%BD%A2-153900642.html",
+   "type": "媒體報導",
+   "code": "6908",
+   "event_date": "2026-11-04",
+   "title": "宏碁遊戲-創 代子公司Winking Studios Limited公告庫藏股執行情形",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1446,
+   "pre_vol_spike": 1.747,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-04",
+   "weight": 1.0,
+   "ref_close": 21.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
    "entry_close": null,
