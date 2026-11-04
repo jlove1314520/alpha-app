@@ -720,6 +720,9 @@ def describe_scores(path: Path) -> dict:
     }
 
 
+DATA_FILES_DEFAULT_SOURCE = "通用解析（讀 generated_at）"
+
+
 def build_data_files() -> list[dict]:
     out = []
     for path in sorted(DATA_DIR.glob("*.json")):
@@ -782,6 +785,14 @@ def build_data_files() -> list[dict]:
         entry = {"path": "scores_future.json", **info}
         entry["status"] = status_from_age(info.get("generated_at"), 30)
         out.append(entry)
+    # 先.一三五-1kh-l 丙（Cowork 收件匣 039 定案）：省略「完全等於預設值」的欄位壓 STATUS.json 大小——
+    # source＝DATA_FILES_DEFAULT_SOURCE、detail＝空字串時不寫。讀取端（app.js／status_lite／heartbeat／
+    # schema_guard／smoke）都只讀 path／generated_at／status／records，2026-11-05 逐支 grep 確認。
+    for e in out:
+        if e.get("source") == DATA_FILES_DEFAULT_SOURCE:
+            e.pop("source", None)
+        if e.get("detail") == "":
+            e.pop("detail", None)
     return out
 
 
@@ -1460,6 +1471,7 @@ def main():
     payload = {
         "updated_at": datetime.now(TW_TZ).isoformat(),
         "latest_commit": _git("rev-parse", "--short", "HEAD"),
+        "data_files_defaults": "data_files 沒寫 source＝" + DATA_FILES_DEFAULT_SOURCE + "；沒寫 detail＝無補充說明",
         "data_files": build_data_files(),
         "workflows": build_workflows(),
         "schedule_health": build_schedule_health(),  # 2026-09-03（P0三-三.1）排程錯過時窗判定
