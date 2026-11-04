@@ -1,3 +1,13 @@
+## 2026-11-05 06:4x DevQueue 20261105-060102（維運帽）1kh-w 驗收／1kh-x stock_names 日期欄／1kh-y data 子目錄暫存檔
+
+- **等待總司令審閱：16 件**（`research/AWAITING_REVIEW.md` 等待中 16 列；本輪未新增）。
+- **先.一三五-1kh-w 驗收 ✅**：audit.yml run 41915358335（11/04 21:21 UTC 起跑，GitHub 排程延遲，非 15:20 準點）success、「Commit 稽核結果」步驟 success；listed_universe.json 新 commit e9573a312b7，meta.generated_at 2026-11-05 05:23（台北）。STATUS 原本仍 stale 是因為上次產生在 audit 班之前；本機重跑 `generate_status_json.py` 後該列 ok。
+- **先.一三五-1kh-x ✅**：`scripts/build_stock_names.py` meta 加 generated_at，每班照寫（主體沒變只印訊息）；`generate_status_json.py` STALE_HOURS 加 stock_names＝72（[自行裁量]：market.yml 只跑平日，週末跨約 60 小時）。STATUS 該列由 no_date 變 ok。App 只讀 tw／us 不受影響。
+- **先.一三五-1kh-y ✅**：data/ 下 27 個子目錄的暫存檔（*.json.tmp、price_history_store 的 *.json.tmp<行程號>）原本全部沒被 .gitignore 擋；加結構性規則 `data/**/*.tmp`、`data/**/*.tmp[0-9]*`（[自行裁量]：不逐目錄列名）。27×3 樣式全擋、`git ls-files -ci --exclude-standard data` 為空。
+- **冒煙**：前兩次 `node scripts/smoke_test.mjs` 出現 Chromium「Page crashed／Target crashed」（第一次 7 項、第二次 1 項，皆測試本身崩潰非斷言失敗，當時可用記憶體 10.5GB），依四節等 10 分鐘重跑：06:27～06:36 exit 0、184 項全過、0 FAIL。
+- **維運產物**：data/STATUS.json、data/status_lite.json 本機重產（listed_universe、stock_names 兩列皆 ok）。
+- **佇列**：`- [ ]` 20 項（≥12，不補件）；BLOCKED 未逐項重查（時間不足，下一輪補）。
+
 ## 2026-11-05 05:1x DevQueue 20261105-043102（維運帽）先.一四九-1／一四九-2 提案＋1kh-l 乙部分
 
 - **等待總司令審閱：16 件**（`research/AWAITING_REVIEW.md` 等待中表格 16 列；本輪新增 2 件：先.一四九-1、先.一四九-2，皆剛送出、24 小時後照零之二預設放行甲）。
