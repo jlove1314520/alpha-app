@@ -12,8 +12,8 @@ if hasattr(sys.stdout, "reconfigure"):
 
 # 前 20 個家族（依 TRIALS_LEDGER／TRIALS_REGISTRY 文字裡記錄的最高「年化 X%」排序後去重；抽取規則見 md 第 1 節）
 TOP20 = [
-    (1, "#64／#151 f_us_low_vol 小型股", "280%／121%", "個股橫斷面（美股）", "待第二批；原數字當時已判經濟上不可信"),
-    (2, "#128／#144 f_us_value_bm", "121%", "個股橫斷面（美股）", "待第二批；原數字當時已判經濟上不可信"),
+    (1, "#64／#151 f_us_low_vol 小型股", "280%／121%", "個股橫斷面（美股）", "F15（第 2 批，2011～2024，只做多，價格改 yfinance，同 #151 分層抽樣宇宙）；原數字含放空腿且當時已判經濟上不可信"),
+    (2, "#128／#144 f_us_value_bm", "121%", "個股橫斷面（美股）", "F16（第 2 批，2011～2024，只做多，B/M 用 SEC XBRL PIT，同 F15 宇宙）；原數字含放空腿且當時已判經濟上不可信"),
     (3, "#418／#420／#425 Bb-90 核心配置", "38.36%（#425 為 2025 OOS，不用）", "ETF 配置", "F1"),
     (4, "#424／#426／#428 危機閘門 × 槓桿 Bb-90", "22.23%（#428 為 2025 OOS，不用）", "ETF 配置＋閘門", "F2"),
     (5, "#133／#136／#137／#384 借券賣出使用率", "19.89%", "個股組合（台股）", "F8（第 2 批，2015～2024，`research/backtest/` 引擎）"),
@@ -55,7 +55,7 @@ def main():
     L.append("> **性質：樣本內最優化（描述性），不是判定。** 每一列都是「在 2003-07～2024-12 這段資料上掃參數後挑最好的一組」，"
              "所以數字**一定偏樂觀**（挑格子本身就是過擬合來源）；下一步照方針直接上紙上測試，用前向數據說話。"
              "2025 以後資料（holdout）本批完全沒讀。非投資建議。\n")
-    L.append(f"資料期間：{meta['data_start']}～{meta['data_end']}；產生：{meta['generated_at']}；程式 `research/reaudit_optimized_batch1.py`（F1～F6）、`research/reaudit_optimized_batch2_tx.py`（F7，台指期連續合約，期間同樣從 2003-07-01 起以對齊無風險利率資料）、`research/reaudit_optimized_batch2_ssu.py`（F8，台股個股，期間 2015-01～2024-12，同 #133 抽樣宇宙 300 檔）、`research/reaudit_optimized_batch2_sector.py`（F9，同 F8 宇宙與期間）、`research/reaudit_optimized_batch2_breadth.py`（F10，期間 2010-12-31～2024-12-31，廣度暖身後才有訊號）、`research/reaudit_optimized_batch2_margin.py`（F11，期間 2013-11-25～2024-12-31，融資餘額 2012-05 起、暖身 52 週）、`research/reaudit_optimized_batch2_weinstein.py`（F12，同 F8 宇宙與期間）、`research/reaudit_optimized_batch2_roe.py`（F13，同 F8 宇宙與期間）、`research/reaudit_optimized_batch2_ml.py`（F14，同 F8 宇宙與期間，模型訓練資料 2011 起）。**注意：各家族期間不同，綜合分數跨家族比較要看期間**（F1～F7 從 2003-07、F8／F9／F12～F14 從 2015、F10 從 2011、F11 從 2013-11）。**曲線 png 與明細 JSON 在本機 `research/data/`（該目錄依 .gitignore 不進公開 repo），連結只在本機有效。**\n")
+    L.append(f"資料期間：{meta['data_start']}～{meta['data_end']}；產生：{meta['generated_at']}；程式 `research/reaudit_optimized_batch1.py`（F1～F6）、`research/reaudit_optimized_batch2_tx.py`（F7，台指期連續合約，期間同樣從 2003-07-01 起以對齊無風險利率資料）、`research/reaudit_optimized_batch2_ssu.py`（F8，台股個股，期間 2015-01～2024-12，同 #133 抽樣宇宙 300 檔）、`research/reaudit_optimized_batch2_sector.py`（F9，同 F8 宇宙與期間）、`research/reaudit_optimized_batch2_breadth.py`（F10，期間 2010-12-31～2024-12-31，廣度暖身後才有訊號）、`research/reaudit_optimized_batch2_margin.py`（F11，期間 2013-11-25～2024-12-31，融資餘額 2012-05 起、暖身 52 週）、`research/reaudit_optimized_batch2_weinstein.py`（F12，同 F8 宇宙與期間）、`research/reaudit_optimized_batch2_roe.py`（F13，同 F8 宇宙與期間）、`research/reaudit_optimized_batch2_ml.py`（F14，同 F8 宇宙與期間，模型訓練資料 2011 起）、`research/reaudit_optimized_batch2_us_lowvol.py`（F15，美股，2011-01～2024-12）、`research/reaudit_optimized_batch2_us_value.py`（F16，美股，同 F15）。**注意：各家族期間不同，綜合分數跨家族比較要看期間**（F1～F7 從 2003-07、F8／F9／F12～F14 從 2015、F10 從 2011、F11 從 2013-11、F15／F16 從 2011）。**曲線 png 與明細 JSON 在本機 `research/data/`（該目錄依 .gitignore 不進公開 repo），連結只在本機有效。**\n")
     L.append("## 0. 總表（依綜合分數＝年化報酬÷|最大回撤| 排名；MDD 超過 50% 的排最後並標天條一）\n")
     L.append("| 排名 | 家族 | 最好的一組參數 | 年化 | MDD | Sharpe | 勝率 | 交易次數 | 綜合分數 | 掃描格數（多重比較參考） | 曲線 |")
     L.append("|---|---|---|---|---|---|---|---|---|---|---|")
@@ -113,7 +113,15 @@ def main():
              "- F12（Weinstein 第二階段）：同 F8 引擎、宇宙、成本與融資假設；還原收盤 > MA_n 且 MA_n 比 10 日前高、以 60 日報酬排序，可選大盤 200 日均線閘門；引擎第一層出場線同步改成 MA_n。最好的一組沒開大盤閘門、2× 融資、組合止損 10%；2× 以上融資在台股個股屬實務上限邊緣，追繳以權益歸零近似（偏樂觀）；宇宙為抽樣 300 檔、存活者偏誤未完全排除。\n"
              "- F13（ROE 穩定度）：同 F8 引擎、宇宙、成本與融資假設；#16／#17 原版是十分位多空，這裡只做多頭半邊（放空腿借券成本未接真實資料，依放空腿硬規則不做），所以和原版 13.2% 的多空價差不能直接比。原版數字含放空腿，屬資料缺陷、不得採信。槓桿在這個家族沒有幫助（報酬低於融資利率 6.5%，加槓桿反而變差）。\n"
              "- F14（ML 價量）：同 F8 引擎、宇宙、成本與融資假設；HistGradientBoostingRegressor 預設參數、#483 同一組 10 個價量因子，標籤＝每月第一個交易日起 H 日報酬的橫斷面百分位；測試年 Y 的模型只用標籤到期日早於 Y-01-01 的樣本訓練（2011 起擴張視窗），只用當時看得到的資料。#483 原版是 2008～2012 全市場、天條一 −52.75% 死在 2008；這裡期間 2015 起**不含 2008**、宇宙是抽樣 236 檔，和原版不能直接比。\n"
-             "- 美股（VTI）結論附但書：**存活者偏誤未完全修正：已下市股約 97%（抽樣 55／57）無價格來源。**（VTI 為指數 ETF，影響較小，但書照附。）\n")
+             "- F15／F16（美股個股）：價格改走美股原生來源 yfinance（原版走 FinMind `USStockPrice`，台灣資料商，違反七節），"
+             "一次批次下載 248 檔＋SPY（2010-01～2024-12，auto_adjust 還原股息與分割），存本機 `research/data/reaudit_us_prices.pkl`，246 檔有價；"
+             "宇宙＝#151 的 `data/us_stratified_universe_sample.csv`（**今天還在的名冊**分層抽樣，存活者偏誤很重：同宇宙等權持有 2011～2024 年化 +21.8%、MDD −38.8%，遠高於 SPY 的 +13.7%／−33.7%，"
+             "所以 F15／F16 要跟這個等權數字比，不是跟 SPY 比）。只做多（原版十分位多空含放空腿，依放空腿硬規則原版數字屬資料缺陷、不得採信）。"
+             "訊號第 t 日收盤算、t+1 日收盤成交；換手成本單邊 0.10%〔自行裁量〕；槓桿借款＝DTB3＋1.5%/年〔自行裁量〕，3× 超過 Reg T 2× 上限只當參考。"
+             "勝率＝換股期組合報酬>0 的比例、交易次數＝被換出的個股筆數（個股逐筆損益未追蹤）。"
+             "F15 最好的一組（20 日波動、50 檔、月換、1×、止損 10%）年化 +13.3%／MDD −15.5%，**低於同宇宙等權 +21.8%**，好處只在回撤。"
+             "F16 的 B/M 用 `us_factors_value.book_value_per_share_pit()`（SEC XBRL，本機快取 246/246 命中、零新請求），期末 158 檔有值，2011 年前後 XBRL 覆蓋較少。\n"
+             "- 美股（VTI）結論附但書：**存活者偏誤未完全修正：已下市股約 97%（抽樣 55／57）無價格來源。**（VTI 為指數 ETF，影響較小，但書照附；F15／F16 是個股，影響大。）\n")
     out = HERE / "REAUDIT_OPTIMIZED.md"
     out.write_text("\n".join(L) + "\n", encoding="utf-8")
     print(f"寫入 {out}（{len(fams)} 個家族）")

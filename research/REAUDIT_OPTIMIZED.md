@@ -2,7 +2,7 @@
 
 > **性質：樣本內最優化（描述性），不是判定。** 每一列都是「在 2003-07～2024-12 這段資料上掃參數後挑最好的一組」，所以數字**一定偏樂觀**（挑格子本身就是過擬合來源）；下一步照方針直接上紙上測試，用前向數據說話。2025 以後資料（holdout）本批完全沒讀。非投資建議。
 
-資料期間：2003-07-01～2024-12-31；產生：2026-11-04T19:34:18；程式 `research/reaudit_optimized_batch1.py`（F1～F6）、`research/reaudit_optimized_batch2_tx.py`（F7，台指期連續合約，期間同樣從 2003-07-01 起以對齊無風險利率資料）、`research/reaudit_optimized_batch2_ssu.py`（F8，台股個股，期間 2015-01～2024-12，同 #133 抽樣宇宙 300 檔）、`research/reaudit_optimized_batch2_sector.py`（F9，同 F8 宇宙與期間）、`research/reaudit_optimized_batch2_breadth.py`（F10，期間 2010-12-31～2024-12-31，廣度暖身後才有訊號）、`research/reaudit_optimized_batch2_margin.py`（F11，期間 2013-11-25～2024-12-31，融資餘額 2012-05 起、暖身 52 週）、`research/reaudit_optimized_batch2_weinstein.py`（F12，同 F8 宇宙與期間）、`research/reaudit_optimized_batch2_roe.py`（F13，同 F8 宇宙與期間）、`research/reaudit_optimized_batch2_ml.py`（F14，同 F8 宇宙與期間，模型訓練資料 2011 起）。**注意：各家族期間不同，綜合分數跨家族比較要看期間**（F1～F7 從 2003-07、F8／F9／F12～F14 從 2015、F10 從 2011、F11 從 2013-11）。**曲線 png 與明細 JSON 在本機 `research/data/`（該目錄依 .gitignore 不進公開 repo），連結只在本機有效。**
+資料期間：2003-07-01～2024-12-31；產生：2026-11-04T19:34:18；程式 `research/reaudit_optimized_batch1.py`（F1～F6）、`research/reaudit_optimized_batch2_tx.py`（F7，台指期連續合約，期間同樣從 2003-07-01 起以對齊無風險利率資料）、`research/reaudit_optimized_batch2_ssu.py`（F8，台股個股，期間 2015-01～2024-12，同 #133 抽樣宇宙 300 檔）、`research/reaudit_optimized_batch2_sector.py`（F9，同 F8 宇宙與期間）、`research/reaudit_optimized_batch2_breadth.py`（F10，期間 2010-12-31～2024-12-31，廣度暖身後才有訊號）、`research/reaudit_optimized_batch2_margin.py`（F11，期間 2013-11-25～2024-12-31，融資餘額 2012-05 起、暖身 52 週）、`research/reaudit_optimized_batch2_weinstein.py`（F12，同 F8 宇宙與期間）、`research/reaudit_optimized_batch2_roe.py`（F13，同 F8 宇宙與期間）、`research/reaudit_optimized_batch2_ml.py`（F14，同 F8 宇宙與期間，模型訓練資料 2011 起）、`research/reaudit_optimized_batch2_us_lowvol.py`（F15，美股，2011-01～2024-12）、`research/reaudit_optimized_batch2_us_value.py`（F16，美股，同 F15）。**注意：各家族期間不同，綜合分數跨家族比較要看期間**（F1～F7 從 2003-07、F8／F9／F12～F14 從 2015、F10 從 2011、F11 從 2013-11、F15／F16 從 2011）。**曲線 png 與明細 JSON 在本機 `research/data/`（該目錄依 .gitignore 不進公開 repo），連結只在本機有效。**
 
 ## 0. 總表（依綜合分數＝年化報酬÷|最大回撤| 排名；MDD 超過 50% 的排最後並標天條一）
 
@@ -10,18 +10,20 @@
 |---|---|---|---|---|---|---|---|---|---|---|
 | 1 | F11 #249 全市場融資餘額 regime（0050 曝險，2013～2024） | k_weeks=8，pctile=0.7，direction=cold，def_exposure=0.25，freq=M，L=3.0，stop=0.3 | +47.0% | -44.3% | 1.21 | +100.0% | 5 | 1.06 | 2304（其中 873 格 MDD>50%） | [png](data/reaudit_curves/batch2_F11.png) |
 | 2 | F12 #11／#393 Weinstein 第二階段（台股個股，引擎版） | ma=150，market_gate=False，top_n=20，pos_stop=None，rebalance_days=21，L=2.0，stop=0.1 | +26.6% | -30.1% | 0.94 | +34.6% | 332 | 0.88 | 384（其中 197 格 MDD>50%） | [png](data/reaudit_curves/batch2_F12.png) |
-| 3 | F14 #475／#483 ML 價量選股（HGB 逐年重訓，台股個股，引擎版） | horizon_eq_rebalance_days=63，market_gate=False，top_n=30，pos_stop=0.15，L=1.0，stop=0.2 | +10.9% | -13.1% | 1.30 | +35.7% | 516 | 0.83 | 384（其中 77 格 MDD>50%） | [png](data/reaudit_curves/batch2_F14.png) |
-| 4 | F10 #248 全市場廣度 regime（0050 曝險，2011～2024） | ma=250，threshold=0.4，def_exposure=0.0，freq=M，L=3.0，stop=0.3 | +31.0% | -48.2% | 0.91 | +63.6% | 11 | 0.64 | 1152（其中 227 格 MDD>50%） | [png](data/reaudit_curves/batch2_F10.png) |
-| 5 | F2 #426 危機閘門 × 槓桿 Bb-90（月均線／絕對動能閘門） | mix=B，w_eq=0.85，safe=IEF，gate=MA6m，L=1.0，stop=0.1 | +10.1% | -17.9% | 1.05 | +64.0% | 25 | 0.57 | 1344（其中 244 格 MDD>50%） | [png](data/reaudit_curves/batch1_F2.png) |
-| 6 | F7 #244／#250～#252 台指期均線擇時（TX 連續合約） | ma_days=100，bear_exposure=0.0，L=1.0，stop=None | +10.8% | -21.2% | 0.83 | +25.2% | 115 | 0.51 | 240（其中 115 格 MDD>50%） | [png](data/reaudit_curves/batch2_F7.png) |
-| 7 | F6 #430 R1 信用利差閘門（BAA10Y） | spread_ma_months=18，w_eq=0.7，L=1.0，stop=None | +8.1% | -16.3% | 0.86 | +71.4% | 14 | 0.50 | 96（其中 23 格 MDD>50%） | [png](data/reaudit_curves/batch1_F6.png) |
-| 8 | F8 #133／#136／#137／#384 融券使用率最低 N 檔（台股個股，多頭鏡像半邊） | top_n=10，rebalance_days=42，pos_stop=0.15，L=1.0，stop=0.1 | +6.0% | -12.8% | 0.70 | +51.9% | 162 | 0.47 | 576（其中 106 格 MDD>50%） | [png](data/reaudit_curves/batch2_F8.png) |
-| 9 | F9 #282（#73）產業金流加速度輪動（台股個股，引擎版） | accel_ma=20-60，top_frac=0.2，top_n=30，rebalance_days=21，pos_stop=None，L=1.0，stop=None | +4.0% | -9.5% | 0.66 | +48.7% | 791 | 0.43 | 512（其中 177 格 MDD>50%） | [png](data/reaudit_curves/batch2_F9.png) |
-| 10 | F1 #418／#425 Bb-90 核心配置（0050／VTI＋債／現金） | mix=B，w_eq=0.5，safe=IEF，L=1.0，stop=0.1 | +6.8% | -16.9% | 0.99 | +80.0% | 5 | 0.40 | 576（其中 329 格 MDD>50%） | [png](data/reaudit_curves/batch1_F1.png) |
-| 11 | F13 #16／#17 f_quality_roe_stability 最高 N 檔（台股個股，只做多頭半邊） | rebalance_days=63，market_gate=True，top_n=20，pos_stop=0.15，L=1.0，stop=0.2 | +4.5% | -11.4% | 0.57 | +27.3% | 348 | 0.40 | 384（其中 87 格 MDD>50%） | [png](data/reaudit_curves/batch2_F13.png) |
-| 12 | F3 #414 0050 趨勢槓桿（日均線） | ma_days=50，bear_exposure=0.5，L=3.0，stop=0.1 | +13.7% | -45.6% | 0.54 | +48.1% | 104 | 0.30 | 160（其中 84 格 MDD>50%） | [png](data/reaudit_curves/batch1_F3.png) |
-| 13 | F5 #247 已實現波動度 regime（0050） | vol_win=60，hi_vol_exposure=0.25，L=1.0，stop=None | +6.9% | -23.9% | 0.58 | +100.0% | 1 | 0.29 | 144（其中 49 格 MDD>50%） | [png](data/reaudit_curves/batch1_F5.png) |
-| 14 | F4 #413 美股趨勢槓桿（VTI 台幣計，日均線） | ma_days=250，bear_exposure=0.5，L=1.0，stop=None | +7.0% | -33.4% | 0.54 | +100.0% | 1 | 0.21 | 160（其中 108 格 MDD>50%） | [png](data/reaudit_curves/batch1_F4.png) |
+| 3 | F16 #128／#144 f_us_value_bm 美股價值（只做多） | lowvol_filter_window=0，N=25，rebalance_days=126，L=1.5，stop=0.2 | +26.9% | -30.7% | 1.04 | +75.0% | 137 | 0.88 | 288（其中 122 格 MDD>50%） | [png](data/reaudit_curves/batch2_F16.png) |
+| 4 | F15 #64／#151 f_us_low_vol 美股低波動（只做多） | vol_window=20，N=50，rebalance_days=21，L=1.0，stop=0.1 | +13.3% | -15.5% | 1.21 | +67.3% | 2540 | 0.86 | 384（其中 138 格 MDD>50%） | [png](data/reaudit_curves/batch2_F15.png) |
+| 5 | F14 #475／#483 ML 價量選股（HGB 逐年重訓，台股個股，引擎版） | horizon_eq_rebalance_days=63，market_gate=False，top_n=30，pos_stop=0.15，L=1.0，stop=0.2 | +10.9% | -13.1% | 1.30 | +35.7% | 516 | 0.83 | 384（其中 77 格 MDD>50%） | [png](data/reaudit_curves/batch2_F14.png) |
+| 6 | F10 #248 全市場廣度 regime（0050 曝險，2011～2024） | ma=250，threshold=0.4，def_exposure=0.0，freq=M，L=3.0，stop=0.3 | +31.0% | -48.2% | 0.91 | +63.6% | 11 | 0.64 | 1152（其中 227 格 MDD>50%） | [png](data/reaudit_curves/batch2_F10.png) |
+| 7 | F2 #426 危機閘門 × 槓桿 Bb-90（月均線／絕對動能閘門） | mix=B，w_eq=0.85，safe=IEF，gate=MA6m，L=1.0，stop=0.1 | +10.1% | -17.9% | 1.05 | +64.0% | 25 | 0.57 | 1344（其中 244 格 MDD>50%） | [png](data/reaudit_curves/batch1_F2.png) |
+| 8 | F7 #244／#250～#252 台指期均線擇時（TX 連續合約） | ma_days=100，bear_exposure=0.0，L=1.0，stop=None | +10.8% | -21.2% | 0.83 | +25.2% | 115 | 0.51 | 240（其中 115 格 MDD>50%） | [png](data/reaudit_curves/batch2_F7.png) |
+| 9 | F6 #430 R1 信用利差閘門（BAA10Y） | spread_ma_months=18，w_eq=0.7，L=1.0，stop=None | +8.1% | -16.3% | 0.86 | +71.4% | 14 | 0.50 | 96（其中 23 格 MDD>50%） | [png](data/reaudit_curves/batch1_F6.png) |
+| 10 | F8 #133／#136／#137／#384 融券使用率最低 N 檔（台股個股，多頭鏡像半邊） | top_n=10，rebalance_days=42，pos_stop=0.15，L=1.0，stop=0.1 | +6.0% | -12.8% | 0.70 | +51.9% | 162 | 0.47 | 576（其中 106 格 MDD>50%） | [png](data/reaudit_curves/batch2_F8.png) |
+| 11 | F9 #282（#73）產業金流加速度輪動（台股個股，引擎版） | accel_ma=20-60，top_frac=0.2，top_n=30，rebalance_days=21，pos_stop=None，L=1.0，stop=None | +4.0% | -9.5% | 0.66 | +48.7% | 791 | 0.43 | 512（其中 177 格 MDD>50%） | [png](data/reaudit_curves/batch2_F9.png) |
+| 12 | F1 #418／#425 Bb-90 核心配置（0050／VTI＋債／現金） | mix=B，w_eq=0.5，safe=IEF，L=1.0，stop=0.1 | +6.8% | -16.9% | 0.99 | +80.0% | 5 | 0.40 | 576（其中 329 格 MDD>50%） | [png](data/reaudit_curves/batch1_F1.png) |
+| 13 | F13 #16／#17 f_quality_roe_stability 最高 N 檔（台股個股，只做多頭半邊） | rebalance_days=63，market_gate=True，top_n=20，pos_stop=0.15，L=1.0，stop=0.2 | +4.5% | -11.4% | 0.57 | +27.3% | 348 | 0.40 | 384（其中 87 格 MDD>50%） | [png](data/reaudit_curves/batch2_F13.png) |
+| 14 | F3 #414 0050 趨勢槓桿（日均線） | ma_days=50，bear_exposure=0.5，L=3.0，stop=0.1 | +13.7% | -45.6% | 0.54 | +48.1% | 104 | 0.30 | 160（其中 84 格 MDD>50%） | [png](data/reaudit_curves/batch1_F3.png) |
+| 15 | F5 #247 已實現波動度 regime（0050） | vol_win=60，hi_vol_exposure=0.25，L=1.0，stop=None | +6.9% | -23.9% | 0.58 | +100.0% | 1 | 0.29 | 144（其中 49 格 MDD>50%） | [png](data/reaudit_curves/batch1_F5.png) |
+| 16 | F4 #413 美股趨勢槓桿（VTI 台幣計，日均線） | ma_days=250，bear_exposure=0.5，L=1.0，stop=None | +7.0% | -33.4% | 0.54 | +100.0% | 1 | 0.21 | 160（其中 108 格 MDD>50%） | [png](data/reaudit_curves/batch1_F4.png) |
 | 對照 | 0050 買進持有（含息） | — | +11.6% | -55.8% | 0.64 | — | — | 0.21 | — | — |
 
 ### 同一家族裡「MDD≤50% 前提下年化最高」的一組（給想看報酬上限的人）
@@ -30,6 +32,8 @@
 |---|---|---|---|---|---|
 | F11 | k_weeks=8，pctile=0.7，direction=cold，def_exposure=0.25，freq=M，L=3.0，stop=0.3 | +47.0% | -44.3% | 1.21 | 5 |
 | F12 | ma=150，market_gate=False，top_n=20，pos_stop=0.15，rebalance_days=21，L=3.0，stop=0.1 | +38.2% | -45.8% | 1.03 | 375 |
+| F16 | lowvol_filter_window=0，N=10，rebalance_days=21，L=2.0，stop=0.1 | +33.6% | -41.2% | 0.97 | 159 |
+| F15 | vol_window=20，N=50，rebalance_days=21，L=3.0，stop=0.2 | +31.5% | -44.3% | 1.04 | 2540 |
 | F14 | horizon_eq_rebalance_days=63，market_gate=False，top_n=30，pos_stop=0.15，L=3.0，stop=0.1 | +22.8% | -34.8% | 1.09 | 516 |
 | F10 | ma=250，threshold=0.4，def_exposure=0.0，freq=M，L=3.0，stop=0.3 | +31.0% | -48.2% | 0.91 | 11 |
 | F2 | mix=B，w_eq=0.85，safe=IEF，gate=MA6m，L=3.0，stop=0.2 | +22.8% | -46.7% | 0.98 | 26 |
@@ -49,8 +53,8 @@
 
 | 序 | 家族（來源試驗） | 當時記錄的最高年化 | 類型 | 本批狀態 |
 |---|---|---|---|---|
-| 1 | #64／#151 f_us_low_vol 小型股 | 280%／121% | 個股橫斷面（美股） | 待第二批；原數字當時已判經濟上不可信 |
-| 2 | #128／#144 f_us_value_bm | 121% | 個股橫斷面（美股） | 待第二批；原數字當時已判經濟上不可信 |
+| 1 | #64／#151 f_us_low_vol 小型股 | 280%／121% | 個股橫斷面（美股） | F15（第 2 批，2011～2024，只做多，價格改 yfinance，同 #151 分層抽樣宇宙）；原數字含放空腿且當時已判經濟上不可信 |
+| 2 | #128／#144 f_us_value_bm | 121% | 個股橫斷面（美股） | F16（第 2 批，2011～2024，只做多，B/M 用 SEC XBRL PIT，同 F15 宇宙）；原數字含放空腿且當時已判經濟上不可信 |
 | 3 | #418／#420／#425 Bb-90 核心配置 | 38.36%（#425 為 2025 OOS，不用） | ETF 配置 | F1 |
 | 4 | #424／#426／#428 危機閘門 × 槓桿 Bb-90 | 22.23%（#428 為 2025 OOS，不用） | ETF 配置＋閘門 | F2 |
 | 5 | #133／#136／#137／#384 借券賣出使用率 | 19.89% | 個股組合（台股） | F8（第 2 批，2015～2024，`research/backtest/` 引擎） |
@@ -85,5 +89,6 @@
 - F12（Weinstein 第二階段）：同 F8 引擎、宇宙、成本與融資假設；還原收盤 > MA_n 且 MA_n 比 10 日前高、以 60 日報酬排序，可選大盤 200 日均線閘門；引擎第一層出場線同步改成 MA_n。最好的一組沒開大盤閘門、2× 融資、組合止損 10%；2× 以上融資在台股個股屬實務上限邊緣，追繳以權益歸零近似（偏樂觀）；宇宙為抽樣 300 檔、存活者偏誤未完全排除。
 - F13（ROE 穩定度）：同 F8 引擎、宇宙、成本與融資假設；#16／#17 原版是十分位多空，這裡只做多頭半邊（放空腿借券成本未接真實資料，依放空腿硬規則不做），所以和原版 13.2% 的多空價差不能直接比。原版數字含放空腿，屬資料缺陷、不得採信。槓桿在這個家族沒有幫助（報酬低於融資利率 6.5%，加槓桿反而變差）。
 - F14（ML 價量）：同 F8 引擎、宇宙、成本與融資假設；HistGradientBoostingRegressor 預設參數、#483 同一組 10 個價量因子，標籤＝每月第一個交易日起 H 日報酬的橫斷面百分位；測試年 Y 的模型只用標籤到期日早於 Y-01-01 的樣本訓練（2011 起擴張視窗），只用當時看得到的資料。#483 原版是 2008～2012 全市場、天條一 −52.75% 死在 2008；這裡期間 2015 起**不含 2008**、宇宙是抽樣 236 檔，和原版不能直接比。
-- 美股（VTI）結論附但書：**存活者偏誤未完全修正：已下市股約 97%（抽樣 55／57）無價格來源。**（VTI 為指數 ETF，影響較小，但書照附。）
+- F15／F16（美股個股）：價格改走美股原生來源 yfinance（原版走 FinMind `USStockPrice`，台灣資料商，違反七節），一次批次下載 248 檔＋SPY（2010-01～2024-12，auto_adjust 還原股息與分割），存本機 `research/data/reaudit_us_prices.pkl`，246 檔有價；宇宙＝#151 的 `data/us_stratified_universe_sample.csv`（**今天還在的名冊**分層抽樣，存活者偏誤很重：同宇宙等權持有 2011～2024 年化 +21.8%、MDD −38.8%，遠高於 SPY 的 +13.7%／−33.7%，所以 F15／F16 要跟這個等權數字比，不是跟 SPY 比）。只做多（原版十分位多空含放空腿，依放空腿硬規則原版數字屬資料缺陷、不得採信）。訊號第 t 日收盤算、t+1 日收盤成交；換手成本單邊 0.10%〔自行裁量〕；槓桿借款＝DTB3＋1.5%/年〔自行裁量〕，3× 超過 Reg T 2× 上限只當參考。勝率＝換股期組合報酬>0 的比例、交易次數＝被換出的個股筆數（個股逐筆損益未追蹤）。F15 最好的一組（20 日波動、50 檔、月換、1×、止損 10%）年化 +13.3%／MDD −15.5%，**低於同宇宙等權 +21.8%**，好處只在回撤。F16 的 B/M 用 `us_factors_value.book_value_per_share_pit()`（SEC XBRL，本機快取 246/246 命中、零新請求），期末 158 檔有值，2011 年前後 XBRL 覆蓋較少。
+- 美股（VTI）結論附但書：**存活者偏誤未完全修正：已下市股約 97%（抽樣 55／57）無價格來源。**（VTI 為指數 ETF，影響較小，但書照附；F15／F16 是個股，影響大。）
 
