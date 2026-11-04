@@ -78,6 +78,24 @@ jobs:
             git commit -m "新聞與事件：更新 news.json / events.json（每 30 分鐘排程）"
             # 2026-10-01（【先.九】二）rebase前先收走工作目錄殘留；已commit的資料不受影響。
             git stash push --include-untracked -m ci-leftovers || true
-            git pull --rebase --autostash
-            git push
+            # 先.一三五-1kc-a（收件匣 039 定案甲）：本機新聞補班同時寫同一批檔會讓 rebase 衝突（10/21、10/25、10/30 三班紅叉）。
+            # 只有 rebase 真的停在衝突（.git/rebase-merge 或 rebase-apply 存在）才放棄本班、exit 0＋警告——main 上已有本機補班版本，
+            # 30 分鐘後下一班會蓋上最新版；其他 pull 失敗（網路錯等）照舊 exit 1 不吞錯。非衝突的單純撞車重試 3 次（比照 1ka）。
+            for i in 1 2 3; do
+              if git pull --rebase --autostash; then
+                if git push; then exit 0; fi
+                echo "push 失敗（可能有人剛推），第${i}次，重新 pull --rebase 後重試"
+                sleep $((i * 5))
+                continue
+              fi
+              if [ -d .git/rebase-merge ] || [ -d .git/rebase-apply ]; then
+                git rebase --abort || true
+                echo "::warning::本班與本機補班撞同一批檔，放棄本班、main 上已有本機補班版本（先.一三五-1kc-a）"
+                exit 0
+              fi
+              echo "::error::git pull --rebase 失敗且不是衝突（第${i}次）"
+              exit 1
+            done
+            echo "::error::push 重試 3 次仍失敗"
+            exit 1
           fi
