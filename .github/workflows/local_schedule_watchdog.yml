@@ -56,6 +56,7 @@ jobs:
           python scripts/data_schema_guard.py guard --report data/schema_guard/local_schedule_watchdog.json --label local_schedule_watchdog || true
           git add -- data/schema_guard/local_schedule_watchdog.json 2>/dev/null || true
           git add data/STATUS.json
+          git add -- data/status_lite.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "心跳欄位與上次相同，不產生 commit"
           else

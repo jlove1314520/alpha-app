@@ -354,6 +354,12 @@ def _write_into_status_json(result: dict) -> None:
         _mark_block_staleness(doc, key, now)
     _refresh_top_level(doc, now)
     STATUS_PATH.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
+    # 先.一三五-1kh-i：首頁改讀小檔 data/status_lite.json（只抽首頁用的三個欄位）；失敗只警告（十二節）
+    try:
+        from build_status_lite import write_status_lite
+        write_status_lite(STATUS_PATH)
+    except Exception as e:  # noqa: BLE001
+        print(f"::warning::status_lite 產生失敗：{type(e).__name__}: {e}")
 
 
 def _refresh_top_level(doc: dict, now: datetime) -> None:

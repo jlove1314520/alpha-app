@@ -2777,7 +2777,7 @@
     const twOpen=nowTW.wd>=1&&nowTW.wd<=5&&(nowTW.h*60+nowTW.mi)>=540&&(nowTW.h*60+nowTW.mi)<810&&!_isTwHolidayToday();  // 先.一三二-13e
     const usOpen=usMarketSession(nowUS)==='regular';  // 先.一三二-13d：扣休市日與半日市（原本寫死 09:30～16:00）
     const problems=diagQuoteProblems(twOpen,usOpen);
-    const stDoc=await ensureStatusDoc();
+    const stDoc=await ensureStatusLite();
     const twSched=marketScheduleLabel(stDoc,'tw'),usSched=marketScheduleLabel(stDoc,'us');
     // 先.九十五-R1 順帶：斷網時沒抓到檔，說「離線」而不是「尚未排程抓取或抓取失敗」
     const netOff=navigator.onLine===false||INTRADAY_NET_OFF.tw;
@@ -4942,7 +4942,7 @@
   // 啟動時自己抓一次 STATUS.json（設定頁沒被點開也要看得到橫幅）。抓檔失敗
   // 一律當成「沒有告警」處理，不得讓它變成另一個單點故障（CLAUDE.md 十二節 fail open）。
   async function loadClaudeAuthBanner(){
-    renderClaudeAuthBanner(await ensureStatusDoc());
+    renderClaudeAuthBanner(await ensureStatusLite());
   }
   // 常備.開發-20（2026-10-11）：啟動時 Claude 授權橫幅與診斷橫幅都要 STATUS.json，共用一次下載
   // （60 秒內重用）。失敗回 null，呼叫端照舊當成「沒有資料」處理（十二節 fail open）。
@@ -4954,13 +4954,25 @@
       .catch(e=>{console.warn('[ensureStatusDoc]',e);return null});
     return STATUS_DOC_P;
   }
+  // 先.一三五-1kh-i（2026-11-04）：首頁只用 STATUS.json 的三個欄位（workflows[market.yml]／data_files[fundamentals]／
+  // local_schedule_heartbeat.claude_auth），改讀 scripts/build_status_lite.py 抽出的小檔 data/status_lite.json（約 1KB，
+  // 整份 STATUS gzip 約 20KB、會一直長，冒煙 #78 首頁 350KB 門檻被它推過）。小檔讀不到或格式不對才退回整份（十二節 fail open）。
+  let STATUS_LITE_P=null,STATUS_LITE_AT=0;
+  function ensureStatusLite(){
+    if(STATUS_LITE_P&&Date.now()-STATUS_LITE_AT<60*1000)return STATUS_LITE_P;
+    STATUS_LITE_AT=Date.now();
+    STATUS_LITE_P=fetch('data/status_lite.json?t='+Date.now()).then(r=>r.ok?r.json():null)
+      .then(j=>(j&&Array.isArray(j.workflows)&&Array.isArray(j.data_files))?j:ensureStatusDoc())
+      .catch(e=>{console.warn('[ensureStatusLite] 退回整份 STATUS.json',e);return ensureStatusDoc()});
+    return STATUS_LITE_P;
+  }
   // 2026-08-25 新增，2026-08-28擴充：設定頁+首頁底部顯示 App 版本／Service
   // Worker 版本／SW 狀態，方便確認手機是不是真的更新到最新版（用手機開 App
   // 時肉眼比對這裡的版本號即可）。**這個常數由 .git/hooks/pre-commit 在每次
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-11-04.0230';
+  const APP_VERSION='2026-11-04.1512';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

@@ -1468,6 +1468,12 @@ def main():
         except Exception:  # noqa: BLE001 -- 舊檔壞掉就不保留，不讓這支也跟著炸
             pass
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    # 先.一三五-1kh-i：同步產生首頁用的小檔 data/status_lite.json；失敗只警告（十二節）
+    try:
+        from build_status_lite import write_status_lite
+        write_status_lite(OUT_PATH)
+    except Exception as e:  # noqa: BLE001
+        print(f"::warning::status_lite 產生失敗：{type(e).__name__}: {e}")
     print(f"寫入 {OUT_PATH}")
     print(f"latest_commit={payload['latest_commit']}，data_files={len(payload['data_files'])}筆，workflows={len(payload['workflows'])}筆")
 
