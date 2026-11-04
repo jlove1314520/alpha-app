@@ -353,7 +353,8 @@ def _write_into_status_json(result: dict) -> None:
     for key in STALENESS_WATCHED_KEYS:
         _mark_block_staleness(doc, key, now)
     _refresh_top_level(doc, now)
-    STATUS_PATH.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
+    # 先.一三五-1kh-r：明確寫 LF，Windows 文字模式預設會寫成 CRLF
+    STATUS_PATH.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8", newline="\n")
     # 先.一三五-1kh-i：首頁改讀小檔 data/status_lite.json（只抽首頁用的三個欄位）；失敗只警告（十二節）
     try:
         from build_status_lite import write_status_lite

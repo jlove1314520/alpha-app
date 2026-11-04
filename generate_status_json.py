@@ -1468,7 +1468,8 @@ def main():
                 payload["local_schedule_heartbeat"] = prior["local_schedule_heartbeat"]
         except Exception:  # noqa: BLE001 -- 舊檔壞掉就不保留，不讓這支也跟著炸
             pass
-    OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    # 先.一三五-1kh-r：明確寫 LF，Windows 本機跑時文字模式預設會寫成 CRLF
+    OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8", newline="\n")
     # 先.一三五-1kh-i：同步產生首頁用的小檔 data/status_lite.json；失敗只警告（十二節）
     try:
         from build_status_lite import write_status_lite
