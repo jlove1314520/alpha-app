@@ -81,5 +81,23 @@ finally:
 
 t = C.commit_title("2026-10-15", ["2026-10-13"], 3)
 check("⑤標題用資料日", "資料日 2026-10-15" in t and "10/13" in t)
+
+# ⑥ 先.一三五-1kf：查雲端狀態失敗 → 仍回 None（fail open），但 CLOUD_CHECK 留下原因
+_sh = C.sh
+def _fake(rc, out="", err=""):
+    return lambda args, **k: type("R", (), {"returncode": rc, "stdout": out, "stderr": err})()
+try:
+    C.sh = _fake(1, err="HTTP 401: Requires authentication" + chr(10) + "Try gh auth login")
+    check("⑥gh 失敗 → None＋記錯誤第一行", C.cloud_running("2026-10-16T00:00:00Z") is None
+          and C.CLOUD_CHECK.get("cloud_check_error") == "HTTP 401: Requires authentication")
+    C.sh = _fake(0, out="not json")
+    check("⑥輸出不是 JSON → None＋記錯誤、不拋例外", C.cloud_running("2026-10-16T00:00:00Z") is None
+          and "JSON" in C.CLOUD_CHECK.get("cloud_check_error", ""))
+    C.sh = _fake(0, out='[{"status":"in_progress","createdAt":"2026-10-16T09:00:00Z","databaseId":7}]')
+    check("⑥正常且在跑 → 回 run id、清掉舊錯誤", C.cloud_running("2026-10-16T00:00:00Z") == 7 and not C.CLOUD_CHECK)
+    C.sh = _fake(0, out='[{"status":"completed","createdAt":"2026-10-16T09:00:00Z","databaseId":7}]')
+    check("⑥正常但已完成 → None、無錯誤", C.cloud_running("2026-10-16T00:00:00Z") is None and not C.CLOUD_CHECK)
+finally:
+    C.sh = _sh
 print(f"{sum(results)}/{len(results)} PASS")
 sys.exit(0 if all(results) else 1)

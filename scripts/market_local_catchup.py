@@ -204,11 +204,23 @@ def landed_date():
     return json.loads(r.stdout).get("data_date")
 
 
+CLOUD_CHECK = {}  # 先.一三五-1kf：查不到雲端狀態時記原因，帶進心跳（原本靜默當成沒在跑）
+
+
 def cloud_running(today_utc_start, statuses=("queued", "in_progress", "waiting", "pending")):
+    CLOUD_CHECK.clear()
     r = sh(["gh", "run", "list", "--workflow=market.yml", "-L", "5", "--json", "status,createdAt,databaseId"])
-    if r.returncode:
+    if r.returncode:  # 讀不到照舊當成沒在跑（漏跑才有害），但要留下紀錄
+        CLOUD_CHECK["cloud_check_error"] = ((r.stderr or "").strip().splitlines() or ["?"])[0][:160]
+        print("warn: 查雲端 market.yml 狀態失敗，當成沒在跑：", CLOUD_CHECK["cloud_check_error"])
         return None
-    for run in json.loads(r.stdout or "[]"):
+    try:
+        runs = json.loads(r.stdout or "[]")
+    except ValueError as e:
+        CLOUD_CHECK["cloud_check_error"] = f"JSON 解析失敗：{e}"[:160]
+        print("warn:", CLOUD_CHECK["cloud_check_error"])
+        return None
+    for run in runs:
         if run["createdAt"] >= today_utc_start and run["status"] in statuses:
             return run["databaseId"]
     return None
@@ -361,6 +373,7 @@ def main():
         rid = cloud_running(start_utc, ("in_progress",) if a.late else ("queued", "in_progress", "waiting", "pending"))
         if rid:
             return heartbeat({"date": today, "result": "cloud_running", "run_id": rid, **info})
+        tag.update(CLOUD_CHECK)
     if a.check:
         return heartbeat({"date": today, "result": "not_landed_check_only", **info})
     steps, add_line = load_steps()

@@ -146,9 +146,39 @@ def local_push_and_dispatch(alarm: bool, changed: bool = True) -> None:
     msg = "台股當日資料檢查（先.一一三-A3）：" + (("告警" if alarm else "解除") if changed else "執行紀錄")
     print(G.commit_paths(["data/tw_data_alarm.json", "research/tw_data_check.jsonl"], msg))
     if alarm:
-        r = subprocess.run(["gh", "workflow", "run", "tw_data_landed_check.yml", "-f", "reason=local_20_30"],
-                           cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
-        print("已叫雲端檢查（失敗推播）" if r.returncode == 0 else f"::warning::叫雲端檢查失敗：{r.stderr.strip()[:200]}")
+        dispatch_or_push()
+
+
+def dispatch_or_push(run=subprocess.run, notify=None) -> str:
+    """叫雲端檢查（讓 Actions 失敗推播發出去）；叫不動就改用本機 Web Push 直接推（先.一三五-1ke）。
+
+    10/23 起本機 gh token 失效，`gh workflow run` 一律 HTTP 401，告警日的推播全沒發出、只留在本機 log。
+    回傳 "dispatched"／"pushed"／"push_failed"；自己任何例外只印警告（十二節）。
+    """
+    err = ""
+    try:
+        r = run(["gh", "workflow", "run", "tw_data_landed_check.yml", "-f", "reason=local_20_30"],
+                cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
+        if r.returncode == 0:
+            print("已叫雲端檢查（失敗推播）")
+            return "dispatched"
+        err = (r.stderr or "").strip()[:200]
+    except Exception as e:  # noqa: BLE001
+        err = f"{type(e).__name__}: {e}"
+    print(f"::warning::叫雲端檢查失敗：{err}；改用本機推播")
+    try:
+        if notify is None:
+            sys.path.insert(0, str(ROOT / "research"))
+            import web_push  # noqa: PLC0415
+            notify = web_push.notify
+        res = notify("今日台股資料未進來", MESSAGE + "（本機 20:30 檢查；雲端檢查叫不動，改由本機直接推播）",
+                     kind="watchdog")
+        sent = isinstance(res, dict) and res.get("ok")
+        print("本機推播：" + ("已送出" if sent else f"未送達 {res if isinstance(res, dict) else ''}"))
+        return "pushed" if sent else "push_failed"
+    except Exception as e:  # noqa: BLE001
+        print(f"::warning::本機推播也失敗：{type(e).__name__}: {e}")
+        return "push_failed"
 
 
 def main(argv=None) -> int:

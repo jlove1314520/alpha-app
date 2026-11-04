@@ -1,3 +1,16 @@
+## 2026-11-04 08:3x DevQueue（維運帽，空轉補件 先.一三五-1）：gh token 失效影響範圍——1ke 落地告警推播備援、1kf 補班查雲端失敗留紀錄、1kg 實地驗收
+
+- **等待總司令審閱：13 件**（本輪沒有新增 AWAITING；同上一輪 13 件，`research/AWAITING_REVIEW.md` 未改）。
+- **前向模擬上限 14／14 已滿**：本輪不新增候選、不寫 PREREG、不送候選 AWAITING、不碰 holdout、不算報酬、不登記試驗；只在 `research/FORWARD_CANDIDATES.md` 記一行本輪補件。
+- **做了什麼**：
+  ①**1ke（純 bug 修復）**：本機 20:30 台股落地檢查在 10/23、10/27、10/28、10/29 四個告警日叫雲端發失敗推播全被 HTTP 401 擋掉（`research/tw_data_landed_check.log`），告警只留在本機 log。`scripts/check_tw_data_landed.py` 改成 gh 叫不動就用本機 Web Push（kind=watchdog）直接推；自測加 6 項，96／96 過。
+  ②**1kf（純 bug 修復）**：`scripts/market_local_catchup.py::cloud_running()` 查不到雲端狀態時原本靜默當成沒在跑；行為不變（照舊 fail open），改成印 warn 並把原因寫進心跳 `cloud_check_error`。自測加 ⑥ 4 項，10／10 過。
+  ③**gh 清查**：本機呼叫 gh 的 8 支裡只有 ①需要登入；`gh run list` 未登入仍可讀（本輪 1 次實測 rc=0）；`watchdog_dispatch_market.py` 跑在雲端不受影響。
+- **[自行裁量]**：1ke 用既有本機 Web Push 當備援，不等新 PAT（補 PAT 時間不確定，告警通道不能等）。
+- **BLOCKED**：1kg 時間閘（下一個告警日或新 PAT 設好）；1kd-e 仍等總司令新 PAT。
+- **外部請求**：GitHub API 1 次（`gh run list` 未登入讀取）；資料端點 0 次。
+- **冒煙測試**：`node scripts/smoke_test.mjs` exit 0，181 項全部 `[x]`、無 FAIL。
+
 ## 2026-11-04 07:2x DevQueue（維運帽→開發帽，cycle 20261104-070101）：1kd workflow 失敗班清點＋market／quotes 衝突提案、冒煙第 146 項改測 App 路徑、gh token 失效登記
 
 - **等待總司令審閱：13 件**（新增 先.一三五-1kd-a 衝突提案、先.一三五-1kd-e 請總司令提供新 PAT；`research/AWAITING_REVIEW.md` 等待中表格 13 列，一致）。

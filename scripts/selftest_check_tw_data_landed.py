@@ -148,5 +148,52 @@ with tempfile.TemporaryDirectory() as td:
     case("疑似休市是昨天", "2026-10-29T21:00:00+08:00", 1, True, data_date="2026-10-28",
          cal=scal(suspected_closed_today={"date": "2026-10-28"}))
 
+print("情境六（先.一三五-1ke）：叫雲端檢查失敗時改用本機推播（gh／推播都換假的，零外部請求）")
+
+
+class _R:
+    def __init__(self, rc, err=""):
+        self.returncode, self.stderr, self.stdout = rc, err, ""
+
+
+def _fake_run(rc=0, err="", boom=False):
+    calls = []
+
+    def f(args, **kw):
+        calls.append(args)
+        if boom:
+            raise FileNotFoundError("gh")
+        return _R(rc, err)
+    return f, calls
+
+
+def _fake_notify(ok_=True, boom=False):
+    calls = []
+
+    def f(title, body, kind="info", **kw):
+        calls.append((title, body, kind))
+        if boom:
+            raise RuntimeError("push boom")
+        return {"ok": ok_, "sent": 1 if ok_ else 0}
+    return f, calls
+
+
+run_, rc_ = _fake_run(0)
+nt, nc = _fake_notify()
+check("gh 成功 → dispatched、不推播", B.dispatch_or_push(run_, nt) == "dispatched" and len(rc_) == 1 and not nc)
+run_, rc_ = _fake_run(1, "HTTP 401: Requires authentication")
+nt, nc = _fake_notify()
+res = B.dispatch_or_push(run_, nt)
+check("gh 401 → 本機推播 pushed", res == "pushed" and len(nc) == 1, res)
+check("推播類別＝watchdog（設定頁「漏跑」可關）、標題含未進來", nc and nc[0][2] == "watchdog" and "未進來" in nc[0][0], nc)
+run_, _ = _fake_run(boom=True)
+nt, nc = _fake_notify()
+check("找不到 gh（例外）→ 照樣本機推播", B.dispatch_or_push(run_, nt) == "pushed" and len(nc) == 1)
+run_, _ = _fake_run(1, "x")
+nt, _ = _fake_notify(ok_=False)
+check("推播未送達 → push_failed、不拋例外", B.dispatch_or_push(run_, nt) == "push_failed")
+nt, _ = _fake_notify(boom=True)
+check("推播本身拋例外 → push_failed、不拋例外（十二節）", B.dispatch_or_push(run_, nt) == "push_failed")
+
 print(f"\n合計 {ok} 過、{fail} 失敗")
 sys.exit(1 if fail else 0)
