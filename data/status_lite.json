@@ -1,11 +1,11 @@
 {
  "_note": "由 scripts/build_status_lite.py 從 data/STATUS.json 抽出首頁用的欄位；完整內容看 STATUS.json",
- "source_updated_at": "2026-11-05T02:55:48.921410+08:00",
- "generated_at": "2026-11-04T18:55:51+00:00",
+ "source_updated_at": "2026-11-05T06:18:35.816974+08:00",
+ "generated_at": "2026-11-04T22:18:59+00:00",
  "workflows": [
   {
    "file": ".github/workflows/market.yml",
-   "name": null,
+   "name": "大盤/類股/三大法人/期貨/美股指數",
    "schedule": "台股收盤後 17:13（補救 18:41） 台北／美股收盤後 05:43 台北（隔日），週一至週五（GitHub 排程常延遲數小時）",
    "crons": [
     {
@@ -30,9 +30,12 @@
      "comment": "台北隔日 05:43 — 美股班次"
     }
    ],
-   "last_run": null,
-   "last_status": null,
-   "today_runs": null
+   "last_run": "2026-11-04T18:13:50Z",
+   "last_status": "success",
+   "today_runs": {
+    "date_tw": "2026-11-05",
+    "total": 0
+   }
   }
  ],
  "data_files": [
