@@ -43,3 +43,24 @@
 - PowerShell `*>>` 寫的 log 是 UTF-16，`pipeline_freshness` 的 `log_last_timestamp` 解不出時間戳、會退回 mtime；
   有進 git 的 log（例：`research/tdcc_holders_cycle.log`）mtime 會被 checkout／pull 改寫，不能當判準（1kh-c 同一個坑）。
 - 真錢相關（AlphaAuto*）只能看「有沒有跑」的痕跡，盤點與登記都不執行、不觸發下單程式。
+
+## 1kh-g 登記結果（2026-11-04 DevQueue 20261104-123101）
+
+資料類 12 支登記成 `data/seed/pipeline_registry.json` 11 條（AlphaMarketCatchup／Late 寫同一份 jsonl，合一條）。
+登記當下實跑 `pipeline_freshness.evaluate()`（2026-11-04 12:3x）：
+
+| 排程 | 看什麼 | 判準 | 結果 | 跟盤點表不同處 |
+|---|---|---|---|---|
+| AlphaTdccHolders | data/holders.json `meta.generated_at` | 每 10080 分×3 | ok（10-31 09:00） | — |
+| AlphaWarrantSnapshot | data/warrant_backup_status.json `generated_at` | 1440×3，tw_trading_days_only | ok（11-03 17:37） | — |
+| AlphaMoeaPitSnapshot | research/data/moea_pit_status.json `run_utc` | 1440×3 | ok（11-04 10:30） | 時間欄位是 run_utc（UTC） |
+| AlphaRfMonthly | research/data/rf_monthly_cycle.log 最後時間戳 | 1440×3 | ok（11-04 09:20） | 不用 rf_monthly.json（月資料、沒變不 commit） |
+| AlphaFinMindWarmup | research/data/finmind_warmup_status.json `ts` | 15×3 | ok（11-04 12:22） | — |
+| AlphaPaperSupplyV2 | research/data/paper_supply_v2_cycle.log 最後時間戳 | 60×3 | ok（11-04 12:10） | paper_supply_v2_log.jsonl 實際不存在 |
+| AlphaPaper9 | research/data/paper_9_cycle.log 最後時間戳 | 1440×3，tw_trading_days_only | ok（11-03 18:30） | data/paper_9.json 另有寫手（11-04 01:12），不能用 |
+| AlphaB25Control | research/data/b25_random_control/run.log mtime | 1440×3 | ok（11-04 00:30） | 任務 10-19 已完成，每晚只寫「已完成過」；停用另案 1kh-g1 |
+| AlphaMarketCatchup（含 Late） | research/market_local_catchup.jsonl 末筆 `ts` | 1440×3，tw_trading_days_only | ok（11-03 19:30） | 兩支合一條 |
+| AlphaMarginCkCheck | research/data/margin_reconcile/ck_check_log.jsonl 末筆 `ts` | 1440×3，tw_trading_days_only | ok（11-03 19:30） | 產出查到了 |
+| AlphaTwDataCheck | research/tw_data_landed_check.log mtime | 1440×3，tw_trading_days_only | ok（11-03 20:30） | 日誌行沒時間戳，用 mtime |
+
+所有 log 都查過：UTF-8（有 BOM 或純 ASCII）、在 `.gitignore`，git 不會改 mtime。

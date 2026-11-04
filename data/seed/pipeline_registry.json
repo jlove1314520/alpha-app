@@ -750,6 +750,105 @@
           "2026-10-28T22:37:02.426661+08:00"
         ]
       }
+    },
+    {
+      "task": "AlphaTdccHolders",
+      "purpose": "集保股權分散表（千張大戶）每日 09:00 → data/holders.json（官方週更，同一週已存就不重產）",
+      "interval_min": 10080,
+      "artifact": "data/holders.json",
+      "freshness": "json_field",
+      "field": "meta.generated_at",
+      "note": "先.一三五-1kh-g（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。同一週已存就略過不重產，meta.generated_at 只在新的一週才前進，所以 interval 用 10080（門檻 3 倍＝21 天）。不用 research/tdcc_holders_cycle.log：PowerShell *>> 寫成 UTF-16 且有進 git，mtime 會被 checkout／pull 改寫（1kh-c 同一個坑）。限制：門檻寬，要停擺約 3 週才亮燈。"
+    },
+    {
+      "task": "AlphaWarrantSnapshot",
+      "purpose": "權證每日快照（週一～五 17:30，scripts/run_warrant_snapshot.ps1）→ data/warrant_backup_status.json",
+      "tw_trading_days_only": true,
+      "interval_min": 1440,
+      "artifact": "data/warrant_backup_status.json",
+      "freshness": "json_field",
+      "field": "generated_at",
+      "note": "先.一三五-1kh-g（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。launcher 每次執行都重寫 generated_at（成功或失敗都會），所以本條只證明排程有跑；快照本身成敗看同檔 last_snapshot_date／last_failure。休市日不跑，標 tw_trading_days_only；週一判週五產出約 2.7 天＜門檻 3 天。"
+    },
+    {
+      "task": "AlphaMoeaPitSnapshot",
+      "purpose": "經濟部統計 PIT 快照（每日 10:30，scripts/snapshot_moea_pit.py）→ research/data/moea_pit_status.json",
+      "interval_min": 1440,
+      "artifact": "research/data/moea_pit_status.json",
+      "freshness": "json_field",
+      "field": "run_utc",
+      "note": "先.一三五-1kh-g（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。run_utc 每次執行都寫（資料沒變也寫），UTC 帶 Z。檔案在 research/data/（.gitignore），只在本機。"
+    },
+    {
+      "task": "AlphaRfMonthly",
+      "purpose": "無風險利率月序列（每日 09:20，scripts/export_rf_monthly.py）→ data/rf_monthly.json",
+      "interval_min": 1440,
+      "artifact": "research/data/rf_monthly_cycle.log",
+      "freshness": "log_last_timestamp",
+      "note": "先.一三五-1kh-g（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。資料是月頻、序列沒變就不 commit，rf_monthly.json 的 fetched_at／資料月份都不適合判每日有沒有跑；改看 launcher 日誌（UTF-8，每輪開頭寫『===== rf_monthly launcher: 時間 =====』，已 .gitignore）。只證明有觸發。"
+    },
+    {
+      "task": "AlphaFinMindWarmup",
+      "purpose": "FinMind 預熱抓取（每 15 分鐘，research/finmind_warmup.py）→ research/data/finmind_warmup_status.json",
+      "interval_min": 15,
+      "artifact": "research/data/finmind_warmup_status.json",
+      "freshness": "json_field",
+      "field": "ts",
+      "note": "先.一三五-1kh-g（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。status 每輪結束寫 ts（含呼叫次數、停止原因），門檻 45 分鐘。檔案只在本機（.gitignore）。"
+    },
+    {
+      "task": "AlphaPaperSupplyV2",
+      "purpose": "模擬供給 v2（每小時，research/paper_supply_v2.py）",
+      "interval_min": 60,
+      "artifact": "research/data/paper_supply_v2_cycle.log",
+      "freshness": "log_last_timestamp",
+      "note": "先.一三五-1kh-g（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。盤點表寫的 research/data/paper_supply_v2_log.jsonl 實際不存在（launcher 回『no log file yet』），改看 launcher 日誌（UTF-8，每輪寫開頭時間，.gitignore）。只證明有觸發。"
+    },
+    {
+      "task": "AlphaPaper9",
+      "purpose": "模擬 I（paper_9）每日標記（週一～五 18:30，scripts/run_paper_9.py）→ data/paper_9.json",
+      "tw_trading_days_only": true,
+      "interval_min": 1440,
+      "artifact": "research/data/paper_9_cycle.log",
+      "freshness": "log_last_timestamp",
+      "note": "先.一三五-1kh-g（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。不用 data/paper_9.json 的 generated_at：實測 11-04 01:12 有別的寫手刷新它（非 18:30 這支），會遮住本機停擺；改看本機 launcher 日誌（UTF-8，.gitignore）。"
+    },
+    {
+      "task": "AlphaB25Control",
+      "purpose": "B25 regime 隨機控制組（每日 00:30，research/b25_random_control_regime.py --max-minutes 300）",
+      "interval_min": 1440,
+      "artifact": "research/data/b25_random_control/run.log",
+      "freshness": "mtime",
+      "note": "先.一三五-1kh-g（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。任務已於 2026-10-19 跑完（finished_at 2026-10-19T01:07），之後每晚只寫一行『已完成過』。日誌時間戳是『[MM-DD HH:MM:SS]』沒有年份，log_last_timestamp 解不出，用 mtime（檔案在 .gitignore 的 research/data/，git 不會改 mtime）。是否停用這支排程另案提案（先.一三五-1kh-g1）。"
+    },
+    {
+      "task": "AlphaMarketCatchup",
+      "purpose": "market.yml 本機補班檢查（週一～五 17:30＋19:30 兩支排程 AlphaMarketCatchup／AlphaMarketCatchupLate 共用，scripts/market_local_catchup.py）",
+      "tw_trading_days_only": true,
+      "interval_min": 1440,
+      "artifact": "research/market_local_catchup.jsonl",
+      "freshness": "jsonl_last_field",
+      "field": "ts",
+      "note": "先.一三五-1kh-g（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。兩支排程寫同一份 jsonl（layer 欄區分），合為一條：任一支有跑就不算停擺，所以單獨一支停掉抓不到——[自行裁量] 接受，因兩支是同一件事的早晚兩班。只證明有觸發，不證明有補成功（result 欄另看）。"
+    },
+    {
+      "task": "AlphaMarginCkCheck",
+      "purpose": "融資維持率 vs 籌碼K 對帳（週一～五 19:30，scripts/margin_ck_check.py）",
+      "tw_trading_days_only": true,
+      "interval_min": 1440,
+      "artifact": "research/data/margin_reconcile/ck_check_log.jsonl",
+      "freshness": "jsonl_last_field",
+      "field": "ts",
+      "note": "先.一三五-1kh-g（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。盤點表標『產出待查』，查程式得每次執行 append 一筆 ts 到 ck_check_log.jsonl（.gitignore，外部數值不進 repo）。"
+    },
+    {
+      "task": "AlphaTwDataCheck",
+      "purpose": "台股資料落地檢查本機層（週一～五 20:30，scripts/check_tw_data_landed.py --layer local）",
+      "tw_trading_days_only": true,
+      "interval_min": 1440,
+      "artifact": "research/tw_data_landed_check.log",
+      "freshness": "mtime",
+      "note": "先.一三五-1kh-g（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。日誌行沒有時間戳，用 mtime；cmd >> 寫入（非 UTF-16），檔案在 .gitignore，git 不會改 mtime。"
     }
   ],
   "github_pat_expiry": {
