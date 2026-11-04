@@ -79,13 +79,18 @@ def sec_system_health(now: datetime) -> dict:
     }
     ts = _parse_ts(a.get("generated_at"))
     out["audit_age_hours"] = round((now - ts).total_seconds() / 3600, 1) if ts else None
+    # 先.一三五-1kh：self_check 是雲端 audit.yml（audit_preflight.py）寫的，本機 23:00 data_audit.py 只保留原樣、
+    # 卻會刷新頂層 generated_at——自檢新鮮度要看它自己的 checked_at，不能借頂層時間（雲端停擺時會被誤當成新的）
+    sts = _parse_ts(sc.get("checked_at"))
+    out["self_check_checked_at"] = sc.get("checked_at")
+    out["self_check_age_hours"] = round((now - sts).total_seconds() / 3600, 1) if sts else None
     # 稽核附帶的本機管線告警（含「使用者可見阻塞」「合規」等非新鮮度類告警），只取前 8 條避免灌爆
     out["alerts"] = [str(s)[:160] for s in (lth.get("stalled") or [])][:8]
     out["alerts_total"] = len(lth.get("stalled") or [])
     lvl = "ok"
     if out["audit_gate_pass"] is False or out["self_check_ok"] is False:
         lvl = "bad"
-    elif out["alerts_total"] or (out["audit_age_hours"] or 0) > 48:
+    elif out["alerts_total"] or (out["audit_age_hours"] or 0) > 48 or (out["self_check_age_hours"] or 0) > 48:
         lvl = "warn"
     out["level"] = lvl
     return out
@@ -192,7 +197,9 @@ def summary_lines(rep: dict) -> list:
     L = []
     h = rep.get("system_health") or {}
     if "error" not in h:
-        L.append(f'系統健康：稽核閘門{"通過" if h.get("audit_gate_pass") else "未通過"}、自檢{"正常" if h.get("self_check_ok") else "異常"}、告警 {h.get("alerts_total", 0)} 條')
+        L.append(f'系統健康：稽核閘門{"通過" if h.get("audit_gate_pass") else "未通過"}、自檢{"正常" if h.get("self_check_ok") else "異常"}、告警 {h.get("alerts_total", 0)} 條'
+                 + (f'（自檢結果已 {h["self_check_age_hours"]:.0f} 小時沒更新，雲端 audit.yml 可能停擺）'
+                    if (h.get("self_check_age_hours") or 0) > 48 else ''))
     f = rep.get("freshness") or {}
     if "error" not in f:
         n_bad = len(f.get("stalled") or [])
