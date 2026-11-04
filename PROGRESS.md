@@ -1,3 +1,20 @@
+## 2026-11-04 18:01～18:4x DevQueue 20261104-180102（維運帽）
+
+**等待總司令審閱：13 件**（本輪新增 1 件 1kh-v 後，依 Cowork 收件匣 039〔先.一四九-1〕結案 6 件：1kh-v、1hb、一四四-1、1kc-a、1kj、1hn；清單見 `research/AWAITING_REVIEW.md`「等待中」）。
+
+- **先.一三五-1kh-v ✅（commit 620241cf187）data_files 門檻／static 提案**：`docs/PROPOSAL_DATA_FILES_STATIC_THRESHOLDS.md`（甲建議／乙／丙）。PENDING_QUEUE 本條 `[x]` 被互動視窗 064ce48b7d8 一併提交（共用工作目錄，十三節第 5 點如實記錄）。
+- **先.一四九-1（收件匣 039，11 件一次定案）本輪做 6 件，條目維持 `- [ ]`**：
+  - **零之二預設放行為什麼沒觸發（根因＋修好＋自測）**：`_default_release_candidates()` 的排除字比對**整列**，說明欄的順帶字眼把提案擋掉——1hb「Disable、**不刪除**」、1hn「claude **登入**過期」、1gt「**門檻** 99.9788 百分位」，所以 11/01～11/02 這三件等了 49～78 小時也沒被放行；乾淨的 1ie／1ib／1hx 有照常放行。修法：holdout／真錢／實盤照舊比整列，其他排除字只比「項目」欄（要總司令動手的列項目欄都寫「請總司令」），「門檻」改只認「關卡門檻／通過門檻／GATE數字／violation_rate」。自測 `selftest_dev_queue_idle_fallback.py` 加第 4 項（1hb／1hn／1gt 實例放行、刪除／真錢／改 GATE 門檻照擋），11 支 DevQueue 自測全過。次要原因（如實記錄、未改）：預設放行只在「沒有可執行 `- [ ]`」時才跑，佇列有貨時會延後。
+  - **1kj 甲（與 1hn 合併）**：`find_next()` 找不到 `- [ ]` 時，把行首標準格式〔時間閘：YYYY-MM-DD（週X）[HH:MM ]後…〕且台北時間已過的 `- [!]` **由機器直接改回 `- [ ]`**（行尾記「時間閘已到，DevQueue 自動轉回待辦」）再取件；時間窗、行中時間閘、事件條件、怪格式、引文內一律不認；自身失敗 fail open。[自行裁量] 提案原寫「提示詞叫它先改回 `- [ ]`」，改成機器直接改——不靠模型記得做，mark_blocked／record 也會對到同一行。新自測 `scripts/selftest_dev_queue_time_gate.py` 全過。
+  - **1hb 乙**：`AlphaTwsePublishProbe` 已 `Disable-ScheduledTask`（State=Disabled；未刪除，設定先匯出到 `C:\alpha\task_trigger_backup\AlphaTwsePublishProbe_20261104_before_disable.xml`）；`pipeline_registry.json` 該列加 `retired`；T86 結論（16:15～16:45）與 STOCK_DAY_ALL 視窗量不到的結論寫進 `docs/LOCAL_SCHEDULED_TASKS.md` 第七節。每交易日少約 108 次 TWSE 請求。
+  - **1kh-v 甲**：`generate_status_json.py` holders／tw50_constituents 給 192 小時、7 個一次性／研究檔列 `GENERIC_SKIP_STALE`。本機用 HEAD 版與新版各跑一次 `build_data_files()`（不寫回 STATUS.json）：132 列只變 9 列（stale→ok 2、stale→static 2、no_date→static 5），其他 123 列不變；stale 10→6、no_date 6→1。stock_names 加時間欄位照提案另條（既有 1kh-x）。STATUS.json 下一班 market.yml 重產生效。
+  - **1kc-a 甲**：`news_events.yml` Commit 步驟改成 pull/push 迴圈：rebase 真的停在衝突才 abort＋`::warning::`＋exit 0；非衝突撞車重試 3 次；其他 pull 失敗 exit 1。新自測 `scripts/selftest_news_commit_conflict.py`（暫存 repo：同檔衝突／非快轉／遠端連不到）全過。本 commit 新增的 workflow 步驟只改 git 流程、不新增輸出檔（十節）。
+  - **一四四-1 甲**：維持現狀，不動作，AWAITING 結案。
+  - **未做（留下一輪）**：1gt 乙（改 `selection_bias_ledger.py` 分軌門檻＝研究／驗證帽，一輪一頂帽子）、1jt-a 甲（融資逐股另存＋git 歷史回補）、1kd-a 甲（market.yml 逐檔取捨）、1kh-e 甲（停擺自檢要新增「補抓比例」判斷類型）、1kh-l 丙（乙要確認設定頁有沒有讀 `source`／`detail`，且 app.js 正被互動視窗改）。1kh-o／1kh-s 照 039 暫緩。
+- **冒煙測試**：主工作目錄 18:0x 跑出 3 項 FAIL（16／28／36，自選股小圖）——來源是互動視窗**尚未提交**的 `app.js`／`smoke_test.mjs`（先.一四八-4），不是本輪變更；第一個 commit 620241cf187（只有文件）前那次冒煙我只看了尾段 8 行、沒逐項確認，如實記錄。之後改在乾淨的 HEAD 副本（`git worktree`＋本輪變更檔，埠 8793）重跑：第 1 次 181 PASS／1 FAIL（#179 強制更新按鈕高 43.99998＜44，次像素誤差；主工作目錄同項通過、本輪沒碰 App）→ 18:19～18:24 重跑 182 PASS／0 FAIL、exit 0，之後才提交程式 commit。
+- **收工補件**：DevQueue 可執行（非研究）只剩 4 項（<6）→ 補 1kh-v2（supply_watchlist 每晚 18～23 點假 stale，寫提案，①）、1kh-v3（app_errors_summary 本機檔停在 10/17，查證，①），來源＝本輪 build_data_files() 比對。暫停④文書類。
+- **BLOCKED／未做**：1kh-h1 仍等總司令重裝 IB Gateway；1kh-w 時間閘 11/05 00:00。
+
 ## 2026-11-04 17:01～17:4x DevQueue 20261104-170102（維運帽；本輪提示允許非[研究]類，1kh-s 為[開發]提案）
 
 **等待總司令審閱：18 件**（本輪新增 1 件：1kh-s 首頁費半膠囊逾期字樣提案〔建議甲〕；清單見 `research/AWAITING_REVIEW.md`「等待中」）。
