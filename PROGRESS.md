@@ -1,6 +1,6 @@
 ## 2026-11-04 18:01～18:4x DevQueue 20261104-180102（維運帽）
 
-**等待總司令審閱：13 件**（本輪新增 1 件 1kh-v 後，依 Cowork 收件匣 039〔先.一四九-1〕結案 6 件：1kh-v、1hb、一四四-1、1kc-a、1kj、1hn；清單見 `research/AWAITING_REVIEW.md`「等待中」）。
+**等待總司令審閱：14 件**（本輪新增 2 件〔1kh-v、1kh-v2 supply_watchlist 判法提案，建議甲〕；另依 Cowork 收件匣 039〔先.一四九-1〕結案 6 件：1kh-v、1hb、一四四-1、1kc-a、1kj、1hn；清單見 `research/AWAITING_REVIEW.md`「等待中」）。
 
 - **先.一三五-1kh-v ✅（commit 620241cf187）data_files 門檻／static 提案**：`docs/PROPOSAL_DATA_FILES_STATIC_THRESHOLDS.md`（甲建議／乙／丙）。PENDING_QUEUE 本條 `[x]` 被互動視窗 064ce48b7d8 一併提交（共用工作目錄，十三節第 5 點如實記錄）。
 - **先.一四九-1（收件匣 039，11 件一次定案）本輪做 6 件，條目維持 `- [ ]`**：
@@ -11,7 +11,8 @@
   - **1kc-a 甲**：`news_events.yml` Commit 步驟改成 pull/push 迴圈：rebase 真的停在衝突才 abort＋`::warning::`＋exit 0；非衝突撞車重試 3 次；其他 pull 失敗 exit 1。新自測 `scripts/selftest_news_commit_conflict.py`（暫存 repo：同檔衝突／非快轉／遠端連不到）全過。本 commit 新增的 workflow 步驟只改 git 流程、不新增輸出檔（十節）。
   - **一四四-1 甲**：維持現狀，不動作，AWAITING 結案。
   - **未做（留下一輪）**：1gt 乙（改 `selection_bias_ledger.py` 分軌門檻＝研究／驗證帽，一輪一頂帽子）、1jt-a 甲（融資逐股另存＋git 歷史回補）、1kd-a 甲（market.yml 逐檔取捨）、1kh-e 甲（停擺自檢要新增「補抓比例」判斷類型）、1kh-l 丙（乙要確認設定頁有沒有讀 `source`／`detail`，且 app.js 正被互動視窗改）。1kh-o／1kh-s 照 039 暫緩。
-- **冒煙測試**：主工作目錄 18:0x 跑出 3 項 FAIL（16／28／36，自選股小圖）——來源是互動視窗**尚未提交**的 `app.js`／`smoke_test.mjs`（先.一四八-4），不是本輪變更；第一個 commit 620241cf187（只有文件）前那次冒煙我只看了尾段 8 行、沒逐項確認，如實記錄。之後改在乾淨的 HEAD 副本（`git worktree`＋本輪變更檔，埠 8793）重跑：第 1 次 181 PASS／1 FAIL（#179 強制更新按鈕高 43.99998＜44，次像素誤差；主工作目錄同項通過、本輪沒碰 App）→ 18:19～18:24 重跑 182 PASS／0 FAIL、exit 0，之後才提交程式 commit。
+- **冒煙測試**：主工作目錄 18:0x 跑出 3 項 FAIL（16／28／36，自選股小圖）——來源是互動視窗**尚未提交**的 `app.js`／`smoke_test.mjs`（先.一四八-4），不是本輪變更；第一個 commit 620241cf187（只有文件）前那次冒煙我只看了尾段 8 行、沒逐項確認，如實記錄。之後改在乾淨的 HEAD 副本（`git worktree`＋本輪變更檔，埠 8793）重跑：第 1 次 181 PASS／1 FAIL（#179 強制更新按鈕高 43.99998＜44，次像素誤差；主工作目錄同項通過、本輪沒碰 App）→ 18:19～18:24 重跑 182 PASS／0 FAIL、exit 0，之後才提交程式 commit；1kh-v2（只有文件）提交前同樣在乾淨 HEAD 副本 18:28～18:33 跑 182 PASS／0 FAIL、exit 0。
+- **先.一三五-1kh-v2 ✅ supply_watchlist 判法提案**：`docs/PROPOSAL_SUPPLY_WATCHLIST_THRESHOLD.md`。[自行裁量] 查證後建議由原條目的「30 小時」改成甲＝列 static＋registry 加一條看 launcher log：`build_supply_watchlist.py` 內容沒變就不改寫，`as_of` 是內容變動日（近 6 次 commit 間隔 1～16 天）；`research/data/supply_watchlist_cycle.log` 10/31～11/03 每晚 23:00 都有跑，但 registry 沒人看。送 AWAITING。未動程式。
 - **收工補件**：DevQueue 可執行（非研究）只剩 4 項（<6）→ 補 1kh-v2（supply_watchlist 每晚 18～23 點假 stale，寫提案，①）、1kh-v3（app_errors_summary 本機檔停在 10/17，查證，①），來源＝本輪 build_data_files() 比對。暫停④文書類。
 - **BLOCKED／未做**：1kh-h1 仍等總司令重裝 IB Gateway；1kh-w 時間閘 11/05 00:00。
 
