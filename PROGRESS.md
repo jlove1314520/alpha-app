@@ -1,3 +1,16 @@
+## 2026-11-05 07:4x DevQueue 20261105-070102（維運帽）1kh-z 換行提案／1kh-v3 app_errors_summary 查證／1w 模擬 G／I 起跑驗收
+
+等待總司令審閱：17 件（`research/AWAITING_REVIEW.md` 等待中表格 17 列；本輪新增 1kh-z、1kh-v3a 兩列，開工時表頭寫 16 件但實際只有 15 列，已照實更正）。
+
+- **先.一三五-1kh-z**（c33f66b3a7c）：寫 `docs/PROPOSAL_DATA_JSON_EOL_LF.md` 送 AWAITING。證據：冒煙 #65 與 price_history 分桶都用 `fs.statSync` 量工作目錄檔；本機 STATUS 100,937 bytes vs `git show HEAD:` 98,727（上限 102,400，本機只剩約 1.4KB）；`git ls-files --eol data/`＝360 個 i/lf w/crlf。**條目原本假設 renormalize 零變化，實測不是**：`data/auto_heartbeat.json` index 內就是 CRLF，加規則後會多 1 個換行 commit，已寫進提案與預設放行條件（變動不只這一檔就停）。建議甲。未動程式。
+- **先.一三五-1kh-v3**（9842ad4a8a6，只讀）：`app_errors_summary.json` 只在本機服務收到 `POST /errors`／`GET /errors/summary` 時重建；`app_errors.jsonl` 0 bytes、本次服務啟動以來 stdout log 4,814 筆請求無一筆 `/errors`＝沒人觸發，寫入路徑沒壞。本機 STATUS 是 `build_data_files()` glob 掃磁碟才誤列（被 .gitignore 排除的 data 檔只有這一個）。補節寫進 `docs/DATA_FILES_STALE_AUDIT_20261104.md`，提案 1kh-v3a（建議甲：跳過 .gitignore 排除的檔）送 AWAITING。未重啟服務、未改 alpha_live_server.py。
+- **先.一三五-1w**（b3c57920136）：paper_7 started、as_of 11-04、無錯；paper_9 started、as_of 11-03、無錯；帳本只看日期：paper_7 1 列（11-02 inception，此支只在換股記列）、paper_9 2 列（11-02、11-03），都沒有 11-02 前的列；`forward_sim_watch.py` overall=OK 14 檔 0 警示。未讀 nav。同 commit 帶入 `find_next()` 時間閘到期自動轉回 `- [ ]` 的 4 項（1an、audit 驗收、1jk、1ju）。
+- **流程失誤照實記**：1w 那次我把 commit 串在冒煙同一行指令後面，冒煙第一次 exit=1（#18「page.evaluate: Resulting promise was garbage collected」，Playwright 測試本身出錯，本輪只改 md/json）時 commit 已經做了（未 push）。立刻重跑冒煙 184 項全過才保留該 commit 並 push。之後冒煙與 commit 分兩步。
+- 冒煙：三項各跑一次，184 項全過（1w 為第二次）。
+- 佇列深度：`- [ ]` 25 項（≥12）；DevQueue 可執行 4 項（<6）——**本輪時間到（07:46 上限），未補件**，留下一輪收工補件。
+- [自行裁量]：1kh-v3 的後續提案直接送 AWAITING、不另開 `- [ ]`（照 1kh-l／1kh-o 前例，由零之二預設放行處理）。
+- BLOCKED：無新增。下一項：先.一三五-1an 模擬 F／F-翼起跑驗收（時間閘已過）。
+
 ## 2026-11-05 06:4x DevQueue 20261105-060102（維運帽）1kh-w 驗收／1kh-x stock_names 日期欄／1kh-y data 子目錄暫存檔
 
 - **等待總司令審閱：16 件**（`research/AWAITING_REVIEW.md` 等待中 16 列；本輪未新增）。
