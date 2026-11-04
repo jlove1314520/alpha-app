@@ -666,6 +666,14 @@
       "note": "2026-09-16新增，2026-09-17（總司令裁示【停擺】查核）補上shift_profile：原本沒被納入前一天的班次數轉換，停留在interval×3=3天門檻，導致data_audit.py因TWSE_COMPANY ImportError連續兩個交易日（09-16/09-17）沒有產出時舊判準沒亮燈（要等第3天）——這正是總司令這次抓到的落差，已修復ImportError（見同日commit）並補上shift_profile=audit_yml，交易日連續錯過2班（2天）即亮燈。**注意**：本條監控的是`audit_report.json`頂層的`generated_at`（data_audit.py每晚稽核寫入），跟`local_task_health`區塊自己的`checked_at`（check_external_connectivity.py每5分鐘更新）是同一份檔案裡的兩個不同欄位，不要混淆。"
     },
     {
+      "task": "AlphaDataAudit",
+      "purpose": "本機 23:00 稽核每晚排程（排程 AlphaDataAudit 第一個動作：python scripts\\data_audit.py *>> research\\data_audit_cycle.log，再 commit data/audit_report.json「稽核每晚排程自動更新」；第二個動作是 run_supply_watchlist.ps1）",
+      "interval_min": 1440,
+      "artifact": "research/data_audit_cycle.log",
+      "freshness": "mtime",
+      "note": "先.一三五-1kh-c（2026-11-04 DevQueue 20261104-113101）新增：data/audit_report.json 有兩個寫手——雲端 audit.yml（上一條，看 self_check.checked_at）與本機這支（刷新頂層 generated_at）。1kh-b 把上一條改看雲端欄位後本機寫入者沒人看，故另立一條。artifact 不用 audit_report.json 的 generated_at，因為兩寫手都會刷新它、雲端照跑時會遮住本機停擺；改看本機專屬 log。該 log 由 PowerShell *>> 寫成 UTF-16，log_last_timestamp 讀不到時間戳，所以用 mtime；log 已列 .gitignore，git checkout／pull 不會改它的 mtime。限制：data_audit.py 跑了但中途失敗也會寫 log，本條只證明排程有觸發、不證明稽核成功。"
+    },
+    {
       "task": "AlphaDisposalFlags",
       "purpose": "處置／注意股旗標（先.五十一-3，scripts/run_disposal_flags.ps1 每日 18:30 → data/disposal_flags.json，App 個股頁紅標、AI 選股排除處置股）",
       "interval_min": 1440,
