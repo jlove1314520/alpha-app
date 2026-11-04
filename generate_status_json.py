@@ -56,7 +56,8 @@ STALE_HOURS = {
     "data/quotes_all_tw.json": 72,  # 跟price_history.json同一次排程產生，門檻一致
     "data/earnings_calendar.json": 72,  # 財報日期變動很慢，門檻可以更寬鬆，先跟其他每日檔案一致
     "data/ex_dividend_events.json": 72,  # 跟price_history.json同一次排程產生，門檻一致
-    "data/picks_ledger.json": 48,  # 一天一次的前瞻選股快照，跟margin_maintenance.json同等寬鬆門檻
+    "data/picks_ledger.json": 48,
+    "data/stock_names.json": 72,  # 先.一三五-1kh-x：market.yml 週一～五每班重產，週末跨約 60 小時，同其他每日檔給 72  # 一天一次的前瞻選股快照，跟margin_maintenance.json同等寬鬆門檻
     "data/strategies.json": 168,  # 手動跑generate_strategies_json.py產生，沒有排程，門檻放寬到一週避免誤標stale
     "data/strategy_performance.json": 48,  # 掛market.yml排程更新，跟picks_ledger.json同等寬鬆門檻
     "data/quotes_ibkr.json": 168,  # 只有使用者本機開著IB Gateway+排程在跑才會更新，機器關機/週末沒開很正常，門檻比照strategies.json放寬到一週

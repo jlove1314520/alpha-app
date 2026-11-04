@@ -5,11 +5,14 @@
 - 台股：data/company_info.json（3 千多檔，含 ETF；只取名稱與產業，去掉網站等欄位）
 - 美股：data/us_financials.json 的 SEC 名冊公司名＋data/us_sic.json 的 entity_name（目前約 250 檔，非全市場）
 App 搜尋先查這份；查不到才向 FinMind 完整名單補查（見 app.js loadStockInfo／doSearch）。
-零外部請求、內容沒變不重寫。排程：market.yml。用法：python scripts/build_stock_names.py
+零外部請求。排程：market.yml。
+先.一三五-1kh-x（2026-11-05）：meta 加 generated_at（台北時間），每班照寫——原本內容沒變就不重寫、檔內也沒有日期，
+STATUS 永遠 no_date，管線停了看不出來。主體（tw／us）沒變時只印訊息，仍更新 generated_at。用法：python scripts/build_stock_names.py
 """
 import json
 import re
 import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -66,14 +69,17 @@ def main() -> int:
     doc = {"meta": {"source": "台股 data/company_info.json；美股 data/us_financials.json（SEC 名冊）＋data/us_sic.json；scripts/build_stock_names.py",
                     "note": "repo 名單為主；查不到的代號 App 才向 FinMind 完整名單補查", "tw_count": len(tw), "us_count": len(us_rows)},
            "tw": tw, "us": us_rows}
-    txt = json.dumps(doc, ensure_ascii=False, separators=(",", ":"))
     try:
-        if OUT.read_text(encoding="utf-8") == txt:
-            print("stock_names：內容沒變")
-            return 0
-    except OSError:
-        pass
+        prev = json.loads(OUT.read_text(encoding="utf-8"))
+        same_body = isinstance(prev, dict) and prev.get("tw") == tw and prev.get("us") == us_rows
+    except (OSError, ValueError):
+        same_body = False
+    doc["meta"]["generated_at"] = datetime.now(timezone(timedelta(hours=8))).isoformat(timespec="seconds")
+    txt = json.dumps(doc, ensure_ascii=False, separators=(",", ":"))
     OUT.write_text(txt, encoding="utf-8")
+    if same_body:
+        print("stock_names：名單內容沒變，只更新 generated_at")
+        return 0
     print(f"stock_names：台股 {len(tw)} 檔、美股 {len(us_rows)} 檔，{len(txt.encode('utf-8')) // 1024}KB")
     return 0
 
