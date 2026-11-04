@@ -1,3 +1,17 @@
+## 2026-11-04 10:0x DevQueue（維運帽，空轉補件 先.一三五-1）：11/04 到期時間閘驗收 4 條結案＋1kh／1ki／1kj 補件
+
+- **等待總司令審閱：13 件**（本輪沒有新增 AWAITING；`research/AWAITING_REVIEW.md` 等待中表格未改）。
+- **前向模擬上限 14／14 已滿**：不新增候選、不寫 PREREG、不送候選 AWAITING、不碰 holdout、不算報酬、不登記試驗；`research/FORWARD_CANDIDATES.md` 只記一行本輪紀錄。
+- **做了什麼（全部零外部資料請求，只讀 `origin/main`）**：
+  ①**時間閘驗收**：1iw（paper_5／paper_6 帳本 11/03 已有事件、摘要 11/04 09:46 更新）、1jg（紙.三兩份摘要無 ERROR、選股台帳最新快照 0 筆 0 元收盤）、1jo（模擬 G as_of 推進到 11/03、仍 1 次再平衡 20 檔）、1jv（上櫃 20261103 鍵沒被晚班推成 11/03，走第二分支）→ 皆 `- [x]`。1jl 時間閘已過 → 轉 `- [ ]` 留給下一輪照原做法驗。
+  ②**1it 還不能驗**：雲端 audit.yml 11/03 班到 11/04 10:00 沒有 commit（`reproducibility_check.checked_at` 仍 11/03 07:08，早於 1is commit），11/03 23:00 只有本機寫入者動過該檔；本機 gh token 失效查不到該班狀態 → 順延到 11/05 09:00 與 1kb 一起驗。
+  ③**新補 3 條**：1kh（`audit_report.json` 本機／雲端兩寫入者欄位新鮮度查核：頂層 generated_at 是新的、子欄位是舊的）、1ki（模擬 F-翼 11/03 第一次停損，自測目前沒有 stop 案例 → 補停損後同月不進場／次月再進場路徑，第 9 關 absorbing state 檢查）、1kj（提案：DevQueue 認得標準格式時間閘已過就取件，本輪 6 條到期項就是因為只認 `- [ ]` 而晚了一輪）。
+  ④**順手修文字損壞**：`PENDING_QUEUE.md`（舊 2 行）、`PROGRESS.md`、`research/AWAITING_REVIEW.md` 裡的 `C:\alpha` 被寫成「C:＋響鈴字元（0x07）＋lpha」（前幾輪用 Python 字串寫路徑時 `\a` 被當跳脫字元），已改回反斜線；只改這幾個字元。
+- **[自行裁量]**：1it 不另開條目查雲端 11/03 班，併進 1kh 的附帶步驟（要 gh，等 1kd-e 新 PAT）。
+- **BLOCKED**：1it／1kb 時間閘 11/05 09:00；1kd-c 11/05 08:00；1kd-e 等總司令新 PAT。
+- **外部請求**：資料端點 0 次；`git fetch` 1 次。
+- **冒煙測試**：第 1 次 10:12 有 1 項 FAIL（#79 個股明細獨立檔與整份檔不一致）——查證是測試途中背景排程把 HEAD 從 4a55ca8 推到 aa07016、資料檔被換掉；跑完後兩檔逐欄比對已一致。照規則重跑：`node scripts/smoke_test.mjs` 2026/11/4 10:20:22 exit 0、「全部通過」、181 項全 `[x]`。
+
 ## 2026-11-04 08:3x DevQueue（維運帽，空轉補件 先.一三五-1）：gh token 失效影響範圍——1ke 落地告警推播備援、1kf 補班查雲端失敗留紀錄、1kg 實地驗收
 
 - **等待總司令審閱：13 件**（本輪沒有新增 AWAITING；同上一輪 13 件，`research/AWAITING_REVIEW.md` 未改）。
@@ -17,7 +31,7 @@
 - **做了什麼**：
   ①**1kd（維運，唯讀、零外部資料請求；`gh api` 共 28 次）**：10/21 起失敗班＝market 4、quotes 1、smoke_cloud 11、tw_data_landed_check 0、us_financials 0。market 10/28 14:35Z 是 exit 128（先.一四〇-1z 已修）；market 10/21、10/27、10/28 00:50Z＋quotes 10/30 都是 Commit 步驟 exit 1，每個失敗窗 main 上都有人 push 同一批檔（by_code、PENDING_QUEUE／trials_index、PENDING_QUEUE／STATUS／PROGRESS_HEARTBEAT、本機報價備援 quotes_tw.json）→ 推論 rebase 衝突、重試救不了 → 提案 `docs/MARKET_QUOTES_COMMIT_CONFLICT_1KD.md`（market **甲（建議）**衝突時共用追蹤檔取 main、資料檔取雲端後繼續 rebase，不丟整班；quotes **甲（建議）**比照 1kc-a）送 AWAITING（1kd-a，11/05 07:1x 起 24 小時預設放行）。純 bug 修復：quotes.yml rebase 衝突路徑補 `::warning::` 衝突檔名（market 已有）。commit `e69efbefe77`。
   ②**1kd-b（開發）**：雲端冒煙第 146 項 13 班壞 11 班，原子檢查自建 span 測的是瀏覽器 0 秒動畫事件時序；改成直接呼叫 App `flashPriceEls()`：減少動態不得加閃色、對照組一般模式必須加上且 3 秒內移除（防恆真，沒有放寬）。commit `63c2bc8f535`；雲端驗收排 1kd-c（時間閘 11/05 08:00 後）。
-  ③**1kd-e（維運）**：本機 `gh` token 失效（`gh auth status`），本機叫雲端複查 10/27 起 HTTP 401；git push 不受影響。需總司令提供新 PAT → AWAITING＋`C:lpha\總司令待辦.md` 第 7 項。commit `49e0d479b0e`。
+  ③**1kd-e（維運）**：本機 `gh` token 失效（`gh auth status`），本機叫雲端複查 10/27 起 HTTP 401；git push 不受影響。需總司令提供新 PAT → AWAITING＋`C:\alpha\總司令待辦.md` 第 7 項。commit `49e0d479b0e`。
 - **[自行裁量]**：market 三班早於衝突 annotation 上線、run log 要 admin，「CONFLICT」由時間窗＋檔案重疊推得；quotes 那班由「沒有重試耗盡 warning＋2 秒結束」推得走的是衝突路徑。1kd-b 沒另做「拿掉 App 防線看測試會不會紅」的反向驗證（時間不夠），以對照組加上=true 確認測試路徑有在跑。gh 改用未登入額度查（公開 repo 讀中繼資料足夠），沒有去讀 Windows 認證區的 PAT 給 gh 用。
 - **BLOCKED**：1kd-a 等 Cowork 審（24 小時預設放行）；1kd-c 時間閘 11/05 08:00；1kd-e 等總司令新 PAT。
 - **補件**：本輪自行補入 1kd-a／1kd-b／1kd-c／1kd-e 四條；收工時 DevQueue 可執行項 0（`dev_queue_runner.py next`→NO_PENDING_ITEM），仍低於 6；來源照上一輪紀錄（BACKLOG 未完成項、DATA_GAP_PLAN 甲類）已用盡、本輪未重掃，本週暫停文書類，研究候選留給研究帽輪次。
@@ -106,7 +120,7 @@
 - **修法**：新版 SW 裝好立即接手、頁面自動重載一次；App 在背景超過 10 分鐘再回來自動整頁重抓；資料檔改「網路優先、3 秒逾時才用存檔」；台股資料比最近交易日舊 → 首頁紅條「資料過期 N 天」＋「強制更新」按鈕、今日摘要卡標紅、狀態列紅點且不再顯示綠色即時連線；強制更新改成只清畫面與資料快取（不解除 SW 註冊＝推播訂閱不會掉、自選股不受影響）。
 - **[自行裁量]**：交易日當晚（18:00 後）資料只落後一天先不標紅——雲端收盤班實測常延遲數小時（先.一四〇-15），否則每晚都會誤報。
 - **驗證**：重現腳本修好後新版不再等待；再發一版時同一頁自動重載（`scripts/repro_autoreload.mjs`，兩種瀏覽器都 reloaded=true）。冒煙 #9、#115 改測新行為，新增 #179（過期紅條／卡片標紅／狀態列不准綠／資料新就不顯示／強制更新保留自選股與 SW 註冊）。前向看板搬到 `app-lab.js`（研究室點到才載），首頁首次載入 346.5KB（門檻 350KB）。**全套 181 項全過**（exit 0）。
-- **總司令要做一次**：手機上那份 10/15 舊程式不會自己重載。打開 App 等 10 秒 → 從多工畫面把 App 滑掉 → 再打開（`C:lpha\總司令待辦.md` 第 6 項）。不要清除網站資料。
+- **總司令要做一次**：手機上那份 10/15 舊程式不會自己重載。打開 App 等 10 秒 → 從多工畫面把 App 滑掉 → 再打開（`C:\alpha\總司令待辦.md` 第 6 項）。不要清除網站資料。
 - 下一步：P1 全頁實測。
 
 ## 2026-11-04 01:31 DevQueue 20261104-013101（維運帽）：先.一四七-2 美股報價空檔覆蓋好資料——查因＋純 bug 修復
