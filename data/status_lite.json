@@ -1,7 +1,7 @@
 {
  "_note": "由 scripts/build_status_lite.py 從 data/STATUS.json 抽出首頁用的欄位；完整內容看 STATUS.json",
- "source_updated_at": "2026-11-05T09:54:14.020867+08:00",
- "generated_at": "2026-11-05T01:54:19+00:00",
+ "source_updated_at": "2026-11-05T15:29:00.695606+08:00",
+ "generated_at": "2026-11-05T07:29:03+00:00",
  "workflows": [
   {
    "file": ".github/workflows/market.yml",
@@ -52,16 +52,16 @@
  "local_schedule_heartbeat": {
   "claude_auth": {
    "overall_status": "STALLED_3H",
-   "detail": "marathon:STALLED_3H(373.21h)",
+   "detail": "marathon:STALLED_3H(380.22h)",
    "launchers": {
     "devqueue": {
      "status": "OK",
      "last_reason": "OK",
      "last_detail": "OK/0",
-     "last_cycle_id": "20261105-080102",
-     "last_attempt_at": "2026-11-05T08:16:28+08:00",
-     "last_ok_at": "2026-11-05T08:16:28+08:00",
-     "hours_since_last_attempt": 0.2
+     "last_cycle_id": "20261105-150102",
+     "last_attempt_at": "2026-11-05T15:20:50+08:00",
+     "last_ok_at": "2026-11-05T15:20:50+08:00",
+     "hours_since_last_attempt": 0.14
     },
     "marathon": {
      "status": "STALLED_3H",
@@ -70,7 +70,7 @@
      "last_cycle_id": "20261020-191357",
      "last_attempt_at": "2026-10-20T19:15:45+08:00",
      "last_ok_at": "2026-10-20T19:15:45+08:00",
-     "hours_since_last_attempt": 373.21
+     "hours_since_last_attempt": 380.22
     },
     "hypothesis_queue": {
      "status": "STALLED_3H",
@@ -79,10 +79,10 @@
      "last_cycle_id": "2026-10-20 19:25:14",
      "last_attempt_at": "2026-10-20T19:25:15+08:00",
      "last_ok_at": "2026-10-20T19:25:15+08:00",
-     "hours_since_last_attempt": 373.06
+     "hours_since_last_attempt": 380.06
     }
    },
-   "checked_at": "2026-11-05T00:28:37.535763+00:00"
+   "checked_at": "2026-11-05T07:29:00.513700+00:00"
   }
  }
 }
