@@ -198,6 +198,19 @@ def main():
         """個股層級：每次換股被賣出的持股算一筆；勝率另以「組合在該持有期是否賺錢」近似不可得，改報換股期勝率。"""
         return sum(len(a - b) for a, b in zip(hlog[:-1], hlog[1:])) + (len(hlog[-1]) if hlog else 0)
 
+    # 先.一五二-1：REAUDIT_DUMP_BASE＝輸出路徑時，只算最優格的 1× 底層日報酬並存檔後結束（不重跑網格、不覆寫既有輸出）
+    import os as _os
+    if _os.environ.get("REAUDIT_DUMP_BASE"):
+        _b = json.loads(OUT_JSON.read_text(encoding="utf-8"))["families"][0]["best_by_calmar"]
+        _base, _ = base_returns(int(_b["lowvol_filter_window"]), int(_b["N"]), int(_b["rebalance_days"]))
+        _spy = spy.pct_change(fill_method=None).fillna(0).to_numpy()
+        Path(_os.environ["REAUDIT_DUMP_BASE"]).write_text(json.dumps({
+            "dates": [str(x)[:10] for x in dates[i0:]], "base": [float(x) for x in _base[i0:]],
+            "rf": [float(x) for x in rf[i0:]], "borrow": [float(x) for x in borrow[i0:]],
+            "spy": [float(x) for x in _spy[i0:]], "best": _b}), encoding="utf-8")
+        print("已存 1× 底層日報酬", _os.environ["REAUDIT_DUMP_BASE"])
+        return
+
     rows, best = [], None
     for w, N, reb, L, st in itertools.product((0, 60), (10, 25, 50), (21, 63, 126), LEVS, STOPS):
         base, hlog = base_returns(w, N, reb)

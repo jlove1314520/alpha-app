@@ -1,3 +1,15 @@
+## 2026-11-05 22:01～22:30 DevQueue 20261105-220102（研究帽）先.一五二-1 回撤診斷與降回撤優化（帳戶層）
+
+等待總司令審閱：11 件（`research/AWAITING_REVIEW.md` 等待中表格未異動）。
+
+- **做了什麼**：新 `research/drawdown_fix.py`／`drawdown_fix_combo.py`／`drawdown_fix_report.py` → `research/DRAWDOWN_FIX.md`（圖在本機 `research/data/drawdown_fix/`）。REAUDIT 前 10 名（F11、F18、F12、F16、F15、F14、F10、F17、F2、F7）全部重建，年化／MDD 與 REAUDIT 差 <0.2pp；①最深 5 段回撤成因表；②條件 A 大盤均線、B 只在崩盤段生效、C 波動目標、D 1× 影子回撤斷路器、E 停損後看影子回升才進場（各掃參數）＋多策略組合 364 個；③每個版本把槓桿調回原版年化再比 MDD。
+- **結果**：單支加條件、同年化下 MDD 只淺 0.1～5.7pp（F11 −44.3%→−38.6%，但只 5 筆交易最不可信）；B 類在台股／0050 家族勝出、C 類在美股與台指期勝出、E 類 6 支全更差。很多深回撤是「槓桿＋帳戶停損出場後空手 21 日錯過反彈」自己造成（1× 底層小跌或上漲）。**唯一明顯的降回撤來源是低相關多策略組合**：2015～2024 加槓桿到年化 25% 時 MDD −17.1%（F11+F12+F15+F16 反波動），單支 F12 26.6% 要 −30.1%。兩層樣本內挑選、美股未換匯、組合層不計成本 → 偏樂觀。
+- **④上紙上**：前向上限 14／14 已滿（零之二⑤），不新增登記；組合寫進 `research/FORWARD_CANDIDATES.md` 候選 N14。
+- **[自行裁量]**：歸因門檻（大盤同期跌 >8% 且重疊六大崩盤段）；F2／F10／F11 大盤代理用 0050 含息、美股用 SPY、F7 用 TX；組合排除 F18（2020-10 起太短）；組合加槓桿用台股融資 6.5%；美股兩支原腳本加 `REAUDIT_DUMP_BASE` 模式（只存最優格 1× 底層日報酬、不重跑網格、不覆寫既有輸出）。描述性最優化不登記試驗，心跳寫 PROGRESS_HEARTBEAT.jsonl。
+- **拆出**：先.一五二-1b（個股層歸因、個股停損＋跳空、產業上限、台指期避險、恐慌 PQ 套用，需重跑引擎）。
+- **冒煙**：`node scripts/smoke_test.mjs` **184 PASS／0 FAIL、EXIT=0**（總計 510.6 秒）。
+- 影響檔案：`research/drawdown_fix*.py`、`research/DRAWDOWN_FIX.md`、`research/reaudit_optimized_batch2_us_{value,lowvol}.py`、`research/FORWARD_CANDIDATES.md`、`research/PROGRESS_HEARTBEAT.jsonl`、`PENDING_QUEUE.md`、`PROGRESS.md`。
+
 ## 2026-11-05 20:0x DevQueue 20261105-200102（維運帽）空轉補件：1la～1ld
 
 等待總司令審閱：11 件（`research/AWAITING_REVIEW.md` 等待中表格未異動）。
