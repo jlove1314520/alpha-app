@@ -4104,12 +4104,21 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("117. 個股走勢／主流題材／期貨法人以 repo 檔為主、FinMind 只補充，兩邊都失敗寫明原因（先.八十一-10）", r10Errs.length === 0, r10Errs.join("; "));
 
   // 118.【2026-10-13 先.八十一-11】「我的持股事件」只列自選股＋真錢持股（不含研究策略持股）、顯示股名；沒事件的代號
-  // （8054、6693）不再打出 events_by_code 404；說明寫明範圍與真錢持股未列入的原因。
+  // （自選股裡動態挑的無事件代號，見下）不再打出 events_by_code 404；說明寫明範圍與真錢持股未列入的原因。
   const hevErrs = [];
   try {
+    // 2026-11-05 先.一五〇-3：寫死的「無事件代號」會過期（10/22 8054、11/05 6693 先後因新聞補班有了事件）。
+    // 改成每次從 data/listed_universe.json 的 active 名冊，動態挑一檔「不在 events_by_code/_index.json」的上市櫃普通股代號。
+    let noEvCode = null;
+    try {
+      const evCodes = new Set((readJsonRetry(fs, "data/events_by_code/_index.json").codes) || []);
+      const active = (readJsonRetry(fs, "data/listed_universe.json").active) || [];
+      noEvCode = active.find(c => /^[1-9]\d{3}$/.test(c) && c !== "2330" && c !== "2317" && !evCodes.has(c)) || null;
+    } catch (e) { hevErrs.push(`讀不到事件索引或名冊，無法挑無事件代號：${e.message || e}`); }
+    if (!noEvCode && !hevErrs.length) hevErrs.push("名冊裡找不到任何不在事件索引的代號（索引可能異常）");
     const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
     try {
-      await ctx.addInitScript(() => { try { localStorage.setItem("alpha_wl", JSON.stringify(["2330", "8054", "6693", "2317"])); localStorage.removeItem("alpha_wl_lists"); } catch (e) {} });
+      await ctx.addInitScript((nc) => { try { localStorage.setItem("alpha_wl", JSON.stringify(["2330", "8054", nc || "6693", "2317"])); localStorage.removeItem("alpha_wl_lists"); } catch (e) {} }, noEvCode);
       const p = await ctx.newPage();
       const bad = [];
       p.on("response", (r) => { if (/events_by_code\//.test(r.url()) && r.status() === 404) bad.push(r.url().replace(/\?.*$/, "")); });
@@ -4129,8 +4138,8 @@ async function runSmokeTest(baseUrl, headless = true) {
       if (!r2330.length || !r2330.every(x => /台積電 2330/.test(x))) hevErrs.push(`2330 的列沒顯示股名：${r2330.slice(0, 2).join("、")}`);
       if (st.rows.some(x => /^(\d{4}) \1$/.test(x))) hevErrs.push("出現「代號 代號」重複顯示");
       if (bad.length) hevErrs.push("仍有事件檔 404：" + bad.map(u => u.replace(/^.*\//, "")).join("、"));
-      const idxOk = await p.evaluate(async () => { const s = await eventsIndex(); return !!s && s.size > 100 && !s.has("6693"); });  // 2026-10-22：8054 於 15:39 新聞更新後已有事件，改用仍無事件的 6693 驗「索引不含無事件代號」
-      if (!idxOk) hevErrs.push("events_by_code/_index.json 沒讀到或內容不對");
+      const idxOk = await p.evaluate(async (nc) => { const s = await eventsIndex(); return !!s && s.size > 100 && !!nc && !s.has(nc); }, noEvCode);  // 先.一五〇-3：用動態挑的無事件代號驗「索引不含無事件代號」
+      if (!idxOk) hevErrs.push(`events_by_code/_index.json 沒讀到或內容不對（無事件代號 ${noEvCode}）`);
     } finally { await ctx.close(); }
   } catch (e) { hevErrs.push(`測試本身出錯：${e.message || e}`); }
   record("118. 我的持股事件只列自選股＋真錢持股、顯示股名、沒事件代號不打 404（先.八十一-11）", hevErrs.length === 0, hevErrs.join("; "));
