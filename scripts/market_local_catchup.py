@@ -11,7 +11,8 @@ market_tw 停在 10/12。不是程式壞掉，是 GitHub schedule 沒觸發。
 4. 否則在 repo 外的獨立 worktree（從 origin/main 乾淨簽出，跟雲端一樣）依序執行 market.yml
    每個 `run:` 步驟（略過 pip install 與最後的 commit 步驟）；沒標 continue-on-error 的步驟失敗，
    後面的一般步驟就不跑（同 GitHub 行為），只跑 commit。
-5. commit：schema 守門員 → 用 market.yml 自己那一行 `git add -A ...` 清單（直接從 yml 擷取，不另抄一份）
+5. commit：schema 守門員 → 用 market.yml commit 步驟裡全部 `git add` 行（直接從 yml 擷取，不另抄一份；
+   先.一三五-1le 前只抓第一行，10/29～11/05 因此只提交停資停券資料夾）
    → commit → push（失敗 fetch+rebase 重試 5 次）。持有 research/git_op_lock.py 的鎖。
    不改 git config（worktree 共用 .git/config，雲端那步的 `git config user.name` 會改到本機身分，故不照抄）。
 6. 心跳：research/data/market_local_catchup.jsonl（一行一次，含每步 rc／秒數）。
@@ -244,10 +245,27 @@ def load_steps():
             commit = s["run"]
         elif not s["run"].strip().startswith("pip install"):
             run_steps.append(s)
-    m = re.search(r"^\s*(git add -A .+)$", commit or "", re.M)
-    if not m:
-        raise RuntimeError("market.yml commit 步驟找不到 git add -A 清單")
-    return run_steps, m.group(1).strip()
+    return run_steps, extract_add_lines(commit)
+
+
+def extract_add_lines(commit):
+    """先.一三五-1le（2026-11-06）：收 commit 步驟 `QL=` 之前所有 `git add …` 行與 `for … git add … done` 行，照 yml 原樣（含 `|| true`）。
+
+    舊版只用正則抓「第一行」`git add -A`；10/28 23:17（592c508d671）market.yml 在主清單前面插了
+    `git add -A -- data/margin_suspension_daily/` 單獨一行，之後本機補跑只 commit 停資停券資料夾，
+    market_tw／price_history 等全部沒提交（10/29～11/05 六個交易日）。
+    必須含 data/market_tw.json 那行，否則 RuntimeError（寧可補跑明確失敗，不要安靜地只提交一部分）。
+    """
+    lines = []
+    for raw in (commit or "").splitlines():
+        s = raw.strip()
+        if s.startswith("QL="):
+            break
+        if s.startswith("git add") or (s.startswith("for ") and "git add" in s and s.endswith("done")):
+            lines.append(s)
+    if not any(s.startswith("git add -A") and "data/market_tw.json" in s for s in lines):
+        raise RuntimeError("market.yml commit 步驟找不到含 data/market_tw.json 的 git add -A 清單")
+    return "\n".join(lines)  # 用換行串接：日後 yml 行尾若加 # 註解，只影響該行
 
 
 def prepare_worktree():
@@ -293,8 +311,8 @@ def commit_title(data_date, backfilled=(), ql=0):
 def commit_push(add_line, backfilled=()):
     bash = bash_exe()
     guard = ("python scripts/data_schema_guard.py guard --report data/schema_guard/market.json --label market || true; "
-             "git add -- data/schema_guard/market.json 2>/dev/null || true; " + add_line + "; "
-             "for f in paper_7030 paper_1b paper_3 paper_4; do git add -f research/data/${f}_log.jsonl 2>/dev/null || true; done")
+             "git add -- data/schema_guard/market.json 2>/dev/null || true\n" + add_line + "\n")
+    # 先.一三五-1le：paper_* 的 git add -f 已在 yml commit 步驟裡（add_line 會收），不再另抄一份
     sh([bash, "-c", guard], cwd=WT, timeout=900)
     if sh(["git", "diff", "--cached", "--quiet"], cwd=WT).returncode == 0:
         return {"commit": None, "note": "無變動"}

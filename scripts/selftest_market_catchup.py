@@ -99,5 +99,24 @@ try:
     check("⑥正常但已完成 → None、無錯誤", C.cloud_running("2026-10-16T00:00:00Z") is None and not C.CLOUD_CHECK)
 finally:
     C.sh = _sh
+
+# ⑦ 先.一三五-1le：用真實 market.yml 解析 commit 步驟的 git add，不能只抓第一行
+try:
+    _steps, add = C.load_steps()
+    for need in ("data/market_tw.json", "data/price_history", "data/margin_suspension_daily/",
+                 "data/tpex_limit_next.json", "research/data/ledger_corrupt_backup/", "paper_18_log.jsonl"):
+        check(f"⑦真實 market.yml 的 git add 含 {need}", need in add)
+    check("⑦不含 commit／push 指令", "git commit" not in add and "git push" not in add)
+except Exception as e:  # noqa: BLE001
+    check(f"⑦load_steps 失敗：{type(e).__name__}: {e}", False)
+_c1 = "git add -- a.json || true\ngit add -A -- data/x/ 2>/dev/null || true\ngit add -A data/market_tw.json data/y.json\nQL=1\ngit add -A data/late.json"
+_o = C.extract_add_lines(_c1)
+check("⑦合成：第一行不是主清單也抓得到主清單", "data/market_tw.json" in _o and "data/x/" in _o)
+check("⑦合成：QL= 之後的不收", "late.json" not in _o)
+try:
+    C.extract_add_lines("git add -A -- data/x/ || true\nQL=1")
+    check("⑦合成：沒有 market_tw 主清單 → RuntimeError", False)
+except RuntimeError:
+    check("⑦合成：沒有 market_tw 主清單 → RuntimeError", True)
 print(f"{sum(results)}/{len(results)} PASS")
 sys.exit(0 if all(results) else 1)
