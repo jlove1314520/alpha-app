@@ -1,3 +1,14 @@
+## 2026-11-05 17:3x～17:5x DevQueue（開發帽）先.一三五-1kh-s 首頁費半膠囊：照收件匣 039 結案（未預設放行）
+
+等待總司令審閱：12 件（`research/AWAITING_REVIEW.md` 等待中表格 13→12，本項移到已結案）。
+
+- **本輪派工**：零之二 24 小時預設放行（AWAITING 等 24.2 小時）。
+- **為什麼沒照甲執行**：本條其實有 Cowork 收件匣 039 的指示——「1kh-s 暫緩，038 完成後再排，若首頁改版已解決就直接結案」。038（先.一四八-3／4）已完成。
+- **查證**：390×844 Playwright 實測首頁只顯示加權／櫃買／台指期三顆膠囊；`app.css:648`（c8f48f8f844，038 改版）`#scr-home #home-idx-rows .idx-cap:nth-child(n+4){display:none}` 讓費半膠囊寬高皆 0，手機看不到整顆膠囊，「逾期字樣看不到」的問題在首頁已無對象；市場頁費半列的來源字樣本來就看得到。
+- **[自行裁量]**：一開始照甲改了 `idxCapsuleHtml()`＋冒煙 #182，量高度時量到 0 才發現膠囊被藏，改判結案，**程式與冒煙改動全部還原**（本 commit 只有文件）。Cowork 可推翻：若要首頁恢復顯示費半，再照提案甲做（改動很小）。
+- **冒煙**：本輪最終沒有程式變更。還原前跑了兩次：除了自己加的 #182（量測方式問題），#45 兩次都出現 Playwright「Resulting promise was garbage collected」（測試框架層的偶發錯誤，PROGRESS 已有 20 次紀錄，跟本項無關）；其他 183 項 PASS。
+- 影響檔案：`PENDING_QUEUE.md`、`research/AWAITING_REVIEW.md`、`docs/PROPOSAL_HOME_CAPSULE_SOURCE_TAG.md`、`PROGRESS.md`。
+
 ## 2026-11-05 16:2x～17:00 DevQueue（開發帽）先.一三五-1kh-o app.js 再拆分 **[預設放行]**
 
 等待總司令審閱：13 件（`research/AWAITING_REVIEW.md` 等待中表格 14→13，本項移到已結案）。
