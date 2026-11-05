@@ -1,3 +1,14 @@
+## 2026-11-05 18:3x DevQueue（維運帽）先.一三五-1kh-v2 supply_watchlist 在 STATUS 的判法 **[預設放行]**
+
+等待總司令審閱：11 件（`research/AWAITING_REVIEW.md` 等待中表格 12→11，本項移到已結案）。
+
+- **依據**：零之二 24 小時預設放行（AWAITING 等 24.0 小時無 Cowork 裁示），照提案 `docs/PROPOSAL_SUPPLY_WATCHLIST_THRESHOLD.md` 作者標的**甲（建議）**執行；只改兩處設定，不涉 holdout／真錢／刪除／密碼／付費資料／關卡門檻。**Cowork 可推翻，推翻時照 PREREG 修訂規則處理**（git revert 即還原）。
+- **做了什麼**：`generate_status_json.py` `GENERIC_SKIP_STALE` 加 `supply_watchlist.json`（內容沒變不改寫、`as_of` 是內容變動日，不再每晚 18:00～23:00 假 stale）；`data/seed/pipeline_registry.json` 加 `AlphaSupplyWatchlist`：看 `research/data/supply_watchlist_cycle.log`、`freshness: log_last_timestamp`、`line_filter: "supply_watchlist launcher"`、`interval_min: 1440`、`tw_trading_days_only: false`（停擺照樣有人看，十一節）。
+- **冒煙**：`node scripts/smoke_test.mjs` 184 項全 PASS、exit 0。
+- **證據**：`pipeline_freshness.evaluate()` 該條 status=ok、last_output=2026-11-04T23:00:27+08:00；本機重產 STATUS 該列 status=static（本機 STATUS 只用來驗證、已還原回 HEAD，交雲端重產）。
+- **限制**：registry 這條只證明排程有觸發，不證明有寫成功。
+- 影響檔案：`generate_status_json.py`、`data/seed/pipeline_registry.json`、`PENDING_QUEUE.md`、`research/AWAITING_REVIEW.md`、`PROGRESS.md`。
+
 ## 2026-11-05 17:3x～17:5x DevQueue（開發帽）先.一三五-1kh-s 首頁費半膠囊：照收件匣 039 結案（未預設放行）
 
 等待總司令審閱：12 件（`research/AWAITING_REVIEW.md` 等待中表格 13→12，本項移到已結案）。

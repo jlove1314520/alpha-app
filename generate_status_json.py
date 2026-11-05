@@ -616,6 +616,9 @@ GENERIC_SKIP_STALE = {  # 設定檔／一次性對照表：內容不隨時間過
     "news_yield_sample.json",  # scripts/measure_news_yield.py 手動量測
     "price_history_index_legacy.json",  # 10/16 舊檔搬移，無產生者
     "paper_order_log.json",  # 測試下單紀錄，只在下單測試時才寫
+    # 先.一三五-1kh-v2 [預設放行] 甲：內容沒變就不改寫（build_supply_watchlist.py::same_content），as_of＝內容變動日；
+    # 停擺改由 pipeline_registry 的 AlphaSupplyWatchlist 看 research/data/supply_watchlist_cycle.log
+    "supply_watchlist.json",
 }
 
 
