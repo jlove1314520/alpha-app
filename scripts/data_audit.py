@@ -569,6 +569,11 @@ def check_c_range(a, universe, ref, names, loc):
                   round(hi, 2), official, abs(official / hi - 1), "sparklines.json")
 
 
+# 先.一三五-1ll（2026-11-06）：這兩項只在命中時才 checked+1，所以 checked＝violations（100%）是定義使然、不是檢查壞掉；
+# 屬完整性檢查（COMPLETENESS），不進 violation_rate。只補說明，計數方式不變。
+_COMPLETENESS_NOTE = "只在命中時計入 checked，checked＝violations 是定義使然；屬完整性檢查，不計入 violation_rate"
+
+
 def check_e_pe(a, universe, ref, names, loc):
     """(e) 本益比 = 現價 / 近四季 EPS，誤差 <10%。"""
     for code in universe:
@@ -609,14 +614,14 @@ def check_e_pe(a, universe, ref, names, loc):
         except TypeError:
             stale = True
         if stale:
-            a.note("e_quarters_stale", checked=1)
+            a.note("e_quarters_stale", checked=1, note=_COMPLETENESS_NOTE)
             a.hit("e_quarters_stale", code, names.get(code, ""),
                   "stock_detail 的最新季報過舊（超過三季沒更新），算出來的近四季 EPS 不能代表現況",
                   str(last_q[0]) + "Q" + str(last_q[1]),
                   str(cur_q[0]) + "Q" + str(cur_q[1]) + " 當期", None, "stock_detail.json")
             continue
         if expected and seq != expected:
-            a.note("e_quarters_gap", checked=1)
+            a.note("e_quarters_gap", checked=1, note=_COMPLETENESS_NOTE)
             a.hit("e_quarters_gap", code, names.get(code, ""),
                   "stock_detail 的季報序列不連續，算不出真正的近四季 EPS",
                   "-".join(str(x[0]) + "Q" + str(x[1]) for x in seq),
