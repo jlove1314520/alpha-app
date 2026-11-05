@@ -208,13 +208,129 @@ def _alert_autostash_failure(stash: str, back: list, kept: list, newer: list, dr
         print(f"[local_git_commit] 警告：autostash 失敗推播失敗（{type(e).__name__}）", file=sys.stderr)
 
 
+def _classify_restore_per_file(after: str, names: list) -> tuple[list, list, list]:
+    """舊版逐檔做法（先.一〇三-14v～先.一三一-1）：每檔約 4～5 個子行程，982 檔要 10 分鐘、期間 index.lock 幾乎一直被佔。
+    先.一三五-1kk 起只當批次版出錯時的退路，以及自測的對照組。"""
+    back, kept, newer = [], [], []
+    for n in names:
+        if _worktree_is_stash(n, after):
+            back.append(n)
+            continue
+        if _worktree_newer(n, after):
+            newer.append(n)
+            continue
+        if _g("diff", "--quiet", f"{after}^1", "HEAD", "--", n).returncode == 0:
+            if _g("checkout", "-q", after, "--", n).returncode == 0:
+                _g("reset", "-q", "--", n)
+                back.append(n)
+                continue
+        kept.append(n)
+        _g("checkout", "-q", "HEAD", "--", n)
+    return back, kept, newer
+
+
+RESTORE_BATCH = 200  # 每批路徑數（pathspec 走 stdin，不受命令列長度限制；分批只是讓單一 git 指令別持鎖太久）
+
+
+def _cat_blobs(specs: list[str], timeout=300) -> dict:
+    """一個 `git cat-file --batch` 子行程讀全部 `rev:path`；不存在的回 None。失敗就拋例外（由呼叫端退回逐檔）。"""
+    if not specs:
+        return {}
+    data = "".join(sp + "\n" for sp in specs).encode("utf-8")
+    p = subprocess.run(["git", "-C", str(ROOT), "cat-file", "--batch"], input=data, capture_output=True,
+                       timeout=timeout, env=_GIT_ENV)
+    if p.returncode != 0:
+        raise RuntimeError(f"cat-file --batch exit {p.returncode}")
+    out, i, res = p.stdout, 0, {}
+    for sp in specs:
+        j = out.index(b"\n", i)
+        head = out[i:j].split()
+        i = j + 1
+        if len(head) == 3 and head[1] != b"missing":
+            size = int(head[2])
+            res[sp] = out[i:i + size]
+            i += size + 1  # 內容後面還有一個換行
+        else:
+            res[sp] = None  # "<spec> missing"／"ambiguous"
+    return res
+
+
+def _git_paths(args: list, paths: list) -> bool:
+    """對 paths 分批跑 `git <args> --pathspec-from-file=- --pathspec-file-nul`；全部成功回 True。"""
+    ok = True
+    for k in range(0, len(paths), RESTORE_BATCH):
+        chunk = paths[k:k + RESTORE_BATCH]
+        r = run_git([*args, "--pathspec-from-file=-", "--pathspec-file-nul"], input="\0".join(chunk) + "\0", timeout=300)
+        ok = ok and r.returncode == 0
+    return ok
+
+
+def _classify_restore_batch(after: str, names: list) -> tuple[list, list, list]:
+    """先.一三五-1kk：與 _classify_restore_per_file 同一套判定（名單逐檔一致，自測比對），但子行程數與檔數無關：
+    cat-file --batch 1 次＋diff --name-only 1 次＋取回／還原各 ceil(N/200)×2 次。
+    取回用 `restore --worktree`（只寫工作樹）再 `reset`，暫存區從頭到尾不會出現 stash 版——舊版 checkout 與 reset 之間的
+    空檔曾讓別的寫入者把 stash 版一起 commit 走（04bb2f262c9 夾帶 events_by_code/6153.json）。"""
+    n_ = lambda b: b.replace(b"\r\n", b"\n")  # core.autocrlf：工作樹 CRLF、物件庫 LF，比內容不比行尾
+    blobs = _cat_blobs([f"HEAD:{n}" for n in names] + [f"{after}:{n}" for n in names])
+    d = run_git(["diff", "--name-only", "--no-renames", "-z", f"{after}^1", "HEAD"], timeout=300)
+    if d.returncode != 0:
+        raise RuntimeError(f"diff --name-only exit {d.returncode}")
+    remote_changed = set(x for x in d.stdout.split("\0") if x)
+    back, kept, newer, take, take_set = [], [], [], [], set()
+    for n in names:
+        h, s = blobs.get(f"HEAD:{n}"), blobs.get(f"{after}:{n}")
+        p = ROOT / n
+        w = p.read_bytes() if p.is_file() else None
+        if w is not None and n_(w) == n_(s or b""):
+            back.append(n)  # git 已經部分套回這個檔
+            continue
+        if w is not None and b"\n<<<<<<< " not in b"\n" + w and n_(w) != n_(h or b"") and n_(w) != n_(s or b""):
+            newer.append(n)
+            continue
+        if n not in remote_changed and s is not None:
+            take.append(n)
+            take_set.add(n)
+            continue
+        kept.append(n)
+    if take:
+        if _git_paths(["restore", f"--source={after}", "--worktree"], take):
+            _git_paths(["reset", "-q"], take)
+            back.extend(take)
+        else:  # 批次失敗就退回逐檔，判定不變
+            for n in take:
+                if _g("checkout", "-q", after, "--", n).returncode == 0:
+                    _g("reset", "-q", "--", n)
+                    back.append(n)
+                else:
+                    kept.append(n)
+    # 遠端較新（或 stash 裡已刪）→ 改回 HEAD 版；HEAD 也沒有的檔，舊版 checkout 本來就失敗、等於不動
+    in_head = [k for k in kept if blobs.get(f"HEAD:{k}") is not None]
+    if in_head and not _git_paths(["checkout", "-q", "HEAD"], in_head):
+        for k in in_head:
+            _g("checkout", "-q", "HEAD", "--", k)
+    order = {n: i for i, n in enumerate(names)}
+    return sorted(back, key=order.get), sorted(kept, key=order.get), newer
+
+
+def _unstage(paths: list) -> None:
+    """先.一三五-1kk：已取回的檔一律撤出暫存區（只動暫存區、工作樹不動）。git 套回 autostash 衝突時會把「乾淨合併」的檔
+    直接 add 進暫存區，舊版不處理，下一個不帶 pathspec 的 commit 就把別人的未提交修改一起提交走。自身失敗只印警告（十二節）。"""
+    try:
+        if paths and not _git_paths(["reset", "-q"], paths):
+            print("[local_git_commit] 警告：已取回檔撤出暫存區失敗（工作樹內容不受影響）", file=sys.stderr)
+    except Exception as e:  # noqa: BLE001
+        print(f"[local_git_commit] 警告：已取回檔撤出暫存區失敗（{type(e).__name__}）", file=sys.stderr)
+
+
 def _restore_failed_autostash(stash_before: str) -> str:
     """先.一〇三-14v（2026-10-16 事故）：pull --autostash 套回失敗時，git 把「別的排程／互動視窗」尚未 commit 的修改
     整包留在 stash（`Your changes are safe in the stash`，exit 0），工作目錄留下衝突標記或被清回 HEAD。10:05 新聞補班就這樣
     吃掉 DevQueue 剛重產的 research*.json 與 by_code。
 
-    這裡偵測 refs/stash 換了新的 autostash，就逐檔取回：只取回「遠端這次沒動到」的檔（stash 基底版＝目前 HEAD 版），
-    遠端有更新的檔保留遠端版（那正是套回衝突的原因，舊的機器產出以遠端為準）。stash 本身不刪（不可逆，留給人工）。
+    這裡偵測 refs/stash 換了新的 autostash，就取回：只取回「遠端這次沒動到」的檔（stash 基底版＝目前 HEAD 版），
+    遠端有更新的檔保留遠端版（那正是套回衝突的原因，舊的機器產出以遠端為準）；工作樹已是 stash 版的算已取回；
+    工作樹是 stash 之後別人寫的更新版（先.一三一-1）就保留工作樹。
+    先.一三五-1kk（2026-11-05）：改批次（_classify_restore_batch），批次判定出錯才退回逐檔舊版。
     自身任何失敗只回傳原因字串（十二節）。"""
     try:
         after = _g("rev-parse", "-q", "--verify", "refs/stash").stdout.strip()
@@ -223,23 +339,12 @@ def _restore_failed_autostash(stash_before: str) -> str:
         if "autostash" not in _g("log", "-1", "--format=%gs", "-g", "refs/stash").stdout:
             return ""
         names = [n for n in _g("stash", "show", "--name-only", after).stdout.splitlines() if n.strip()]
-        back, kept, newer = [], [], []
-        for n in names:
-            # 先.一三一-1（2026-10-22）：套回失敗常見原因是別的排程在 stash 之後又寫了同一個檔（rate_limit_state.json）。
-            # 工作樹版本若沒有衝突標記、且既不是 HEAD 版也不是 stash 版＝有人寫了更新的內容 → 保留工作樹，不拿舊 stash 蓋掉。
-            if _worktree_is_stash(n, after):
-                back.append(n)  # git 已經部分套回這個檔
-                continue
-            if _worktree_newer(n, after):
-                newer.append(n)
-                continue
-            if _g("diff", "--quiet", f"{after}^1", "HEAD", "--", n).returncode == 0:
-                if _g("checkout", "-q", after, "--", n).returncode == 0:
-                    _g("reset", "-q", "--", n)
-                    back.append(n)
-                    continue
-            kept.append(n)
-            _g("checkout", "-q", "HEAD", "--", n)  # 套回失敗會留衝突標記（UU），改回遠端版；本機版仍在 stash
+        try:
+            back, kept, newer = _classify_restore_batch(after, names)
+        except Exception as e:  # noqa: BLE001
+            print(f"[local_git_commit] 警告：批次取回失敗（{type(e).__name__}: {e}），退回逐檔", file=sys.stderr)
+            back, kept, newer = _classify_restore_per_file(after, names)
+        _unstage(back + newer)
         dropped, why = _auto_drop_if_nothing_unique(after, names, back, kept, newer)
         msg = (f"autostash 套回失敗：已取回 {len(back)} 檔、遠端較新保留遠端版 {len(kept)} 檔（{', '.join(kept)[:200]}）、"
                f"工作樹已有更新內容保留 {len(newer)} 檔（{', '.join(newer)[:200]}）；{why}")

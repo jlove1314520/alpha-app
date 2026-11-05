@@ -1,3 +1,15 @@
+## 2026-11-05 10:0x DevQueue 20261105-100102（維運帽）先.一三五-1kk autostash 取回批次化
+
+等待總司令審閱：17 件（`research/AWAITING_REVIEW.md` 等待中表格 17 列；本輪未新增、未結案）。
+
+- **先.一三五-1kk ✅**（純 bug 修復、零外部請求）：`scripts/local_git_commit.py` 的 `_restore_failed_autostash()` 改走批次版 `_classify_restore_batch()`——`git cat-file --batch` 一個子行程讀全部 HEAD／stash blob、一次 `diff --name-only --no-renames -z` 求遠端改動、取回用 `restore --worktree`＋`reset`（pathspec 走 stdin、每批 200 檔）。子行程數不再隨檔數成長；暫存區從頭到尾不出現 stash 版（舊版 checkout→reset 空檔就是 `04bb2f262c9` 夾帶 6153.json 的來源）。舊逐檔版改名 `_classify_restore_per_file()`，只在批次出錯時退回（十二節）。
+- **證據**：新自測 `scripts/selftest_autostash_restore_batch.py`（暫存 repo，1,000 檔 autostash 套回失敗）——back 913／kept 62／newer 25 新舊逐檔一致、工作樹每檔內容一致、`git status` 一致、批次出錯退回逐檔結果同舊版；耗時舊 45.0 秒 → 新 5.1 秒。既有 `selftest_autostash_restore.py`、`selftest_inventory_autostash_residual.py`、`selftest_local_git_orphan_autostash.py` 全過。
+- **[自行裁量]**：①加 `_unstage(back+newer)`——實測 git 套回衝突時會自己把乾淨合併的檔 add 進暫存區（舊版沒處理），現在一律撤出暫存區、工作樹不動；②條目說「quotes 補班沒拿 git_op_lock」查證不成立（兩處都經 `commit_paths()`，先搶鎖才 pull）；`.ps1` 的 `local_git_commit.py pull`／`pull_autostash_safe()` 呼叫端不加鎖（部分呼叫端已自己持鎖，再搶會自鎖），批次化後持 index 時間已從分鐘級降到秒級。
+- **附帶（條目要求照實寫）**：09:05 那筆 autostash（`da964e0…`，982 檔）已在 09:15:31 被 `_auto_drop_if_nothing_unique` 自動刪除（取回 953／遠端較新 21／工作樹較新 8）。stash 清單剩 11/04 `pre-036-rebase` 與 10/24～10/30 七筆舊 autostash（交人工，本輪未動）。
+- **冒煙**：10:13 第一次只有第 12 項失敗——`quotes_tw.json` 剛好在 10:15 被本機報價補班改寫，讀到寫一半的檔（之後確認是合法 JSON）；10:21 第二次失敗 18（Playwright「promise was garbage collected」）與 79（`stock_detail/2330.json` 10:22 被別的排程改寫）。兩次失敗都是測試期間別的排程在寫檔，與本次 Python 改動無關（App 不載入這支腳本）；**10:31 第三次 exit 0、184 項全過、0 FAIL**（未放寬任何測試）。
+- **收工補件**：`- [ ]` 21 項（≥12）；DevQueue 可執行 0 項（<6）。受 45 分鐘時間上限，本輪**未補件**，留給下一輪照【常規.補件順序】補。
+- BLOCKED：無新增。
+
 ## 2026-11-05 09:0x DevQueue 20261105-090102（維運帽）1jr／1kb 時間閘驗收＋收工補件 1kk
 
 等待總司令審閱：17 件（`research/AWAITING_REVIEW.md` 等待中表格 17 列；本輪未新增、未結案）。
