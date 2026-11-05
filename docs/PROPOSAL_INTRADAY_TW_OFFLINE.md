@@ -34,3 +34,14 @@
 
 建議**甲**（資料真、零新增外部請求、改動只在新腳本＋App 讀取端）。照零之二，24 小時內無 Cowork 裁示即預設放行甲。
 放行後先做匯出腳本＋自測，再改 App 讀取並加冒煙一項；推送頻率若日後要調（例如 10 分鐘）另提案。
+
+## 四、執行結果（2026-11-06 DevQueue，[預設放行]）
+
+照零之二預設放行**甲**（等約 25.2 小時無 Cowork 裁示；Cowork 可推翻，推翻時照 PREREG 修訂規則處理，程式 git revert 即還原）。
+
+- `scripts/export_intraday_tw.py`：只讀熱檔與 `.live_watchlist.json`，寫 `data/intraday_tw/YYYY-MM-DD.json`＋`data/intraday_tw/index.json`（`latest`）；零外部請求，不動 `shioaji_quotes.py`。
+- 掛在 `scripts/quotes_local_fallback.py` 台股分支（AlphaQuotesFallback，交易日 09:05～13:45 每 10 分鐘），不新建排程；心跳 `research/quotes_local_fallback.jsonl` `intraday_export`。
+- App：自選股拿不到本機 1 分K 才讀 repo 檔；今天標「至HH:MM」、前一交易日標 MM-DD，title「約每 20 分鐘上傳一次，不是即時」；另存 localStorage 一份供斷網。
+- 實測 11/05 熱檔：8 檔、1,953 根、77.8KB（gzip 17KB）。
+- [自行裁量]：①實際約每 20 分鐘（每 10 分鐘的排程＋距上次 ≥14 分鐘），13:35 後必匯收盤版；②舊檔**不刪**（刪除屬不可逆，輪替留 Cowork 決定）；③多一個 `index.json`。
+- 自測 `selftest_export_intraday_tw.py` 10/10、`selftest_quotes_local_fallback.py` 17/17；冒煙新增 #182，全套 185 PASS／0 FAIL。

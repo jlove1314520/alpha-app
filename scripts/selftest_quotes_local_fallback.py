@@ -58,6 +58,7 @@ def fake_run(args, **kw):
 
 Q.G = FakeG
 Q.subprocess = SimpleNamespace(run=fake_run)
+Q._export_intraday = lambda now: state.setdefault("exports", []).append(now.strftime("%m-%d %H:%M"))  # 先.一四九-2：自測不碰真熱檔／真 repo
 
 
 def last():
@@ -80,6 +81,8 @@ Q.main(datetime(2026, 10, 14, 10, 10, tzinfo=TW)); res.append(("⑤抓完雲端�
 state["ages"], state["fetch_ok"] = [40], False
 (tmp / "data" / "quotes_tw.json").unlink()
 Q.main(datetime(2026, 10, 14, 10, 20, tzinfo=TW)); res.append(("⑥抓取失敗→不提交", last() == "fetch_failed" and len(state["commits"]) == 1))
+res.append(("先.一四九-2 日內匯出只在台股交易時段內呼叫（休市／盤前不叫）", state.get("exports", [])[:1] == ["10-14 10:00"]
+            and not any(x.startswith(("10-17", "10-26")) or x.endswith("08:50") for x in state.get("exports", []))))
 # ---- 美股分支（先.一四一-3）：盤中／盤外／休市／半日市／無金鑰／雲端已更新／金鑰不外洩／最短間隔 ----
 from zoneinfo import ZoneInfo  # noqa: E402
 ET = ZoneInfo("America/New_York")

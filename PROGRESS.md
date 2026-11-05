@@ -1,3 +1,14 @@
+## 2026-11-06 06:4x DevQueue（開發帽）零之二預設放行 先.一四九-2：**[預設放行] 照作者建議甲執行**
+
+等待總司令審閱：10 件（`research/AWAITING_REVIEW.md`「等待中（目前：10件）」；先.一四九-2 移到已結案並標 [預設放行]）。
+
+- **為什麼可以放行**：草稿 `docs/PROPOSAL_INTRADAY_TW_OFFLINE.md` 明標「甲（建議）」，等約 25.2 小時無 Cowork 裁示；排除檢查：不碰 holdout（當日顯示用資料）、不涉真錢、無密碼／本人登入、無付費資料、不改關卡門檻、**沒有刪除任何檔**。Cowork 可推翻，推翻時照 PREREG 修訂規則處理（程式面 git revert 即還原）。
+- **做了什麼**：①新 `scripts/export_intraday_tw.py`（只讀本機 Shioaji 熱檔，**零外部請求**，不動常駐 `shioaji_quotes.py`）→ `data/intraday_tw/YYYY-MM-DD.json`＋`index.json`；②掛在既有 `quotes_local_fallback.py` 台股盤中分支（AlphaQuotesFallback），不新建排程，`data/` 已在 MACHINE_WRITTEN；③`app.js` 自選股拿不到本機 1 分K 時讀 repo 檔畫分時（今天標「至HH:MM」、前一交易日標 MM-DD、title 寫非即時），並存 localStorage 副本供斷網。
+- **證據**：11/05 熱檔實匯 8 檔、1,953 根、77.8KB（gzip 17KB），一併提交當第一份；自測 `selftest_export_intraday_tw.py` 10/10、`selftest_quotes_local_fallback.py` 17/17。
+- **冒煙**：`node scripts/smoke_test.mjs` 前幾次 FAIL 依序修掉：#182 第一版測「重畫後消失」與 #151 離線保留設計衝突（拿掉）；#151 新瀏覽器環境離線時 repo 日內檔沒被 SW 存到 → 加 localStorage 副本；#28 在途請求蓋掉測試注入 → 測試先擋 repo 檔；#182 改用 page.route 假檔。#18 Playwright「Resulting promise was garbage collected」為已知偶發。最終 **185 PASS／0 FAIL、exit=0**。
+- **[自行裁量]**：實際頻率約每 20 分鐘（提案寫 15；掛在每 10 分鐘排程上用 ≥14 分鐘節流，13:35 後必匯收盤版）；舊檔不刪（提案寫每天刪，刪除屬不可逆，留 Cowork 決定）；多寫 `index.json`。
+- **下一步**：11/06 盤中看 `research/quotes_local_fallback.jsonl` 的 `intraday_export` 與 git log 確認真的有推；手機在外面時自選股小圖應出現「至HH:MM」。
+
 ## 2026-11-06 05:0x DevQueue（維運帽）零之二預設放行 先.一四九-1：**不放行（排除類別＝擴大 holdout）**
 
 等待總司令審閱：11 件（`research/AWAITING_REVIEW.md`「等待中（目前：11件）」，件數未變；先.一四九-1 列補註不放行原因、仍在等待中）。

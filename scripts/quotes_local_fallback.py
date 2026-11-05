@@ -74,6 +74,18 @@ def origin_age_min() -> float | None:
     return _age(G._g("show", f"origin/main:{OUT}", timeout=60).stdout)
 
 
+def _export_intraday(now: datetime) -> None:
+    """先.一四九-2 甲（[預設放行]）：盤中順便把本機熱檔的自選股 1 分K 匯出到 data/intraday_tw/（零外部請求）。
+    自身失敗只記心跳，不影響下面的報價備援（十二節）。"""
+    try:
+        import export_intraday_tw as X  # noqa: PLC0415
+        res = X.run(now)
+    except Exception as e:  # noqa: BLE001
+        res = f"error（{type(e).__name__}: {e}）"
+    if not res.startswith("skip_gap"):
+        heartbeat("intraday_export", result=res[:240])
+
+
 def main(now: datetime | None = None) -> int:
     now = now or datetime.now(TW)
     day, hm = now.strftime("%Y-%m-%d"), now.strftime("%H:%M")
@@ -84,6 +96,7 @@ def main(now: datetime | None = None) -> int:
     if not (WINDOW[0] <= hm <= WINDOW[1]):
         heartbeat("skip_outside_window", hm=hm)
         return 0
+    _export_intraday(now)
     if G.rebase_in_progress():
         heartbeat("skip_rebase_in_progress")
         return 0

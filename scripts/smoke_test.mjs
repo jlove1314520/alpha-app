@@ -1117,7 +1117,10 @@ async function runSmokeTest(baseUrl, headless = true) {
       quotes: { "2330": { name: "台積電", price: 1000, prev_close: 990, change: 10, change_pct: 1.01, time: "13:30:00", date: "20260904", stale: true,
         sparkline: Array.from({ length: 20 }, (_, i) => 950 + i * 2), sparkline_date: "2026-09-04" } } };
     await page.route("**/data/quotes_tw.json**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fakeTw) }));
-    await page.evaluate(() => { const wl = JSON.parse(localStorage.getItem("alpha_wl") || "[]"); if (!wl.includes("2330")) { wl.push("2330"); localStorage.setItem("alpha_wl", JSON.stringify(wl)); } INTRADAY_TW = null; INTRADAY_TW_AT = 0; LIVE.connected = false; });
+    await page.route("**/data/intraday_tw/**", (route) => route.fulfill({ status: 404, body: "" }));  // 先.一四九-2：先擋 repo 日內備援，等先前在途的請求落地再清掉
+    await page.waitForTimeout(800);
+    await page.evaluate(() => { try { localStorage.removeItem("alpha_intraday_tw_last"); } catch (e) {} });
+    await page.evaluate(() => { const wl = JSON.parse(localStorage.getItem("alpha_wl") || "[]"); if (!wl.includes("2330")) { wl.push("2330"); localStorage.setItem("alpha_wl", JSON.stringify(wl)); } INTRADAY_TW = null; INTRADAY_TW_AT = 0; LIVE.connected = false; REPO_INTRA = { bars: {} }; REPO_INTRA_AT = Date.now(); });  // 先.一四九-2：關掉 repo 日內備援，只測「什麼都沒有」
     await page.evaluate(() => window.go("home"));
     await page.waitForTimeout(1500);
     const info = await page.evaluate(() => {
@@ -1128,6 +1131,8 @@ async function runSmokeTest(baseUrl, headless = true) {
     if (info.hasSpark) sparkTagErrors.push("沒有日內資料卻畫了走勢線（應不畫 20 日）");
     if (info.tag !== "無日內資料") sparkTagErrors.push(`沒有日內資料時應標「無日內資料」，實際「${info.tag}」`);
     await page.unroute("**/data/quotes_tw.json**");
+    await page.unroute("**/data/intraday_tw/**");
+    await page.evaluate(() => { REPO_INTRA = null; REPO_INTRA_AT = 0; });
   } catch (e) {
     sparkTagErrors.push(`測試本身出錯：${e.message || e}`);
   }
@@ -1251,7 +1256,7 @@ async function runSmokeTest(baseUrl, headless = true) {
 
   const sparkGateErrors = [];
   try {
-    await page.evaluate(() => { try { localStorage.removeItem("alpha_live_url"); localStorage.removeItem("alpha_live_token"); } catch (e) {} LIVE.connected = false; });
+    await page.evaluate(() => { try { localStorage.removeItem("alpha_live_url"); localStorage.removeItem("alpha_live_token"); } catch (e) {} LIVE.connected = false; REPO_INTRA = { bars: {} }; REPO_INTRA_AT = Date.now(); });
     await page.evaluate(() => window.go("home"));
     await page.waitForTimeout(1800);
     // 先.一四八-4（收件匣 037／038 P3）：自選股小圖只畫日內分時。沒連電腦（拿不到當日 1 分K）→ 每列標「無日內資料」、不准再畫 20 日；
@@ -1283,6 +1288,47 @@ async function runSmokeTest(baseUrl, headless = true) {
   }
   record("36. 自選股小圖只畫日內分時：沒日內資料標「無日內資料」、不畫 20 日；有當日 1 分K 畫分時線＋平盤線（先.一四八-4）",
     sparkGateErrors.length === 0, sparkGateErrors.join("; "));
+
+  // 182.【先.一四九-2 甲，[預設放行]】連不到家裡電腦時，自選股小圖改讀 repo data/intraday_tw/ 的當日 1 分K：
+  // 今天的檔 → 畫分時線＋平盤線、標「至HH:MM」並有 title 說明非即時；前一交易日的檔 → 標 MM-DD；都沒有時標「無日內資料」由 #28／#36 測（重畫時保留上一版走勢線是 #151 的離線設計，這裡不測「消失」）。
+  const repoIntraErrors = [];
+  try {
+    const base = await page.evaluate(() => {
+      const row = [...document.querySelectorAll("#wl-list .swipe-row")].find((x) => x.querySelector("[data-flash-code]") && !isUS(x.querySelector("[data-flash-code]").dataset.flashCode));
+      const z = _zonedParts(new Date(), "Asia/Taipei");
+      return { code: row ? row.querySelector("[data-flash-code]").dataset.flashCode : null, today: `${z.y}-${String(z.m).padStart(2, "0")}-${String(z.d).padStart(2, "0")}` };
+    });
+    if (base.code) {
+      const bars = [["09:00", 100, 100, 100, 100, 1], ["09:01", 101, 101, 101, 101, 1], ["10:20", 99, 99, 99, 99, 1]];
+      let fakeDate = base.today;
+      // 用假的 repo 檔回應（在途請求也拿到同一份，避免直接改全域變數被別的重畫蓋掉）
+      await page.route("**/data/intraday_tw/**", (route) => {
+        const u = route.request().url();
+        const body = /index\.json/.test(u) ? { latest: fakeDate } : { date: fakeDate, bars: { [base.code]: bars } };
+        return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+      });
+      const probe = () => page.evaluate(async (code) => {
+        Object.keys(LIVE_KB).forEach((k) => delete LIVE_KB[k]);
+        REPO_INTRA = null; REPO_INTRA_AT = 0;
+        await hydrateHome();
+        await new Promise((r) => setTimeout(r, 300));
+        const r2 = [...document.querySelectorAll("#wl-list .swipe-row")].find((x) => x.querySelector(`[data-flash-code="${code}"]`));
+        const w = r2 && r2.querySelector(".sparkwrap");
+        return { line: !!(r2 && r2.querySelector("svg.spark polyline")), base: !!(r2 && r2.querySelector("svg.spark line[stroke-dasharray]")), tag: w ? (w.querySelector("em")?.textContent || "") : "", title: w ? (w.getAttribute("title") || "") : "" };
+      }, base.code);
+      const a = await probe();
+      fakeDate = "2026-01-02";
+      const b = await probe();
+      await page.unroute("**/data/intraday_tw/**");
+      await page.evaluate(() => { REPO_INTRA = null; REPO_INTRA_AT = 0; try { localStorage.removeItem("alpha_intraday_tw_last"); } catch (e) {} });
+      if (!a.line || !a.base || a.tag !== "至10:20" || !/不是即時/.test(a.title)) repoIntraErrors.push(`今天的 repo 檔（${base.code}）：${JSON.stringify(a)}`);
+      if (!b.line || b.tag !== "01-02") repoIntraErrors.push(`前一交易日的 repo 檔應標 01-02：${JSON.stringify(b)}`);
+    }
+  } catch (e) {
+    repoIntraErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("182. 連不到家裡電腦時自選股小圖讀 repo data/intraday_tw/ 當日 1 分K（今天標至HH:MM＋非即時說明／前一交易日標日期；都沒有時標無日內資料見 #28／#36；先.一四九-2）",
+    repoIntraErrors.length === 0, repoIntraErrors.join("; "));
 
   // 37.【2026-09-05新增，新一.6】評分頁不得再出現「需要新聞/供應鏈連動分析，下一輪實作」這類
   // 佔位字——八因子現在全部有真實資料源，缺漏的原因必須逐因子講清楚是哪個資料檔沒有這一檔。

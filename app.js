@@ -1446,6 +1446,9 @@
   // ── 2026-09-04（四修.三）走勢線二選一：連上即時且該檔有當日1分K→畫「今日走勢」（隨盤中變動）；
   // 否則退回既有近20日日線並標「20日」。標籤永遠顯示，使用者一眼分得出是今日還是20日。
   const LIVE_KB={};  // code -> {at, closes:[...], lastT}
+  // 先.一四九-2 甲（[預設放行]）：連不到家裡電腦時的備援——家裡電腦約每 20 分鐘把自選股當日 1 分K
+  // 從 Shioaji 熱檔匯出到 repo（data/intraday_tw/，scripts/export_intraday_tw.py）。只在 live server 拿不到時才讀。
+  let REPO_INTRA=null,REPO_INTRA_AT=0;
   // ── 2026-09-05（總司令「零」）全市場走勢線：data/sparklines.json（每檔近20收盤，約286KB）
   // 由 build_sparklines.py 從 price_history.json 切出（零額外網路請求）。取代舊的「逐檔打
   // TWSE STOCK_DAY」：舊法只有清單內的上市股有線、上櫃股完全沒有、一次抓不完還會被限流打斷。
@@ -1594,6 +1597,40 @@
       if(bc==null)return;
       if(c.lastT===bt){if(c.closes.length)c.closes[c.closes.length-1]=bc}else{c.closes.push(bc);c.lastT=bt}});
   }
+  async function ensureRepoIntradayTw(){
+    if(REPO_INTRA&&Date.now()-REPO_INTRA_AT<300000)return REPO_INTRA;
+    try{
+      const t=Math.floor(Date.now()/60000);  // 不用 no-store：SW 網路優先、斷網退回上次存檔（離線時走勢線不消失，#151）
+      const r=await fetch('data/intraday_tw/index.json?t='+t);
+      if(!r.ok)throw new Error('index HTTP '+r.status);
+      const idx=await r.json();
+      if(!idx||!/^\d{4}-\d{2}-\d{2}$/.test(String(idx.latest||'')))throw new Error('index 格式不符');
+      const r2=await fetch('data/intraday_tw/'+idx.latest+'.json?t='+t);
+      if(!r2.ok)throw new Error(idx.latest+' HTTP '+r2.status);
+      const d=await r2.json();
+      REPO_INTRA=(d&&d.bars&&typeof d.bars==='object')?d:{bars:{}};
+      try{localStorage.setItem('alpha_intraday_tw_last',JSON.stringify(REPO_INTRA))}catch(e2){console.warn('[ensureRepoIntradayTw] 存本機副本失敗',e2)}  // 容量滿只是少一層離線備援，不記診斷
+    }catch(e){
+      // 斷網／檔案還沒產生是常態（比照 getLiveCloses 不灌診斷橫幅）：退回上次存在本機的那份（帶日期，標籤照實顯示 MM-DD 或至HH:MM）
+      console.warn('[ensureRepoIntradayTw]',e.message||e);
+      if(!REPO_INTRA){try{const c=JSON.parse(localStorage.getItem('alpha_intraday_tw_last')||'null');REPO_INTRA=(c&&c.bars)?c:{bars:{}}}catch(e3){console.warn('[ensureRepoIntradayTw] 本機副本壞掉',e3);REPO_INTRA={bars:{}}}}
+    }
+    REPO_INTRA_AT=Date.now();
+    return REPO_INTRA;
+  }
+  // repo 備援日內線：回傳 {closes,tag,title,isToday} 或 null
+  function repoIntraFor(code){
+    const d=REPO_INTRA;const rows=d&&d.bars&&d.bars[code];
+    if(!rows||rows.length<2)return null;
+    const closes=rows.map(b=>Array.isArray(b)?b[4]:null).filter(v=>v!=null&&isFinite(v));
+    if(closes.length<2)return null;
+    const z=_zonedParts(new Date(),'Asia/Taipei');
+    const today=`${z.y}-${String(z.m).padStart(2,'0')}-${String(z.d).padStart(2,'0')}`;
+    const isToday=d.date===today;
+    const lastHm=String(rows[rows.length-1][0]||'');
+    return {closes,isToday,tag:isToday?('至'+lastHm):String(d.date||'').slice(5),
+      title:`家裡電腦上傳的 Shioaji 1 分K（${d.date} 至 ${lastHm}），約每 20 分鐘上傳一次，不是即時`};
+  }
   function sparkWithTag(closes,up,tag){const s=spark(closes,up);if(!s)return '<span class="sparkwrap"></span>';return `<span class="sparkwrap">${s}<em>${tag}</em></span>`}
   // 2026-09-06（實測.二.2）當日曲線專用：**以前收為基線**，不是 min-max 拉滿。
   // 差別很實際：min-max 會把「今天只動了 0.3%」畫成一條劇烈起伏的線，看起來像
@@ -1642,6 +1679,13 @@
     // fallback20d 是 quotes_tw.json 裡的舊欄位，留著當它還在時的備援，之後會整個消失。
     // 先.一四八-4（收件匣 037／038 P3，總司令：「日內線圖不要用 20 日」）：自選股列只畫日內分時，
     // 拿不到當日 1 分K（電腦沒連線、美股沒有日內來源）就照實標「無日內資料」，不改畫 20 日。
+    if(intradayOnly){
+      const ri=isUS(code)?null:repoIntraFor(code);
+      if(ri){
+        const html=sparkBaseline(ri.closes,ri.isToday?prevClose:null);  // 前一交易日的線不能拿今天的前收當平盤
+        if(html)return {html:`<span class="sparkwrap" title="${ri.title}">${html}<em>${ri.tag}</em></span>`,mode:'today-repo'};
+      }
+    }
     if(intradayOnly)return {html:'<span class="sparkwrap sparkwrap-none"><em style="font-size:10px;line-height:1.2;color:var(--ink-4);text-align:center">無日內資料</em></span>',mode:'none'};
     const marketWide=sparkFor(code);
     const closes=(marketWide&&marketWide.length>=2)?marketWide:((fallback20d&&fallback20d.length>=2)?fallback20d:null);
@@ -1846,6 +1890,8 @@
     // 2026-09-06（實測.二）改成 LIVE.configured：當日曲線現在不需要 SSE 已連線，
     // /live/kbars 對未訂閱代號會走 api.kbars() 查詢，只要 live server 連得上就有線。
     if(LIVE.configured){mergeLiveKbarsLast();await Promise.allSettled(WL.filter(c=>!isUS(c)).map(getLiveCloses))}  // 2026-09-04四修.三
+    // 先.一四九-2：有台股自選股拿不到本機 1 分K 才讀 repo 備援（ensureRepoIntradayTw 自己接住錯誤、不會丟出）
+    if(WL.some(c=>!isUS(c)&&!(LIVE_KB[c]&&LIVE_KB[c].closes&&LIVE_KB[c].closes.length>=2)))await ensureRepoIntradayTw();
     if(runId!==HYDRATE_HOME_SEQ)return;
     let showedExtendedHours=false; // 2026-08-27新增：只要有任一列顯示了盤前/盤後價，就顯示風險揭露
     const earningsCal=await loadEarningsCalendar(); // 2026-08-27新增（P2-新，財報行事曆）
@@ -4564,7 +4610,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-11-05.1659';
+  const APP_VERSION='2026-11-06.0700';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
