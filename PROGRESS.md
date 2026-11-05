@@ -1,3 +1,16 @@
+## 2026-11-05 11:0x DevQueue（維運帽）先.一三五-1jt-a 融資個股依官方資料日逐股表 [預設放行]
+
+等待總司令審閱：16 件（`research/AWAITING_REVIEW.md` 等待中表格 16 列；1jt-a 移到已結案）。
+
+- **[預設放行]**（零之二）：AWAITING 的 1jt-a 等了 39.5 小時沒有 Cowork 裁示，照作者標的建議**甲**執行（收件匣 039 也列 1jt-a 甲）。不涉 holdout／真錢／刪除／密碼／付費資料／關卡門檻。**Cowork 可推翻，推翻時照 PREREG 修訂規則處理。**
+- **改了什麼**：`.github/scripts/accumulate_margin_by_stock.py` 另存頂層 `by_data_date[twse|tpex][官方資料日][代號]`（同一資料日同一檔先到先存、不覆寫）＋`by_data_date_src`；原本的執行日鍵 series／data_dates 一字不動（已逐鍵比對 HEAD 一致），模擬 Q 現行讀法不受影響。仍寫同一個檔，已在 market.yml commit 清單內（十節：未新增輸出檔）。
+- **回補**：新 `scripts/rebuild_margin_by_data_date.py`（零外部請求，讀 git 歷史 90 版）——上市 9/30～11/04 共 23 天 0 缺、上櫃 9/24～11/04 共 24 天只缺 10/01；1jy 列的 6 個只剩 git 歷史的資料日全數補回；自我檢查（現行 data_dates 鍵 vs 重建表）通過。
+- **[自行裁量]**：上市 9/24、9/29 各有 2 份不同快照推到同一天，照衝突規則不寫（上市從 9/30 起）。上櫃 10/01 要向官方補，另開 **先.一三五-1jt-b**（`- [ ]`，最多 1～2 次 TPEx 請求、先查端點與 robots）。
+- **風險照實寫**：檔案 1.85→3.11MB，一年約 +13MB（提案估 +2MB 低估）；App 不讀此檔。要瘦身另提案。模擬 Q 起跑前是否改讀新表，照提案留給互動視窗。
+- **證據**：`python scripts/selftest_margin_data_dates.py` 22 項 ALL PASS（新增第 5 段：同鍵晚班上櫃資料日 10/29→10/30，10/29 逐股保留）。
+- **冒煙**：`node scripts/smoke_test.mjs` 11:1x exit 0、184 項全過。
+- BLOCKED：無新增。
+
 ## 2026-11-05 10:0x DevQueue 20261105-100102（維運帽）先.一三五-1kk autostash 取回批次化
 
 等待總司令審閱：17 件（`research/AWAITING_REVIEW.md` 等待中表格 17 列；本輪未新增、未結案）。

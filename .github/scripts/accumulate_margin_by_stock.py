@@ -30,6 +30,13 @@ holding.py`——沒有已知的固定視窗下游需求，先自然累積，`me
 `update_margin_maintenance.py` 寫進 `stock_detail.json` 的 `meta.margin_data_dates`（上櫃＝TPEx 回應 Date 欄；
 上市＝openapi 與同班 rwd MI_MARGN 逐股比對推定），以及 `tpex_codes`（上櫃代號，用來挑 twse／tpex）。零額外請求。
 `meta.margin_data_dates` 的 `recorded_at` 離現在超過 6 小時就當作舊值不採用（該鍵不記 data_dates）。
+
+**依官方資料日的逐股表（先.一三五-1jt-a 甲，2026-11-05 [預設放行]）**：執行日鍵 series 同鍵後一班會覆寫前一班，
+上櫃官方資料日在同一台北日內會從「前一交易日」跳到「當日」，前一交易日的上櫃數字因此被蓋掉（1jt）。
+另存頂層 `by_data_date[side][YYYYMMDD][code] = [今日融資餘額, 前日融資餘額, 今日融券餘額]`（side＝twse／tpex，
+依 `tpex_codes` 分邊）：只在本班 data_dates 該邊有可信資料日時寫入，**同一資料日同一檔先到先存、不覆寫**
+（新出現的代號照補）。`by_data_date_src[side][YYYYMMDD]` 記來源（live:執行日鍵 或 git:版本 hash）。
+舊的執行日鍵 series／data_dates 照留不動，模擬 Q 現行讀法不受影響。歷史回補見 `scripts/rebuild_margin_by_data_date.py`。
 """
 from __future__ import annotations
 
@@ -87,6 +94,29 @@ def fresh_data_dates(meta: dict, now: datetime | None = None) -> dict | None:
         return t if len(t) == 8 and t.isdigit() else None
     out = {"twse": _d8(mdd.get("twse")), "tpex": _d8(mdd.get("tpex"))}
     return out if any(out.values()) else None
+
+
+def store_by_data_date(bdd: dict, src: dict, dates: dict | None, vals: dict, tpex_codes: set, tag: str) -> int:
+    """把本班逐股數值依官方資料日併進 bdd（先到先存、不覆寫既有代號）；回傳新增筆數（先.一三五-1jt-a）。"""
+    if not dates:
+        return 0
+    n = 0
+    for side in ("twse", "tpex"):
+        dd = dates.get(side)
+        if not dd:
+            continue
+        day = bdd.setdefault(side, {}).setdefault(dd, {})
+        k = 0
+        for code, v in vals.items():
+            if ((code in tpex_codes) == (side == "tpex")) and code not in day and v is not None:
+                day[code] = v
+                k += 1
+        if not day:
+            bdd[side].pop(dd, None)
+        elif k and dd not in src.setdefault(side, {}):
+            src[side][dd] = tag
+        n += k
+    return n
 
 
 INHERIT_MIN_SAME_RATIO = 0.98
@@ -162,6 +192,13 @@ def main() -> int:
     else:
         data_dates.pop(d, None)  # 這一班沒有可信的資料日 → 不留同一執行日鍵較早一班的值（避免與本班數值不一致）
 
+    # 先.一三五-1jt-a 甲：依官方資料日另存一份（先到先存、不覆寫）
+    bdd = {side: dict(v) for side, v in (prior.get("by_data_date") or {}).items() if isinstance(v, dict)}
+    bdd = {side: {dt: dict(rows) for dt, rows in days.items()} for side, days in bdd.items()}
+    bsrc = {side: dict(v) for side, v in (prior.get("by_data_date_src") or {}).items() if isinstance(v, dict)}
+    n_bdd = store_by_data_date(bdd, bsrc, merged, {c: series[c][d] for c in series if d in series[c]},
+                               tpex_codes, f"live:{d}")
+
     all_dates = sorted({dt for b in series.values() for dt in b})
     doc = {
         "meta": {
@@ -179,12 +216,15 @@ def main() -> int:
         "data_dates": dict(sorted(data_dates.items())),
         "tpex_codes": sorted(tpex_codes),
         "series": series,
+        "by_data_date": {side: dict(sorted(days.items())) for side, days in sorted(bdd.items())},
+        "by_data_date_src": {side: dict(sorted(v.items())) for side, v in sorted(bsrc.items())},
     }
     OUT.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     size_mb = OUT.stat().st_size / 1e6
     print(f"margin_by_stock_history.json：{len(series)} 檔 × {len(all_dates)} 個交易日"
           f"（本次快照日期 {d}，本次含margin的股票數 {n_with_margin}，新增 {added} 筆），{size_mb:.2f}MB")
     print(f"  資料日對照（執行日鍵 {d}）：{dd if dd else '本班沒有可信的資料日（未記）'}")
+    print(f"  依資料日逐股表：本班新增 {n_bdd} 筆；上市 {len(bdd.get('twse', {}))} 天、上櫃 {len(bdd.get('tpex', {}))} 天")
     if all_dates:
         print(f"  日期範圍 {all_dates[0]} ~ {all_dates[-1]}")
     return 0

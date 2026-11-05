@@ -3,6 +3,7 @@
 1. infer_twse_margin_data_date：openapi 與同班 rwd 逐股餘額 ≥98% 相同才推定資料日；不足 100 檔或不夠相同 → None。
 2. fresh_data_dates：recorded_at 超過 6 小時當舊值不用；日期轉 YYYYMMDD。
 3. accumulate main()：新鍵記 data_dates／tpex_codes；舊鍵與 series 不改寫；本班沒有可信資料日 → 該執行日鍵不留 data_dates。
+5. by_data_date（先.一三五-1jt-a）：同鍵晚班資料日前進時保留前一資料日；先到先存不覆寫。
 """
 from __future__ import annotations
 
@@ -98,6 +99,39 @@ out = json.loads(A.OUT.read_text(encoding="utf-8"))
 check(out["data_dates"].get("20261029") == {"twse": None, "tpex": "20261028"},
       "晚班上市數值已變 → 不沿用（上市 null，上櫃照本班）")
 check(A.inherit_same_day_dates(None, None, {}, {}, set()) is None, "沒有本班也沒有早班資料日 → None")
+
+# 5. 先.一三五-1jt-a 甲：同一執行日鍵晚班上櫃資料日前進 → by_data_date 保留前一資料日、先到先存不覆寫
+A.OUT.write_text(json.dumps({"meta": {}, "dates": [], "series": {}}), encoding="utf-8")
+stk5 = {"2330": {"margin": {"margin_balance_today": 100.0, "margin_balance_prev": 90.0, "short_balance_today": 1.0}},
+        "6488": {"margin": {"margin_balance_today": 7.0, "margin_balance_prev": 6.0, "short_balance_today": 1.0}}}
+e5 = {"meta": {"generated_at": "2026-10-30T09:16:00+08:00",
+               "margin_data_dates": {"twse": "2026-10-29", "tpex": "2026-10-29", "tpex_codes": ["6488"],
+                                     "recorded_at": now.isoformat()}}, "stocks": stk5}
+A.SNAPSHOT.write_text(json.dumps(e5), encoding="utf-8")
+A.main()
+l5 = json.loads(json.dumps(e5))
+l5["meta"]["generated_at"] = "2026-10-30T23:59:00+08:00"
+l5["meta"]["margin_data_dates"]["tpex"] = "2026-10-30"
+l5["stocks"]["6488"]["margin"] = {"margin_balance_today": 9.0, "margin_balance_prev": 7.0, "short_balance_today": 2.0}
+l5["stocks"]["2330"]["margin"]["margin_balance_today"] = 555.0  # 上市同日數值異動（不該蓋掉先存的）
+l5["stocks"]["5555"] = {"margin": {"margin_balance_today": 3.0, "margin_balance_prev": 3.0, "short_balance_today": 0.0}}
+A.SNAPSHOT.write_text(json.dumps(l5), encoding="utf-8")
+A.main()
+out = json.loads(A.OUT.read_text(encoding="utf-8"))
+b = out.get("by_data_date") or {}
+check(out["series"]["6488"]["20261030"] == [9.0, 7.0, 2.0], "執行日鍵 series 照舊被晚班覆寫（舊讀法不變）")
+check(b.get("tpex", {}).get("20261029", {}).get("6488") == [7.0, 6.0, 1.0],
+      "上櫃 10/29 逐股數字在 by_data_date 保留（晚班資料日前進不蓋掉）")
+check(b.get("tpex", {}).get("20261030", {}).get("6488") == [9.0, 7.0, 2.0], "上櫃 10/30 另存一天")
+check(b.get("twse", {}).get("20261029", {}).get("2330") == [100.0, 90.0, 1.0], "上市 10/29 同一檔先到先存、不覆寫")
+check(b.get("twse", {}).get("20261029", {}).get("5555") == [3.0, 3.0, 0.0], "上市 10/29 新出現的代號照補")
+check(out.get("by_data_date_src", {}).get("tpex", {}).get("20261029") == "live:20261030", "by_data_date_src 記來源")
+l5b = json.loads(json.dumps(l5))
+l5b["meta"]["margin_data_dates"]["recorded_at"] = (now - timedelta(hours=9)).isoformat()
+A.SNAPSHOT.write_text(json.dumps(l5b), encoding="utf-8")
+A.main()
+out2 = json.loads(A.OUT.read_text(encoding="utf-8"))
+check(out2["by_data_date"] == out["by_data_date"], "本班沒有可信資料日 → by_data_date 不動")
 
 print(f"\n{'ALL PASS' if not fails else f'{len(fails)} FAIL'}（暫存目錄 {td}）")
 sys.exit(1 if fails else 0)
