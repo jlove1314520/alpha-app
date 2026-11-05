@@ -1,3 +1,18 @@
+## 2026-11-06 05:0x DevQueue（維運帽）零之二預設放行 先.一四九-1：**不放行（排除類別＝擴大 holdout）**
+
+等待總司令審閱：11 件（`research/AWAITING_REVIEW.md`「等待中（目前：11件）」，件數未變；先.一四九-1 列補註不放行原因、仍在等待中）。
+
+- **草稿有標建議選項**（`docs/PROPOSAL_KLINE_3Y_REPO.md` 甲），但第 2 步排除檢查擋下：甲的「最近 1 年零請求組出」要讀 `research/data/paper_9_lookback/`，
+  那是 holdout 期間（2025-01-01 起）的限定讀取資料夾，`research/validation/holdout.py::RESTRICTED_LOOKBACK_DIRS` 只准 `fetch_paper_9_lookback.py`／`paper_9_breakout_tracker.py` 兩支讀
+  （`scripts/selftest_display_only_files.py` 會抓）；加讀取者＝擴大 holdout 讀取範圍，且 holdout.py 屬十三節核心檔。產出的 `data/kline/2025`／`2026` 與回補 2025-01～10 段也都在 holdout 期間，
+  照先.一百-4 前例須先登記 `DISPLAY_ONLY_DATA_FILES`。草稿沒寫到這個限制，所以不照草稿執行、也不自己改做法。
+- **沒有改任何程式、零外部請求、未寫 CLAUDE.md 頻率清單**（回補沒跑）。
+- `dev_queue_runner.py block` 沒有呼叫：目前沒有 `- [ ]` 項目，`mark_blocked()` 走 `find_next()` 會回 NO_ITEM，不會標到這一條；改為直接在條目與 AWAITING 列寫明原因。
+  AWAITING 列說明含「holdout」，`_default_release_candidates()` 的整列強排除字已不再挑它（實測候選只剩先.一四九-2）。
+- **待決（Cowork／互動視窗）**：①`data/kline/` 是否登記 DISPLAY_ONLY（互動視窗改 holdout.py）；②最近 1 年改重抓官方日檔（另約 494 次，同 twse_mi_index／tpex_www 節流）或核准建檔腳本列入受限讀取者；③或改採乙／丙。
+- **冒煙**：`node scripts/smoke_test.mjs` 前兩次 183 PASS／1 FAIL（#18 Playwright「Resulting promise was garbage collected」，已知偶發框架錯誤；加步驟標記查到卡在 `openStock("2330")` 那次 evaluate，單獨跑 openStock 2330／AAPL 都在 0.5 秒內完成，本輪只改文件），第三次 **184 PASS／0 FAIL、exit=0**。
+- 影響檔案：`PENDING_QUEUE.md`、`research/AWAITING_REVIEW.md`、`PROGRESS.md`。
+
 ## 2026-11-06 03:31～03:5x DevQueue 20261106-033101（維運帽）空轉補件 先.一三五-1lo～1lq
 
 等待總司令審閱：11 件（`research/AWAITING_REVIEW.md`「等待中（目前：11件）」，本輪未異動）。
