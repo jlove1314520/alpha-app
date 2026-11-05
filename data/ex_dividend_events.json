@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated_at": "2026-11-05T09:52:26.785735+08:00",
-    "last_fetch_count": 13,
-    "reductions_generated_at": "2026-11-05T09:52:34.349458+08:00"
+    "generated_at": "2026-11-06T00:01:09.308101+08:00",
+    "last_fetch_count": 14,
+    "reductions_generated_at": "2026-11-06T00:01:16.420550+08:00"
   },
   "events": {
     "01010T": [
@@ -1569,6 +1569,16 @@
         "first_seen": "2026-08-28",
         "applied": true,
         "factor_applied": 0.9752650176678446
+      },
+      {
+        "ex_date": "2026-11-19",
+        "cash": 0.0,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.07903413,
+        "rights_price": 0.0,
+        "type": "權",
+        "first_seen": "2026-11-05",
+        "applied": false
       }
     ],
     "2330": [
@@ -4148,6 +4158,30 @@
         "first_seen": "2026-11-04",
         "applied": true,
         "factor_applied": 0.995260663507109
+      }
+    ],
+    "3289": [
+      {
+        "ex_date": "2026-11-05",
+        "official_factor": 0.9874015748031496,
+        "pre_close": 127.0,
+        "ref_price": 125.4,
+        "source": "TPEx exDailyQ",
+        "first_seen": "2026-11-05",
+        "applied": true,
+        "factor_applied": 0.9874015748031496
+      }
+    ],
+    "5523": [
+      {
+        "ex_date": "2026-11-05",
+        "official_factor": 0.9835255354200988,
+        "pre_close": 30.35,
+        "ref_price": 29.85,
+        "source": "TPEx exDailyQ",
+        "first_seen": "2026-11-05",
+        "applied": true,
+        "factor_applied": 0.9835255354200988
       }
     ]
   },
