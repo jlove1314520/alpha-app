@@ -1,3 +1,21 @@
+## 2026-11-06 02:01～02:25 DevQueue 20261106-020101（維運帽）先.一三五-1le～1ln 共 8 項
+
+等待總司令審閱：11 件（`research/AWAITING_REVIEW.md`「等待中（目前：11件）」，本輪未異動）。
+
+- **1le 本機台股補跑只提交停資停券資料夾（bug 修復）**：`scripts/market_local_catchup.py` 新 `extract_add_lines()` 收 market.yml commit 步驟 `QL=` 之前全部 `git add`／`for…git add…done` 行（真實 yml 收 16 行），沒有含 `data/market_tw.json` 的 `git add -A` 行就 RuntimeError；`commit_push()` 刪掉自抄的 paper_* 迴圈。證據：`selftest_market_catchup.py` 20/20 PASS；暫存 git repo 實跑產生的 add 腳本 stage 104 檔。**[自行裁量]** 用換行串接（不是 `; `），日後 yml 行尾加 `#` 註解不會把後面整串註解掉。**未驗證**：下一班真實本機補跑的 commit 檔數。
+- **1lf 影響範圍**：10/29～11/05 台股收盤實際都由雲端班落地（台北 10/29 21:29、10/30 18:23、11/02 18:13、11/03 18:16、11/04 19:45、11/05→11/06 00:03）；20:30 檢查在 10/29、11/05 告警，週核對（當天 23:59 口徑）11/02 週唯讀預算 11/05 LATE、11/09 會報出。無漏抓，不開 bug。
+- **1lg 同形狀清查**：只有 market_local_catchup 從 yml 擷取 git add；news／quotes 補班是寫死清單（news 與 yml 一致），兩支自測都收全部行。無第二支同類 bug。
+- **收工補件（DevQueue 可執行 0→6）**：1li～1ln，來源全是①資料錯／監控線索（`data/audit_report.json` 11/05 23:00、`adjustment_anomaly_warnings.jsonl`、1lg）。隨後本輪自己做完其中 5 項＋1 項只讀。
+- **1ln AlphaQuotesTW 夜間告警**：查證後**不是誤報**——`fetch_quotes_tw.py` 任何時段有報價就刷新 fetched_at，夜間告警＝雲端 quotes.yml 真的沒跑（同 1kh-e5）。只更正 registry note 裡不存在的 `quotes_tw_10min` 敘述。**[自行裁量]** 不改 profile，避免把雲端夜間停擺消音。
+- **1li 還原價異常警告**：7,119 筆中 ETF 只有 104 筆（1.5%），ETF 豁免不是主因；另發現 00631L 2015-01-05 −95.44%／2015-08-24 −33.64% 疑似真的還原錯，開互動視窗條目 先.一三五-1li-a（adjust.py 屬十三節核心檔）。
+- **1lj a4 混合日期 11 檔**：全是零星成交、無成交日不記（11/05 量 2～8 張、過去多日斷續），非缺價。限制：未向官方再要 11/04 日檔逐檔確認。
+- **1lk e_pe 39 筆**：38 筆屬既有「EPS 基礎不同」；**3550 聯穎本益比 7.3×10¹⁷** 是浮點誤差（四季 EPS 實際加總 0 → 2.8×10⁻¹⁷），`scripts/data_audit.py` 改 `ttm = round(sum(eps4), 4)`。a3 1 筆（3064）同 1lj 零星成交。**未驗證**：下次 23:00 稽核 e_pe 應為 38。
+- **1ll e_quarters_gap 100%**：只在命中時 checked+1，定義使然；補 `_COMPLETENESS_NOTE` 說明，計數與門檻不變。`selftest_data_audit_dates.py` 全過、`selftest_audit_preflight.py` 25/0。
+- **1lm**：新 `scripts/selftest_news_fallback_outputs.py`，news 補班 OUTPUTS 與 yml git add 集合比對，4/4 PASS；反向（砍 2 個）3/4、exit 1。
+- **收工佇列檢查**：補件後的 6 項本輪已做完，DevQueue 可執行再度回到 0（剩下 1li-a 是互動視窗）；本輪查過的①來源（稽核 by_check 各非零項、異常警告、local_task_health）都已排成條目並處理，**來源已用盡，不再補**；④文書核對照本週用量上限規定暫停。
+- **冒煙**：`node scripts/smoke_test.mjs` **184 PASS／0 FAIL、exit=0**（本輪程式改動後跑；記憶體未中止）。
+- 影響檔案：`scripts/market_local_catchup.py`、`scripts/selftest_market_catchup.py`、`data/seed/pipeline_registry.json`、`scripts/data_audit.py`、`scripts/selftest_news_fallback_outputs.py`、`PENDING_QUEUE.md`、`PROGRESS.md`。
+
 ## 2026-11-05 22:52～23:10 DevQueue 20261105-223102（研究帽）先.一五二-1d F18 個股層歸因（本輪第 2 項）
 
 等待總司令審閱：11 件（`research/AWAITING_REVIEW.md` 等待中表格未異動）。
