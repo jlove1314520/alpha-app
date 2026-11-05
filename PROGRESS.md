@@ -1,3 +1,25 @@
+## 2026-11-05 13:01～13:4x DevQueue 20261105-130102（開發帽，接續維運項）先.一三五-1kh-e3 首頁提醒按鈕＋1kh-e4 心跳自測＋1kh-e5 quotes 漏跑提案
+
+等待總司令審閱：14 件（`research/AWAITING_REVIEW.md` 等待中表格 14 列；本輪新增 1kh-e5）。
+
+### 先.一三五-1kh-e3 冒煙 #91：首頁提醒列按鈕超過 6 字（`- [x]`，commit af0b52cdc16）
+- **做了什麼**：`app.js` buildHomeFocus 的提醒列拿掉整列 `role=button`；說明文字（例「聯發科 今天 -5.92%」）改為一般文字，右側加短字真按鈕「看個股／看模擬／看詳情›」（依點擊動作判斷）。整列仍可點，按鈕 `stopPropagation` 避免觸發兩次。所有提醒列一起改（「XX 最大跌幅 …」等長說明同樣會撞 #91）。
+- **證據**：冒煙 13:19 exit=0、184 項全過；#91「12 頁 0 處違規」；#181 新加「沒有整列 role=button」「提醒列按鈕 ≤6 字」並在異常注入情境（資料過期＋模擬 G −42.3%）通過。13:10 第一次只有 #18 Playwright「promise was garbage collected」（已知偶發），重跑過。
+- **[自行裁量]**：選「說明文字＋短按鈕」而非 role=link（檔內無 role=link 先例）；沒另造 ±6% 自選股（要動 resolveQuote 注入），改用同一段渲染程式的長說明注入列驗證。**未放寬 #91**。
+
+### 先.一三五-1kh-e4 本機心跳自測 ②③⑤ 誤判（`- [x]`，commit 2158d944e84）
+- **做了什麼**：`scripts/selftest_local_heartbeats.py` 把 `N.archive_commit` 換成空函式（②③⑤ 只測補班判斷），另加 ⑥ 三項測 archive_commit 本身（假月檔模組：有新月檔只提交月檔；沒新檔不提交；模組出錯只記警告）。
+- **證據**：自測 15/15 PASS（原 12＋3）；工作目錄沒多出真 repo 檔；冒煙 13:28 exit=0、184 項全過。
+
+### 先.一三五-1kh-e5 雲端 quotes.yml 盤中漏跑提案（`- [!]` 等 Cowork，已送 AWAITING）
+- **證據**：`gh run list --workflow=quotes.yml`：11/02 3 班、11/03 6 班、11/04 7 班（UTC 日，全是 schedule 事件；cron 一天約 80 個時段）→ GitHub 排程略過，不是 workflow 錯。`gh auth status`：本機 token 無效。
+- **建議乙**：本機補抓維持主力，`AlphaQuotesTW-雲端遮蔽` 改「已知、只記不告警」，DATA/STATUS 標「台股盤中報價主要由本機補抓」。甲（`gh workflow run`）要總司令先重新登入 gh。**BLOCKED 解除條件**：Cowork 裁示，或 2026-11-06 13:3x 照零之二預設放行乙。
+- **[自行裁量]**：建議乙而非甲（甲依賴總司令動手）。
+
+### 收工
+- 佇列：`- [ ]` 20 項（≥12，不補件）。時間到 45 分鐘上限，權威清單下一項留給下一輪。
+- 冒煙（1kh-e5 md 改動後）：13:38 exit=0、184 項全過。
+
 ## 2026-11-05 12:01～12:3x DevQueue 20261105-120102（維運帽）先.一三五-1kh-l2 STATUS 瘦身甲＋1kh-e2 雲端被遮住偵測＋1kj-b 結案
 
 等待總司令審閱：13 件（`research/AWAITING_REVIEW.md` 等待中表格 13 列；1kh-l、1kh-e 移到已結案）。
