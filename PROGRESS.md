@@ -1,3 +1,15 @@
+## 2026-11-06 03:31～03:5x DevQueue 20261106-033101（維運帽）空轉補件 先.一三五-1lo～1lq
+
+等待總司令審閱：11 件（`research/AWAITING_REVIEW.md`「等待中（目前：11件）」，本輪未異動）。
+
+- **補件**：前向模擬 14／14 已滿（`research/FORWARD_CANDIDATES.md`），照零之二⑤不新增候選、不寫 PREREG、不送 AWAITING；改補 3 條維運條目（先寫進 PENDING_QUEUE 並 commit `60aede1f976` 才動工）。
+- **1lo 前向模擬自測回歸第二次**：28 支（`selftest_paper_*` 22＋`selftest_forward_*` 6）全部 exit 0，無失敗、未改程式。
+- **1lp 起跑後首週輸出新鮮度**：`data/paper_*.json` 18 支 generated_at 全在 24 小時內；`paper_tracking_watch.json` OK。F／F-翼 `last_date` 落後一天＝期交所次日早上才換日的正常型態（git 歷史 11/02～11/05 一致），不是缺口。
+- **1lq 〔時間閘 11/06 14:00〕**：驗證 24 小時預設放行（先.一四九-1／一四九-2／1kh-z／1kh-v3a／1kh-e5）到期有沒有照建議選項執行。
+- 不碰 holdout、未讀報酬、未登記試驗、零外部請求（`gh run list` 讀公開 repo 1 次）。
+- **冒煙**：`node scripts/smoke_test.mjs` **184 PASS／0 FAIL、exit=0**。
+- 影響檔案：`PENDING_QUEUE.md`、`PROGRESS.md`、`research/FORWARD_CANDIDATES.md`。下一步：1kd-g（08:00）、1lb（09:00）、1lq（14:00）、1lh（18:00）時間閘。
+
 ## 2026-11-06 02:01～02:25 DevQueue 20261106-020101（維運帽）先.一三五-1le～1ln 共 8 項
 
 等待總司令審閱：11 件（`research/AWAITING_REVIEW.md`「等待中（目前：11件）」，本輪未異動）。
