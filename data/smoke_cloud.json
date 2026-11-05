@@ -1,33 +1,14 @@
 {
- "generated_at": "2026-11-04T23:58:02.331Z",
+ "generated_at": "2026-11-05T23:52:27.971Z",
  "url": "https://jlove1314520.github.io/alpha-app",
- "all_passed": false,
+ "all_passed": true,
  "crashed": false,
  "crash_error": null,
- "total": 184,
- "passed": 181,
- "failed": 3,
- "failures": [
-  {
-   "name": "65. STATUS.json < 100 KB；還原價異常明細移到 data/adjustment_anomalies.json，STATUS 只留摘要＋連結；設定頁讀新檔",
-   "detail": "兩檔 n_warnings 不一致（7032 vs 7119）"
-  },
-  {
-   "name": "142. 事件精簡版與整份檔同一班（fetched_at 一致）；不同班時 App 退回整份並標示（先.八十一-56）",
-   "detail": "不同班時應退回整份並標原因，實際 undefined／; 退回整份後筆數 0 ≠ 精簡版 9513"
-  },
-  {
-   "name": "12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132/133/134/135/136/137/138/139/140/141/142/143/144/146/147/148/151/152/157/158/161/164/175/176/177新增檢查）結束後仍無累積的uncaught error",
-   "detail": "GLOBAL_ERRORS=[{\"label\":\"ensureEvents\",\"msg\":\"Unterminated string in JSON at position 3309 (line 149 column 33)\",\"time\":\"07:56\"}]"
-  }
- ],
- "global_errors_final": [
-  {
-   "label": "ensureEvents",
-   "msg": "Unterminated string in JSON at position 3309 (line 149 column 33)",
-   "time": "07:56"
-  }
- ],
- "run_url": "https://github.com/jlove1314520/alpha-app/actions/runs/41937034878",
- "commit": "184c60e47"
+ "total": 185,
+ "passed": 185,
+ "failed": 0,
+ "failures": [],
+ "global_errors_final": [],
+ "run_url": "https://github.com/jlove1314520/alpha-app/actions/runs/42131905658",
+ "commit": "c04bcb187"
 }
