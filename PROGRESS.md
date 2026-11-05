@@ -1,3 +1,14 @@
+## 2026-11-05 08:4x DevQueue（研究帽）先.一三五-1gt 未分軌判軌照乙案執行 [預設放行]
+
+等待總司令審閱：17 件（`research/AWAITING_REVIEW.md` 等待中表格 17 列；1gt 移到已結案；上一輪寫 18 件，表頭原本就沒跟上，本輪已照實際列數改正）。
+
+- **[預設放行]**（零之二）：AWAITING 的 1gt 提案等了 92.2 小時都沒有 Cowork 裁示，照作者標的建議選項**乙**執行（收件匣 039 也列了 1gt 乙）。不涉及 holdout／真錢／刪除／付費資料／關卡門檻。**Cowork 可以推翻，推翻時照 PREREG 修訂規則處理。**
+- **改了什麼**：`research/selection_bias_ledger.py::parse()` 加了未分軌的退路規則——明確編號表 `TRACK_OVERRIDE_IDS`（#324→US、#127→FUT、#429／#430→TW）；第 3 欄 `hypothesis_queue`／`calibration` 一律判 TW；第 3 欄是「跨市場」的列，`main()` 同時計入 TW 和 US 兩軌的分母（全體 N 不重複計）。分母自查時，跨市場列取兩軌中較嚴的那一軌。JSON 輸出多一個 `n_cross_market` 欄位。
+- **重跑結果**：全體 N 457 不變。TW 235→**326**（門檻 99.9787→99.9847 百分位）、US 77→82（99.9390）、FUT 52→53（99.9057），未分軌一軌消失。跨市場算 4 筆（#427 已被 1gv 合併，所以不是 1gt 報告寫的 5 筆）。撐住 3／倒下 4（#8／13／14／15）、跨軌重複 1 個（low_vol），三項都沒變；分軌口徑下 #2／7／9／40 仍撐住。**歷史判定一律沒改。**
+- **檔案**：`research/selection_bias_ledger.py`、`research/SELECTION_BIAS_LEDGER.md`（重產）、`research/AWAITING_REVIEW.md`、`PENDING_QUEUE.md`（先.一四九-1 條目第 3 批）、`PROGRESS.md`。`TRIALS_LEDGER.md` 的累積總數沒變，所以沒有回寫。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0，184 項全過、0 FAIL。
+- 先.一四九-1 還剩：1kh-l 甲、1jt-a 甲、1kd-a 甲、1kh-e 甲。
+
 ## 2026-11-05 08:1x DevQueue 20261105-080102（維運帽）1an／1it／1jk／1ju／1kd-c 時間閘驗收＋1kd-d／1kd-f 雲端冒煙三項失敗修復
 
 等待總司令審閱：18 件（`research/AWAITING_REVIEW.md` 等待中表格 18 列；本輪未新增）。

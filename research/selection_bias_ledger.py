@@ -84,6 +84,12 @@ FACTOR_RE = re.compile(r"`([^`]+)`")
 # `hypothesis_queue.md`／`trial_registry.register_trial` 為跨軌重複，2026-09-10 查出）。
 FACTOR_JUNK_RE = re.compile(r"\.md$|register_trial|evaluate_factor|is_holdout_consumed", re.IGNORECASE)
 TRACK_RE = re.compile(r"^(TW|US|FUT)$")
+# 先.一三五-1gt 乙案：未分軌列的明確判軌表（逐列依據見 research/UNTRACKED_TRIALS_AUDIT.md 第 5 節）
+TRACK_OVERRIDE_IDS = {324: "US",   # #75 美股內部人交易 SEC Form 4
+                      127: "FUT",  # 賣出台指選擇權收波動度溢酬（交易期交所衍生品）
+                      429: "TW", 430: "TW"}  # 第 3 欄標「跨市場」但只交易台股（0050 信用閘門）
+CROSS_MARKET = "跨市場"
+CROSS_MARKET_INTO = ("TW", "US")  # 跨市場列同時計入這兩軌分母
 
 
 def _pick_factor(blob: str, fallback: str) -> str:
@@ -133,6 +139,19 @@ def parse() -> list[dict]:
             track = "FUT"
         elif track == "未分軌" and re.search(r"\bf_us_|美股", blob):
             track = "US"
+        # 2026-11-05 先.一三五-1gt 乙案 [預設放行]（Cowork 收件匣 039 亦定案 1gt 乙；判讀依據
+        # research/UNTRACKED_TRIALS_AUDIT.md）：口徑＝交易／預測標的所在市場。
+        # ① 明確編號表（比照 KNOWN_DUPLICATE_IDS 寫法）：hypothesis_queue 列裡實為美股／期貨的、
+        #    以及第 3 欄寫「跨市場」但實際只交易台股的 #429／#430。
+        # ② 第 3 欄 hypothesis_queue／calibration → TW。
+        # ③ 第 3 欄「跨市場」→ CROSS_MARKET，main() 同時計入 TW 與 US 分母（保守方向），全體 N 不重複計。
+        if track == "未分軌":
+            if int(c[1]) in TRACK_OVERRIDE_IDS:
+                track = TRACK_OVERRIDE_IDS[int(c[1])]
+            elif c[3] in ("hypothesis_queue", "calibration"):
+                track = "TW"
+            elif c[3] == CROSS_MARKET:
+                track = CROSS_MARKET
         # 判定：**從右往左找**含判定關鍵字的那一欄。
         # 不能掃整列——第二版就是這樣寫，結果備註裡提到別筆的 FAIL 就把這一筆也判成
         # FAIL，害「撐住」數字從 4 掉到 0。判定欄通常是倒數第二欄（最後一欄是備註），
@@ -258,7 +277,11 @@ def main() -> int:
     by_track = defaultdict(list)
     for r in rows:
         by_track[r["track"]].append(r)
+    n_cross = len(by_track.pop(CROSS_MARKET, []))
     n_track = {t: len(v) for t, v in sorted(by_track.items())}
+    # 先.一三五-1gt 乙案：跨市場試驗同時佔用台美兩邊的搜尋名額，計入兩軌分母（全體 N 不重複計）
+    for t in CROSS_MARKET_INTO:
+        n_track[t] = n_track.get(t, 0) + n_cross
 
     # ── 有效N vs 總N（2026-09-20總司令裁示【depth-1閘門設計缺陷要修；
     # p=0.053作廢要正式處理】二）：IRREPRODUCIBLE的列（登記過的數值結果，
@@ -322,7 +345,8 @@ def main() -> int:
         if not r["claims_correction"] or r["percentile"] is None:
             continue
         claimed = r["claimed_n"]
-        correct_track = n_track.get(r["track"], n_all)
+        correct_track = (max(n_track[t] for t in CROSS_MARKET_INTO) if r["track"] == CROSS_MARKET
+                         else n_track.get(r["track"], n_all))
         correct_all = n_all
         holds_claimed = (r["percentile"] >= required_percentile(claimed)) if claimed else None
         holds_track = r["percentile"] >= required_percentile(correct_track)
@@ -376,6 +400,10 @@ def main() -> int:
              f"{required_percentile(n_valid):.4f} 百分位 |")
     for t, n in n_track.items():
         L.append(f"| 分軌 {t} | {n} | {required_percentile(n):.4f} 百分位 |")
+    L.append("")
+    L.append(f"分軌口徑（先.一三五-1gt 乙案）：「跨市場」{n_cross} 筆同時計入 TW 與 US 分母（全體 N 只計 1 次）；"
+             "第 3 欄 `hypothesis_queue`／`calibration` 判 TW，#324→US、#127→FUT、#429／#430→TW"
+             "（依據 `UNTRACKED_TRIALS_AUDIT.md`）。")
     L.append("")
     if irreproducible_rows:
         L.append("**IRREPRODUCIBLE列表**（登記過的數值結果，用現有程式碼/資料重跑對不上，"
@@ -474,7 +502,7 @@ def main() -> int:
 
     md = "\n".join(L) + "\n"
     payload = {
-        "generated_at": now.isoformat(), "n_all": n_all, "n_track": n_track,
+        "generated_at": now.isoformat(), "n_all": n_all, "n_track": n_track, "n_cross_market": n_cross,
         "claims_checked": len(denom_rows), "survived": len(survived), "degraded": len(degraded),
         "degraded_items": [{"id": r["id"], "factor": r["factor"], "percentile": r["percentile"],
                             "claimed_n": r["claimed_n"]} for r in degraded],
