@@ -6176,12 +6176,17 @@ async function runSmokeTest(baseUrl, headless = true) {
         if (mode === "bad") await p.evaluate(() => buildHomeFocus());
         const r = await p.evaluate(() => ({ theme: document.documentElement.getAttribute("data-theme"),
           items: [...document.querySelectorAll("#home-focus-list .focus-item")].map((x) => ({ lv: x.dataset.lv, t: x.innerText.trim(), h: x.getBoundingClientRect().height })),
-          txt: document.getElementById("home-focus-list").innerText }));
+          txt: document.getElementById("home-focus-list").innerText,
+          // 先.一三五-1kh-e3：提醒列不得整列當按鈕（長說明會違反 #91 按鈕 ≤6 字），右側短字按鈕 ≤6 字
+          roleBtn: document.querySelectorAll("#home-focus-list .focus-item[role=button]").length,
+          longBtn: [...document.querySelectorAll("#home-focus-list button, #home-focus-list [role=button]")].map((b) => b.textContent.replace(/\s+/g, " ").trim()).filter((t) => [...t].length > 6) }));
         if (mode === "bad") {
           if (r.theme !== "light") fcErrs.push(`沒選過主題時應為淺色（系統深色），實得 ${r.theme}`);
           if (!r.items.length || r.items[0].lv !== "alert" || !/資料過期/.test(r.items[0].t)) fcErrs.push(`資料過期沒有排第一：${JSON.stringify(r.items.slice(0, 2))}`);
           if (!r.items.some((x) => x.lv === "alert" && /模擬 G 最大跌幅 -42\.3%/.test(x.t))) fcErrs.push(`模擬 G 跌幅 -42.3% 沒列紅色：${JSON.stringify(r.items.map((x) => x.t))}`);
           if (r.items.some((x) => !(x.h >= 44))) fcErrs.push("有列高度 <44px");
+          if (r.roleBtn) fcErrs.push(`有 ${r.roleBtn} 列整列是 role=button`);
+          if (r.longBtn.length) fcErrs.push(`提醒列按鈕超過 6 字：${r.longBtn.join("、")}`);
           fcInfo += `異常時 ${r.items.length} 列（第一列「${r.items[0] ? r.items[0].t : ""}」）`;
         } else {
           if (r.items.length || !/今天沒事/.test(r.txt)) fcErrs.push(`沒事時應寫「今天沒事」：${r.txt.slice(0, 80)}`);

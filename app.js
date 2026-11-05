@@ -2109,8 +2109,12 @@
     el.setAttribute('data-focus-n',String(items.length));
     if(!items.length){el.innerHTML='<div style="font-size:var(--fs-md);font-weight:600;padding:4px 0">今天沒事</div>'+
       '<div class="note" style="margin:2px 0 0">看過：資料新鮮度、14 支前向模擬與 4 個模擬帳戶的跌幅、自選股漲跌與今明兩天的事件</div>';return}
-    el.innerHTML=items.map(it=>`<div class="row focus-item" data-lv="${it.lv}" role="button" tabindex="0" style="cursor:pointer;min-height:44px;display:flex;align-items:center;gap:10px" onclick="${it.act}">`+
-      `<span class="sdot" style="background:${col[it.lv]};flex:none"></span><span style="flex:1;line-height:1.4">${_uiEsc(it.txt)}</span><span style="color:var(--ink-4)">›</span></div>`).join('');
+    // 先.一三五-1kh-e3：整列原本是 role=button，長說明（例「聯發科 今天 -5.92%」）被當成按鈕文字而違反 #91（按鈕 ≤6 字）。
+    // 改成：說明是一般文字，右側放一顆短字真按鈕（看個股／看模擬／看詳情）；整列仍可點（滑鼠／觸控方便），鍵盤焦點落在按鈕上。
+    const btnOf=a=>/openStock\(/.test(a)?'看個股':/go\('lab'\)|journalToTrade\('strategy'\)/.test(a)?'看模擬':'看詳情';
+    el.innerHTML=items.map(it=>`<div class="row focus-item" data-lv="${it.lv}" style="cursor:pointer;min-height:44px;display:flex;align-items:center;gap:10px" onclick="${it.act}">`+
+      `<span class="sdot" style="background:${col[it.lv]};flex:none"></span><span style="flex:1;line-height:1.4">${_uiEsc(it.txt)}</span>`+
+      `<button type="button" class="focus-go" style="flex:none;min-height:44px;background:none;border:0;color:var(--ink-3);font:inherit;padding:0 4px;cursor:pointer" onclick="event.stopPropagation();${it.act}">${btnOf(it.act)}›</button></div>`).join('');
   }
   async function loadHomeFwdLine(){
     const el=document.getElementById('home-fwd-line');if(!el)return;
@@ -5054,7 +5058,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-11-05.0815';
+  const APP_VERSION='2026-11-05.1319';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
