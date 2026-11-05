@@ -1,3 +1,21 @@
+## 2026-11-05 08:1x DevQueue 20261105-080102（維運帽）1an／1it／1jk／1ju／1kd-c 時間閘驗收＋1kd-d／1kd-f 雲端冒煙三項失敗修復
+
+等待總司令審閱：18 件（`research/AWAITING_REVIEW.md` 等待中表格 18 列；本輪未新增）。
+
+- **先.一三五-1an ✅**（只讀）：`research/data/paper_5_log.jsonl`／`paper_6_log.jsonl` 都有 2026-11-02 entry 列，`data/paper_5.json`／`paper_6.json` started=true、start 2026-11-02、last_date 11-03。11/04 列未出現屬正常（期交所選擇權日報次日早上才有，前兩天都是次日 09 點記入）。不看報酬。
+- **先.一三五-1it ✅**（只讀）：雲端 audit `e9573a312b7` 的 reproducibility_check.checked_at 11-05 05:22，晚於 1is commit；env_missing 3 筆（sklearn×2、statsmodels×1）對得上。
+- **先.一三五-1jk ✅**（只讀）：只有 mem_profile_day 11-02／11-03（各 27 列），11-04 白天／晚上都沒有新檔，量滿自動停如設計。
+- **先.一三五-1ju ✅**：11/04 17:33 權證班 `[tpex limit archive exit=0]`、新寫 0 檔，看守員 tpex_limit_next OK。缺 11-04 檔是時序：該資料日版本雲端 19:45（台北）才進 repo。[自行裁量] 手動補跑歸檔（只讀 git 歷史）→ 新寫 1 檔，`2026-11-04.json` 已存在。
+- **先.一三五-1kd-c ✅**：雲端冒煙 `85f85910388` 第 146 項已通過。同份另有 65、142、12 失敗 → 開兩條純 bug 修復：
+  - **先.一三五-1kd-f**（1a1598c68e9）：`app.js` `_eventsFullFetchedAt()` 的 Range 前 4KB 請求跟退回整份共用同一網址，快取把截斷內容回給整份那次（11/03、11/04 都在約 3300 字元處 Unterminated string）；本機 http.server 不支援 Range 所以本機測不出。改 `cache:'no-store'`＋查詢鍵 `h=`。
+  - **先.一三五-1kd-d**（edd0f3bebf2）：上一輪只提交 STATUS.json（7119），`adjustment_anomalies.json` 留在工作目錄（雲端 7032）。本輪重產後兩檔一起提交。[自行裁量] 不改程式，是提交漏檔。
+  - 雲端生效未驗證：新增 **先.一三五-1kd-g**（時間閘 11/06 08:00）看 65／142／12。
+- **冒煙**：`node scripts/smoke_test.mjs` exit 0，184 項全過、0 FAIL（修改後跑；第一次在改之前啟動的那次已中止不算）。注意 STATUS.json 98.6 KB，離 #65 的 100 KB 上限很近。
+- **維運產物**：data/STATUS.json、data/status_lite.json 重產（edd0f3bebf2）。
+- **佇列**：`- [ ]` 21 項（≥12）；DevQueue 可執行 0 項（<6）→ 收工補件：只補得出 1kd-g（時間閘，先標 `- [!]`）；BACKLOG、UX 提案、DATA_GAP_PLAN 甲類（第 50 行：已無待排抓取）都**來源已用盡**；研究候選本輪不補（維運帽、前向模擬 14／14 已滿）。
+- [自行裁量]：四項驗收與 1kd-c 都只改 PENDING_QUEUE.md 同一檔，合成一個 commit，沒有逐項拆。
+- BLOCKED：無新增（1kd-g 為時間閘）。
+
 ## 2026-11-05 07:4x DevQueue 20261105-070102（維運帽）1kh-z 換行提案／1kh-v3 app_errors_summary 查證／1w 模擬 G／I 起跑驗收
 
 等待總司令審閱：17 件（`research/AWAITING_REVIEW.md` 等待中表格 17 列；本輪新增 1kh-z、1kh-v3a 兩列，開工時表頭寫 16 件但實際只有 15 列，已照實更正）。
