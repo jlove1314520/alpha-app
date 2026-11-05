@@ -1,3 +1,14 @@
+## 2026-11-05 22:52～23:10 DevQueue 20261105-223102（研究帽）先.一五二-1d F18 個股層歸因（本輪第 2 項）
+
+等待總司令審閱：11 件（`research/AWAITING_REVIEW.md` 等待中表格未異動）。
+
+- **做了什麼**：新 `research/drawdown_fix_trades_f18.py`（引擎只呼叫不改；資料走 `load_sample_with_factors` 本機快取，載入約 8.5 分鐘，log 無外部請求紀錄），F18 最優格重建對上 REAUDIT（+24.31%／−25.37%，trades 1,225 筆）；`research/drawdown_fix_report2.py` 加 F18，重產 `research/DRAWDOWN_FIX.md` 4.1／4.5 節。
+- **發現**：F18 虧損分散（前 3 檔佔各段虧損 18～43%、單一產業 ≤27%、0 筆跌停賣不掉）；最深一段 2023-07→2024-12 帳戶 −25.4% 但同期 1× 引擎 +2.5%——3× 槓桿＋帳戶停損停手自己造成，個股層砍不掉。
+- **[自行裁量]**：產業別先用 `data/company_info.json`，缺的用 `score.load_industry_map` 補。
+- **收工佇列檢查**：`- [ ]` 22 項（≥12）；粗算 DevQueue 可執行（不含「互動視窗」字樣）0 項，可能低於 6 的補件門檻——本輪時間上限到，**未補件**，留下一輪收工自動補件處理。下一項 先.一五二-1c 是互動視窗執行（核心引擎檔），本輪不碰。
+- **冒煙**：`node scripts/smoke_test.mjs` **184 PASS／0 FAIL、exit=0**。
+- 影響檔案：`research/drawdown_fix_trades_f18.py`、`research/drawdown_fix_report2.py`、`research/DRAWDOWN_FIX.md`、`research/PROGRESS_HEARTBEAT.jsonl`、`PENDING_QUEUE.md`、`PROGRESS.md`。
+
 ## 2026-11-05 22:31～22:52 DevQueue 20261105-223102（研究帽）先.一五二-1b 回撤診斷第二段
 
 等待總司令審閱：11 件（`research/AWAITING_REVIEW.md` 等待中表格未異動）。
