@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-11-05T08:28:37.698760+08:00",
-  "latest_commit": "23e14a66f7b",
+  "updated_at": "2026-11-05T09:24:20.705717+08:00",
+  "latest_commit": "3634bc15dcc",
   "data_files_defaults": "data_files 沒寫 source＝通用解析（讀 generated_at）；沒寫 detail＝無補充說明",
   "data_files": [
     {
@@ -17,6 +17,12 @@
       "status": "ok"
     },
     {
+      "path": "data/app_errors_summary.json",
+      "generated_at": "2026-10-17T00:04:11+08:00",
+      "records": 7,
+      "status": "stale"
+    },
+    {
       "path": "data/audit_report.json",
       "generated_at": "2026-11-05T05:23:26.274880+08:00",
       "records": 524,
@@ -24,7 +30,7 @@
     },
     {
       "path": "data/auto_heartbeat.json",
-      "generated_at": "2026-11-04T13:40:00+08:00",
+      "generated_at": "2026-11-05T09:05:01+08:00",
       "records": 40,
       "source": "通用解析（讀 updated_at）",
       "status": "ok"
@@ -138,14 +144,14 @@
     },
     {
       "path": "data/events.json",
-      "generated_at": "2026-11-05T07:35:04.055219+08:00",
+      "generated_at": "2026-11-05T09:05:04.023789+08:00",
       "records": 9513,
       "source": "通用解析（讀 fetched_at）",
       "status": "ok"
     },
     {
       "path": "data/events_search.json",
-      "generated_at": "2026-11-05T07:35:04.055219+08:00",
+      "generated_at": "2026-11-05T09:05:04.023789+08:00",
       "records": 9513,
       "source": "通用解析（讀 top.fetched_at）",
       "status": "ok"
@@ -160,7 +166,7 @@
     },
     {
       "path": "data/factory_stability.json",
-      "generated_at": "2026-11-05T08:07:01.867726+08:00",
+      "generated_at": "2026-11-05T09:22:01.939852+08:00",
       "records": 50,
       "status": "ok"
     },
@@ -253,7 +259,7 @@
     },
     {
       "path": "data/ir_events.json",
-      "generated_at": "2026-11-05T07:35:04.055219+08:00",
+      "generated_at": "2026-11-05T09:05:04.023789+08:00",
       "records": 460,
       "source": "通用解析（讀 fetched_at）",
       "status": "ok"
@@ -318,22 +324,22 @@
     },
     {
       "path": "data/news.json",
-      "generated_at": "2026-11-05T07:35:04.055219+08:00",
+      "generated_at": "2026-11-05T09:05:04.023789+08:00",
       "records": 300,
       "source": "通用解析（讀 fetched_at）",
       "status": "ok"
     },
     {
       "path": "data/news_evidence.json",
-      "generated_at": "2026-11-05T07:36:33.168634+08:00",
-      "records": 66747,
+      "generated_at": "2026-11-05T09:07:58.843408+08:00",
+      "records": 66803,
       "source": "通用解析（讀 meta.generated_at）",
       "status": "ok"
     },
     {
       "path": "data/news_urls.json",
-      "generated_at": "2026-11-05T07:35:24.120854+08:00",
-      "records": 66668,
+      "generated_at": "2026-11-05T09:06:05.873277+08:00",
+      "records": 66724,
       "source": "通用解析（讀 meta.generated_at）",
       "status": "ok"
     },
@@ -542,10 +548,10 @@
     },
     {
       "path": "data/quotes_tw.json",
-      "generated_at": "2026-11-04T21:50:06+00:00",
-      "records": 242,
+      "generated_at": "2026-11-05T01:15:21+00:00",
+      "records": 241,
       "source": "TWSE MIS（mis.twse.com.tw，證交所公開即時行情端點）",
-      "detail": "queried=242 matched=242 trading_window=False",
+      "detail": "queried=242 matched=241 trading_window=True",
       "status": "ok"
     },
     {
@@ -664,7 +670,7 @@
     },
     {
       "path": "data/status_lite.json",
-      "generated_at": "2026-11-05T00:11:21+00:00",
+      "generated_at": "2026-11-05T00:28:40+00:00",
       "records": 1,
       "status": "ok"
     },
@@ -747,7 +753,7 @@
     },
     {
       "path": "data/themes.json",
-      "generated_at": "2026-11-05T07:36:40.928151+08:00",
+      "generated_at": "2026-11-05T09:08:04.012132+08:00",
       "records": 195,
       "source": "通用解析（讀 meta.generated_at）",
       "status": "ok"
@@ -961,10 +967,11 @@
     }
   ],
   "schedule_health": {
-    "checked_at": "2026-11-05T08:28:37+08:00",
+    "checked_at": "2026-11-05T09:24:44+08:00",
     "any_overdue": true,
     "overdue_names": [
-      "美股即時報價（本機IBKR）"
+      "美股即時報價（本機IBKR）",
+      "美股四大指數（market.yml 21:43 UTC）"
     ],
     "known_simplification": "台股項目扣 data/trading_calendar.json 休市日（含今天疑似臨時休市，先.一三二-10b）；美股項目扣同檔 us 休市日（先.一三二-13）；美股提早收盤（半日市）扣同檔 us[年].early_close，當天收盤時刻改用它（先.一三二-13a）",
     "tw_closed_today_note": null,
@@ -974,9 +981,9 @@
         "file": "data/quotes_tw.json",
         "owner": "GitHub Actions",
         "status": "ok",
-        "last_data_at": "2026-11-05T05:50+08:00",
+        "last_data_at": "2026-11-05T09:15+08:00",
         "expected_at_or_after": "2026-11-04T13:00+08:00",
-        "rule": "盤後/假日：需有最近一個交易日的收盤資料",
+        "rule": "開盤前30分鐘寬限期：需有上一交易日收盤資料",
         "note": "每10分鐘；盤中超過30分鐘沒落地=異常"
       },
       {
@@ -986,7 +993,7 @@
         "status": "ok",
         "last_data_at": "2026-11-04T13:45+08:00",
         "expected_at_or_after": "2026-11-04T13:00+08:00",
-        "rule": "盤後/假日：需有最近一個交易日的收盤資料",
+        "rule": "開盤前30分鐘寬限期：需有上一交易日收盤資料",
         "note": "只有使用者這台機器開機且排程在跑才會更新；乙.1冷熱分離上線後盤中不再push，只在收盤後commit一次"
       },
       {
@@ -1023,9 +1030,9 @@
         "name": "美股四大指數（market.yml 21:43 UTC）",
         "file": "data/market_us.json",
         "owner": "GitHub Actions",
-        "status": "ok",
+        "status": "overdue",
         "last_data_at": "2026-11-05T02:15+08:00",
-        "expected_at_or_after": "2026-11-04T05:43+08:00",
+        "expected_at_or_after": "2026-11-05T05:43+08:00",
         "rule": "每個平日21:43（UTC）排程，寬限3.0小時",
         "note": "台北隔天05:43排程，寬限3小時（時刻來源：market.yml cron）"
       },
@@ -1082,12 +1089,11 @@
     ]
   },
   "local_pipeline_health": {
-    "checked_at": "2026-11-05T08:11:21.048462+08:00",
+    "checked_at": "2026-11-05T09:24:45.888517+08:00",
     "registry": "data/seed/pipeline_registry.json",
     "any_stalled": true,
     "stalled": [
-      "AlphaIbkrQuotes：data/quotes_ibkr.json 已 25750 分鐘沒有新產出（預期每 5 分鐘，門檻 15 分鐘；JSON 欄位 fetched_at）",
-      "AlphaQuotesTW：data/quotes_tw.json 已連續錯過 14 個應跑班次（門檻 3 班，最近應跑 2026-11-05 08:10；JSON 欄位 fetched_at）"
+      "AlphaIbkrQuotes：data/quotes_ibkr.json 已 25824 分鐘沒有新產出（預期每 5 分鐘，門檻 15 分鐘；JSON 欄位 fetched_at）"
     ],
     "pipelines": [
       {
@@ -1097,8 +1103,8 @@
         "expected_interval_min": 1,
         "freshness": "log_last_timestamp",
         "source": "log 內最後時間戳",
-        "last_output": "2026-11-05T08:11:02+08:00",
-        "age_min": 0.3,
+        "last_output": "2026-11-05T09:24:01+08:00",
+        "age_min": 0.7,
         "stall_limit_min": 3,
         "status": "ok"
       },
@@ -1109,8 +1115,8 @@
         "expected_interval_min": 2,
         "freshness": "log_last_timestamp",
         "source": "log 內最後時間戳",
-        "last_output": "2026-11-05T08:11:07+08:00",
-        "age_min": 0.2,
+        "last_output": "2026-11-05T09:23:01+08:00",
+        "age_min": 1.7,
         "stall_limit_min": 6,
         "status": "ok"
       },
@@ -1122,7 +1128,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 fetched_at",
         "last_output": "2026-11-04T13:45:29.215393+08:00",
-        "age_min": 1105.8,
+        "age_min": 1179.3,
         "shift_profile": "shioaji_close",
         "missed_shifts": 1,
         "missed_shift_threshold": 3,
@@ -1136,8 +1142,8 @@
         "expected_interval_min": 5,
         "freshness": "log_last_timestamp",
         "source": "log 內最後時間戳",
-        "last_output": "2026-11-05T08:11:05+08:00",
-        "age_min": 0.3,
+        "last_output": "2026-11-05T09:21:04+08:00",
+        "age_min": 3.7,
         "stall_limit_min": 15,
         "status": "ok"
       },
@@ -1149,7 +1155,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 fetched_at",
         "last_output": "2026-10-18T11:01:05.500839+08:00",
-        "age_min": 25750.2,
+        "age_min": 25823.7,
         "stall_limit_min": 15,
         "status": "stalled"
       },
@@ -1160,8 +1166,8 @@
         "expected_interval_min": 5,
         "freshness": "jsonl_last_field",
         "source": "JSONL 末筆 ts",
-        "last_output": "2026-11-05T08:07:01.867726+08:00",
-        "age_min": 4.3,
+        "last_output": "2026-11-05T09:22:01.939852+08:00",
+        "age_min": 2.7,
         "stall_limit_min": 15,
         "status": "ok"
       },
@@ -1181,8 +1187,8 @@
         "expected_interval_min": 15,
         "freshness": "log_last_timestamp",
         "source": "log 內最後時間戳",
-        "last_output": "2026-11-05T08:01:02+08:00",
-        "age_min": 10.3,
+        "last_output": "2026-11-05T09:01:02+08:00",
+        "age_min": 23.7,
         "stall_limit_min": 45,
         "status": "ok"
       },
@@ -1212,7 +1218,7 @@
         "freshness": "sqlite_max_date",
         "source": "各表 max(date)：daily_price=2026-11-03、inst_trades=2026-11-03、valuation=2026-11-03、taifex_large=20261103",
         "last_output": "2026-11-03T00:00:00+08:00",
-        "age_min": 3371.3,
+        "age_min": 3444.8,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -1224,7 +1230,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 generated_at",
         "last_output": "2026-11-02T08:00:04.294850+08:00",
-        "age_min": 4331.3,
+        "age_min": 4404.7,
         "stall_limit_min": 30240,
         "status": "ok"
       },
@@ -1236,7 +1242,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 meta.generated_at",
         "last_output": "2026-11-05T02:18:25.793610+08:00",
-        "age_min": 352.9,
+        "age_min": 426.3,
         "shift_profile": "market_yml",
         "missed_shifts": 1,
         "missed_shift_threshold": 2,
@@ -1251,7 +1257,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 fetched_at",
         "last_output": "2026-11-04T18:15:25+00:00",
-        "age_min": 355.9,
+        "age_min": 429.3,
         "shift_profile": "market_yml",
         "missed_shifts": 1,
         "missed_shift_threshold": 2,
@@ -1266,7 +1272,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 meta.generated_at",
         "last_output": "2026-11-05T02:17:38.924825+08:00",
-        "age_min": 353.7,
+        "age_min": 427.1,
         "shift_profile": "market_yml",
         "missed_shifts": 1,
         "missed_shift_threshold": 2,
@@ -1281,7 +1287,7 @@
         "freshness": "dir_latest_json_field",
         "source": "目錄最新檔 2026-11-04.json 的 meta.date",
         "last_output": "2026-11-04T00:00:00+08:00",
-        "age_min": 1931.3,
+        "age_min": 2004.8,
         "stall_limit_min": 8640,
         "status": "ok"
       },
@@ -1293,7 +1299,7 @@
         "freshness": "dir_latest_json_field",
         "source": "目錄最新檔 2026-11-04.json 的 fetched_at",
         "last_output": "2026-11-04T09:36:18+00:00",
-        "age_min": 875.0,
+        "age_min": 948.5,
         "stall_limit_min": 8640,
         "status": "ok"
       },
@@ -1305,7 +1311,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 meta.generated_at",
         "last_output": "2026-11-05T02:18:06.885934+08:00",
-        "age_min": 353.2,
+        "age_min": 426.6,
         "shift_profile": "market_yml",
         "missed_shifts": 1,
         "missed_shift_threshold": 2,
@@ -1319,13 +1325,13 @@
         "expected_interval_min": 60,
         "freshness": "json_field",
         "source": "JSON 欄位 fetched_at",
-        "last_output": "2026-11-04T21:50:06+00:00",
-        "age_min": 141.2,
+        "last_output": "2026-11-05T01:15:21+00:00",
+        "age_min": 9.4,
         "shift_profile": "quotes_yml",
-        "missed_shifts": 14,
+        "missed_shifts": 1,
         "missed_shift_threshold": 3,
-        "latest_due_shift": "2026-11-05 08:10",
-        "status": "stalled"
+        "latest_due_shift": "2026-11-05 09:20",
+        "status": "ok"
       },
       {
         "task": "AlphaNewsEvents",
@@ -1334,12 +1340,12 @@
         "expected_interval_min": 30,
         "freshness": "json_field",
         "source": "JSON 欄位 fetched_at",
-        "last_output": "2026-11-05T07:35:04.055219+08:00",
-        "age_min": 36.3,
+        "last_output": "2026-11-05T09:05:04.023789+08:00",
+        "age_min": 19.7,
         "shift_profile": "news_events_yml",
-        "missed_shifts": 1,
+        "missed_shifts": 0,
         "missed_shift_threshold": 3,
-        "latest_due_shift": "2026-11-05 08:00",
+        "latest_due_shift": null,
         "status": "ok"
       },
       {
@@ -1350,7 +1356,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 self_check.checked_at",
         "last_output": "2026-11-05T05:22:09.080241+08:00",
-        "age_min": 169.2,
+        "age_min": 242.6,
         "shift_profile": "audit_yml",
         "missed_shifts": 0,
         "missed_shift_threshold": 2,
@@ -1365,7 +1371,7 @@
         "freshness": "mtime",
         "source": "檔案修改時間",
         "last_output": "2026-11-04T23:00:20.270924+08:00",
-        "age_min": 551.0,
+        "age_min": 624.4,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -1377,7 +1383,7 @@
         "freshness": "log_last_timestamp",
         "source": "log 內最後時間戳",
         "last_output": "2026-11-04T18:30:07+08:00",
-        "age_min": 821.2,
+        "age_min": 894.6,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -1389,7 +1395,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 meta.generated_at",
         "last_output": "2026-11-05T02:19:13+08:00",
-        "age_min": 352.1,
+        "age_min": 425.5,
         "shift_profile": "market_yml",
         "missed_shifts": 1,
         "missed_shift_threshold": 2,
@@ -1404,7 +1410,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 generated_at",
         "last_output": "2026-11-05T07:21:39+08:00",
-        "age_min": 49.7,
+        "age_min": 123.1,
         "shift_profile": "market_yml",
         "missed_shifts": 0,
         "missed_shift_threshold": 2,
@@ -1419,7 +1425,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 meta.generated_at",
         "last_output": "2026-11-05T02:19:13+08:00",
-        "age_min": 352.1,
+        "age_min": 425.5,
         "shift_profile": "market_yml",
         "missed_shifts": 1,
         "missed_shift_threshold": 2,
@@ -1434,7 +1440,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 meta.generated_at",
         "last_output": "2026-10-31T09:00:29.881265+08:00",
-        "age_min": 7150.8,
+        "age_min": 7224.3,
         "stall_limit_min": 30240,
         "status": "ok"
       },
@@ -1446,7 +1452,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 generated_at",
         "last_output": "2026-11-04T17:33:02+08:00",
-        "age_min": 878.3,
+        "age_min": 951.7,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -1458,7 +1464,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 run_utc",
         "last_output": "2026-11-04T02:30:01+00:00",
-        "age_min": 1301.3,
+        "age_min": 1374.7,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -1469,8 +1475,8 @@
         "expected_interval_min": 1440,
         "freshness": "log_last_timestamp",
         "source": "log 內最後時間戳",
-        "last_output": "2026-11-04T09:20:01+08:00",
-        "age_min": 1371.3,
+        "last_output": "2026-11-05T09:20:01+08:00",
+        "age_min": 4.7,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -1481,8 +1487,8 @@
         "expected_interval_min": 15,
         "freshness": "json_field",
         "source": "JSON 欄位 ts",
-        "last_output": "2026-11-05T07:53:05+08:00",
-        "age_min": 18.3,
+        "last_output": "2026-11-05T09:22:03+08:00",
+        "age_min": 2.7,
         "stall_limit_min": 45,
         "status": "ok"
       },
@@ -1493,8 +1499,8 @@
         "expected_interval_min": 60,
         "freshness": "log_last_timestamp",
         "source": "log 內最後時間戳",
-        "last_output": "2026-11-05T08:10:01+08:00",
-        "age_min": 1.3,
+        "last_output": "2026-11-05T09:10:01+08:00",
+        "age_min": 14.7,
         "stall_limit_min": 180,
         "status": "ok"
       },
@@ -1506,7 +1512,7 @@
         "freshness": "log_last_timestamp",
         "source": "log 內最後時間戳",
         "last_output": "2026-11-04T18:30:01+08:00",
-        "age_min": 821.3,
+        "age_min": 894.7,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -1518,7 +1524,7 @@
         "freshness": "mtime",
         "source": "檔案修改時間",
         "last_output": "2026-11-05T00:30:04.312887+08:00",
-        "age_min": 461.3,
+        "age_min": 534.7,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -1530,7 +1536,7 @@
         "freshness": "jsonl_last_field",
         "source": "JSONL 末筆 ts",
         "last_output": "2026-11-04T17:44:26+08:00",
-        "age_min": 866.9,
+        "age_min": 940.3,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -1542,7 +1548,7 @@
         "freshness": "jsonl_last_field",
         "source": "JSONL 末筆 ts",
         "last_output": "2026-11-04T19:41:02+08:00",
-        "age_min": 750.3,
+        "age_min": 823.7,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -1554,7 +1560,7 @@
         "freshness": "jsonl_last_field",
         "source": "JSONL 末筆 ts",
         "last_output": "2026-11-04T19:30:01+08:00",
-        "age_min": 761.3,
+        "age_min": 834.7,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -1566,7 +1572,7 @@
         "freshness": "mtime",
         "source": "檔案修改時間",
         "last_output": "2026-11-04T20:30:08.217499+08:00",
-        "age_min": 701.2,
+        "age_min": 774.6,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -1577,8 +1583,8 @@
         "expected_interval_min": 1440,
         "freshness": "log_last_timestamp",
         "source": "log 內最後時間戳",
-        "last_output": "2026-11-04T09:05:00+08:00",
-        "age_min": 1386.3,
+        "last_output": "2026-11-05T09:05:00+08:00",
+        "age_min": 19.8,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -1590,7 +1596,7 @@
         "freshness": "log_last_timestamp",
         "source": "log 內最後時間戳",
         "last_output": "2026-11-04T09:40:01+08:00",
-        "age_min": 1351.3,
+        "age_min": 1424.7,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -1602,7 +1608,7 @@
         "freshness": "log_last_timestamp",
         "source": "log 內最後時間戳",
         "last_output": "2026-11-04T13:40:00+08:00",
-        "age_min": 1111.3,
+        "age_min": 1184.8,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -1614,7 +1620,7 @@
         "freshness": "log_last_timestamp",
         "source": "log 內最後時間戳",
         "last_output": "2026-11-04T09:55:00+08:00",
-        "age_min": 1336.3,
+        "age_min": 1409.8,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -1626,7 +1632,7 @@
         "freshness": "log_last_timestamp",
         "source": "log 內最後時間戳",
         "last_output": "2026-11-04T14:00:00+08:00",
-        "age_min": 1091.3,
+        "age_min": 1164.8,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -1637,8 +1643,8 @@
         "expected_interval_min": 15,
         "freshness": "log_last_timestamp",
         "source": "log 內最後時間戳",
-        "last_output": "2026-11-05T08:09:15+08:00",
-        "age_min": 2.1,
+        "last_output": "2026-11-05T09:24:15+08:00",
+        "age_min": 0.5,
         "stall_limit_min": 45,
         "status": "ok"
       },
@@ -1650,7 +1656,7 @@
         "freshness": "mtime",
         "source": "檔案修改時間",
         "last_output": "2026-11-05T06:00:02.452464+08:00",
-        "age_min": 131.3,
+        "age_min": 204.7,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -1662,7 +1668,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 checked_at",
         "last_output": "2026-11-05T03:00:02+08:00",
-        "age_min": 311.3,
+        "age_min": 384.7,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -1674,7 +1680,7 @@
         "freshness": "jsonl_last_field",
         "source": "JSONL 末筆 ts",
         "last_output": "2026-11-04T22:39:11+08:00",
-        "age_min": 572.2,
+        "age_min": 645.6,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -1685,8 +1691,8 @@
         "expected_interval_min": 1440,
         "freshness": "log_last_timestamp",
         "source": "log 內最後時間戳",
-        "last_output": "2026-11-04T08:22:39+08:00",
-        "age_min": 1428.7,
+        "last_output": "2026-11-05T08:20:31+08:00",
+        "age_min": 64.2,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -1698,7 +1704,7 @@
         "freshness": "log_last_timestamp",
         "source": "log 內最後時間戳",
         "last_output": "2026-11-04T20:16:26+08:00",
-        "age_min": 714.9,
+        "age_min": 788.3,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -1710,20 +1716,17 @@
         "freshness": "json_field",
         "source": "JSON 欄位 generated_at",
         "last_output": "2026-11-01T20:00:00+08:00",
-        "age_min": 5051.3,
+        "age_min": 5124.8,
         "stall_limit_min": 30240,
         "status": "ok"
       }
     ],
-    "note": "本機排程管線的新鮮度。判定看的是**產出檔內部的資料時間戳**（能取得的話），不是檔案修改時間——mtime 新鮮不代表資料新鮮，alpha.db 就是 mtime 天天更新但資料停在 2026-08-21。這份與 data/audit_report.json 的 local_task_health、scripts/pipeline_inventory.py 讀同一份登錄檔。",
-    "status": "ok",
-    "status_checked_at": "2026-11-05T00:28:37.698760+00:00",
-    "status_age_hours": 0.3
+    "note": "本機排程管線的新鮮度。判定看的是**產出檔內部的資料時間戳**（能取得的話），不是檔案修改時間——mtime 新鮮不代表資料新鮮，alpha.db 就是 mtime 天天更新但資料停在 2026-08-21。這份與 data/audit_report.json 的 local_task_health、scripts/pipeline_inventory.py 讀同一份登錄檔。"
   },
   "adjustment_anomaly_warnings": {
     "n_warnings": 7119,
     "file": "data/adjustment_anomalies.json",
-    "generated_at": "2026-11-05T08:11:21.103446+08:00",
+    "generated_at": "2026-11-05T09:24:45.919478+08:00",
     "note": "research/adjust.py::adjusted_price_series()偵測到的單日|報酬|>11%還原價異常（新上市5日內除外），修.六第三點新增。只降級為警告，不影響任何回測/排程執行；由 market.yml 每次排程執行generate_status_json.py 時更新（先.六十-C9 起），非即時。"
   },
   "app_data_sources": [
@@ -2117,7 +2120,7 @@
     "2026-10-27（DevQueue 20261027-100102，先.一三五-1d）：data/events.json 只留 90 天；重大訊息（TWSE／TPEx）另由本機 AlphaNewsFallback（每 30 分鐘，scripts/news_local_fallback.py 開頭呼叫 scripts/archive_mops_events.py）以（代號、日期、標題）去重 append 到 research/data/mops_events_archive.jsonl（本機檔、不進公開 repo、零外部請求）。限制：只在這台電腦有；本機排程停擺超過 90 天仍會遺失；首次歸檔 4,377 筆、最早 2026-09-06（更早的已被 90 天視窗刷掉，無法回補）。"
   ],
   "any_overdue": true,
-  "updated_by": "scripts/check_local_schedule_heartbeat.py（local_schedule_watchdog.yml 每 30 分鐘）",
+  "updated_by": "generate_status_json.py（market.yml 每次排程＋手動）",
   "local_schedule_heartbeat": {
     "checked_at": "2026-11-05T00:28:37.535763+00:00",
     "stall_threshold_minutes": 60,
@@ -2205,12 +2208,5 @@
     "judged_by": "any_of_local_heartbeats",
     "stall_minutes": 12.1,
     "note": "本機排程最後活動時間；2026-09-27【乾.三主體第八點】裁示改為「DevQueue／Marathon／Hypothesis-queue三軌任一有新鮮心跳（≤60分鐘）即視為本機整體存活」（取代原本只看DevQueue單一訊號的版本，因為DevQueue的既有碰撞防護機制在互動視窗長時間編輯檔案時會正確YIELD但不留心跳，容易誤判——詳見PENDING_QUEUE.md查.一條目的根因分析）。個別軌道超過360分鐘另外標記track_stalled警告，不影響本機整體存活的判定，但值得單獨留意。偵測放在雲端是因為本機push被卡住時無法自己通知任何人。"
-  },
-  "data_files_checked_at": "2026-11-05T08:28:37.698760+08:00",
-  "orphan_processes": {
-    "count": 0,
-    "total_private_mb": 0,
-    "checked_at": "2026-11-05T03:00:02+08:00",
-    "warning": false
   }
 }
