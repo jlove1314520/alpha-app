@@ -1,7 +1,7 @@
 # 提案：app.js 再拆分，壓住首頁首次載入（先.一三五-1kh-o）
 
 - 寫於：2026-11-04 16:3x，DevQueue 20261104-160102
-- 狀態：**送審中**（`research/AWAITING_REVIEW.md` 一列）；**不改冒煙 #78 的 350KB 門檻**，本輪未改任何程式。
+- 狀態：2026-11-05 **[預設放行]** 照甲執行（見 PENDING_QUEUE 先.一三五-1kh-o、AWAITING 已結案）。原狀態：**送審中**（`research/AWAITING_REVIEW.md` 一列）；**不改冒煙 #78 的 350KB 門檻**，本輪未改任何程式。
 
 ## 1. 量測（本機冒煙伺服器 8792、Playwright Chromium 390×844、首頁載入後等 6 秒、V8 block coverage）
 

@@ -998,3 +998,180 @@
       +'<div style="display:flex;flex-direction:column;gap:9px">'+eventsTopHtml(mine)+'</div>'
       +`<div class="note" style="margin-top:8px">近 30 日共 ${mine.length} 筆，依重要度排序、先列 ${Math.min(mine.length,IMP_TOP_N)} 筆。資料來源：MOPS 重大訊息／TWSE 月營收／除權息，只存索引不存全文，點標題看原文。</div>`;
   }
+
+// 先.一三五-1kh-o（2026-11-05，[預設放行]，docs/PROPOSAL_APPJS_SPLIT.md 甲）：方法論說明視窗（選股頁／首頁按鈕開啟）由 app.js 原封不動搬出（首頁首次載入用不到），
+// 由 app.js 的轉接殼以 _lazyCall 載入；與 app.js 共用同一個全域範圍（一般 <script>，非 ES module）。
+  // 先.九十四-5g（2026-10-14）：方法論說明頁。分數算法說明對照 research/score_v2.py::_pct_score（去極值1%/99%→百分位→×10）
+  // 與三支 generate_scores_*.py 的加權（缺資料的因子不算 0 分，只用有資料的因子按權重比例算；coverage＝有資料的權重合計）。
+  // 日期、回測狀態、權重一律讀當下資料檔（scores_*_list.json 的 meta、research/weights_frozen*.json、data/STATUS.json），不寫死數字。
+  // 失敗只影響本視窗（各段各自 try/catch），不外溢。
+  const METHOD_BOARDS={
+    value:{title:'價值成長榜',list:'scores_list.json',weights:'research/weights_frozen.json',
+      inputs:['data/fundamentals.json','data/stock_detail.json','data/price_history/','data/company_info.json'],
+      plain:'想找「財報在成長、價格不算太貴、籌碼與走勢不差」的公司。估值是跟同產業比（同產業不足 8 檔就跟全市場比）。'},
+    momentum:{title:'題材動能榜',list:'scores_momentum_list.json',weights:'research/weights_frozen_momentum.json',
+      inputs:['data/fundamentals.json','data/stock_detail.json','data/price_history/','data/company_info.json','data/quotes_all_tw.json','data/market_tw.json'],
+      plain:'想找「股價與成交量正在轉強、資金往那個族群流」的公司。財報只用來排除地雷，不加分；完全不看本益比，題材股本來就貴。'},
+    future:{title:'未來性濾網',list:'scores_future_list.json',weights:'research/weights_frozen_future.json',
+      inputs:['data/stock_detail.json','data/company_info.json','data/price_history/'],
+      plain:'想找「法人持續買進、毛利率高又穩」的公司。目前只做得到「現在就能算」的部分，事件資料與 AI 質性判讀尚未實作。'},
+  };
+  // 美股但書原文（alpha-app/CLAUDE.md 七、資料原則「美股結論一律附存活者偏誤但書」現行文字，2026-10-14 先.九十四-4 口徑）。
+  const US_SURVIVORSHIP_CAVEAT='存活者偏誤未完全修正：已下市股約 97%（抽樣 55／57）無價格來源。';
+  const METHOD_INPUT_NAMES={'data/fundamentals.json':'本益比、殖利率、月營收','data/stock_detail.json':'財報、三大法人、融資融券',
+    'data/price_history/':'每日收盤價','data/company_info.json':'公司名稱與產業別','data/quotes_all_tw.json':'今日收盤快照','data/market_tw.json':'大盤與類股'};
+  // 先.一〇八-3（2026-10-17）：每個因子可展開的白話說明（怎麼算／用哪份資料／多久更新／已知限制）。
+  // 文字對照實際產生榜單的程式：價值成長榜 research/generate_scores_live.py＋research/live_factors.py（scores_list.json 的 engine_version＝scoring-live-json），
+  // 題材動能榜 research/generate_scores_momentum.py，未來性濾網 research/generate_scores_future.py；只是說明，不影響評分。
+  // 資料名稱沿用 METHOD_INPUT_NAMES 的白話名稱，前台不顯示原始檔路徑。
+  const METHOD_FACTOR_NOTES={
+    earnings_growth:{how:'最新一季跟去年同一季比：EPS 年增、營收年增、毛利率變化、營益率變化，四項有幾項算幾項取平均（年增率上下限 ±200%）。',src:'財報（每季）',freq:'每天盤後重算；財報本身一季才公布一次',bias:'財報公布本來就晚一到兩個月；最新一季落後現在超過兩季就不給分。'},
+    revenue_momentum:{how:'最新一個月營收的官方年增率；去年同月營收太小（低於 3,000 萬元）視為無效，上下限 ±200%。',src:'月營收',freq:'每月公布一次',bias:'只看單一個月，雜訊大；沒有依公司規模分層。'},
+    growth_quality:{how:'近 12 個月逐月營收年增率的平均（至少要 6 個月）；沒有官方年增率時，改用同月份配對算近 12 個月合計比去年同期。',src:'月營收',freq:'每月',bias:'只看營收成長，不是真正的長期複合成長率，也沒看毛利率趨勢；部分股票歷史月份有缺。'},
+    chips:{how:'三大法人近幾個交易日（最多 5 天）買賣超張數加總。',src:'三大法人',freq:'每天盤後',bias:'用張數、沒有除以股本，大型股天生占優；只看得到最近 5 天。'},
+    technical:{how:'四項平均：5／20／60 日均線排列、收盤價在近 60 日高低區間的位置、RSI（14 日）、近 5 日比近 20 日的平均成交值。股價用還原權息價。',src:'每日收盤價',freq:'每天盤後',bias:'資料不滿 60 天時，60 日均線那一項會缺。'},
+    valuation_adj:{how:'本益比、股價淨值比、PEG（本益比 ÷ EPS 年增）三項，各自跟同產業比名次（同產業不足 8 檔就跟全市場比），越便宜分數越高，再平均。',src:'本益比與淨值比、財報',freq:'本益比每天；EPS 年增每季',bias:'虧損股與 EPS 衰退股算不出 PEG，只剩另外兩項。'},
+    analyst:{how:'台股沒有免費的分析師評等資料，這一項其實看的是法人行為：外資、投信各自連續買或賣的天數，加上近期買超方向，三項平均。',src:'三大法人',freq:'每天盤後',bias:'只看得到最近 5 天，連續天數能分出的差別很小。'},
+    catalyst:{how:'近 30 天的公司事件加分：重大訊息、法說會、月營收公布、除權息、新聞依類型給不同權重，越新越重（7 天減半）。',src:'公司事件與新聞',freq:'約每 30 分鐘',bias:'只要有消息就加分，不分利多利空；「沒有事件」和「沒有資料」分不出來。'},
+    relative_strength:{how:'個股漲幅減去加權指數漲幅，取近 20 日與近 60 日兩段的平均。股價用還原權息價。',src:'每日收盤價、大盤與類股',freq:'每天盤後',bias:'同一天個股沒有價格就不給分。'},
+    volume_breakout:{how:'今天的成交值 ÷ 前 20 個交易日的平均成交值。',src:'每日收盤價（含成交值）',freq:'每天盤後',bias:'名稱叫量能，實際算的是成交「值」不是成交「量」；日期有缺口就不給分。'},
+    new_high_breakout:{how:'今天的收盤 ÷ 前 60 個交易日最高收盤，再減 1；創新高但量價不配合時分數打三折。',src:'每日收盤價',freq:'每天盤後',bias:'至少要連續 61 天資料；沒創新高時是離前高的距離（負值）。'},
+    volume_price_coordination:{how:'照幾條規則加減分：上漲有量、回檔量縮加分；價漲量縮、高檔爆量不漲、下跌放量扣分。',src:'每日收盤價（含成交量）',freq:'每天盤後',bias:'加減分的門檻是經驗值，沒有做過統計驗證。'},
+    chip_concentration:{how:'三大法人逐日買超加總，再依「最近連續買超幾天」放大。',src:'三大法人',freq:'每天盤後',bias:'用張數、沒有除以股本；只看得到最近 5 天。'},
+    group_breadth:{how:'同產業今天上漲家數的比例；如果漲幅幾乎都集中在前兩檔，會打折。產業至少要 3 檔。',src:'今日收盤快照、公司名稱與產業別',freq:'每天盤後',bias:'只看一天；同產業的股票這一項分數都一樣。'},
+    sector_capital_flow:{how:'產業成交值占全市場的比例：近 5 日平均減去再往前 15 日的平均，看資金是不是往這個產業移動。',src:'每日收盤價（含成交值）、公司名稱與產業別',freq:'每天盤後',bias:'至少要 20 天資料；同產業的股票這一項分數都一樣。'},
+    institutional_buying_streak:{how:'三大法人最近連續買超的天數 ÷ 看得到的天數（0～1）。',src:'三大法人',freq:'每天盤後',bias:'只看得到最近 5 天，分數只有幾種值，很容易同分。'},
+    institutional_ownership_pct:{how:'三大法人近幾天買超張數 ÷ 公司股數。',src:'三大法人、財報（股本）',freq:'法人每天；股本隨財報更新',bias:'股數是用股本除以每股面額 10 元估出來的近似值。'},
+    institutional_buying_concentration:{how:'外資買超 ÷ 三大法人買超合計；合計是賣超時不給分。',src:'三大法人',freq:'每天盤後',bias:'所謂集中度只看外資占多少，是簡化的定義。'},
+    gross_margin_level_stability:{how:'近 8 季毛利率的平均，再依波動打折（越穩定折得越少），至少要 3 季。',src:'財報（每季）',freq:'每季',bias:'天生偏向高毛利產業；只是議價能力的粗略代表，沒有驗證過。'},
+    capacity_utilization_proxy:{how:'近 4 季營收合計 ÷ 最新一期非流動資產，粗略看資產被用得多滿。',src:'財報（每季）',freq:'每季',bias:'只看現在的水準不是趨勢；非流動資產也包含商譽與長期投資，不等於廠房設備。'},
+  };
+  function _mFactorRow(k,label,w){
+    const n=METHOD_FACTOR_NOTES[k];
+    const head=`<span>${_mEsc(label)}</span><b class="num">${Math.round(w*100)}%</b>`;
+    if(!n)return `<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--hairline);padding:3px 0">${head}</div>`;
+    return `<details class="method-factor" data-factor="${_mEsc(k)}" style="border-bottom:1px solid var(--hairline);padding:3px 0"><summary style="display:flex;justify-content:space-between;cursor:pointer;list-style:none">${head}</summary>`
+      +`<div style="font-size:12px;color:var(--ink-3);padding:4px 0 2px;line-height:1.6"><div>怎麼算：${_mEsc(n.how)}</div><div>用哪份資料：${_mEsc(n.src)}</div><div>多久更新：${_mEsc(n.freq)}</div><div>已知限制：${_mEsc(n.bias)}</div></div></details>`;
+  }
+  const METHOD_META_CACHE={};
+  let METHOD_STATUS_CACHE=null,METHOD_BOARD='value',METHOD_GEN=0;
+  function _mEsc(t){return String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+  function _mTime(iso){if(!iso)return '—';const d=new Date(iso);if(isNaN(d))return _mEsc(iso);const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`}
+  function _mMoney(v){if(v==null||!isFinite(v))return '—';if(Math.abs(v)>=1e8)return (v/1e8).toFixed(2)+'億';if(Math.abs(v)>=1e4)return (v/1e4).toFixed(0)+'萬';return String(v)}
+  async function _methodJson(url){const r=await fetch(url);if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
+  function closeMethodSheet(){
+    document.getElementById('method-mask').classList.remove('open');
+    document.getElementById('method-sheet').classList.remove('open');
+  }
+  function openMethodSheet(board){
+    try{
+      // 先.九十五-R4：'us'＝從美股選股開啟，只顯示美股段（但書置頂），台股三榜切換與內容隱藏。
+      const us=board==='us';
+      const usEl=document.getElementById('method-us-body'),tg=document.getElementById('method-board-toggle'),bb=document.getElementById('method-board-body');
+      if(usEl)usEl.style.display=us?'':'none';
+      if(tg)tg.style.display=us?'none':'inline-flex';
+      if(bb)bb.style.display=us?'none':'';
+      if(us){
+        document.getElementById('method-mask').classList.add('open');
+        document.getElementById('method-sheet').classList.add('open');
+        const sh=document.getElementById('method-sheet');if(sh)sh.scrollTop=0;
+        renderMethodUs();renderMethodCommon();
+        return;
+      }
+      if(!METHOD_BOARDS[board])board=METHOD_BOARD;
+      METHOD_BOARD=board;
+      document.getElementById('method-mask').classList.add('open');
+      document.getElementById('method-sheet').classList.add('open');
+      document.querySelectorAll('#method-board-toggle .mtg-opt').forEach(b=>b.classList.toggle('on',b.dataset.board===board));
+      renderMethodCommon();
+      renderMethodBoard(board).catch(e=>{console.warn('[renderMethodBoard]',e);recordGlobalError('renderMethodBoard',e)});
+    }catch(e){console.warn('[openMethodSheet]',e);recordGlobalError('openMethodSheet',e)}
+  }
+  function methodGoResearch(){
+    closeMethodSheet();go('journal');
+    setTimeout(()=>{const c=document.getElementById('journal-research-card');if(c)uiScrollIntoView(c)},200);  // 先.一〇三-6：只捲 #main
+  }
+  async function renderMethodBoard(board){
+    const el=document.getElementById('method-board-body');if(!el)return;
+    const gen=++METHOD_GEN,cfg=METHOD_BOARDS[board];
+    el.innerHTML='載入中…';
+    let meta=METHOD_META_CACHE[board],wf=null,status=METHOD_STATUS_CACHE,labels={};
+    const errs=[];
+    const jobs=[
+      meta?null:_methodJson(cfg.list).then(j=>{meta=METHOD_META_CACHE[board]=j.meta||{}}).catch(e=>{errs.push('榜單檔 '+cfg.list+'：'+e.message)}),
+      _methodJson(cfg.weights).then(j=>{wf=j}).catch(e=>{errs.push('權重檔：'+e.message)}),
+      status?null:_methodJson('data/STATUS.json').then(j=>{status=METHOD_STATUS_CACHE=j}).catch(e=>{errs.push('STATUS.json：'+e.message)}),
+      loadAppModule('shared').then(()=>{const bc=typeof BOARD_CONFIG!=='undefined'&&BOARD_CONFIG[board];if(bc)labels=bc.factorLabels||{}}).catch(e=>{errs.push('因子中文名：'+e.message)}),
+    ].filter(Boolean);
+    await Promise.allSettled(jobs);
+    if(gen!==METHOD_GEN)return;  // 使用者已切到別的榜
+    if(errs.length){console.warn('[renderMethodBoard] 部分資料載入失敗',errs);recordGlobalError('renderMethodBoard',new Error(errs.join('；')))}
+    const m=meta||{};
+    const btag=m.backtest_status?`<span style="display:inline-block;font-size:10.5px;font-weight:600;color:var(--caution);border:1px solid rgba(201,82,74,.5);border-radius:6px;padding:1px 7px">${_mEsc(m.backtest_status)}</span>`+(m.backtest_note?` ${_mEsc(m.backtest_note)}`:''):'（讀不到回測狀態）';
+    let wHtml='<div>讀不到權重檔，無法列出權重。</div>';
+    if(wf&&wf.weights){
+      const ws=Object.entries(wf.weights).filter(([,w])=>w>0).sort((a,b)=>b[1]-a[1]);
+      wHtml='<div style="font-size:12px;color:var(--ink-3);margin-bottom:2px">點一下因子名稱，看它怎麼算、用哪份資料、多久更新、有什麼限制。</div>'+ws.map(([k,w])=>_mFactorRow(k,labels[k]||k,w)).join('');
+      const hashOk=m.weights_hash&&wf.weights_sha256?m.weights_hash===wf.weights_sha256:null;
+      wHtml+=`<div style="margin-top:4px">${wf.dev_period?`權重凍結於 ${_mEsc(wf.frozen_at)}，只用 ${_mEsc(wf.dev_period.val_end)} 以前的研究期決定，之後不再依結果調整。`:`這組權重是初始設計值（${_mEsc(wf.frozen_at)} 定下），<b>不是</b>回測找出來的最佳值。`}`
+        +(hashOk===true?' 已核對：今天榜單用的就是這組權重。':hashOk===false?' <span style="color:var(--caution)">⚠ 今天榜單記錄的權重版本與此檔不一致，以榜單為準。</span>':'')+'</div>';
+      // 價值成長榜 meta.disclaimer 載明 analyst／catalyst 全市場沒有資料源，權重實際全數重新分配（讀當下 meta，文字改了就不顯示）。
+      if(board==='value'&&/analyst\/catalyst兩項全市場沒有資料源/.test(m.disclaimer||''))wHtml+=`<div>其中「${_mEsc(labels.analyst||'analyst')}」「${_mEsc(labels.catalyst||'catalyst')}」目前全市場都沒有資料，實際上這兩項的權重都分給了其他項目。</div>`;
+    }
+    const files=((status&&status.data_files)||[]);
+    // 前台不顯示原始來源字串（含內部端點代號），只顯示白話名稱＋產生時間；完整來源在設定頁「進階 → 資料來源」。
+    const inHtml=cfg.inputs.map(pth=>{
+      const f=files.find(x=>x.path===pth);
+      return `<div style="display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--hairline);padding:4px 0"><span>${_mEsc(METHOD_INPUT_NAMES[pth]||pth)}</span>`
+        +(f?`<span class="num" style="text-align:right">${_mTime(f.generated_at)}${f.status&&f.status!=='ok'?` <span style="color:var(--caution)">異常</span>`:''}</span>`
+          :'<span style="text-align:right">未列入清單，看資料基準日</span>')+'</div>';
+    }).join('');
+    const floor=m.liquidity_floor_20d_value;
+    el.innerHTML=`
+      <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px">${_mEsc(cfg.title)}</div>
+      <div>${_mEsc(cfg.plain)}</div>
+      <div style="margin-top:6px">回測狀態：${btag}</div>
+      <div style="font-weight:700;color:var(--ink-2);margin-top:12px">分數怎麼算（0～10 分）</div>
+      <div>① 每個因子（例如營收成長、法人買超）先在全市場合格股票裡比名次，最極端的前後 1% 先壓平，再換成百分位：贏過幾成的股票，大約就是幾分（贏過 80% ≈ 8 分）。</div>
+      <div>② 各因子的分數按下面的權重加權平均，得到總分。</div>
+      <div>③ 某個因子沒有資料，<b>不當成 0 分</b>：總分只用有資料的因子、按權重比例算；「資料完整度」＝有資料的因子權重合計。完整度低的分數比較不可靠。</div>
+      <div>④ 近 20 日平均成交值${floor?'低於 '+_mEsc(_mMoney(floor))+'元':'不足'}的股票照樣算分，但<b>不進數字排名</b>；處置期間的股票從清單排除。</div>
+      <div style="margin-top:4px">所以分數是「跟今天其他股票比的相對位置」，不是漲跌預測；高分不等於該買。</div>
+      <div style="font-weight:700;color:var(--ink-2);margin-top:12px">因子權重</div>
+      ${wHtml}
+      <div style="font-weight:700;color:var(--ink-2);margin-top:12px">資料日期</div>
+      <div>資料基準日：<b class="num">${_mEsc(m.data_asof||'—')}</b>　榜單產生：<span class="num">${_mTime(m.generated_at)}</span>　合格股票 ${_mEsc(m.universe_size??'—')} 檔</div>
+      <div>都是盤後資料，不是即時報價。</div>
+      <div style="font-weight:700;color:var(--ink-2);margin-top:12px">用到哪些資料、何時更新</div>
+      ${inHtml}
+      <div style="margin-top:4px">原始資料來自證交所、櫃買中心、期交所的官方公開資料；公司產業別是一次性整理、不常變動。</div>
+      ${errs.length?`<div style="color:var(--note-gold);margin-top:6px">部分資料讀取失敗：${_mEsc(errs.join('；'))}</div>`:''}`;
+  }
+  function renderMethodUs(){
+    const el=document.getElementById('method-us-body');if(!el||el.dataset.done)return;
+    try{
+      el.innerHTML=`
+        <div id="method-us-caveat" style="color:var(--caution);font-weight:700;border:1px solid rgba(201,82,74,.5);border-radius:8px;padding:8px 10px;margin-bottom:10px">⚠ ${_mEsc(US_SURVIVORSHIP_CAVEAT)}</div>
+        <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px">美股評分 v0</div>
+        <div>用 SEC 申報的年度財報（XBRL）加上 yfinance 每日收盤價，把美股排序。只是資料排序，<b>還沒回測過</b>。</div>
+        <div>名冊是 SEC 當下的申報人清單，不是當年的名冊，已下市公司多數拿不到價格，所以這份排序不能拿來回測、也不能當成歷史上會贏的證據。</div>
+        <div style="margin-top:4px">美股篩選（成交額／漲跌幅／市值門檻）只篩資料、不排名，也不是選股訊號。</div>`;
+      el.dataset.done='1';
+    }catch(e){console.warn('[renderMethodUs]',e);recordGlobalError('renderMethodUs',e)}
+  }
+  function renderMethodCommon(){
+    const el=document.getElementById('method-common-body');if(!el||el.dataset.done)return;
+    try{
+      el.innerHTML=`
+        <div style="font-weight:700;color:var(--ink-2)">回測與已知偏誤</div>
+        <div>· 台股三個榜的回測狀態寫在上方紅框標籤；「回測未通過」代表照分數挑股票，在歷史上贏不過 0050，分數只能當資料整理參考。</div>
+        <div>· 台股榜每天會先排除已不在上市櫃名冊、或股價落後全市場 30 天以上的代號（已下市、長期停止交易）。</div>
+        <div>· 美股：<b>${_mEsc(US_SURVIVORSHIP_CAVEAT)}</b> 美股評分 v0 用的是 SEC 當下名冊，不是當年的名冊，不能拿來回測。</div>
+        <div>· 回測用的是過去的資料，不代表未來。</div>
+        <div style="font-weight:700;color:var(--ink-2);margin-top:12px">研究做得怎麼樣</div>
+        <div>試過多少想法、哪些失敗、有沒有贏過 0050，都記在「研究成績單」。</div>
+        <button class="btn ghost" style="width:100%;margin-top:8px" onclick="methodGoResearch()">研究成績單</button>
+        <div style="margin-top:10px;color:var(--ink-3)">所有分數只是資料整理與排序，非投資建議，不代表買賣訊號。</div>`;
+      el.dataset.done='1';
+    }catch(e){console.warn('[renderMethodCommon]',e);recordGlobalError('renderMethodCommon',e)}
+  }

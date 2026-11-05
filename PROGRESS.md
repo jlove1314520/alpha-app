@@ -1,3 +1,14 @@
+## 2026-11-05 16:2x～17:00 DevQueue（開發帽）先.一三五-1kh-o app.js 再拆分 **[預設放行]**
+
+等待總司令審閱：13 件（`research/AWAITING_REVIEW.md` 等待中表格 14→13，本項移到已結案）。
+
+- **依據**：零之二 24 小時預設放行（AWAITING 等 24.0 小時無 Cowork 裁示），照提案作者標的**甲（建議）**執行；不涉 holdout／真錢／刪除／密碼／付費資料／關卡門檻。**Cowork 可推翻**（純前端搬移，git revert 即還原；非研究試驗、不涉 PREREG 與 N）。
+- **做了什麼**：app.js 的「策略 vs 0050」曲線群（`loadStrategyCurves`／`loadStrategyHistory`／`renderStrategyCurves`／`retryStrategyCurves`／`sc*`／`SC_*`）原封不動搬到 `app-trade.js` 末尾；方法論視窗（`openMethodSheet`／`closeMethodSheet`／`renderMethod*`／`METHOD_*`／`US_SURVIVORSHIP_CAVEAT`）搬到 `app-picks.js` 末尾；app.js 留 6 個 `_lazyCall` 轉接殼並列入 `_lazyStub`。冒煙 #78 加「距 350KB 不到 15KB 只在資訊欄提示」（不 FAIL、不改門檻）；冒煙 #114 等待條件補 `typeof SC_DATA` 防護（變數改到延後載入檔後，載入前不存在）。
+- **證據**：app.js gzip（level 6）153,969→137,716 bytes（−16.3KB，高於提案估的 8～12KB）；`scripts/measure_first_load.mjs` 首頁首次載入 330.2KB（56 個請求）。
+- **[自行裁量]**：破億路徑（`renderBtPath`／`bt*`，約 4KB gzip）冒煙有多處同步呼叫、`btRead` 被設定同步用到，本輪不搬；研究室 `_labDeep` 也不搬，留待另案。
+- **冒煙**：第 1 次 183 PASS／1 FAIL（#114 測試等待條件 ReferenceError，已修測試）；第 2 次 183／1（#18 Playwright「Resulting promise was garbage collected」，第 1 次同項 PASS、與搬移無關）；第 3 次 **184 PASS／0 FAIL、EXIT=0**（16:50～16:59）。
+- 影響檔案：`app.js`、`app-trade.js`、`app-picks.js`、`scripts/smoke_test.mjs`、`docs/PROPOSAL_APPJS_SPLIT.md`、`PENDING_QUEUE.md`、`research/AWAITING_REVIEW.md`、`PROGRESS.md`。
+
 ## 2026-11-05 16:01～16:20 DevQueue 20261105-160102（研究帽）先.一五〇-2 第 2 步：恐慌×PQ 格點回測＋對照組
 
 等待總司令審閱：14 件（`research/AWAITING_REVIEW.md` 等待中表格未異動，沿用 14 列）。

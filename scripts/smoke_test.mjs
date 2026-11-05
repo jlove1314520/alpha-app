@@ -2814,6 +2814,8 @@ async function runSmokeTest(baseUrl, headless = true) {
     if (!urls.some(u => /\/data\/quote_lite\/[^/]+\.json$/.test(u))) flErrors.push("首頁沒有抓任何 data/quote_lite 小檔（自選股走勢線／收盤來源斷了？）");
     if (m.total >= 350 * 1024) flErrors.push(`首頁首次載入 ${(m.total / 1024).toFixed(1)} KB ≥ 350KB（先.六十五／六十七驗收門檻）`);
     flInfo = `首頁首次載入實測 ${(m.total / 1024).toFixed(1)} KB（${m.rows.length} 個請求；目標 <350KB，先.六十五丙案）`;
+    // 先.一三五-1kh-o（[預設放行]）：距 350KB 門檻不到 15KB 只在資訊欄提示（不 FAIL、不改門檻）
+    if (m.total < 350 * 1024 && m.total >= 335 * 1024) flInfo += `；⚠️ 預警：距 350KB 門檻只剩 ${((350 * 1024 - m.total) / 1024).toFixed(1)} KB`;
   } catch (e) { flErrors.push(`測試本身出錯：${e.message || e}`); }
   record("78. 首頁首次載入 <350KB，不下載整份 stock_detail／events／fundamentals／sparklines／quotes_all_tw／company_info、不預載圖表函式庫", flErrors.length === 0, flErrors.join("; ") || flInfo);
 
@@ -3942,9 +3944,9 @@ async function runSmokeTest(baseUrl, headless = true) {
       if (n(/\/data\/strategy_history\.json$/, afterScroll)) lzErrs.push("首頁（含捲到底）抓了 strategy_history.json");
       if (n(/\/sw\.js$/, before) > 1) lzErrs.push(`首次載入 sw.js 被抓 ${n(/\/sw\.js$/, before)} 次`);
       await p2.evaluate(() => go("trade"));
-      await p2.waitForFunction(() => !!(SC_DATA && SC_DATA.lines && SC_DATA.lines.length), null, { timeout: 15000 }).catch(() => {});
+      await p2.waitForFunction(() => typeof SC_DATA !== "undefined" && !!(SC_DATA && SC_DATA.lines && SC_DATA.lines.length), null, { timeout: 15000 }).catch(() => {});
       if (!n(/\/data\/strategy_history\.json$/, urls)) lzErrs.push("進交易頁後仍沒抓 strategy_history.json");
-      const has = await p2.evaluate(() => !!(SC_DATA && SC_DATA.lines && SC_DATA.lines.length));
+      const has = await p2.evaluate(() => typeof SC_DATA !== "undefined" && !!(SC_DATA && SC_DATA.lines && SC_DATA.lines.length));  // 先.一三五-1kh-o：SC_DATA 改在 app-trade.js，載入前不存在
       if (!has) lzErrs.push("進交易頁後「跟 0050 比」沒有畫出資料");
     } finally { await ctx.close(); }
   } catch (e) { lzErrs.push(`測試本身出錯：${e.message || e}`); }
