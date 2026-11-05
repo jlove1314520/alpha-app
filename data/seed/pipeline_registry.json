@@ -995,6 +995,53 @@
       "freshness": "json_field",
       "field": "generated_at",
       "note": "先.一三五-1kh-h（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。週更，門檻 3 週。不用 research/data/weekly_report_cycle.log（同樣只週更，資料層欄位較準）。"
+    },
+    {
+      "task": "AlphaQuotesTW-雲端遮蔽",
+      "purpose": "雲端 quotes.yml 停擺被本機備援遮住的偵測（看 AlphaQuotesLocalFallback 的補抓比例，不看 data/quotes_tw.json）",
+      "interval_min": 10,
+      "artifact": "research/quotes_local_fallback.jsonl",
+      "check": "fallback_ratio",
+      "format": "jsonl",
+      "field_ts": "ts",
+      "field_decision": "decision",
+      "fetched_values": [
+        "fetched"
+      ],
+      "skip_values": [
+        "skip_cloud_fresh"
+      ],
+      "min_samples_per_day": 6,
+      "consecutive_days": 2,
+      "ratio_threshold": 0.4,
+      "max_age_days": 5,
+      "note": "先.一三五-1kh-e2（2026-11-05 DevQueue 20261105-120102，收件匣 039 已定案 1kh-e 甲）。data/quotes_tw.json 的 fetched_at 雲端與本機備援都會刷新，AlphaQuotesTW 那條在雲端停擺時不會亮燈，這條補上。[自行裁量] 門檻 0.4（不是提案寫的「過半」）：本機備援每 10 分鐘看一次、雲端落後 ≥20 分鐘才補，雲端全停時補一次就把檔案刷新、下一輪跳過，比例約 50%（10/28～11/05 實測 15/29≈52%），用「過半」會在 48%～52% 之間閃爍；雲端正常時接近 0%，0.4 夾在中間。只取盤中 fetched／skip_cloud_fresh 兩種判斷，rebase 中、美股、窗外的不算。檔案只在本機（不進公開 repo），雲端 runner 讀不到標 skipped。",
+      "fault_history": {
+        "count": 1,
+        "last_fault_at": "2026-11-05T12:17:02.282658+08:00",
+        "fault_types": {
+          "stalled": 1
+        },
+        "removable": null,
+        "event_log": [
+          "2026-11-05T12:17:02.282658+08:00"
+        ]
+      }
+    },
+    {
+      "task": "AlphaNewsEvents-雲端遮蔽",
+      "purpose": "雲端 news_events.yml 停擺被本機備援遮住的偵測（看 AlphaNewsFallback 日誌的補班比例，不看 data/news.json）",
+      "interval_min": 30,
+      "artifact": "research/news_local_fallback.log",
+      "check": "fallback_ratio",
+      "format": "log",
+      "fetched_regex": "雲端 news\\.json .*沒更新 → 本機補班",
+      "skip_regex": "雲端 news\\.json .*前更新，不需補班",
+      "min_samples_per_day": 12,
+      "consecutive_days": 2,
+      "ratio_threshold": 0.4,
+      "max_age_days": 5,
+      "note": "先.一三五-1kh-e2（2026-11-05 DevQueue 20261105-120102，收件匣 039 已定案 1kh-e 甲）。data/news.json 的 fetched_at 雲端與本機補班都會刷新，AlphaNewsEvents 那條在雲端停擺時不會亮燈，這條補上。備援每 30 分鐘看一次、雲端 ≥60 分鐘沒更新才補，雲端全停時比例約 50%，[自行裁量] 門檻同 quotes 取 0.4。新聞全年無休，日子以日曆日計、每日至少 12 次判斷才算樣本足夠。日誌行首只有 [MM-DD HH:MM]，年份取今年（月份大於本月算去年）。"
     }
   ],
   "github_pat_expiry": {

@@ -175,6 +175,79 @@ def _last_output(spec: dict, f: Path) -> tuple[datetime | None, str]:
     return None, f"未知的 freshness 類型 {kind}"
 
 
+_LOG_DAY_RE = re.compile(r"^\[(\d{2})-(\d{2}) \d{2}:\d{2}\]")
+
+
+def _fallback_ratio(spec: dict, f: Path, now: datetime) -> tuple[str, str, dict]:
+    """先.一三五-1kh-e2（收件匣 039 已定案 1kh-e 甲）：雲端停擺被本機備援遮住的判斷。
+
+    `data/quotes_tw.json`／`data/news.json` 的時間戳雲端與本機備援都會刷新，看產出檔永遠是新的；
+    改看本機備援自己的紀錄：每天「雲端落後→本機補抓」占全部判斷的比例。雲端全停時，備援補一次就把
+    檔案刷新，下一輪看到「雲端新鮮」而跳過，所以比例約 50%（不是 100%）；雲端正常時接近 0%。
+    門檻（ratio_threshold）因此取兩者之間，最近 consecutive_days 個「有足夠樣本的日子」都 ≥ 門檻才判停擺。
+
+    登錄檔欄位：format＝"jsonl"（field_ts／field_decision／fetched_values／skip_values）或
+    "log"（fetched_regex／skip_regex，日期取行首 [MM-DD HH:MM]）；min_samples_per_day、
+    consecutive_days、ratio_threshold、max_age_days。回傳 (status, reason, extra)。
+    讀檔／解析失敗由 evaluate() 的單條 try 接住只標 unknown（十二節：寧可漏抓，不可癱瘓）。
+    """
+    fmt = spec.get("format", "jsonl")
+    per_day: dict = {}
+    text = f.read_text(encoding="utf-8", errors="replace")
+    if fmt == "jsonl":
+        fts, fdec = spec.get("field_ts", "ts"), spec.get("field_decision", "decision")
+        fetched_v = set(spec.get("fetched_values", ["fetched"]))
+        skip_v = set(spec.get("skip_values", ["skip_cloud_fresh"]))
+        for ln in text.splitlines():
+            if not ln.strip():
+                continue
+            try:
+                d = json.loads(ln)
+            except ValueError:
+                continue  # 單行壞掉跳過，不讓一筆髒資料炸掉整條
+            dt = _parse_ts(d.get(fts))
+            dec = d.get(fdec)
+            if dt is None or dec not in fetched_v | skip_v:
+                continue
+            c = per_day.setdefault(dt.astimezone(TZ).date(), [0, 0])
+            c[0 if dec in fetched_v else 1] += 1
+    elif fmt == "log":
+        rf, rs = re.compile(spec["fetched_regex"]), re.compile(spec["skip_regex"])
+        for ln in text.splitlines():
+            m = _LOG_DAY_RE.match(ln)
+            if not m:
+                continue
+            hit_f, hit_s = bool(rf.search(ln)), bool(rs.search(ln))
+            if not (hit_f or hit_s):
+                continue
+            mo, dd = int(m.group(1)), int(m.group(2))
+            yr = now.year - 1 if mo > now.month else now.year  # 日誌沒寫年；跨年時月份大於今天的算去年
+            try:
+                day = datetime(yr, mo, dd).date()
+            except ValueError:
+                continue
+            c = per_day.setdefault(day, [0, 0])
+            c[0 if hit_f else 1] += 1
+    else:
+        return "unknown", f"未知的 format {fmt}", {}
+    min_n = int(spec.get("min_samples_per_day", 6))
+    need = int(spec.get("consecutive_days", 2))
+    thr = float(spec.get("ratio_threshold", 0.4))
+    days = sorted(d for d, (a, b) in per_day.items() if a + b >= min_n)[-need:]
+    detail = {d.isoformat(): {"fetched": per_day[d][0], "skip": per_day[d][1],
+                              "ratio": round(per_day[d][0] / sum(per_day[d]), 3)} for d in days}
+    extra = {"fallback_days": detail, "ratio_threshold": thr}
+    if len(days) < need:
+        return "skipped", f"本機備援紀錄裡樣本足夠（≥{min_n} 次／日）的日子不到 {need} 天，不判定", extra
+    max_age = int(spec.get("max_age_days", 5))
+    if (now.date() - days[-1]).days > max_age:
+        return "skipped", f"本機備援紀錄最近有樣本的日子是 {days[-1]}，超過 {max_age} 天，不判定（備援本身可能沒在跑）", extra
+    if all(detail[d.isoformat()]["ratio"] >= thr for d in days):
+        txt = "、".join(f'{k} {v["fetched"]}/{v["fetched"] + v["skip"]}' for k, v in detail.items())
+        return "stalled", f"雲端停擺被本機備援遮住：最近 {need} 天本機補抓比例都 ≥ {thr:.0%}（{txt}）", extra
+    return "ok", "雲端大多準時（本機補抓比例未連續偏高）", extra
+
+
 def _tw_closed(d) -> bool:
     """台股休市日（週末＋data/trading_calendar.json closed／unscheduled_closed）。讀不到日曆 → False（照常判定）。"""
     if d.weekday() >= 5:
@@ -229,9 +302,21 @@ def evaluate(now: datetime | None = None) -> tuple[list[dict], list[str]]:
                 rows.append(row)
                 continue
             f = _resolve(spec["artifact"])
+            if not f.exists() and spec.get("check") == "fallback_ratio":
+                # 備援紀錄只在本機有（不進公開 repo）；雲端 runner 讀不到是正常的，不判停擺（十二節）
+                row.update(status="skipped", reason="本機備援紀錄不存在（雲端 runner 或備援未啟用），不判定")
+                rows.append(row)
+                continue
             if not f.exists():
                 row.update(status="missing", reason="產出檔不存在")
                 stalled.append(f'{spec["task"]}：產出檔 {spec["artifact"]} 不存在')
+                rows.append(row)
+                continue
+            if spec.get("check") == "fallback_ratio":
+                st, why, extra = _fallback_ratio(spec, f, now)
+                row.update(status=st, reason=why, source="本機備援補抓比例", **extra)
+                if st == "stalled":
+                    stalled.append(f'{spec["task"]}：{why}')
                 rows.append(row)
                 continue
             last, how = _last_output(spec, f)
