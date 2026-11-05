@@ -49,6 +49,10 @@ try:
     # 被下面的假 subprocess.run 吃到而讓 ② 誤判「有跑步驟」；這裡換成假的歸檔模組，只測補班判斷本身。
     import types
     sys.modules["archive_mops_events"] = types.SimpleNamespace(run=lambda revs: 0)
+    # 先.一三五-1kh-e4：先.一三五-1ie 在 main() 加了 archive_commit()（全宇宙月檔＋重大訊息歸檔提交），沒替身時會經假
+    # G.commit_paths 記一筆 commit 讓 ②③⑤「不提交」誤判，還會在真 repo 跑 archive_universe_daily.run()；②③⑤ 換成空函式，⑥另測。
+    orig_archive_commit = N.archive_commit
+    N.archive_commit = lambda: None
     ran = []
 
     class R:
@@ -80,8 +84,26 @@ try:
     calls.clear(); ran.clear(); N.main()
     check("⑤跑完 events 12,819→1,055 縮水 → 不提交", ran and not calls)
     N._count = saved_count
+    # ⑥ 素材存檔提交（archive_commit 本身，不跑 news 步驟；全宇宙月檔模組用假的，不碰真 repo）
+    N.archive_commit = orig_archive_commit
+    sys.modules["archive_universe_daily"] = types.SimpleNamespace(run=lambda: ["data/universe_daily/2026-10.json"])
+    G.last_commit_age_min = lambda p: 5.0  # 重大訊息歸檔 5 分鐘前才提交過 → 不重提
+    calls.clear(); N.archive_commit()
+    check("⑥有新月檔 → 只提交月檔、重大訊息歸檔未滿 20 小時不重提", calls == [("commit", ("data/universe_daily/2026-10.json",))])
+    sys.modules["archive_universe_daily"] = types.SimpleNamespace(run=lambda: [])
+    calls.clear(); N.archive_commit()
+    check("⑥沒有新月檔且歸檔剛提交過 → 不提交", not calls)
+    sys.modules["archive_universe_daily"] = types.SimpleNamespace(run=lambda: (_ for _ in ()).throw(RuntimeError("boom")))
+    calls.clear(); N.archive_commit()
+    check("⑥月檔模組自己出錯 → 只記警告、不拋錯、不提交（十二節）", not calls)
 finally:
     G.last_commit_age_min, G.commit_paths, N.origin_age_min, N.subprocess.run, N.log, sys.argv, G._g = saved
+    try:
+        N.archive_commit = orig_archive_commit
+    except NameError:
+        pass
+    sys.modules.pop("archive_universe_daily", None)
+    sys.modules.pop("archive_mops_events", None)
 
 # ④ 真 git 衝突回歸（暫存目錄的 bare origin＋兩個 clone）
 import shutil, subprocess, tempfile, importlib
