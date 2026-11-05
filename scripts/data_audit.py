@@ -622,7 +622,9 @@ def check_e_pe(a, universe, ref, names, loc):
                   "-".join(str(x[0]) + "Q" + str(x[1]) for x in seq),
                   "連續四季", None, "stock_detail.json")
             continue
-        ttm = sum(eps4)
+        # 先.一三五-1lk（2026-11-06）：四季 EPS 浮點加總要四捨五入，否則實際為 0 的 TTM（例 3550：
+        # −0.18−0.49+0.21+0.46）會變成 2.8e-17 正數而放行，算出本益比 7.3e17 掛進 e_pe 違規。
+        ttm = round(sum(eps4), 4)
         if ttm <= 0:
             a.note("e_pe", unverifiable=1)  # 虧損股沒有有意義的本益比
             continue
