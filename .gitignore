@@ -133,3 +133,6 @@ data/*.json.tmp
 # quotes.yml／market.yml 的 git add -A data/ 會掃子目錄；用 data/**/ 結構性涵蓋日後新增的子目錄（CLAUDE.md 十節第 3 點）。
 data/**/*.tmp
 data/**/*.tmp[0-9]*
+
+# 先.一三五-1ld（2026-11-05）：根目錄排程盤點暫存傾印，只擋這一個名字（不刪，要刪由總司令決定）。
+/.tmp_inv.txt

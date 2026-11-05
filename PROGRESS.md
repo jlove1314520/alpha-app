@@ -1,3 +1,15 @@
+## 2026-11-05 20:0x DevQueue 20261105-200102（維運帽）空轉補件：1la～1ld
+
+等待總司令審閱：11 件（`research/AWAITING_REVIEW.md` 等待中表格未異動）。
+
+- **本輪派工**：先.一三五-1 空轉補件（連續 2 輪 QUEUE_EMPTY）。前向模擬上限 14／14 已滿 → 照零之二⑤不新增候選、不寫 PREREG、不送候選 AWAITING，改補既有模擬追蹤與維運。
+- **1la（純 bug 修復，已做）**：缺期看守員 `margin_tpex` 一直報 10/29 GAP，但 10/29 上櫃已依 1jt-a 甲回補進 `data/margin_by_stock_history.json` 的 `by_data_date`——看守員只讀舊的 `data_dates`。`research/forward_source_gap_watch.py::_accum_dates()` 改成兩者聯集（只收不早於 `data_dates` 起點的鍵，起算日不變；壞值 fail open）。自測 `scripts/selftest_forward_source_gap_watch.py` 加情境八，**35 過／0 失敗**（第一次跑抓到壞值 AttributeError，已補防護）。實跑（零請求）margin_tpex GAP→**OK**。
+- **1lb（時間閘 11/06 09:00）**：同次實跑看到 `tpex_limit_next` GAP［11/05］，原因是雲端 `market.yml` 11/05 台北 17:13 班到 20:10 都還沒觸發（`gh run list` 最新 01:48Z），不是本修改；排明早驗收。
+- **1lc（互動視窗）**：cycle log 793 行守門員警告裡 787 行是先.八十四-7（1hi 已建議結案），建議互動視窗結案，免得真正的新警告被淹沒。
+- **1ld（已做）**：根目錄未追蹤 `.tmp_inv.txt`（排程盤點傾印、無帳密）加進 `.gitignore`（只擋這個名字）；[自行裁量] 不刪，要刪由總司令決定。
+- **冒煙**：`node scripts/smoke_test.mjs` **184 PASS／0 FAIL、EXIT=0**。
+- 影響檔案：`research/forward_source_gap_watch.py`、`scripts/selftest_forward_source_gap_watch.py`、`.gitignore`、`PENDING_QUEUE.md`、`research/FORWARD_CANDIDATES.md`、`PROGRESS.md`。
+
 ## 2026-11-05 18:3x DevQueue（維運帽）先.一三五-1kh-v2 supply_watchlist 在 STATUS 的判法 **[預設放行]**
 
 等待總司令審閱：11 件（`research/AWAITING_REVIEW.md` 等待中表格 12→11，本項移到已結案）。

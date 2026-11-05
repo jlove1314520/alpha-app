@@ -142,6 +142,16 @@ def _accum_dates(root: Path, key: str) -> set[date] | None:
     doc = json.loads(f.read_text(encoding="utf-8"))
     if kind == "margin":
         vals = {str((v or {}).get(mkt) or "") for v in (doc.get("data_dates") or {}).values() if isinstance(v, dict)}
+        # 先.一三五-1la：1jt-a 甲起另存依官方資料日的 by_data_date（回補的 10/29 上櫃只在這裡）。
+        # 只收「不早於 data_dates 起點」的鍵，起算日不變（by_data_date 由 git 歷史回補到 9/24，不能拿來往前擴大檢查範圍）。
+        base = {d for v in vals if (d := _parse(v))}
+        if base:
+            lo = min(base)
+            bdd = doc.get("by_data_date")
+            side = bdd.get(mkt) if isinstance(bdd, dict) else None
+            extra = {d for k in (side if isinstance(side, dict) else {}) if (d := _parse(str(k))) and d >= lo}
+            return base | extra
+        return base
     else:
         vals = {d for b in (doc.get(f"series_{mkt}") or {}).values() if isinstance(b, dict) for d in b}
     return {d for v in vals if (d := _parse(v))}

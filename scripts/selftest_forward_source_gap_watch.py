@@ -150,6 +150,24 @@ with tempfile.TemporaryDirectory() as td:
     check("sbl_twse／sbl_tpex ERROR", s["sbl_twse"]["status"] == "ERROR" and s["sbl_tpex"]["status"] == "ERROR", s["sbl_twse"])
     check("margin_twse 仍 OK", s["margin_twse"]["status"] == "OK", s["margin_twse"])
 
+    print("情境八（先.一三五-1la）：融資上櫃 data_dates 缺 10/27、by_data_date 有 → OK；by_data_date 更早的鍵不擴大起算")
+    (r / "data" / "margin_by_stock_history.json").write_text(json.dumps({
+        "data_dates": {"20261023": {"twse": "20261022", "tpex": "20261022"}, "20261028": {"twse": "20261027", "tpex": None}},
+        "by_data_date": {"tpex": {"20261020": {}, "20261027": {}}, "twse": {"20261015": {}}}}), encoding="utf-8")
+    rc, doc, out = run(r)
+    s = doc["sources"]
+    check("exit 0", rc == 0, out)
+    check("margin_tpex OK（10/27 由 by_data_date 補上）", s["margin_tpex"]["status"] == "OK", s["margin_tpex"])
+    check("margin_tpex 起算仍 10/22（by_data_date 的 10/20 不算）", s["margin_tpex"].get("first") == "2026-10-22", s["margin_tpex"])
+    check("margin_twse 起算仍 10/22（by_data_date 的 10/15 不算）", s["margin_twse"].get("first") == "2026-10-22", s["margin_twse"])
+    (r / "data" / "margin_by_stock_history.json").write_text(json.dumps({
+        "data_dates": {"20261023": {"twse": "20261022", "tpex": "20261022"}, "20261028": {"twse": "20261027", "tpex": None}},
+        "by_data_date": "壞值"}), encoding="utf-8")
+    rc, doc, out = run(r)
+    s = doc["sources"]
+    check("by_data_date 壞值 → 不崩、margin_tpex GAP 缺 10/27", rc == 0 and s["margin_tpex"]["status"] == "GAP"
+          and s["margin_tpex"]["missing"] == ["2026-10-27"], s["margin_tpex"])
+
     print("情境五：--root 指到不能寫的位置（看守員自身失敗）→ 仍 exit 0")
     bad = Path(td) / "e"
     bad.write_text("我是檔案不是目錄", encoding="utf-8")
