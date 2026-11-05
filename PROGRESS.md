@@ -1,3 +1,29 @@
+## 2026-11-05 12:01～12:3x DevQueue 20261105-120102（維運帽）先.一三五-1kh-l2 STATUS 瘦身甲＋1kh-e2 雲端被遮住偵測＋1kj-b 結案
+
+等待總司令審閱：13 件（`research/AWAITING_REVIEW.md` 等待中表格 13 列；1kh-l、1kh-e 移到已結案）。
+
+### 先.一三五-1kh-l2 STATUS.json 瘦身甲（`- [x]`，commit 10fc3fa618b）
+- **做了什麼**：讀取端（`index.html`／`app.js`／`scripts/smoke_test.mjs`／`scripts/build_status_lite.py`）grep 確認都不讀 `known_limitations`；`generate_status_json.py` `KNOWN_LIMITATIONS` 13→5 條，8 條原文搬到 `docs/KNOWN_LIMITATIONS_ARCHIVE.md`，STATUS 加 `known_limitations_archive`。
+- **證據**：STATUS.json 73,826→70,197 bytes；冒煙 184 PASS／0 FAIL（#65 68.6KB、#180 一致）；`data_schema_guard.py` exit 0。
+- **[自行裁量]**：①判準＝該條在產生程式的最後改寫日（`git log -S` 末 40 字）早於 2026-10-06；②不在本機整份重產 STATUS（會帶入本機版 local_pipeline_health 約 +12.6KB），只就地換這兩欄，下次 market.yml 雲端重產自然對齊。提案寫的「15 條」實為 13 條（有一條是三段字串黏在一起）。
+
+### 先.一三五-1kh-e2 停擺自檢另看雲端那一手（`- [x]`，commit eea3385491b）
+- **做了什麼**：`scripts/pipeline_freshness.py` 新判斷類型 `check: fallback_ratio`（jsonl／log）；registry 加 `AlphaQuotesTW-雲端遮蔽`、`AlphaNewsEvents-雲端遮蔽`；新自測 `scripts/selftest_pipeline_fallback_ratio.py`。
+- **證據**：自測 6/6；實況 quotes **判停擺**（11/04 補抓 15/29、11/05 11/19；`gh run list` quotes.yml 11/04 只跑 6 班），news ok（31%／36%）；12:17 本機 5 分鐘自檢已記第一筆 fault；冒煙 184 PASS／0 FAIL。
+- **[自行裁量]**：門檻 0.4 不用「過半」——雲端全停時本機補一次就刷新檔案、下一輪跳過，比例約 50%，過半會閃爍。
+- **提醒**：這條上線後會持續亮燈，因為雲端 quotes.yml 盤中真的幾乎沒在跑（已另立 1kh-e5 提案）。
+
+### 先.一三五-1kj-b（`- [x]` 不做，commit 1ac4f3e453d）
+- 照分支「已實作同效果」結案：1kj 甲已於 20261104-180102（`ed3c72234ec`）做完；`selftest_dev_queue_time_gate.py` 重跑全過。同時補標 先.一三五-1hn `- [x]`（039 已合併）。本條只改文字未跑冒煙。
+
+### 嘗試但撤回：`selftest_local_heartbeats.py` 既有 4 項 FAIL
+- 根因：先.一三五-1ie 加的 `archive_commit()` 沒替身。補一行替身後 12/12 通過，但同時段冒煙 **#91 FAIL**（`app.js:2101` 自選股單日 ≥5% 提醒按鈕「聯發科 今天 -5.92%›」超過 6 字，今天盤中才第一次觸發，與本修改無關）；冒煙沒過不提交，已撤回，改寫成 1kh-e4（含修法）。
+
+### 收工補件與佇列
+- `- [ ]` 原 21 項（≥12），DevQueue 可執行 0 項（<6）→ 補 3 項：1kh-e3（冒煙 #91，②畫面）、1kh-e4（自測修法，①）、1kh-e5（quotes.yml 雲端只跑 6 班提案，①）。只補到 3 項，原因：12:46 時間到；未掃完 ①～⑤ 其他來源。
+- **[自行裁量]** 本收工 commit 只改 `PENDING_QUEUE.md`／`PROGRESS.md` 文字，提交時冒煙 #91 仍 FAIL（盤中資料觸發的既有 App 問題，見上），未因此改任何程式。
+- 最後一次冒煙：12:32，183 PASS／1 FAIL（#91）。
+
 ## 2026-11-05 11:31～12:1x DevQueue 20261105-113102（維運帽）先.一三五-1jt-b 上櫃 10/01 官方補齊＋1kd-a rebase 衝突處理 [預設放行]
 
 等待總司令審閱：15 件（`research/AWAITING_REVIEW.md` 等待中表格 15 列；1kd-a 移到已結案）。
