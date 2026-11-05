@@ -529,7 +529,8 @@ jobs:
             git stash push --include-untracked -m ci-leftovers || true
             git fetch origin main
             # 先.一三八-8：rebase 衝突時把衝突檔名寫成 annotation（run log 需 admin 權限才能讀，annotation 不用），下次能直接看到根因
-            git rebase origin/main || { echo "::warning::market.yml rebase衝突檔：$(git diff --name-only --diff-filter=U | paste -sd ' ')"; echo "rebase衝突，放棄自動解決"; git rebase --abort; exit 1; }
+            # 先.一三五-1kd-a 甲（2026-11-05 [預設放行]）：衝突時逐檔取捨（共用追蹤檔取 main、其他取本班）後繼續，不丟整班；解不了才 abort＋exit 1
+            git rebase origin/main || { echo "::warning::market.yml rebase衝突檔：$(git diff --name-only --diff-filter=U | paste -sd ' ')"; bash .github/scripts/rebase_resolve_conflicts.sh market.yml || { echo "rebase衝突無法自動取捨"; exit 1; }; }
             sleep $((RANDOM % 6 + 3))
           done
           # 先.一四〇-11：run log 要 admin 權限才能讀，重試耗盡也寫 annotation（跟 rebase 衝突那條分得開），下次 exit 1 能直接看到是哪一種

@@ -1,3 +1,27 @@
+## 2026-11-05 11:31～12:1x DevQueue 20261105-113102（維運帽）先.一三五-1jt-b 上櫃 10/01 官方補齊＋1kd-a rebase 衝突處理 [預設放行]
+
+等待總司令審閱：15 件（`research/AWAITING_REVIEW.md` 等待中表格 15 列；1kd-a 移到已結案）。
+
+### 先.一三五-1jt-b 融資個股上櫃 10/01 逐股餘額（`- [x]`，commit 55a60becae3）
+- **做了什麼**：讀本機 TPEx swagger（零請求）確認 openapi `tpex_mainboard_margin_balance` 沒有參數、只有最新一天；`www.tpex.org.tw/robots.txt` 轉址 404（不存在）；網頁版 `www/zh-tw/margin/balance?date=2026/10/01&response=json` 送 1 次＝200、918 檔。共 2 次請求（`tpex_www` 節流）。
+- **證據**：前資餘額＝9/30 資餘額 916/916、資餘額＝10/02 前資餘額 916/916（皆 100%，門檻 95%）→ 寫進 `data/margin_by_stock_history.json` `by_data_date.tpex.20261001`（916 檔，來源標 `official:www.tpex.org.tw/www/zh-tw/margin/balance`），重跑不覆寫。上櫃 9/24～11/04 現在 0 缺。腳本 `research/probe_tpex_margin_balance_20261001.py`；`C:\alpha\CLAUDE.md` 頻率上限清單補「上櫃融資融券餘額歷史」。
+- **[自行裁量]**：官方多出的 00847B、8908 不在 `tpex_codes`，照既有分邊規則不寫。
+- 冒煙 368 項 0 失敗（exit 0）；`selftest_margin_data_dates.py` ALL PASS。
+
+### 先.一三五-1kd-a market.yml／quotes.yml rebase 衝突處理（`- [x]`，[預設放行] 甲）
+- **為什麼能做**：AWAITING 自 11/04 07:1x 等約 28.7 小時無 Cowork 裁示（零之二），收件匣 039 也定案 1kd-a 甲；原本 `- [!]` 轉回處理。
+- **做了什麼**：新增 `.github/scripts/rebase_resolve_conflicts.sh`（共用追蹤檔取 main、其他取本班、印 warning，解不了才 abort）；`market.yml` 衝突時呼叫它，失敗才 exit 1；`quotes.yml` 內容衝突改 abort＋warning＋exit 0，其他 rebase 失敗照舊 exit 1。
+- **證據**：自測 `scripts/selftest_rebase_resolve_conflicts.sh` 15/15 ALL PASS（暫存 repo 合成 5 種情境，含衝突取捨後可 fast-forward push、空 commit 跳過）；兩支 YAML 用 `yaml.safe_load` 驗過語法；冒煙 368 項 0 失敗（exit 0）。
+- **[自行裁量]**：自測在 Windows 要 clone 時就關 `core.autocrlf`（系統層 autocrlf=true 會把換行差異算成本班變動，雲端 Linux 不受影響）。
+- **未驗證**：雲端真衝突班（約兩週 1 次）尚未發生，下次看 Actions annotation 有沒有「rebase衝突已逐檔取捨」且該班 exit 0。
+
+### 收工補件
+- DevQueue 可執行項開工時為 0（權威清單只剩 1jt-b）。把收件匣 039 已定案、還沒做的兩件拆成獨立條目：**先.一三五-1kh-l2**（known_limitations 舊條目移 docs）、**先.一三五-1kh-e2**（停擺自檢看本機備援心跳）。`dev_queue_runner.py next` 已能取到 1kh-l2。
+- 補了 2 條，未達「可執行 ≥6」；其他來源本輪時間不夠盤點（45 分鐘上限），下一輪續補。`- [ ]` 總數 23（≥12）。
+- 先.一四九-1 保持 `- [!]`，只剩 1kh-o／1kh-s 照 039 暫緩。
+- 維運帽產物：`data/STATUS.json` 由雲端 `generate_status_json.py` 產生，本輪沒有改資料源登記，沒有手動改。
+- BLOCKED：無新增。
+
 ## 2026-11-05 11:0x DevQueue（維運帽）先.一三五-1jt-a 融資個股依官方資料日逐股表 [預設放行]
 
 等待總司令審閱：16 件（`research/AWAITING_REVIEW.md` 等待中表格 16 列；1jt-a 移到已結案）。
