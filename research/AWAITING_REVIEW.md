@@ -20,7 +20,7 @@
 - N=0時「等待中」表格留表頭但清空列，不得整份刪除本檔案。
 - 2026-10-29（收件匣 031）：凡「請總司令執行一次」（要總司令本人在電腦或手機上動手）的項目，除了列 AWAITING，也同步加進 `C:\alpha\總司令待辦.md`（白話、每項一行做法、寫不做的影響）；能用腳本做的接進 `C:\alpha\run-owner-todo.ps1`（每支先問 Y/N、失敗不中斷）。總司令做完後由 CC 查證（看排程／資料檔／log，不看金鑰內容）再打勾移到「已完成」，同時 AWAITING 結案。
 
-## 等待中（目前：15件）
+## 等待中（目前：14件）
 
 | 項目 | 完成時間 | 等待審閱內容 | 等待時長 |
 |---|---|---|---|
@@ -31,7 +31,6 @@
 | 先.一四七-1 「前向通過後怎麼上線」部署規則草稿（Cowork 審；**真錢相關、不適用 24 小時預設放行**） | 2026-11-04 04:1x | `docs/DEPLOYMENT_PLAYBOOK_DRAFT.md`：①資金分段 10%／30%／60%／80%（佔原 0050 部位，各階段停留 3／6／12 個月、每階都要裁示、回撤 −20% 停晉級／−30% 退一階／−40% 退回紙上、帳戶 −45% 降股票）；②只換 0050，00646／00697B 不換，每次增量分 4 個月；③多支同時通過寫死**等權**（風險平價要估 24 筆月報酬的波動度，誤差大、會加碼短期低波動）；④風控層 beta ≤1.0、單檔 ≤策略 10%／帳戶 2%、產業 30%、現金 5%／10%、流動性 5%，引用 V1／ML 單發出處；⑤八節逐條對照。待判：用帳戶回撤代替 regime 閘門是否滿足最高投資原則 3、O 的產業上限例外。 | 剛送出 |
 | 先.一三五-1kh-e 雲端報價／新聞停擺被本機備援遮住，停擺自檢要不要另看雲端那一手（**甲（建議）**／乙／丙） | 2026-11-04 11:4x | 1kh-d 掃描：`data/quotes_tw.json`、`data/news.json` 的 fetched_at 雲端與本機備援都會刷新，雲端沒有專屬欄位，所以 AlphaQuotesTW／AlphaNewsEvents 那兩條在雲端停擺時不會亮燈。本機證據：`research/quotes_local_fallback.jsonl` 歷來 decision＝fetched 178 次、skip_cloud_fresh 163 次（本機補抓比雲端準時還多）。甲＝registry 另加兩條看備援心跳（近 2 個交易日盤中補抓比例過半即判「雲端被遮住」，需 pipeline_freshness 認一種新格式，可還原）；乙＝雲端腳本寫 `meta.cloud_fetched_at`、本機備援保留不覆蓋，registry 改看它（動雲端 workflow 腳本）；丙＝維持現狀（資料新鮮才是目的）。24 小時無裁示照零之二預設放行甲 | 0 小時 |
 | 先.一三五-1kd-e 本機 gh 重新登入：提供新 GitHub PAT（**請總司令執行一次**） | 2026-11-04 07:2x | `gh auth status`「The token in default is invalid」；本機 `check_tw_data_landed` 叫雲端複查 10/27 起每次 HTTP 401，查 Actions 只剩未登入 60 次／小時。git push 用的 Windows 認證區 PAT 不受影響。已加進 `C:\alpha\總司令待辦.md` 第 7 項 | 0 小時 |
-| 先.一三五-1kh-l STATUS.json 瘦身（甲／乙／**丙（建議）**） | 2026-11-04 16:1x | `docs/PROPOSAL_STATUS_JSON_SLIM.md`：現檔 76.8KB、30 天前 60KB、11/01 曾到 90KB（本機版 local_pipeline_health 13KB）；甲 known_limitations 舊 10 條移 docs 省 4.4KB，乙 data_files 省略通用 source／空 detail 省 7.0KB，丙合計省 11.4KB→約 65KB。不改 #65 門檻。24 小時無裁示照丙預設放行 | 0 小時 |
 | 先.一三五-1kh-o app.js 再拆分壓首頁首次載入（**甲（建議）**／乙／丙） | 2026-11-04 16:3x | `docs/PROPOSAL_APPJS_SPLIT.md`：首頁首次載入 330.5KB（門檻 350KB）；app.js gzip 147KB、首頁只執行到 44.5%；其他 8 支 app-*.js 已延後載入。甲：方法頁／策略曲線／回測圖／研究室專用函式搬進延後載入檔，估省 gzip 8～12KB（未實測）。不改 350KB 門檻。24 小時無裁示照甲預設放行 | 0 小時 |
 | 先.一三五-1kh-s 首頁費半膠囊「本機IBKR逾期」手機看不到（**甲（建議）**／乙／丙） | 2026-11-04 17:2x | `docs/PROPOSAL_HOME_CAPSULE_SOURCE_TAG.md`：逾期但資料日不落後時，來源字樣只在 title、手機只剩灰點；甲＝膠囊名稱旁加既有 `.stale-tag` 小字「收盤」，乙＝膠囊帶下加一行註記，丙＝維持現狀。驗收用冒煙模擬＋390 寬自動截圖，不要求總司令截圖。24 小時無裁示照甲預設放行（零之二）。 | 0 小時 |
 | 先.一三五-1kh-v2 supply_watchlist 在 STATUS 的判法（**甲（建議）**／乙／丙） | 2026-11-04 18:3x | `docs/PROPOSAL_SUPPLY_WATCHLIST_THRESHOLD.md`：檔案內容沒變就不改寫，`meta.as_of`＝最後一次內容變動日（近 6 次 commit 間隔 1～16 天），STATUS 用它判新鮮度結構上不準；真正每晚 23:00 有跑的證據在 `research/data/supply_watchlist_cycle.log`，但 registry 沒有任何一條看它。甲＝列 static（同 strategy_history.json 先例）＋registry 加 AlphaSupplyWatchlist 看 log；乙＝門檻 30 小時（內容沒變仍天天亮）；丙＝每晚寫 generated_at（每晚多一個 commit）。24 小時無裁示照零之二預設放行甲 | 0 小時 |
@@ -48,6 +47,7 @@
 
 ## 已結案審閱紀錄
 
+- 2026-11-05 先.一三五-1kh-l STATUS.json 瘦身 → 收件匣 039 已定案**丙**（甲＋乙）。乙 DevQueue 20261105-043102 已做；甲 DevQueue 20261105-120102（先.一三五-1kh-l2）做完：`generate_status_json.py` `KNOWN_LIMITATIONS` 13→5 條，最後改寫早於 2026-10-06 的 8 條原文搬到 `docs/KNOWN_LIMITATIONS_ARCHIVE.md`，STATUS 加 `known_limitations_archive` 連結；STATUS.json 73,826→70,197 bytes；冒煙 184 PASS／0 FAIL（#65 68.6KB、#180 一致）（結案）。
 - 2026-11-05 先.一三五-1kd-a market.yml／quotes.yml Commit 步驟 rebase 衝突處理 → **[預設放行]**（零之二，等約 28.7 小時無 Cowork 裁示；收件匣 039 亦定案 1kd-a 甲）照建議**甲**執行：market 衝突逐檔取捨（`.github/scripts/rebase_resolve_conflicts.sh`），quotes 衝突 abort＋exit 0；自測 15/15。雲端待下次真衝突班驗證。DevQueue 20261105-113102。
 - 2026-11-05 先.一三五-1jt-a 融資個股累積檔同鍵晚班蓋掉前一交易日上櫃數字 → **[預設放行]**（零之二，等 39.5 小時無 Cowork 裁示；收件匣 039 亦列 1jt-a 甲）照建議**甲**執行：`accumulate_margin_by_stock.py` 新增 `by_data_date`（依官方資料日、先到先存不覆寫）＋`scripts/rebuild_margin_by_data_date.py` 從 git 歷史回補（上市 23 天、上櫃 24 天，上櫃 10/01 從沒抓到過仍缺）。Cowork 可推翻，推翻時照 PREREG 修訂規則處理。
 - 2026-11-04 18:2x 收件匣 039（先.一四九-1）：先.一四四-1 採甲＝維持現狀，不動作（結案）。

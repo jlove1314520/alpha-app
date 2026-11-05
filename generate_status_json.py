@@ -1292,21 +1292,15 @@ TODO = [
     {"item": "CLAUDE.md候選：美股報價/AI盤前日報真新聞/Phase2券商下單研究", "priority": "P2", "blocker": "尚未排序，等使用者指示"},
 ]
 
+# 先.一三五-1kh-l2（2026-11-05）：只留近 30 天改寫過的條目；更舊的原文在 docs/KNOWN_LIMITATIONS_ARCHIVE.md。
+# 之後新增條目照舊加在這裡；條目最後改寫超過 30 天就搬到該檔（人工，每月一次）。
 KNOWN_LIMITATIONS = [
-    "【策略層面，最重要】2026-08-27新增題材動能榜（scores_momentum.json）+未來性濾網（scores_future.json），跟價值成長榜（scores.json）三榜並列——三榜都尚未經過組合策略回測驗證，App固定顯示「本榜為資料排序，尚未經過組合策略回測驗證，不代表能贏大盤」，見TODO的B16項目。權重是專家判斷的初始設計值（weights_frozen_momentum.json/weights_frozen_future.json），不是回測最佳化結果。",
-    "2026-08-27修正P0 bug（使用者回報）：題材動能榜relative_strength因子改用還原權息收盤價（price_history.json新增adj_close欄位）——來源雙軌：一次性回補讀research端FinMind TaiwanStockDividend本機快取（research/build_price_history.py），之後每日排程改讀TWSE官方rwd/zh/exRight/TWT48U除權息預告表累積事件、回溯調整（.github/scripts/update_price_history.py，見data/ex_dividend_events.json）——刻意不在每日排程呼叫FinMind，維持JSON-only架構原則。已知殘留限制：(1)TWT48U只回傳未來約5週的事件預告，不支援歷史查詢，故涵蓋率隨每天累積逐步提高，剛上線這幾週少數個股可能還沒回溯到；(2)實測發現少數股票(如2420/2227/6216/8442等8檔)的research端FinMind快取已經停在很久以前(2024-12-31)，導致「除權息日前一筆可用資料」距離超過10天，判定無法安全定錨調整係數，這類事件會被跳過(adj_close退回等於close，不會比修正前更差)並記錄skip_reason，不會靜默套用錯誤係數。",
-    "margin_maintenance.json：分母（全市場融資金額）2026-09-15起改用TWSE官方www.twse.com.tw/rwd信用交易統計端點（同T86網站家族），拔掉最後一個FinMind依賴；單日查無資料時往回找最多5天取最新可用值，若5天內都失敗才明確寫入data_incomplete=true，App顯示「資料不完整」，不會沿用舊值假裝正常。",
     "stock_detail.json：財報(EPS/毛利率/ROE)原只涵蓋TWSE上市「一般業」，2026-10-11（常備.開發-4）起已接上市金融業5類與上櫃6類端點（update_stock_financials.py），上櫃（例6488）與金控（例2881）都有季財報；金融業無毛利率／營益率欄位屬會計格式本身。"
     "三大法人/融資融券2026-08-27（P1-新）已補上TPEx上櫃股票（tpex_3insti_daily_trading/tpex_mainboard_margin_balance）："
     "三大法人涵蓋檔數1,083→1,990檔、融資融券1,063→1,983檔，scores.json全市場平均coverage 0.341→0.376（chips因子權重14%受益最多）。"
     "FCF：TWSE/TPEx官方均無現金流量表端點，MOPS網頁查詢被反爬蟲擋——改用FinMind TaiwanStockCashFlowsStatement本機研究快取產出data/cash_flow.json（B27），目前每季手動跑、不在Actions排程（排程提案見PENDING_QUEUE先.一〇三-15g）。",
-    "quotes_tw.json：自選股sparkline約24檔上櫃(TPEx)股票查不到（TWSE STOCK_DAY端點是TWSE專屬）。",
     "個股頁美股分頁：月營收結構性不存在（美股公司無揭露義務）；三大法人/融資融券無「每日」免費對應（替代=SEC 13F季度+FINRA放空週資料，顆粒度不同，暫不列入排隊）；財報改走SEC XBRL companyfacts（data/us_financials.json，us_financials.yml每週）。",
     "個股走勢圖（台股repo price_history、美股repo us_daily）、主流題材chips（data/industry_flow.json）、期貨籌碼（data/futures_institutional.json，TAIFEX官方）已改repo主來源（先.八十一-10等），FinMind只剩讀不到時的備援；備援也失敗時誠實顯示原因（不是假資料）。",
-    "2026-08-27發現：這台機器目前曾被FinMind IP封鎖過（非單純額度用盡），research/finmind_client.py原本完全沒有請求節流——已加上每次真正網路請求間至少0.35秒的節流，但這只能降低未來再次觸發封鎖的機率，無法解除已經發生的封鎖，也不是精確調校過的數字。",
-    "scores.json（選股頁分數）2026-08-27新增GitHub Actions每日排程（research/generate_scores_live.py，market.yml），只讀repo內JSON、不依賴parquet/FinMind，不會再因為研究者本機沒開機而停擺——但這條JSON-only路徑覆蓋率上限約0.74（technical/analyst/catalyst三項恆缺），跟研究端手動執行（research/generate_scores_v2.py，因子較完整）互不覆蓋衝突，用meta.engine_version分辨這次是哪條管線產生的。",
-    "本檔案（STATUS.json）由generate_status_json.py產生，APP_DATA_SOURCES那份面板對照表是人工核對、不是自動掃描——異動面板資料源時要記得同步更新腳本裡的常數，否則這份清單會跟實際程式碼不同步。",
-    "earnings_calendar.json：yfinance get_calendar()（下一次財報日期）穩定可用，但get_earnings_dates()（用來推估盤前/盤後公布時段）在這台機器持續遇到curl_cffi對guce.yahoo.com的DNS解析失敗（socket.gethostbyname()本身正常，是curl_cffi內部的環境特定問題，不是程式bug）——estimated_session因此誠實降級為'unknown'，不影響next_earnings_date本身的可靠性；GitHub Actions runner環境不一定有同樣的DNS問題，之後排程實跑可能就會恢復正常。",
     "2026-10-23（DevQueue 20261023-133102，先.一三二-10）：交易日曆 trading_calendar.json 的 unscheduled_closed 只靠 TWSE FMTQIK 回填「今天以前」且 7 天快取，當天颱風臨時休市（10/23 薔琵）記不到 → schedule_health 會把本機 Shioaji 判逾期、常駐行程照常空跑；修法提案 docs/PROPOSAL_UNSCHEDULED_CLOSURE_SAMEDAY.md 已核准採丙並完成（先.一三二-10b，2026-10-24：盤中零請求寫 suspected_closed_today、收盤後 FMTQIK 確認、schedule_health 與 4 支本機讀者已扣休市日；10/23 已補進 unscheduled_closed）。收盤零 tick 仍 commit 空快照另案 先.一三二-11。",
     "2026-10-27（DevQueue 20261027-100102，先.一三五-1d）：data/events.json 只留 90 天；重大訊息（TWSE／TPEx）另由本機 AlphaNewsFallback（每 30 分鐘，scripts/news_local_fallback.py 開頭呼叫 scripts/archive_mops_events.py）以（代號、日期、標題）去重 append 到 research/data/mops_events_archive.jsonl（本機檔、不進公開 repo、零外部請求）。限制：只在這台電腦有；本機排程停擺超過 90 天仍會遺失；首次歸檔 4,377 筆、最早 2026-09-06（更早的已被 90 天視窗刷掉，無法回補）。",
 ]
@@ -1484,6 +1478,8 @@ def main():
         "sec_access": build_sec_access(),  # 先.一〇三-1b-3：SEC 回 403＝疑似 User-Agent 被擋
         "todo": TODO,
         "known_limitations": KNOWN_LIMITATIONS,
+        # 先.一三五-1kh-l2：超過 30 天沒改寫的條目原文搬到 docs，STATUS 只留連結
+        "known_limitations_archive": "docs/KNOWN_LIMITATIONS_ARCHIVE.md（2026-11-05 搬出 8 條：最後改寫早於 2026-10-06 者）",
     }
     # 先.六十-C9：頂層 any_overdue（＝schedule_health.any_overdue）與寫入者，讓 App／人一眼看得到 STATUS.json 本身新不新、有沒有逾期項
     payload["any_overdue"] = bool((payload.get("schedule_health") or {}).get("any_overdue"))
