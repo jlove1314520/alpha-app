@@ -1,3 +1,21 @@
+## 2026-11-06 17:01～17:2x DevQueue 20261106-170101（開發帽）先.一三五-1lv 冒煙 #78 首頁載入超標修復＋收工補件
+
+等待總司令審閱：7 件（同 `research/AWAITING_REVIEW.md` 等待中表格，本輪無增減）。
+
+**1. 先.一三五-1lv（純 bug 修復）✅** commit `52529a1948c`
+- 做了什麼：`scripts/export_intraday_tw.py` 另寫首頁用精簡檔 `data/intraday_tw/YYYY-MM-DD.spark.json`（每 5 分鐘取樣＋第一與最後一根、只留 [時間,收盤]），`index.json` 加 `spark` 欄位；`app.js` `ensureRepoIntradayTw()` 有 spark 就只讀精簡檔、舊版 index 才退回完整檔；`repoIntraFor()` 依 columns 找收盤欄，小圖說明註明「每 5 分鐘取一點」。補產 11/05、11/06 精簡檔。
+- 證據：11/06 當日檔原始 81,066B→精簡 7,387B（gzip 約 18.6KB→2.1KB）。自測 `scripts/selftest_export_intraday_tw.py` 12/12 PASS（新增 3 項）。冒煙 #182 加第三段：index 帶 spark 時只抓 `.spark.json`、照常畫線＋非即時說明（原有兩段不變）。**冒煙 2026-11-06 17:11 全部通過：185 PASS／0 FAIL；#78 首頁首次載入 334.5KB（58 請求），350KB 門檻未動。**
+- [自行裁量] 選做法①（精簡檔）不選②（可視範圍才抓）：①不改首頁載入時機、改動最小；②會讓小圖晚出現且要加可視範圍偵測。完整 1 分K 檔照舊寫。
+- 同一 commit 一併提交 先.一三五-1kh-e5 [預設放行] 乙 的未提交改動（pipeline_freshness／pipeline_inventory／自測／STATUS／DATA.md／AWAITING），`selftest_pipeline_fallback_ratio.py` 全過。
+- 十節：新排程輸出 `data/intraday_tw/*.spark.json` 在 `data/` 下，被 MACHINE_WRITTEN `^data/` 涵蓋，並已加入 export 自己的 commit_paths。
+
+**2. 下一項是 [研究]（先.一五四-1 紙上優化軌）→ 照一輪一頂帽子收工，留給下一輪研究帽。**
+
+**3. 收工補件**：`- [ ]` 26 項（≥12）；DevQueue 可執行的非研究項原本約 0 條（其餘多為互動視窗／時間閘／總司令本人操作），低於 6 條門檻。本輪補 2 條（①資料缺口，零外部請求）：
+- 先.一三五-1lw：`data/stock_detail.json` 有 853 檔最新季停在 2024Q4，其中 669 檔在 `data/financials_backfill.json` 已有 2026Q2，個股頁因此標「資料較舊」（例 2883）；`update_stock_financials.py` 只拿回補檔當差分基準、沒併進輸出。
+- 先.一三五-1lx：兩邊都沒有的 192 檔先分類（下市／暫停／金融業／真缺）。
+- 照實記錄：DevQueue 可執行仍不足 6 條；本輪時間內只掃了稽核報告與冒煙輸出（①②類），BACKLOG／UX 提案／全檢報告未掃，④文書類照本週用量上限暫停。
+
 ## 2026-11-06 14:0x DevQueue（維運帽）零之二預設放行 先.一三五-1kh-e5：**[預設放行] 照作者建議乙執行**
 
 等待總司令審閱：7 件（`research/AWAITING_REVIEW.md`「等待中（目前：7件）」；1kh-e5 移到已結案並標 [預設放行]）。
