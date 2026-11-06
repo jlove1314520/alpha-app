@@ -180,6 +180,10 @@ async function runSmokeTest(baseUrl, headless = true) {
 
   const pageErrors = [];
   page.on("pageerror", (exc) => pageErrors.push(String(exc)));
+  // 先.一三五-1lr：主頁面每次主框架導航（含 App 自己 location.reload）都記時間，給偶發「Resulting promise was garbage collected」
+  // （執行環境被換掉）留證據；第一次 goto 也會記一筆，之後再出現就代表頁面在測試中途被重載。
+  const mainNavLog = [];
+  page.on("framenavigated", (f) => { if (f === page.mainFrame()) mainNavLog.push(new Date().toISOString().slice(11, 23) + " " + f.url().slice(-60)); });
   // 先.六十九-1：主頁面的多項檢查會在同一頁內換假資料再重抓，關掉 App 的 60 秒資料記憶體快取；
   // 記憶體快取本身由 #90 在獨立 context（不關）實測。
   await page.addInitScript(() => { window.__ALPHA_FETCH_MEMCACHE_OFF = true; });
@@ -681,9 +685,16 @@ async function runSmokeTest(baseUrl, headless = true) {
   // 提示，不能是空白或掛掉的uncaught error。(c) 沒填token時按送出要擋下來，
   // 不能真的送出fetch請求。
   const ibkrUiErrors = [];
+  let step18 = "開始";
+  const navStart18 = mainNavLog.length;
   try {
-    await page.evaluate((code) => window.openStock(code), "AAPL");
+    // 先.一三五-1lr：本項所有會回傳長 promise 的 evaluate 都改成「只觸發＋waitForFunction 等結果」，失敗時附步驟名與主框架導航紀錄
+    step18 = "openStock(AAPL)";
+    await page.evaluate(() => { Promise.resolve(window.openStock("AAPL")).catch((e) => console.warn("[smoke#18] openStock AAPL", e)); });
+    const usOpened = await page.waitForFunction(() => ((document.getElementById("sh-sub") || {}).textContent || "").startsWith("AAPL"), null, { timeout: 15000 }).then(() => true).catch(() => false);
+    if (!usOpened) ibkrUiErrors.push("openStock(\"AAPL\") 15 秒內沒打開美股個股頁");
     await page.waitForTimeout(300);
+    step18 = "按美股買進";
     await page.evaluate(() => document.getElementById("buy-cta-us-buy").click());
     await page.waitForTimeout(2500);
     const usSheetOpen = await page.evaluate(() => document.getElementById("ibkr-sheet")?.classList.contains("open"));
@@ -693,19 +704,33 @@ async function runSmokeTest(baseUrl, headless = true) {
       ibkrUiErrors.push(`測試環境沒有真的啟動ibkr_order_server.py，連線狀態應顯示未啟動/失敗訊息，實際："${healthText}"`);
     }
     await page.evaluate(() => { document.getElementById("ibkr-token").value = ""; });
-    await page.evaluate(() => window.submitIbkrOrderUI());
+    step18 = "submitIbkrOrderUI(無token)";
+    await page.evaluate(() => { Promise.resolve(window.submitIbkrOrderUI()).catch((e) => console.warn("[smoke#18] submitIbkrOrderUI", e)); });
+    await page.waitForFunction(() => /token/.test((document.getElementById("ibkr-result") || {}).textContent || ""), null, { timeout: 3000 }).catch(() => null);
     await page.waitForTimeout(300);
     const resultText = await page.evaluate(() => document.getElementById("ibkr-result")?.textContent || "");
     if (!resultText.includes("token")) ibkrUiErrors.push(`沒填token應該被前端擋下並提示，實際訊息："${resultText}"`);
-    await page.evaluate(() => window.closeIbkrSheet());
+    step18 = "closeIbkrSheet";
+    await page.evaluate(() => { window.closeIbkrSheet(); });
 
     // 先.六十-A1：台股假下單抽屜已移除；台股個股頁不得出現 IBKR 下單鈕（分工鐵律：IBKR 下單卡只給美股）
-    await page.evaluate(() => Promise.race([window.openStock("2330"), new Promise((r) => setTimeout(r, 15000))]));
+    // 先.一三五-1lr：不再把 openStock 的 promise 回傳給 page.evaluate（偶發「Resulting promise was garbage collected」，
+    // 歷來約 20 次都落在這類「回傳長 promise」的 evaluate），改成只觸發、再用 waitForFunction 等個股頁真的換成 2330。
+    // 檢查本身不放寬：15 秒內沒換成台股 2330 一樣記 FAIL，並附主框架導航紀錄。
+    const navBefore18 = mainNavLog.length;
+    step18 = "openStock(2330)";
+    await page.evaluate(() => { Promise.resolve(window.openStock("2330")).catch((e) => console.warn("[smoke#18] openStock 2330", e)); });
+    const twOpened = await page.waitForFunction(() => {
+      const sub = (document.getElementById("sh-sub") || {}).textContent || "";
+      const scr = document.getElementById("scr-stock");
+      return sub.startsWith("2330") && !!scr && scr.classList.contains("active");
+    }, null, { timeout: 15000 }).then(() => true).catch(() => false);
+    if (!twOpened) ibkrUiErrors.push(`openStock("2330") 15 秒內沒打開台股個股頁（測試期間主框架導航：${mainNavLog.slice(navBefore18).join("、") || "無"}）`);
     await page.waitForTimeout(300);
     const twIbkrBtnShown = await page.evaluate(() => { const b = document.getElementById("buy-cta-us-buy"); return !!b && getComputedStyle(b).display !== "none"; });
     if (twIbkrBtnShown) ibkrUiErrors.push("台股個股頁竟然顯示 IBKR 下單鈕（分工鐵律破功）");
   } catch (e) {
-    ibkrUiErrors.push(`測試本身出錯：${e.message || e}`);
+    ibkrUiErrors.push(`測試本身出錯（步驟：${step18}；本項期間主框架導航：${mainNavLog.slice(navStart18).join("、") || "無"}）：${e.message || e}`);
   }
   record("18. IBKR Paper下單UI卡片：美股/台股分工正確、伺服器未啟動時有清楚提示、無token時前端擋下送出",
     ibkrUiErrors.length === 0, ibkrUiErrors.join("; "));
@@ -1307,18 +1332,30 @@ async function runSmokeTest(baseUrl, headless = true) {
         const body = /index\.json/.test(u) ? { latest: fakeDate } : { date: fakeDate, bars: { [base.code]: bars } };
         return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
       });
-      const probe = () => page.evaluate(async (code) => {
-        Object.keys(LIVE_KB).forEach((k) => delete LIVE_KB[k]);
-        REPO_INTRA = null; REPO_INTRA_AT = 0;
-        await hydrateHome();
-        await new Promise((r) => setTimeout(r, 300));
-        const r2 = [...document.querySelectorAll("#wl-list .swipe-row")].find((x) => x.querySelector(`[data-flash-code="${code}"]`));
-        const w = r2 && r2.querySelector(".sparkwrap");
-        return { line: !!(r2 && r2.querySelector("svg.spark polyline")), base: !!(r2 && r2.querySelector("svg.spark line[stroke-dasharray]")), tag: w ? (w.querySelector("em")?.textContent || "") : "", title: w ? (w.getAttribute("title") || "") : "" };
-      }, base.code);
-      const a = await probe();
+      // 先.一三五-1lr：盤中資料檔被排程更新時 App 會另起一次 hydrateHome（HYDRATE_HOME_SEQ 遞增），測試自己叫的那次被作廢、
+      // 300ms 後量到的是重畫前的舊畫面（11/06 10:1x 實測 FAIL）。改成只觸發重畫、再等畫面出現預期標籤（最多 10 秒）後量測；
+      // 預期內容（分時線、平盤線、標籤、非即時說明）一項都不放寬，等不到照樣 FAIL。
+      const probe = async (wantTag) => {
+        await page.evaluate(() => {
+          Object.keys(LIVE_KB).forEach((k) => delete LIVE_KB[k]);
+          REPO_INTRA = null; REPO_INTRA_AT = 0;
+          Promise.resolve(hydrateHome()).catch((e) => console.warn("[smoke#182] hydrateHome", e));
+        });
+        await page.waitForFunction(([code, tag]) => {
+          const r2 = [...document.querySelectorAll("#wl-list .swipe-row")].find((x) => x.querySelector(`[data-flash-code="${code}"]`));
+          const em = r2 && r2.querySelector(".sparkwrap em");
+          return !!(em && em.textContent === tag && r2.querySelector("svg.spark polyline"));
+        }, [base.code, wantTag], { timeout: 10000 }).catch(() => null);
+        await page.waitForTimeout(300);
+        return page.evaluate((code) => {
+          const r2 = [...document.querySelectorAll("#wl-list .swipe-row")].find((x) => x.querySelector(`[data-flash-code="${code}"]`));
+          const w = r2 && r2.querySelector(".sparkwrap");
+          return { line: !!(r2 && r2.querySelector("svg.spark polyline")), base: !!(r2 && r2.querySelector("svg.spark line[stroke-dasharray]")), tag: w ? (w.querySelector("em")?.textContent || "") : "", title: w ? (w.getAttribute("title") || "") : "" };
+        }, base.code);
+      };
+      const a = await probe("至10:20");
       fakeDate = "2026-01-02";
-      const b = await probe();
+      const b = await probe("01-02");
       await page.unroute("**/data/intraday_tw/**");
       await page.evaluate(() => { REPO_INTRA = null; REPO_INTRA_AT = 0; try { localStorage.removeItem("alpha_intraday_tw_last"); } catch (e) {} });
       if (!a.line || !a.base || a.tag !== "至10:20" || !/不是即時/.test(a.title)) repoIntraErrors.push(`今天的 repo 檔（${base.code}）：${JSON.stringify(a)}`);

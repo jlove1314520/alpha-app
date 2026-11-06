@@ -12,3 +12,6 @@ research/data/adjustment_anomaly_warnings.jsonl merge=union
 # union 合併可能產生重複列；改由 paper_7030_tracker.py 載入時偵測重複並中止（不自動刪除任何列）
 data/factory_stability_history.jsonl merge=union
 data/moea_pit/manifest.jsonl merge=union
+
+# 2026-11-06 先.一三五-1kh-z 甲 [預設放行]：data/ 底下 JSON 本機工作目錄也固定 LF，讓本機量到的檔案大小＝線上（冒煙 #65 STATUS<100KB）
+data/**/*.json text eol=lf

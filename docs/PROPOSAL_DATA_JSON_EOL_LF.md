@@ -38,3 +38,10 @@
 
 建議**甲**：一行設定、結構性解決（不用每個量大小的地方各自記得），只多 1 個內容不變的 commit。
 照 CLAUDE.md 零之二：24 小時內無 Cowork 裁示，DevQueue 照甲執行，執行時先跑 `git add --renormalize data/` 並貼出 `--cached --stat`，若變動不只 `auto_heartbeat.json` 就停下改回 AWAITING。
+
+## 五、執行紀錄（2026-11-06 DevQueue，[預設放行]）
+
+- 照甲執行：`.gitattributes` 加 `data/**/*.json text eol=lf`。
+- `git ls-files --eol data/`：i/crlf 1（`data/auto_heartbeat.json`）、i/lf 520、i/none 10,498；`git add --renormalize data/auto_heartbeat.json` 後 `--cached --stat` 只有這 1 檔（206+／206−），`--ignore-cr-at-eol` 比對零內容變化，符合第四節「只有 auto_heartbeat.json」的放行條件。
+- `data/STATUS.json`（工作目錄乾淨）刪掉重取：本機 69,042 bytes＝`git cat-file -s HEAD:` 69,042。其餘 CRLF 工作目錄檔不強制重取（有些正被排程改寫中），等下次寫檔自然變 LF。
+- Cowork 可推翻；還原＝刪掉那一行再 renormalize。

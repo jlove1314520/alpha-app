@@ -1,3 +1,15 @@
+## 2026-11-06 10:3x DevQueue（開發帽）先.一三五-1lr 冒煙 #18 偶發「Resulting promise was garbage collected」
+
+等待總司令審閱：9 件（`research/AWAITING_REVIEW.md`「等待中（目前：9件）」，本輪無增減）。
+
+- **做了什麼**：`scripts/smoke_test.mjs` #18 內三個把長 promise 回傳給 `page.evaluate` 的步驟（`openStock("AAPL")`、`openStock("2330")`、`submitIbkrOrderUI()`）改成「只觸發＋`waitForFunction` 等結果」——個股頁要真的換成該代號（`#sh-sub` 開頭＝代號、`#scr-stock` 為 active），15 秒等不到照樣 FAIL；無 token 擋單仍要看到含「token」的提示。檢查內容一項都沒拿掉或放寬。主頁面新增 `framenavigated` 紀錄，#18 失敗訊息會附「卡在哪一步＋測試期間主框架有沒有被重載」。
+- **#182 同輪修**〔[自行裁量]：不修冒煙就不能全過〕：盤中排程更新資料檔時 App 會另起一次 `hydrateHome`，測試自己叫的那次被作廢、300ms 後量到重畫前畫面（10:1x 實測 FAIL）。改成只觸發重畫、等列上出現預期標籤（至10:20／01-02）再量，預期值不變。
+- **證據**：10:01 第 1 次（未改）185 全過＝盤中不一定重現；只改 2330 那步後第 2 次 #18 過、#182 FAIL；修 #182 後第 3 次 #18 在別的步驟又出 GC 錯（＝不只 2330 那一步）；三步全改後第 4 次 **185 PASS／0 FAIL、EXIT=0（10:38:25）**。
+- **誠實揭露**：偶發 GC 的真正根因（頁面被重載？Playwright 框架層？）仍未證實；這次是讓測試不依賴長 promise 回傳＋留下導航紀錄，下次若再出現可直接看訊息判斷。偶發錯誤只跑了 1 次全過，不代表已根除。
+- **1kh-z 留下的變更一併提交**：`.gitattributes`（`data/**/*.json text eol=lf`）、`data/auto_heartbeat.json`（只換行，重做 `git add --renormalize`）、`docs/PROPOSAL_DATA_JSON_EOL_LF.md`、`research/AWAITING_REVIEW.md`。
+- 影響檔案：`scripts/smoke_test.mjs`、`PENDING_QUEUE.md`、`PROGRESS.md`＋上列 1kh-z 檔。
+- 下一步：時間到（10:46 上限），本輪只做這一項；收工補件未做（時間不足，照實記）。
+
 ## 2026-11-06 07:2x DevQueue（維運帽）零之二預設放行 先.一三五-1kh-z：**[預設放行] 照作者建議甲執行**
 
 等待總司令審閱：9 件（`research/AWAITING_REVIEW.md`「等待中（目前：9件）」；1kh-z 移到已結案並標 [預設放行]）。
