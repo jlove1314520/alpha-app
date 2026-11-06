@@ -1204,8 +1204,8 @@
     "roe_cleared_nonconsecutive_codes": [],
     "financials_backfill_display_merge": {
       "note": "官方 quarters 沒有的季度取自 financials_backfill.json（FinMind，App 顯示用），標 source=q1_from_backfill；官方同季優先（先.一三五-1lw）",
-      "merged_count": 756,
-      "rows_added": 4441,
+      "merged_count": 3,
+      "rows_added": 12,
       "rejected": {
         "2072": "eps 加總 9.37 vs 官方累計 9.3",
         "3135": "eps 加總 20.93 vs 官方累計 20.87",
@@ -1248,7 +1248,7 @@
         "8435": "eps 加總 2.84 vs 官方累計 2.88",
         "5386": "eps 加總 57.27 vs 官方累計 42.93"
       },
-      "generated_at": "2026-11-06T23:32:30.437296+08:00",
+      "generated_at": "2026-11-06T23:43:52.338219+08:00",
       "mode": "offline"
     }
   },
@@ -146714,42 +146714,6 @@
       "financials": {
         "quarters": [
           {
-            "year": 2021,
-            "quarter": 2,
-            "revenue": 1601732000.0,
-            "gross_margin_pct": 9.54,
-            "op_margin_pct": 4.93,
-            "net_income_parent": 66187000.0,
-            "eps": 3.31
-          },
-          {
-            "year": 2021,
-            "quarter": 4,
-            "revenue": 938303000.0,
-            "gross_margin_pct": 10.35,
-            "op_margin_pct": 2.39,
-            "net_income_parent": 16236000.0,
-            "eps": 4.12
-          },
-          {
-            "year": 2022,
-            "quarter": 2,
-            "revenue": 1240425000.0,
-            "gross_margin_pct": 12.85,
-            "op_margin_pct": 6.71,
-            "net_income_parent": 73115000.0,
-            "eps": 3.65
-          },
-          {
-            "year": 2022,
-            "quarter": 4,
-            "revenue": 989568000.0,
-            "gross_margin_pct": 14.46,
-            "op_margin_pct": 6.14,
-            "net_income_parent": 61474000.0,
-            "eps": 6.71
-          },
-          {
             "year": 2023,
             "quarter": 2,
             "revenue": 1083118000.0,
@@ -146784,6 +146748,46 @@
             "op_margin_pct": 12.19,
             "net_income_parent": 146895000.0,
             "eps": 15.36
+          },
+          {
+            "year": 2025,
+            "quarter": 2,
+            "revenue": 1450874000.0,
+            "gross_margin_pct": 24.03,
+            "op_margin_pct": 17.88,
+            "net_income_parent": 148380000.0,
+            "eps": 6.4,
+            "source": "q1_from_backfill"
+          },
+          {
+            "year": 2025,
+            "quarter": 4,
+            "revenue": 1184764000.0,
+            "gross_margin_pct": 20.76,
+            "op_margin_pct": 11.94,
+            "net_income_parent": 141155000.0,
+            "eps": 4.95,
+            "source": "q1_from_backfill"
+          },
+          {
+            "year": 2026,
+            "quarter": 1,
+            "revenue": 706973000.0,
+            "gross_margin_pct": 22.18,
+            "op_margin_pct": 16.05,
+            "net_income_parent": 102363000.0,
+            "eps": 4.01,
+            "source": "q1_from_backfill"
+          },
+          {
+            "year": 2026,
+            "quarter": 2,
+            "revenue": 457331000.0,
+            "gross_margin_pct": 22.58,
+            "op_margin_pct": 12.45,
+            "net_income_parent": 34157000.0,
+            "eps": 1.33,
+            "source": "q1_from_backfill"
           }
         ],
         "roe_ttm_pct": null,
@@ -218470,42 +218474,6 @@
       "financials": {
         "quarters": [
           {
-            "year": 2015,
-            "quarter": 4,
-            "revenue": 18040000.0,
-            "gross_margin_pct": 42.49,
-            "op_margin_pct": -416.97,
-            "net_income_parent": -26870000.0,
-            "eps": -1.42
-          },
-          {
-            "year": 2016,
-            "quarter": 2,
-            "revenue": 18914000.0,
-            "gross_margin_pct": 45.43,
-            "op_margin_pct": -280.98,
-            "net_income_parent": -54087000.0,
-            "eps": -1.03
-          },
-          {
-            "year": 2016,
-            "quarter": 4,
-            "revenue": 17099000.0,
-            "gross_margin_pct": 29.58,
-            "op_margin_pct": -325.49,
-            "net_income_parent": -55101000.0,
-            "eps": -2.09
-          },
-          {
-            "year": 2017,
-            "quarter": 2,
-            "revenue": 7821000.0,
-            "gross_margin_pct": -19.08,
-            "op_margin_pct": -622.94,
-            "net_income_parent": -69314000.0,
-            "eps": -1.33
-          },
-          {
             "year": 2017,
             "quarter": 4,
             "revenue": 4580000.0,
@@ -218540,6 +218508,46 @@
             "op_margin_pct": -11359.94,
             "net_income_parent": null,
             "eps": -3.12
+          },
+          {
+            "year": 2025,
+            "quarter": 2,
+            "revenue": 7779000.0,
+            "gross_margin_pct": 62.67,
+            "op_margin_pct": -970.23,
+            "net_income_parent": null,
+            "eps": -1.4,
+            "source": "q1_from_backfill"
+          },
+          {
+            "year": 2025,
+            "quarter": 4,
+            "revenue": 631000.0,
+            "gross_margin_pct": 84.31,
+            "op_margin_pct": -22926.31,
+            "net_income_parent": null,
+            "eps": -2.76,
+            "source": "q1_from_backfill"
+          },
+          {
+            "year": 2026,
+            "quarter": 1,
+            "revenue": 9000.0,
+            "gross_margin_pct": 100.0,
+            "op_margin_pct": -484833.33,
+            "net_income_parent": null,
+            "eps": -0.82,
+            "source": "q1_from_backfill"
+          },
+          {
+            "year": 2026,
+            "quarter": 2,
+            "revenue": 1341000.0,
+            "gross_margin_pct": 90.38,
+            "op_margin_pct": -4046.68,
+            "net_income_parent": null,
+            "eps": -1.01,
+            "source": "q1_from_backfill"
           }
         ],
         "roe_ttm_pct": null
@@ -237108,33 +237116,6 @@
       "financials": {
         "quarters": [
           {
-            "year": 2021,
-            "quarter": 4,
-            "revenue": 713881000.0,
-            "gross_margin_pct": 30.72,
-            "op_margin_pct": 17.12,
-            "net_income_parent": 94198000.0,
-            "eps": 8.27
-          },
-          {
-            "year": 2022,
-            "quarter": 2,
-            "revenue": 506013000.0,
-            "gross_margin_pct": 29.69,
-            "op_margin_pct": 18.68,
-            "net_income_parent": 85558000.0,
-            "eps": 5.55
-          },
-          {
-            "year": 2022,
-            "quarter": 4,
-            "revenue": 464121000.0,
-            "gross_margin_pct": 30.42,
-            "op_margin_pct": 22.07,
-            "net_income_parent": 83204000.0,
-            "eps": 10.88
-          },
-          {
             "year": 2023,
             "quarter": 2,
             "revenue": 480197000.0,
@@ -237169,6 +237150,46 @@
             "op_margin_pct": 15.11,
             "net_income_parent": 82367000.0,
             "eps": 8.48
+          },
+          {
+            "year": 2025,
+            "quarter": 2,
+            "revenue": 558532000.0,
+            "gross_margin_pct": 23.31,
+            "op_margin_pct": 14.83,
+            "net_income_parent": 74415000.0,
+            "eps": 3.45,
+            "source": "q1_from_backfill"
+          },
+          {
+            "year": 2025,
+            "quarter": 4,
+            "revenue": 638129000.0,
+            "gross_margin_pct": 24.98,
+            "op_margin_pct": 16.57,
+            "net_income_parent": 97544000.0,
+            "eps": 2.64,
+            "source": "q1_from_backfill"
+          },
+          {
+            "year": 2026,
+            "quarter": 1,
+            "revenue": 311097000.0,
+            "gross_margin_pct": 22.78,
+            "op_margin_pct": 13.13,
+            "net_income_parent": 36739000.0,
+            "eps": 1.27,
+            "source": "q1_from_backfill"
+          },
+          {
+            "year": 2026,
+            "quarter": 2,
+            "revenue": 310412000.0,
+            "gross_margin_pct": 25.11,
+            "op_margin_pct": 13.98,
+            "net_income_parent": 44581000.0,
+            "eps": 1.53,
+            "source": "q1_from_backfill"
           }
         ],
         "roe_ttm_pct": null,

@@ -82,6 +82,8 @@ def main() -> int:
     ap.add_argument("--max", type=int, default=MAX_PER_RUN)
     ap.add_argument("--until", default=None, help="台北時間 HH:MM 到了就停（排程時間上限用）")
     ap.add_argument("--hour-cap", type=int, default=450)
+    ap.add_argument("--codes", default=None,
+                    help="逗號分隔代號：只抓這幾檔（已完成的也重抓；先.一三五-1ly 新轉上市櫃檔逐檔補用）")
     a = ap.parse_args()
     import finmind_client as fc
 
@@ -95,6 +97,8 @@ def main() -> int:
     stocks = doc.get("stocks") or {}
     done = set((doc.get("meta") or {}).get("done") or []) | set(stocks)
     todo = [c for c in stale_first if c not in done][: max(0, a.max)]
+    if a.codes:
+        todo = [c.strip() for c in a.codes.split(",") if c.strip()][: max(0, a.max)]
     print(f"宇宙 {len(uni)} 檔；已完成 {len(done & set(uni))}；本輪 {len(todo)} 檔（上限 {a.max}）", flush=True)
     n_ok = n_empty = 0
     stop = None
