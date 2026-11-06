@@ -1,3 +1,14 @@
+## 2026-11-06 07:2x DevQueue（維運帽）零之二預設放行 先.一三五-1kh-z：**[預設放行] 照作者建議甲執行**
+
+等待總司令審閱：9 件（`research/AWAITING_REVIEW.md`「等待中（目前：9件）」；1kh-z 移到已結案並標 [預設放行]）。
+
+- **為什麼可以放行**：`docs/PROPOSAL_DATA_JSON_EOL_LF.md` 明標「甲（建議）」，等約 24.4 小時無 Cowork 裁示；排除檢查：不碰 holdout、不涉真錢、無密碼／本人登入、無付費資料、不改關卡門檻（冒煙 #65 門檻沒動）、沒有刪檔（只是重取一份乾淨的追蹤檔），可還原。Cowork 可推翻，推翻時照 PREREG 修訂規則處理（刪掉 `.gitattributes` 那一行再 renormalize 即還原）。
+- **做了什麼**：`.gitattributes` 加 `data/**/*.json text eol=lf`；`git add --renormalize data/auto_heartbeat.json`（index 內唯一 CRLF 的 data 檔，`--ignore-cr-at-eol` 比對零內容變化）。
+- **證據**：`git ls-files --eol data/`＝i/crlf 1、i/lf 520、i/none 10,498；`--cached --stat` 只有 auto_heartbeat.json（206+／206−），符合提案的放行條件。`data/STATUS.json` 重取後本機 69,042 bytes＝HEAD 69,042（本機與線上量到同一個大小）。
+- **冒煙**：`node scripts/smoke_test.mjs` 連跑 4 次都是 **184 PASS／1 FAIL**（#18「page.evaluate: Resulting promise was garbage collected」，卡在 `openStock("2330")`）；第 4 次把 STATUS.json 改回 CRLF 當對照組也一樣 FAIL＝不是這次改動造成的。照「冒煙沒過不提交」**本輪沒有 commit**，變更留在工作目錄；`smoke_test.mjs` 屬開發帽檔案，本輪（維運帽）不改，另補 `- [ ]` 先.一三五-1lr 交給下一輪修好後一併提交。
+- 影響檔案：`.gitattributes`、`data/auto_heartbeat.json`（只換行）、`docs/PROPOSAL_DATA_JSON_EOL_LF.md`、`PENDING_QUEUE.md`、`research/AWAITING_REVIEW.md`、`PROGRESS.md`。
+- 下一步：其餘本機 CRLF 的 data JSON 等排程下次寫檔自然變 LF；`git ls-files --eol data/ | grep w/crlf` 可追蹤剩幾個。
+
 ## 2026-11-06 06:4x DevQueue（開發帽）零之二預設放行 先.一四九-2：**[預設放行] 照作者建議甲執行**
 
 等待總司令審閱：10 件（`research/AWAITING_REVIEW.md`「等待中（目前：10件）」；先.一四九-2 移到已結案並標 [預設放行]）。
