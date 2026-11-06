@@ -1,3 +1,13 @@
+## 2026-11-06 23:31～23:56 DevQueue 20261106-233102（維運帽）先.一三五-1lw／1ly／1ma＋收工補件
+
+等待總司令審閱：8 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪沒有新增）。
+
+- **先.一三五-1lw ✅（64cd2fb8d37）**：取到的 1ly 要求先完成 1lw，所以先做。`.github/scripts/update_stock_financials.py` 新增 `merge_backfill_display_quarters()`：每日寫檔前把 `data/financials_backfill.json` 裡官方 quarters 沒有、且比官方最早季新的季度併進去，標 `source=q1_from_backfill`（研究端 `DISPLAY_ONLY_DERIVED_SOURCES` 已排除），官方同季不覆蓋；另加 `--offline-merge-backfill`（零請求）本機重產＋重拆 `data/stock_detail/`。證據：併入 756 檔／4,441 季，最新季停在 2024Q4 的 **827→209 檔**，官方季度改動 0 筆，2883 最後一季→2026Q2 EPS 0.95；`scripts/selftest_stock_financials.py` 28 項全過（新增 6 項）；冒煙 186 項全過、0 失敗。`app-stock.js` 回補季說明改通用版。[自行裁量] 加「官方累計對帳」安全檢查，40 檔因 EPS 加總差幾分錢被擋（另開 1mc）；ROE 未用回補季重算（另開 1md）。
+- **先.一三五-1ly ✅（04c176f54c4）**：`scripts/backfill_financials_display.py` 加 `--codes`；FinMind 3 次請求，2249／6467／6898 都有資料。2026Q1＋Q2 與官方累計一致（2249 EPS 5.34、6898 EPS 2.80）；重產後 3 檔最新季→2026Q2。照實註記：2025Q2／Q4 是興櫃時期半年數，與既有列同口徑。冒煙 186 項全過。
+- **先.一三五-1ma ✅（39a23ce6215，零外部請求）**：本機照稽核同邏輯重算，不連續約 80→12 檔；7822、6884 已連續；2237、6947 等約 12 檔為半年報公司（官方與 FinMind 都只有 Q2／Q4），[自行裁量] 不送原訂 4 次請求。App `epsTtmFromDetail()` 遇不連續回 null，不是錯值；改善開 1mb。正式數字看下一次 23:00 稽核（未驗證）。
+- **收工補件**：`- [ ]` 29 項；DevQueue 可執行非研究 4→6 項（補 1mb 半年報 TTM、1mc 40 檔放寬為營收／淨利對帳、1md ROE 用合併後季度重算；來源都是 ①資料缺口、本輪實測）。
+- **收工原因**：權威清單下一項 先.一五五-2 是 [研究]，一輪一頂帽子，留給下一輪。BLOCKED：無。本輪無資料源／面板異動，`data/STATUS.json` 未改（維運帽本輪無 STATUS 產出，原因同上）。
+
 ## 2026-11-06 22:31～ DevQueue 20261106-223102（研究帽）先.一五五-2 墓園重審補跑 2025 起資料（第 2 批：F12，F8／F9 標資料缺）
 
 等待總司令審閱：8 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪沒有新增）。
