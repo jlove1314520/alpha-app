@@ -1605,7 +1605,10 @@
       if(!r.ok)throw new Error('index HTTP '+r.status);
       const idx=await r.json();
       if(!idx||!/^\d{4}-\d{2}-\d{2}$/.test(String(idx.latest||'')))throw new Error('index 格式不符');
-      const r2=await fetch('data/intraday_tw/'+idx.latest+'.json?t='+t);
+      // 先.一三五-1lv：首頁只讀精簡檔（每 5 分鐘取樣、只留收盤，約 2KB gzip）；完整 1 分K 盤中長到 80KB 會撐爆首頁載入量（冒煙 #78）。
+      // 舊版 index 沒有 spark 欄位才退回完整檔。
+      const sparkName=/^\d{4}-\d{2}-\d{2}\.spark\.json$/.test(String(idx.spark||''))?idx.spark:(idx.latest+'.json');
+      const r2=await fetch('data/intraday_tw/'+sparkName+'?t='+t);
       if(!r2.ok)throw new Error(idx.latest+' HTTP '+r2.status);
       const d=await r2.json();
       REPO_INTRA=(d&&d.bars&&typeof d.bars==='object')?d:{bars:{}};
@@ -1622,14 +1625,15 @@
   function repoIntraFor(code){
     const d=REPO_INTRA;const rows=d&&d.bars&&d.bars[code];
     if(!rows||rows.length<2)return null;
-    const closes=rows.map(b=>Array.isArray(b)?b[4]:null).filter(v=>v!=null&&isFinite(v));
+    const ci=Array.isArray(d.columns)&&d.columns.indexOf('close')>=0?d.columns.indexOf('close'):4;  // 精簡檔 [時間,收盤]、完整檔 [時間,開,高,低,收,量]
+    const closes=rows.map(b=>Array.isArray(b)?b[ci]:null).filter(v=>v!=null&&isFinite(v));
     if(closes.length<2)return null;
     const z=_zonedParts(new Date(),'Asia/Taipei');
     const today=`${z.y}-${String(z.m).padStart(2,'0')}-${String(z.d).padStart(2,'0')}`;
     const isToday=d.date===today;
     const lastHm=String(rows[rows.length-1][0]||'');
     return {closes,isToday,tag:isToday?('至'+lastHm):String(d.date||'').slice(5),
-      title:`家裡電腦上傳的 Shioaji 1 分K（${d.date} 至 ${lastHm}），約每 20 分鐘上傳一次，不是即時`};
+      title:`家裡電腦上傳的 Shioaji 1 分K（${d.date} 至 ${lastHm}${d.interval==='5m'?'，小圖每 5 分鐘取一點':''}），約每 20 分鐘上傳一次，不是即時`};
   }
   function sparkWithTag(closes,up,tag){const s=spark(closes,up);if(!s)return '<span class="sparkwrap"></span>';return `<span class="sparkwrap">${s}<em>${tag}</em></span>`}
   // 2026-09-06（實測.二.2）當日曲線專用：**以前收為基線**，不是 min-max 拉滿。
@@ -4610,7 +4614,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-11-06.0700';
+  const APP_VERSION='2026-11-06.1712';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

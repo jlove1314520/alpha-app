@@ -3,6 +3,7 @@
 
 情境：①jsonl 高補抓比例 → stalled ②低比例 → ok ③檔案不存在 → skipped（不判停擺）
 ④log 格式高比例 → stalled ⑤樣本不足 → skipped ⑥壞正規式 → evaluate() 只標 unknown、不崩潰（十二節）
+⑦標 known_issue 且高比例 → known（只記不告警）⑧標 known_issue 但低比例 → ok（先.一三五-1kh-e5）
 零外部請求，只寫暫存目錄。"""
 from __future__ import annotations
 
@@ -63,8 +64,11 @@ def main() -> int:
             {**BASE, "task": "log", "artifact": "n.log", **log_spec},
             {**BASE, "task": "few", "artifact": "few.jsonl", "format": "jsonl"},
             {**BASE, "task": "badre", "artifact": "n.log", **log_spec, "fetched_regex": "([壞"},
+            {**BASE, "task": "known_hi", "artifact": "hi.jsonl", "format": "jsonl", "known_issue": "測試"},
+            {**BASE, "task": "known_lo", "artifact": "lo.jsonl", "format": "jsonl", "known_issue": "測試"},
         ])
-    expect = {"hi": "stalled", "lo": "ok", "missing": "skipped", "log": "stalled", "few": "skipped", "badre": "unknown"}
+    expect = {"hi": "stalled", "lo": "ok", "missing": "skipped", "log": "stalled", "few": "skipped", "badre": "unknown",
+              "known_hi": "known", "known_lo": "ok"}
     for k, want in expect.items():
         got = rows.get(k, {}).get("status")
         good = got == want

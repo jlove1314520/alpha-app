@@ -1475,7 +1475,8 @@
     "個股頁美股分頁：月營收結構性不存在（美股公司無揭露義務）；三大法人/融資融券無「每日」免費對應（替代=SEC 13F季度+FINRA放空週資料，顆粒度不同，暫不列入排隊）；財報改走SEC XBRL companyfacts（data/us_financials.json，us_financials.yml每週）。",
     "個股走勢圖（台股repo price_history、美股repo us_daily）、主流題材chips（data/industry_flow.json）、期貨籌碼（data/futures_institutional.json，TAIFEX官方）已改repo主來源（先.八十一-10等），FinMind只剩讀不到時的備援；備援也失敗時誠實顯示原因（不是假資料）。",
     "2026-10-23（DevQueue 20261023-133102，先.一三二-10）：交易日曆 trading_calendar.json 的 unscheduled_closed 只靠 TWSE FMTQIK 回填「今天以前」且 7 天快取，當天颱風臨時休市（10/23 薔琵）記不到 → schedule_health 會把本機 Shioaji 判逾期、常駐行程照常空跑；修法提案 docs/PROPOSAL_UNSCHEDULED_CLOSURE_SAMEDAY.md 已核准採丙並完成（先.一三二-10b，2026-10-24：盤中零請求寫 suspected_closed_today、收盤後 FMTQIK 確認、schedule_health 與 4 支本機讀者已扣休市日；10/23 已補進 unscheduled_closed）。收盤零 tick 仍 commit 空快照另案 先.一三二-11。",
-    "2026-10-27（DevQueue 20261027-100102，先.一三五-1d）：data/events.json 只留 90 天；重大訊息（TWSE／TPEx）另由本機 AlphaNewsFallback（每 30 分鐘，scripts/news_local_fallback.py 開頭呼叫 scripts/archive_mops_events.py）以（代號、日期、標題）去重 append 到 research/data/mops_events_archive.jsonl（本機檔、不進公開 repo、零外部請求）。限制：只在這台電腦有；本機排程停擺超過 90 天仍會遺失；首次歸檔 4,377 筆、最早 2026-09-06（更早的已被 90 天視窗刷掉，無法回補）。"
+    "2026-10-27（DevQueue 20261027-100102，先.一三五-1d）：data/events.json 只留 90 天；重大訊息（TWSE／TPEx）另由本機 AlphaNewsFallback（每 30 分鐘，scripts/news_local_fallback.py 開頭呼叫 scripts/archive_mops_events.py）以（代號、日期、標題）去重 append 到 research/data/mops_events_archive.jsonl（本機檔、不進公開 repo、零外部請求）。限制：只在這台電腦有；本機排程停擺超過 90 天仍會遺失；首次歸檔 4,377 筆、最早 2026-09-06（更早的已被 90 天視窗刷掉，無法回補）。",
+    "2026-11-06 先.一三五-1kh-e5［預設放行］：台股盤中報價主要由本機補抓（雲端 quotes.yml 常被 GitHub 略過），詳見 DATA.md。"
   ],
   "known_limitations_archive": "docs/KNOWN_LIMITATIONS_ARCHIVE.md（2026-11-05 搬出 8 條：最後改寫早於 2026-10-06 者）",
   "any_overdue": true,

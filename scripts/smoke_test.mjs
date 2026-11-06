@@ -1326,10 +1326,15 @@ async function runSmokeTest(baseUrl, headless = true) {
     if (base.code) {
       const bars = [["09:00", 100, 100, 100, 100, 1], ["09:01", 101, 101, 101, 101, 1], ["10:20", 99, 99, 99, 99, 1]];
       let fakeDate = base.today;
+      let fakeSpark = false;  // 先.一三五-1lv：index 帶 spark 欄位時，首頁應只讀精簡檔 [時間,收盤]、不碰完整 1 分K 檔
+      const fetched = [];
       // 用假的 repo 檔回應（在途請求也拿到同一份，避免直接改全域變數被別的重畫蓋掉）
       await page.route("**/data/intraday_tw/**", (route) => {
         const u = route.request().url();
-        const body = /index\.json/.test(u) ? { latest: fakeDate } : { date: fakeDate, bars: { [base.code]: bars } };
+        fetched.push(u.split("/").pop().split("?")[0]);
+        const body = /index\.json/.test(u) ? (fakeSpark ? { latest: fakeDate, spark: `${fakeDate}.spark.json` } : { latest: fakeDate })
+          : /\.spark\.json/.test(u) ? { date: fakeDate, interval: "5m", columns: ["time", "close"], bars: { [base.code]: bars.map((r) => [r[0], r[4]]) } }
+          : { date: fakeDate, bars: { [base.code]: bars } };
         return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
       });
       // 先.一三五-1lr：盤中資料檔被排程更新時 App 會另起一次 hydrateHome（HYDRATE_HOME_SEQ 遞增），測試自己叫的那次被作廢、
@@ -1356,7 +1361,11 @@ async function runSmokeTest(baseUrl, headless = true) {
       const a = await probe("至10:20");
       fakeDate = "2026-01-02";
       const b = await probe("01-02");
+      fakeDate = base.today; fakeSpark = true; fetched.length = 0;
+      const c = await probe("至10:20");
       await page.unroute("**/data/intraday_tw/**");
+      if (!c.line || !c.base || c.tag !== "至10:20" || !/每 5 分鐘/.test(c.title) || fetched.some((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f)) || !fetched.some((f) => /\.spark\.json$/.test(f)))
+        repoIntraErrors.push(`精簡檔（index 帶 spark）應只讀 .spark.json 並照常畫線：${JSON.stringify(c)}／抓了 ${fetched.join(",")}`);
       await page.evaluate(() => { REPO_INTRA = null; REPO_INTRA_AT = 0; try { localStorage.removeItem("alpha_intraday_tw_last"); } catch (e) {} });
       if (!a.line || !a.base || a.tag !== "至10:20" || !/不是即時/.test(a.title)) repoIntraErrors.push(`今天的 repo 檔（${base.code}）：${JSON.stringify(a)}`);
       if (!b.line || b.tag !== "01-02") repoIntraErrors.push(`前一交易日的 repo 檔應標 01-02：${JSON.stringify(b)}`);

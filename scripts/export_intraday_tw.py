@@ -11,6 +11,9 @@
 - 熱檔不是今天、或超過 HOT_STALE_MIN 沒更新（電腦關機／行程停）→ 不寫、不推。
 - 自身任何失敗只回傳一行說明、不丟例外（十二節：不得拖垮呼叫端的報價備援）。
 - 輸出路徑在 data/ 底下，已被 dev_queue_runner.MACHINE_WRITTEN 的 ^data/ 涵蓋（十節）。
+- 先.一三五-1lv：另寫首頁用精簡檔 YYYY-MM-DD.spark.json（每 5 分鐘取樣、只留時間＋收盤，最後一根一定保留），
+  index.json 的 spark 欄位指向它；首頁小圖只讀精簡檔（完整 1 分K 盤中一路長大到約 80KB，撐爆冒煙 #78 首頁載入量 350KB 門檻）。
+  完整檔照舊寫，留給要看完整 1 分K 的地方。
 - [自行裁量] 提案寫「舊檔每天刪」，本版先不刪（刪除屬不可逆類，留待 Cowork 決定）；每日約 85KB。
 用法：python scripts/export_intraday_tw.py [--no-commit] [--force]
 """
@@ -73,6 +76,23 @@ def build(now: datetime) -> tuple[dict | None, str]:
     return doc, "ok"
 
 
+SPARK_STEP_MIN = 5
+
+
+def spark_doc(doc: dict) -> dict:
+    """首頁小圖用精簡檔：每 SPARK_STEP_MIN 分鐘取一根（分鐘數整除者）＋第一根＋最後一根，只留 [時間, 收盤]。"""
+    ci = (doc.get("columns") or []).index("close") if "close" in (doc.get("columns") or []) else 4
+    bars = {}
+    for code, rows in (doc.get("bars") or {}).items():
+        keep = [r for i, r in enumerate(rows)
+                if i == 0 or i == len(rows) - 1 or (str(r[0])[3:5].isdigit() and int(str(r[0])[3:5]) % SPARK_STEP_MIN == 0)]
+        bars[code] = [[r[0], r[ci]] for r in keep]
+    return {"date": doc.get("date"), "generated_at": doc.get("generated_at"), "hot_updated_at": doc.get("hot_updated_at"),
+            "source": doc.get("source"), "interval": f"{SPARK_STEP_MIN}m", "columns": ["time", "close"],
+            "note": f"首頁小圖用精簡檔：完整 1 分K 每 {SPARK_STEP_MIN} 分鐘取樣、只留收盤（最後一根必留）；非投資建議（先.一三五-1lv）",
+            "bars": bars}
+
+
 def run(now: datetime | None = None, commit: bool = True, force: bool = False) -> str:
     try:
         now = now or datetime.now(TW)
@@ -96,15 +116,17 @@ def run(now: datetime | None = None, commit: bool = True, force: bool = False) -
             return "skip_" + why
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")), encoding="utf-8", newline="\n")
+        spark = ROOT / OUT_DIR / f"{day}.spark.json"
+        spark.write_text(json.dumps(spark_doc(doc), ensure_ascii=False, separators=(",", ":")), encoding="utf-8", newline="\n")
         idx = ROOT / OUT_DIR / "index.json"
-        idx.write_text(json.dumps({"latest": day, "generated_at": doc["generated_at"], "codes": sorted(doc["bars"])},
+        idx.write_text(json.dumps({"latest": day, "spark": spark.name, "generated_at": doc["generated_at"], "codes": sorted(doc["bars"])},
                                   ensure_ascii=False), encoding="utf-8", newline="\n")
         n = sum(len(v) for v in doc["bars"].values())
         if not commit:
             return f"written（{len(doc['bars'])} 檔、{n} 根，未提交）"
         sys.path.insert(0, str(ROOT / "scripts"))
         import local_git_commit as G  # noqa: PLC0415
-        res = G.commit_paths([f"{OUT_DIR}/{day}.json", f"{OUT_DIR}/index.json"],
+        res = G.commit_paths([f"{OUT_DIR}/{day}.json", f"{OUT_DIR}/{day}.spark.json", f"{OUT_DIR}/index.json"],
                              f"自選股日內分時：本機熱檔匯出 {day} {hm}（{len(doc['bars'])} 檔，先.一四九-2）",
                              drop_on_conflict=True)
         return f"exported（{len(doc['bars'])} 檔、{n} 根）：{res}"

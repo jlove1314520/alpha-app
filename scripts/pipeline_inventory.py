@@ -40,7 +40,7 @@ for _s in (sys.stdout, sys.stderr):
     except Exception:  # noqa: BLE001
         pass
 
-MARK = {"ok": "✓", "stalled": "✗", "missing": "✗", "skipped": "－", "unknown": "?"}
+MARK = {"ok": "✓", "stalled": "✗", "missing": "✗", "skipped": "－", "unknown": "?", "known": "△"}
 
 
 def _age(row: dict) -> str:

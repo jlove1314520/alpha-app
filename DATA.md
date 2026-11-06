@@ -94,3 +94,11 @@ Stooq 免費 key（需人工過 CAPTCHA）。兩者都需要總司令親自領�
 - ⚠️ **上市口徑不同**（2026-10-29 先.一四〇-16，零請求）：上市 30 檔權值股近 20 日 600 筆量，599 筆**不是** 1000 股整數倍（例 2330 10/01 20,666,092 股）＝上市 `STOCK_DAY_ALL`／`MI_INDEX` 的成交股數含零股；TWSE swagger 另有 `TWT53U`（零股）、`BFT41U`（盤後定價）端點，上市是否含盤後定價未查證。**上市、上櫃的 `volume` 不是同一個口徑**，跨市場比較量能（流動性門檻、量比排名）時上櫃會略偏小。統一與否待裁示（AWAITING 先.一四〇-16a）。
 - 要不要改成含零股＋盤後定價＝改資料定義，屬提案，目前不改。
 - ✅ 已定案（Cowork 收件匣 030，先.一四〇-16a 採甲）：**不改資料，只揭露**。凡是跨上市／上櫃比較或加總成交量／成交值的研究（例 `scripts/build_industry_flow.py` 產業成交值、`scripts/build_research.py` 流動性門檻與 turnover20 排序），研究報告必須寫一句但書：「上市成交量含零股、上櫃只含一般交易整股，上櫃量能偏小」。同一檔自己跟自己比（例 `build_signal_ledger.py` 量能突增）不受影響、不必寫。
+
+## 🟡 台股盤中報價主要由本機補抓（2026-11-06 先.一三五-1kh-e5［預設放行］建議乙，Cowork 可推翻）
+
+- 雲端 `quotes.yml` 排程應每 10 分鐘跑一次，但 GitHub 大量略過排程事件：11/02～11/04（UTC 日）實際只跑 3／6／7 班，全是 schedule 事件被略過，不是 workflow 失敗（`gh run list --workflow=quotes.yml`）。
+- 盤中 `data/quotes_tw.json` 實際靠本機 `AlphaQuotesLocalFallback`（`scripts/quotes_local_fallback.py`，雲端落後 ≥20 分鐘才補抓，同一支 `fetch_quotes_tw.py`、報價請求數不變）維持；紀錄在本機 `research/quotes_local_fallback.jsonl`（11/04 補抓 15/29、11/05 11/19）。
+- **限制**：這台電腦關機或本機排程停擺時，盤中報價會停在雲端最後一班（App 照常顯示資料時間）。
+- 監控 `AlphaQuotesTW-雲端遮蔽` 標 `known_issue`：判到停擺只記不告警（狀態 `known`）；要恢復告警，刪掉 `data/seed/pipeline_registry.json` 該條的 `known_issue` 欄。
+- 未採的甲（本機落後時改 `gh workflow run quotes.yml` 讓雲端自己跑）需總司令先重新 `gh auth login`（先.一三五-1kd-e）。

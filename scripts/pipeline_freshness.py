@@ -314,6 +314,12 @@ def evaluate(now: datetime | None = None) -> tuple[list[dict], list[str]]:
                 continue
             if spec.get("check") == "fallback_ratio":
                 st, why, extra = _fallback_ratio(spec, f, now)
+                # 2026-11-06 先.一三五-1kh-e5［預設放行］建議乙：登錄檔標 "known_issue"（已知原因＋依據）的，
+                # 判到停擺只記不告警——狀態改 "known"（不在 fault ledger 的 FAULT_STATUSES、不進 stalled 清單），
+                # 原因照實寫進 reason。比例回落（ok）時照常顯示 ok；要恢復告警，刪掉該欄即可。
+                known = spec.get("known_issue")
+                if st == "stalled" and known:
+                    st, why = "known", f"已知、只記不告警（{known}）：{why}"
                 row.update(status=st, reason=why, source="本機備援補抓比例", **extra)
                 if st == "stalled":
                     stalled.append(f'{spec["task"]}：{why}')

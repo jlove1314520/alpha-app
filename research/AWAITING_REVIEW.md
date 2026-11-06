@@ -20,7 +20,7 @@
 - N=0時「等待中」表格留表頭但清空列，不得整份刪除本檔案。
 - 2026-10-29（收件匣 031）：凡「請總司令執行一次」（要總司令本人在電腦或手機上動手）的項目，除了列 AWAITING，也同步加進 `C:\alpha\總司令待辦.md`（白話、每項一行做法、寫不做的影響）；能用腳本做的接進 `C:\alpha\run-owner-todo.ps1`（每支先問 Y/N、失敗不中斷）。總司令做完後由 CC 查證（看排程／資料檔／log，不看金鑰內容）再打勾移到「已完成」，同時 AWAITING 結案。
 
-## 等待中（目前：8件）
+## 等待中（目前：7件）
 
 | 項目 | 完成時間 | 等待審閱內容 | 等待時長 |
 |---|---|---|---|
@@ -31,7 +31,6 @@
 | 先.一四七-1 「前向通過後怎麼上線」部署規則草稿（Cowork 審；**真錢相關、不適用 24 小時預設放行**） | 2026-11-04 04:1x | `docs/DEPLOYMENT_PLAYBOOK_DRAFT.md`：①資金分段 10%／30%／60%／80%（佔原 0050 部位，各階段停留 3／6／12 個月、每階都要裁示、回撤 −20% 停晉級／−30% 退一階／−40% 退回紙上、帳戶 −45% 降股票）；②只換 0050，00646／00697B 不換，每次增量分 4 個月；③多支同時通過寫死**等權**（風險平價要估 24 筆月報酬的波動度，誤差大、會加碼短期低波動）；④風控層 beta ≤1.0、單檔 ≤策略 10%／帳戶 2%、產業 30%、現金 5%／10%、流動性 5%，引用 V1／ML 單發出處；⑤八節逐條對照。待判：用帳戶回撤代替 regime 閘門是否滿足最高投資原則 3、O 的產業上限例外。 | 剛送出 |
 | 先.一三五-1kd-e 本機 gh 重新登入：提供新 GitHub PAT（**請總司令執行一次**） | 2026-11-04 07:2x | `gh auth status`「The token in default is invalid」；本機 `check_tw_data_landed` 叫雲端複查 10/27 起每次 HTTP 401，查 Actions 只剩未登入 60 次／小時。git push 用的 Windows 認證區 PAT 不受影響。已加進 `C:\alpha\總司令待辦.md` 第 7 項 | 0 小時 |
 | 先.一四九-1 個股 K 線 6 個月～3 年日線改由 repo 提供（**甲（建議）**／乙／丙） | 2026-11-05 04:4x | `docs/PROPOSAL_KLINE_3Y_REPO.md`：by_code price 只有 60 根、price_history 每檔中位數 90 根，本機 FinMind 402；本機已有官方日檔快取 1 年（2025-10-28～2026-10-30）可零請求組出。實測 1 年逐檔 25MB（gzip 7MB），3 年約 75MB。repo pack 已 998MiB，每日改寫全部逐檔會暴增，所以甲＝`data/kline/<年>/<代號>.json` 年分檔、過去年凍結、當年每週補一次、最近 60 日沿用 by_code；回補 2023-11～2025-10 官方全市場日檔約 1,032 次（同 V1 節流規則，先寫 CLAUDE.md 再跑）。乙＝by_code 拉到 250 日（只到 1 年、每日膨脹更大）；丙＝維持 FinMind。24 小時無裁示照零之二預設放行甲。**⚠️ 2026-11-06 05:0x DevQueue：預設放行不執行**——甲要讀 holdout 期間限定快取 `paper_9_lookback`（RESTRICTED_LOOKBACK_DIRS 只准兩支讀）且產出的 2025／2026 年分檔屬 holdout 期間、需先登記 DISPLAY_ONLY（改 holdout.py＝十三節核心檔），屬「擴大 holdout」排除類別；待 Cowork／互動視窗裁示（見 PENDING_QUEUE 先.一四九-1 條目三個選項） | 0 小時 |
-| 先.一三五-1kh-e5 雲端 quotes.yml 盤中漏跑提案（Cowork 審，24 小時預設放行乙） | 2026-11-05 13:3x | 證據（`gh run list --workflow=quotes.yml`，公開 repo 免登入讀取）：排程一天約 80 個時段，11/02～11/04 實際各只跑 3／6／7 班（全是 schedule 事件，GitHub 擅自略過，不是 workflow 失敗）。另查到本機 `gh auth status`＝token 無效（10/23 起，`check_tw_data_landed.py` 註解同），所以「本機叫雲端跑」現在做不到。**建議乙**：維持本機補抓 `quotes_local_fallback` 為盤中主力（已在跑，11/05 補抓 11/19 班），`pipeline_registry` 的 `AlphaQuotesTW-雲端遮蔽` 改成「已知、只記不告警」並在 DATA/STATUS 標「台股盤中報價主要由本機補抓」；甲＝總司令重新 `gh auth login` 後，本機落後時改 `gh workflow run quotes.yml`（每次只多 1 次 GitHub API，報價請求數不變）；丙＝把台股盤中報價整段搬到本機排程、雲端只留盤後。news 同機制 31～36% 一併觀察。 | 0 小時 |
 
 ## 等前置條件（不需總司令動作，不計入等待中）
 
@@ -40,6 +39,8 @@
 | （目前無） | | | |
 
 ## 已結案審閱紀錄
+
+- 2026-11-06 先.一三五-1kh-e5 雲端 quotes.yml 盤中漏跑 → **[預設放行]** 照作者建議**乙**執行（零之二，2026-11-05 13:3x 送審、約 24 小時無 Cowork 裁示；Cowork 可推翻，推翻時照 PREREG 修訂規則處理，刪掉登錄檔 `known_issue` 欄即恢復告警）：`scripts/pipeline_freshness.py` 新增 `known_issue` 欄位語意（fallback_ratio 判停擺時改狀態 `known`、不進停擺告警與故障帳），`data/seed/pipeline_registry.json` 的 `AlphaQuotesTW-雲端遮蔽` 標 known_issue；`data/STATUS.json` known_limitations 與 `DATA.md` 標「台股盤中報價主要由本機補抓」。甲（gh workflow run）仍待總司令重新登入 gh（見 先.一三五-1kd-e）。
 
 - 2026-11-06 先.一三五-1kh-v3a 本機 STATUS 掃到 .gitignore 排除的 data 檔 → **[預設放行]** 照作者建議**甲**執行（零之二，等約 28.2 小時無 Cowork 裁示；Cowork 可推翻，推翻時照 PREREG 修訂規則處理，git revert 即還原）：`generate_status_json.py` 新增 `_gitignored_data_names()`（`git ls-files --others --ignored --exclude-standard -- data/`），`build_data_files()` 跳過這些檔；git 失敗時 fail open（照舊全列、印警告）。實測本機 data_files 131 列、不再含 `data/app_errors_summary.json`。
 

@@ -42,7 +42,12 @@ d = json.loads(out.read_text(encoding="utf-8")) if out.exists() else {}
 idx = json.loads((tmp / "data" / "intraday_tw" / "index.json").read_text(encoding="utf-8")) if out.exists() else {}
 res.append(("正常→只含自選股＋指數、只收當天 bar、不含期貨／美股／沒資料代號", r.startswith("written")
             and sorted(d.get("bars", {})) == ["2330", "TAIEX"] and d["bars"]["2330"] == [["09:00", 10, 10, 10, 10, 1], ["09:01", 11, 11, 11, 11, 1]]))
-res.append(("index.json 指向今天", idx.get("latest") == "2026-11-06"))
+res.append(("index.json 指向今天＋精簡檔", idx.get("latest") == "2026-11-06" and idx.get("spark") == "2026-11-06.spark.json"))
+sp = json.loads((tmp / "data" / "intraday_tw" / "2026-11-06.spark.json").read_text(encoding="utf-8")) if out.exists() else {}
+res.append(("精簡檔只留 [時間, 收盤]、保留第一與最後一根", sp.get("columns") == ["time", "close"] and sp.get("bars", {}).get("2330") == [["09:00", 10], ["09:01", 11]]))
+rows = [[f"{9 + m // 60:02d}:{m % 60:02d}", 1, 1, 1, 100 + m, 1] for m in range(0, 23)]
+sd = X.spark_doc({"date": "d", "columns": ["time", "open", "high", "low", "close", "volume"], "bars": {"X": rows}})
+res.append(("精簡檔每 5 分鐘取樣（09:00/05/10/15/20＋最後 09:22）", [r[0] for r in sd["bars"]["X"]] == ["09:00", "09:05", "09:10", "09:15", "09:20", "09:22"] and sd["bars"]["X"][-1][1] == 122))
 res.append(("10 分鐘後→skip_gap", X.run(datetime(2026, 11, 6, 10, 10, tzinfo=TW), commit=False).startswith("skip_gap")))
 hot("2026-11-06T10:19:00+08:00")
 res.append(("20 分鐘後→再寫", X.run(datetime(2026, 11, 6, 10, 20, tzinfo=TW), commit=False).startswith("written")))
