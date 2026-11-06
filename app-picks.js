@@ -848,6 +848,13 @@
     const idx=last4.map(x=>_qIndex(x.year,x.quarter));
     // 先.一三五-1mb：半年報轉上市櫃的公司，序列是 …、去年Q4（period=H2 下半年）、今年Q1、今年Q2（單季）。
     // 這時近四季＝下半年＋今年Q1＋Q2（剛好 12 個月）；只在今年最新是 Q2 時成立，其他半年報組合照舊回 null。
+    // 先.一三五-1me：仍是半年報、今年只有上半年一筆（period=H1）時，近四季＝去年下半年（H2）＋今年上半年（H1）。
+    const t2=qs.slice(-2);
+    if(t2.length===2&&t2[0].period==='H2'&&t2[0].quarter===4&&t2[1].period==='H1'&&t2[1].quarter===2
+       &&t2[1].year===t2[0].year+1&&t2.every(x=>x.eps!=null&&isFinite(x.eps))){
+      if(_qIndex(t2[1].year,2)<_currentQIndex(nowMs)-VALUATION_EPS_MAX_LAG_Q)return null; // 過期 → 不用
+      return {eps:t2[0].eps+t2[1].eps,label:t2[0].year+'下半年~'+t2[1].year+'上半年'};
+    }
     const h=qs.slice(-3);
     if(h.length===3&&h[0].period==='H2'&&!h[1].period&&!h[2].period
        &&h[0].quarter===4&&h[1].year===h[0].year+1&&h[1].quarter===1&&h[2].year===h[1].year&&h[2].quarter===2

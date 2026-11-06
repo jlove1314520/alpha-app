@@ -1,3 +1,18 @@
+## 2026-11-07 03:31～ DevQueue 20261107-033102（開發帽）先.一三五-1me 仍是半年報的 6 檔近四季 EPS
+
+等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
+
+- **先.一三五-1me ✅**（零外部請求）：
+  - 來源查證：這 6 檔的 2026Q2 列是 2026-08-27 `research/build_stock_financials_history.py` 從 FinMind 本機快取（date=2026-06-30）寫入的。
+  - 證明是上半年：5 檔用月營收（`data/fundamentals.json` 的 month_revenue＋revenue_history_scoring）——2026Q2 營收＝2026 年 1～6 月加總（6565／6812／7752／6911 完全相等，2760 差 0.2%），也不等於 4～6 月單季；6911 的 2025Q4＝7～12 月加總，標 H2。
+  - [自行裁量] 2758 本機查不到 2025 年以後的月營收，改用結構規則：前一年已是 H1／H2、今年只有 Q2、營收是去年上半年的 0.5～2 倍（1.15）就標 H1，並記 `period_basis=prior_year_half`，照實標出證據比較弱。月營收查得到但對不上，就不標（有反例自測）。
+  - 改了哪些檔：`.github/scripts/update_stock_financials.py`（新增 `load_month_revenue_map()`，`tag_half_year_periods()` 加兩條規則並寫 `period_basis`）、`app-picks.js` `epsTtmFromDetail()` 與 `scripts/data_audit.py` `check_e_pe()` 加「去年 H2＋今年 H1」分支、`scripts/selftest_half_year_ttm.py`。
+  - 證據：自測全過（2758 TTM＝2.29＋0.33＝2.62、6911＝0.39＋0.43、2760／6565／6812／7752 都以月營收證明、反例不標、沒月營收時退回結構規則、稽核樣本 9 檔都不列 e_quarters_gap）。全市場試標：月營收證明 17 列、結構規則 4 列（另外 3 檔是 2024 年以前的舊列，App 會因過期不用）。
+  - 照實：本機 `data/stock_detail.json` 沒有重產，等下一班 market.yml 寫入標記，**線上畫面效果還沒驗證**。
+- 收工補件：DevQueue 可執行非研究項只剩 5 項（門檻 6），補 1 條 **先.一三五-1mf**（2758 在名冊的 last_seen 是 2024-12-31，疑似已下櫃轉興櫃，但仍在 stock_detail／稽核裡；來源①資料缺口＝本輪查證）。
+- 冒煙：`node scripts/smoke_test.mjs` rc=0、186 項 [x]、沒有未過項（03:43～03:52 完整輸出重跑；第一次用了 `| tail` 看不到真正 rc，所以重跑）。開發帽產物＝本冒煙結果。
+- 收工原因：權威清單下一項是 先.一五五-3 [研究]，一輪只戴一頂帽子，留給下一輪研究帽。
+
 ## 2026-11-07 03:01～ DevQueue 20261107-030102（研究帽）先.一五五-2 PQ② 收尾＋先.一五五-3 第二批清單
 
 等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。

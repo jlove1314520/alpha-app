@@ -753,33 +753,110 @@ def merge_backfill_display_quarters(stocks: dict, backfill: dict) -> dict:
     return stats
 
 
-def tag_half_year_periods(stocks: dict) -> dict:
+def load_month_revenue_map(path: Path | None = None) -> dict:
+    """先.一三五-1me：讀 data/fundamentals.json 的月營收（元，month_revenue＋revenue_history_scoring），回 {代號: {(年, 月): 營收}}。零外部請求；讀不到回空 dict。"""
+    path = path or (REPO_ROOT / "data" / "fundamentals.json")
+    out: dict = {}
+    try:
+        f = json.loads(path.read_text(encoding="utf-8")).get("fundamentals") or {}
+        for code, v in f.items():
+            m = {}
+            # month_revenue 優先；只保留 8 個月的檔再用 revenue_history_scoring（26 個月）補（先.一三五-1me）
+            for r in ((v or {}).get("month_revenue") or []) + ((v or {}).get("revenue_history_scoring") or []):
+                try:
+                    if r.get("revenue") is not None:
+                        m.setdefault((int(r["year"]), int(r["month"])), float(r["revenue"]))
+                except (TypeError, ValueError, KeyError):
+                    continue
+            if m:
+                out[str(code)] = m
+    except Exception as e:  # 讀不到月營收只是少一種證明，不擋流程（十二節）
+        print(f"[warn] 讀月營收失敗（半年報證明只用結構規則）：{e}")
+    return out
+
+
+HALF_YEAR_REV_TOL = 0.005  # 營收與月營收加總相對差 ≤0.5% 才算對上
+
+
+def _month_sum(mr: dict, year: int, months) -> float | None:
+    vals = [mr.get((year, m)) for m in months]
+    return None if not mr or any(v is None for v in vals) else sum(vals)
+
+
+def _close(a, b) -> bool:
+    try:
+        return a is not None and b is not None and b != 0 and abs(a - b) <= HALF_YEAR_REV_TOL * abs(b)
+    except TypeError:
+        return False
+
+
+def tag_half_year_periods(stocks: dict, month_rev: dict | None = None) -> dict:
     """先.一三五-1mb（2026-11-07）：半年報公司（興櫃／創新板時期上下半年各申報一次）轉上市櫃後，
     quarters 會出現「同一年只有 Q2、Q4 兩筆」——Q2 那筆其實是上半年、Q4 那筆是下半年，不是單季。
     這裡只加標記 period="H1"／"H2"（數值一律不改），讓 App／稽核組近四季 EPS 時認得出來。
     判定：同一年在 quarters 裡剛好是 {2,4} 兩筆（沒有 Q1／Q3）。年度後來補齊 Q1／Q3 時，舊標記拿掉。
+    先.一三五-1me（2026-11-07）追加兩條（period_basis 記證據類型）：
+      ① month_revenue：Q2 列同年沒有 Q1（或 Q4 列同年沒有 Q3），且該列營收＝當年 1～6 月（7～12 月）月營收加總（±0.5%）、
+         又不等於 4～6 月（10～12 月）單季加總 → 標 H1（H2）。月營收對不上就不標。
+      ② prior_year_half：當年只有 Q2 一筆、該年 1～6 月月營收查不齊（無法用①證明也無法否證）、
+         前一年 Q2／Q4 已是 H1／H2，且營收介於去年上半年的 0.5～2 倍 → 標 H1。
     自身出錯只略過該檔（十二節）。回傳統計。"""
-    stats = {"tagged_codes": [], "rows_tagged": 0, "untagged_rows": 0}
+    month_rev = month_rev or {}
+    stats = {"tagged_codes": [], "rows_tagged": 0, "untagged_rows": 0, "basis_count": {}}
     for code, s in stocks.items():
         try:
             fin = (s or {}).get("financials") if isinstance(s, dict) else None
             qs = [r for r in ((fin or {}).get("quarters") or []) if isinstance(r, dict)]
             if not qs:
                 continue
+            mr = month_rev.get(str(code)) or {}
             by_year: dict = {}
             for r in qs:
                 by_year.setdefault(r.get("year"), set()).add(r.get("quarter"))
+            want: dict = {}  # id(row) -> (period, basis)
+            for r in qs:
+                y, q = r.get("year"), r.get("quarter")
+                if by_year.get(y) == {2, 4} and q in (2, 4):
+                    want[id(r)] = ("H1" if q == 2 else "H2", "q2_q4_pair")
+            for r in sorted(qs, key=lambda x: (x.get("year") or 0, x.get("quarter") or 0)):
+                y, q = r.get("year"), r.get("quarter")
+                if id(r) in want or q not in (2, 4) or not isinstance(y, int):
+                    continue
+                if (q - 1) in by_year.get(y, set()):
+                    continue  # 有前一季單季 → 這筆就是單季
+                rv = r.get("revenue")
+                half = _month_sum(mr, y, range(1, 7) if q == 2 else range(7, 13))
+                single = _month_sum(mr, y, range(4, 7) if q == 2 else range(10, 13))
+                if half is not None:
+                    if _close(rv, half) and not _close(rv, single):
+                        want[id(r)] = ("H1" if q == 2 else "H2", "month_revenue")
+                    continue
+                if q == 2 and by_year.get(y) == {2}:
+                    prev = {x.get("quarter"): x for x in qs if x.get("year") == y - 1}
+                    p2, p4 = prev.get(2), prev.get(4)
+                    if (p2 is not None and p4 is not None and want.get(id(p2), ("",))[0] == "H1"
+                            and want.get(id(p4), ("",))[0] == "H2"):
+                        pr = p2.get("revenue")
+                        try:
+                            ok_mag = rv is not None and pr and 0.5 <= rv / pr <= 2.0
+                        except TypeError:
+                            ok_mag = False
+                        if ok_mag:
+                            want[id(r)] = ("H1", "prior_year_half")
             hit = False
             for r in qs:
-                half = by_year.get(r.get("year")) == {2, 4}
-                want = ("H1" if r.get("quarter") == 2 else "H2") if half else None
-                if want and r.get("period") != want:
-                    r["period"] = want
-                    stats["rows_tagged"] += 1
-                elif not want and r.get("period") in ("H1", "H2"):
+                w = want.get(id(r))
+                if w:
+                    if r.get("period") != w[0] or r.get("period_basis") != w[1]:
+                        if r.get("period") != w[0]:
+                            stats["rows_tagged"] += 1
+                        r["period"], r["period_basis"] = w
+                    stats["basis_count"][w[1]] = stats["basis_count"].get(w[1], 0) + 1
+                    hit = True
+                elif r.get("period") in ("H1", "H2"):
                     r.pop("period", None)
+                    r.pop("period_basis", None)
                     stats["untagged_rows"] += 1
-                hit = hit or bool(want)
             if hit:
                 stats["tagged_codes"].append(str(code))
         except Exception as e:  # 單檔出錯只略過（十二節）
@@ -911,10 +988,11 @@ def main():
         errors.append(f"backfill_display_merge: {e}")
     # 先.一三五-1mb：半年報列標 period=H1/H2（不改數值）；自身失敗只警告（十二節）
     try:
-        _hy = tag_half_year_periods(stocks)
+        _hy = tag_half_year_periods(stocks, load_month_revenue_map())
         payload["meta"]["financials_half_year_period"] = {
-            "note": "同一年 quarters 只有 Q2／Q4 兩筆（半年報公司）時，Q2 標 period=H1（上半年）、Q4 標 period=H2（下半年），數值不改（先.一三五-1mb）",
-            "tagged_count": len(_hy["tagged_codes"]), "tagged_codes": _hy["tagged_codes"]}
+            "note": "同一年 quarters 只有 Q2／Q4 兩筆（半年報公司）時，Q2 標 period=H1（上半年）、Q4 標 period=H2（下半年），數值不改（先.一三五-1mb）；"
+                    "另以月營收證明（營收＝半年月營收加總）或前一年已是半年報＋今年只有 Q2 標記，period_basis 記證據類型（先.一三五-1me）",
+            "tagged_count": len(_hy["tagged_codes"]), "tagged_codes": _hy["tagged_codes"], "basis_count": _hy["basis_count"]}
     except Exception as e:
         print(f"[warn] 半年報標記失敗：{e}")
         errors.append(f"half_year_period: {e}")

@@ -633,6 +633,17 @@ def check_e_pe(a, universe, ref, names, loc):
                     half_ttm = he
         except TypeError:
             half_ttm = None
+        # 先.一三五-1me：仍是半年報、今年只有上半年一筆時，近四季＝去年下半年（H2）＋今年上半年（H1）；與 App 同規則。
+        try:
+            t2 = qs[-2:]
+            if (half_ttm is None and len(t2) == 2 and t2[0].get("period") == "H2" and t2[0].get("quarter") == 4
+                    and t2[1].get("period") == "H1" and t2[1].get("quarter") == 2
+                    and t2[1].get("year") == t2[0].get("year") + 1):
+                he = [num(q.get("eps")) for q in t2]
+                if None not in he:
+                    half_ttm = he
+        except TypeError:
+            pass
         if half_ttm is not None:
             eps4 = half_ttm
         elif expected and seq != expected:
