@@ -114,7 +114,36 @@ def next_tw_trading_day(after: str) -> str:
     raise RuntimeError("30 天內找不到交易日")
 
 
-def paper_block(start: str, today: str) -> dict:
+LEDGER_DIR = HERE / "data" / "paper_opt"
+
+
+def paper_block(start: str, today: str, member: str | None = None) -> dict:
+    """有每日產生器的成員（research/data/paper_opt/ledger_<id>.jsonl）就讀它畫紙上曲線（先.一五四-1a）。"""
+    lp = LEDGER_DIR / f"ledger_{member}.jsonl" if member else None
+    gen = HERE / f"paper_opt_{member.lower()}.py" if member else None
+    if lp is not None and (lp.exists() or gen.exists()):
+        rows = []
+        for ln in (lp.read_text(encoding="utf-8").splitlines() if lp.exists() else []):
+            try:
+                r = json.loads(ln)
+                rows.append((r["date"], float(r["ret"])))
+            except Exception as e:  # 單行壞掉只略過，記警告
+                print(f"[warn] {lp.name} 有一行讀不到：{e}")
+        rows = [r for r in rows if r[0] >= start]
+        if rows:
+            eq = np.cumprod([1 + r for _, r in rows])
+            dd = float((eq / np.maximum.accumulate(eq) - 1).min())
+            yrs = len(eq) / 252
+            cagr = float(eq[-1] ** (1 / yrs) - 1) if len(eq) >= 60 else None  # 未滿約 3 個月不年化〔自行裁量〕
+            s = pd.Series(np.concatenate([[1.0], eq]),
+                          pd.to_datetime([start] + [d for d, _ in rows]))
+            return {"start": start, "status": "LIVE", "status_zh": f"紙上記帳中（{len(rows)} 個交易日，至 {rows[-1][0]}）",
+                    "points": weekly_points(s), "cagr_to_date": None if cagr is None else round(cagr, 4),
+                    "mdd_to_date": round(dd, 4), "total_return": round(float(eq[-1] - 1), 4), "days": len(rows)}
+        status = "NOT_STARTED" if today < start else "GENERATOR_READY"
+        msg = "產生器已上線，等起跑日後第一個交易日寫入" if status == "GENERATOR_READY" else "尚未起跑（起跑日前不記帳）；每日產生器已上線"
+        return {"start": start, "status": status, "status_zh": msg, "points": [], "cagr_to_date": None, "mdd_to_date": None,
+                "generator": f"research/paper_opt_{member.lower()}.py"}
     status = "NOT_STARTED" if today < start else "NO_SIGNAL_GENERATOR"
     msg = ("尚未起跑（起跑日前不記帳）" if status == "NOT_STARTED"
            else "每日訊號產生器尚未建好，紙上曲線從產生器上線那天起記，不倒填、不拿回測頂替")
@@ -164,7 +193,7 @@ def build() -> dict:
     tracks.append({"id": "PQ", "kind": "single", "name": PQ_REF["name"], "rule": PQ_REF["rule"], "market": "TW", "reproduced": ok,
                    "backtest": {"period": ["2007-05-15", "2024-12-31"], "cagr": None if g is None else round(g, 4),
                                 "mdd": None if m is None else round(m, 4), "points": weekly_points(pq) if ok else []},
-                   "paper": paper_block(start, today)})
+                   "paper": paper_block(start, today, "PQ")})
     return {"generated_at": datetime.now(TW).isoformat(timespec="seconds"), "track": "紙上優化軌（先.一五四-1）",
             "start": start, "note": NOTE, "tracks": tracks, "last_error": "；".join(errs) or None,
             "external_requests": 0}

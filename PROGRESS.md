@@ -1,3 +1,18 @@
+## 2026-11-06 18:01～18:3x DevQueue 20261106-180102（研究帽）先.一五四-1a ③ PQ 每日訊號產生器
+
+等待總司令審閱：7 件（同 `research/AWAITING_REVIEW.md` 等待中表格，本輪無增減）。
+
+**1. 先.一五四-1a ③ PQ 產生器 ⚠️ 已實作、自測通過；主條目維持 `- [ ]`（還有 F12／F18／F11／F15／F16／F14／F17）**
+- 做了什麼：新增 `research/paper_opt_pq.py`（零外部請求）。恐慌指標改讀 `data/price_history`（上市櫃 4 碼普通股，每日約 1,950 檔有成交）；PQ 名單讀 `data/stock_detail.json`（每日官方季報）＋`financials_backfill.json`、月營收讀 `data/fundamentals.json`（每日）＋`revenue_backfill.json`；高峰濾網的近 20 季毛利率另讀本機 2024 以前 FinMind 快取（第一次約 3.5 分鐘，算完存本機快取，之後全程 1.6 秒）。規則照 PANIC_PQ_OPTIMIZED 2 節最優組（θ=20%、20 交易日合併、持有中觸發跳過、隔日開盤買、120 日、收盤 −15% 停損、1×、同組成本），不調參。輸出 append-only `research/data/paper_opt/ledger_PQ.jsonl`＋`state_PQ.json`，起跑日 2026-11-09。`research/paper_opt_track.py` 紙上欄改為：有產生器就標「每日產生器已上線」、有 ledger 就畫紙上曲線（其他 7 支不變）。
+- 證據：`--probe` 近 15 日鎖跌停比例最高 11/05 5.99%（未達 20%、維持空手）；假設 11/06 觸發：46 檔過 strict、高峰濾網排除 4、取前 20。暫存目錄自測（門檻臨時降到 5%、起跑 10/01，不寫正式檔）：11/05 觸發→11/06 開盤買 20 檔、當日 +4.54%（抽查 5289 開 851／收 928、7610 開 1040／收 1150 對上），重跑冪等 24→24 行。`paper_opt_track.py` 重跑 8 支回測仍全部對上、last_error=None。
+- 口徑差異（照實）：本機 price_history 沒有官方參考價欄，用 adj_close 日報酬近似「收盤÷參考價」，回測用 FinMind spread；近期季報只有約 9 季，高峰濾網靠 2024 前快取補足 20 季。
+- [自行裁量] 少於 1,000 檔有成交的日子不算完整交易日；某檔連續 10 個交易日無價格視為下市／長期停牌、以最後價值出場；紙上未滿 60 個交易日不年化。
+- ⚠️ 給 1c：`research/data/` 被 .gitignore 蓋住，ledger／state 不進 repo，這支**不能掛 market.yml**（雲端讀不到狀態與 2024 前快取），要在本機跑、再 commit `data/paper_opt_track.json`；1c 做法要照這條改。
+- 描述性、非判定，不寫 TRIALS_LEDGER；心跳已 append `research/PROGRESS_HEARTBEAT.jsonl`。
+- 冒煙：`node scripts/smoke_test.mjs` 185 PASS／0 FAIL／EXIT=0（18:31）。
+
+**2. 收工**：佇列 `- [ ]` 29 項（≥12，不補件）。下一支 ① F12 要先逐條對照回測引擎多層出場規則，本輪剩餘時間不夠，留給下一輪。
+
 ## 2026-11-06 17:31～17:5x DevQueue 20261106-173102（研究帽）先.一五四-1 紙上優化軌第 1 批（骨架＋回測基準線）
 
 等待總司令審閱：7 件（同 `research/AWAITING_REVIEW.md` 等待中表格，本輪無增減）。
