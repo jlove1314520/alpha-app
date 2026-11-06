@@ -11,6 +11,8 @@
 - 冒煙：`node scripts/smoke_test.mjs` 185 PASS／0 FAIL／EXIT=0（17:45）。
 - 描述性、非判定，不寫 TRIALS_LEDGER；心跳已 append `research/PROGRESS_HEARTBEAT.jsonl`。推播留到主條目真正完成（紙上開始記帳）時再發。
 
+- push 時遠端已前進，`git pull --rebase --autostash` 後 push 成功（`3df60ce366c`）；但 autostash（工作目錄裡其他排程未提交的機器寫入檔，1,932 個檔案，多為 `data/by_code/`、log、jsonl）還原時與遠端新版衝突，git 保留成 `stash@{0}`（autostash）未丟棄。**本輪沒有刪它**；那些檔多半已被遠端新版取代、排程下一輪會重寫，要不要 `git stash drop` 留給互動視窗確認。
+
 **2. 收工**：佇列 `- [ ]` 29 項（≥12，本輪自走補入 3 條：先.一五四-1a／1b／1c）。下一項 先.一五四-1a 是[研究]但本輪剩餘時間不夠做完 F12 引擎出場對照，留給下一輪。
 
 ## 2026-11-06 17:01～17:2x DevQueue 20261106-170101（開發帽）先.一三五-1lv 冒煙 #78 首頁載入超標修復＋收工補件
