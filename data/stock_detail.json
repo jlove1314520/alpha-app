@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-11-07T00:45:21.845550+08:00",
+    "generated_at": "2026-11-07T01:42:30.962164+08:00",
     "financials_source": "TWSE openapi t187ap06_L_ci(綜合損益表-一般業) + t187ap07_L_ci(資產負債表-一般業)",
     "financials_updated_count": 157,
     "errors": [],
@@ -1921,11 +1921,9 @@
         "9960",
         "9962"
       ],
-      "recorded_at": "2026-11-07T00:48:25+08:00"
+      "recorded_at": "2026-11-07T01:45:19+08:00"
     },
-    "roe_cleared_nonconsecutive_codes": [
-      "8917"
-    ],
+    "roe_cleared_nonconsecutive_codes": [],
     "financials_backfill_display_merge": {
       "note": "官方 quarters 沒有的季度取自 financials_backfill.json（FinMind，App 顯示用），標 source=q1_from_backfill；官方同季優先（先.一三五-1lw）",
       "merged_count": 0,
@@ -1972,7 +1970,7 @@
         "8435": "eps 加總 2.84 vs 官方累計 2.88",
         "5386": "eps 加總 57.27 vs 官方累計 42.93"
       },
-      "generated_at": "2026-11-07T00:45:21.889649+08:00",
+      "generated_at": "2026-11-07T01:42:31.019362+08:00",
       "mode": "daily"
     }
   },
