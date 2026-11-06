@@ -12,6 +12,7 @@
   - 尚餘：F7／F8／F9（資料缺、要提案）、F10、F11、F13～F18、PQ；下一輪從 F13 續。推播等全部完成才發。
 - 冒煙：`node scripts/smoke_test.mjs` 186 項 PASS、exit 0（第一次經 tail 截斷看不到總計，重跑存檔核對）。
 - BLOCKED：本輪無新增。佇列 `- [ ]` 31 項（≥12），本輪不補件。
+- 事件（照實記錄）：commit `e8f157bda9b` 後 `git pull --rebase --autostash` 時，另一支排程正在寫 `data/events_by_code/`／`data/news_by_code/` 等檔，rebase 拒絕、autostash 套不回，整包留在 `stash@{0}`（1,300 檔，全是機器寫的資料檔與 research 日誌）。[自行裁量] 復原：工作樹沒被再改過的 1,292 檔從 stash 取回、`data/news_by_code/3191.json` 照 stash 刪除；兩邊都改過的 8 檔保留工作樹較新版本；`stash@{0}` 不刪（刪除屬不可逆，留給既有 `scripts/inventory_autostash_residual.py` 盤點）。之後直接 push 成功，我的 commit 不受影響。
 
 ## 2026-11-06 21:31～ DevQueue 20261106-213101（研究帽）先.一五五-2 墓園重審補跑 2025 起資料（第 1 批 F1～F6）
 
