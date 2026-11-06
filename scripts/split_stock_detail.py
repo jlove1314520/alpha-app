@@ -5,7 +5,7 @@
 - `data/stock_detail/{代號}.json`：單檔內容與 stock_detail.json 的 `stocks[代號]` 完全相同
   （不改欄位、不加工），App 開哪一檔才抓哪一檔。
 - `data/stock_detail_eps.json`：估值區間卡要「同產業所有股票」的近四季 EPS，
-  只保留每檔 financials.quarters 的最後四筆 {year, quarter, eps}——
+  只保留每檔 financials.quarters 的最後四筆 {year, quarter, eps}（半年報列另帶 period，先.一三五-1mb）——
   App 的 epsTtmFromDetail() 本來就只取最後四筆，結果與讀整份檔相同。
 
 規則：
@@ -75,7 +75,8 @@ def main() -> int:
         qs = ((st.get("financials") or {}).get("quarters")) or []
         if qs:
             eps[code] = {"financials": {"quarters": [
-                {"year": q.get("year"), "quarter": q.get("quarter"), "eps": q.get("eps")} for q in qs[-4:]
+                {"year": q.get("year"), "quarter": q.get("quarter"), "eps": q.get("eps"),
+                 **({"period": q["period"]} if q.get("period") else {})} for q in qs[-4:]
             ]}}
     meta = data.get("meta") or {}
     eps_doc = {

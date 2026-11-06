@@ -620,7 +620,22 @@ def check_e_pe(a, universe, ref, names, loc):
                   str(last_q[0]) + "Q" + str(last_q[1]),
                   str(cur_q[0]) + "Q" + str(cur_q[1]) + " 當期", None, "stock_detail.json")
             continue
-        if expected and seq != expected:
+        # 先.一三五-1mb（2026-11-07）：半年報轉上市櫃的公司，序列是 …、去年Q4（period=H2 下半年）、今年Q1、
+        # 今年Q2（單季），近四季＝下半年＋Q1＋Q2（剛好 12 個月），不是斷層；與 App epsTtmFromDetail() 同規則。
+        h = qs[-3:]
+        half_ttm = None
+        try:
+            if (len(h) == 3 and h[0].get("period") == "H2" and not h[1].get("period") and not h[2].get("period")
+                    and h[0].get("quarter") == 4 and h[1].get("year") == h[0].get("year") + 1
+                    and h[1].get("quarter") == 1 and h[2].get("year") == h[1].get("year") and h[2].get("quarter") == 2):
+                he = [num(q.get("eps")) for q in h]
+                if None not in he:
+                    half_ttm = he
+        except TypeError:
+            half_ttm = None
+        if half_ttm is not None:
+            eps4 = half_ttm
+        elif expected and seq != expected:
             a.note("e_quarters_gap", checked=1, note=_COMPLETENESS_NOTE)
             a.hit("e_quarters_gap", code, names.get(code, ""),
                   "stock_detail 的季報序列不連續，算不出真正的近四季 EPS",

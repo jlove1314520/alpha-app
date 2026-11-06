@@ -846,6 +846,16 @@
     const last4=qs.slice(-4);
     if(last4.some(x=>x.eps==null||!isFinite(x.eps)))return null;
     const idx=last4.map(x=>_qIndex(x.year,x.quarter));
+    // 先.一三五-1mb：半年報轉上市櫃的公司，序列是 …、去年Q4（period=H2 下半年）、今年Q1、今年Q2（單季）。
+    // 這時近四季＝下半年＋今年Q1＋Q2（剛好 12 個月）；只在今年最新是 Q2 時成立，其他半年報組合照舊回 null。
+    const h=qs.slice(-3);
+    if(h.length===3&&h[0].period==='H2'&&!h[1].period&&!h[2].period
+       &&h[0].quarter===4&&h[1].year===h[0].year+1&&h[1].quarter===1&&h[2].year===h[1].year&&h[2].quarter===2
+       &&h.every(x=>x.eps!=null&&isFinite(x.eps))){
+      if(_qIndex(h[2].year,2)<_currentQIndex(nowMs)-VALUATION_EPS_MAX_LAG_Q)return null; // 過期 → 不用
+      return {eps:h.reduce((s,x)=>s+x.eps,0),
+              label:h[0].year+'下半年~'+h[2].year+'Q2'};
+    }
     for(let i=1;i<4;i++)if(idx[i]!==idx[0]+i)return null;                // 不連續 → 不用
     if(idx[3]<_currentQIndex(nowMs)-VALUATION_EPS_MAX_LAG_Q)return null; // 過期 → 不用
     return {eps:last4.reduce((s,x)=>s+x.eps,0),

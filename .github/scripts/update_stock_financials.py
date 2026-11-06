@@ -753,6 +753,41 @@ def merge_backfill_display_quarters(stocks: dict, backfill: dict) -> dict:
     return stats
 
 
+def tag_half_year_periods(stocks: dict) -> dict:
+    """先.一三五-1mb（2026-11-07）：半年報公司（興櫃／創新板時期上下半年各申報一次）轉上市櫃後，
+    quarters 會出現「同一年只有 Q2、Q4 兩筆」——Q2 那筆其實是上半年、Q4 那筆是下半年，不是單季。
+    這裡只加標記 period="H1"／"H2"（數值一律不改），讓 App／稽核組近四季 EPS 時認得出來。
+    判定：同一年在 quarters 裡剛好是 {2,4} 兩筆（沒有 Q1／Q3）。年度後來補齊 Q1／Q3 時，舊標記拿掉。
+    自身出錯只略過該檔（十二節）。回傳統計。"""
+    stats = {"tagged_codes": [], "rows_tagged": 0, "untagged_rows": 0}
+    for code, s in stocks.items():
+        try:
+            fin = (s or {}).get("financials") if isinstance(s, dict) else None
+            qs = [r for r in ((fin or {}).get("quarters") or []) if isinstance(r, dict)]
+            if not qs:
+                continue
+            by_year: dict = {}
+            for r in qs:
+                by_year.setdefault(r.get("year"), set()).add(r.get("quarter"))
+            hit = False
+            for r in qs:
+                half = by_year.get(r.get("year")) == {2, 4}
+                want = ("H1" if r.get("quarter") == 2 else "H2") if half else None
+                if want and r.get("period") != want:
+                    r["period"] = want
+                    stats["rows_tagged"] += 1
+                elif not want and r.get("period") in ("H1", "H2"):
+                    r.pop("period", None)
+                    stats["untagged_rows"] += 1
+                hit = hit or bool(want)
+            if hit:
+                stats["tagged_codes"].append(str(code))
+        except Exception as e:  # 單檔出錯只略過（十二節）
+            print(f"[warn] {code} 半年報標記失敗：{e}")
+    stats["tagged_codes"].sort()
+    return stats
+
+
 def offline_merge_backfill() -> None:
     """零外部請求：只讀既有 stock_detail.json＋financials_backfill.json，併回補季後寫回（本機重產／驗證用）。"""
     payload = load_existing()
@@ -874,6 +909,15 @@ def main():
     except Exception as e:
         print(f"[warn] 回補季併入失敗：{e}")
         errors.append(f"backfill_display_merge: {e}")
+    # 先.一三五-1mb：半年報列標 period=H1/H2（不改數值）；自身失敗只警告（十二節）
+    try:
+        _hy = tag_half_year_periods(stocks)
+        payload["meta"]["financials_half_year_period"] = {
+            "note": "同一年 quarters 只有 Q2／Q4 兩筆（半年報公司）時，Q2 標 period=H1（上半年）、Q4 標 period=H2（下半年），數值不改（先.一三五-1mb）",
+            "tagged_count": len(_hy["tagged_codes"]), "tagged_codes": _hy["tagged_codes"]}
+    except Exception as e:
+        print(f"[warn] 半年報標記失敗：{e}")
+        errors.append(f"half_year_period: {e}")
     try:
         payload["meta"]["roe_cleared_nonconsecutive_codes"] = clear_stale_nonconsecutive_roe(stocks)
     except Exception as e:  # 這道清理自己出錯只記警告，不擋寫檔（十二節）
