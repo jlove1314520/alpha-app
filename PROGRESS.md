@@ -13,6 +13,16 @@
 - 冒煙：`node scripts/smoke_test.mjs` rc=0、186 項 [x]、沒有未過項（03:43～03:52 完整輸出重跑；第一次用了 `| tail` 看不到真正 rc，所以重跑）。開發帽產物＝本冒煙結果。
 - 收工原因：權威清單下一項是 先.一五五-3 [研究]，一輪只戴一頂帽子，留給下一輪研究帽。
 
+
+## 2026-11-07 04:40 DevQueue 20261107-040102（研究帽）
+
+等待總司令審閱：0 件（本輪無新增）。
+
+- **先.一五五-3 墓園重審第二批 第 1 批 10 族③**（維持 - [ ]）：新 `research/reaudit_batch3_factors.py`，零新外部請求，做法同 F13（#133 抽樣 236 檔、`research/backtest/` 引擎只呼叫不改、只做多頭、順向反向都掃；引擎 48 格×組合層槓桿／止損 16 格）。10 族全部 48/48，期間 2015-01～2024-12。Calmar 最好的一組：f_52w_high_prox +18.5%／−15.9%／Sharpe 1.34（綜合分數 1.16，排總表第 1）、f_rel_strength +31.8%／−32.7%（1.5×）、f_revenue_surprise +16.8%／−20.3%、f_dividend_yield_ttm +7.9%／−9.4%、f_low_vol +5.7%／−7.2%；同期加權價格指數 +9.5%／−31.6%。結果在 `research/REAUDIT_OPTIMIZED.md` 第 5 節。推播已送（1 個訂閱成功）。
+  - 證據：`research/data/reaudit_batch3_cells/*.json` 10 檔各 48 格、`research/data/reaudit_batch3_batch1.json`；冒煙測試 `node scripts/smoke_test.mjs` 全部通過（04:22，186 項）。
+  - [自行裁量]：先跑 2024 底前；2025 起延長（財報因子要照原公式重算）與寫進 `data/paper_opt_track.json` 候選欄留下一輪。樣本內最優化、宇宙為今天名冊抽樣，數字偏樂觀；非投資建議。
+  - 交辦佇列：本項維持未完成，下一輪接 (a) 2025 起延長 (b) 候選寫入 (d) 第 2 批。
+
 ## 2026-11-07 03:01～ DevQueue 20261107-030102（研究帽）先.一五五-2 PQ② 收尾＋先.一五五-3 第二批清單
 
 等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
