@@ -1,3 +1,16 @@
+## 2026-11-07 02:31～02:50 DevQueue 20261107-023102（開發帽）先.一三五-1mb 半年報公司近四季 EPS
+
+等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
+
+- **先.一三五-1mb ✅**（commit e997fa16eff＋e513d998ad6，零外部請求）：
+  - 做了什麼：`.github/scripts/update_stock_financials.py` 新增 `tag_half_year_periods()`——同一年 quarters 只有 Q2／Q4 時標 period＝H1／H2（數值不改，補齊 Q1／Q3 時拿掉）；`scripts/split_stock_detail.py` EPS 摘要帶出 period；`app-picks.js` `epsTtmFromDetail()` 與 `scripts/data_audit.py` `check_e_pe()` 加分支：最後三筆是「去年Q4（H2）＋今年Q1＋Q2」時 TTM＝三筆加總（App 標「2025下半年~2026Q2」），其餘照舊。
+  - 證據：新自測 `scripts/selftest_half_year_ttm.py` 11 項全過（2249 TTM＝4.95＋4.01＋1.33＝10.29、6898＝5.44；2330 連續四季 86.28 不變；2758 型照舊 null；沒標記照舊 null；稽核樣本標記後只剩 2758 列 gap）；`selftest_split_stock_detail.py` 34 過 0 失敗；冒煙 `node scripts/smoke_test.mjs` exit 0、無累積 uncaught error。
+  - [自行裁量] ①本機 `data/stock_detail.json` 不改寫，等下一班 market.yml 自動標記（避免和雲端寫入撞檔），所以畫面上的效果要下一班之後才出現——**線上效果未驗證**；②App 只認 period 標記，不用結構去猜（猜錯會把單季 Q4 當下半年）。
+  - 照實：11/06 23:00 稽核 e_quarters_gap 是 102 筆（不是先前估的 12），最新季 2026Q3 有 75 筆，多數是 2025 整年缺、屬 1lw 回補季併入範圍；本項只解決「去年下半年＋今年 Q1／Q2」型（本機 6 檔）。
+- 收工補件：DevQueue 可執行非研究項只剩 5 項（門檻 6），補 1 條 **先.一三五-1me**（仍是半年報的 6 檔，今年只有 Q2 一筆→先證明是上半年再組 TTM；來源①資料缺口＝本輪自測）。`- [ ]` 共 31 項。
+- 開發帽產物：冒煙結果如上。
+- 收工原因：權威清單下一項是 先.一五五-2 [研究]，一輪只戴一頂帽子，留給下一輪研究帽。
+
 ## 2026-11-07 01:31～02:16 DevQueue 20261107-013102（研究帽）先.一五五-2 墓園重審 2025 起補跑第 4 批：F17＋PQ①
 
 等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
