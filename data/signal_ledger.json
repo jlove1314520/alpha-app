@@ -2,10 +2,10 @@
  "meta": {
   "created_at": "2026-10-11T14:17:33.521387+08:00",
   "schema_note": "B19 前瞻訊號台帳（非回測）：每筆在事件發生後 4 日內事前寫入，寫入後內容不可修改；entry_close 為寫入日之後第一個交易日收盤（避免前視）；returns.t5/t20/t60 由 update_signal_ledger_returns.py 只回填 null 欄位。status=待驗證線索 者不得影響任何評分。規格 research/B19_SIGNAL_LEDGER_SPEC.md。非投資建議。",
-  "last_build_at": "2026-11-06T09:53:03.839211+08:00",
-  "total_signals": 2742,
+  "last_build_at": "2026-11-06T17:37:13.169899+08:00",
+  "total_signals": 2778,
   "source": ".github/scripts/build_signal_ledger.py（讀 events.json L1＋news.json L3＋price_history.json）",
-  "last_returns_backfill_at": "2026-11-06T00:02:06.284510+08:00",
+  "last_returns_backfill_at": "2026-11-06T17:37:15.912434+08:00",
   "entry_skipped": {
    "count": 21,
    "reason": "進場日無收盤（停牌／無成交／未掛牌）",
@@ -44055,7 +44055,7 @@
    "returns": {
     "t5": {
      "return_pct": -7.2464,
-     "excess_vs_taiex_pct": null,
+     "excess_vs_taiex_pct": 3.0917,
      "exit_date": "2026-11-05",
      "filled_at": "2026-11-06T00:02:06.284341+08:00"
     },
@@ -44096,7 +44096,7 @@
    "returns": {
     "t5": {
      "return_pct": -7.2464,
-     "excess_vs_taiex_pct": null,
+     "excess_vs_taiex_pct": 3.0917,
      "exit_date": "2026-11-05",
      "filled_at": "2026-11-06T00:02:06.284370+08:00"
     },
@@ -44137,7 +44137,7 @@
    "returns": {
     "t5": {
      "return_pct": -15.4426,
-     "excess_vs_taiex_pct": null,
+     "excess_vs_taiex_pct": -5.1045,
      "exit_date": "2026-11-05",
      "filled_at": "2026-11-06T00:02:06.284387+08:00"
     },
@@ -44282,7 +44282,7 @@
    "returns": {
     "t5": {
      "return_pct": -8.3738,
-     "excess_vs_taiex_pct": null,
+     "excess_vs_taiex_pct": 1.9643,
      "exit_date": "2026-11-05",
      "filled_at": "2026-11-06T00:02:06.284404+08:00"
     },
@@ -44322,7 +44322,7 @@
    "returns": {
     "t5": {
      "return_pct": -8.3738,
-     "excess_vs_taiex_pct": null,
+     "excess_vs_taiex_pct": 1.9643,
      "exit_date": "2026-11-05",
      "filled_at": "2026-11-06T00:02:06.284416+08:00"
     },
@@ -44362,7 +44362,7 @@
    "returns": {
     "t5": {
      "return_pct": -8.3738,
-     "excess_vs_taiex_pct": null,
+     "excess_vs_taiex_pct": 1.9643,
      "exit_date": "2026-11-05",
      "filled_at": "2026-11-06T00:02:06.284428+08:00"
     },
@@ -44402,7 +44402,7 @@
    "returns": {
     "t5": {
      "return_pct": -3.0189,
-     "excess_vs_taiex_pct": null,
+     "excess_vs_taiex_pct": 7.3192,
      "exit_date": "2026-11-05",
      "filled_at": "2026-11-06T00:02:06.284444+08:00"
     },
@@ -44444,7 +44444,7 @@
    "returns": {
     "t5": {
      "return_pct": -24.2478,
-     "excess_vs_taiex_pct": null,
+     "excess_vs_taiex_pct": -13.9097,
      "exit_date": "2026-11-05",
      "filled_at": "2026-11-06T00:02:06.284459+08:00"
     },
@@ -44484,7 +44484,7 @@
    "returns": {
     "t5": {
      "return_pct": -8.3738,
-     "excess_vs_taiex_pct": null,
+     "excess_vs_taiex_pct": 1.9643,
      "exit_date": "2026-11-05",
      "filled_at": "2026-11-06T00:02:06.284470+08:00"
     },
@@ -44524,7 +44524,7 @@
    "returns": {
     "t5": {
      "return_pct": -3.0189,
-     "excess_vs_taiex_pct": null,
+     "excess_vs_taiex_pct": 7.3192,
      "exit_date": "2026-11-05",
      "filled_at": "2026-11-06T00:02:06.284481+08:00"
     },
@@ -44566,7 +44566,7 @@
    "returns": {
     "t5": {
      "return_pct": -24.2478,
-     "excess_vs_taiex_pct": null,
+     "excess_vs_taiex_pct": -13.9097,
      "exit_date": "2026-11-05",
      "filled_at": "2026-11-06T00:02:06.284493+08:00"
     },
@@ -44608,7 +44608,7 @@
    "returns": {
     "t5": {
      "return_pct": -24.2478,
-     "excess_vs_taiex_pct": null,
+     "excess_vs_taiex_pct": -13.9097,
      "exit_date": "2026-11-05",
      "filled_at": "2026-11-06T00:02:06.284504+08:00"
     },
@@ -44854,7 +44854,12 @@
    "entry_close": 277.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -27.2072,
+     "excess_vs_taiex_pct": -15.0197,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908316+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -44887,7 +44892,12 @@
    "entry_close": 19.25,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -3.6364,
+     "excess_vs_taiex_pct": 8.5511,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908353+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -44920,7 +44930,12 @@
    "entry_close": 97.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 0.3093,
+     "excess_vs_taiex_pct": 12.4968,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908377+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -44953,7 +44968,12 @@
    "entry_close": 62.9,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.8617,
+     "excess_vs_taiex_pct": 9.3258,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908396+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -44986,7 +45006,12 @@
    "entry_close": 5430.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -17.4954,
+     "excess_vs_taiex_pct": -5.3079,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908415+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45019,7 +45044,12 @@
    "entry_close": 326.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -15.9265,
+     "excess_vs_taiex_pct": -3.739,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908433+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45052,7 +45082,12 @@
    "entry_close": 247.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -9.5142,
+     "excess_vs_taiex_pct": 2.6733,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908453+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45085,7 +45120,12 @@
    "entry_close": 367.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -13.0612,
+     "excess_vs_taiex_pct": -0.8737,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908472+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45118,7 +45158,12 @@
    "entry_close": 716.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -23.743,
+     "excess_vs_taiex_pct": -11.5555,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908491+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45153,7 +45198,12 @@
    "entry_close": 1085.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -23.9631,
+     "excess_vs_taiex_pct": -11.7756,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908510+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45186,7 +45236,12 @@
    "entry_close": 418.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -26.2843,
+     "excess_vs_taiex_pct": -14.0969,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908527+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45219,7 +45274,12 @@
    "entry_close": 242.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -14.876,
+     "excess_vs_taiex_pct": -2.6885,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908546+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45252,7 +45312,12 @@
    "entry_close": 35.3,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -15.1558,
+     "excess_vs_taiex_pct": -2.9683,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908564+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45285,7 +45350,12 @@
    "entry_close": 109.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -1.3699,
+     "excess_vs_taiex_pct": 10.8176,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908582+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45318,7 +45388,12 @@
    "entry_close": 109.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -1.3699,
+     "excess_vs_taiex_pct": 10.8176,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908597+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45351,7 +45426,12 @@
    "entry_close": 213.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -24.8244,
+     "excess_vs_taiex_pct": -12.6369,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908615+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45384,7 +45464,12 @@
    "entry_close": 277.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -25.0903,
+     "excess_vs_taiex_pct": -12.9028,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908633+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45417,7 +45502,12 @@
    "entry_close": 733.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -21.9645,
+     "excess_vs_taiex_pct": -9.777,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908652+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45450,7 +45540,12 @@
    "entry_close": 733.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -21.9645,
+     "excess_vs_taiex_pct": -9.777,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908668+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45483,7 +45578,12 @@
    "entry_close": 277.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -25.0903,
+     "excess_vs_taiex_pct": -12.9028,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908683+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45516,7 +45616,12 @@
    "entry_close": 256.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.5078,
+     "excess_vs_taiex_pct": -8.3203,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908701+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45549,7 +45654,12 @@
    "entry_close": 367.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -13.0612,
+     "excess_vs_taiex_pct": -0.8737,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908716+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45582,7 +45692,12 @@
    "entry_close": 28.2,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -13.6525,
+     "excess_vs_taiex_pct": -1.465,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908734+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45615,7 +45730,12 @@
    "entry_close": 116.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -8.6207,
+     "excess_vs_taiex_pct": 3.5668,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908751+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45651,7 +45771,12 @@
    "entry_close": 225.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -6.6519,
+     "excess_vs_taiex_pct": 5.5356,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908770+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45684,7 +45809,12 @@
    "entry_close": 867.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -22.8374,
+     "excess_vs_taiex_pct": -10.6499,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908788+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45717,7 +45847,12 @@
    "entry_close": 47.65,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -8.0797,
+     "excess_vs_taiex_pct": 4.1077,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908806+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45753,7 +45888,12 @@
    "entry_close": 225.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -6.6519,
+     "excess_vs_taiex_pct": 5.5356,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908821+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45786,7 +45926,12 @@
    "entry_close": 95.4,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.5451,
+     "excess_vs_taiex_pct": -8.3576,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908839+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45822,7 +45967,12 @@
    "entry_close": 225.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -6.6519,
+     "excess_vs_taiex_pct": 5.5356,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908854+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45855,7 +46005,12 @@
    "entry_close": 50.7,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -17.8501,
+     "excess_vs_taiex_pct": -5.6626,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908872+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45888,7 +46043,12 @@
    "entry_close": 15.15,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -14.8515,
+     "excess_vs_taiex_pct": -2.664,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908889+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45921,7 +46081,12 @@
    "entry_close": 7.62,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 2.231,
+     "excess_vs_taiex_pct": 14.4185,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908908+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45954,7 +46119,12 @@
    "entry_close": 19.55,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -5.3708,
+     "excess_vs_taiex_pct": 6.8166,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908926+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -45987,7 +46157,12 @@
    "entry_close": 637.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -16.1695,
+     "excess_vs_taiex_pct": -3.9821,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908946+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46020,7 +46195,12 @@
    "entry_close": 120.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -17.75,
+     "excess_vs_taiex_pct": -5.5625,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908964+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46056,7 +46236,12 @@
    "entry_close": 42.25,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -8.9941,
+     "excess_vs_taiex_pct": 3.1934,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908981+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46092,7 +46277,12 @@
    "entry_close": 42.25,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -8.9941,
+     "excess_vs_taiex_pct": 3.1934,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.908996+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46128,7 +46318,12 @@
    "entry_close": 42.25,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -8.9941,
+     "excess_vs_taiex_pct": 3.1934,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909010+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46164,7 +46359,12 @@
    "entry_close": 42.25,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -8.9941,
+     "excess_vs_taiex_pct": 3.1934,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909025+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46197,7 +46397,12 @@
    "entry_close": 33.8,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -21.0059,
+     "excess_vs_taiex_pct": -8.8184,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909042+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46233,7 +46438,12 @@
    "entry_close": 42.25,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -8.9941,
+     "excess_vs_taiex_pct": 3.1934,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909057+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46266,7 +46476,12 @@
    "entry_close": 989.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -26.4914,
+     "excess_vs_taiex_pct": -14.3039,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909073+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46299,7 +46514,12 @@
    "entry_close": 989.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -26.4914,
+     "excess_vs_taiex_pct": -14.3039,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909089+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46332,7 +46552,12 @@
    "entry_close": 989.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -26.4914,
+     "excess_vs_taiex_pct": -14.3039,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909103+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46365,7 +46590,12 @@
    "entry_close": 20.3,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -5.1724,
+     "excess_vs_taiex_pct": 7.0151,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909121+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46398,7 +46628,12 @@
    "entry_close": 54.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -11.2037,
+     "excess_vs_taiex_pct": 0.9838,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909139+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46431,7 +46666,12 @@
    "entry_close": 915.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -22.8415,
+     "excess_vs_taiex_pct": -10.654,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909156+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46464,7 +46704,12 @@
    "entry_close": 16.3,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -8.2822,
+     "excess_vs_taiex_pct": 3.9053,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909173+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46497,7 +46742,12 @@
    "entry_close": 133.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -16.1049,
+     "excess_vs_taiex_pct": -3.9174,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909191+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46530,7 +46780,12 @@
    "entry_close": 52.9,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -17.2023,
+     "excess_vs_taiex_pct": -5.0148,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909205+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46563,7 +46818,12 @@
    "entry_close": 31.35,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -11.3238,
+     "excess_vs_taiex_pct": 0.8637,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909222+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46596,7 +46856,12 @@
    "entry_close": 24.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -0.8333,
+     "excess_vs_taiex_pct": 11.3542,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909239+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46629,7 +46894,12 @@
    "entry_close": 24.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -0.8333,
+     "excess_vs_taiex_pct": 11.3542,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909254+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46662,7 +46932,12 @@
    "entry_close": 9.9,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -8.0808,
+     "excess_vs_taiex_pct": 4.1067,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909271+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46695,7 +46970,12 @@
    "entry_close": 233.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -9.2275,
+     "excess_vs_taiex_pct": 2.96,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909288+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46728,7 +47008,12 @@
    "entry_close": 34.1,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -3.5191,
+     "excess_vs_taiex_pct": 8.6684,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909307+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46761,7 +47046,12 @@
    "entry_close": 97.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -22.1538,
+     "excess_vs_taiex_pct": -9.9664,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909325+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46794,7 +47084,12 @@
    "entry_close": 24.7,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 4.8583,
+     "excess_vs_taiex_pct": 17.0458,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909343+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46827,7 +47122,12 @@
    "entry_close": 2820.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -18.2624,
+     "excess_vs_taiex_pct": -6.0749,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909361+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46860,7 +47160,12 @@
    "entry_close": 31.45,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -3.8156,
+     "excess_vs_taiex_pct": 8.3719,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909378+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46893,7 +47198,12 @@
    "entry_close": 113.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -14.5374,
+     "excess_vs_taiex_pct": -2.35,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909396+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46926,7 +47236,12 @@
    "entry_close": 578.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -29.7578,
+     "excess_vs_taiex_pct": -17.5703,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909413+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46959,7 +47274,12 @@
    "entry_close": 578.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -29.7578,
+     "excess_vs_taiex_pct": -17.5703,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909428+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -46992,7 +47312,12 @@
    "entry_close": 33.6,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -9.0774,
+     "excess_vs_taiex_pct": 3.1101,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909447+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47027,7 +47352,12 @@
    "entry_close": 19.75,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.0253,
+     "excess_vs_taiex_pct": 10.1622,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909466+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47062,7 +47392,12 @@
    "entry_close": 50.3,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -1.5905,
+     "excess_vs_taiex_pct": 10.597,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909483+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47098,7 +47433,12 @@
    "entry_close": 42.25,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -8.9941,
+     "excess_vs_taiex_pct": 3.1934,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909500+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47134,7 +47474,12 @@
    "entry_close": 42.25,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -8.9941,
+     "excess_vs_taiex_pct": 3.1934,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909515+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47309,7 +47654,12 @@
    "entry_close": 486.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -23.251,
+     "excess_vs_taiex_pct": -11.0635,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909535+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47344,7 +47694,12 @@
    "entry_close": 486.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -23.251,
+     "excess_vs_taiex_pct": -11.0635,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909551+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47379,7 +47734,12 @@
    "entry_close": 486.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -23.251,
+     "excess_vs_taiex_pct": -11.0635,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909567+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47414,7 +47774,12 @@
    "entry_close": 486.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -23.251,
+     "excess_vs_taiex_pct": -11.0635,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909582+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47449,7 +47814,12 @@
    "entry_close": 486.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -23.251,
+     "excess_vs_taiex_pct": -11.0635,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909597+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47484,7 +47854,12 @@
    "entry_close": 486.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -23.251,
+     "excess_vs_taiex_pct": -11.0635,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909612+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47519,7 +47894,12 @@
    "entry_close": 486.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -23.251,
+     "excess_vs_taiex_pct": -11.0635,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909626+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47554,7 +47934,12 @@
    "entry_close": 486.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -23.251,
+     "excess_vs_taiex_pct": -11.0635,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909641+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47589,7 +47974,12 @@
    "entry_close": 173.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -4.6243,
+     "excess_vs_taiex_pct": 7.5632,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909659+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47625,7 +48015,12 @@
    "entry_close": 42.25,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -8.9941,
+     "excess_vs_taiex_pct": 3.1934,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909674+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47660,7 +48055,12 @@
    "entry_close": 486.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -23.251,
+     "excess_vs_taiex_pct": -11.0635,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909689+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47695,7 +48095,12 @@
    "entry_close": 486.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -23.251,
+     "excess_vs_taiex_pct": -11.0635,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909703+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47730,7 +48135,12 @@
    "entry_close": 486.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -23.251,
+     "excess_vs_taiex_pct": -11.0635,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909719+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47767,7 +48177,12 @@
    "entry_close": 169.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -11.2426,
+     "excess_vs_taiex_pct": 0.9449,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909737+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47804,7 +48219,12 @@
    "entry_close": 1335.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.9738,
+     "excess_vs_taiex_pct": -8.7863,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909754+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47841,7 +48261,12 @@
    "entry_close": 28.1,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -0.5338,
+     "excess_vs_taiex_pct": 11.6537,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909773+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47878,7 +48303,12 @@
    "entry_close": 46.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -10.3226,
+     "excess_vs_taiex_pct": 1.8649,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909791+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47915,7 +48345,12 @@
    "entry_close": 1335.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.9738,
+     "excess_vs_taiex_pct": -8.7863,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909815+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47950,7 +48385,12 @@
    "entry_close": 4675.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -18.2888,
+     "excess_vs_taiex_pct": -6.1013,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909834+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -47985,7 +48425,12 @@
    "entry_close": 4675.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -18.2888,
+     "excess_vs_taiex_pct": -6.1013,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909850+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48022,7 +48467,12 @@
    "entry_close": 1335.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.9738,
+     "excess_vs_taiex_pct": -8.7863,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909865+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48092,7 +48542,12 @@
    "entry_close": 4675.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -18.2888,
+     "excess_vs_taiex_pct": -6.1013,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909880+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48127,7 +48582,12 @@
    "entry_close": 4675.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -18.2888,
+     "excess_vs_taiex_pct": -6.1013,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909895+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48162,7 +48622,12 @@
    "entry_close": 4675.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -18.2888,
+     "excess_vs_taiex_pct": -6.1013,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909910+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48199,7 +48664,12 @@
    "entry_close": 1335.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.9738,
+     "excess_vs_taiex_pct": -8.7863,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909925+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48236,7 +48706,12 @@
    "entry_close": 1335.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.9738,
+     "excess_vs_taiex_pct": -8.7863,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909940+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48273,7 +48748,12 @@
    "entry_close": 1335.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.9738,
+     "excess_vs_taiex_pct": -8.7863,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909955+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48310,7 +48790,12 @@
    "entry_close": 169.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -11.2426,
+     "excess_vs_taiex_pct": 0.9449,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909970+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48347,7 +48832,12 @@
    "entry_close": 169.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -11.2426,
+     "excess_vs_taiex_pct": 0.9449,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.909987+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48384,7 +48874,12 @@
    "entry_close": 169.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -11.2426,
+     "excess_vs_taiex_pct": 0.9449,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910002+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48420,7 +48915,12 @@
    "entry_close": 225.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -6.6519,
+     "excess_vs_taiex_pct": 5.5356,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910019+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48455,7 +48955,12 @@
    "entry_close": 54.4,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -11.0294,
+     "excess_vs_taiex_pct": 1.1581,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910037+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48491,7 +48996,12 @@
    "entry_close": 225.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -6.6519,
+     "excess_vs_taiex_pct": 5.5356,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910052+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48527,7 +49037,12 @@
    "entry_close": 225.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -6.6519,
+     "excess_vs_taiex_pct": 5.5356,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910066+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48564,7 +49079,12 @@
    "entry_close": 1335.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.9738,
+     "excess_vs_taiex_pct": -8.7863,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910081+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48601,7 +49121,12 @@
    "entry_close": 1335.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.9738,
+     "excess_vs_taiex_pct": -8.7863,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910096+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48638,7 +49163,12 @@
    "entry_close": 1335.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.9738,
+     "excess_vs_taiex_pct": -8.7863,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910111+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48675,7 +49205,12 @@
    "entry_close": 28.1,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -0.5338,
+     "excess_vs_taiex_pct": 11.6537,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910126+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48712,7 +49247,12 @@
    "entry_close": 46.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -10.3226,
+     "excess_vs_taiex_pct": 1.8649,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910141+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48747,7 +49287,12 @@
    "entry_close": 1190.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 6.7227,
+     "excess_vs_taiex_pct": 18.9102,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910158+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48782,7 +49327,12 @@
    "entry_close": 67.1,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -13.8599,
+     "excess_vs_taiex_pct": -1.6724,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910175+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48819,7 +49369,12 @@
    "entry_close": 1335.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.9738,
+     "excess_vs_taiex_pct": -8.7863,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910190+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48856,7 +49411,12 @@
    "entry_close": 28.1,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -0.5338,
+     "excess_vs_taiex_pct": 11.6537,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910205+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48893,7 +49453,12 @@
    "entry_close": 46.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -10.3226,
+     "excess_vs_taiex_pct": 1.8649,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910220+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48930,7 +49495,12 @@
    "entry_close": 28.1,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -0.5338,
+     "excess_vs_taiex_pct": 11.6537,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910235+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -48967,7 +49537,12 @@
    "entry_close": 46.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -10.3226,
+     "excess_vs_taiex_pct": 1.8649,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910250+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49004,7 +49579,12 @@
    "entry_close": 1335.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.9738,
+     "excess_vs_taiex_pct": -8.7863,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910264+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49041,7 +49621,12 @@
    "entry_close": 1335.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.9738,
+     "excess_vs_taiex_pct": -8.7863,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910279+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49078,7 +49663,12 @@
    "entry_close": 1335.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.9738,
+     "excess_vs_taiex_pct": -8.7863,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910293+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49115,7 +49705,12 @@
    "entry_close": 1335.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.9738,
+     "excess_vs_taiex_pct": -8.7863,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910308+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49151,7 +49746,12 @@
    "entry_close": 42.25,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -8.9941,
+     "excess_vs_taiex_pct": 3.1934,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910324+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49187,7 +49787,12 @@
    "entry_close": 225.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -6.6519,
+     "excess_vs_taiex_pct": 5.5356,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910339+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49222,7 +49827,12 @@
    "entry_close": 66.6,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -3.9039,
+     "excess_vs_taiex_pct": 8.2836,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910356+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49257,7 +49867,12 @@
    "entry_close": 66.6,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -3.9039,
+     "excess_vs_taiex_pct": 8.2836,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910371+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49292,7 +49907,12 @@
    "entry_close": 469.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -17.8914,
+     "excess_vs_taiex_pct": -5.7039,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910388+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49329,7 +49949,12 @@
    "entry_close": 2370.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -9.9156,
+     "excess_vs_taiex_pct": 2.2719,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910405+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49366,7 +49991,12 @@
    "entry_close": 28.1,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -0.5338,
+     "excess_vs_taiex_pct": 11.6537,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910420+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49403,7 +50033,12 @@
    "entry_close": 46.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -10.3226,
+     "excess_vs_taiex_pct": 1.8649,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910434+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49440,7 +50075,12 @@
    "entry_close": 28.1,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -0.5338,
+     "excess_vs_taiex_pct": 11.6537,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910448+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49477,7 +50117,12 @@
    "entry_close": 46.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -10.3226,
+     "excess_vs_taiex_pct": 1.8649,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910463+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49512,7 +50157,12 @@
    "entry_close": 1085.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -23.9631,
+     "excess_vs_taiex_pct": -11.7756,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910480+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49549,7 +50199,12 @@
    "entry_close": 2370.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -9.9156,
+     "excess_vs_taiex_pct": 2.2719,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910497+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49586,7 +50241,12 @@
    "entry_close": 2370.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -9.9156,
+     "excess_vs_taiex_pct": 2.2719,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910511+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49623,7 +50283,12 @@
    "entry_close": 2370.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -9.9156,
+     "excess_vs_taiex_pct": 2.2719,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910526+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49660,7 +50325,12 @@
    "entry_close": 3915.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -13.41,
+     "excess_vs_taiex_pct": -1.2225,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910544+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49697,7 +50367,12 @@
    "entry_close": 2370.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -9.9156,
+     "excess_vs_taiex_pct": 2.2719,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910559+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49734,7 +50409,12 @@
    "entry_close": 3915.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -13.41,
+     "excess_vs_taiex_pct": -1.2225,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910574+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49771,7 +50451,12 @@
    "entry_close": 2370.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -9.9156,
+     "excess_vs_taiex_pct": 2.2719,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910589+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49808,7 +50493,12 @@
    "entry_close": 2370.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -9.9156,
+     "excess_vs_taiex_pct": 2.2719,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910603+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49845,7 +50535,12 @@
    "entry_close": 3915.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -13.41,
+     "excess_vs_taiex_pct": -1.2225,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910626+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49880,7 +50575,12 @@
    "entry_close": 454.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -24.4224,
+     "excess_vs_taiex_pct": -12.235,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910644+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49950,7 +50650,12 @@
    "entry_close": 66.6,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -3.9039,
+     "excess_vs_taiex_pct": 8.2836,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910660+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -49985,7 +50690,12 @@
    "entry_close": 4675.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -18.2888,
+     "excess_vs_taiex_pct": -6.1013,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910677+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50020,7 +50730,12 @@
    "entry_close": 4675.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -18.2888,
+     "excess_vs_taiex_pct": -6.1013,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910692+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50055,7 +50770,12 @@
    "entry_close": 66.6,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -3.9039,
+     "excess_vs_taiex_pct": 8.2836,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910707+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50125,7 +50845,12 @@
    "entry_close": 4675.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -18.2888,
+     "excess_vs_taiex_pct": -6.1013,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910726+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50162,7 +50887,12 @@
    "entry_close": 2370.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -9.9156,
+     "excess_vs_taiex_pct": 2.2719,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910741+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50199,7 +50929,12 @@
    "entry_close": 3915.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -13.41,
+     "excess_vs_taiex_pct": -1.2225,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910758+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50235,7 +50970,12 @@
    "entry_close": 164.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -26.7477,
+     "excess_vs_taiex_pct": -14.5602,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910774+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50270,7 +51010,12 @@
    "entry_close": 66.6,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.5706,
+     "excess_vs_taiex_pct": -8.3831,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910792+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50306,7 +51051,12 @@
    "entry_close": 164.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -26.7477,
+     "excess_vs_taiex_pct": -14.5602,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910807+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50341,7 +51091,12 @@
    "entry_close": 50.2,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -8.9641,
+     "excess_vs_taiex_pct": 3.2233,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910824+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50376,7 +51131,12 @@
    "entry_close": 68.4,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -6.8713,
+     "excess_vs_taiex_pct": 5.3161,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910845+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50411,7 +51171,12 @@
    "entry_close": 78.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -8.0255,
+     "excess_vs_taiex_pct": 4.162,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910863+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50446,7 +51211,12 @@
    "entry_close": 707.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -32.744,
+     "excess_vs_taiex_pct": -20.5565,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910880+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50483,7 +51253,12 @@
    "entry_close": 169.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -11.2426,
+     "excess_vs_taiex_pct": 0.9449,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910896+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50518,7 +51293,12 @@
    "entry_close": 14.9,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -4.3624,
+     "excess_vs_taiex_pct": 7.8251,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910914+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50555,7 +51335,12 @@
    "entry_close": 28.1,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -0.5338,
+     "excess_vs_taiex_pct": 11.6537,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910929+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50592,7 +51377,12 @@
    "entry_close": 46.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -10.3226,
+     "excess_vs_taiex_pct": 1.8649,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910945+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50627,7 +51417,12 @@
    "entry_close": 1020.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.2941,
+     "excess_vs_taiex_pct": -8.1066,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910963+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50662,7 +51457,12 @@
    "entry_close": 3915.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -13.41,
+     "excess_vs_taiex_pct": -1.2225,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910979+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50697,7 +51497,12 @@
    "entry_close": 2385.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -29.1405,
+     "excess_vs_taiex_pct": -16.953,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.910996+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50732,7 +51537,12 @@
    "entry_close": 668.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -21.1078,
+     "excess_vs_taiex_pct": -8.9203,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911014+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50767,7 +51577,12 @@
    "entry_close": 668.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -21.1078,
+     "excess_vs_taiex_pct": -8.9203,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911029+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50802,7 +51617,12 @@
    "entry_close": 668.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -21.1078,
+     "excess_vs_taiex_pct": -8.9203,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911043+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50837,7 +51657,12 @@
    "entry_close": 668.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -21.1078,
+     "excess_vs_taiex_pct": -8.9203,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911060+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50872,7 +51697,12 @@
    "entry_close": 668.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -21.1078,
+     "excess_vs_taiex_pct": -8.9203,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911076+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50907,7 +51737,12 @@
    "entry_close": 668.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -21.1078,
+     "excess_vs_taiex_pct": -8.9203,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911090+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50942,7 +51777,12 @@
    "entry_close": 668.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -21.1078,
+     "excess_vs_taiex_pct": -8.9203,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911105+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -50975,7 +51815,12 @@
    "entry_close": 37.4,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -9.7594,
+     "excess_vs_taiex_pct": 2.4281,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911124+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51008,7 +51853,12 @@
    "entry_close": 73.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 3.5616,
+     "excess_vs_taiex_pct": 15.7491,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911141+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51041,7 +51891,12 @@
    "entry_close": 13.45,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -4.0892,
+     "excess_vs_taiex_pct": 8.0983,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911159+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51074,7 +51929,12 @@
    "entry_close": 158.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -6.6456,
+     "excess_vs_taiex_pct": 5.5419,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911181+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51107,7 +51967,12 @@
    "entry_close": 279.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -3.9427,
+     "excess_vs_taiex_pct": 8.2448,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911198+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51140,7 +52005,12 @@
    "entry_close": 65.1,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -16.4363,
+     "excess_vs_taiex_pct": -4.2488,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911216+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51173,7 +52043,12 @@
    "entry_close": 57.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -5.4386,
+     "excess_vs_taiex_pct": 6.7489,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911235+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51206,7 +52081,12 @@
    "entry_close": 9.06,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -10.7064,
+     "excess_vs_taiex_pct": 1.4811,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911252+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51242,7 +52122,12 @@
    "entry_close": 4675.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -18.2888,
+     "excess_vs_taiex_pct": -6.1013,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911268+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51275,7 +52160,12 @@
    "entry_close": 38.8,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -9.7938,
+     "excess_vs_taiex_pct": 2.3937,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911286+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51308,7 +52198,12 @@
    "entry_close": 55.9,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -7.8712,
+     "excess_vs_taiex_pct": 4.3163,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911303+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51341,7 +52236,12 @@
    "entry_close": 418.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -26.2843,
+     "excess_vs_taiex_pct": -14.0969,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911320+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51374,7 +52274,12 @@
    "entry_close": 139.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -22.5806,
+     "excess_vs_taiex_pct": -10.3932,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911337+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51407,7 +52312,12 @@
    "entry_close": 51.3,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -16.9591,
+     "excess_vs_taiex_pct": -4.7716,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911355+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51440,7 +52350,12 @@
    "entry_close": 63.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -0.9449,
+     "excess_vs_taiex_pct": 11.2426,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911373+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51473,7 +52388,12 @@
    "entry_close": 56.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -6.0714,
+     "excess_vs_taiex_pct": 6.1161,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911395+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51506,7 +52426,12 @@
    "entry_close": 12.2,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -13.1148,
+     "excess_vs_taiex_pct": -0.9273,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911412+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51539,7 +52464,12 @@
    "entry_close": 42.55,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -15.2761,
+     "excess_vs_taiex_pct": -3.0887,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911429+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51572,7 +52502,12 @@
    "entry_close": 9.99,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.8028,
+     "excess_vs_taiex_pct": 9.3847,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911448+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51605,7 +52540,12 @@
    "entry_close": 183.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -10.0817,
+     "excess_vs_taiex_pct": 2.1057,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911465+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51638,7 +52578,12 @@
    "entry_close": 1755.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -31.339,
+     "excess_vs_taiex_pct": -19.1515,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911482+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51671,7 +52616,12 @@
    "entry_close": 111.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -17.4888,
+     "excess_vs_taiex_pct": -5.3013,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911500+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51704,7 +52654,12 @@
    "entry_close": 111.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -17.4888,
+     "excess_vs_taiex_pct": -5.3013,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911515+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51737,7 +52692,12 @@
    "entry_close": 111.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -17.4888,
+     "excess_vs_taiex_pct": -5.3013,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911530+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51772,7 +52732,12 @@
    "entry_close": 28.1,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -0.5338,
+     "excess_vs_taiex_pct": 11.6537,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911545+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51805,7 +52770,12 @@
    "entry_close": 765.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -18.4314,
+     "excess_vs_taiex_pct": -6.2439,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911563+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51840,7 +52810,12 @@
    "entry_close": 28.1,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -0.5338,
+     "excess_vs_taiex_pct": 11.6537,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911578+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51873,7 +52848,12 @@
    "entry_close": 39.25,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -14.0127,
+     "excess_vs_taiex_pct": -1.8252,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911595+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51906,7 +52886,12 @@
    "entry_close": 39.25,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -14.0127,
+     "excess_vs_taiex_pct": -1.8252,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911610+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51942,7 +52927,12 @@
    "entry_close": 169.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -11.2426,
+     "excess_vs_taiex_pct": 0.9449,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911625+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -51975,7 +52965,12 @@
    "entry_close": 66.6,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -3.9039,
+     "excess_vs_taiex_pct": 8.2836,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911640+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52008,7 +53003,12 @@
    "entry_close": 47.55,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -1.0515,
+     "excess_vs_taiex_pct": 11.136,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911658+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52041,7 +53041,12 @@
    "entry_close": 4950.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -25.7576,
+     "excess_vs_taiex_pct": -13.5701,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911676+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52077,7 +53082,12 @@
    "entry_close": 169.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -11.2426,
+     "excess_vs_taiex_pct": 0.9449,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911691+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52110,7 +53120,12 @@
    "entry_close": 58.1,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -2.4096,
+     "excess_vs_taiex_pct": 9.7779,
+     "exit_date": "2026-11-04",
+     "filled_at": "2026-11-06T17:37:15.911837+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52146,7 +53161,12 @@
    "entry_close": 1335.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.9738,
+     "excess_vs_taiex_pct": -8.7863,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911857+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52181,7 +53201,12 @@
    "entry_close": 225.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -6.6519,
+     "excess_vs_taiex_pct": 5.5356,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911873+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52217,7 +53242,12 @@
    "entry_close": 1335.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.9738,
+     "excess_vs_taiex_pct": -8.7863,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911888+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52250,7 +53280,12 @@
    "entry_close": 803.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -11.8306,
+     "excess_vs_taiex_pct": 0.3569,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911906+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52286,7 +53321,12 @@
    "entry_close": 1335.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.9738,
+     "excess_vs_taiex_pct": -8.7863,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911940+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52319,7 +53359,12 @@
    "entry_close": 124.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -28.5944,
+     "excess_vs_taiex_pct": -16.4069,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911958+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52352,7 +53397,12 @@
    "entry_close": 124.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -28.5944,
+     "excess_vs_taiex_pct": -16.4069,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911974+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52385,7 +53435,12 @@
    "entry_close": 245.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -22.6531,
+     "excess_vs_taiex_pct": -10.4656,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.911992+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52418,7 +53473,12 @@
    "entry_close": 336.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -11.3095,
+     "excess_vs_taiex_pct": 0.878,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912010+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52524,7 +53584,12 @@
    "entry_close": 169.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -11.2426,
+     "excess_vs_taiex_pct": 0.9449,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912025+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52560,7 +53625,12 @@
    "entry_close": 14.9,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -4.3624,
+     "excess_vs_taiex_pct": 7.8251,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912043+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52595,7 +53665,12 @@
    "entry_close": 17.15,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -7.5802,
+     "excess_vs_taiex_pct": 4.6073,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912063+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52630,7 +53705,12 @@
    "entry_close": 54.4,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -11.0294,
+     "excess_vs_taiex_pct": 1.1581,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912080+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52665,7 +53745,12 @@
    "entry_close": 50.3,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -1.5905,
+     "excess_vs_taiex_pct": 10.597,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912097+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52700,7 +53785,12 @@
    "entry_close": 50.2,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -8.9641,
+     "excess_vs_taiex_pct": 3.2233,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912115+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52735,7 +53825,12 @@
    "entry_close": 33.8,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -21.0059,
+     "excess_vs_taiex_pct": -8.8184,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912133+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52770,7 +53865,12 @@
    "entry_close": 160.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 2.1875,
+     "excess_vs_taiex_pct": 14.375,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912151+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52806,7 +53906,12 @@
    "entry_close": 1335.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.9738,
+     "excess_vs_taiex_pct": -8.7863,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912166+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52842,7 +53947,12 @@
    "entry_close": 27.8,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -13.8489,
+     "excess_vs_taiex_pct": -1.6614,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912183+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52878,7 +53988,12 @@
    "entry_close": 4675.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -18.2888,
+     "excess_vs_taiex_pct": -6.1013,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912199+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52913,7 +54028,12 @@
    "entry_close": 72.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": 2.069,
+     "excess_vs_taiex_pct": 14.2565,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912217+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52949,7 +54069,12 @@
    "entry_close": 14.9,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -4.3624,
+     "excess_vs_taiex_pct": 7.8251,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912232+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -52984,7 +54109,12 @@
    "entry_close": 50.3,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -11.332,
+     "excess_vs_taiex_pct": 0.8555,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912249+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -53019,7 +54149,12 @@
    "entry_close": 23.2,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -4.9569,
+     "excess_vs_taiex_pct": 7.2306,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912265+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -53054,7 +54189,12 @@
    "entry_close": 2370.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -9.9156,
+     "excess_vs_taiex_pct": 2.2719,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912281+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -53090,7 +54230,12 @@
    "entry_close": 27.8,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -13.8489,
+     "excess_vs_taiex_pct": -1.6614,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912296+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -53125,7 +54270,12 @@
    "entry_close": 59.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -11.5966,
+     "excess_vs_taiex_pct": 0.5909,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912314+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -53161,7 +54311,12 @@
    "entry_close": 1335.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -20.9738,
+     "excess_vs_taiex_pct": -8.7863,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912329+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -53197,7 +54352,12 @@
    "entry_close": 4675.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -18.2888,
+     "excess_vs_taiex_pct": -6.1013,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912344+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -53232,7 +54392,12 @@
    "entry_close": 225.5,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -6.6519,
+     "excess_vs_taiex_pct": 5.5356,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912360+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -53267,7 +54432,12 @@
    "entry_close": 1085.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -23.9631,
+     "excess_vs_taiex_pct": -11.7756,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912377+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -53302,7 +54472,12 @@
    "entry_close": 668.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -21.1078,
+     "excess_vs_taiex_pct": -8.9203,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912393+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -53337,7 +54512,12 @@
    "entry_close": 23.8,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -15.9664,
+     "excess_vs_taiex_pct": -3.7789,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912411+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -53372,7 +54552,12 @@
    "entry_close": 668.0,
    "entry_date": "2026-10-30",
    "returns": {
-    "t5": null,
+    "t5": {
+     "return_pct": -21.1078,
+     "excess_vs_taiex_pct": -8.9203,
+     "exit_date": "2026-11-06",
+     "filled_at": "2026-11-06T17:37:15.912426+08:00"
+    },
     "t20": null,
     "t60": null
    }
@@ -82530,8 +83715,8 @@
    "ref_close": 2080.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1690.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -82565,8 +83750,8 @@
    "ref_close": 30.8,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 30.6,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -82600,8 +83785,8 @@
    "ref_close": 1250.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1270.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -82637,8 +83822,8 @@
    "ref_close": 56.4,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 52.6,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -82672,8 +83857,8 @@
    "ref_close": 125.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 120.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -82708,8 +83893,8 @@
    "ref_close": 161.5,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 163.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -82744,8 +83929,8 @@
    "ref_close": 161.5,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 163.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -82779,8 +83964,8 @@
    "ref_close": 135.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 133.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -82814,8 +83999,8 @@
    "ref_close": 234.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 223.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -82849,8 +84034,8 @@
    "ref_close": 15.65,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 14.45,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -82919,8 +84104,8 @@
    "ref_close": 4555.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 3820.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -82954,8 +84139,8 @@
    "ref_close": 2080.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1690.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83026,8 +84211,8 @@
    "ref_close": 2260.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2135.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83061,8 +84246,8 @@
    "ref_close": 45.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 43.8,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83098,8 +84283,8 @@
    "ref_close": 2260.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2135.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83135,8 +84320,8 @@
    "ref_close": 2260.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2135.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83172,8 +84357,8 @@
    "ref_close": 2260.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2135.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83242,8 +84427,8 @@
    "ref_close": 48.2,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 43.1,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83277,8 +84462,8 @@
    "ref_close": 2080.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 1690.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83314,8 +84499,8 @@
    "ref_close": 3715.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 3390.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83351,8 +84536,8 @@
    "ref_close": 2260.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2135.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83388,8 +84573,8 @@
    "ref_close": 3715.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 3390.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83460,8 +84645,8 @@
    "ref_close": 3715.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 3390.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83497,8 +84682,8 @@
    "ref_close": 3715.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 3390.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83569,8 +84754,8 @@
    "ref_close": 56.4,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 52.6,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83606,8 +84791,8 @@
    "ref_close": 2260.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2135.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83641,8 +84826,8 @@
    "ref_close": 234.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 223.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83676,8 +84861,8 @@
    "ref_close": 586.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 475.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83713,8 +84898,8 @@
    "ref_close": 57.2,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 55.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83750,8 +84935,8 @@
    "ref_close": 57.2,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 55.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83786,8 +84971,8 @@
    "ref_close": 29.15,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 26.7,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83821,8 +85006,8 @@
    "ref_close": 97.6,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 85.7,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83857,8 +85042,8 @@
    "ref_close": 161.5,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 163.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83929,8 +85114,8 @@
    "ref_close": 57.2,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 55.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83964,8 +85149,8 @@
    "ref_close": 130.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 116.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -83999,8 +85184,8 @@
    "ref_close": 130.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 116.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84035,8 +85220,8 @@
    "ref_close": 29.15,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 26.7,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84071,8 +85256,8 @@
    "ref_close": 161.5,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 163.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84107,8 +85292,8 @@
    "ref_close": 29.15,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 26.7,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84144,8 +85329,8 @@
    "ref_close": 3715.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 3390.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84181,8 +85366,8 @@
    "ref_close": 56.4,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 52.6,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84216,8 +85401,8 @@
    "ref_close": 32.4,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 30.4,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84253,8 +85438,8 @@
    "ref_close": 56.4,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 52.6,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84290,8 +85475,8 @@
    "ref_close": 56.4,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 52.6,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84325,8 +85510,8 @@
    "ref_close": 189.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 183.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84360,8 +85545,8 @@
    "ref_close": 21.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 20.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84393,8 +85578,8 @@
    "ref_close": 21.3,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 20.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84426,8 +85611,8 @@
    "ref_close": 56.5,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 51.3,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84459,8 +85644,8 @@
    "ref_close": 64.8,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 56.1,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84494,8 +85679,8 @@
    "ref_close": 135.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 133.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84527,8 +85712,8 @@
    "ref_close": 119.5,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 97.2,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84560,8 +85745,8 @@
    "ref_close": 90.3,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 91.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84593,8 +85778,8 @@
    "ref_close": 50.9,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 49.25,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84626,8 +85811,8 @@
    "ref_close": 71.9,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 67.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84659,8 +85844,8 @@
    "ref_close": 25.7,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 23.05,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84692,8 +85877,8 @@
    "ref_close": 88.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 97.3,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84725,8 +85910,8 @@
    "ref_close": 23.15,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 23.7,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84758,8 +85943,8 @@
    "ref_close": 118.5,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 111.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84791,8 +85976,8 @@
    "ref_close": 24.8,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 24.2,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84824,8 +86009,8 @@
    "ref_close": 27.9,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 27.55,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84857,8 +86042,8 @@
    "ref_close": 27.9,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 27.55,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84890,8 +86075,8 @@
    "ref_close": 15.55,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 14.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84923,8 +86108,8 @@
    "ref_close": 65.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 59.7,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84956,8 +86141,8 @@
    "ref_close": 135.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 119.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -84989,8 +86174,8 @@
    "ref_close": 182.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 192.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85022,8 +86207,8 @@
    "ref_close": 35.55,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 33.85,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85055,8 +86240,8 @@
    "ref_close": 98.9,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 94.4,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85088,8 +86273,8 @@
    "ref_close": 63.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 57.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85121,8 +86306,8 @@
    "ref_close": 130.5,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 126.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85154,8 +86339,8 @@
    "ref_close": 457.5,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 389.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85187,8 +86372,8 @@
    "ref_close": 59.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 51.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85220,8 +86405,8 @@
    "ref_close": 399.5,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 343.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85253,8 +86438,8 @@
    "ref_close": 41.15,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 40.4,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85286,8 +86471,8 @@
    "ref_close": 89.6,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 85.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85319,8 +86504,8 @@
    "ref_close": 49.6,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 48.25,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85352,8 +86537,8 @@
    "ref_close": 32.9,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 27.2,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85385,8 +86570,8 @@
    "ref_close": 11.75,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 11.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85418,8 +86603,8 @@
    "ref_close": 378.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 308.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85451,8 +86636,8 @@
    "ref_close": 59.6,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 52.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85484,8 +86669,8 @@
    "ref_close": 59.6,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 52.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85517,8 +86702,8 @@
    "ref_close": 59.6,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 52.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85550,8 +86735,8 @@
    "ref_close": 48.8,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 42.25,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85583,8 +86768,8 @@
    "ref_close": 61.5,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 52.2,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85616,8 +86801,8 @@
    "ref_close": 111.5,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 106.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85649,8 +86834,8 @@
    "ref_close": 81.8,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 80.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85682,8 +86867,8 @@
    "ref_close": 12.65,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 12.4,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85715,8 +86900,8 @@
    "ref_close": 13.6,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 12.75,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85748,8 +86933,8 @@
    "ref_close": 104.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 102.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85781,8 +86966,8 @@
    "ref_close": 104.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 102.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85814,8 +86999,8 @@
    "ref_close": 26.1,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 25.45,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85847,8 +87032,8 @@
    "ref_close": 117.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 123.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85880,8 +87065,8 @@
    "ref_close": 125.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 113.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85913,8 +87098,8 @@
    "ref_close": 41.15,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 39.8,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85946,8 +87131,8 @@
    "ref_close": 137.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 125.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -85979,8 +87164,8 @@
    "ref_close": 28.05,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 27.75,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86012,8 +87197,8 @@
    "ref_close": 82.9,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 70.6,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86045,8 +87230,8 @@
    "ref_close": 137.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 125.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86078,8 +87263,8 @@
    "ref_close": 42.85,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 39.95,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86111,8 +87296,8 @@
    "ref_close": 48.8,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 47.9,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86144,8 +87329,8 @@
    "ref_close": 15.05,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 14.6,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86177,8 +87362,8 @@
    "ref_close": 15.05,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 14.6,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86212,8 +87397,8 @@
    "ref_close": 586.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 475.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86245,8 +87430,8 @@
    "ref_close": 19.9,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 20.15,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86280,8 +87465,8 @@
    "ref_close": 586.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 475.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86313,8 +87498,8 @@
    "ref_close": 15.85,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 16.2,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86346,8 +87531,8 @@
    "ref_close": 234.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 201.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86379,8 +87564,8 @@
    "ref_close": 159.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 166.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86412,8 +87597,8 @@
    "ref_close": 30.5,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 29.75,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86445,8 +87630,8 @@
    "ref_close": 258.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 274.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86478,8 +87663,8 @@
    "ref_close": 131.5,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 115.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86511,8 +87696,8 @@
    "ref_close": 361.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 347.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86544,8 +87729,8 @@
    "ref_close": 73.3,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 66.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86577,8 +87762,8 @@
    "ref_close": 130.5,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 115.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86610,8 +87795,8 @@
    "ref_close": 130.5,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 115.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86643,8 +87828,8 @@
    "ref_close": 70.7,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 65.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86676,8 +87861,8 @@
    "ref_close": 70.7,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 65.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86709,8 +87894,8 @@
    "ref_close": 20.2,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 19.7,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86742,8 +87927,8 @@
    "ref_close": 15.15,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 14.4,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86775,8 +87960,8 @@
    "ref_close": 20.2,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 19.7,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86808,8 +87993,8 @@
    "ref_close": 12.9,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 13.1,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86841,8 +88026,8 @@
    "ref_close": 20.15,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 20.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86874,8 +88059,8 @@
    "ref_close": 10.25,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 9.95,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86907,8 +88092,8 @@
    "ref_close": 10.25,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 9.95,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86940,8 +88125,8 @@
    "ref_close": 27.8,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 29.2,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -86973,8 +88158,8 @@
    "ref_close": 32.4,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 29.1,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87008,8 +88193,8 @@
    "ref_close": 234.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 223.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87041,8 +88226,8 @@
    "ref_close": 5010.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 4480.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87074,8 +88259,8 @@
    "ref_close": 201.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 164.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87107,8 +88292,8 @@
    "ref_close": 201.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 164.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87140,8 +88325,8 @@
    "ref_close": 7.99,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 7.92,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87173,8 +88358,8 @@
    "ref_close": 39.45,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 33.85,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87206,8 +88391,8 @@
    "ref_close": 24.15,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 22.9,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87239,8 +88424,8 @@
    "ref_close": 24.15,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 22.9,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87272,8 +88457,8 @@
    "ref_close": 28.75,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 28.3,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87305,8 +88490,8 @@
    "ref_close": 17.65,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 17.35,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87338,8 +88523,8 @@
    "ref_close": 201.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 164.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87371,8 +88556,8 @@
    "ref_close": 27.7,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 27.85,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87404,8 +88589,8 @@
    "ref_close": 11.35,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 11.4,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87437,8 +88622,8 @@
    "ref_close": 45.35,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 43.7,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87470,8 +88655,8 @@
    "ref_close": 11.35,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 11.4,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87503,8 +88688,8 @@
    "ref_close": 45.35,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 43.7,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87536,8 +88721,8 @@
    "ref_close": 45.35,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 43.7,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87569,8 +88754,8 @@
    "ref_close": 48.65,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 47.25,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87602,8 +88787,8 @@
    "ref_close": 82.9,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 70.6,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87635,8 +88820,8 @@
    "ref_close": 127.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 104.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87668,8 +88853,8 @@
    "ref_close": 31.75,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 31.3,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87701,8 +88886,8 @@
    "ref_close": 57.2,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 55.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87736,8 +88921,8 @@
    "ref_close": 29.15,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 26.7,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87769,8 +88954,8 @@
    "ref_close": 82.4,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 74.7,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87802,8 +88987,8 @@
    "ref_close": 82.4,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 74.7,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87835,8 +89020,8 @@
    "ref_close": 371.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 399.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87868,8 +89053,8 @@
    "ref_close": 375.5,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 304.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87904,8 +89089,8 @@
    "ref_close": 2260.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2135.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -87975,8 +89160,8 @@
    "ref_close": 2260.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2135.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -88010,8 +89195,8 @@
    "ref_close": 51.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 48.4,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -88045,8 +89230,8 @@
    "ref_close": 16.55,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 15.85,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -88081,8 +89266,8 @@
    "ref_close": 2260.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2135.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -88116,8 +89301,8 @@
    "ref_close": 140.5,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 121.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -88152,8 +89337,8 @@
    "ref_close": 2260.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2135.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -88187,8 +89372,8 @@
    "ref_close": 29.15,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 26.7,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -88223,8 +89408,8 @@
    "ref_close": 2260.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2135.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -88258,8 +89443,8 @@
    "ref_close": 3715.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 3390.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -88293,8 +89478,8 @@
    "ref_close": 586.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 475.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -88328,8 +89513,8 @@
    "ref_close": 189.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 183.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -88364,8 +89549,8 @@
    "ref_close": 161.5,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 163.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -88400,8 +89585,8 @@
    "ref_close": 2260.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2135.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -88435,8 +89620,8 @@
    "ref_close": 166.5,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 160.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -88471,8 +89656,8 @@
    "ref_close": 2260.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2135.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -88507,8 +89692,8 @@
    "ref_close": 2260.0,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 2135.0,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -88542,8 +89727,8 @@
    "ref_close": 21.3,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 20.45,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -88578,8 +89763,8 @@
    "ref_close": 161.5,
    "ref_close_date": "2026-11-04",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
-   "entry_close": null,
-   "entry_date": null,
+   "entry_close": 163.5,
+   "entry_date": "2026-11-06",
    "returns": {
     "t5": null,
     "t20": null,
@@ -99734,6 +100919,1289 @@
    "weight": 1.0,
    "ref_close": 4525.0,
    "ref_close_date": "2026-11-05",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "a1f348bf6b757bc5",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E6%97%A5%E6%9C%AC%E6%94%BE%E5%B0%84%E7%B7%9A%E7%81%BD%E5%AE%B3%E9%86%AB%E7%99%82%E5%AD%B8%E6%AC%8A%E5%A8%81%E5%B0%87%E4%BE%86%E5%8F%B0%E4%BA%A4%E6%B5%81-%E6%B7%B1%E5%8C%96%E8%88%87%E9%BA%97%E5%AF%B6%E6%96%B0%E8%97%A5lib-101%E5%9C%8B%E9%9A%9B%E5%90%88%E4%BD%9C-044611266.html",
+   "type": "媒體報導",
+   "code": "7888",
+   "event_date": "2026-11-06",
+   "title": "日本放射線災害醫療學權威將來台交流，深化與麗寶新藥LIB-101國際合作",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": null,
+   "pre_vol_spike": null,
+   "reflected": "unknown",
+   "pre_volume_spike": null,
+   "reason": "價格序列不足（0<23 筆）",
+   "weight": 1.0,
+   "ref_close": null,
+   "ref_close_date": null,
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "38f7e3236fcb4989",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E5%A4%A7%E5%AE%89%E6%96%87%E5%B1%B1-2026%E5%B9%B410%E6%9C%88%E5%90%88%E4%BD%B5%E7%87%9F%E6%94%B63016-6%E8%90%AC%E5%85%83-%E5%B9%B4%E5%A2%9E-043237339.html",
+   "type": "媒體報導",
+   "code": "3016",
+   "event_date": "2026-11-06",
+   "title": "【公告】大安文山 2026年10月合併營收3016.6萬元 年增-2.26%",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.2231,
+   "pre_vol_spike": 1.081,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 97.5,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "f2b1328334ece241",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E5%84%AA%E4%BD%A0%E5%BA%B7%E7%99%BC%E8%A8%80%E4%BA%BA%E7%95%B0%E5%8B%95-042330801.html",
+   "type": "媒體報導",
+   "code": "4150",
+   "event_date": "2026-11-06",
+   "title": "【公告】優你康發言人異動",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0035,
+   "pre_vol_spike": 0.661,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2024-12-31",
+   "weight": 1.0,
+   "ref_close": null,
+   "ref_close_date": null,
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "ef8e82bbd5efdf73",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E6%80%9D%E6%8D%B7%E5%84%AA%E9%81%94-ky-2026%E5%B9%B410%E6%9C%88%E5%90%88%E4%BD%B5%E7%87%9F%E6%94%B6%E8%90%AC%E5%85%83-%E5%B9%B4%E5%A2%9E999999-041226345.html",
+   "type": "媒體報導",
+   "code": "7829",
+   "event_date": "2026-11-06",
+   "title": "【公告】思捷優達-KY 2026年10月合併營收萬元 年增999999.99%",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": null,
+   "pre_vol_spike": null,
+   "reflected": "unknown",
+   "pre_volume_spike": null,
+   "reason": "價格序列不足（0<23 筆）",
+   "weight": 1.0,
+   "ref_close": null,
+   "ref_close_date": null,
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "3dda3cf34d77025d",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E5%9C%8B%E5%85%89%E7%94%9F-2026%E5%B9%B410%E6%9C%88%E5%90%88%E4%BD%B5%E7%87%9F%E6%94%B66-34%E5%84%84%E5%85%83-%E5%B9%B4%E5%A2%9E6-041224379.html",
+   "type": "媒體報導",
+   "code": "4142",
+   "event_date": "2026-11-06",
+   "title": "【公告】國光生 2026年10月合併營收6.34億元 年增6.74%",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0494,
+   "pre_vol_spike": 0.963,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 16.35,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "480f09c159b438a3",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E7%84%A6%E9%BB%9E%E8%82%A1-%E7%94%9F%E6%8A%80%E8%82%A1%E8%90%AC%E7%B6%A0%E5%8F%A2%E4%B8%AD-%E9%BB%9E%E7%B4%85-%E8%97%A5%E8%8F%AF%E8%97%A5%E6%88%90%E5%8D%83%E9%87%91%E8%82%A1%E5%94%AF-%E8%B5%B0%E6%8F%9A-040742063.html",
+   "type": "媒體報導",
+   "code": "6446",
+   "event_date": "2026-11-06",
+   "title": "〈焦點股〉生技股萬綠叢中一點紅 藥華藥成千金股唯一走揚",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0672,
+   "pre_vol_spike": 2.101,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 0.5,
+   "ref_close": 1270.0,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "c33919aa2c65e58c",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9861531",
+   "type": "媒體報導",
+   "code": "3576",
+   "event_date": "2026-11-06",
+   "title": "AI 股遭血洗！太陽能掀政策想像 聯合再生、元晶、達能突圍上攻",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0887,
+   "pre_vol_spike": 3.137,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 0.5,
+   "ref_close": 17.8,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "0c5b35039b5508da",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E7%A9%8D%E9%9B%BB%E5%A4%A7%E8%B7%8C%E3%80%81%E5%A4%96%E8%B3%87%E4%B9%9F%E8%99%A7%E5%A4%A7%E4%BA%86%EF%BC%81%E5%B8%82%E5%80%BC1%E5%80%8B%E6%9C%88%E8%92%B8%E7%99%BC10%E5%85%86%E5%85%83-%E6%98%AF%E9%AD%8F%E5%93%B2%E5%AE%B6%E7%9A%842100%E5%80%8D-033920583.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-11-06",
+   "title": "台積電大跌、外資也虧大了！市值1個月蒸發10兆元 是魏哲家的2100倍",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0992,
+   "pre_vol_spike": 1.776,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 2135.0,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "8edf7ce73e028c30",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9861466",
+   "type": "媒體報導",
+   "code": "5609",
+   "event_date": "2026-11-06",
+   "title": "AI貨運旺季需求強 中菲行關注美西碼頭罷工變數",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0141,
+   "pre_vol_spike": 0.867,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 77.1,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "0ecf607ce4162364",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9861453",
+   "type": "媒體報導",
+   "code": "2646",
+   "event_date": "2026-11-06",
+   "title": "星宇航空 ITF 台灣國際旅展 日本航線下殺七字頭",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0203,
+   "pre_vol_spike": 1.784,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 19.35,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "3bb5e67b65671f7b",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9861433",
+   "type": "媒體報導",
+   "code": "6446",
+   "event_date": "2026-11-06",
+   "title": "台股暴跌後拚返4萬點！千金股跌停剩不到10檔 藥華藥一度逆漲逾8%",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0672,
+   "pre_vol_spike": 2.101,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 0.5,
+   "ref_close": 1270.0,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "8a3ba67d0c35eb6a",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/ai%E7%A0%B8%E9%8C%A2%E6%84%88%E5%A4%9A%EF%BC%8C%E4%BD%95%E6%99%82%E6%89%8D%E8%83%BD%E5%9B%9E%E6%9C%AC%EF%BC%9F%E8%81%AF%E7%99%BC%E7%A7%91%E8%94%A1%E5%8A%9B%E8%A1%8C%E6%8F%ADai%E6%8A%95%E8%B3%87%E7%9C%9F%E7%9B%B8%EF%BC%9A%E5%AE%A2%E6%88%B6%E8%9E%8D%E8%B3%87%E3%80%81asic%E7%8D%B2%E5%88%A9%E8%88%87%E4%BE%9B%E6%87%89%E9%8F%88%E6%8C%91%E6%88%B0-031842737.html",
+   "type": "媒體報導",
+   "code": "2454",
+   "event_date": "2026-11-06",
+   "title": "AI砸錢愈多，何時才能回本？聯發科蔡力行揭AI投資真相：客戶融資、ASIC獲利與供應鏈挑戰",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1341,
+   "pre_vol_spike": 1.732,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 3390.0,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "cd26247619034ded",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E6%9D%BE%E7%91%9E%E8%97%A5%E7%94%A2%E8%83%BD%E5%80%8D%E5%A2%9E%E6%90%B6%E5%85%A8%E7%90%83%E4%BE%9B%E6%87%89%E7%BC%BA%E5%8F%A3%E5%95%86%E6%A9%9F-%E7%AC%AC%E5%9B%9B%E5%AD%A3%E7%87%9F%E6%94%B6%E6%8B%9A%E6%96%B0%E9%AB%98%E5%B3%B0-031826533.html",
+   "type": "媒體報導",
+   "code": "4167",
+   "event_date": "2026-11-06",
+   "title": "松瑞藥產能倍增搶全球供應缺口商機，第四季營收拚新高峰",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0846,
+   "pre_vol_spike": 0.611,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 18.4,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "4dd0ba57b5e3a440",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/ai%E6%84%88%E8%81%B0%E6%98%8E%EF%BC%8C%E6%84%88%E8%A6%81%E5%B0%8F%E5%BF%83%EF%BC%81%E5%8F%B0%E7%A9%8D%E9%9B%BB%E7%A7%A6%E6%B0%B8%E6%B2%9B%E9%BB%9E%E5%87%BAai%E5%B0%8E%E5%85%A5%E4%B8%89%E5%A4%A7%E9%9A%B1%E6%86%82-031350953.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-11-06",
+   "title": "AI愈聰明，愈要小心！台積電秦永沛點出AI導入三大隱憂",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0992,
+   "pre_vol_spike": 1.776,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 2135.0,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "196ba7a9e8956e1f",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E6%9A%B4%E8%B7%8C3737%E9%BB%9E%E6%B2%92%E5%9C%A8%E6%80%95-%E9%83%AD%E5%93%B2%E6%A6%AE%E5%86%8D%E7%A0%B85%E5%8D%83%E8%90%AC%E8%B2%B70050-%E7%9C%9F%E7%9A%84%E6%B2%92%E9%8C%A2%E4%BA%86-031300025.html",
+   "type": "媒體報導",
+   "code": "0050",
+   "event_date": "2026-11-06",
+   "title": "暴跌3737點沒在怕！ 郭哲榮再砸5千萬買0050：真的沒錢了",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1186,
+   "pre_vol_spike": 3.384,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 0.5,
+   "ref_close": 92.5,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "ff4ca19dd35b57c6",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E5%85%86%E8%B1%90%E8%AD%89%E5%88%B8-2026%E5%B9%B410%E6%9C%88%E5%90%88%E4%BD%B5%E7%87%9F%E6%94%B6-4105-2%E8%90%AC%E5%85%83-031235246.html",
+   "type": "媒體報導",
+   "code": "4105",
+   "event_date": "2026-11-06",
+   "title": "【公告】兆豐證券 2026年10月合併營收-4105.2萬元 年增-107.17%",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0088,
+   "pre_vol_spike": 0.944,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 79.2,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "ca8e436f1a447ec2",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E4%B8%AD%E5%9C%8B%E6%83%B3%E9%9D%A0%E3%80%8C%E8%92%B8%E9%A4%BE%E3%80%8D%E7%A8%B1%E9%9C%B8%E7%A7%91%E6%8A%80%E6%A5%AD%EF%BC%8C%E7%BE%8E%E4%B8%AD%E5%8D%8A%E5%B0%8E%E9%AB%94%E7%AB%B6%E7%88%AD%E8%AA%B0%E8%83%BD%E5%8B%9D%E5%87%BA%EF%BC%9F%E5%8F%B0%E7%A9%8D%E9%9B%BB%E7%8D%B2%E5%88%A9%E8%A1%A8%E7%8F%BE%E6%98%AF%E8%A7%80%E5%AF%9F%E6%8C%87%E6%A8%99-030839805.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-11-06",
+   "title": "中國想靠「蒸餾」稱霸科技業，美中半導體競爭誰能勝出？台積電獲利表現是觀察指標",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0992,
+   "pre_vol_spike": 1.776,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 2135.0,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "46091d23a6768f40",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E5%A4%A7%E7%95%A5-ky-2026%E5%B9%B410%E6%9C%88%E5%90%88%E4%BD%B5%E7%87%9F%E6%94%B636-6%E8%90%AC%E5%85%83-030216076.html",
+   "type": "媒體報導",
+   "code": "4804",
+   "event_date": "2026-11-06",
+   "title": "【公告】大略-KY 2026年10月合併營收36.6萬元 年增-96.74%",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": null,
+   "pre_vol_spike": null,
+   "reflected": "unknown",
+   "pre_volume_spike": null,
+   "reason": "價格序列不足（0<23 筆）",
+   "weight": 1.0,
+   "ref_close": null,
+   "ref_close_date": null,
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "4c41841383f31ec4",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9861334",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-11-06",
+   "title": "台股暴跌3,737點後急拉！盤中觸及4萬點 台積電、聯發科等跌幅收斂",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0992,
+   "pre_vol_spike": 1.776,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 2135.0,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "6b8face0afa6b655",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9861334",
+   "type": "媒體報導",
+   "code": "2454",
+   "event_date": "2026-11-06",
+   "title": "台股暴跌3,737點後急拉！盤中觸及4萬點 台積電、聯發科等跌幅收斂",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1341,
+   "pre_vol_spike": 1.732,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 3390.0,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "75d53c58d45bffc0",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%B0%8F%E8%B3%87%E6%97%8F%E6%90%B6%E8%B2%B70050%EF%BC%81%E9%9B%B6%E8%82%A1%E4%B8%80%E5%80%8B%E5%8D%8A%E5%B0%8F%E6%99%82%E3%80%8C%E7%88%86%E9%80%BE3800%E8%90%AC%E8%82%A1%E3%80%8D-%E5%8F%B2%E4%B8%8A%E7%AC%AC%E5%8D%81%E5%A4%A7-023233038.html",
+   "type": "媒體報導",
+   "code": "0050",
+   "event_date": "2026-11-06",
+   "title": "小資族搶買0050！零股一個半小時「爆逾3800萬股」 史上第十大",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1186,
+   "pre_vol_spike": 3.384,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 0.5,
+   "ref_close": 92.5,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "b1cd263a236a14dd",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "經濟日報焦點",
+   "source_id": "https://money.udn.com/money/story/5599/9861274",
+   "type": "媒體報導",
+   "code": "2028",
+   "event_date": "2026-11-06",
+   "title": "盧比歐否認辭職傳聞 拒談是否2028選總統",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0901,
+   "pre_vol_spike": 1.579,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 14.65,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "5f7904355b11b288",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E8%82%A1%E6%81%90%E6%85%8C%E8%B3%A3%E5%A3%93%E6%98%AF%E5%90%A6%E8%BF%91%E5%B0%BE%E8%81%B2-%E5%8F%B0%E7%A9%8D%E9%9B%BB-%E8%81%AF%E7%99%BC%E7%A7%91%E8%88%87%E5%8F%B0%E9%81%94%E9%9B%BB%E6%88%90%E8%A7%80%E5%AF%9F%E6%8C%87%E6%A8%99-022535498.html",
+   "type": "媒體報導",
+   "code": "2308",
+   "event_date": "2026-11-06",
+   "title": "台股恐慌賣壓是否近尾聲？台積電、聯發科與台達電成觀察指標",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.2097,
+   "pre_vol_spike": 1.958,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 1055.0,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "05e8dc36fa7249a9",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E8%82%A1%E6%81%90%E6%85%8C%E8%B3%A3%E5%A3%93%E6%98%AF%E5%90%A6%E8%BF%91%E5%B0%BE%E8%81%B2-%E5%8F%B0%E7%A9%8D%E9%9B%BB-%E8%81%AF%E7%99%BC%E7%A7%91%E8%88%87%E5%8F%B0%E9%81%94%E9%9B%BB%E6%88%90%E8%A7%80%E5%AF%9F%E6%8C%87%E6%A8%99-022535498.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-11-06",
+   "title": "台股恐慌賣壓是否近尾聲？台積電、聯發科與台達電成觀察指標",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0992,
+   "pre_vol_spike": 1.776,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 2135.0,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "7f44a010bd942670",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E8%82%A1%E6%81%90%E6%85%8C%E8%B3%A3%E5%A3%93%E6%98%AF%E5%90%A6%E8%BF%91%E5%B0%BE%E8%81%B2-%E5%8F%B0%E7%A9%8D%E9%9B%BB-%E8%81%AF%E7%99%BC%E7%A7%91%E8%88%87%E5%8F%B0%E9%81%94%E9%9B%BB%E6%88%90%E8%A7%80%E5%AF%9F%E6%8C%87%E6%A8%99-022535498.html",
+   "type": "媒體報導",
+   "code": "2454",
+   "event_date": "2026-11-06",
+   "title": "台股恐慌賣壓是否近尾聲？台積電、聯發科與台達電成觀察指標",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1341,
+   "pre_vol_spike": 1.732,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 3390.0,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "6967d28ee33b363f",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9861234",
+   "type": "媒體報導",
+   "code": "6278",
+   "event_date": "2026-11-06",
+   "title": "台表科受惠 AI 需求 法人上修今年 EPS 至12.4元",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.2851,
+   "pre_vol_spike": 0.967,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 180.5,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "436a6ef1edc09e3f",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9861209",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-11-06",
+   "title": "買盤趁崩跌搶進12檔撿漏股 台積電跌幅收斂",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0992,
+   "pre_vol_spike": 1.776,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 2135.0,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "c89d3e30d1a82c54",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E6%BC%A2%E4%BE%86%E7%BE%8E%E9%A3%9F%E5%89%8D%E4%B8%89%E5%AD%A3eps11-20%E5%85%83-%E8%B3%BA%E8%B4%8F%E5%8E%BB%E5%B9%B4%E5%85%A8%E5%B9%B4-q4%E6%97%BA%E5%AD%A3%E6%A5%AD%E7%B8%BE%E5%8B%95%E8%83%BD%E7%BA%8C%E6%97%BA-020915449.html",
+   "type": "媒體報導",
+   "code": "1268",
+   "event_date": "2026-11-06",
+   "title": "漢來美食前三季EPS11.20元，賺贏去年全年，Q4旺季業績動能續旺",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0529,
+   "pre_vol_spike": 1.26,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 170.0,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "8bcdfd7537acc958",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E9%81%94%E9%9B%BB%E9%96%8B%E7%9B%A4%E9%8E%96%E7%B6%A0%E7%87%88%E3%80%8C%E6%9C%80%E5%A4%A7%E8%8B%A6%E4%B8%BB%E3%80%8D%E9%84%AD%E5%B4%87%E8%8F%AF%E5%AE%B6%E6%97%8F%E7%88%B6%E5%AD%903%E4%BA%BA%E8%BA%AB%E5%AE%B6%E4%B8%80%E7%A7%92%E8%92%B8%E7%99%BC206%E5%84%84%E5%85%83-020131664.html",
+   "type": "媒體報導",
+   "code": "2308",
+   "event_date": "2026-11-06",
+   "title": "台達電開盤鎖綠燈...「最大苦主」鄭崇華家族父子3人身家一秒蒸發206億元",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.2097,
+   "pre_vol_spike": 1.958,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 1055.0,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "0231631170750d59",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/11074/9861168",
+   "type": "媒體報導",
+   "code": "5609",
+   "event_date": "2026-11-06",
+   "title": "中菲行營收／10月38億元、年增65.3% 創2022年5月以來新高",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0141,
+   "pre_vol_spike": 0.867,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 77.1,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "0d5da4e9af063383",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/ai%E5%B8%82%E5%A0%B4%E6%B3%A2%E5%8B%95%E7%8F%BE%E7%AB%AF%E5%80%AA-%E8%B6%85%E5%BE%AE%E8%88%87%E5%8F%B0%E7%A9%8D%E9%9B%BB%E8%B2%A1%E5%A0%B1%E6%8F%AD%E7%A4%BA%E9%97%9C%E9%8D%B5%E5%B7%AE%E7%95%B0-015354952.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-11-06",
+   "title": "AI市場波動現端倪：超微與台積電財報揭示關鍵差異",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0992,
+   "pre_vol_spike": 1.776,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 2135.0,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "06e22ecd136934e2",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%89%E5%AF%B6%E7%A7%91%E5%B0%87%E5%89%8D%E9%80%B22026%E5%BE%B7%E5%9C%8B%E6%85%95%E5%B0%BC%E9%BB%91%E9%9B%BB%E5%AD%90%E5%B1%95-%E5%B1%95%E7%8F%BE%E8%B7%A8%E9%A0%98%E5%9F%9F%E6%8A%80%E8%A1%93%E6%95%B4%E5%90%88%E5%AF%A6%E5%8A%9B-015319149.html",
+   "type": "媒體報導",
+   "code": "2301",
+   "event_date": "2026-11-06",
+   "title": "光寶科將前進2026德國慕尼黑電子展，展現跨領域技術整合實力",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1767,
+   "pre_vol_spike": 1.173,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 198.0,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "ba494689082a78a2",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9861162",
+   "type": "媒體報導",
+   "code": "1463",
+   "event_date": "2026-11-06",
+   "title": "強盛新賣子公司估損逾2千萬、股價卻大漲近9% 買方新紡有董事提異議",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0283,
+   "pre_vol_spike": 1.58,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 17.15,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "a9b70cdf6abb47c9",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E9%90%B5%E7%A0%94-2026%E5%B9%B410%E6%9C%88%E5%90%88%E4%BD%B5%E7%87%9F%E6%94%B66116-4%E8%90%AC%E5%85%83-%E5%B9%B4%E5%A2%9E18-015231015.html",
+   "type": "媒體報導",
+   "code": "6116",
+   "event_date": "2026-11-06",
+   "title": "【公告】鐵研 2026年10月合併營收6116.4萬元 年增18.73%",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0865,
+   "pre_vol_spike": 0.501,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 12.15,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "c76f78d548d79c3e",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9861095",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-11-06",
+   "title": "台積電跌停 台股早盤崩跌3737點創盤中最大跌點失守年線",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0992,
+   "pre_vol_spike": 1.776,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 2135.0,
+   "ref_close_date": "2026-11-06",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "5eae9a6c1b91a500",
+   "recorded_at": "2026-11-06T17:37:13.169899+08:00",
+   "layer": "L3",
+   "source": "中央社財經",
+   "source_id": "https://www.cna.com.tw/news/afe/202611060037.aspx",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-11-06",
+   "title": "台積電跌停 台股早盤崩跌3737點創盤中最大跌點失守年線",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0992,
+   "pre_vol_spike": 1.776,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-06",
+   "weight": 1.0,
+   "ref_close": 2135.0,
+   "ref_close_date": "2026-11-06",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
    "entry_close": null,
    "entry_date": null,
