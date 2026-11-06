@@ -539,8 +539,18 @@
     }catch(e){console.warn('[loadFinancials:fcf]',e);recordGlobalError('loadFinancials:fcf',e);setTxt('fin-fcf','—');fcfNote+='讀取失敗'}
     // 常備.開發-4（2026-10-11）：上市金融業＋上櫃財報。來源標記讀 financials.source；
     // 官方只給最新一季「累計數」，單季序列有 2025Q1~2026Q1 斷層的公司，另外顯示最新累計（latest_cum）。
-    const F=detail.financials||{},lc=F.latest_cum,src=F.source||(last?'t187ap06_L_ci':'');
-    const srcTxt=src?((/_O_|mopsfin/.test(src)?'TPEx官方 ':'TWSE官方 ')+src+'（'+(F.industry_format||'上市一般業')+'）'):'';
+    const F=detail.financials||{},lc=F.latest_cum;
+    // 先.一三五-1lz：沒有 source 的單季序列原本一律當成 TWSE 官方 t187ap06_L_ci；但已下市公司（不在今日官方名冊）
+    // 的季報其實來自 2026-08-27 FinMind 歷史回補（公司下市後仍公開發行、向 MOPS 申報），不是官方開放資料，照實標出。
+    let _delisted=false;
+    if(!F.source&&last){
+      try{await ensureListedUniverse();_delisted=!isListedNow(code)}
+      catch(e){console.warn('[loadFinancials:listed]',e);recordGlobalError('loadFinancials:listed',e)}
+      if(currentCode!==code)return;
+    }
+    const src=F.source||(last&&!_delisted?'t187ap06_L_ci':'');
+    const srcTxt=_delisted?'FinMind 季報回補（非官方；此代號已下市，下市後公司仍公開發行、向 MOPS 申報）'
+      :src?((/_O_|mopsfin/.test(src)?'TPEx官方 ':'TWSE官方 ')+src+'（'+(F.industry_format||'上市一般業')+'）'):'';
     const lcNewer=lc&&(!last||lc.year*4+lc.quarter>last.year*4+last.quarter);
     if(lcNewer&&!last){
       const _cq=_qTag(lc.year,lc.quarter).replace('（',`（前 ${lc.quarter} 季累計，`);
