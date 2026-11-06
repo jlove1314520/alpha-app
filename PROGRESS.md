@@ -1,3 +1,17 @@
+## 2026-11-06 11:1x DevQueue（維運帽）先.一三五-1kd-g＋先.一三五-1lb 兩項時間閘驗收
+
+等待總司令審閱：9 件（`research/AWAITING_REVIEW.md`「等待中（目前：9件）」，本輪無增減）。
+
+- **先.一三五-1kd-g（雲端冒煙第 65／142／12 項）**：讀 origin/main 最新 `data/smoke_cloud.json`（b288ece07d1，11/05 23:52 UTC 班，受測 commit c04bcb187，run 42131905658），all_passed=true、**185/185**、failures=[]、crashed=false。前一班（85f85910388）是 181/184，失敗的正是這三項（65：n_warnings 7032 vs 7119；142：退回整份 undefined）＝1kd-d／1kd-f 的修正已在雲端生效。零 API。→ `- [x]`。
+- **先.一三五-1lb（上櫃 11/05 前向資料）**：`gh run list --workflow=market.yml` 顯示 11/05 15:52Z 看門狗 workflow_dispatch、17:21Z、18:16Z、11/06 01:48Z 全 success；origin/main `data/tpex_limit_next.json` data_date=2026-11-05；`data/margin_by_stock_history.json` `by_data_date.tpex` 有 20261105。本機歸檔原缺 11/05，照條目做法手動跑 `python scripts/archive_tpex_limit_next.py`（零外部請求）→「資料日 7 個、新寫 1 檔、壞版本 0」。→ `- [x]`。
+- **冒煙**：`node scripts/smoke_test.mjs` **185 PASS／0 FAIL、EXIT 0**（11:01～11:10）。
+- **誠實揭露**：原擬兩項各一個 commit，但拆檔時 Python 讀不到 Git Bash 的 `/tmp` 路徑，結果兩項合進同一個 commit（39f8e13fef3，推送前已改寫訊息照實說明）。
+- **附帶觀察（不開條目）**：本機 `data/STATUS.json`（09:52 產）列「美股四大指數」逾期——雲端 21:43Z 班延遲到 11/06 01:48Z 才跑（約 4 小時、超過 3 小時寬限），`market_us.json` 01:53Z 已更新，晚於 STATUS 檢查時刻約 1 分鐘＝時間差，下次重產會自癒。
+- **阻塞檢查**：先.一三五-1kd-e 仍 BLOCKED——`gh auth status` 仍是「The token in default is invalid」（`gh run list` 能用只是因為 repo 公開）。
+- **維運帽產物**：本輪**沒有重產** `data/STATUS.json`——原因：`generate_status_json.py` 會打未登入的 GitHub API（每小時 60 次額度），且已經由既有排程產生，上面的逾期屬時間差、不需人工重產。
+- **收工補件**：DevQueue 可執行 `- [ ]` 剩 0 項（`dev_queue_runner.py next`＝NO_PENDING_ITEM）。查了 ① `data/STATUS.json` schedule_health（三項逾期：Shioaji／IBKR 已有條目 1kh-h1、先.一三二-12，美股指數是時間差）、② `BACKLOG.md`／`docs/UX_REDESIGN_PROPOSAL.md`（沒有未做的 App 項目，只剩已標現況的舊註）、③ 先.八十 全檢節（沒有 `- [ ]`）、④ `research/DATA_GAP_PLAN.md` 甲類（都已抓或已測）→ **來源已用盡，本輪不補**；⑤ 研究候選屬[研究]帽、前向模擬 14／14 已滿，留給下一輪空轉補件（`_idle_fallback_prompt()`）。本週已撞到用量上限，所以不硬湊。
+- 影響檔案：`PENDING_QUEUE.md`、`PROGRESS.md`；本機 `research/data/tpex_limit_next/2026-11-05.json`（gitignore，不進 repo）。
+
 ## 2026-11-06 10:3x DevQueue（開發帽）先.一三五-1lr 冒煙 #18 偶發「Resulting promise was garbage collected」
 
 等待總司令審閱：9 件（`research/AWAITING_REVIEW.md`「等待中（目前：9件）」，本輪無增減）。
