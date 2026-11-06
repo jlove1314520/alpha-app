@@ -174,6 +174,12 @@ def main():
     w("- F15／F16 為美股：存活者偏誤未完全修正：已下市股約 97%（抽樣 55／57）無價格來源。")
     w("- 第 4.3 節含台指期空單腿：期貨無借券問題，但轉倉價差／滑價／保證金以近似處理，數字偏樂觀（資料缺陷但書）。")
     w("- 本研究不登記試驗（描述性最優化，比照 REAUDIT 與先.一五〇-2 做法），心跳寫 `research/PROGRESS_HEARTBEAT.jsonl`。")
+    # 先.一五五-2：保留手寫的「2025 起補跑」附加節（標記之間），重產本檔時不覆蓋
+    if OUT.exists():
+        old = OUT.read_text(encoding="utf-8")
+        a, b = "<!-- EXT2025-DDFIX-BEGIN -->", "<!-- EXT2025-DDFIX-END -->"
+        if a in old and b in old:
+            L += ["", a + old.split(a, 1)[1].split(b, 1)[0] + b]
     OUT.write_text("\n".join(L) + "\n", encoding="utf-8")
     print(f"寫入 {OUT}（完成 {len(done)}，待做 {todo}）")
 
