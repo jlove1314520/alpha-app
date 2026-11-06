@@ -1,3 +1,14 @@
+## 2026-11-06 14:0x DevQueue（維運帽）零之二預設放行 先.一三五-1kh-e5：**[預設放行] 照作者建議乙執行**
+
+等待總司令審閱：7 件（`research/AWAITING_REVIEW.md`「等待中（目前：7件）」；1kh-e5 移到已結案並標 [預設放行]）。
+
+- **依據**：提案 11/05 13:3x 送審，約 24 小時無 Cowork 裁示；作者明標「建議乙」；不涉及 holdout／真錢／刪除／密碼／付費資料／關卡門檻。**Cowork 可推翻，推翻時照 PREREG 修訂規則處理**（刪掉登錄檔 `known_issue` 欄即恢復告警）。
+- **做了什麼**：`scripts/pipeline_freshness.py` 新增 `known_issue` 欄位語意——fallback_ratio 判到停擺時改狀態 `known`、reason 前綴「已知、只記不告警（…）」，不進停擺告警清單、也不在故障帳 `FAULT_STATUSES`；比例回落照常 ok。`scripts/pipeline_inventory.py` 標 △。`data/seed/pipeline_registry.json` 的 `AlphaQuotesTW-雲端遮蔽` 標 known_issue；`data/STATUS.json` known_limitations 與 `DATA.md` 新段寫「台股盤中報價主要由本機補抓」與限制（電腦關機時盤中報價停在雲端最後一班）。
+- **證據**：`scripts/selftest_pipeline_fallback_ratio.py` 8/8 PASS（新增 known_hi→known、known_lo→ok）；實跑 `pipeline_inventory.py`：該條顯示 △「已知、只記不告警」，news 那條仍 ✓（照提案繼續觀察、未標）。零外部請求。
+- **未做**：甲（`gh workflow run quotes.yml`）待總司令重新登入 gh（先.一三五-1kd-e）。
+- **冒煙**：兩次都 184 PASS／2 FAIL→1 FAIL：第 1 次 #45（1lr 已記錄的偶發 GC）＋#78；第 2 次只剩 #78「首頁首次載入 350.9 KB ≥ 350KB」。根因＝先.一四九-2 首頁整份下載 `data/intraday_tw/2026-11-06.json`（gzip 18.6KB、盤中一路長大），STATUS.json 不在首頁前十大，與本輪改動無關（STATUS 那條仍縮成一句以免加重）。**照規定冒煙沒過不 commit**，已登記 先.一三五-1lv（純 bug 修復，修好後連同本輪改動一起 commit）。
+- 影響檔案：`scripts/pipeline_freshness.py`、`scripts/pipeline_inventory.py`、`scripts/selftest_pipeline_fallback_ratio.py`、`data/seed/pipeline_registry.json`、`data/STATUS.json`、`DATA.md`、`PENDING_QUEUE.md`、`research/AWAITING_REVIEW.md`、`PROGRESS.md`。
+
 ## 2026-11-06 13:3x DevQueue（維運帽）空轉補件：先.一三五-1lu（純 bug 修復）＋1lt＋1ls／1lu-a 時間閘
 
 等待總司令審閱：8 件（`research/AWAITING_REVIEW.md` 未變動）。前向模擬 14／14 已滿，照零之二⑤不新增候選、不寫 PREREG、不送候選 AWAITING。
