@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-11-06T09:37:48.354107+00:00",
+    "generated_at": "2026-11-06T16:49:16.244623+00:00",
     "universe_size": 1986,
     "reason_categories": {
       "R1": "個股完全無此類原始資料",
@@ -14,12 +14,12 @@
   "factors": {
     "earnings_growth": {
       "label": "財報成長",
-      "coverage_pct": 0.434,
-      "covered_count": 862,
-      "missing_count": 1124,
+      "coverage_pct": 0.8147,
+      "covered_count": 1618,
+      "missing_count": 368,
       "missing_reason_breakdown": {
         "個股完全無此類原始資料": 157,
-        "個股有資料但數量/期數不足以計算": 967
+        "個股有資料但數量/期數不足以計算": 211
       }
     },
     "revenue_momentum": {
