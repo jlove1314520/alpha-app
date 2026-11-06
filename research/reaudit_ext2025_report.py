@@ -15,8 +15,12 @@ PENDING = [
     ("F7", "2025 起資料缺：`research/data/raw/TaiwanFuturesDaily__TX__2000-01-01__2024-12-31.parquet` 只到 2024-12-31，"
            "本機沒有 TX 2025 起日資料（`taifex_fut_yearly/` 也只到 2024.zip）。補法要新增請求（TAIFEX futDataDown 2025、2026 各 1 次，"
            "`taifex_www` 節流），依條目規定先寫提案，本輪不送。"),
-    ("F8、F9、F12、F13、F14", "未跑（下一輪）：本機有 1,931 檔 `TaiwanStockPrice__*__2025-01-01__latest.parquet`，"
-           "個股引擎價格由呼叫端傳入，可接上；需逐支改原腳本的 END 與讀檔路徑。"),
+    ("F8", "2025 起資料缺：訊號 f_short_sale_utilization 來自逐檔 `TaiwanStockMarginPurchaseShortSale`，本機 1,058 檔快取全部截在 "
+           "`__2024-12-31.parquet`、沒有任何 2025 起檔；補要新增 FinMind 請求（236 檔×1 次，這台電腦 FinMind 402），依條目規定先寫提案，本輪不送。"),
+    ("F9", "2025 起資料缺：訊號讀 `research/data/sector_flow_daily_gate73.parquet`（只到 2024-12-31），其來源逐檔三大法人 "
+           "`TaiwanStockInstitutionalInvestorsBuySell` 本機沒有 2025 起快取；同 F8 要新請求，先寫提案。"),
+    ("F13、F14", "未跑（下一輪）：價格可用 F12 同一套接法（`research/reaudit_ext2025_engine.py`）；F13 另需 2025 起 ROE 穩定度（本機有 "
+           "`TaiwanStockFinancialStatements__*__latest.parquet`，要重算因子）、F14 要用延長後價量重算特徵並逐年重訓。"),
     ("F10、F11、F15、F16、F17、F18", "未跑（下一輪）：各自的訊號資料（廣度快取、MI_MARGN 週資料、`reaudit_us_prices.pkl`、重建臺灣50、TWTC7U）"
            "要逐一查 2025 起本機有沒有；美股 `reaudit_us_prices.pkl` 只到 2024-12，延長要重新批次下載 yfinance（新請求，先寫提案）。"),
 ]
@@ -74,7 +78,8 @@ def build(d: dict) -> str:
                  f"{pct(rs.get('cagr'))}／{pct(rs.get('mdd'))} | {'；'.join(viol) or '未越線'} | "
                  f"[png](data/reaudit_curves/ext2025_{f['id']}.png) |")
     L += ["", "**天條一（MDD>50%）**：" + ("；".join(f"{i} {v}" for i, v in flags) if flags else
-                                        "本批 F1～F6 沒有任何一組（①或②）越過 50%，不用補 DRAWDOWN_FIX。"), ""]
+                                        "F1～F6、F12 沒有任何一組（①或②）越過 50%，不用補 DRAWDOWN_FIX（F12 全期 -48.1% 逼近，見 3b）。"), ""]
+    L += _engine_rows()
     L += ["**還沒補跑的列（照實寫）**：", ""]
     L += [f"- {a}：{b}" for a, b in PENDING]
     L += ["", "**但書**：2025 起段只有約 1.8 年、是 0050 強勢上漲的一段（同段 0050 年化見上），任何只做多台股的組合在這段都會好看，"
@@ -82,6 +87,36 @@ def build(d: dict) -> str:
           "已下市股約 97%（抽樣 55／57）無價格來源。**（VTI 為指數 ETF，影響較小。）曲線 png 在本機 `research/data/reaudit_curves/ext2025_*.png`"
           "（該目錄不進公開 repo）。", "", END_MARK]
     return "\n".join(L)
+
+
+def _engine_rows():
+    """個股引擎家族（reaudit_ext2025_engine.py 的輸出，目前 F12）。"""
+    p = HERE / "data" / "reaudit_ext2025_engine.json"
+    if not p.exists():
+        return []
+    e = json.loads(p.read_text(encoding="utf-8"))
+    fp = {k: e["fixed_params"][k] for k in ("ma", "market_gate", "top_n", "pos_stop", "rebalance_days", "L", "stop")}
+    pre, sg, fu, ro, rs = e["fixed_pre2025"], e["fixed_seg2025"], e["fixed_full"], e.get("reopt", {}), e.get("reopt_seg2025", {})
+    flag = "**全期 MDD 逼近 50%（未越線）**" if fu["mdd"] < -0.45 else "未越線"
+    L = ["### 3b. 個股引擎家族（`research/reaudit_ext2025_engine.py`，零新外部請求）", "",
+         f"期間 2015-01～{e['end']}（本機個股 2025 起快取的共同終點）；宇宙同第二批 #133 抽樣 236 檔。2025 起價格讀 "
+         "`TaiwanStockPrice__{代號}__2025-01-01__latest.parquet`，還原權息用「漲跌」欄（當日報酬＝收盤÷(收盤−漲跌)−1，"
+         "TWSE 漲跌對除權息參考價計；0050 2025-06-18 分割日 47.57−0.41＝47.16＝官方參考價，已核對），從 2024 最後一筆還原價連乘；"
+         f"還原後沒有任何單日超過 ±10.5%。〔自行裁量〕2024 底仍掛牌但本機沒有 2025 起價格的 {e['missing_note']['n_missing']} 檔"
+         "（多為 ETF／債券 ETF，例：0056、00878、00772B），從 2024-11-15 起不再給分數，讓它們在 12 月換股就賣出；"
+         f"2025 起實際交易到這些檔：{len(e['missing_note']['traded_2025'])} 檔。同段加權指數（價格、不含息）2025-01～2026-09-24 年化 +53.9%、MDD -26.7%。", "",
+         "| 家族 | ①原最優組（不重調） | ① 2024 底前 年化／MDD（原表） | ① 2025 起段 年化 | ① 2025 起段 MDD | ① 2025 起段 Sharpe | ① 全期 年化／MDD | ②全期重新優化 | ② 全期 年化／MDD／Sharpe | ② 2025 起段 年化／MDD | 天條一 | 曲線 |",
+         "|---|---|---|---|---|---|---|---|---|---|---|---|",
+         f"| F12 #11／#393 Weinstein 第二階段（台股個股，引擎版） | {fmt_params(fp)} | {pct(pre['cagr'])}／{pct(pre['mdd'])}（+26.6%／-30.1%） | "
+         f"{pct(sg['cagr'])} | {pct(sg['mdd'])} | {sg['sharpe']:.2f} | {pct(fu['cagr'])}／{pct(fu['mdd'])} | "
+         f"key={ro.get('key')}（ma_gate_topN_個股停損），L={ro.get('L')}，stop={ro.get('stop')} | "
+         f"{pct(ro.get('cagr'))}／{pct(ro.get('mdd'))}／{ro.get('sharpe', 0):.2f} | {pct(rs.get('cagr'))}／{pct(rs.get('mdd'))} | {flag} | "
+         "[png](data/reaudit_curves/ext2025_F12.png) |", "",
+         "**F12 怎麼讀**：原最優組（2 倍融資＋10% 組合止損）在沒調參的 2025 起段年化 +13.2%、MDD -35.8%，明顯落後同段大盤；"
+         "全期 MDD 從 -30.1% 擴大到 -48.1%（回撤從 2024 年高點延續到 2025 年），離天條一 50% 只剩約 2 個百分點。"
+         "全期重新優化挑到 3 倍＋個股停損 15%，但它在 2025 起段只有 +2.8%、MDD -42.6%——重新優化換來的是更差的 2025 段，"
+         "代表 F12 的最優格對參數很敏感。融資倍數越高、2025 起段回撤越深（2 倍 -35.8%、重新優化的 3 倍 -42.6%）；要上紙上的話建議先用 1 倍版觀察〔自行裁量建議，未驗證〕。", ""]
+    return L
 
 
 def main():
