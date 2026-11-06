@@ -549,6 +549,11 @@ def load_full_history(
     through validation.holdout.unlock_holdout_once(), which is one-time-use,
     lock-file enforced, and permanently logged.
     """
+    # 先.一五五-1（收件匣 039）：保留資料開放期間不再拒絕，改成記錄（validation.holdout.HOLDOUT_OPEN）。
+    from validation import holdout as _ho
+    if _ho.HOLDOUT_OPEN:
+        _ho.log_holdout_access("load_full_history", f"{dataset}/{data_id}")
+        return _fetch(dataset, data_id, start_date, end_date=None, force_refresh=force_refresh)
     if not allow_holdout:
         raise RuntimeError(
             f"load_full_history(dataset={dataset!r}) refused: this returns UNCAPPED data that can "

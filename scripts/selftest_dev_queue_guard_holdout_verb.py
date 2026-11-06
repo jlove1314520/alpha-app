@@ -17,6 +17,8 @@ sys.path.insert(0, str(ROOT / "scripts"))
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 import dev_queue_runner as D  # noqa: E402
+_DEFAULT_HOLDOUT_BLOCK = D.GUARD_HOLDOUT_BLOCK
+D.GUARD_HOLDOUT_BLOCK = True  # 先.一五五-1（收件匣 039）：正式預設不擋保留資料；本自測驗證「開關改回 True 時舊防線照舊」
 
 W = "hold" + "out"  # 拆開寫，避免本檔被其他掃描器當成要動用資料切分
 results = []

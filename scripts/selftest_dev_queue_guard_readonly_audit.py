@@ -20,6 +20,7 @@ if hasattr(sys.stdout, "reconfigure"):
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 import dev_queue_runner as dq  # noqa: E402
+dq.GUARD_HOLDOUT_BLOCK = True  # 先.一五五-1（收件匣 039）：正式預設不擋保留資料；本自測驗證「開關改回 True 時舊防線照舊」
 
 EXPECT_1AA_BLOCKED = False  # 2026-10-28 收件匣 029 守門員改「動詞同句」後不再擋（原為 True）
 WORD = "hold" + "out"      # 拆開寫，避免本檔被其他掃描器當成要動用資料切分

@@ -94,6 +94,14 @@ for base in ("research", "scripts"):
                 lb_bad.append(f"{rel}：{d}")
 res.append(("holdout 限定讀取資料夾（" + "、".join(RESTRICTED_LOOKBACK_DIRS) + "）只有列名程式提到"
             + ("" if not lb_bad else "；" + "；".join(lb_bad[:5])), not lb_bad))
+# 先.一五五-1（2026-11-06，Cowork 收件匣 039，總司令本人確認）：保留資料開放（validation.holdout.HOLDOUT_OPEN），
+# 上面三項「研究端不得讀 2025 起資料」的限制改成只記錄：列出讀取者、標 WARN、不算失敗。
+# 讀這些檔的回測仍要自己守 PIT（季報用法定公告期限、月營收用次月 10 日之後才算看得到），守門員不替你做。
+from validation.holdout import HOLDOUT_OPEN  # noqa: E402
+_HOLDOUT_SCOPED = ("research/ 底下沒有程式引用 App 顯示用回補檔", "research/ 沒有新的 stock_detail.json 讀取者", "holdout 限定讀取資料夾")
+if HOLDOUT_OPEN:
+    res = [(("WARN（保留資料開放，只記錄）" + n) if (not ok and n.startswith(_HOLDOUT_SCOPED)) else n,
+            ok or n.startswith(_HOLDOUT_SCOPED)) for n, ok in res]
 for n, ok in res:
     print(("PASS " if ok else "FAIL ") + n)
 nb = sum(1 for _, ok in res if not ok)

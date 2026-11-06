@@ -8,6 +8,10 @@
 拉一份未 cap 的資料下來。
 
 跑法：`python research/holdout_guard_test.py`
+
+2026-11-06 先.一五五-1（Cowork 收件匣 039，總司令本人確認）：保留資料開放（`holdout.HOLDOUT_OPEN=True`），
+守門改成「記錄、不擋」。新增 test_open_* 驗證開放行為；舊的拒絕／收窄測試改在 `_closed()` 裡跑
+（暫時把開關設回 False），證明開關改回去時舊防線原封不動。
 """
 from __future__ import annotations
 
@@ -21,6 +25,42 @@ import finmind_client as fc
 import holdout_leak_audit as hla
 from validation import holdout
 from validation.holdout import VAL_END
+
+
+import contextlib
+
+
+@contextlib.contextmanager
+def _closed():
+    """暫時把保留資料開關設回 False（舊的「擋」模式），測完還原。"""
+    orig = holdout.HOLDOUT_OPEN
+    holdout.HOLDOUT_OPEN = False
+    try:
+        yield
+    finally:
+        holdout.HOLDOUT_OPEN = orig
+
+
+def test_open_logs_not_refuse():
+    """先.一五五-1：開放期間 load_full_history 不帶旗標也放行、assert 不 raise、unlock 可重複，且都留下記錄。"""
+    assert holdout.HOLDOUT_OPEN, "現行設定應為開放（收件匣 039）"
+    holdout._ACCESS_SEEN.clear()
+    before = holdout.HOLDOUT_ACCESS_LOG.read_text(encoding="utf-8").count(chr(10)) if holdout.HOLDOUT_ACCESS_LOG.exists() else 0
+    orig, fc._fetch = fc._fetch, lambda *a, **k: pd.DataFrame({"date": ["2025-06-01"]})
+    try:
+        assert len(fc.load_full_history("TaiwanStockPrice", "2330")) == 1
+        holdout.assert_no_holdout_leakage(pd.DataFrame({"date": ["2025-06-01"]}), context="open 測試")
+        lock_before = holdout.HOLDOUT_LOCK.read_text(encoding="utf-8") if holdout.HOLDOUT_LOCK.exists() else None
+        for _ in range(2):
+            out = holdout.unlock_holdout_once(pd.DataFrame({"date": ["2024-12-31", "2025-06-01"]}), "測試", "測試")
+            assert list(out["date"]) == ["2025-06-01"], out
+        after_lock = holdout.HOLDOUT_LOCK.read_text(encoding="utf-8") if holdout.HOLDOUT_LOCK.exists() else None
+        assert lock_before == after_lock, "開放模式不得改寫 HOLDOUT_LOCK.json"
+    finally:
+        fc._fetch = orig
+    after = holdout.HOLDOUT_ACCESS_LOG.read_text(encoding="utf-8").count(chr(10))
+    assert after - before >= 3, f"三種存取都要各記一筆，實際新增 {after - before}"
+    print("test_open_logs_not_refuse PASS")
 
 
 def test_default_refuses():
@@ -82,15 +122,19 @@ def test_audit_classifies_and_finds_no_uncapped_loader():
        591 筆命中全是註解日期戳記，那種報告沒有人會讀，等於沒有防線。
     """
     rep = hla.audit()
-    assert rep["counts"]["UNCAPPED_LOADER"] == 0, \
+    # 先.一五五-1：開放期間未 cap 呼叫是允許的，只列數字不擋；關閉模式才要求 0。
+    if holdout.HOLDOUT_OPEN:
+        print(f"  （開放模式：未 cap loader 呼叫 {rep['counts']['UNCAPPED_LOADER']} 筆，只記錄）")
+    assert holdout.HOLDOUT_OPEN or rep["counts"]["UNCAPPED_LOADER"] == 0, \
         f"出現未經允許的未 cap loader 呼叫：{[f for f in rep['findings'] if f['kind'] == 'UNCAPPED_LOADER']}"
-    assert rep["counts"]["AFTER_VAL_END_IN_PROSE"] > rep["counts"]["AFTER_VAL_END"], \
+    # 開放後程式裡寫 2025 起日期是正常的（例：紙上優化軌補跑 2025～），高風險計數不再有意義，只在關閉模式檢查分級。
+    assert holdout.HOLDOUT_OPEN or rep["counts"]["AFTER_VAL_END_IN_PROSE"] > rep["counts"]["AFTER_VAL_END"], \
         f"分級失效：高風險 {rep['counts']['AFTER_VAL_END']} 不該多於訊息文字 {rep['counts']['AFTER_VAL_END_IN_PROSE']}"
     assert not rep["unparsable"], f"有檔案解析不了，等於沒掃到：{rep['unparsable']}"
     assert rep["val_end"] == VAL_END
     print(f"test_audit_classifies_and_finds_no_uncapped_loader PASS"
           f"（掃 {rep['files_scanned']} 檔，高風險 {rep['counts']['AFTER_VAL_END']} 筆、"
-          f"訊息文字 {rep['counts']['AFTER_VAL_END_IN_PROSE']} 筆、未cap呼叫 0 筆）")
+          f"訊息文字 {rep['counts']['AFTER_VAL_END_IN_PROSE']} 筆、未cap呼叫 {rep['counts']['UNCAPPED_LOADER']} 筆）")
 
 
 def test_allowlist_blocks_non_allowlisted_caller():
@@ -127,9 +171,15 @@ def test_allowlist_passes_for_400_script():
 
 
 def main() -> int:
-    tests = [test_default_refuses, test_allow_holdout_warns_and_names_caller,
+    def closed(fn):
+        def w():
+            with _closed():
+                fn()
+        w.__name__ = fn.__name__ + "（關閉模式）"
+        return w
+    tests = [test_open_logs_not_refuse, closed(test_default_refuses), closed(test_allow_holdout_warns_and_names_caller),
              test_load_dev_still_caps, test_audit_classifies_and_finds_no_uncapped_loader,
-             test_allowlist_blocks_non_allowlisted_caller, test_allowlist_passes_for_400_script]
+             closed(test_allowlist_blocks_non_allowlisted_caller), closed(test_allowlist_passes_for_400_script)]
     failed = []
     for t in tests:
         try:

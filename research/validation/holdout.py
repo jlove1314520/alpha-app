@@ -42,6 +42,16 @@ VAL_END = "2024-12-31"     # inclusive. VAL = (TRAIN_END, VAL_END]
 # that passes, which is the point: it should always be "the real, not-yet-seen future"
 # relative to whenever a strategy's train/val work was actually done.
 
+# ══ 先.一五五-1（2026-11-06，Cowork 收件匣 039；總司令本人 2026-11-06 回覆「039 全部照做，不用再問我」）══
+# 研究方針轉向「找最優、優化後直接上紙上測試」：保留資料（2025-01 起）開放用於優化與回測，
+# 紙上前向測試本身就是新的驗證。守門由「擋」改成「記錄」：
+#   - assert_no_holdout_leakage()：讀到 VAL_END 之後的資料 → 記一筆到 HOLDOUT_ACCESS_LOG、不 raise。
+#   - unlock_holdout_once()：不再因「已用過」而拒絕，記錄後照常回傳 2025 起的切片（不改 HOLDOUT_LOCK.json）。
+#   - finmind_client.load_full_history()：不帶 allow_holdout 也放行（照樣印一行、記一筆）。
+# 仍然要遵守、守門員不會替你做的（039 A3）：只用當時看得到的資料（公告日／PIT）、成本照實扣、下市照實、漲跌停照實。
+# 要改回「擋」：把 HOLDOUT_OPEN 改成 False，下面所有舊行為（含 ALLOWED_HOLDOUT_READERS 收窄）原封不動恢復。
+HOLDOUT_OPEN = True
+
 # 2026-09-26 守.一裁示：unlock_holdout_once()成功後，is_holdout_consumed()==True
 # 是「holdout這個資源本身」的全域一次性狀態，但總司令核准的解鎖範圍只限#400候選
 # （dividend_yield_v1_common×帳戶70/30），不是全專案。這份清單就是把「資源已解鎖」
@@ -109,6 +119,36 @@ def _caller_is_allowlisted() -> bool:
 _RESEARCH_DIR = Path(__file__).parent.parent
 HOLDOUT_LOCK = _RESEARCH_DIR / "HOLDOUT_LOCK.json"   # committed to git -- the lock must survive
 HOLDOUT_LOG = _RESEARCH_DIR / "HOLDOUT_LOG.md"       # committed to git -- permanent audit trail
+# 先.一五五-1：開放後每次讀到保留期資料記一行（本機、不進 git：回測一跑就是幾千次，進 git 只會灌爆 diff）。
+# 同一個行程內同一個呼叫檔＋同一種動作只記一次。
+HOLDOUT_ACCESS_LOG = _RESEARCH_DIR / "data" / "holdout_access.jsonl"
+_ACCESS_SEEN: set = set()
+
+
+def _external_caller() -> str:
+    """呼叫鏈上第一個不是 holdout.py／finmind_client.py 的檔案:行號。"""
+    for fi in inspect.stack()[1:]:
+        name = Path(fi.filename).name
+        if name not in ("holdout.py", "finmind_client.py"):
+            return f"{name}:{fi.lineno}"
+    return "?"
+
+
+def log_holdout_access(kind: str, context: str = "", max_date=None) -> None:
+    """先.一五五-1：記錄一次保留期資料存取。自身失敗只印警告，不影響回測（十二節：守門員不可讓主流程崩潰）。"""
+    try:
+        caller = _external_caller()
+        key = (kind, caller.split(":")[0])
+        if key in _ACCESS_SEEN:
+            return
+        _ACCESS_SEEN.add(key)
+        HOLDOUT_ACCESS_LOG.parent.mkdir(parents=True, exist_ok=True)
+        row = {"ts": datetime.now(timezone.utc).isoformat(timespec="seconds"), "kind": kind,
+               "caller": caller, "context": context, "max_date": None if max_date is None else str(max_date)[:10]}
+        with HOLDOUT_ACCESS_LOG.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    except Exception as e:  # noqa: BLE001 — 記錄失敗不得擋回測
+        print(f"[holdout] 存取記錄寫入失敗（不影響執行）：{e}", flush=True)
 
 
 def cap_to_dev(df: pd.DataFrame, date_col: str = "date") -> pd.DataFrame:
@@ -168,6 +208,9 @@ def assert_no_holdout_leakage(df: pd.DataFrame, date_col: str = "date", context:
     if df.empty or date_col not in df.columns:
         return
     max_date = df[date_col].max()
+    if pd.Timestamp(max_date) > pd.Timestamp(VAL_END) and HOLDOUT_OPEN:
+        log_holdout_access("assert_no_holdout_leakage", context, max_date)  # 先.一五五-1：記錄、不擋
+        return
     if pd.Timestamp(max_date) > pd.Timestamp(VAL_END):
         narrowed_note = (
             " (holdout已被合法解鎖過，但本次呼叫鏈上未出現ALLOWED_HOLDOUT_READERS"
@@ -199,6 +242,11 @@ def unlock_holdout_once(df: pd.DataFrame, reason: str, approved_by: str, date_co
         raise ValueError("approved_by is required -- this must be a recorded human decision")
 
     ts = datetime.now(timezone.utc).isoformat()
+
+    if HOLDOUT_OPEN:  # 先.一五五-1：開放期間不再一次性；記錄後照常回傳，不動 HOLDOUT_LOCK.json
+        log_holdout_access("unlock_holdout_once", f"{reason}｜{approved_by}")
+        dates = pd.to_datetime(df[date_col])
+        return df[dates > pd.Timestamp(VAL_END)].copy()
 
     if is_holdout_consumed():
         prior = json.loads(HOLDOUT_LOCK.read_text(encoding="utf-8"))

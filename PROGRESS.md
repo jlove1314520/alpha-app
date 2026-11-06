@@ -11,6 +11,18 @@
 - **同時段**互動視窗在做 先.一五五-1（CLAUDE.md、PROGRESS.md 等未提交），本輪 commit 只含自己的變更、沒有掃進對方的檔案。
 - BLOCKED：本輪無新增。
 
+## 2026-11-06 21:0x～21:3x 互動視窗：收件匣 039 A 段——保留資料開放、守門改記錄、研究兩軌（先.一五五-0／1）
+
+- **為什麼**：Cowork 收件匣 039 轉述總司令方針「找最優、優化後直接上紙上測試，用數據說話」。11/04 先停下問（碰到當時的停下白名單：保留資料、既有關卡門檻）；總司令本人 11/06 回覆「039 全部照做，不用再問我」。B 段研究工作 Cowork 已透過裝置橋接派給 DevQueue（先.一五〇／一五二／一五四，已在跑）。
+- **改了什麼**：
+  - `research/validation/holdout.py`：`HOLDOUT_OPEN=True`，讀到 2025 起資料只記錄到本機 `research/data/holdout_access.jsonl`、不擋，`HOLDOUT_LOCK.json` 不改；`research/finmind_client.py::load_full_history()` 開放期間不帶旗標也放行。開關改回 False，舊行為全部恢復。
+  - `scripts/dev_queue_runner.py`：守門員不再因 holdout 字樣擋（`GUARD_HOLDOUT_BLOCK=False`）；研究帽提示詞改兩軌，多重比較／DSR／N／第 11 關／事前登記只當參考欄位；前向上限 14 取消、紙上優化軌上限 30。
+  - CLAUDE.md（零之一、零之二、六、七之三新增「研究兩軌」、八）、`research/CONSTITUTION.md`、`research/FORWARD_CANDIDATES.md` 加註；舊文劃線保留供稽核。
+  - 自測改寫：holdout_guard_test 7/7、selftest_display_only_files 7/7、selftest_dev_queue_guard*／idle_fallback 全過。
+- **沒變的**：真錢分段規則、八節安全紅線；回測要算對（PIT、成本、下市、漲跌停）；既有 14 支前向模擬照原規則跑完。
+- **新派 DevQueue**：先.一五五-2（墓園重審第一批補跑 2025 起）、先.一五五-3（墓園重審第二批，其餘試驗逐族）。
+- **冒煙**：`node scripts/smoke_test.mjs` 186/186 全過。本次 commit 的 PENDING_QUEUE.md 一併帶到 DevQueue 進行中輪次尚未提交的 1lx 標 [x]、新增 1ly／1lz 三行（十三-5 照實記錄）。
+
 ## 2026-11-06 20:31～20:53 DevQueue 20261106-203101（開發帽）先.一五四-1b 研究室「紙上優化軌」區上線
 
 等待總司令審閱：8 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪沒有新增）。

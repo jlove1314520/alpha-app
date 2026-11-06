@@ -45,7 +45,8 @@ AW = """# 等待
 ## 等前置條件
 """
 c = D._default_release_candidates(now, AW)
-check("1 只選等 >24 小時且不碰排除類別的列（含 21:2x 寫法）", [x[0] for x in c] == ["先.甲 前向草稿"], str(c))
+# 先.一五五-1（收件匣 039）：保留資料開放，「要讀 holdout」不再是排除類別
+check("1 只選等 >24 小時且不碰排除類別的列（含 21:2x 寫法）", [x[0] for x in c] == ["先.甲 前向草稿", "先.丙 要讀 holdout"], str(c))
 
 # 4. 先.一四九-1：說明欄的順帶字眼不該擋（11/01～11/03 1hb／1hn／1gt 實例），項目欄與強排除字照擋
 AW4 = """## 等待中（目前：6件）
@@ -69,6 +70,8 @@ log = "\n".join(f"===== DevQueue cycle end: 2026-10-27 0{i}:01:02 cycle_id=x rea
 check("2a 連續空轉 2 輪（YIELD 不算不打斷）", D._consecutive_idle_rounds(log) == 2, str(D._consecutive_idle_rounds(log)))
 check("2b 最後一輪 OK → 0", D._consecutive_idle_rounds(log + "\n===== DevQueue cycle end: x y cycle_id=z reason=OK exit=0 =====") == 0)
 
+# 先.一五五-1：3 系列只留一個可放行候選（拿掉「要讀 holdout」那列，它現在也會被放行）
+AW = chr(10).join(l for l in AW.split(chr(10)) if "先.丙" not in l)
 with tempfile.TemporaryDirectory() as td:
     td = Path(td)
     _state = {}

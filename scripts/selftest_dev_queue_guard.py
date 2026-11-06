@@ -47,7 +47,10 @@ check("同一括號內的做法句仍會觸發", blocked("**某項**〔現況：
 check("否定詞超過 8 字之後的命中仍觸發", blocked("**某項 不做這件事，但之後要再請總司令登入**"))
 # ④ 真正的不可逆
 check("刪除資料庫仍擋", D.guard_hits("**某項 刪除 alpha.db 的舊資料表**")["irreversible"])
-check("解鎖 holdout 仍擋", D.guard_hits("**某項 解鎖 holdout 再測一次**")["irreversible"])
+check("先.一五五-1：正式預設解鎖 holdout 不擋（收件匣 039）", not D.GUARD_HOLDOUT_BLOCK and not D.guard_hits("**某項 解鎖 holdout 再測一次**")["irreversible"])
+_hb, D.GUARD_HOLDOUT_BLOCK = D.GUARD_HOLDOUT_BLOCK, True
+check("開關改回 True 時解鎖 holdout 仍擋", D.guard_hits("**某項 解鎖 holdout 再測一次**")["irreversible"])
+D.GUARD_HOLDOUT_BLOCK = _hb
 # ⑤ 守門員自身出錯 → 降級回整句比對
 orig = D.guard_scope
 D.guard_scope = lambda _c: (_ for _ in ()).throw(RuntimeError("故意弄壞"))

@@ -428,6 +428,10 @@ _GUARD_INBOX_REF = re.compile(r"收件匣\s*\d{3}")
 # 「讀 …期間資料的方式清查」「`…_READERS` 白名單」這類只提到名詞的唯讀條目也被擋（10/28 先.一三五-1aa）。
 # 改為：同一句（以 ；;。換行 切）出現下列動詞才算不可逆；檔名、常數名、函式名這類沒有動詞的提及不算。
 # 真要解鎖的寫法（「解鎖 …跑最終檢定」「呼叫 unlock_…_once()」）照擋；守門員不是唯一防線（解鎖旗標仍要本人建立）。
+# 先.一五五-1（2026-11-06，Cowork 收件匣 039，總司令本人確認「039 全部照做」）：保留資料（2025-01 起）開放用於優化與回測，
+# 不再是停下條件。GUARD_HOLDOUT_BLOCK=False → 不可逆組命中 hold+out 一律不算（其他不可逆字照舊）。
+# 要改回舊的擋法：設 True（下面 GUARD_HOLDOUT_VERB_ON 的動詞判斷會照舊生效）。自測：selftest_dev_queue_guard_holdout_verb.py。
+GUARD_HOLDOUT_BLOCK = False
 GUARD_HOLDOUT_VERB_ON = True  # 自測用開關（selftest_dev_queue_guard_holdout_verb.py 比對修前／修後），正式一律 True
 _GUARD_HOLDOUT_VERBS = re.compile(r"解鎖|擴大|動用|開封|啟用|提前|unlock|跑.{0,8}(回測|檢定)|最終檢定", re.I)
 
@@ -462,6 +466,8 @@ def _guard_hit_ignored(text: str, mt: "re.Match", irreversible: bool) -> bool:
         clause = re.split(r"[，。；;、\n]", text[mt.end():])[0][:30]
         if _GUARD_SAFE_DELETE.search(clause):
             return True
+    if irreversible and not GUARD_HOLDOUT_BLOCK and mt.group(0) == "hold" + "out":
+        return True
     if irreversible and GUARD_HOLDOUT_VERB_ON and mt.group(0) == "hold" + "out":
         a = max(text.rfind(c, 0, p) for c in "；;。\n") + 1
         ends = [k for k in (text.find(c, mt.end()) for c in "；;。\n") if k >= 0]
@@ -1155,18 +1161,22 @@ def research_hat_block(crunch: bool) -> str:
     return f"""## 本輪帽子：研究／驗證（CLAUDE.md 九、七之三、十三；先.一二七-A 研究軌併入 DevQueue）
 開工先寫一句「本輪戴研究帽」或「本輪戴驗證帽」，**擇一**：研究帽產物＝SPEC／PREREG／因子程式碼；
 驗證帽產物＝`TRIALS_LEDGER` 判定。**做與判分離：同一輪不得既開發策略又宣告它有效。**{tail}
-研究紀律（照舊，無例外）：
-1. **事前登記**：任何回測／單發前，PREREG 先定稿 commit，再用 `research/trial_registry.py` 的
-   `register_trial()` 登記（未登記的判定一律無效），之後重跑 `research/selection_bias_ledger.py` 更新 N；
-   自由參數 >5 個照第 11 關計 N。只跑一次，不得看完結果回去調參重測。
+研究分兩軌（先.一五五-1，Cowork 收件匣 039 已定案；CLAUDE.md 七之三「研究兩軌」）：
+- **紙上優化軌（主軸）**：目標＝找回測最好的版本（報酬、曲線、Sharpe、回撤綜合排名）。可以掃參數、換持有期、組合訊號、
+  加止盈止損與槓桿（1×／1.5×／2×／3×，期貨／融資／槓桿 ETF 照實算成本與保證金）。**多重比較懲罰、DSR、Bonferroni、N 計數、
+  第 11 關參數懲罰、事前登記單發都只當參考欄位列出，不當判死理由**。保留資料（2025-01 起）可以用（守門只記錄、不擋）。
+  優化到最好的版本直接上紙上追蹤（上限 30 支，最差的可汰換，汰換照實記錄），不用 PREREG、不用 register_trial。
+- **既有 14 支前向模擬（PREREG 軌）**：照原規則跑完，不停、不改，當對照組；這一軌的 PREREG／N 規則照舊。
+不打折的紀律（回測要算對，否則紙上一定對不起來）：
+1. 只用當時看得到的資料（公告日／PIT、rolling／expanding 門檻，不偷看未來）；成本照實扣；下市股照實處理；漲跌停買不到／賣不掉照實處理。
 2. **試驗帳本單一寫入者**：`TRIALS_REGISTRY.jsonl`／`TRIALS_LEDGER.md` 只能經 `register_trial()` 寫，不准手改。
-   描述性研究不登記試驗時，照條目指示 append `research/PROGRESS_HEARTBEAT.jsonl` 當心跳。
+   紙上優化軌的結果寫 `research/REAUDIT_OPTIMIZED.md`／`data/paper_opt_track.json` 等自己的檔，或照條目指示 append `research/PROGRESS_HEARTBEAT.jsonl` 當心跳。
 3. **核心研究檔案只能互動視窗改**（十三節）：{core} 可以讀、可以呼叫，**不准改原始碼**。
    需要改就把提案（發現什麼／建議怎麼改／影響哪些判定）寫進 PENDING_QUEUE 新條目並標「（互動視窗執行）」，
    這一項需要那個修改才能繼續的話，用 `block` 標阻塞，換下一項。
-4. holdout（2025+）不得解鎖；天條一 MDD>50% 直接 `VIOLATES_SURVIVAL`；第 8 關用 `evaluate_gate8()`；
+4. 天條一 MDD>50% 照舊標 `VIOLATES_SURVIVAL`（紙上優化軌：先加條件把回撤壓到 50% 內再上紙上）；
    含放空腿的數字附資料缺陷但書；美股結論附存活者偏誤但書。
-5. FAIL／不可行一律附至少 3 個變形方向（七之三「失敗必附變形方向」），寫進 `STRATEGY_GRAVEYARD.md`。
+5. 結果不好不寫「不可行／沒 edge」就停：**優化到最好再上紙上**，用紙上數據說話；真的掃完都不好，照實寫最好的那組數字與已試過的方向。
 6. 研究帽不改 `index.html`；冒煙測試照樣要跑（全過才 commit）。"""
 
 
@@ -1181,9 +1191,10 @@ DEFAULT_RELEASE_HOURS = 24
 # 先.一四九-1（收件匣 039）：原本整列比對 → 說明欄的順帶字眼（「Disable、不刪除」「claude 登入過期」「門檻 99.98 百分位」）
 # 讓 1hb／1hn／1gt 等提案過了 24 小時也從沒被放行。改成：強排除字（holdout／真錢／實盤）照舊比整列；
 # 其餘排除字只比「項目」欄（要總司令動手的列，項目欄一律寫「請總司令」）；「門檻」改只認關卡門檻。
-DEFAULT_RELEASE_EXCLUDE_ROW = re.compile(r"holdout|保留資料|真錢|實盤")
+# 先.一五五-1（收件匣 039）：保留資料開放，holdout／保留資料不再是排除字。
+DEFAULT_RELEASE_EXCLUDE_ROW = re.compile(r"真錢|實盤")
 DEFAULT_RELEASE_EXCLUDE = re.compile(
-    r"holdout|保留資料|真錢|實盤|下單|刪除|清除|drop|不可逆|密碼|登入|本人|親手|請總司令|付費|採購|關卡門檻|通過門檻|GATE\d|violation_rate|非阻塞")
+    r"真錢|實盤|下單|刪除|清除|drop|不可逆|密碼|登入|本人|親手|請總司令|付費|採購|關卡門檻|通過門檻|GATE\d|violation_rate|非阻塞")
 _AWAIT_TIME = re.compile(r"(20\d\d-\d\d-\d\d) (\d\d):(\d|x)(\d|x)")
 
 
@@ -1251,8 +1262,8 @@ def _idle_fallback_prompt() -> bool:
 照 `C:\\alpha\\alpha-app\\CLAUDE.md`「零之二、24 小時預設放行」執行：
 1. 讀 PENDING_QUEUE.md 對應條目與草稿／提案原文，找出**作者自己標的建議選項**（「建議」「推薦」「甲（建議）」之類）。
    **找不到明確的建議選項就不要自己挑**：`python scripts/dev_queue_runner.py block "預設放行：草稿沒有標建議選項"`，收工。
-2. 再檢查一次：執行內容若涉及解鎖或擴大 holdout、真錢、刪除／不可逆、密碼或本人登入、新增付費資料、改既有關卡門檻 → 不做，同上 block。
-3. 照建議選項執行（PREREG 定稿＋register_trial、程式、文件……照該條目原本的流程），研究紀律照舊（不碰 holdout、照實計 N）。
+2. 再檢查一次：執行內容若涉及真錢、刪除／不可逆、密碼或本人登入、新增付費資料、改既有關卡門檻 → 不做，同上 block。
+3. 照建議選項執行（PREREG 定稿＋register_trial、程式、文件……照該條目原本的流程），回測照舊要算對（PIT、成本、下市、漲跌停照實）。
 4. 條目與 PROGRESS 都標 **[預設放行]**，寫明「Cowork 可推翻，推翻時照 PREREG 修訂規則處理」；AWAITING 該列移到「已結案審閱紀錄」並註明 [預設放行]。
 5. 冒煙全過再 commit。
 """, encoding="utf-8", newline="\n")
@@ -1268,10 +1279,9 @@ def _idle_fallback_prompt() -> bool:
 - **只限台股個股層級**（不要 ETF、不要高股息），**優先前向版**（與模擬 J／K／L 同框架、2027-01-04 起跑，參數 ≤5）；
 - 每條寫成 PENDING_QUEUE `- [ ]` 新條目（標「DevQueue 可執行」、附心跳位置與來源：墓園變形方向／LEADS／資料缺口等），至少 3 條；
 - 需要 Cowork 審的草稿送 AWAITING（24 小時後適用預設放行）；
-- 不碰 holdout、不算任何報酬、不登記試驗（登記等定稿）。
-- **前向模擬上限＝14（現有）＝滿**（CLAUDE.md 零之二⑤，收件匣 025／027：任何一支判定或終止前不新增登記）：先看 `research/FORWARD_CANDIDATES.md` 頂端「進行中」計數；
-  **上限已滿時只把候選寫進該檔候選表（機制、來源、資料、參數草案），不寫可登記的 PREREG 草稿、不送 AWAITING**，
-  這一輪改補其他類（資料缺口、維運、既有模擬的追蹤程式／自測）。
+- 紙上優化軌候選（收件匣 039）可以直接寫成「優化→上紙上」條目，不用等 PREREG；PREREG 前向軌照下面規則。
+- **前向模擬上限 14 已取消**（收件匣 039）：新候選優先走紙上優化軌（上限 30 支，計數看 `data/paper_opt_track.json`），
+  滿 30 支時把表現最差的汰換並照實記錄；舊 PREREG 前向軌 14 支照原規則跑完當對照組。
 冒煙全過再 commit。
 """, encoding="utf-8", newline="\n")
             _safe_print(f"IDLE_REPLENISH：連續 {idle} 輪空轉 → 候選補件")
@@ -1492,7 +1502,7 @@ def build_prompt() -> int:
 
 ## 只有下面這五種情況才停，其餘一律自行裁量繼續做
 - 需要總司令親自操作（登入、實機測試、花錢、要他裁示）
-- 不可逆動作（刪資料、解鎖 holdout、真實下單）
+- 不可逆動作（刪資料、真實下單）
 - 要修改既有已驗證關卡的通過門檻（GATE1~6、violation_rate門檻等）
 - 法遵疑慮（ToS、爬蟲、付費資料、robots.txt）
 - 同一項試了兩次還是失敗
