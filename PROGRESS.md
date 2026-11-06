@@ -1,3 +1,19 @@
+## 2026-11-07 05:01～ DevQueue 20261107-050102（開發帽）先.一三五-1mf 已不在上市櫃的代號不出本益比
+
+等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
+
+- **先.一三五-1mf ✅**（零外部請求，只讀本機檔）：
+  - 查證：2758 路易莎咖啡不在 `listed_universe.json` 任何名單（active／inactive／suspended／suspected_halt），`last_seen` 沒有它（條目寫的 2024-12-31 其實是 `last_quoted`）；產業來源是興櫃名冊。`quotes_tw.json` 沒有報價，但 `quotes_all_tw.json` 還留著 2024-12-31 收盤 90.3（stale_days 675）。
+  - 稽核：`check_e_pe()` 只稽核「官方今日有收盤價」的代號，2758 不在範圍，不用改。
+  - **查出真 bug**：App 估值卡 `peValueFor()` 用 `quotes_all_tw.json`，會拿舊收盤算本益比——5262 立達會用 2024-12-31 的價出推導本益比；已下市股的證交所本益比也是當年舊值（2837 停 2014-09-01 等 8 檔），會混進同產業百分位。上一輪 1me 給 2758 標了半年報後，下一班 market.yml 重產時 2758 也會變成用 2024 年價格算出本益比，這次一併擋掉。
+  - 修法：`app-picks.js` 新增 `freshCloseFor()`：收盤落後超過 30 天（沿用名冊 `inactive_after_days`）就整檔不出本益比，估值卡現價顯示「—」。[自行裁量] 門檻沿用既有 30 天，沒有另訂。
+  - 證據：node 載入實際資料檔：有本益比 1558 檔、落後超過 30 天的 0 檔（修前 9 檔）；2330 照舊 25.96（證交所）。
+  - 全市場清單（不在名冊或 last_seen 早於 10/07、但有 2026 財報）8 檔：2758、2760、5262、6565、6812、6911、7752（皆興櫃）、8183 精星，已寫進條目。
+- **順手修 bug：冒煙 #39 稽核閘門 FAIL**（程式碼層級違規 1 筆）：上一輪 1me 新增的 `load_month_revenue_map()` 直接 `float(r["revenue"])`，遇千分位逗號會變空值（稽核 g_comma_parsing）。改用同檔既有的 `_num()`。`scripts/selftest_half_year_ttm.py` 全過；[自行裁量] 重跑 `python scripts/data_audit.py` 一次（TWSE／TPEx 全市場快照各 1 次，同既有排程 AlphaDataAudit），報告 05:23 重產：code_free_violations 0、違規率 0%。另成一個 commit。
+- 冒煙：`node scripts/smoke_test.mjs` rc=0、186 項 [x]、沒有未過項（05:24 重跑）。中途一次因不小心兩支冒煙同時跑導致頁面崩潰，非程式問題，已單獨重跑。開發帽產物＝本冒煙結果。
+- 佇列深度：`- [ ]` 29 項、DevQueue 可執行非研究 6 項，兩個門檻都達到，不補件。
+- 收工原因：權威清單下一項是 先.一五五-3 [研究]，一輪只戴一頂帽子，留給下一輪研究帽。
+
 ## 2026-11-07 03:31～ DevQueue 20261107-033102（開發帽）先.一三五-1me 仍是半年報的 6 檔近四季 EPS
 
 等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。

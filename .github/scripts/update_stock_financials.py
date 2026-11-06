@@ -764,8 +764,9 @@ def load_month_revenue_map(path: Path | None = None) -> dict:
             # month_revenue 優先；只保留 8 個月的檔再用 revenue_history_scoring（26 個月）補（先.一三五-1me）
             for r in ((v or {}).get("month_revenue") or []) + ((v or {}).get("revenue_history_scoring") or []):
                 try:
-                    if r.get("revenue") is not None:
-                        m.setdefault((int(r["year"]), int(r["month"])), float(r["revenue"]))
+                    rev = _num(r.get("revenue"))  # 千分位安全（稽核 g_comma_parsing）
+                    if rev is not None:
+                        m.setdefault((int(r["year"]), int(r["month"])), rev)
                 except (TypeError, ValueError, KeyError):
                     continue
             if m:
