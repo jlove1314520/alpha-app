@@ -48,3 +48,4 @@
 - **雲端 STATUS 不會有這列**：`.gitignore` 第 103 行排除、git 未追蹤；`git ls-files --others --ignored --exclude-standard data/*.json` 只列出這一個檔。
 - **本機 STATUS 會誤列**：`generate_status_json.py::build_data_files()` 用 `DATA_DIR.glob("*.json")` 掃磁碟，不分追蹤與否 → 本機手動跑時多一列、且必然 stale（門檻 24 小時，檔案只在有人觸發時才更新）。這是本機 STATUS 跟雲端 STATUS 不一致的來源之一，不是資料停擺。
 - **後續**：開提案條目 先.一三五-1kh-v3a（甲：`build_data_files` 跳過被 .gitignore 排除的檔＝結構性、之後新的本機檔也不會混進來；乙：只把這個檔列 `GENERIC_SKIP_STALE`＝static；丙：不改）。建議甲。
+- **2026-11-06 [預設放行] 已執行甲**（零之二，約 28.2 小時無 Cowork 裁示；Cowork 可推翻）：`generate_status_json.py::_gitignored_data_names()`＋`build_data_files()` 跳過；git 失敗 fail open。

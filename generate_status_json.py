@@ -727,10 +727,36 @@ def describe_scores(path: Path) -> dict:
 DATA_FILES_DEFAULT_SOURCE = "通用解析（讀 generated_at）"
 
 
+def _gitignored_data_names() -> set[str]:
+    """先.一三五-1kh-v3a 甲［預設放行］：被 .gitignore 排除、git 未追蹤的 data/*.json 檔名。
+
+    這類檔只存在本機（例如本機服務寫的 app_errors_summary.json），雲端 STATUS 本來就沒有，
+    本機手動跑時不該混進 data_files 被判 stale。守門員規則（CLAUDE.md 十二節）：
+    git 不可用／指令失敗一律回空集合（fail open＝照舊全列），不中斷 STATUS 產生。
+    """
+    try:
+        r = subprocess.run(
+            ["git", "ls-files", "--others", "--ignored", "--exclude-standard", "--", "data/"],
+            cwd=REPO_ROOT, capture_output=True, text=True, encoding="utf-8", timeout=20,
+        )
+        if r.returncode != 0:
+            print(f"[warn] 讀 .gitignore 排除清單失敗（exit {r.returncode}），data_files 照舊全列", file=sys.stderr)
+            return set()
+        return {Path(line.strip()).name for line in r.stdout.splitlines()
+                if line.strip().startswith("data/") and line.strip().count("/") == 1}
+    except Exception as e:  # noqa: BLE001 — 守門員自己失敗只降級成警告
+        print(f"[warn] 讀 .gitignore 排除清單失敗（{type(e).__name__}），data_files 照舊全列", file=sys.stderr)
+        return set()
+
+
 def build_data_files() -> list[dict]:
     out = []
+    ignored_names = _gitignored_data_names()
     for path in sorted(DATA_DIR.glob("*.json")):
         if path.name == "STATUS.json":
+            continue
+        if path.name in ignored_names:
+            # 先.一三五-1kh-v3a 甲［預設放行］：本機專用、.gitignore 排除的檔不列（雲端本來就沒有）
             continue
         if path.name == "rate_limit_state.json":
             # 2026-08-28新增：這個檔案不是「App資料」，是跨process共用的節流/

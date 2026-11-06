@@ -1,3 +1,14 @@
+## 2026-11-06 11:4x DevQueue（維運帽）零之二預設放行 先.一三五-1kh-v3a：**[預設放行] 照作者建議甲執行**
+
+等待總司令審閱：8 件（`research/AWAITING_REVIEW.md`「等待中（目前：8件）」；1kh-v3a 移到已結案並標 [預設放行]）。
+
+- **依據**：提案 11/05 07:2x 送審，約 28.2 小時無 Cowork 裁示；作者明標「甲（建議）」；不涉及 holdout／真錢／刪除／密碼／付費資料／關卡門檻。**Cowork 可推翻，推翻時照 PREREG 修訂規則處理**（git revert 即還原）。
+- **做了什麼**：`generate_status_json.py` 新增 `_gitignored_data_names()`（`git ls-files --others --ignored --exclude-standard -- data/`），`build_data_files()` 跳過被 .gitignore 排除、git 未追蹤的 data/*.json——本機手動產 STATUS 不再多列 `data/app_errors_summary.json` 並誤判 stale；雲端本來就沒有這類檔，不受影響。
+- **守門員規則（十二節）**：git 不可用或指令失敗 → 回空集合（fail open，照舊全列）＋印一行警告，不中斷 STATUS 產生。
+- **證據**：實測排除清單＝`{app_errors_summary.json}`；data_files 131 列、不含該檔；把 `subprocess.run` 換成拋 FileNotFoundError 的假函式 → 回 `set()`、只印警告。本輪沒有重產 `data/STATUS.json`（避免打未登入 GitHub API，照上一輪做法）。
+- **冒煙**：第 1 次 184 PASS／1 FAIL（#45「Resulting promise was garbage collected」，即 1lr 記錄的偶發問題，本次改動沒碰 index.html／冒煙腳本）；重跑第 2 次 **185 PASS／0 FAIL、EXIT 0**。
+- 影響檔案：`generate_status_json.py`、`research/AWAITING_REVIEW.md`、`PENDING_QUEUE.md`、`docs/DATA_FILES_STALE_AUDIT_20261104.md`、`PROGRESS.md`。
+
 ## 2026-11-06 11:1x DevQueue（維運帽）先.一三五-1kd-g＋先.一三五-1lb 兩項時間閘驗收
 
 等待總司令審閱：9 件（`research/AWAITING_REVIEW.md`「等待中（目前：9件）」，本輪無增減）。
