@@ -1,3 +1,15 @@
+## 2026-11-07 07:01～ DevQueue 20261107-070102（維運帽）先.一三五-1mc 舊報價列是否被當成真漲跌顯示
+
+等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
+
+- **先.一三五-1mc**（`- [x]`，只讀本機、零外部請求）：
+  - 寫入者：`.github/scripts/update_price_history.py` 從 price_history 每檔最後兩筆衍生 `data/quotes_all_tw.json`；落後列照 2026-09-17 稽核.四.1 設計保留並標 is_stale／stale_days。現在 505 列日期早於 2025，其中 39 列 close＝0（多數 change_pct −100 或 null）。
+  - 已擋住（①）：自選股／個股頁的 `app.js` resolveQuote 第 3 層（擋 close≤0、−100%，is_stale 不顯示漲跌）、本益比 freshCloseFor（先.一三五-1mf）、sparklines 有 stale_dates 標日期。
+  - **沒擋（②，純 bug 修）**：市場頁「類股成分股清單」`app-market.js` openSectorList 直接顯示 change_pct／turnover。名冊內 490 檔落後、454 檔落後 >30 天（例 6238 把 2020-06-10 的 +1.70% 當今日漲跌並參與排序）、32 檔 close＝0。改成：is_stale 或 close≤0 → 不顯示漲跌與成交值，改標「資料停在 YYYY-MM-DD」，排到最後。
+  - 冒煙：`node scripts/smoke_test.mjs` exit 0、186 項全過（07:17～07:26）。前兩次是已知的 Chromium「Target crashed」加上我設的 timeout 太短（完整跑要約 9 分鐘），測試本身中斷，沒有斷言失敗；確認沒有殘留冒煙行程後重跑全過。
+  - 維運帽產物：本項只改 App 顯示、沒動資料源，`data/STATUS.json` 本輪不更新。
+  - 下一項（先.一三五-1mc 回補季 EPS 放行）時間不夠（07:27 已過、冒煙要 9 分鐘），留給下一輪。
+
 ## 2026-11-07 06:01～ DevQueue 20261107-060102（研究帽）先.一五五-3 墓園重審第二批：第 1 批延長＋候選欄＋第 2 批 10 族
 
 等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。

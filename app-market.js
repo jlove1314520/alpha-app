@@ -51,13 +51,17 @@
       if(PICKS_CACHE&&PICKS_CACHE.stocks)scoreMap=Object.fromEntries(PICKS_CACHE.stocks.map(s=>[s.code,s.total_score]));
       const rows=codes.map(code=>{
         const q=quotes[code]||{};
-        return{code,name:companies[code].name||code,change_pct:q.change_pct,turnover:q.turnover,score:scoreMap[code]};
+        // 先.一三五-1mc：quotes_all_tw.json 保留落後列（is_stale，例 6238 停在 2020-06-10、6287 停在 2024-12-31 且 close=0、漲跌 −100%）。
+        // 落後的漲跌是舊日期算的、close≤0 是零成交，都不是今天的漲跌：不顯示漲跌與成交值，改標資料日期，排到最後。
+        const stale=q.is_stale===true||!(q.close>0);
+        return{code,name:companies[code].name||code,change_pct:stale?null:q.change_pct,turnover:stale?null:q.turnover,
+               stale_asof:stale&&q.as_of?String(q.as_of):null,score:scoreMap[code]};
       }).sort((a,b)=>(b.change_pct??-999)-(a.change_pct??-999));
       const ciAt=COMPANY_INFO_CACHE&&COMPANY_INFO_CACHE.meta&&COMPANY_INFO_CACHE.meta.generated_at;
       listEl.innerHTML='<div class="note" style="margin-bottom:8px">依股票產業分類分組，非TWSE官方指數完整成分股清單；共 '+rows.length+' 檔。產業分類'+(ciAt?_dataDateLabel(ciAt,'公司名冊非每日排程'):'資料日不明')+'。</div>'
         +rows.map(r=>{
           const chgCls=r.change_pct==null?'':(r.change_pct>=0?'pos':'neg');
-          const chgTxt=r.change_pct==null?'—':(r.change_pct>=0?'+':'')+r.change_pct.toFixed(2)+'%';
+          const chgTxt=r.change_pct==null?(r.stale_asof?'<span style="font-size:10px;color:var(--ink-3)">'+'資料停在 '+r.stale_asof.slice(0,10)+'</span>':'—'):(r.change_pct>=0?'+':'')+r.change_pct.toFixed(2)+'%';
           const turnTxt=r.turnover==null?'—':fmtLiquidity(r.turnover)+'元';
           const scoreTxt=r.score==null?'—':r.score.toFixed(1);
           return `<div class="row press" style="cursor:pointer" onclick="closeSectorSheet();openStock('${r.code}')">
