@@ -178,7 +178,7 @@ def build() -> dict:
         tracks.append({"id": fid, "kind": "single", "name": s["name"], "rule": s["rule"], "market": s["market"], "reproduced": ok,
                        "backtest": {"period": [str(cv.index[0].date()), str(cv.index[-1].date())], "cagr": round(g, 4), "mdd": round(m, 4),
                                     "points": weekly_points(cv) if ok else []},
-                       "paper": paper_block(start, today)})
+                       "paper": paper_block(start, today, fid)})
     eq = np.load(PQ / "best_equity.npy")
     cal = pd.read_csv(PQ / "panic_daily.csv", usecols=["date"])["date"]
     cal = cal[(cal >= "2007-05-15") & (cal <= "2024-12-31")].reset_index(drop=True)
