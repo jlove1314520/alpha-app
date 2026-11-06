@@ -1,3 +1,14 @@
+## 2026-11-06 13:3x DevQueue（維運帽）空轉補件：先.一三五-1lu（純 bug 修復）＋1lt＋1ls／1lu-a 時間閘
+
+等待總司令審閱：8 件（`research/AWAITING_REVIEW.md` 未變動）。前向模擬 14／14 已滿，照零之二⑤不新增候選、不寫 PREREG、不送候選 AWAITING。
+
+- **1lu（已做，純 bug 修復）**：market.yml push 撞車走 `rebase_resolve_conflicts.sh` 時，STATUS.json 取 main 版（常是 watchdog 一分鐘前寫的），把本班剛更新的檔標 stale。實例：11/06 01:52Z watchdog 重算時 `insider_transfer_tw_history.json`（01:51:50Z 已更新）、`us_index_close_history.json`（01:50:48Z）被標 stale、any_overdue＝true；01:53Z market 提交 62ef174e306 不含 STATUS.json，13:0x 台北仍誤標。修法：新增 `.github/scripts/refresh_status_after_rebase.py`（只重算只讀 repo 的 data_files／schedule_health＋status_lite，不重打 GitHub API），`market.yml` 只在衝突取捨後呼叫並另提交一筆；失敗只警告不擋 push（十二節）。會改寫的 `data/STATUS.json`、`data/status_lite.json` 已在同 job git add 清單（十節）。
+- **證據**：`scripts/selftest_refresh_status_after_rebase.py` 15 PASS／0 FAIL；本機 STATUS 複本實跑 2.0 秒，stale 5→3（剩 IBKR 三檔，Gateway 未登入，真過期）；`scripts/selftest_rebase_resolve_conflicts.sh` ALL PASS（未改）。
+- **1lt（查完無 bug）**：9 處讀 git 提交時間的腳本都用 epoch 或帶時區 ISO，無 `--date=format:` 被拿去計算。
+- **新時間閘**：1ls（11/09 盤前冒煙連跑 2 次驗 1lr；11:4x 那輪 #45 也出過同一個 GC 錯）、1lu-a（下一次衝突班雲端實地驗收，最晚 11/13）。
+- **冒煙**：185 PASS／0 FAIL、EXIT 0（511 秒）。
+- 影響檔案：`.github/scripts/refresh_status_after_rebase.py`（新）、`scripts/selftest_refresh_status_after_rebase.py`（新）、`.github/workflows/market.yml`、`PENDING_QUEUE.md`、`research/FORWARD_CANDIDATES.md`、`PROGRESS.md`。
+
 ## 2026-11-06 11:4x DevQueue（維運帽）零之二預設放行 先.一三五-1kh-v3a：**[預設放行] 照作者建議甲執行**
 
 等待總司令審閱：8 件（`research/AWAITING_REVIEW.md`「等待中（目前：8件）」；1kh-v3a 移到已結案並標 [預設放行]）。

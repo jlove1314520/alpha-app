@@ -530,7 +530,16 @@ jobs:
             git fetch origin main
             # 先.一三八-8：rebase 衝突時把衝突檔名寫成 annotation（run log 需 admin 權限才能讀，annotation 不用），下次能直接看到根因
             # 先.一三五-1kd-a 甲（2026-11-05 [預設放行]）：衝突時逐檔取捨（共用追蹤檔取 main、其他取本班）後繼續，不丟整班；解不了才 abort＋exit 1
-            git rebase origin/main || { echo "::warning::market.yml rebase衝突檔：$(git diff --name-only --diff-filter=U | paste -sd ' ')"; bash .github/scripts/rebase_resolve_conflicts.sh market.yml || { echo "rebase衝突無法自動取捨"; exit 1; }; }
+            RESOLVED=0
+            git rebase origin/main || { echo "::warning::market.yml rebase衝突檔：$(git diff --name-only --diff-filter=U | paste -sd ' ')"; bash .github/scripts/rebase_resolve_conflicts.sh market.yml || { echo "rebase衝突無法自動取捨"; exit 1; }; RESOLVED=1; }
+            # 先.一三五-1lu（純 bug 修復）：衝突時 STATUS.json 取 main 版（常是 watchdog 一分鐘前寫的），會把本班剛更新的檔標 stale；
+            # rebase 完成後只重算 data_files／schedule_health（只讀 repo、不連網）另提交一筆。失敗只警告、不擋 push（十二節）。
+            # 會改寫 data/STATUS.json、data/status_lite.json，兩者本來就在上方 git add 清單（十節）。
+            if [ "$RESOLVED" = 1 ]; then
+              python .github/scripts/refresh_status_after_rebase.py || true
+              git add data/STATUS.json data/status_lite.json || true
+              git diff --cached --quiet || git commit -m "STATUS.json 重算檔案新鮮度（rebase 衝突取 main 版後，先.一三五-1lu）" || true
+            fi
             sleep $((RANDOM % 6 + 3))
           done
           # 先.一四〇-11：run log 要 admin 權限才能讀，重試耗盡也寫 annotation（跟 rebase 衝突那條分得開），下次 exit 1 能直接看到是哪一種

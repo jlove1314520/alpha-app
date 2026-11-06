@@ -108,6 +108,8 @@
 
 2026-11-04 08:3x DevQueue 空轉補件：上限仍 14／14，本輪不新增候選、不寫 PREREG、不送候選 AWAITING；改補 gh token 失效影響範圍——1ke 本機 20:30 落地告警叫雲端推播被 401 擋掉（10/23、10/27～29 四天告警沒送出），改由本機 Web Push 備援（純 bug 修復，已做）、1kf 本機補班查雲端狀態失敗靜默改記心跳（純 bug 修復，已做）、1kg 實地驗收（時間閘：下一個告警日或新 PAT）。
 
+2026-11-06 13:3x DevQueue 空轉補件：上限仍 14／14，本輪不新增候選、不寫 PREREG、不送 AWAITING；改補 1lu market.yml rebase 衝突取 main 版 STATUS 誤標剛更新的檔 stale（純 bug 修復，已做）、1lt git 提交時間時區清查（無 bug）、1ls 盤前冒煙驗 1lr／1lu-a 雲端驗收（時間閘）。
+
 | 模擬 | 程式代號 | 內容 | 試驗 | 起跑 | 判定 |
 |---|---|---|---|---|---|
 | F | paper_5 | 台指選擇權 VRP | 見 `research/paper_5_vrp_tracker.py` | 2026-11 | — |
