@@ -102,6 +102,32 @@ cl = m.clear_stale_nonconsecutive_roe(st)
 check("舊殘值不連續／不足四季／壞列被清", cl == ["1293", "BAD", "SHORT"] and st["1293"]["financials"]["roe_ttm_pct"] is None)
 check("連續四季保留、本來 None 不動", st["OK"]["financials"]["roe_ttm_pct"] == 10.0 and st["NULL"]["financials"]["roe_ttm_pct"] is None)
 
+
+# 先.一三五-1lw：回補季併入（官方同季不覆蓋、只補比最早季新的、加總對不上整檔不併、缺檔不報錯）
+def _q(y, q, eps, src=None):
+    r = {"year": y, "quarter": q, "revenue": 100.0, "gross_margin_pct": 10.0, "op_margin_pct": 5.0,
+         "net_income_parent": 10.0, "eps": eps}
+    if src:
+        r["source"] = src
+    return r
+st2 = {
+    "A": {"financials": {"quarters": [_q(2024, 3, 1.0), _q(2024, 4, 1.1)],
+                         "latest_cum": {"year": 2026, "quarter": 2, "revenue_cum": 200.0, "net_income_parent_cum": 20.0, "eps_cum": 2.0}}},
+    "B": {"financials": {"quarters": [_q(2024, 4, 1.0)],
+                         "latest_cum": {"year": 2026, "quarter": 2, "revenue_cum": 200.0, "net_income_parent_cum": 20.0, "eps_cum": 5.0}}},
+    "C": {"financials": {"quarters": [_q(2024, 4, 1.0)]}},
+}
+bf2 = {"A": [_q(2024, 1, 9.9), _q(2024, 4, 9.9), _q(2025, 1, 1.0), _q(2026, 1, 1.0), _q(2026, 2, 1.0)],
+       "B": [_q(2026, 1, 1.0), _q(2026, 2, 1.0)]}
+r2 = m.merge_backfill_display_quarters(st2, bf2)
+qa = st2["A"]["financials"]["quarters"]
+check("回補季併入：最新季→2026Q2", (qa[-1]["year"], qa[-1]["quarter"]) == (2026, 2))
+check("回補季併入：官方同季不覆蓋", [x for x in qa if (x["year"], x["quarter"]) == (2024, 4)][0]["eps"] == 1.1)
+check("回補季併入：比官方最早季舊的不補", not any((x["year"], x["quarter"]) == (2024, 1) for x in qa))
+check("回補季併入：標 q1_from_backfill", all(x.get("source") == m.SRC_Q_FROM_BACKFILL for x in qa if x["year"] >= 2025))
+check("回補季併入：加總對不上整檔不併", len(st2["B"]["financials"]["quarters"]) == 1 and "B" in r2["rejected"])
+check("回補季併入：回補檔沒有的代號不報錯", r2["merged_codes"] == ["A"] and len(st2["C"]["financials"]["quarters"]) == 1)
+
 # research 副本行為一致
 try:
     h = load("research/build_stock_financials_history.py", "bsfh_selftest")

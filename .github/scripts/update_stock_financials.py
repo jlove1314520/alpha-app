@@ -691,6 +691,81 @@ def restore_with_backfill(existing_quarters: list[dict], cum: dict, bf_rows: lis
     return [b for b in base if b.get("source") == SRC_Q_FROM_BACKFILL] + [discrete], "ok"
 
 
+def merge_backfill_display_quarters(stocks: dict, backfill: dict) -> dict:
+    """2026-11-06 先.一三五-1lw（純 bug 修復）：官方 openapi 只給「最新一季累計數」，缺同年基準季的檔
+    單季序列會停在很久以前（實測 669 檔停在 2024Q4，但回補檔已有到 2026Q2）。這裡把回補檔裡
+    「官方 quarters 沒有」的季度直接併進 quarters（App 顯示用），規則：
+    - 官方已有的季度一律不覆蓋（同季官方優先）；只補「比現有最早季更新」的季度（包含中間缺口與更新的季）。
+    - 補進來的季度標 source=q1_from_backfill（研究端 DISPLAY_ONLY_DERIVED_SOURCES 已排除；App 已照實標「取自 FinMind 季報回補」）。
+    - 安全檢查：若官方 latest_cum 那一年回補檔 Q1..Qn 都有，加總要對得上官方累計（營收／歸母淨利相對差
+      ≤BACKFILL_MAX_DIFF、EPS 差 ≤BACKFILL_EPS_ABS_TOL×n）；對不上就整檔不併（寧可舊，不顯示錯的）。
+    回傳統計；自身出錯只略過該檔（十二節）。"""
+    stats = {"merged_codes": [], "rows_added": 0, "rejected": {}}
+    for code, s in stocks.items():
+        try:
+            bf_rows = backfill.get(str(code)) if isinstance(backfill, dict) else None
+            fin = (s or {}).get("financials") if isinstance(s, dict) else None
+            if not bf_rows or not isinstance(fin, dict):
+                continue
+            qs = [r for r in (fin.get("quarters") or []) if isinstance(r, dict)]
+            if not qs:
+                continue
+            have = {(r.get("year"), r.get("quarter")) for r in qs}
+            earliest = min(int(r["year"]) * 4 + int(r["quarter"]) for r in qs)
+            bf = {(int(r["year"]), int(r["quarter"])): r for r in bf_rows
+                  if isinstance(r, dict) and r.get("year") and r.get("quarter")}
+            lc = fin.get("latest_cum") or {}
+            ly, lq = lc.get("year"), lc.get("quarter")
+            if ly and lq and all((ly, k) in bf for k in range(1, lq + 1)):
+                rows = [bf[(ly, k)] for k in range(1, lq + 1)]
+                bad = []
+                for key, ck in (("revenue", "revenue_cum"), ("net_income_parent", "net_income_parent_cum")):
+                    vals = [r.get(key) for r in rows]
+                    if lc.get(ck) is not None and None not in vals:
+                        d = _rel_diff(sum(vals), lc[ck])
+                        if d is not None and d > BACKFILL_MAX_DIFF:
+                            bad.append(f"{key} 加總差 {d:.2%}")
+                eps = [r.get("eps") for r in rows]
+                if lc.get("eps_cum") is not None and None not in eps and abs(sum(eps) - lc["eps_cum"]) > BACKFILL_EPS_ABS_TOL * lq:
+                    bad.append(f"eps 加總 {round(sum(eps), 2)} vs 官方累計 {lc['eps_cum']}")
+                if bad:
+                    stats["rejected"][str(code)] = "；".join(bad)
+                    continue
+            added = []
+            for (y, q), r in bf.items():
+                if (y, q) in have or y * 4 + q < earliest:
+                    continue
+                if r.get("revenue") is None and r.get("eps") is None:
+                    continue
+                added.append({"year": y, "quarter": q, "revenue": r.get("revenue"),
+                              "gross_margin_pct": r.get("gross_margin_pct"), "op_margin_pct": r.get("op_margin_pct"),
+                              "net_income_parent": r.get("net_income_parent"), "eps": r.get("eps"),
+                              "source": SRC_Q_FROM_BACKFILL})
+            if not added:
+                continue
+            merged = sorted(qs + added, key=lambda r: (r["year"], r["quarter"]))[-QUARTERS_TO_KEEP:]
+            fin["quarters"] = merged
+            stats["merged_codes"].append(str(code))
+            stats["rows_added"] += len(added)
+        except Exception as e:  # 單檔出錯只略過（十二節）
+            stats["rejected"][str(code)] = f"合併失敗：{e}"
+    stats["merged_codes"].sort()
+    return stats
+
+
+def offline_merge_backfill() -> None:
+    """零外部請求：只讀既有 stock_detail.json＋financials_backfill.json，併回補季後寫回（本機重產／驗證用）。"""
+    payload = load_existing()
+    stocks = payload.setdefault("stocks", {})
+    st = merge_backfill_display_quarters(stocks, load_backfill())
+    payload.setdefault("meta", {})["financials_backfill_display_merge"] = {
+        "note": "官方 quarters 沒有的季度取自 financials_backfill.json（FinMind，App 顯示用），標 source=q1_from_backfill；官方同季優先（先.一三五-1lw）",
+        "merged_count": len(st["merged_codes"]), "rows_added": st["rows_added"], "rejected": st["rejected"],
+        "generated_at": datetime.now(TW_TZ).isoformat(), "mode": "offline"}
+    OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
+    print(f"離線併入回補季：{len(st['merged_codes'])} 檔、{st['rows_added']} 季；拒絕 {len(st['rejected'])} 檔")
+
+
 def main():
     payload = load_existing()
     stocks = payload.setdefault("stocks", {})
@@ -789,6 +864,16 @@ def main():
         "rejected": dict(sorted(backfill_rejected.items())),
         "dropped_cumulative_as_single_codes": sorted(set(dropped_cum_as_single)),
     }
+    # 先.一三五-1lw：官方 quarters 沒有的季度取回補檔補上（App 顯示用）；自身失敗只警告（十二節）
+    try:
+        _st = merge_backfill_display_quarters(stocks, load_backfill())
+        payload["meta"]["financials_backfill_display_merge"] = {
+            "note": "官方 quarters 沒有的季度取自 financials_backfill.json（FinMind，App 顯示用），標 source=q1_from_backfill；官方同季優先（先.一三五-1lw）",
+            "merged_count": len(_st["merged_codes"]), "rows_added": _st["rows_added"], "rejected": _st["rejected"],
+            "generated_at": datetime.now(TW_TZ).isoformat(), "mode": "daily"}
+    except Exception as e:
+        print(f"[warn] 回補季併入失敗：{e}")
+        errors.append(f"backfill_display_merge: {e}")
     try:
         payload["meta"]["roe_cleared_nonconsecutive_codes"] = clear_stale_nonconsecutive_roe(stocks)
     except Exception as e:  # 這道清理自己出錯只記警告，不擋寫檔（十二節）
@@ -805,4 +890,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if "--offline-merge-backfill" in sys.argv:
+        offline_merge_backfill()
+    else:
+        main()
