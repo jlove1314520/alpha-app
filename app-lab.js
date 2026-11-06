@@ -102,3 +102,49 @@
       catch(e){console.warn('[labForward toggle]',e);recordGlobalError('labForwardToggle',e)}
     }));
   }
+  // ══════ 先.一五四-1b（2026-11-06）研究室「紙上優化軌」區 ══════
+  // 讀 data/paper_opt_track.json（研究端產生）：每支一張卡，回測曲線虛線（backtest.points）＋紙上實線（paper.points，
+  // 空的時候顯示 paper.status_zh）；列回測年化／最大跌幅 vs 紙上至今；顯示檔內 note（含再平衡成本與換匯差異）。前端不寫死數字。
+  function _poPct(v,sign){if(v==null||isNaN(v))return '—';const x=+v*100;return (sign&&x>0?'+':'')+x.toFixed(1)+'%'}
+  function _poChart(bt,pp){
+    const b=(bt||[]).filter(p=>p&&p[1]>0),q=(pp||[]).filter(p=>p&&p[1]>0);
+    if(b.length<2&&q.length<2)return '<div class="note">曲線資料不足</div>';
+    const W=300,H=80,P=5;
+    const seg=(arr,dash,col,wd)=>{if(arr.length<2)return '';const v0=arr[0][1],vs=arr.map(p=>p[1]/v0),mn=Math.min(...vs),mx=Math.max(...vs),rg=(mx-mn)||1;
+      return `<polyline points="${vs.map((v,i)=>(P+i*(W-2*P)/(vs.length-1)).toFixed(1)+','+(H-P-(v-mn)/rg*(H-2*P)).toFixed(1)).join(' ')}" fill="none" stroke="${col}" stroke-width="${wd}"${dash?' stroke-dasharray="4 3"':''}/>`};
+    // 回測與紙上期間完全不重疊（紙上從起跑日才記），各自依自己期間畫滿寬度，不拼接
+    return `<svg data-po-chart viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" role="img" aria-label="回測曲線（虛線）與紙上曲線（實線）">`+
+      seg(b,true,'var(--ink-3)',1.6)+seg(q,false,'var(--accent)',2.2)+`</svg>`+
+      `<div class="note" style="margin-top:2px"><b style="color:var(--ink-3)">┅</b> 回測（${_fwYmd(b[0]&&b[0][0])}～${_fwYmd(b.length?b[b.length-1][0]:null)}）`+
+      (q.length>=2?`　<b style="color:var(--accent)">━</b> 紙上（${_fwYmd(q[0][0])} 起）`:'')+`</div>`;
+  }
+  function _poCard(t){
+    const esc=_uiEsc,bt=t.backtest||{},pp=t.paper||{},pts=Array.isArray(pp.points)?pp.points:[];
+    const st=pts.length?'run':'wait';
+    const meta=[t.kind==='combo'&&Array.isArray(t.members)?'成員 '+t.members.join('、'):'',t.weight||'',t.leverage!=null&&t.leverage!==1?'槓桿 '+t.leverage+' 倍':''].filter(Boolean).join('・');
+    return `<div class="po-row" data-po="${esc(t.id||'')}" data-po-state="${st}" style="padding:12px 0;border-bottom:1px solid var(--hairline)">`+
+      `<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline"><span style="font-weight:600">${esc(_fwClean(t.name||t.id||''))}</span><span style="font-size:var(--fs-xs);color:${st==='run'?'var(--accent)':'var(--ink-3)'};white-space:nowrap">${st==='run'?'紙上進行中':'未起跑'}</span></div>`+
+      (meta?`<div class="note">${esc(_fwClean(meta))}</div>`:'')+
+      `<div class="num" style="font-size:var(--fs-sm);line-height:1.7">回測年化 ${_poPct(bt.cagr)}・最大跌幅 ${_poPct(bt.mdd)}<br>`+
+      `紙上至今 ${pts.length?`年化 <span style="${_fwPctCls(pp.cagr_to_date)}">${_poPct(pp.cagr_to_date,1)}</span>・最大跌幅 ${_poPct(pp.mdd_to_date)}`:esc(_fwClean(pp.status_zh||'尚未起跑'))}</div>`+
+      _poChart(bt.points,pts)+
+      (t.note?`<div class="note" style="margin-top:4px">${esc(_fwClean(String(t.note).replace(/[，。；]?\s*非投資建議[。.]?/g,'')))}</div>`:'')+
+      (t.reproduced===false?`<div class="note" style="margin-top:4px;color:var(--warn)">回測數字尚未重現核對</div>`:'')+
+      `</div>`;
+  }
+  async function _labPaperOpt(){
+    const el=document.getElementById('lab-po-list'),sm=document.getElementById('lab-po-summary'),nt=document.getElementById('lab-po-note');if(!el)return;
+    try{
+      const r=await fetch('data/paper_opt_track.json?t='+Math.floor(Date.now()/600000));
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const d=await r.json();
+      if(!d||!Array.isArray(d.tracks))throw new Error('格式不對（缺 tracks）');
+      const html=d.tracks.map(t=>{try{return _poCard(t)}catch(e){console.warn('[labPaperOpt] '+(t&&t.id),e);recordGlobalError('labPaperOpt:'+(t&&t.id),e);return `<div class="po-row" data-po-state="missing" style="padding:12px 0;border-bottom:1px solid var(--hairline)"><div class="note">這支資料格式不對，略過</div></div>`}});
+      el.innerHTML=html.join('')||'<div class="note">資料檔沒有任何一支</div>';
+      if(sm)sm.textContent=`共 ${d.tracks.length} 支・紙上起跑 ${_fwYmd(d.start)}・資料 ${_fwYmd(d.generated_at)}`;
+      if(nt)nt.textContent=_fwClean(String(d.note||'').replace(/[，。；]?\s*非投資建議[。.]?/g,''));  // 免責全站只在頁尾一處（前台文案規則），資料檔這句不重複顯示
+    }catch(e){
+      console.warn('[labPaperOpt]',e);recordGlobalError('labPaperOpt',e);
+      el.innerHTML='<div class="note">資料尚未產生</div>';if(sm)sm.textContent='';
+    }
+  }

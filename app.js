@@ -428,8 +428,8 @@
   }
   // 先.一四七-0 前向模擬看板搬到 app-lab.js（先.一四八-1：首頁首次載入 ≤350KB，研究室點到才載入）
   async function hydrateLab(){
-    const labels=['labDeep','labRadar','labHeat','labForward'];
-    const rs=await Promise.allSettled([_labDeep(),_lazyCall('picks','hydrateRadar',[false]),_lazyCall('market','loadIndustryHeat',[]),_lazyCall('lab','_labForward',[])]);
+    const labels=['labDeep','labRadar','labHeat','labForward','labPaperOpt'];
+    const rs=await Promise.allSettled([_labDeep(),_lazyCall('picks','hydrateRadar',[false]),_lazyCall('market','loadIndustryHeat',[]),_lazyCall('lab','_labForward',[]),_lazyCall('lab','_labPaperOpt',[])]);
     rs.forEach((r,i)=>{if(r.status==='rejected'){console.warn('['+labels[i]+']',r.reason);recordGlobalError(labels[i],r.reason)}});
   }
   // 先.一一二-3：首頁「研究室：今天 N 檔有新變化 →」（N＝變化雷達「綜合變化」符合條件的檔數；名單本身只列前 50）
@@ -4614,7 +4614,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-11-06.1712';
+  const APP_VERSION='2026-11-06.2051';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

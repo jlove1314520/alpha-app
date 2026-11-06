@@ -6381,6 +6381,53 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { p0Errs.push(`測試本身出錯：${e.message || e}`); }
   record("179. 資料過期：紅條＋卡片標紅＋狀態列不准綠；資料新就不顯示；強制更新保留自選股與 SW 註冊；SW 立即接手＋資料網路優先（先.一四八-1）", p0Errs.length === 0, p0Errs.join("; ") || p0Info);
 
+  // 183. 先.一五四-1b 研究室「紙上優化軌」區：每支一張卡、回測虛線曲線、未起跑顯示 status_zh、標非投資建議；資料檔壞掉只壞自己
+  const poErrs = []; let poInfo = "";
+  try {
+    for (const mode of ["ok", "broken"]) {
+      const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+      try {
+        const p = await ctx.newPage();
+        const pe = []; p.on("pageerror", (e) => pe.push(String(e.message || e)));
+        if (mode === "broken") await p.route(/\/data\/paper_opt_track\.json/, (r) => r.fulfill({ status: 404, body: "nope" }));
+        await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+        await p.evaluate(() => go("lab"));
+        await p.waitForFunction(() => document.querySelector("#lab-po-list .po-row") || /資料尚未產生/.test(document.getElementById("lab-po-list")?.textContent || ""), null, { timeout: 20000 }).catch(() => {});
+        await p.waitForFunction(() => document.querySelectorAll("#lab-forward-list .fwd-row").length >= 14, null, { timeout: 20000 }).catch(() => {});
+        const a = await p.evaluate(async () => {
+          const rows = [...document.querySelectorAll("#lab-po-list .po-row")], card = document.getElementById("lab-po-card");
+          let doc = null; try { doc = await (await fetch("data/paper_opt_track.json")).json(); } catch (e) {}
+          return { n: rows.length, nDoc: doc && Array.isArray(doc.tracks) ? doc.tracks.length : null,
+            charts: rows.filter((r) => r.querySelector("svg[data-po-chart] polyline[stroke-dasharray]")).length,
+            waitOk: rows.filter((r) => r.dataset.poState === "wait").every((r) => { const t = (doc.tracks.find((x) => x.id === r.dataset.po) || {}).paper; return t && r.textContent.includes(t.status_zh); }),
+            nums: rows.every((r) => /回測年化 [+−-]?[\d.]+%・最大跌幅 [+−-]?[\d.]+%/.test(r.textContent)),
+            text: card ? card.innerText : "", listTxt: document.getElementById("lab-po-list")?.textContent || "",
+            fwd: document.querySelectorAll("#lab-forward-list .fwd-row").length,
+            footer: [...document.querySelectorAll("[data-ui-footer-disclaimer]")].some((e) => /非投資建議/.test(e.textContent)) };
+        });
+        if (mode === "ok") {
+          if (!a.nDoc || a.n !== a.nDoc) poErrs.push(`卡片 ${a.n} 張（資料檔 ${a.nDoc} 支）`);
+          if (a.charts !== a.n) poErrs.push(`有回測虛線的卡 ${a.charts}/${a.n}`);
+          if (!a.waitOk) poErrs.push("未起跑的卡沒顯示 paper.status_zh");
+          if (!a.nums) poErrs.push("有卡缺回測年化／最大跌幅");
+          // 免責依前台文案規則只在頁尾一處（#91）：卡片內不得重複，頁尾那一處要在
+          if (/非投資建議/.test(a.text)) poErrs.push("卡片內重複出現非投資建議（應只在頁尾）");
+          if (!a.footer) poErrs.push("頁尾免責「非投資建議」不見了");
+          if (!/再平衡成本/.test(a.text) || !/換匯/.test(a.text)) poErrs.push("沒顯示再平衡成本與換匯差異說明");
+          const bad = (a.text.match(/#\d{3}|先[.．][一二三四五六七八九十〇]+|MDD|天條一|[\w-]+\.py|AI 選股|推薦/g) || []);
+          if (bad.length) poErrs.push(`前台禁用詞：${[...new Set(bad)].join("、")}`);
+          poInfo = `${a.n} 張卡、回測虛線 ${a.charts}/${a.n}、未起跑顯示狀態說明、免責在頁尾`;
+        } else {
+          if (!/資料尚未產生/.test(a.listTxt)) poErrs.push("資料檔 404 時沒顯示「資料尚未產生」");
+          if (a.fwd < 14) poErrs.push(`資料檔 404 連帶弄壞前向模擬（${a.fwd} 張）`);
+          poInfo += "；404 只壞自己";
+        }
+        if (pe.length) poErrs.push(`${mode} pageerror ${pe.slice(0, 2).join(" | ")}`);
+      } finally { await ctx.close(); }
+    }
+  } catch (e) { poErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("183. 研究室紙上優化軌：每支一張卡、回測虛線、未起跑顯示狀態說明、回測年化／最大跌幅、免責在頁尾、資料壞只壞自己（先.一五四-1b）", poErrs.length === 0, poErrs.join("; ") || poInfo);
+
   record("178. 研究室前向模擬看板：14 張卡、壞檔只顯示「資料尚未產生」、點開有近 30 日走勢＋持股、回撤 40% 紅色、可點 ≥44px、無禁用詞（先.一四七-0）", fwdErrs.length === 0, fwdErrs.join("; ") || fwdInfo);
 
   const finalErrors = await page.evaluate(

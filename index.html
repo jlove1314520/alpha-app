@@ -44,7 +44,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(mq.addEventListener)mq.addEventListener('change',h);else if(mq.addListener)mq.addListener(h)}
 })();
 </script>
-<link rel="stylesheet" href="app.css?v=2026-11-06.1712">
+<link rel="stylesheet" href="app.css?v=2026-11-06.2051">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -857,6 +857,14 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" id="lab-forward-summary" data-ui-keep style="margin-top:4px">載入中…</div>
       <div id="lab-forward-list"><div class="skel-line w80"></div><div class="skel-line w60"></div></div>
     </div>
+    <!-- 先.一五四-1b（2026-11-06）：紙上優化軌——讀 data/paper_opt_track.json，每支一張卡：回測虛線＋紙上實線、回測年化／最大跌幅 vs 紙上至今。 -->
+    <div class="card" id="lab-po-card" style="margin-bottom:10px">
+      <h3>紙上優化軌</h3>
+      <div class="note" data-ui-keep style="color:var(--caution);font-weight:600">回測挑出的最優版拿來紙上追蹤，虛擬帳戶，不是真的交易</div>
+      <div class="note" id="lab-po-summary" data-ui-keep style="margin-top:4px">載入中…</div>
+      <div id="lab-po-list"><div class="skel-line w80"></div><div class="skel-line w60"></div></div>
+      <div class="note" id="lab-po-note" data-ui-keep style="margin-top:6px"></div>
+    </div>
     <div class="card" id="lab-deep-card">
       <h3>深度研究</h3>
       <div id="lab-deep-list"><div class="skel-line w80"></div><div class="skel-line w60"></div></div>
@@ -1633,6 +1641,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-11-06.1712"></script>
+<script src="app.js?v=2026-11-06.2051"></script>
 </body>
 </html>
