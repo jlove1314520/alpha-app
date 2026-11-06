@@ -869,11 +869,21 @@
             label:last4[0].year+'Q'+last4[0].quarter+'~'+last4[3].year+'Q'+last4[3].quarter};
   }
   // 單一代號的本益比（含回退鏈），拿不到就回 null，不猜、不填 0
+  // 先.一三五-1mf：quotes_all_tw.json 會保留已不在上市櫃名冊代號的最後收盤（例 5262／2758 停在 2024-12-31、stale_days 675）。
+  // 收盤落後超過 30 天（同 listed_universe.json inactive_after_days）就不拿來算本益比或當現價，回 null。
+  const VALUATION_QUOTE_MAX_STALE_DAYS=30;
+  function freshCloseFor(q){
+    if(!q||q.close==null||!isFinite(q.close))return null;
+    if(q.stale_days!=null&&isFinite(q.stale_days)&&q.stale_days>VALUATION_QUOTE_MAX_STALE_DAYS)return null;
+    return q.close;
+  }
   function peValueFor(code,funds,detailStocks,quotes,nowMs){
+    // 收盤已落後 30 天以上＝已不在上市櫃交易，fundamentals 的證交所本益比也是當年的舊值（例 2837 停在 2014-09-01），整檔不出本益比
+    if(quotes[code]&&quotes[code].close!=null&&freshCloseFor(quotes[code])==null)return null;
     const r=((funds[code]||{}).ratios)||{};
     if(r.per!=null&&isFinite(r.per)&&r.per>0)return{pe:r.per,src:'twse',date:r.date||null};
     const t=epsTtmFromDetail(detailStocks[code],nowMs);
-    const px=(quotes[code]||{}).close;
+    const px=freshCloseFor(quotes[code]);
     if(t&&t.eps>0&&px!=null&&px>0)return{pe:px/t.eps,src:'derived',date:(quotes[code]||{}).date||null};
     return null;
   }
@@ -922,7 +932,7 @@
     const perDate=perDates.length?perDates.sort()[perDates.length-1]:null;
     // 本檔近四季 EPS（主：季報加總；備援：現價 ÷ 官方本益比 回推）
     const own=peValueFor(code,funds,detailStocks,quotes,null);
-    const px=(quotes[code]&&quotes[code].close)!=null?quotes[code].close:null;
+    const px=freshCloseFor(quotes[code]);
     const t=epsTtmFromDetail(detailStocks[code],null);
     let eps=null,epsSrc='',epsNote='';
     if(t){eps=t.eps;epsSrc='證交所季報加總';epsNote=t.label}
