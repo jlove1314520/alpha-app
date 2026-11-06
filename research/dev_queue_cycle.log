@@ -25038,3 +25038,43 @@ usage_gate: 本輪沒有用量上限錯誤事件
 finally: released .devqueue.lock (cycle_id=20261106-133101)
 ===== DevQueue cycle end: 2026-11-06 13:52:50 cycle_id=20261106-133101 reason=OK exit=0 duration_min=21.8 =====
 record_own_dirty: RECORDED_OWN_DIRTY: PENDING_QUEUE.md, PROGRESS.md
+
+===== DevQueue cycle start: 2026-11-06 14:01:02 cycle_id=20261106-140102 =====
+cc_push: {"done": 0, "stuck": 0, "daily": 0}
+check_collision: INFO: PENDING_QUEUE.md 的未提交改動是 DevQueue 自己留下的（內容與紀錄的雜湊相同，8.1 分鐘前被刷新修改時間），不算有人在中途，照常執行 INFO: PROGRESS.md 的未提交改動是 DevQueue 自己留下的（內容與紀錄的雜湊相同，8.1 分鐘前被刷新修改時間），不算有人在中途，照常執行 YIELD: 有非機器寫入的檔案在最近20分鐘內被改動：DATA.md（8.1分鐘前）、research/AWAITING_REVIEW.md（8.1分鐘前）、scripts/pipeline_freshness.py（8.1分鐘前）、scripts/pipeline_inventory.py（8.1分鐘前）、scripts/selftest_pipeline_fallback_ratio.py（8.1分鐘前），判定有人正在中途，本輪讓路
+===== DevQueue cycle end: 2026-11-06 14:01:03 cycle_id=20261106-140102 reason=YIELD exit=0 duration_min=0 =====
+
+===== DevQueue cycle start: 2026-11-06 14:31:02 cycle_id=20261106-143102 =====
+cc_push: {"done": 0, "stuck": 0, "daily": 0}
+check_collision: INFO: PENDING_QUEUE.md 的未提交改動是 DevQueue 自己留下的（內容與紀錄的雜湊相同，13.8 分鐘前被刷新修改時間），不算有人在中途，照常執行 INFO: PROGRESS.md 的未提交改動是 DevQueue 自己留下的（內容與紀錄的雜湊相同，13.8 分鐘前被刷新修改時間），不算有人在中途，照常執行 YIELD: 有非機器寫入的檔案在最近20分鐘內被改動：DATA.md（13.8分鐘前）、research/AWAITING_REVIEW.md（13.8分鐘前）、scripts/pipeline_freshness.py（13.8分鐘前）、scripts/pipeline_inventory.py（13.8分鐘前）、scripts/selftest_pipeline_fallback_ratio.py（13.8分鐘前），判定有人正在中途，本輪讓路
+===== DevQueue cycle end: 2026-11-06 14:31:03 cycle_id=20261106-143102 reason=YIELD exit=0 duration_min=0 =====
+
+===== DevQueue cycle start: 2026-11-06 15:01:01 cycle_id=20261106-150101 =====
+cc_push: {"done": 0, "stuck": 0, "daily": 0}
+check_collision: INFO: PENDING_QUEUE.md 的未提交改動是 DevQueue 自己留下的（內容與紀錄的雜湊相同，8.7 分鐘前被刷新修改時間），不算有人在中途，照常執行 INFO: PROGRESS.md 的未提交改動是 DevQueue 自己留下的（內容與紀錄的雜湊相同，8.7 分鐘前被刷新修改時間），不算有人在中途，照常執行 YIELD: 有非機器寫入的檔案在最近20分鐘內被改動：DATA.md（8.7分鐘前）、research/AWAITING_REVIEW.md（8.7分鐘前）、scripts/pipeline_freshness.py（8.7分鐘前）、scripts/pipeline_inventory.py（8.7分鐘前）、scripts/selftest_pipeline_fallback_ratio.py（8.7分鐘前），判定有人正在中途，本輪讓路
+===== DevQueue cycle end: 2026-11-06 15:01:03 cycle_id=20261106-150101 reason=YIELD exit=0 duration_min=0 =====
+
+===== DevQueue cycle start: 2026-11-06 15:31:01 cycle_id=20261106-153101 =====
+cc_push: {"done": 0, "stuck": 0, "daily": 0}
+check_collision: INFO: PENDING_QUEUE.md 的未提交改動是 DevQueue 自己留下的（內容與紀錄的雜湊相同，3.7 分鐘前被刷新修改時間），不算有人在中途，照常執行 INFO: PROGRESS.md 的未提交改動是 DevQueue 自己留下的（內容與紀錄的雜湊相同，3.7 分鐘前被刷新修改時間），不算有人在中途，照常執行 WARN: research/AWAITING_REVIEW.md 內容已 ≥60 分鐘未變、無執行中程序提到它（修改時間 3.7 分鐘前多半是其他排程 autostash 刷新），視為殘留、照常執行；請人工確認後 commit 或還原 WARN: scripts/pipeline_freshness.py 內容已 ≥60 分鐘未變、無執行中程序提到它（修改時間 3.7 分鐘前多半是其他排程 autostash 刷新），視為殘留、照常執行；請人工確認後 commit 或還原 WARN: scripts/pipeline_inventory.py 內容已 ≥60 分鐘未變、無執行中程序提到它（修改時間 3.7 分鐘前多半是其他排程 autostash 刷新），視為殘留、照常執行；請人工確認後 commit 或還原 WARN: scripts/selftest_pipeline_fallback_ratio.py 內容已 ≥60 分鐘未變、無執行中程序提到它（修改時間 3.7 分鐘前多半是其他排程 autostash 刷新），視為殘留、照常執行；請人工確認後 commit 或還原 YIELD: 有非機器寫入的檔案在最近20分鐘內被改動：DATA.md（3.7分鐘前），判定有人正在中途，本輪讓路
+===== DevQueue cycle end: 2026-11-06 15:31:03 cycle_id=20261106-153101 reason=YIELD exit=0 duration_min=0 =====
+
+===== DevQueue cycle start: 2026-11-06 16:01:01 cycle_id=20261106-160101 =====
+cc_push: {"done": 0, "stuck": 0, "daily": 0}
+check_collision: INFO: PENDING_QUEUE.md 的未提交改動是 DevQueue 自己留下的（內容與紀錄的雜湊相同，3.7 分鐘前被刷新修改時間），不算有人在中途，照常執行 INFO: PROGRESS.md 的未提交改動是 DevQueue 自己留下的（內容與紀錄的雜湊相同，3.7 分鐘前被刷新修改時間），不算有人在中途，照常執行 WARN: research/AWAITING_REVIEW.md 內容已 ≥60 分鐘未變、無執行中程序提到它（修改時間 3.7 分鐘前多半是其他排程 autostash 刷新），視為殘留、照常執行；請人工確認後 commit 或還原 WARN: scripts/pipeline_freshness.py 內容已 ≥60 分鐘未變、無執行中程序提到它（修改時間 3.7 分鐘前多半是其他排程 autostash 刷新），視為殘留、照常執行；請人工確認後 commit 或還原 WARN: scripts/pipeline_inventory.py 內容已 ≥60 分鐘未變、無執行中程序提到它（修改時間 3.7 分鐘前多半是其他排程 autostash 刷新），視為殘留、照常執行；請人工確認後 commit 或還原 WARN: scripts/selftest_pipeline_fallback_ratio.py 內容已 ≥60 分鐘未變、無執行中程序提到它（修改時間 3.7 分鐘前多半是其他排程 autostash 刷新），視為殘留、照常執行；請人工確認後 commit 或還原 YIELD: 有非機器寫入的檔案在最近20分鐘內被改動：DATA.md（3.7分鐘前），判定有人正在中途，本輪讓路
+===== DevQueue cycle end: 2026-11-06 16:01:03 cycle_id=20261106-160101 reason=YIELD exit=0 duration_min=0 =====
+
+===== DevQueue cycle start: 2026-11-06 16:31:01 cycle_id=20261106-163101 =====
+cc_push: {"done": 0, "stuck": 0, "daily": 0}
+check_collision: INFO: PENDING_QUEUE.md 的未提交改動是 DevQueue 自己留下的（內容與紀錄的雜湊相同，18.1 分鐘前被刷新修改時間），不算有人在中途，照常執行 INFO: PROGRESS.md 的未提交改動是 DevQueue 自己留下的（內容與紀錄的雜湊相同，18.1 分鐘前被刷新修改時間），不算有人在中途，照常執行 WARN: research/AWAITING_REVIEW.md 內容已 ≥60 分鐘未變、無執行中程序提到它（修改時間 18.1 分鐘前多半是其他排程 autostash 刷新），視為殘留、照常執行；請人工確認後 commit 或還原 WARN: scripts/pipeline_freshness.py 內容已 ≥60 分鐘未變、無執行中程序提到它（修改時間 18.1 分鐘前多半是其他排程 autostash 刷新），視為殘留、照常執行；請人工確認後 commit 或還原 WARN: scripts/pipeline_inventory.py 內容已 ≥60 分鐘未變、無執行中程序提到它（修改時間 18.1 分鐘前多半是其他排程 autostash 刷新），視為殘留、照常執行；請人工確認後 commit 或還原 WARN: scripts/selftest_pipeline_fallback_ratio.py 內容已 ≥60 分鐘未變、無執行中程序提到它（修改時間 18.1 分鐘前多半是其他排程 autostash 刷新），視為殘留、照常執行；請人工確認後 commit 或還原 YIELD: 有非機器寫入的檔案在最近20分鐘內被改動：DATA.md（18.1分鐘前），判定有人正在中途，本輪讓路
+===== DevQueue cycle end: 2026-11-06 16:31:04 cycle_id=20261106-163101 reason=YIELD exit=0 duration_min=0 =====
+
+===== DevQueue cycle start: 2026-11-06 17:01:01 cycle_id=20261106-170101 =====
+cc_push: {"done": 0, "stuck": 1, "daily": 0}
+check_collision: WARN: DATA.md 內容已 ≥60 分鐘未變、無執行中程序提到它（修改時間 18.1 分鐘前多半是其他排程 autostash 刷新），視為殘留、照常執行；請人工確認後 commit 或還原 INFO: PENDING_QUEUE.md 的未提交改動是 DevQueue 自己留下的（內容與紀錄的雜湊相同，18.1 分鐘前被刷新修改時間），不算有人在中途，照常執行 INFO: PROGRESS.md 的未提交改動是 DevQueue 自己留下的（內容與紀錄的雜湊相同，18.1 分鐘前被刷新修改時間），不算有人在中途，照常執行 WARN: research/AWAITING_REVIEW.md 內容已 ≥60 分鐘未變、無執行中程序提到它（修改時間 18.1 分鐘前多半是其他排程 autostash 刷新），視為殘留、照常執行；請人工確認後 commit 或還原 WARN: scripts/pipeline_freshness.py 內容已 ≥60 分鐘未變、無執行中程序提到它（修改時間 18.1 分鐘前多半是其他排程 autostash 刷新），視為殘留、照常執行；請人工確認後 commit 或還原 WARN: scripts/pipeline_inventory.py 內容已 ≥60 分鐘未變、無執行中程序提到它（修改時間 18.1 分鐘前多半是其他排程 autostash 刷新），視為殘留、照常執行；請人工確認後 commit 或還原 WARN: scripts/selftest_pipeline_fallback_ratio.py 內容已 ≥60 分鐘未變、無執行中程序提到它（修改時間 18.1 分鐘前多半是其他排程 autostash 刷新），視為殘留、照常執行；請人工確認後 commit 或還原 [local_git_commit] autostash 套回失敗：已取回 22 檔、遠端較新保留遠端版 0 檔（）、工作樹已有更新內容保留 0 檔（）；已確認沒有獨有內容，自動刪除這筆 stash（stash@{0}；先.一三一-3） PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案 INFO: 上一輪 DevQueue 留下的 PENDING_QUEUE.md, PROGRESS.md 代為提交：pull 與遠端衝突：已 abort（commit 留在本機，下一輪再試）（pull exit 1：he stash with "git stash drop", or, if you do not want to resolve them now, run "git reset --hard" and apply the local changes later by running "git stash pop".）
+lock: LOCK_ACQUIRED (cycle 20261106-170101)
+prompt: GUARD_PRECHECK_WARN：**先.八十四-7 （補件，來源：先.八十四-4 停擺告警觀察）DevQueue 改每 30 分鐘後，「三軌任一 ≤60… 會被擋（需總司令：裁示；不可逆：—）。只警告、不改標記，由互動視窗處理 GUARD_PRECHECK_WARN：**先.一〇三-15ak （補件，來源：DevQueue 20261016-200101 冒煙 #131 FAIL 根因… 會被擋（需總司令：等總司令；不可逆：—）。只警告、不改標記，由互動視窗處理 GUARD_PRECHECK_WARN：**先.一〇二-2b 第二批（其餘排程），第一批觀察 3 個交易日無問題後才做**（互動視窗執行；需總司令本人輸入密碼）… 會被擋（需總司令：需總司令；不可逆：—）。只警告、不改標記，由互動視窗處理 GUARD_PRECHECK_WARN：**先.一〇三-15g [自走補入，來源：BACKLOG.md B27 第 2 點（約第 1985 行）＋本檔先.一〇三… 會被擋（需總司令：等總司令、核准、等總司令、核准；不可逆：—）。只警告、不改標記，由互動視窗處理 GUARD_PRECHECK_WARN：**先.一〇三-15aj [自走補入，來源：本檔先.一〇三-15ai ②＋BACKLOG.md「earnings_gro… 會被擋（需總司令：等總司令、核准；不可逆：—）。只警告、不改標記，由互動視窗處理 GUARD_PRECHECK_WARN：**先.一一五-5 10/20 收盤後：第一批排程滿 3 個交易日沒問題，就照先.一〇二-2b 準備第二批清單與切換步驟… 會被擋（需總司令：等總司令；不可逆：—）。只警告、不改標記，由互動視窗處理 DEVQUEUE_ELIGIBLE_LOW：DevQueue 可執行的 - [ ] 共 1 項（下限 6，先.八十五-1c） PROMPT_READY: 先.一三五-1lv 冒煙 #78 首頁首次載入 350.9KB 超標：先.一四九-2 的 data/intraday_tw/{當日}.json 首頁整份下載、盤中一路長大（純 bug 修復）（債務類） (exit=0)
+usage_gate: 本輪沒有用量上限錯誤事件
+finally: released .devqueue.lock (cycle_id=20261106-170101)
+===== DevQueue cycle end: 2026-11-06 17:16:07 cycle_id=20261106-170101 reason=OK exit=0 duration_min=15.1 =====
+record_own_dirty: RECORDED_OWN_DIRTY: （無）
