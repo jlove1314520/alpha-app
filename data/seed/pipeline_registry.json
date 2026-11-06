@@ -1034,6 +1034,7 @@
       "consecutive_days": 2,
       "ratio_threshold": 0.4,
       "max_age_days": 5,
+      "known_issue": "2026-11-06 先.一三五-1kh-e5［預設放行］建議乙：GitHub 排程略過盤中 quotes.yml（11/02～11/04 各 3／6／7 班），台股盤中報價主要由本機 AlphaQuotesLocalFallback 補抓；Cowork 可推翻，推翻或雲端恢復時刪掉本欄即恢復告警",
       "note": "先.一三五-1kh-e2（2026-11-05 DevQueue 20261105-120102，收件匣 039 已定案 1kh-e 甲）。data/quotes_tw.json 的 fetched_at 雲端與本機備援都會刷新，AlphaQuotesTW 那條在雲端停擺時不會亮燈，這條補上。[自行裁量] 門檻 0.4（不是提案寫的「過半」）：本機備援每 10 分鐘看一次、雲端落後 ≥20 分鐘才補，雲端全停時補一次就把檔案刷新、下一輪跳過，比例約 50%（10/28～11/05 實測 15/29≈52%），用「過半」會在 48%～52% 之間閃爍；雲端正常時接近 0%，0.4 夾在中間。只取盤中 fetched／skip_cloud_fresh 兩種判斷，rebase 中、美股、窗外的不算。檔案只在本機（不進公開 repo），雲端 runner 讀不到標 skipped。",
       "fault_history": {
         "count": 1,
