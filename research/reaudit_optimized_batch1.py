@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import itertools
 import json
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -36,8 +37,12 @@ sys.argv = [sys.argv[0], "--formula", "421"]
 import leveraged_bb90_backtest as LB  # noqa: E402
 import core_allocation_backtest as CA  # noqa: E402
 
-END = "2024-12-31"
-OUT_JSON = HERE / "data" / "reaudit_optimized_batch1.json"
+# 先.一五五-2：REAUDIT_END 環境變數可延長到 2025 起（保留資料已開放，先.一五五-1）；預設照舊 2024-12-31。
+END = os.environ.get("REAUDIT_END", "2024-12-31")
+EXTENDED = END > "2024-12-31"
+if EXTENDED:
+    CA.END = LB.END = END
+OUT_JSON = HERE / "data" / ("reaudit_optimized_batch1.json" if not EXTENDED else "reaudit_optimized_batch1_ext2025.json")
 CURVE_DIR = HERE / "data" / "reaudit_curves"
 FEE_LEV = 0.01
 SLIP = 0.001
@@ -53,6 +58,10 @@ def prog(m):
 
 # ───────── 資料 ─────────
 df, _fx = LB.load_all()
+if EXTENDED:
+    import reaudit_ext2025 as EXT
+    df = EXT.extend_0050(df)
+    END = str(df["date"].max().date())
 df = df[df["date"] <= END].reset_index(drop=True)
 assert df["date"].max() <= pd.Timestamp(END)
 DATES = df["date"]
