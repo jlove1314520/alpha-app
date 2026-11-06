@@ -174,3 +174,279 @@
 **F17 怎麼讀**：原最優組在沒調參的 2025 起段 +46.1%、MDD −15.6%，回撤比不傾斜臂淺，但年化輸不傾斜臂（+68.7%）約 23 個百分點、也輸「不傾斜＋同樣止損」（+61.9%）——**跟 2024 底前的結論一樣：改善來自組合止損，不是因子傾斜**，2025 起段傾斜反而拖累（A_4pass 分數低的大型權值股 2025 起漲最多）。沒有任何一組越過天條一。曲線 `research/data/reaudit_curves/ext2025_F17.png`（本機）。
 
 <!-- EXT2025-END -->
+
+<!-- BATCH3-LIST-BEGIN -->
+## 4. 第二批清單（先.一五五-3 ①②，`research/reaudit_batch3_inventory.py` 自動產生，零請求、只讀帳本）
+
+TRIALS_LEDGER＋TRIALS_REGISTRY 共 **489** 筆試驗（編號 1～489），自動分成 **263** 族：第一批已涵蓋 52 族；第二批待做 **162** 族；判「非策略，跳過」49 族。
+
+分族與分類規則〔自行裁量，自動、可重跑、可推翻〕：同一個因子名 `f_xxx`／同一支腳本／同一個 HYPOTHESIS_QUEUE 假說編號＝同一族；都抓不到的單列成族。分類：因子→前 N 檔等權月換股；regime／閘門／擇時→0050 曝險；事件→事件後固定持有；描述性／校準／稽核重跑／量尺驗證→非策略跳過。**自動分類有誤判**（例如事件與因子的界線、同機制不同名），每一批開做前人工複核該批 10 族，併族或改分類就改腳本裡的對照表再重跑，不手改本節。
+
+**第 1 批（10 族，下一輪起做）**〔自行裁量：曾 PASS／CHEAP_PASS、可轉成交易規則、本機台股價格＋財報快取接得上 2025 起〕：`f_eps_surprise`、`f_revenue_surprise`、`f_eps_growth`、`f_value_pe`、`f_value_pb`、`f_low_vol`、`f_rel_strength`、`f_52w_high_prox`、`f_dividend_yield_ttm`、`f_gross_profitability`。做法照條目③：全部可得歷史（含 2025 起）掃參數、持有期、止盈止損、槓桿 1×／1.5×／2×／3×，記最好一組併入總表重排。
+
+| 狀態 | 族 | 試驗數 | 編號（前 8） | 轉成什麼規則 | 當時判定 | 代表名稱 |
+|---|---|---|---|---|---|---|
+| 待做 | fut | 24 | 18,19,20,21,22,23,24,26 | regime→0050 曝險 | FAIL×19、CHEAP_PASS×4、PASS×1 | fut_trend_multi_tf（10/20/60日動能訊號多數決，多時間框架趨勢） |
+| 待做 | f_lending_fee_spike | 8 | 225,264,265,266,267,268,269,279 | 事件→事件後固定持有 | CHEAP_PASS×1、PASS×5、FAIL×2 | f_lending_fee_spike（HYPOTHESIS_QUEUE.md#63，第1關chea |
+| 待做 | 名稱:stock_grid_tw2007q | 7 | 468,469,470,471,472,473,474 | 待人工判斷 | PASS×1、其他×6 | stock_grid_tw2007q4_2009_prereg |
+| 待做 | event_driven_gate_sequence | 6 | 326,332,333,334,335,337 | 事件→事件後固定持有 | PASS×2、CHEAP_PASS×2、FAIL×2 | event_driven_sue_revenue_gate_sequence |
+| 待做 | f_us_momentum_12m | 6 | 44,48,53,58,204,207 | 因子→前 N 檔等權月換股 | FAIL×4、CHEAP_PASS×2 | f_us_momentum_12m（12-1動能，US軌第二個因子，新假說） |
+| 待做 | stock_grid_oneshot | 6 | 477,478,479,480,481,482 | 待人工判斷 | FAIL×6 | stock_grid_tw2007q4_2009_oneshot_param_penalty_2 |
+| **第 1 批** | f_52w_high_prox | 4 | 84,85,86,114 | 事件→事件後固定持有 | CHEAP_PASS×3、PASS×1 | f_52w_high_prox（HYPOTHESIS_QUEUE.md#17「52週高點接近度」Ge |
+| **第 1 批** | f_value_pe | 4 | 14,25,166,173 | 因子→前 N 檔等權月換股 | CHEAP_PASS×2、PASS×2 | f_value_pe（負PER，估值因子） |
+| 待做 | HQ#390 | 3 | 395,437,438 | regime→0050 曝險 | FAIL×3 | value_board_v2_ir_dsr_cheap_review |
+| 待做 | HQ#76 | 3 | 327,357,374 | regime→0050 曝險 | FAIL×1、CHEAP_PASS×2 | #76 VIX9D/VIX期限結構比值 當TAIEX regime降曝險訊號 第1關cheap ga |
+| **第 1 批** | f_eps_growth | 3 | 2,109,287 | 因子→前 N 檔等權月換股 | CHEAP_PASS×1、FAIL×1、PASS×1 | f_eps_growth（EPS成長） |
+| **第 1 批** | f_eps_surprise | 3 | 7,73,288 | 因子→前 N 檔等權月換股 | PASS×3 | f_eps_surprise（EPS意外，SUE方法論） |
+| **第 1 批** | f_low_vol | 3 | 9,82,107 | 因子→前 N 檔等權月換股 | PASS×3 | f_low_vol（低波動） |
+| **第 1 批** | f_rel_strength | 3 | 5,77,101 | 因子→前 N 檔等權月換股 | CHEAP_PASS×2、FAIL×1 | f_rel_strength（相對強度） |
+| **第 1 批** | f_revenue_surprise | 3 | 8,289,456 | 因子→前 N 檔等權月換股 | PASS×2、FAIL×1 | f_revenue_surprise（營收意外，SUE方法論） |
+| 待做 | fx_twd | 3 | 123,363,365 | regime→0050 曝險 | FAIL×3 | fx_twd_gate（HYPOTHESIS_QUEUE.md#32美元兌台幣匯率當資金外流/市場壓 |
+| 待做 | option_pcr_overlay | 3 | 122,126,348 | regime→0050 曝險 | CHEAP_PASS×1、PASS×2 | option_pcr_overlay_v1（HYPOTHESIS_QUEUE.md#31接續#121 |
+| 待做 | portfolio | 3 | 318,319,367 | regime→0050 曝險 | FAIL×3 | portfolio_multifactor_v2 p=0.053不可重現的根因調查（財報PIT.四後 |
+| 待做 | us_8k_pead_gate52 | 3 | 215,216,220 | 事件→事件後固定持有 | FAIL×3 | #52-US SEC EDGAR 8-K Item 2.02 事件反應速度（PEAD）cheap g |
+| 待做 | HQ#29 | 2 | 202,462 | regime→0050 曝險 | PASS×2 | #58 反向波動度加權投資組合建構 GATE_SEQUENCE第2關 隨機控制組 |
+| 待做 | HQ#405 | 2 | 406,408 | regime→0050 曝險 | PASS×2 | supply_tightness_satellite_v1_result |
+| 待做 | HQ#65 | 2 | 66,229 | 因子→前 N 檔等權月換股 | PASS×1、FAIL×1 | fut_night_gap_continuation（日盤收盤(T-1)→夜盤開盤(T)跳空，順勢交 |
+| 待做 | capital_reduction_car | 2 | 262,263 | 事件→事件後固定持有 | FAIL×2 | 減資事件CAR·現金減資組(#71) |
+| 待做 | copper_gold_ratio | 2 | 125,364 | regime→0050 曝險 | CHEAP_PASS×1、FAIL×1 | 銅金比 Copper/Gold Ratio 當全球成長/風險偏好regime訊號（HYPOTHESI |
+| 待做 | dividend_yield | 2 | 371,376 | regime→0050 曝險 | FAIL×2 | dividend_yield_portfolio_v1_engine_fix_recheck |
+| 待做 | etf_rebalance_event_study | 2 | 457,458 | 事件→事件後固定持有 | 其他×1、FAIL×1 | etf_rebalance_high_dividend_event_2022_2024_prereg |
+| 待做 | exit_rule_lab | 2 | 359,360 | regime→0050 曝險 | PASS×2 | exit_rule_regime_gate_E-c_trailing10 |
+| 待做 | f_bab | 2 | 61,78 | 因子→前 N 檔等權月換股 | CHEAP_PASS×2 | f_bab（betting-against-beta, Frazzini&Pedersen 2014 |
+| **第 1 批** | f_dividend_yield_ttm | 2 | 74,75 | 因子→前 N 檔等權月換股 | CHEAP_PASS×2 | f_dividend_yield_ttm（HYPOTHESIS_QUEUE.md#4「股票股利率ca |
+| 待做 | f_inst_flow | 2 | 4,12 | 因子→前 N 檔等權月換股 | CHEAP_PASS×1、FAIL×1 | f_inst_flow（三大法人淨買/流動性） |
+| 待做 | f_margin_utilization | 2 | 116,117 | 因子→前 N 檔等權月換股 | CHEAP_PASS×2 | f_margin_utilization個股融資使用率（HYPOTHESIS_QUEUE.md #3 |
+| 待做 | f_us_gross_profitability | 2 | 191,193 | 因子→前 N 檔等權月換股 | CHEAP_PASS×2 | f_us_gross_profitability（Novy-Marx GrossProfit/Ass |
+| **第 1 批** | f_value_pb | 2 | 13,42 | 因子→前 N 檔等權月換股 | CHEAP_PASS×1、PASS×1 | f_value_pb（負PBR，估值因子） |
+| 待做 | factor_ic | 2 | 155,157 | 因子→前 N 檔等權月換股 | FAIL×2 | 內部人（董監事/大股東/經理人）持股轉讓（HYPOTHESIS_QUEUE.md #41，infor |
+| 待做 | forced_short_covering_gate1 | 2 | 186,189 | 事件→事件後固定持有 | FAIL×2 | HYPOTHESIS_QUEUE.md #51子事件1（融券強制回補）事件條件式短天期IC 第1關c |
+| 待做 | fut_recheck_inst_momentum_highres | 2 | 30,31 | 因子→前 N 檔等權月換股 | 其他×1、PASS×1 | fut_inst_foreign_net_position_change_5d（外資期貨淨部位5日變 |
+| 待做 | fut_settlement_event_gate60 | 2 | 213,214 | 待人工判斷 | FAIL×2 | fut_settlement_event_gate60_pre |
+| 待做 | min_variance_portfolio_gate59_costs | 2 | 212,276 | 事件→事件後固定持有 | PASS×1、FAIL×1 | #59 最小變異數投資組合建構 GATE4 成本敏感度 |
+| 待做 | spillover_overlay_v1_o2c | 2 | 386,394 | 因子→前 N 檔等權月換股 | CHEAP_PASS×2 | spillover_overnight_gate_o2c |
+| 待做 | spillover_overnight | 2 | 88,121 | regime→0050 曝險 | CHEAP_PASS×2 | spillover_overnight_gate.py（HYPOTHESIS_QUEUE.md#19 |
+| 待做 | us_8k_item502_gate52 | 2 | 217,218 | 事件→事件後固定持有 | FAIL×2 | #52-US SEC EDGAR 8-K Item 5.02 事件反應速度（管理層異動）cheap  |
+| 待做 | var1018_v2_turn_of_month | 2 | 447,450 | 因子→前 N 檔等權月換股 | 其他×1、PASS×1 | var1018_v2_turn_of_month_spx_taiex1990_prereg |
+| 待做 | var1018_v4_short_margin_reversed | 2 | 448,451 | 因子→前 N 檔等權月換股 | 其他×2 | var1018_v4_short_margin_reversed_tw2007_prereg |
+| 待做 | var1018_v5_january_reversal | 2 | 449,452 | 因子→前 N 檔等權月換股 | 其他×1、FAIL×1 | var1018_v5_january_reversal_tw_prereg |
+| 待做 | var1018_v7_us_unemployment | 2 | 453,454 | regime→0050 曝險 | 其他×1、VIOLATES_SURVIVAL×1 | var1018_v7_us_unemployment_spx_prereg |
+| 待做 | vrp | 2 | 127,443 | 事件→事件後固定持有 | FAIL×1、PASS×1 | 賣出台指選擇權波動度風險溢酬 VRP（HYPOTHESIS_QUEUE.md#35，第1關cheap |
+| 待做 | HQ#116 | 1 | 120 | regime→0050 曝險 | FAIL×1 | margin_utilization_regime_portfolio_v1（HYPOTHESIS_ |
+| 待做 | HQ#186 | 1 | 187 | 事件→事件後固定持有 | FAIL×1 | HYPOTHESIS_QUEUE.md #51子事件2（現金增資折價）事件條件式CAR第1關chea |
+| 待做 | HQ#20 | 1 | 188 | regime→0050 曝險 | 其他×1 | round418下一步：查證FinMind以外免費來源能否取得#20/#21常駐短腿ticker真實 |
+| 待做 | HQ#225 | 1 | 227 | regime→0050 曝險 | PASS×1 | #63 gate4成本敏感度 |
+| 待做 | HQ#27 | 1 | 160 | 因子→前 N 檔等權月換股 | FAIL×1 | fut_daily_continuation_1d（同#159反方向，順勢交易前一日報酬方向，同一輪 |
+| 待做 | HQ#31 | 1 | 241 | regime→0050 曝險 | FAIL×1 | option_skew_cheap_gate #70 |
+| 待做 | HQ#32 | 1 | 33 | 因子→前 N 檔等權月換股 | CHEAP_PASS×1 | fut_intraday_gap_continuation（隔夜跳空後日內順勢：gap up做多、g |
+| 待做 | HQ#324 | 1 | 372 | 事件→事件後固定持有 | PASS×1 | insider_event_level_shortwindow |
+| 待做 | HQ#368 | 1 | 369 | regime→0050 曝險 | CHEAP_PASS×1 | monthly_revenue_sue_continuous_bucket_v1_volcheck |
+| 待做 | HQ#379 | 1 | 385 | regime→0050 曝險 | FAIL×1 | f52w_high_portfolio_v1_information_ratio_review_fi |
+| 待做 | HQ#396 | 1 | 398 | regime→0050 曝險 | PASS×1 | f52w_high_portfolio_v1_2007_2014_single_shot |
+| 待做 | HQ#397 | 1 | 399 | 事件→事件後固定持有 | PASS×1 | dividend_yield_portfolio_v1_2007_2014_single_shot |
+| 待做 | HQ#406 | 1 | 407 | regime→0050 曝險 | 其他×1 | supply_tightness_v2_forward_prereg |
+| 待做 | HQ#408 | 1 | 409 | regime→0050 曝險 | VIOLATES_SURVIVAL×1 | industry_shortage_v1_result |
+| 待做 | HQ#424 | 1 | 427 | regime→0050 曝險 | 其他×1 | s3c6_oos_2025_prereg |
+| 待做 | HQ#431 | 1 | 433 | 事件→事件後固定持有 | FAIL×1 | b20_qualitative_ai_forward_v1 |
+| 待做 | HQ#435 | 1 | 436 | regime→0050 曝險 | VIOLATES_SURVIVAL×1 | r1s3_gate_killtest_1990_2003_result |
+| 待做 | HQ#436 | 1 | 439 | regime→0050 曝險 | VIOLATES_SURVIVAL×1 | volmanaged_leverage_1990_2003_prereg |
+| 待做 | HQ#439 | 1 | 440 | regime→0050 曝險 | VIOLATES_SURVIVAL×1 | volmanaged_leverage_1990_2003_result |
+| 待做 | HQ#44 | 1 | 164 | 待人工判斷 | FAIL×1 | 景氣對策信號NDC Business Cycle Composite Signal（HYPOTHES |
+| 待做 | HQ#47 | 1 | 176 | 事件→事件後固定持有 | FAIL×1 | 處置股解除後價格反轉 Post-Disposition-Stock Price Reversion（ |
+| 待做 | HQ#49 | 1 | 441 | regime→0050 曝險 | 其他×1 | overnight_intraday_1999_2009_prereg |
+| 待做 | HQ#51 | 1 | 190 | 事件→事件後固定持有 | FAIL×1 | cb_conversion_price_reset_gate1 |
+| 待做 | HQ#52 | 1 | 223 | 事件→事件後固定持有 | CHEAP_PASS×1 | material_news_car_gate2_continuation |
+| 待做 | HQ#55 | 1 | 56 | regime→0050 曝險 | FAIL×1 | fut_night_session_reversal（夜盤自身open→close報酬方向取反，反向 |
+| 待做 | HQ#58 | 1 | 210 | 待人工判斷 | PASS×1 | #59 最小變異數投資組合建構 GATE2隨機控制組 |
+| 待做 | HQ#61 | 1 | 219 | 事件→事件後固定持有 | FAIL×1 | cbc_decision_event_gate61_subtest1 |
+| 待做 | HQ#63 | 1 | 278 | 因子→前 N 檔等權月換股 | FAIL×1 | #63借券費率異常飆升 第4關安全邊際重新錨定(取代1x/2x/3x) |
+| 待做 | HQ#66 | 1 | 230 | 待人工判斷 | CHEAP_PASS×1 | us_tax_loss_selling_gate66 |
+| 待做 | HQ#69 | 1 | 239 | regime→0050 曝險 | FAIL×1 | option_oi_pcr_gate69 |
+| 待做 | HQ#70 | 1 | 71 | 因子→前 N 檔等權月換股 | CHEAP_PASS×1 | fut_day_gap_continuation（夜盤收盤(T)→日盤開盤(T)跳空，順勢交易同一d |
+| 待做 | HQ#75 | 1 | 324 | 因子→前 N 檔等權月換股 | FAIL×1 | #75 2018+子樣本 第1關cheap IC gate (net_usd/n_buyers vs |
+| 待做 | HQ#78 | 1 | 366 | regime→0050 曝險 | FAIL×1 | PENDING_QUEUE.md 常備.5 HYG/IEF比值水位版其他窗口(M=5/10/60日) |
+| 待做 | HQ#80 | 1 | 345 | 待人工判斷 | FAIL×1 | dgbas_unemployment_yoy_gate1 |
+| 待做 | adr_premium_assembly | 1 | 168 | 事件→事件後固定持有 | CHEAP_PASS×1 | 存託憑證（ADR）溢價/折價收斂第1關cheap gate（HYPOTHESIS_QUEUE.md  |
+| 待做 | adr_premium_gate_ex_tsm | 1 | 169 | 事件→事件後固定持有 | CHEAP_PASS×1 | 存託憑證（ADR）溢價/折價收斂——排除TSM對照重跑最終判定（HYPOTHESIS_QUEUE.m |
+| 待做 | atom_ic_map | 1 | 286 | regime→0050 曝險 | FAIL×1 | 原子.二 分年份/分牛熊段穩定度拆解——最終判定 |
+| 待做 | avg_pairwise_correlation | 1 | 161 | regime→0050 曝險 | FAIL×1 | 三大法人買賣超集中度 Institutional Buying Concentration（HYPO |
+| 待做 | build_signal_ledger | 1 | 432 | 事件→事件後固定持有 | FAIL×1 | b19_signal_ledger_forward_v1 |
+| 待做 | buyback_car | 1 | 150 | 事件→事件後固定持有 | FAIL×1 | 庫藏股買回公告效應（HYPOTHESIS_QUEUE.md #40，管理層信心信號事件研究，上一輪完 |
+| 待做 | cbi_signal | 1 | 361 | regime→0050 曝險 | CHEAP_PASS×1 | 景氣對策信號綜合分數當TAIEX regime降曝險訊號（HYPOTHESIS_QUEUE.md # |
+| 待做 | cybex_engine_on53 | 1 | 242 | regime→0050 曝險 | FAIL×1 | Cybex.引擎：進場/出場延遲確認+總開關重開冷卻期 套用於#53全市場報酬離散度速度 |
+| 待做 | deep_dive_fut_basis_mean_reversion_60d | 1 | 43 | regime→0050 曝險 | PASS×1 | fut_basis_mean_reversion_60d（#38的深挖/1b，非新假說） |
+| 待做 | deep_dive_loo_no_low_vol_independent_sample | 1 | 131 | 事件→事件後固定持有 | FAIL×1 | portfolio_multifactor_v2 loo_no_low_vol（eps_family |
+| 待做 | dgbas_unemployment | 1 | 362 | regime→0050 曝險 | FAIL×1 | 台灣失業率YoY當TAIEX regime降曝險訊號（HYPOTHESIS_QUEUE.md #80 |
+| 待做 | equal_weight_rebalance_costs | 1 | 111 | 事件→事件後固定持有 | PASS×1 | equal_weight_rebalance_costs_v1（HYPOTHESIS_QUEUE.m |
+| 待做 | equal_weight_rebalance_leave_one_out | 1 | 112 | regime→0050 曝險 | PASS×1 | equal_weight_rebalance_leave_one_out_v1（HYPOTHESIS |
+| 待做 | event_driven_prototype | 1 | 325 | 事件→事件後固定持有 | PASS×1 | event_driven_sue_earnings_gate_sequence |
+| 待做 | f_accruals | 1 | 63 | 因子→前 N 檔等權月換股 | FAIL×1 | f_accruals（盈餘品質應計項目，Sloan 1996資產負債表法，「品質」家族accrual |
+| 待做 | f_amihud_illiq | 1 | 50 | 因子→前 N 檔等權月換股 | FAIL×1 | f_amihud_illiq（Amihud 2002流動性因子，20日\ |
+| 待做 | f_asset_growth | 1 | 62 | 因子→前 N 檔等權月換股 | FAIL×1 | f_asset_growth（資產成長異常，Cooper/Gulen/Schill 2008，Tot |
+| 待做 | f_eps_surprise_revalidation_v7 | 1 | 403 | 因子→前 N 檔等權月換股 | FAIL×1 | f_eps_surprise_revalidation_v7 |
+| 待做 | f_eps_surprise_revalidation_v7_prereg | 1 | 401 | 因子→前 N 檔等權月換股 | PASS×1 | f_eps_surprise_revalidation_v7_prereg |
+| 待做 | f_foreign_streak | 1 | 3 | 因子→前 N 檔等權月換股 | CHEAP_PASS×1 | f_foreign_streak（外資連續買超強度） |
+| 待做 | f_gross_margin_stability | 1 | 67 | 因子→前 N 檔等權月換股 | FAIL×1 | f_gross_margin_stability（毛利率穩定度，Novy-Marx精神品質異常變體： |
+| **第 1 批** | f_gross_profitability | 1 | 90 | 因子→前 N 檔等權月換股 | CHEAP_PASS×1 | f_gross_profitability（HYPOTHESIS_QUEUE.md#20「純毛利率因 |
+| 待做 | f_idio_vol | 1 | 51 | 因子→前 N 檔等權月換股 | CHEAP_PASS×1 | f_idio_vol（特異波動率，Ang et al. 2006異常，60日市場模型變異數分解取負號 |
+| 待做 | f_listing_age_days | 1 | 175 | 因子→前 N 檔等權月換股 | FAIL×1 | 新股上市長期弱勢 IPO Long-Run Underperformance（HYPOTHESIS_ |
+| 待做 | f_ma_breakout | 1 | 6 | 因子→前 N 檔等權月換股 | CHEAP_PASS×1 | f_ma_breakout（站上季線+量能） |
+| 待做 | f_rel_strength_regime_switch | 1 | 40 | 因子→前 N 檔等權月換股 | FAIL×1 | f_rel_strength_regime_switch（大盤位階開關+相對強度十分位多空，regi |
+| 待做 | f_residual_momentum | 1 | 76 | 因子→前 N 檔等權月換股 | FAIL×1 | f_residual_momentum（HYPOTHESIS_QUEUE.md#9「殘差動量Resi |
+| 待做 | f_revenue_surprise_revalidation_v7 | 1 | 404 | 因子→前 N 檔等權月換股 | FAIL×1 | f_revenue_surprise_revalidation_v7 |
+| 待做 | f_revenue_surprise_revalidation_v7_prereg | 1 | 402 | 因子→前 N 檔等權月換股 | PASS×1 | f_revenue_surprise_revalidation_v7_prereg |
+| 待做 | f_short_margin_ratio | 1 | 233 | 因子→前 N 檔等權月換股 | PASS×1 | short_margin_ratio_gate68 第1關cheap IC gate（HYPOTHE |
+| 待做 | f_short_reversal_1m | 1 | 46 | 因子→前 N 檔等權月換股 | FAIL×1 | f_short_reversal_1m（短期反轉，21交易日自身累積報酬取負號，新假說） |
+| 待做 | f_short_term_reversal_1w | 1 | 87 | 因子→前 N 檔等權月換股 | FAIL×1 | f_short_term_reversal_1w（HYPOTHESIS_QUEUE.md#18「短期 |
+| 待做 | fetch_news_events | 1 | 284 | 事件→事件後固定持有 | FAIL×1 | #72 重大訂單/得標公告效應 |
+| 待做 | finmind_client | 1 | 400 | 事件→事件後固定持有 | PASS×1 | dividend_yield_v1_common_x_account_70_30_prereg |
+| 待做 | fred_yield_curve | 1 | 124 | regime→0050 曝險 | FAIL×1 | fred_yield_curve_gate（HYPOTHESIS_QUEUE.md#33美國公債殖利 |
+| 待做 | fut_recheck_intraday_gap_continuation_highres | 1 | 34 | 因子→前 N 檔等權月換股 | FAIL×1 | fut_intraday_gap_continuation（隔夜跳空後日內順勢，高解析度重測，非新假 |
+| 待做 | holding_shares_per | 1 | 148 | regime→0050 曝險 | FAIL×1 | 大戶籌碼集中度/股東持股分級表（HYPOTHESIS_QUEUE.md #38，資料可行性查證） |
+| 待做 | hy_etf_ratio | 1 | 330 | regime→0050 曝險 | PASS×1 | HYPOTHESIS_QUEUE.md #78 HYG/IEF比值代理信用利差當TAIEX regi |
+| 待做 | irb130_pledge | 1 | 178 | regime→0050 曝險 | PASS×1 | 董監事及大股東股權質押比例 Controlling Shareholder / Insider Sh |
+| 待做 | leave_one_factor_out_bigsample | 1 | 118 | 事件→事件後固定持有 | PASS×1 | portfolio_multifactor_v2 leave-one-factor-out重跑（tr |
+| 待做 | lending_fee_gate63_param_plateau | 1 | 226 | 待人工判斷 | CHEAP_PASS×1 | #63 借券費率異常飆升 gate2 參數高原檢定(Z_THRESH) |
+| 待做 | material_news_car | 1 | 221 | 事件→事件後固定持有 | CHEAP_PASS×1 | HYPOTHESIS_QUEUE.md #52事件反應速度 正式N=200全量CAR事件研究gate |
+| 待做 | min_variance_portfolio_gate59 | 1 | 211 | 待人工判斷 | PASS×1 | #59 最小變異數投資組合建構 GATE_SEQUENCE第3關 參數密集高原 |
+| 待做 | monthly_revenue_event_study | 1 | 368 | 事件→事件後固定持有 | CHEAP_PASS×1 | monthly_revenue_sue_continuous_bucket_v1 |
+| 待做 | option_pcr | 1 | 146 | regime→0050 曝險 | FAIL×1 | 全市場現股當沖比重（HYPOTHESIS_QUEUE.md #37，市場過熱regime訊號，hyp |
+| 待做 | overnight_1999_2009 | 1 | 442 | 待人工判斷 | FAIL×1 | overnight_intraday_1999_2009_result |
+| 待做 | overnight_intraday_alt_cutpoint_placebo | 1 | 182 | 待人工判斷 | CHEAP_PASS×1 | 日內／隔夜報酬結構分解（HYPOTHESIS_QUEUE.md #49，接續round180第1關C |
+| 待做 | overnight_intraday_gate6_consistency | 1 | 184 | 待人工判斷 | CHEAP_PASS×1 | 日內／隔夜報酬結構分解（HYPOTHESIS_QUEUE.md #49，第6關逐年一致性檢驗，依上一 |
+| 待做 | paper_10_disposition | 1 | 464 | 事件→事件後固定持有 | 其他×1 | paper_j_disposition_release_rebound_forward_prereg |
+| 待做 | paper_11_tdcc_bigholder | 1 | 465 | regime→0050 曝險 | 其他×1 | paper_k_tdcc_bigholder_4w_forward_prereg |
+| 待做 | paper_12_warrant_wave | 1 | 466 | regime→0050 曝險 | 其他×1 | paper_l_warrant_issuance_wave_forward_prereg |
+| 待做 | paper_13_ml_low_beta | 1 | 484 | regime→0050 曝險 | 其他×1 | paper_m_ml_low_beta_forward_prereg |
+| 待做 | paper_14_grid_range | 1 | 485 | regime→0050 曝險 | FAIL×1 | paper_n_stock_grid_range_forward_prereg |
+| 待做 | paper_15_ml_industry | 1 | 486 | regime→0050 曝險 | 其他×1 | paper_o_ml_industry_rotation_forward_prereg |
+| 待做 | paper_16_order_win | 1 | 487 | 事件→事件後固定持有 | 其他×1 | paper_p_order_win_drift_forward_prereg |
+| 待做 | paper_17_margin_liquidation | 1 | 488 | 事件→事件後固定持有 | 其他×1 | paper_q_margin_liquidation_rebound_forward_prereg |
+| 待做 | paper_18_sbl_covering | 1 | 489 | 事件→事件後固定持有 | 其他×1 | paper_r_sbl_covering_drift_forward_prereg |
+| 待做 | paper_6_vrp_wing | 1 | 455 | regime→0050 曝險 | 其他×1 | paper_f_wing_iron_butterfly_forward_prereg |
+| 待做 | paper_8_ml | 1 | 459 | regime→0050 曝險 | 其他×1 | paper_h_ml_stock_forward_prereg |
+| 待做 | paper_9_breakout | 1 | 463 | regime→0050 曝險 | 其他×1 | paper_i_breakout252h_volume_forward_prereg |
+| 待做 | pead | 1 | 373 | 事件→事件後固定持有 | FAIL×1 | pead_portfolio_v1_engine_fix_recheck |
+| 待做 | run_score | 1 | 375 | regime→0050 曝險 | PASS×1 | score_topn_v1_engine_fix_recheck |
+| 待做 | sp500_addition_runup_gate51us | 1 | 222 | 事件→事件後固定持有 | CHEAP_PASS×1 | sp500_addition_runup_gate51us |
+| 待做 | stock_futures_basis | 1 | 461 | regime→0050 曝險 | FAIL×1 | stock_futures_basis_oneshot |
+| 待做 | stock_futures_basis_oneshot | 1 | 460 | 事件→事件後固定持有 | 其他×1 | stock_futures_basis_oneshot_prereg |
+| 待做 | stock_grid_limit7_diag | 1 | 476 | regime→0050 曝險 | FAIL×1 | stock_grid_tw2007q4_2009_oneshot |
+| 待做 | txo_vrp_2002_2014 | 1 | 444 | 待人工判斷 | PASS×1 | txo_vrp_2002_2014_result |
+| 待做 | us_portfolio_multifactor | 1 | 209 | 因子→前 N 檔等權月換股 | FAIL×1 | us_portfolio_gross_profitability_v1（正式N=100版，單因子To |
+| 待做 | var1018_v1_oneshot | 1 | 467 | 事件→事件後固定持有 | VIOLATES_SURVIVAL×1 | var1018_v1_equal_weight_rebalance_tw2007h2_oneshot |
+| 待做 | 名稱: | 1 | 113 | 因子→前 N 檔等權月換股 | FAIL×1 | portfolio_multifactor_v2 leave-one-factor-out（回答ro |
+| 待做 | 名稱:concentrated_backt | 1 | 358 | regime→0050 曝險 | FAIL×1 | concentrated_backtest_framework_check |
+| 待做 | 名稱:core_allocation_24 | 1 | 417 | regime→0050 曝險 | FAIL×1 | core_allocation_24grid_prereg |
+| 待做 | 名稱:event_driven_sue_e | 1 | 336 | 事件→事件後固定持有 | PASS×1 | event_driven_sue_earnings_e1_rejudge_c_right_tail |
+| 待做 | 名稱:fut_cta_multi_tf_v | 1 | 238 | regime→0050 曝險 | FAIL×1 | fut_cta_multi_tf_voltarget |
+| 待做 | 名稱:fut_donchian_full_ | 1 | 235 | regime→0050 曝險 | FAIL×1 | fut_donchian_full_55_20 |
+| 待做 | 名稱:fut_keltner_breako | 1 | 236 | regime→0050 曝險 | FAIL×1 | fut_keltner_breakout_20_2atr |
+| 待做 | 名稱:fut_turtle_system1 | 1 | 234 | regime→0050 曝險 | FAIL×1 | fut_turtle_system1_20_10 |
+| 待做 | 名稱:fut_vol_breakout_0 | 1 | 237 | regime→0050 曝險 | FAIL×1 | fut_vol_breakout_0p5atr |
+| 待做 | 名稱:passive_benchmark_ | 1 | 240 | regime→0050 曝險 | 其他×1 | passive_benchmark_tw_v1（0050固定小倉位被動基準，深讀二.1） |
+| 待做 | 名稱:regime擇時overlay候選5 | 1 | 246 | 事件→事件後固定持有 | FAIL×1 | regime擇時overlay候選5：TAIEX回撤斷路器(自身淨值回撤>=15%降曝險至0.50, |
+| 待做 | 名稱:supply_tightness_s | 1 | 405 | regime→0050 曝險 | PASS×1 | supply_tightness_satellite_v1_prereg |
+| 待做 | 名稱:us_supply_tightnes | 1 | 410 | 因子→前 N 檔等權月換股 | FAIL×1 | us_supply_tightness_data_unavailable |
+| 跳過 | pit3_rerun_v2_corrected | 12 | 292,293,294,295,296,297,298,299 | 非策略，跳過 | FAIL×12 | portfolio_multifactor_v2 A_4pass PIT修正重跑：equal/mon |
+| 跳過 | pit4_rerun_80name | 12 | 304,305,306,307,308,309,310,311 | 非策略，跳過 | FAIL×12 | portfolio_multifactor_v2 80檔PIT修正重跑：A_4pass/equal/ |
+| 跳過 | HQ#338 | 7 | 350,351,352,353,354,355,356 | 非策略，跳過 | 其他×7 | exit_rule_lab_E-a_buy_and_hold |
+| 跳過 | f_us_reversal_1m | 6 | 45,49,54,59,205,208 | 非策略，跳過 | PASS×1、CHEAP_PASS×3、FAIL×2 | f_us_reversal_1m（短期反轉，近1個月累積報酬取負號，US軌第三個因子，新假說） |
+| 跳過 | control_group_standard | 4 | 192,194,224,228 | 非策略，跳過 | PASS×1、FAIL×2、CHEAP_PASS×1 | #53全市場報酬離散度速度(Cross-Sectional Return Dispersion Ve |
+| 跳過 | f52w_high | 4 | 370,377,396,397 | 非策略，跳過 | PASS×3、其他×1 | f52w_high_portfolio_v1_engine_fix_recheck |
+| 跳過 | f_inst_streak_days | 4 | 79,100,140,153 | 非策略，跳過 | FAIL×3、CHEAP_PASS×1 | f_inst_streak_days（HYPOTHESIS_QUEUE.md#13「台股三大法人連續 |
+| 跳過 | piotroski_fscore | 3 | 94,291,391 | 非策略，跳過 | FAIL×3 | piotroski_fscore_gate_v1（HYPOTHESIS_QUEUE.md#23「Pi |
+| 跳過 | 名稱:exit_rule_lab_E-b_ | 3 | 339,340,341 | 非策略，跳過 | 其他×3 | exit_rule_lab_E-b_stop8 |
+| 跳過 | HQ#285 | 2 | 316,317 | 非策略，跳過 | FAIL×2 | 原子.五 財報depth-1素材IC地圖——族層級最終判定 |
+| 跳過 | chip_atom_ic_map | 2 | 328,331 | 非策略，跳過 | FAIL×2 | 原子.六 籌碼depth-1原子IC地圖 Tier A（併入上櫃三大法人重測）——規格第7節判定 |
+| 跳過 | piotroski_fscore_sanity | 2 | 93,290 | 非策略，跳過 | PASS×2 | #23 Piotroski F-score當價值榜排雷閘門 |
+| 跳過 | vol_targeting | 2 | 81,105 | 非策略，跳過 | FAIL×1、PASS×1 | vol_targeting_v1（HYPOTHESIS_QUEUE.md#15「波動度目標化部位配置 |
+| 跳過 | 名稱:exit_rule_lab_E-c_ | 2 | 342,343 | 非策略，跳過 | 其他×2 | exit_rule_lab_E-c_trailing10 |
+| 跳過 | HQ#316 | 1 | 320 | 非策略，跳過 | FAIL×1 | 原子.五B 財報通道B(結構型算子)IC地圖——族層級最終判定 |
+| 跳過 | HQ#367 | 1 | 380 | 非策略，跳過 | FAIL×1 | portfolio_v2_pead_new_scale_recheck |
+| 跳過 | HQ#375 | 1 | 381 | 非策略，跳過 | 其他×1 | run_score_backtest_new_scale_recheck |
+| 跳過 | HQ#77 | 1 | 106 | 非策略，跳過 | CHEAP_PASS×1 | revenue_trend_surprise_low_attention（HYPOTHESIS_QU |
+| 跳過 | HQ#98 | 1 | 99 | 非策略，跳過 | FAIL×1 | 查證CALIBRATION_PROBE.md結論(乙)「#34同理各自重跑」對FUT軌是否可行（非新 |
+| 跳過 | audit_f52w_dsr | 1 | 379 | 非策略，跳過 | PASS×1 | f52w_high_portfolio_v1_dsr_bonferroni_final |
+| 跳過 | b18_8k_commercial | 1 | 431 | 非策略，跳過 | PASS×1 | b18_8k_commercial_item101_drift_v1 |
+| 跳過 | b30_customer_concentration | 1 | 434 | 非策略，跳過 | PASS×1 | b30_us_customer_concentration_v1 |
+| 跳過 | breadth_divergence_sanity | 1 | 103 | 非策略，跳過 | PASS×1 | #28 市場廣度背離Breadth Divergence（TAIEX 20日動量為正但300檔樣本b |
+| 跳過 | calibration_probe_momentum_12_1 | 1 | 98 | 非策略，跳過 | PASS×1 | calibration_probe_momentum_12_1（管線校準探針：橫截面12-1動能當已 |
+| 跳過 | chip_atom_slb_ic_map | 1 | 321 | 非策略，跳過 | FAIL×1 | 原子.六 出借總量(TWSE TWT72U)depth-1 IC地圖（14表達式×2horizon= |
+| 跳過 | composite_quality_revaccel_inst_lowvol_sanity | 1 | 92 | 非策略，跳過 | FAIL×1 | #22 品質×營收加速×法人吸籌×低波動複合訊號（合取AND） |
+| 跳過 | composite_zscore_v1_random_control | 1 | 102 | 非策略，跳過 | CHEAP_PASS×1 | #27 多因子複合評分z-score blend baseline（GP+value_pb+reve |
+| 跳過 | copper_gold_ratio_overlay | 1 | 347 | 非策略，跳過 | PASS×1 | copper_gold_ratio_overlay_v1_etf_tax_recheck |
+| 跳過 | cta_momentum_12m | 1 | 72 | 非策略，跳過 | PASS×1 | fut_cta_momentum_12m（HYPOTHESIS_QUEUE.md#2「CTA趨勢跟隨 |
+| 跳過 | day_trading_ratio_dispersion_gate57 | 1 | 201 | 非策略，跳過 | PASS×1 | day_trading_ratio_dispersion_gate57_control |
+| 跳過 | equal_weight_rebalance_control | 1 | 108 | 非策略，跳過 | CHEAP_PASS×1 | equal_weight_rebalance_control_v1（HYPOTHESIS_QUEUE |
+| 跳過 | equal_weight_rebalance_plateau | 1 | 110 | 非策略，跳過 | PASS×1 | equal_weight_rebalance_plateau_v1（HYPOTHESIS_QUEUE |
+| 跳過 | ex_dividend_seasonal_sanity | 1 | 95 | 非策略，跳過 | PASS×1 | #24 除權息季節行為效應（台股7-9月旺季填息/棄息行為，稅制驅動） |
+| 跳過 | f52w_high_gates | 1 | 378 | 非策略，跳過 | PASS×1 | f52w_high_gates_356_engine_fix_recheck |
+| 跳過 | factors | 1 | 323 | 非策略，跳過 | PASS×1 | 事件驅動原型(方法.三)：E1財報公布(SUE)/E2月營收公布(SUE)分組依事件當下意外程度 |
+| 跳過 | institutional_flow_dispersion_gate55 | 1 | 198 | 非策略，跳過 | PASS×1 | #55 三大法人買賣超截面離散度速度 Institutional Flow Dispersion V |
+| 跳過 | lending_fee_gate63_costs | 1 | 277 | 非策略，跳過 | FAIL×1 | #63借券費率異常飆升 第4關成本敏感度 成本.二重跑(1.8折) |
+| 跳過 | margin_debt_growth | 1 | 97 | 非策略，跳過 | FAIL×1 | #26 全市場融資餘額成長率 Margin Debt Growth（TWSE官方全市場歷史數字，槓桿 |
+| 跳過 | overnight_intraday_decomposition | 1 | 180 | 非策略，跳過 | CHEAP_PASS×1 | 日內／隔夜報酬結構分解 Overnight vs Intraday Return Decomposi |
+| 跳過 | revenue_trend_surprise_low_attention | 1 | 91 | 非策略，跳過 | FAIL×1 | revenue_trend_surprise_low_attention（HYPOTHESIS_QU |
+| 跳過 | run_value_board_v2_pit | 1 | 390 | 非策略，跳過 | PASS×1 | value_board_v2_pit_backtest_liquidity500_engine_fi |
+| 跳過 | spillover_overlay | 1 | 346 | 非策略，跳過 | PASS×1 | spillover_overlay_v1_etf_tax_recheck |
+| 跳過 | tail | 1 | 322 | 非策略，跳過 | 其他×1 | tail_test.py 自我校準（PEAD財報公布後3日累積報酬前10%個股 vs 同時間窗/同產 |
+| 跳過 | turn_of_month | 1 | 96 | 非策略，跳過 | FAIL×1 | #25 月轉效應Turn-of-Month Effect（TAIEX指數層級，非選股） |
+| 跳過 | turnover_concentration_gate54 | 1 | 195 | 非策略，跳過 | PASS×1 | #54 成交值集中度速度（Turnover Concentration Velocity）第1關sa |
+| 跳過 | universe | 1 | 83 | 非策略，跳過 | FAIL×1 | pair_trading_v1（HYPOTHESIS_QUEUE.md#16「同產業配對交易/統計套 |
+| 跳過 | 名稱:exit_rule_lab_E-a_ | 1 | 338 | 非策略，跳過 | 其他×1 | exit_rule_lab_E-a_buy_and_hold |
+| 跳過 | 名稱:exit_rule_lab_E-d_ | 1 | 344 | 非策略，跳過 | 其他×1 | exit_rule_lab_E-d_ma200_regime |
+| 跳過 | 名稱:原子.二 depth-1原子表達式I | 1 | 285 | 非策略，跳過 | 其他×1 | 原子.二 depth-1原子表達式IC地圖（描述性掃描） |
+| 第一批已做 | f_us_low_vol | 20 | 39,41,47,52,57,64,68,104 | 因子→前 N 檔等權月換股 | CHEAP_PASS×12、PASS×3、其他×3、FAIL×2 | f_us_low_vol（60日日報酬std取負號，跟TW版f_low_vol定義/窗口對齊） |
+| 第一批已做 | f_us_value_bm | 16 | 119,128,139,144,163,165,167,170 | 因子→前 N 檔等權月換股 | CHEAP_PASS×3、FAIL×5、PASS×4、其他×4 | f_us_value_bm（book-to-market，US軌第一個基本面/PIT因子，非pric |
+| 第一批已做 | f_quality_roe_stability | 6 | 15,16,17,69,156,158 | 因子→前 N 檔等權月換股 | CHEAP_PASS×1、PASS×4、其他×1 | f_quality_roe_stability（ROE季度變異度穩定性） |
+| 第一批已做 | 名稱:regime.替代A 網格 MA=2 | 6 | 256,257,258,259,260,261 | regime→0050 曝險 | FAIL×5、PASS×1 | regime.替代A 網格 MA=200 k=0.35 |
+| 第一批已做 | HQ#421 | 3 | 424,429,435 | regime→0050 曝險 | 其他×2、PASS×1 | crisis_gate_leveraged_bb90_prereg |
+| 第一批已做 | regime_overlay_trend_filter_gate_fut | 3 | 250,251,252 | regime→0050 曝險 | PASS×3 | regime擇時overlay事前網格：TX連續合約200MA趨勢濾網 bear_exposure= |
+| 第一批已做 | 名稱:regime.替代A 網格 MA=1 | 3 | 253,254,255 | regime→0050 曝險 | FAIL×3 | regime.替代A 網格 MA=140 k=0.35 |
+| 第一批已做 | HQ#11 | 2 | 10,80 | 因子→前 N 檔等權月換股 | FAIL×1、PASS×1 | weinstein_stage2_pilot_v1（手選30檔試點） |
+| 第一批已做 | HQ#418 | 2 | 419,423 | regime→0050 曝險 | 其他×2 | leveraged_bb90_6grid_prereg |
+| 第一批已做 | core_tilt | 2 | 280,281 | regime→0050 曝險 | FAIL×2 | core_tilt SPEC TE可行性驗證(反推所需TE vs 實測市值加權+主動權重帶構造TE) |
+| 第一批已做 | deep_dive_fut_basis_carry | 2 | 37,244 | 事件→事件後固定持有 | CHEAP_PASS×1、PASS×1 | fut_basis_carry（#35的深挖/1b，非新假說——對已通過便宜關卡的候選做完整驗證） |
+| 第一批已做 | f_rev_accel | 2 | 1,11 | 因子→前 N 檔等權月換股 | CHEAP_PASS×1、FAIL×1 | f_rev_accel（月營收YoY加速度） |
+| 第一批已做 | leveraged_bb90 | 2 | 420,422 | regime→0050 曝險 | PASS×1、FAIL×1 | leveraged_bb90_6grid_result |
+| 第一批已做 | margin_debt_level_circular_shift_control | 2 | 143,147 | regime→0050 曝險 | PASS×1、CHEAP_PASS×1 | margin_debt_level_v1第2關深挖：circular-shift自相關保留版隨機控制 |
+| 第一批已做 | regime_overlay | 2 | 89,136 | regime→0050 曝險 | CHEAP_PASS×1、PASS×1 | spillover_overlay_v1（HYPOTHESIS_QUEUE.md#19「跨市場美股隔 |
+| 第一批已做 | weinstein_alpha | 2 | 60,392 | 因子→前 N 檔等權月換股 | FAIL×2 | weinstein_stage2_unbiased alpha/beta顯著性關卡（#11的深挖/W |
+| 第一批已做 | HQ#10 | 1 | 243 | regime→0050 曝險 | PASS×1 | regime擇時overlay#10協定第一個訊號：TAIEX 200MA趨勢濾網(binary曝險 |
+| 第一批已做 | HQ#360 | 1 | 412 | regime→0050 曝險 | PASS×1 | trend_leverage_tw_0050_prereg |
+| 第一批已做 | HQ#411 | 1 | 413 | regime→0050 曝險 | VIOLATES_SURVIVAL×1 | trend_leverage_us_spy_result |
+| 第一批已做 | HQ#412 | 1 | 414 | regime→0050 曝險 | VIOLATES_SURVIVAL×1 | trend_leverage_tw_0050_result |
+| 第一批已做 | HQ#413 | 1 | 415 | regime→0050 曝險 | PASS×1 | trend_scale_1_5x_0_5x_xmkt_prereg |
+| 第一批已做 | HQ#415 | 1 | 416 | regime→0050 曝險 | FAIL×1 | trend_scale_1_5x_0_5x_xmkt_result |
+| 第一批已做 | HQ#417 | 1 | 418 | regime→0050 曝險 | PASS×1 | core_allocation_24grid_result |
+| 第一批已做 | HQ#419 | 1 | 421 | regime→0050 曝險 | 其他×1 | leveraged_bb90_6grid_421_prereg |
+| 第一批已做 | crisis_gate_leveraged_bb90 | 1 | 426 | regime→0050 曝險 | PASS×1 | crisis_gate_leveraged_bb90_result |
+| 第一批已做 | f_odd_lot_imbalance | 1 | 231 | 因子→前 N 檔等權月換股 | CHEAP_PASS×1 | f_odd_lot_imbalance (#67 盤中零股委託簿失衡度，第1關cheap gate) |
+| 第一批已做 | f_short_sale_utilization | 1 | 129 | 因子→前 N 檔等權月換股 | CHEAP_PASS×1 | f_short_sale_utilization個股融券使用率（HYPOTHESIS_QUEUE.m |
+| 第一批已做 | hy_credit_spread | 1 | 329 | regime→0050 曝險 | FAIL×1 | HYPOTHESIS_QUEUE.md #77 美國高收益債利差(BAMLH0A0HYM2)資料可行 |
+| 第一批已做 | margin_debt_level_window_robustness | 1 | 141 | 事件→事件後固定持有 | CHEAP_PASS×1 | margin_debt_level_v1 trailing窗口參數穩健性檢查（#140 60d(12 |
+| 第一批已做 | ml_pricevol_oneshot | 1 | 483 | regime→0050 曝險 | VIOLATES_SURVIVAL×1 | ml_pricevol_tw2008_2012_oneshot |
+| 第一批已做 | r1_0050_credit | 1 | 430 | regime→0050 曝險 | VIOLATES_SURVIVAL×1 | r1_0050_credit_gate_result |
+| 第一批已做 | regime_overlay_breadth | 1 | 248 | regime→0050 曝險 | FAIL×1 | regime擇時overlay候選1：全市場廣度水位regime(4位數代號個股%站上200MA<0 |
+| 第一批已做 | regime_overlay_margin_growth | 1 | 249 | regime→0050 曝險 | PASS×1 | regime擇時overlay候選4：全市場融資餘額12週成長率下檔regime(>expandin |
+| 第一批已做 | regime_overlay_realized_vol | 1 | 247 | regime→0050 曝險 | FAIL×1 | regime擇時overlay候選3：TAIEX已實現波動度regime單獨測試(vol20>exp |
+| 第一批已做 | sector_rotation_accel_gate73_gate2 | 1 | 282 | regime→0050 曝險 | FAIL×1 | HYPOTHESIS_QUEUE.md #73 產業金流加速度輪動（月頻、accel前20%產業）第 |
+| 第一批已做 | short_sale_utilization_gate5_loo | 1 | 135 | regime→0050 曝險 | PASS×1 | short_sale_utilization_gate5_loo第5/6關leave-one-out |
+| 第一批已做 | short_sale_utilization_gates | 1 | 134 | regime→0050 曝險 | PASS×1 | short_sale_utilization_gates第3關參數密集高原（HYPOTHESIS_Q |
+| 第一批已做 | 名稱:ml_pricevol_tw2008 | 1 | 475 | regime→0050 曝險 | PASS×1 | ml_pricevol_tw2008_2012_prereg |
+| 第一批已做 | 名稱:trend_leverage_us_ | 1 | 411 | regime→0050 曝險 | PASS×1 | trend_leverage_us_spy_prereg |
+| 第一批已做 | regime_overlay_trend_filter | 6 | 271,272,273,274,275,349 | 非策略，跳過 | PASS×5、FAIL×1 | regime.候選2/#243 200MA趨勢濾網(TAIEX現貨) 成本.二重跑 |
+| 第一批已做 | margin_utilization_regime | 3 | 133,382,387 | 非策略，跳過 | PASS×1、FAIL×2 | short_sale_utilization_portfolio_v1第2關隨機控制組（HYPOTH |
+| 第一批已做 | odd_lot_imbalance | 3 | 232,383,388 | 非策略，跳過 | CHEAP_PASS×1、FAIL×2 | #67盤中零股交易比重(Odd-Lot Imbalance) portfolio層構造 gate2 |
+| 第一批已做 | short_sale_utilization | 2 | 384,389 | 非策略，跳過 | PASS×2 | short_sale_utilization_portfolio_v1_new_engine_sca |
+| 第一批已做 | HQ#133 | 1 | 137 | 非策略，跳過 | PASS×1 | short_sale_utilization整體最終alpha顯著性判定（HYPOTHESIS_QU |
+| 第一批已做 | HQ#423 | 1 | 425 | 非策略，跳過 | 其他×1 | bb90_oos_2025_result |
+| 第一批已做 | HQ#427 | 1 | 428 | 非策略，跳過 | 其他×1 | s3c6_oos_2025_result |
+| 第一批已做 | HQ#445 | 1 | 446 | 非策略，跳過 | FAIL×1 | core_tilt_v2_stage1_result |
+| 第一批已做 | core_tilt_v2_stage1 | 1 | 445 | 非策略，跳過 | PASS×1 | core_tilt_v2_stage1_prereg |
+| 第一批已做 | margin_debt_level_train_val_heterogeneity | 1 | 142 | 非策略，跳過 | CHEAP_PASS×1 | margin_debt_level_v1疑慮①TRAIN/VAL異質性查證（#140/#141保留疑 |
+| 第一批已做 | us_universe_dispersion_check | 1 | 171 | 非策略，跳過 | PASS×1 | 「宇宙離散度」假說直接檢驗——比較乾淨分層抽樣宇宙（#20/#21用）與舊熱門股偏誤宇宙（#17/# |
+| 第一批已做 | weinstein_v2_alpha | 1 | 393 | 非策略，跳過 | FAIL×1 | weinstein_v2_alpha_gate_engine_fix_recheck |
+| 第一批已做 | 名稱:core_tilt_backtest | 1 | 283 | 非策略，跳過 | FAIL×1 | core_tilt_backtest 決定性驗證：重建組合(純市值前50大) vs 0050真實日報 |
+<!-- BATCH3-LIST-END -->

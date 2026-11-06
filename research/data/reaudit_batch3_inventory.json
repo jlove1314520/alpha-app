@@ -1,0 +1,4097 @@
+{
+ "meta": {
+  "n_trials": 489,
+  "n_families": 263,
+  "n_batch1": 52,
+  "n_todo": 162,
+  "n_skip": 49,
+  "kind_counts": {
+   "regime→0050 曝險": 62,
+   "事件→事件後固定持有": 40,
+   "待人工判斷": 13,
+   "因子→前 N 檔等權月換股": 47,
+   "非策略，跳過": 49
+  },
+  "network_requests": 0
+ },
+ "families": [
+  {
+   "family": "fut",
+   "n_trials": 24,
+   "ids": [
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    26,
+    27,
+    28,
+    29,
+    32,
+    35,
+    36,
+    38,
+    55,
+    65,
+    70,
+    130,
+    132,
+    138,
+    149,
+    159,
+    270
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 19,
+    "CHEAP_PASS": 4,
+    "PASS": 1
+   },
+   "sample": "`fut_trend_multi_tf`（10/20/60日動能訊號多數決，多時間框架趨勢）"
+  },
+  {
+   "family": "f_lending_fee_spike",
+   "n_trials": 8,
+   "ids": [
+    225,
+    264,
+    265,
+    266,
+    267,
+    268,
+    269,
+    279
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "CHEAP_PASS": 1,
+    "PASS": 5,
+    "FAIL": 2
+   },
+   "sample": "`f_lending_fee_spike`（`HYPOTHESIS_QUEUE.md`#63，第1關cheap gate：借券費率異常飆升作為知情放空訊號）"
+  },
+  {
+   "family": "名稱:stock_grid_tw2007q",
+   "n_trials": 7,
+   "ids": [
+    468,
+    469,
+    470,
+    471,
+    472,
+    473,
+    474
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "待人工判斷",
+   "verdicts": {
+    "PASS": 1,
+    "其他": 6
+   },
+   "sample": "stock_grid_tw2007q4_2009_prereg"
+  },
+  {
+   "family": "event_driven_gate_sequence",
+   "n_trials": 6,
+   "ids": [
+    326,
+    332,
+    333,
+    334,
+    335,
+    337
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "PASS": 2,
+    "CHEAP_PASS": 2,
+    "FAIL": 2
+   },
+   "sample": "event_driven_sue_revenue_gate_sequence"
+  },
+  {
+   "family": "f_us_momentum_12m",
+   "n_trials": 6,
+   "ids": [
+    44,
+    48,
+    53,
+    58,
+    204,
+    207
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "FAIL": 4,
+    "CHEAP_PASS": 2
+   },
+   "sample": "`f_us_momentum_12m`（12-1動能，US軌第二個因子，新假說）"
+  },
+  {
+   "family": "stock_grid_oneshot",
+   "n_trials": 6,
+   "ids": [
+    477,
+    478,
+    479,
+    480,
+    481,
+    482
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "待人工判斷",
+   "verdicts": {
+    "FAIL": 6
+   },
+   "sample": "stock_grid_tw2007q4_2009_oneshot_param_penalty_2"
+  },
+  {
+   "family": "f_52w_high_prox",
+   "n_trials": 4,
+   "ids": [
+    84,
+    85,
+    86,
+    114
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "CHEAP_PASS": 3,
+    "PASS": 1
+   },
+   "sample": "`f_52w_high_prox`（HYPOTHESIS_QUEUE.md#17「52週高點接近度」George & Hwang 2004錨定不足：當前收盤價/"
+  },
+  {
+   "family": "f_value_pe",
+   "n_trials": 4,
+   "ids": [
+    14,
+    25,
+    166,
+    173
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "CHEAP_PASS": 2,
+    "PASS": 2
+   },
+   "sample": "`f_value_pe`（負PER，估值因子）"
+  },
+  {
+   "family": "HQ#390",
+   "n_trials": 3,
+   "ids": [
+    395,
+    437,
+    438
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 3
+   },
+   "sample": "value_board_v2_ir_dsr_cheap_review"
+  },
+  {
+   "family": "HQ#76",
+   "n_trials": 3,
+   "ids": [
+    327,
+    357,
+    374
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1,
+    "CHEAP_PASS": 2
+   },
+   "sample": "#76 VIX9D/VIX期限結構比值 當TAIEX regime降曝險訊號 第1關cheap gate"
+  },
+  {
+   "family": "f_eps_growth",
+   "n_trials": 3,
+   "ids": [
+    2,
+    109,
+    287
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "CHEAP_PASS": 1,
+    "FAIL": 1,
+    "PASS": 1
+   },
+   "sample": "`f_eps_growth`（EPS成長）"
+  },
+  {
+   "family": "f_eps_surprise",
+   "n_trials": 3,
+   "ids": [
+    7,
+    73,
+    288
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "PASS": 3
+   },
+   "sample": "`f_eps_surprise`（EPS意外，SUE方法論）"
+  },
+  {
+   "family": "f_low_vol",
+   "n_trials": 3,
+   "ids": [
+    9,
+    82,
+    107
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "PASS": 3
+   },
+   "sample": "`f_low_vol`（低波動）"
+  },
+  {
+   "family": "f_rel_strength",
+   "n_trials": 3,
+   "ids": [
+    5,
+    77,
+    101
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "CHEAP_PASS": 2,
+    "FAIL": 1
+   },
+   "sample": "`f_rel_strength`（相對強度）"
+  },
+  {
+   "family": "f_revenue_surprise",
+   "n_trials": 3,
+   "ids": [
+    8,
+    289,
+    456
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "PASS": 2,
+    "FAIL": 1
+   },
+   "sample": "`f_revenue_surprise`（營收意外，SUE方法論）"
+  },
+  {
+   "family": "fx_twd",
+   "n_trials": 3,
+   "ids": [
+    123,
+    363,
+    365
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 3
+   },
+   "sample": "`fx_twd_gate`（HYPOTHESIS_QUEUE.md#32美元兌台幣匯率當資金外流/市場壓力regime訊號，第1關cheap gate）"
+  },
+  {
+   "family": "option_pcr_overlay",
+   "n_trials": 3,
+   "ids": [
+    122,
+    126,
+    348
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "CHEAP_PASS": 1,
+    "PASS": 2
+   },
+   "sample": "`option_pcr_overlay_v1`（HYPOTHESIS_QUEUE.md#31接續#121，PCR訊號轉具體台股曝險擇時規則，第2/3關）"
+  },
+  {
+   "family": "portfolio",
+   "n_trials": 3,
+   "ids": [
+    318,
+    319,
+    367
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 3
+   },
+   "sample": "portfolio_multifactor_v2 p=0.053不可重現的根因調查（財報PIT.四後續）"
+  },
+  {
+   "family": "us_8k_pead_gate52",
+   "n_trials": 3,
+   "ids": [
+    215,
+    216,
+    220
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "FAIL": 3
+   },
+   "sample": "#52-US SEC EDGAR 8-K Item 2.02 事件反應速度（PEAD）cheap gate 小樣本先導"
+  },
+  {
+   "family": "HQ#29",
+   "n_trials": 2,
+   "ids": [
+    202,
+    462
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 2
+   },
+   "sample": "#58 反向波動度加權投資組合建構 GATE_SEQUENCE第2關 隨機控制組"
+  },
+  {
+   "family": "HQ#405",
+   "n_trials": 2,
+   "ids": [
+    406,
+    408
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 2
+   },
+   "sample": "supply_tightness_satellite_v1_result"
+  },
+  {
+   "family": "HQ#65",
+   "n_trials": 2,
+   "ids": [
+    66,
+    229
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "PASS": 1,
+    "FAIL": 1
+   },
+   "sample": "`fut_night_gap_continuation`（日盤收盤(T-1)→夜盤開盤(T)跳空，順勢交易同一date T夜盤自身open→close報酬）"
+  },
+  {
+   "family": "capital_reduction_car",
+   "n_trials": 2,
+   "ids": [
+    262,
+    263
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "FAIL": 2
+   },
+   "sample": "減資事件CAR·現金減資組(#71)"
+  },
+  {
+   "family": "copper_gold_ratio",
+   "n_trials": 2,
+   "ids": [
+    125,
+    364
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "CHEAP_PASS": 1,
+    "FAIL": 1
+   },
+   "sample": "銅金比 Copper/Gold Ratio 當全球成長/風險偏好regime訊號（`HYPOTHESIS_QUEUE.md`#34，資訊來源首次為商品期貨/實體"
+  },
+  {
+   "family": "dividend_yield",
+   "n_trials": 2,
+   "ids": [
+    371,
+    376
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 2
+   },
+   "sample": "dividend_yield_portfolio_v1_engine_fix_recheck"
+  },
+  {
+   "family": "etf_rebalance_event_study",
+   "n_trials": 2,
+   "ids": [
+    457,
+    458
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "其他": 1,
+    "FAIL": 1
+   },
+   "sample": "etf_rebalance_high_dividend_event_2022_2024_prereg"
+  },
+  {
+   "family": "exit_rule_lab",
+   "n_trials": 2,
+   "ids": [
+    359,
+    360
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 2
+   },
+   "sample": "exit_rule_regime_gate_E-c_trailing10"
+  },
+  {
+   "family": "f_bab",
+   "n_trials": 2,
+   "ids": [
+    61,
+    78
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "CHEAP_PASS": 2
+   },
+   "sample": "`f_bab`（betting-against-beta, Frazzini&Pedersen 2014，60日滾動beta取負號，「低風險」家族第三個測試，新"
+  },
+  {
+   "family": "f_dividend_yield_ttm",
+   "n_trials": 2,
+   "ids": [
+    74,
+    75
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "CHEAP_PASS": 2
+   },
+   "sample": "`f_dividend_yield_ttm`（HYPOTHESIS_QUEUE.md#4「股票股利率carry」：trailing 12個月現金股利/股價，高殖"
+  },
+  {
+   "family": "f_inst_flow",
+   "n_trials": 2,
+   "ids": [
+    4,
+    12
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "CHEAP_PASS": 1,
+    "FAIL": 1
+   },
+   "sample": "`f_inst_flow`（三大法人淨買/流動性）"
+  },
+  {
+   "family": "f_margin_utilization",
+   "n_trials": 2,
+   "ids": [
+    116,
+    117
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "CHEAP_PASS": 2
+   },
+   "sample": "`f_margin_utilization`個股融資使用率（`HYPOTHESIS_QUEUE.md` #30，強制平倉/流動性螺旋風險訊號，新假設，`hypo"
+  },
+  {
+   "family": "f_us_gross_profitability",
+   "n_trials": 2,
+   "ids": [
+    191,
+    193
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "CHEAP_PASS": 2
+   },
+   "sample": "f_us_gross_profitability（Novy-Marx GrossProfit/Assets，US軌第二個PIT基本面因子，非value_bm/l"
+  },
+  {
+   "family": "f_value_pb",
+   "n_trials": 2,
+   "ids": [
+    13,
+    42
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "CHEAP_PASS": 1,
+    "PASS": 1
+   },
+   "sample": "`f_value_pb`（負PBR，估值因子）"
+  },
+  {
+   "family": "factor_ic",
+   "n_trials": 2,
+   "ids": [
+    155,
+    157
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "FAIL": 2
+   },
+   "sample": "內部人（董監事/大股東/經理人）持股轉讓（`HYPOTHESIS_QUEUE.md` #41，informed trading信號，上一輪完成pilot樣本35"
+  },
+  {
+   "family": "forced_short_covering_gate1",
+   "n_trials": 2,
+   "ids": [
+    186,
+    189
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "FAIL": 2
+   },
+   "sample": "`HYPOTHESIS_QUEUE.md` #51子事件1（融券強制回補）事件條件式短天期IC 第1關cheap gate（round420/421確認反推公式"
+  },
+  {
+   "family": "fut_recheck_inst_momentum_highres",
+   "n_trials": 2,
+   "ids": [
+    30,
+    31
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "其他": 1,
+    "PASS": 1
+   },
+   "sample": "`fut_inst_foreign_net_position_change_5d`（外資期貨淨部位5日變化方向，高解析度重測，`fut_recheck_inst"
+  },
+  {
+   "family": "fut_settlement_event_gate60",
+   "n_trials": 2,
+   "ids": [
+    213,
+    214
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "待人工判斷",
+   "verdicts": {
+    "FAIL": 2
+   },
+   "sample": "fut_settlement_event_gate60_pre"
+  },
+  {
+   "family": "min_variance_portfolio_gate59_costs",
+   "n_trials": 2,
+   "ids": [
+    212,
+    276
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "PASS": 1,
+    "FAIL": 1
+   },
+   "sample": "#59 最小變異數投資組合建構 GATE4 成本敏感度"
+  },
+  {
+   "family": "spillover_overlay_v1_o2c",
+   "n_trials": 2,
+   "ids": [
+    386,
+    394
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "CHEAP_PASS": 2
+   },
+   "sample": "spillover_overnight_gate_o2c"
+  },
+  {
+   "family": "spillover_overnight",
+   "n_trials": 2,
+   "ids": [
+    88,
+    121
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "CHEAP_PASS": 2
+   },
+   "sample": "`spillover_overnight_gate.py`（HYPOTHESIS_QUEUE.md#19「跨市場美股隔夜報酬外溢效應」第1關cheap gate"
+  },
+  {
+   "family": "us_8k_item502_gate52",
+   "n_trials": 2,
+   "ids": [
+    217,
+    218
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "FAIL": 2
+   },
+   "sample": "#52-US SEC EDGAR 8-K Item 5.02 事件反應速度（管理層異動）cheap gate 小樣本先導"
+  },
+  {
+   "family": "var1018_v2_turn_of_month",
+   "n_trials": 2,
+   "ids": [
+    447,
+    450
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "其他": 1,
+    "PASS": 1
+   },
+   "sample": "var1018_v2_turn_of_month_spx_taiex1990_prereg"
+  },
+  {
+   "family": "var1018_v4_short_margin_reversed",
+   "n_trials": 2,
+   "ids": [
+    448,
+    451
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "其他": 2
+   },
+   "sample": "var1018_v4_short_margin_reversed_tw2007_prereg"
+  },
+  {
+   "family": "var1018_v5_january_reversal",
+   "n_trials": 2,
+   "ids": [
+    449,
+    452
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "其他": 1,
+    "FAIL": 1
+   },
+   "sample": "var1018_v5_january_reversal_tw_prereg"
+  },
+  {
+   "family": "var1018_v7_us_unemployment",
+   "n_trials": 2,
+   "ids": [
+    453,
+    454
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "其他": 1,
+    "VIOLATES_SURVIVAL": 1
+   },
+   "sample": "var1018_v7_us_unemployment_spx_prereg"
+  },
+  {
+   "family": "vrp",
+   "n_trials": 2,
+   "ids": [
+    127,
+    443
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "FAIL": 1,
+    "PASS": 1
+   },
+   "sample": "賣出台指選擇權波動度風險溢酬 VRP（`HYPOTHESIS_QUEUE.md`#35，第1關cheap gate：IV-RV價差是否系統性為正）"
+  },
+  {
+   "family": "HQ#116",
+   "n_trials": 1,
+   "ids": [
+    120
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "`margin_utilization_regime_portfolio_v1`（HYPOTHESIS_QUEUE.md#30 portfolio層構造，reg"
+  },
+  {
+   "family": "HQ#186",
+   "n_trials": 1,
+   "ids": [
+    187
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "HYPOTHESIS_QUEUE.md #51子事件2（現金增資折價）事件條件式CAR第1關cheap gate"
+  },
+  {
+   "family": "HQ#20",
+   "n_trials": 1,
+   "ids": [
+    188
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "round418下一步：查證FinMind以外免費來源能否取得#20/#21常駐短腿ticker真實未還原收盤價"
+  },
+  {
+   "family": "HQ#225",
+   "n_trials": 1,
+   "ids": [
+    227
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "#63 gate4成本敏感度"
+  },
+  {
+   "family": "HQ#27",
+   "n_trials": 1,
+   "ids": [
+    160
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "`fut_daily_continuation_1d`（同#159反方向，順勢交易前一日報酬方向，同一輪測相反方向非調參數硬救）"
+  },
+  {
+   "family": "HQ#31",
+   "n_trials": 1,
+   "ids": [
+    241
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "option_skew_cheap_gate #70"
+  },
+  {
+   "family": "HQ#32",
+   "n_trials": 1,
+   "ids": [
+    33
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "`fut_intraday_gap_continuation`（隔夜跳空後日內順勢：gap up做多、gap down放空，日內open→close報酬）"
+  },
+  {
+   "family": "HQ#324",
+   "n_trials": 1,
+   "ids": [
+    372
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "insider_event_level_shortwindow"
+  },
+  {
+   "family": "HQ#368",
+   "n_trials": 1,
+   "ids": [
+    369
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "monthly_revenue_sue_continuous_bucket_v1_volcheck"
+  },
+  {
+   "family": "HQ#379",
+   "n_trials": 1,
+   "ids": [
+    385
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "f52w_high_portfolio_v1_information_ratio_review_final"
+  },
+  {
+   "family": "HQ#396",
+   "n_trials": 1,
+   "ids": [
+    398
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "f52w_high_portfolio_v1_2007_2014_single_shot"
+  },
+  {
+   "family": "HQ#397",
+   "n_trials": 1,
+   "ids": [
+    399
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "dividend_yield_portfolio_v1_2007_2014_single_shot"
+  },
+  {
+   "family": "HQ#406",
+   "n_trials": 1,
+   "ids": [
+    407
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "supply_tightness_v2_forward_prereg"
+  },
+  {
+   "family": "HQ#408",
+   "n_trials": 1,
+   "ids": [
+    409
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "VIOLATES_SURVIVAL": 1
+   },
+   "sample": "industry_shortage_v1_result"
+  },
+  {
+   "family": "HQ#424",
+   "n_trials": 1,
+   "ids": [
+    427
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "s3c6_oos_2025_prereg"
+  },
+  {
+   "family": "HQ#431",
+   "n_trials": 1,
+   "ids": [
+    433
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "`b20_qualitative_ai_forward_v1`"
+  },
+  {
+   "family": "HQ#435",
+   "n_trials": 1,
+   "ids": [
+    436
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "VIOLATES_SURVIVAL": 1
+   },
+   "sample": "r1s3_gate_killtest_1990_2003_result"
+  },
+  {
+   "family": "HQ#436",
+   "n_trials": 1,
+   "ids": [
+    439
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "VIOLATES_SURVIVAL": 1
+   },
+   "sample": "volmanaged_leverage_1990_2003_prereg"
+  },
+  {
+   "family": "HQ#439",
+   "n_trials": 1,
+   "ids": [
+    440
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "VIOLATES_SURVIVAL": 1
+   },
+   "sample": "volmanaged_leverage_1990_2003_result"
+  },
+  {
+   "family": "HQ#44",
+   "n_trials": 1,
+   "ids": [
+    164
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "待人工判斷",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "景氣對策信號NDC Business Cycle Composite Signal（`HYPOTHESIS_QUEUE.md` #44，資料可行性查證）"
+  },
+  {
+   "family": "HQ#47",
+   "n_trials": 1,
+   "ids": [
+    176
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "處置股解除後價格反轉 Post-Disposition-Stock Price Reversion（`HYPOTHESIS_QUEUE.md`#47資料可行性查"
+  },
+  {
+   "family": "HQ#49",
+   "n_trials": 1,
+   "ids": [
+    441
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "overnight_intraday_1999_2009_prereg"
+  },
+  {
+   "family": "HQ#51",
+   "n_trials": 1,
+   "ids": [
+    190
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "cb_conversion_price_reset_gate1"
+  },
+  {
+   "family": "HQ#52",
+   "n_trials": 1,
+   "ids": [
+    223
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "material_news_car_gate2_continuation"
+  },
+  {
+   "family": "HQ#55",
+   "n_trials": 1,
+   "ids": [
+    56
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "`fut_night_session_reversal`（夜盤自身open→close報酬方向取反，反向交易同一date T的日盤open→close報酬）"
+  },
+  {
+   "family": "HQ#58",
+   "n_trials": 1,
+   "ids": [
+    210
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "待人工判斷",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "#59 最小變異數投資組合建構 GATE2隨機控制組"
+  },
+  {
+   "family": "HQ#61",
+   "n_trials": 1,
+   "ids": [
+    219
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "cbc_decision_event_gate61_subtest1"
+  },
+  {
+   "family": "HQ#63",
+   "n_trials": 1,
+   "ids": [
+    278
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "#63借券費率異常飆升 第4關安全邊際重新錨定(取代1x/2x/3x)"
+  },
+  {
+   "family": "HQ#66",
+   "n_trials": 1,
+   "ids": [
+    230
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "待人工判斷",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "us_tax_loss_selling_gate66"
+  },
+  {
+   "family": "HQ#69",
+   "n_trials": 1,
+   "ids": [
+    239
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "option_oi_pcr_gate69"
+  },
+  {
+   "family": "HQ#70",
+   "n_trials": 1,
+   "ids": [
+    71
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "`fut_day_gap_continuation`（夜盤收盤(T)→日盤開盤(T)跳空，順勢交易同一date T日盤自身open→close報酬）"
+  },
+  {
+   "family": "HQ#75",
+   "n_trials": 1,
+   "ids": [
+    324
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "#75 2018+子樣本 第1關cheap IC gate (net_usd/n_buyers vs fwd20)"
+  },
+  {
+   "family": "HQ#78",
+   "n_trials": 1,
+   "ids": [
+    366
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "PENDING_QUEUE.md 常備.5 HYG/IEF比值水位版其他窗口(M=5/10/60日) 當TAIEX regime降曝險訊號 第1關cheap g"
+  },
+  {
+   "family": "HQ#80",
+   "n_trials": 1,
+   "ids": [
+    345
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "待人工判斷",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "dgbas_unemployment_yoy_gate1"
+  },
+  {
+   "family": "adr_premium_assembly",
+   "n_trials": 1,
+   "ids": [
+    168
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "存託憑證（ADR）溢價/折價收斂第1關cheap gate（`HYPOTHESIS_QUEUE.md` #45，接續`adr_premium_assembly."
+  },
+  {
+   "family": "adr_premium_gate_ex_tsm",
+   "n_trials": 1,
+   "ids": [
+    169
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "存託憑證（ADR）溢價/折價收斂——排除TSM對照重跑最終判定（`HYPOTHESIS_QUEUE.md` #45，接續`#168`第1關CHEAP_PASS後"
+  },
+  {
+   "family": "atom_ic_map",
+   "n_trials": 1,
+   "ids": [
+    286
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "原子.二 分年份/分牛熊段穩定度拆解——最終判定"
+  },
+  {
+   "family": "avg_pairwise_correlation",
+   "n_trials": 1,
+   "ids": [
+    161
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "三大法人買賣超集中度 Institutional Buying Concentration（`HYPOTHESIS_QUEUE.md`#43，第1關cheap "
+  },
+  {
+   "family": "build_signal_ledger",
+   "n_trials": 1,
+   "ids": [
+    432
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "`b19_signal_ledger_forward_v1`"
+  },
+  {
+   "family": "buyback_car",
+   "n_trials": 1,
+   "ids": [
+    150
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "庫藏股買回公告效應（`HYPOTHESIS_QUEUE.md` #40，管理層信心信號事件研究，上一輪完成MOPS資料回補地基，本輪起跑第1關）"
+  },
+  {
+   "family": "cbi_signal",
+   "n_trials": 1,
+   "ids": [
+    361
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "景氣對策信號綜合分數當TAIEX regime降曝險訊號（HYPOTHESIS_QUEUE.md #81，第1關cheap gate重判，撤銷#357原CHEA"
+  },
+  {
+   "family": "cybex_engine_on53",
+   "n_trials": 1,
+   "ids": [
+    242
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "Cybex.引擎：進場/出場延遲確認+總開關重開冷卻期 套用於#53全市場報酬離散度速度"
+  },
+  {
+   "family": "deep_dive_fut_basis_mean_reversion_60d",
+   "n_trials": 1,
+   "ids": [
+    43
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "`fut_basis_mean_reversion_60d`（#38的深挖/1b，非新假說）"
+  },
+  {
+   "family": "deep_dive_loo_no_low_vol_independent_sample",
+   "n_trials": 1,
+   "ids": [
+    131
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "`portfolio_multifactor_v2` loo_no_low_vol（`eps_family`+`revenue_surprise`兩因子子版本，"
+  },
+  {
+   "family": "dgbas_unemployment",
+   "n_trials": 1,
+   "ids": [
+    362
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "台灣失業率YoY當TAIEX regime降曝險訊號（HYPOTHESIS_QUEUE.md #80，第1關cheap gate重判，同PENDING_QUEU"
+  },
+  {
+   "family": "equal_weight_rebalance_costs",
+   "n_trials": 1,
+   "ids": [
+    111
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "`equal_weight_rebalance_costs_v1`（`HYPOTHESIS_QUEUE.md`#29「等權重再平衡溢酬」接續#110，第4關成本"
+  },
+  {
+   "family": "equal_weight_rebalance_leave_one_out",
+   "n_trials": 1,
+   "ids": [
+    112
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "`equal_weight_rebalance_leave_one_out_v1`（`HYPOTHESIS_QUEUE.md`#29「等權重再平衡溢酬」接續#1"
+  },
+  {
+   "family": "event_driven_prototype",
+   "n_trials": 1,
+   "ids": [
+    325
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "event_driven_sue_earnings_gate_sequence"
+  },
+  {
+   "family": "f_accruals",
+   "n_trials": 1,
+   "ids": [
+    63
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "`f_accruals`（盈餘品質應計項目，Sloan 1996資產負債表法，「品質」家族accruals變體，新假說）"
+  },
+  {
+   "family": "f_amihud_illiq",
+   "n_trials": 1,
+   "ids": [
+    50
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "`f_amihud_illiq`（Amihud 2002流動性因子，20日\\"
+  },
+  {
+   "family": "f_asset_growth",
+   "n_trials": 1,
+   "ids": [
+    62
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "`f_asset_growth`（資產成長異常，Cooper/Gulen/Schill 2008，TotalAssets同比成長取負號，「資產成長/保守投資」家"
+  },
+  {
+   "family": "f_eps_surprise_revalidation_v7",
+   "n_trials": 1,
+   "ids": [
+    403
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "f_eps_surprise_revalidation_v7"
+  },
+  {
+   "family": "f_eps_surprise_revalidation_v7_prereg",
+   "n_trials": 1,
+   "ids": [
+    401
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "f_eps_surprise_revalidation_v7_prereg"
+  },
+  {
+   "family": "f_foreign_streak",
+   "n_trials": 1,
+   "ids": [
+    3
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "`f_foreign_streak`（外資連續買超強度）"
+  },
+  {
+   "family": "f_gross_margin_stability",
+   "n_trials": 1,
+   "ids": [
+    67
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "`f_gross_margin_stability`（毛利率穩定度，Novy-Marx精神品質異常變體：GrossProfit/Revenue，負的近8季滾動標"
+  },
+  {
+   "family": "f_gross_profitability",
+   "n_trials": 1,
+   "ids": [
+    90
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "`f_gross_profitability`（HYPOTHESIS_QUEUE.md#20「純毛利率因子Gross Profitability」Novy-Ma"
+  },
+  {
+   "family": "f_idio_vol",
+   "n_trials": 1,
+   "ids": [
+    51
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "`f_idio_vol`（特異波動率，Ang et al. 2006異常，60日市場模型變異數分解取負號，「低風險」家族第二個測試）"
+  },
+  {
+   "family": "f_listing_age_days",
+   "n_trials": 1,
+   "ids": [
+    175
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "新股上市長期弱勢 IPO Long-Run Underperformance（`HYPOTHESIS_QUEUE.md`#46新假設，`f_listing_ag"
+  },
+  {
+   "family": "f_ma_breakout",
+   "n_trials": 1,
+   "ids": [
+    6
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "`f_ma_breakout`（站上季線+量能）"
+  },
+  {
+   "family": "f_rel_strength_regime_switch",
+   "n_trials": 1,
+   "ids": [
+    40
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "`f_rel_strength_regime_switch`（大盤位階開關+相對強度十分位多空，`regime_switch_f_rel_strength.py"
+  },
+  {
+   "family": "f_residual_momentum",
+   "n_trials": 1,
+   "ids": [
+    76
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "`f_residual_momentum`（HYPOTHESIS_QUEUE.md#9「殘差動量Residual Momentum」，Blitz/Huij/Ma"
+  },
+  {
+   "family": "f_revenue_surprise_revalidation_v7",
+   "n_trials": 1,
+   "ids": [
+    404
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "f_revenue_surprise_revalidation_v7"
+  },
+  {
+   "family": "f_revenue_surprise_revalidation_v7_prereg",
+   "n_trials": 1,
+   "ids": [
+    402
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "f_revenue_surprise_revalidation_v7_prereg"
+  },
+  {
+   "family": "f_short_margin_ratio",
+   "n_trials": 1,
+   "ids": [
+    233
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "short_margin_ratio_gate68 第1關cheap IC gate（`HYPOTHESIS_QUEUE.md` #68券資比 Short-to"
+  },
+  {
+   "family": "f_short_reversal_1m",
+   "n_trials": 1,
+   "ids": [
+    46
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "`f_short_reversal_1m`（短期反轉，21交易日自身累積報酬取負號，新假說）"
+  },
+  {
+   "family": "f_short_term_reversal_1w",
+   "n_trials": 1,
+   "ids": [
+    87
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "`f_short_term_reversal_1w`（HYPOTHESIS_QUEUE.md#18「短期反轉（1週）」Jegadeesh 1990流動性溢酬：-"
+  },
+  {
+   "family": "fetch_news_events",
+   "n_trials": 1,
+   "ids": [
+    284
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "#72 重大訂單/得標公告效應"
+  },
+  {
+   "family": "finmind_client",
+   "n_trials": 1,
+   "ids": [
+    400
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "dividend_yield_v1_common_x_account_70_30_prereg"
+  },
+  {
+   "family": "fred_yield_curve",
+   "n_trials": 1,
+   "ids": [
+    124
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "`fred_yield_curve_gate`（HYPOTHESIS_QUEUE.md#33美國公債殖利率曲線10Y-2Y利差當全球風險regime訊號，第1關"
+  },
+  {
+   "family": "fut_recheck_intraday_gap_continuation_highres",
+   "n_trials": 1,
+   "ids": [
+    34
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "`fut_intraday_gap_continuation`（隔夜跳空後日內順勢，高解析度重測，非新假說，對#33的解析度加密，`fut_recheck_in"
+  },
+  {
+   "family": "holding_shares_per",
+   "n_trials": 1,
+   "ids": [
+    148
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "大戶籌碼集中度/股東持股分級表（`HYPOTHESIS_QUEUE.md` #38，資料可行性查證）"
+  },
+  {
+   "family": "hy_etf_ratio",
+   "n_trials": 1,
+   "ids": [
+    330
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "HYPOTHESIS_QUEUE.md #78 HYG/IEF比值代理信用利差當TAIEX regime降曝險訊號 第1關cheap gate（接續#77資料不"
+  },
+  {
+   "family": "irb130_pledge",
+   "n_trials": 1,
+   "ids": [
+    178
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "董監事及大股東股權質押比例 Controlling Shareholder / Insider Share Pledge Ratio（`HYPOTHESIS_Q"
+  },
+  {
+   "family": "leave_one_factor_out_bigsample",
+   "n_trials": 1,
+   "ids": [
+    118
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "`portfolio_multifactor_v2` leave-one-factor-out重跑（train-only IC加權版，獨立確認#113孤兒紀錄）"
+  },
+  {
+   "family": "lending_fee_gate63_param_plateau",
+   "n_trials": 1,
+   "ids": [
+    226
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "待人工判斷",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "#63 借券費率異常飆升 gate2 參數高原檢定(Z_THRESH)"
+  },
+  {
+   "family": "material_news_car",
+   "n_trials": 1,
+   "ids": [
+    221
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "HYPOTHESIS_QUEUE.md #52事件反應速度 正式N=200全量CAR事件研究gate1（8大類×2控制組變體×200次=400次抽樣，銜接Alp"
+  },
+  {
+   "family": "min_variance_portfolio_gate59",
+   "n_trials": 1,
+   "ids": [
+    211
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "待人工判斷",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "#59 最小變異數投資組合建構 GATE_SEQUENCE第3關 參數密集高原"
+  },
+  {
+   "family": "monthly_revenue_event_study",
+   "n_trials": 1,
+   "ids": [
+    368
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "monthly_revenue_sue_continuous_bucket_v1"
+  },
+  {
+   "family": "option_pcr",
+   "n_trials": 1,
+   "ids": [
+    146
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "全市場現股當沖比重（`HYPOTHESIS_QUEUE.md` #37，市場過熱regime訊號，`hypothesis_queue`獨立排程軌，前一輪完成TW"
+  },
+  {
+   "family": "overnight_1999_2009",
+   "n_trials": 1,
+   "ids": [
+    442
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "待人工判斷",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "overnight_intraday_1999_2009_result"
+  },
+  {
+   "family": "overnight_intraday_alt_cutpoint_placebo",
+   "n_trials": 1,
+   "ids": [
+    182
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "待人工判斷",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "日內／隔夜報酬結構分解（`HYPOTHESIS_QUEUE.md` #49，接續round180第1關CHEAP_PASS後的第2關placebo設計，非新假設"
+  },
+  {
+   "family": "overnight_intraday_gate6_consistency",
+   "n_trials": 1,
+   "ids": [
+    184
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "待人工判斷",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "日內／隔夜報酬結構分解（`HYPOTHESIS_QUEUE.md` #49，第6關逐年一致性檢驗，依上一輪round182建議改道跳過gate2直接測gate6"
+  },
+  {
+   "family": "paper_10_disposition",
+   "n_trials": 1,
+   "ids": [
+    464
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "paper_j_disposition_release_rebound_forward_prereg"
+  },
+  {
+   "family": "paper_11_tdcc_bigholder",
+   "n_trials": 1,
+   "ids": [
+    465
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "paper_k_tdcc_bigholder_4w_forward_prereg"
+  },
+  {
+   "family": "paper_12_warrant_wave",
+   "n_trials": 1,
+   "ids": [
+    466
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "paper_l_warrant_issuance_wave_forward_prereg"
+  },
+  {
+   "family": "paper_13_ml_low_beta",
+   "n_trials": 1,
+   "ids": [
+    484
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "paper_m_ml_low_beta_forward_prereg"
+  },
+  {
+   "family": "paper_14_grid_range",
+   "n_trials": 1,
+   "ids": [
+    485
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "paper_n_stock_grid_range_forward_prereg"
+  },
+  {
+   "family": "paper_15_ml_industry",
+   "n_trials": 1,
+   "ids": [
+    486
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "paper_o_ml_industry_rotation_forward_prereg"
+  },
+  {
+   "family": "paper_16_order_win",
+   "n_trials": 1,
+   "ids": [
+    487
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "paper_p_order_win_drift_forward_prereg"
+  },
+  {
+   "family": "paper_17_margin_liquidation",
+   "n_trials": 1,
+   "ids": [
+    488
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "paper_q_margin_liquidation_rebound_forward_prereg"
+  },
+  {
+   "family": "paper_18_sbl_covering",
+   "n_trials": 1,
+   "ids": [
+    489
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "paper_r_sbl_covering_drift_forward_prereg"
+  },
+  {
+   "family": "paper_6_vrp_wing",
+   "n_trials": 1,
+   "ids": [
+    455
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "paper_f_wing_iron_butterfly_forward_prereg"
+  },
+  {
+   "family": "paper_8_ml",
+   "n_trials": 1,
+   "ids": [
+    459
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "paper_h_ml_stock_forward_prereg"
+  },
+  {
+   "family": "paper_9_breakout",
+   "n_trials": 1,
+   "ids": [
+    463
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "paper_i_breakout252h_volume_forward_prereg"
+  },
+  {
+   "family": "pead",
+   "n_trials": 1,
+   "ids": [
+    373
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "pead_portfolio_v1_engine_fix_recheck"
+  },
+  {
+   "family": "run_score",
+   "n_trials": 1,
+   "ids": [
+    375
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "score_topn_v1_engine_fix_recheck"
+  },
+  {
+   "family": "sp500_addition_runup_gate51us",
+   "n_trials": 1,
+   "ids": [
+    222
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "sp500_addition_runup_gate51us"
+  },
+  {
+   "family": "stock_futures_basis",
+   "n_trials": 1,
+   "ids": [
+    461
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "stock_futures_basis_oneshot"
+  },
+  {
+   "family": "stock_futures_basis_oneshot",
+   "n_trials": 1,
+   "ids": [
+    460
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "stock_futures_basis_oneshot_prereg"
+  },
+  {
+   "family": "stock_grid_limit7_diag",
+   "n_trials": 1,
+   "ids": [
+    476
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "stock_grid_tw2007q4_2009_oneshot"
+  },
+  {
+   "family": "txo_vrp_2002_2014",
+   "n_trials": 1,
+   "ids": [
+    444
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "待人工判斷",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "txo_vrp_2002_2014_result"
+  },
+  {
+   "family": "us_portfolio_multifactor",
+   "n_trials": 1,
+   "ids": [
+    209
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "us_portfolio_gross_profitability_v1（正式N=100版，單因子Top-N=15長多季頻組合）"
+  },
+  {
+   "family": "var1018_v1_oneshot",
+   "n_trials": 1,
+   "ids": [
+    467
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "VIOLATES_SURVIVAL": 1
+   },
+   "sample": "var1018_v1_equal_weight_rebalance_tw2007h2_oneshot"
+  },
+  {
+   "family": "名稱:",
+   "n_trials": 1,
+   "ids": [
+    113
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "`portfolio_multifactor_v2` leave-one-factor-out（回答round340遺留問題：三成分因子是否有拖累整體表現者）"
+  },
+  {
+   "family": "名稱:concentrated_backt",
+   "n_trials": 1,
+   "ids": [
+    358
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "concentrated_backtest_framework_check"
+  },
+  {
+   "family": "名稱:core_allocation_24",
+   "n_trials": 1,
+   "ids": [
+    417
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "core_allocation_24grid_prereg"
+  },
+  {
+   "family": "名稱:event_driven_sue_e",
+   "n_trials": 1,
+   "ids": [
+    336
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "event_driven_sue_earnings_e1_rejudge_c_right_tail"
+  },
+  {
+   "family": "名稱:fut_cta_multi_tf_v",
+   "n_trials": 1,
+   "ids": [
+    238
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "fut_cta_multi_tf_voltarget"
+  },
+  {
+   "family": "名稱:fut_donchian_full_",
+   "n_trials": 1,
+   "ids": [
+    235
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "fut_donchian_full_55_20"
+  },
+  {
+   "family": "名稱:fut_keltner_breako",
+   "n_trials": 1,
+   "ids": [
+    236
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "fut_keltner_breakout_20_2atr"
+  },
+  {
+   "family": "名稱:fut_turtle_system1",
+   "n_trials": 1,
+   "ids": [
+    234
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "fut_turtle_system1_20_10"
+  },
+  {
+   "family": "名稱:fut_vol_breakout_0",
+   "n_trials": 1,
+   "ids": [
+    237
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "fut_vol_breakout_0p5atr"
+  },
+  {
+   "family": "名稱:passive_benchmark_",
+   "n_trials": 1,
+   "ids": [
+    240
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "passive_benchmark_tw_v1（0050固定小倉位被動基準，深讀二.1）"
+  },
+  {
+   "family": "名稱:regime擇時overlay候選5",
+   "n_trials": 1,
+   "ids": [
+    246
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "regime擇時overlay候選5：TAIEX回撤斷路器(自身淨值回撤>=15%降曝險至0.50,回到-7.5%解除)+absorbing state檢查"
+  },
+  {
+   "family": "名稱:supply_tightness_s",
+   "n_trials": 1,
+   "ids": [
+    405
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "supply_tightness_satellite_v1_prereg"
+  },
+  {
+   "family": "名稱:us_supply_tightnes",
+   "n_trials": 1,
+   "ids": [
+    410
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "us_supply_tightness_data_unavailable"
+  },
+  {
+   "family": "pit3_rerun_v2_corrected",
+   "n_trials": 12,
+   "ids": [
+    292,
+    293,
+    294,
+    295,
+    296,
+    297,
+    298,
+    299,
+    300,
+    301,
+    302,
+    303
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "FAIL": 12
+   },
+   "sample": "portfolio_multifactor_v2 A_4pass PIT修正重跑：equal/monthly"
+  },
+  {
+   "family": "pit4_rerun_80name",
+   "n_trials": 12,
+   "ids": [
+    304,
+    305,
+    306,
+    307,
+    308,
+    309,
+    310,
+    311,
+    312,
+    313,
+    314,
+    315
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "FAIL": 12
+   },
+   "sample": "portfolio_multifactor_v2 80檔PIT修正重跑：A_4pass/equal/monthly"
+  },
+  {
+   "family": "HQ#338",
+   "n_trials": 7,
+   "ids": [
+    350,
+    351,
+    352,
+    353,
+    354,
+    355,
+    356
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "其他": 7
+   },
+   "sample": "exit_rule_lab_E-a_buy_and_hold"
+  },
+  {
+   "family": "f_us_reversal_1m",
+   "n_trials": 6,
+   "ids": [
+    45,
+    49,
+    54,
+    59,
+    205,
+    208
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 1,
+    "CHEAP_PASS": 3,
+    "FAIL": 2
+   },
+   "sample": "`f_us_reversal_1m`（短期反轉，近1個月累積報酬取負號，US軌第三個因子，新假說）"
+  },
+  {
+   "family": "control_group_standard",
+   "n_trials": 4,
+   "ids": [
+    192,
+    194,
+    224,
+    228
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 1,
+    "FAIL": 2,
+    "CHEAP_PASS": 1
+   },
+   "sample": "#53全市場報酬離散度速度(Cross-Sectional Return Dispersion Velocity) 第1關sanity"
+  },
+  {
+   "family": "f52w_high",
+   "n_trials": 4,
+   "ids": [
+    370,
+    377,
+    396,
+    397
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 3,
+    "其他": 1
+   },
+   "sample": "f52w_high_portfolio_v1_engine_fix_recheck"
+  },
+  {
+   "family": "f_inst_streak_days",
+   "n_trials": 4,
+   "ids": [
+    79,
+    100,
+    140,
+    153
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "FAIL": 3,
+    "CHEAP_PASS": 1
+   },
+   "sample": "`f_inst_streak_days`（HYPOTHESIS_QUEUE.md#13「台股三大法人連續買超持續性」：三大法人合計淨買超連續同方向天數，新增`f"
+  },
+  {
+   "family": "piotroski_fscore",
+   "n_trials": 3,
+   "ids": [
+    94,
+    291,
+    391
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "FAIL": 3
+   },
+   "sample": "`piotroski_fscore_gate_v1`（HYPOTHESIS_QUEUE.md#23「Piotroski F-score當價值榜排雷閘門」GATE"
+  },
+  {
+   "family": "名稱:exit_rule_lab_E-b_",
+   "n_trials": 3,
+   "ids": [
+    339,
+    340,
+    341
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "其他": 3
+   },
+   "sample": "exit_rule_lab_E-b_stop8"
+  },
+  {
+   "family": "HQ#285",
+   "n_trials": 2,
+   "ids": [
+    316,
+    317
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "FAIL": 2
+   },
+   "sample": "原子.五 財報depth-1素材IC地圖——族層級最終判定"
+  },
+  {
+   "family": "chip_atom_ic_map",
+   "n_trials": 2,
+   "ids": [
+    328,
+    331
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "FAIL": 2
+   },
+   "sample": "原子.六 籌碼depth-1原子IC地圖 Tier A（併入上櫃三大法人重測）——規格第7節判定"
+  },
+  {
+   "family": "piotroski_fscore_sanity",
+   "n_trials": 2,
+   "ids": [
+    93,
+    290
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 2
+   },
+   "sample": "`#23 Piotroski F-score當價值榜排雷閘門`"
+  },
+  {
+   "family": "vol_targeting",
+   "n_trials": 2,
+   "ids": [
+    81,
+    105
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "FAIL": 1,
+    "PASS": 1
+   },
+   "sample": "`vol_targeting_v1`（HYPOTHESIS_QUEUE.md#15「波動度目標化部位配置Vol-Targeting」：TAIEX 60日滾動已實"
+  },
+  {
+   "family": "名稱:exit_rule_lab_E-c_",
+   "n_trials": 2,
+   "ids": [
+    342,
+    343
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "其他": 2
+   },
+   "sample": "exit_rule_lab_E-c_trailing10"
+  },
+  {
+   "family": "HQ#316",
+   "n_trials": 1,
+   "ids": [
+    320
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "原子.五B 財報通道B(結構型算子)IC地圖——族層級最終判定"
+  },
+  {
+   "family": "HQ#367",
+   "n_trials": 1,
+   "ids": [
+    380
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "portfolio_v2_pead_new_scale_recheck"
+  },
+  {
+   "family": "HQ#375",
+   "n_trials": 1,
+   "ids": [
+    381
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "run_score_backtest_new_scale_recheck"
+  },
+  {
+   "family": "HQ#77",
+   "n_trials": 1,
+   "ids": [
+    106
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "`revenue_trend_surprise_low_attention`（HYPOTHESIS_QUEUE.md#21，#91原始100檔測試的300檔樣本"
+  },
+  {
+   "family": "HQ#98",
+   "n_trials": 1,
+   "ids": [
+    99
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "查證`CALIBRATION_PROBE.md`結論(乙)「#34同理各自重跑」對FUT軌是否可行（非新假說，是對#98指令的可行性複查）"
+  },
+  {
+   "family": "audit_f52w_dsr",
+   "n_trials": 1,
+   "ids": [
+    379
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "f52w_high_portfolio_v1_dsr_bonferroni_final"
+  },
+  {
+   "family": "b18_8k_commercial",
+   "n_trials": 1,
+   "ids": [
+    431
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "`b18_8k_commercial_item101_drift_v1`"
+  },
+  {
+   "family": "b30_customer_concentration",
+   "n_trials": 1,
+   "ids": [
+    434
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "b30_us_customer_concentration_v1"
+  },
+  {
+   "family": "breadth_divergence_sanity",
+   "n_trials": 1,
+   "ids": [
+    103
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "`#28 市場廣度背離Breadth Divergence`（TAIEX 20日動量為正但300檔樣本breadth_pct對60日前下降時判定「背離警戒」，作"
+  },
+  {
+   "family": "calibration_probe_momentum_12_1",
+   "n_trials": 1,
+   "ids": [
+    98
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "`calibration_probe_momentum_12_1`（管線校準探針：橫截面12-1動能當已知訊號benchmark，總司令裁示甲.3）"
+  },
+  {
+   "family": "chip_atom_slb_ic_map",
+   "n_trials": 1,
+   "ids": [
+    321
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "原子.六 出借總量(TWSE TWT72U)depth-1 IC地圖（14表達式×2horizon=28測試）"
+  },
+  {
+   "family": "composite_quality_revaccel_inst_lowvol_sanity",
+   "n_trials": 1,
+   "ids": [
+    92
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "`#22 品質×營收加速×法人吸籌×低波動複合訊號`（合取AND）"
+  },
+  {
+   "family": "composite_zscore_v1_random_control",
+   "n_trials": 1,
+   "ids": [
+    102
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "`#27 多因子複合評分z-score blend baseline`（GP+value_pb+revenue_surprise等權，接續composite_z"
+  },
+  {
+   "family": "copper_gold_ratio_overlay",
+   "n_trials": 1,
+   "ids": [
+    347
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "copper_gold_ratio_overlay_v1_etf_tax_recheck"
+  },
+  {
+   "family": "cta_momentum_12m",
+   "n_trials": 1,
+   "ids": [
+    72
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "`fut_cta_momentum_12m`（HYPOTHESIS_QUEUE.md#2「CTA趨勢跟隨」：單一12個月/252交易日回顧報酬正負號，月頻重平衡"
+  },
+  {
+   "family": "day_trading_ratio_dispersion_gate57",
+   "n_trials": 1,
+   "ids": [
+    201
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "day_trading_ratio_dispersion_gate57_control"
+  },
+  {
+   "family": "equal_weight_rebalance_control",
+   "n_trials": 1,
+   "ids": [
+    108
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "`equal_weight_rebalance_control_v1`（`HYPOTHESIS_QUEUE.md`#29「等權重再平衡溢酬」接續#107 san"
+  },
+  {
+   "family": "equal_weight_rebalance_plateau",
+   "n_trials": 1,
+   "ids": [
+    110
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "`equal_weight_rebalance_plateau_v1`（`HYPOTHESIS_QUEUE.md`#29「等權重再平衡溢酬」接續#107/#10"
+  },
+  {
+   "family": "ex_dividend_seasonal_sanity",
+   "n_trials": 1,
+   "ids": [
+    95
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "`#24 除權息季節行為效應`（台股7-9月旺季填息/棄息行為，稅制驅動）"
+  },
+  {
+   "family": "f52w_high_gates",
+   "n_trials": 1,
+   "ids": [
+    378
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "f52w_high_gates_356_engine_fix_recheck"
+  },
+  {
+   "family": "factors",
+   "n_trials": 1,
+   "ids": [
+    323
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "事件驅動原型(方法.三)：E1財報公布(SUE)/E2月營收公布(SUE)分組依事件當下意外程度"
+  },
+  {
+   "family": "institutional_flow_dispersion_gate55",
+   "n_trials": 1,
+   "ids": [
+    198
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "#55 三大法人買賣超截面離散度速度 Institutional Flow Dispersion Velocity"
+  },
+  {
+   "family": "lending_fee_gate63_costs",
+   "n_trials": 1,
+   "ids": [
+    277
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "#63借券費率異常飆升 第4關成本敏感度 成本.二重跑(1.8折)"
+  },
+  {
+   "family": "margin_debt_growth",
+   "n_trials": 1,
+   "ids": [
+    97
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "`#26 全市場融資餘額成長率 Margin Debt Growth`（TWSE官方全市場歷史數字，槓桿/擁擠度regime訊號，非選股）"
+  },
+  {
+   "family": "overnight_intraday_decomposition",
+   "n_trials": 1,
+   "ids": [
+    180
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "日內／隔夜報酬結構分解 Overnight vs Intraday Return Decomposition（`HYPOTHESIS_QUEUE.md` #49"
+  },
+  {
+   "family": "revenue_trend_surprise_low_attention",
+   "n_trials": 1,
+   "ids": [
+    91
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "`revenue_trend_surprise_low_attention`（HYPOTHESIS_QUEUE.md#21「月營收『意外』漂移×低關注度」，改造"
+  },
+  {
+   "family": "run_value_board_v2_pit",
+   "n_trials": 1,
+   "ids": [
+    390
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "value_board_v2_pit_backtest_liquidity500_engine_fix_recheck"
+  },
+  {
+   "family": "spillover_overlay",
+   "n_trials": 1,
+   "ids": [
+    346
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "spillover_overlay_v1_etf_tax_recheck"
+  },
+  {
+   "family": "tail",
+   "n_trials": 1,
+   "ids": [
+    322
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "tail_test.py 自我校準（PEAD財報公布後3日累積報酬前10%個股 vs 同時間窗/同產業/同市值分位未觸發訊號個股）"
+  },
+  {
+   "family": "turn_of_month",
+   "n_trials": 1,
+   "ids": [
+    96
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "`#25 月轉效應Turn-of-Month Effect`（TAIEX指數層級，非選股）"
+  },
+  {
+   "family": "turnover_concentration_gate54",
+   "n_trials": 1,
+   "ids": [
+    195
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "#54 成交值集中度速度（Turnover Concentration Velocity）第1關sanity"
+  },
+  {
+   "family": "universe",
+   "n_trials": 1,
+   "ids": [
+    83
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "`pair_trading_v1`（HYPOTHESIS_QUEUE.md#16「同產業配對交易/統計套利」：`universe.py::industry_ca"
+  },
+  {
+   "family": "名稱:exit_rule_lab_E-a_",
+   "n_trials": 1,
+   "ids": [
+    338
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "exit_rule_lab_E-a_buy_and_hold"
+  },
+  {
+   "family": "名稱:exit_rule_lab_E-d_",
+   "n_trials": 1,
+   "ids": [
+    344
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "exit_rule_lab_E-d_ma200_regime"
+  },
+  {
+   "family": "名稱:原子.二 depth-1原子表達式I",
+   "n_trials": 1,
+   "ids": [
+    285
+   ],
+   "batch1_overlap": [],
+   "status": "第二批待做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "原子.二 depth-1原子表達式IC地圖（描述性掃描）"
+  },
+  {
+   "family": "f_us_low_vol",
+   "n_trials": 20,
+   "ids": [
+    39,
+    41,
+    47,
+    52,
+    57,
+    64,
+    68,
+    104,
+    115,
+    145,
+    151,
+    152,
+    154,
+    162,
+    181,
+    197,
+    200,
+    203,
+    206,
+    245
+   ],
+   "batch1_overlap": [
+    64,
+    151
+   ],
+   "status": "第一批已做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "CHEAP_PASS": 12,
+    "PASS": 3,
+    "其他": 3,
+    "FAIL": 2
+   },
+   "sample": "`f_us_low_vol`（60日日報酬std取負號，跟TW版`f_low_vol`定義/窗口對齊）"
+  },
+  {
+   "family": "f_us_value_bm",
+   "n_trials": 16,
+   "ids": [
+    119,
+    128,
+    139,
+    144,
+    163,
+    165,
+    167,
+    170,
+    172,
+    174,
+    177,
+    179,
+    183,
+    185,
+    196,
+    199
+   ],
+   "batch1_overlap": [
+    128,
+    144
+   ],
+   "status": "第一批已做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "CHEAP_PASS": 3,
+    "FAIL": 5,
+    "PASS": 4,
+    "其他": 4
+   },
+   "sample": "`f_us_value_bm`（book-to-market，US軌第一個基本面/PIT因子，非price-only家族，新假說）"
+  },
+  {
+   "family": "f_quality_roe_stability",
+   "n_trials": 6,
+   "ids": [
+    15,
+    16,
+    17,
+    69,
+    156,
+    158
+   ],
+   "batch1_overlap": [
+    16,
+    17
+   ],
+   "status": "第一批已做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "CHEAP_PASS": 1,
+    "PASS": 4,
+    "其他": 1
+   },
+   "sample": "`f_quality_roe_stability`（ROE季度變異度穩定性）"
+  },
+  {
+   "family": "名稱:regime.替代A 網格 MA=2",
+   "n_trials": 6,
+   "ids": [
+    256,
+    257,
+    258,
+    259,
+    260,
+    261
+   ],
+   "batch1_overlap": [
+    256,
+    257,
+    258,
+    259,
+    260,
+    261
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 5,
+    "PASS": 1
+   },
+   "sample": "regime.替代A 網格 MA=200 k=0.35"
+  },
+  {
+   "family": "HQ#421",
+   "n_trials": 3,
+   "ids": [
+    424,
+    429,
+    435
+   ],
+   "batch1_overlap": [
+    424
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "其他": 2,
+    "PASS": 1
+   },
+   "sample": "crisis_gate_leveraged_bb90_prereg"
+  },
+  {
+   "family": "regime_overlay_trend_filter_gate_fut",
+   "n_trials": 3,
+   "ids": [
+    250,
+    251,
+    252
+   ],
+   "batch1_overlap": [
+    250,
+    251,
+    252
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 3
+   },
+   "sample": "regime擇時overlay事前網格：TX連續合約200MA趨勢濾網 bear_exposure=0.25（延續#244換曝險水位）"
+  },
+  {
+   "family": "名稱:regime.替代A 網格 MA=1",
+   "n_trials": 3,
+   "ids": [
+    253,
+    254,
+    255
+   ],
+   "batch1_overlap": [
+    253,
+    254,
+    255
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 3
+   },
+   "sample": "regime.替代A 網格 MA=140 k=0.35"
+  },
+  {
+   "family": "HQ#11",
+   "n_trials": 2,
+   "ids": [
+    10,
+    80
+   ],
+   "batch1_overlap": [
+    "關鍵字:weinstein"
+   ],
+   "status": "第一批已做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "FAIL": 1,
+    "PASS": 1
+   },
+   "sample": "`weinstein_stage2_pilot_v1`（手選30檔試點）"
+  },
+  {
+   "family": "HQ#418",
+   "n_trials": 2,
+   "ids": [
+    419,
+    423
+   ],
+   "batch1_overlap": [
+    "關鍵字:bb90"
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "其他": 2
+   },
+   "sample": "leveraged_bb90_6grid_prereg"
+  },
+  {
+   "family": "core_tilt",
+   "n_trials": 2,
+   "ids": [
+    280,
+    281
+   ],
+   "batch1_overlap": [
+    "關鍵字:core_tilt"
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 2
+   },
+   "sample": "core_tilt SPEC TE可行性驗證(反推所需TE vs 實測市值加權+主動權重帶構造TE)"
+  },
+  {
+   "family": "deep_dive_fut_basis_carry",
+   "n_trials": 2,
+   "ids": [
+    37,
+    244
+   ],
+   "batch1_overlap": [
+    244
+   ],
+   "status": "第一批已做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "CHEAP_PASS": 1,
+    "PASS": 1
+   },
+   "sample": "`fut_basis_carry`（#35的深挖/1b，非新假說——對已通過便宜關卡的候選做完整驗證）"
+  },
+  {
+   "family": "f_rev_accel",
+   "n_trials": 2,
+   "ids": [
+    1,
+    11
+   ],
+   "batch1_overlap": [
+    11
+   ],
+   "status": "第一批已做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "CHEAP_PASS": 1,
+    "FAIL": 1
+   },
+   "sample": "`f_rev_accel`（月營收YoY加速度）"
+  },
+  {
+   "family": "leveraged_bb90",
+   "n_trials": 2,
+   "ids": [
+    420,
+    422
+   ],
+   "batch1_overlap": [
+    420
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 1,
+    "FAIL": 1
+   },
+   "sample": "leveraged_bb90_6grid_result"
+  },
+  {
+   "family": "margin_debt_level_circular_shift_control",
+   "n_trials": 2,
+   "ids": [
+    143,
+    147
+   ],
+   "batch1_overlap": [
+    "關鍵字:margin_debt_level"
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 1,
+    "CHEAP_PASS": 1
+   },
+   "sample": "`margin_debt_level_v1`第2關深挖：circular-shift自相關保留版隨機控制組（接續round379「下一步(b)」「隨機控制組≥1"
+  },
+  {
+   "family": "regime_overlay",
+   "n_trials": 2,
+   "ids": [
+    89,
+    136
+   ],
+   "batch1_overlap": [
+    136
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "CHEAP_PASS": 1,
+    "PASS": 1
+   },
+   "sample": "`spillover_overlay_v1`（HYPOTHESIS_QUEUE.md#19「跨市場美股隔夜報酬外溢效應」GATE_SEQUENCE第2關以後：把"
+  },
+  {
+   "family": "weinstein_alpha",
+   "n_trials": 2,
+   "ids": [
+    60,
+    392
+   ],
+   "batch1_overlap": [
+    "關鍵字:weinstein"
+   ],
+   "status": "第一批已做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "FAIL": 2
+   },
+   "sample": "`weinstein_stage2_unbiased` alpha/beta顯著性關卡（#11的深挖/`WEINSTEIN_ALPHA_GATE_TASK.md"
+  },
+  {
+   "family": "HQ#10",
+   "n_trials": 1,
+   "ids": [
+    243
+   ],
+   "batch1_overlap": [
+    243
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "regime擇時overlay#10協定第一個訊號：TAIEX 200MA趨勢濾網(binary曝險1.00/0.50)"
+  },
+  {
+   "family": "HQ#360",
+   "n_trials": 1,
+   "ids": [
+    412
+   ],
+   "batch1_overlap": [
+    "關鍵字:trend_leverage"
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "trend_leverage_tw_0050_prereg"
+  },
+  {
+   "family": "HQ#411",
+   "n_trials": 1,
+   "ids": [
+    413
+   ],
+   "batch1_overlap": [
+    413
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "VIOLATES_SURVIVAL": 1
+   },
+   "sample": "trend_leverage_us_spy_result"
+  },
+  {
+   "family": "HQ#412",
+   "n_trials": 1,
+   "ids": [
+    414
+   ],
+   "batch1_overlap": [
+    414
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "VIOLATES_SURVIVAL": 1
+   },
+   "sample": "trend_leverage_tw_0050_result"
+  },
+  {
+   "family": "HQ#413",
+   "n_trials": 1,
+   "ids": [
+    415
+   ],
+   "batch1_overlap": [
+    "關鍵字:trend_scale"
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "trend_scale_1_5x_0_5x_xmkt_prereg"
+  },
+  {
+   "family": "HQ#415",
+   "n_trials": 1,
+   "ids": [
+    416
+   ],
+   "batch1_overlap": [
+    416
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "trend_scale_1_5x_0_5x_xmkt_result"
+  },
+  {
+   "family": "HQ#417",
+   "n_trials": 1,
+   "ids": [
+    418
+   ],
+   "batch1_overlap": [
+    418
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "core_allocation_24grid_result"
+  },
+  {
+   "family": "HQ#419",
+   "n_trials": 1,
+   "ids": [
+    421
+   ],
+   "batch1_overlap": [
+    "關鍵字:bb90"
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "leveraged_bb90_6grid_421_prereg"
+  },
+  {
+   "family": "crisis_gate_leveraged_bb90",
+   "n_trials": 1,
+   "ids": [
+    426
+   ],
+   "batch1_overlap": [
+    426
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "crisis_gate_leveraged_bb90_result"
+  },
+  {
+   "family": "f_odd_lot_imbalance",
+   "n_trials": 1,
+   "ids": [
+    231
+   ],
+   "batch1_overlap": [
+    "關鍵字:odd_lot"
+   ],
+   "status": "第一批已做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "f_odd_lot_imbalance (#67 盤中零股委託簿失衡度，第1關cheap gate)"
+  },
+  {
+   "family": "f_short_sale_utilization",
+   "n_trials": 1,
+   "ids": [
+    129
+   ],
+   "batch1_overlap": [
+    "關鍵字:short_sale_utilization"
+   ],
+   "status": "第一批已做",
+   "kind": "因子→前 N 檔等權月換股",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "`f_short_sale_utilization`個股融券使用率（`HYPOTHESIS_QUEUE.md` #36，知情放空者訊號，新假設，接續#35VRP"
+  },
+  {
+   "family": "hy_credit_spread",
+   "n_trials": 1,
+   "ids": [
+    329
+   ],
+   "batch1_overlap": [
+    "關鍵字:credit_spread"
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "HYPOTHESIS_QUEUE.md #77 美國高收益債利差(BAMLH0A0HYM2)資料可行性查證"
+  },
+  {
+   "family": "margin_debt_level_window_robustness",
+   "n_trials": 1,
+   "ids": [
+    141
+   ],
+   "batch1_overlap": [
+    "關鍵字:margin_debt_level"
+   ],
+   "status": "第一批已做",
+   "kind": "事件→事件後固定持有",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "`margin_debt_level_v1` trailing窗口參數穩健性檢查（#140 60d(12w)結果的第2關深挖之一，接續round375「下一步」"
+  },
+  {
+   "family": "ml_pricevol_oneshot",
+   "n_trials": 1,
+   "ids": [
+    483
+   ],
+   "batch1_overlap": [
+    483
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "VIOLATES_SURVIVAL": 1
+   },
+   "sample": "ml_pricevol_tw2008_2012_oneshot"
+  },
+  {
+   "family": "r1_0050_credit",
+   "n_trials": 1,
+   "ids": [
+    430
+   ],
+   "batch1_overlap": [
+    430
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "VIOLATES_SURVIVAL": 1
+   },
+   "sample": "r1_0050_credit_gate_result"
+  },
+  {
+   "family": "regime_overlay_breadth",
+   "n_trials": 1,
+   "ids": [
+    248
+   ],
+   "batch1_overlap": [
+    248
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "regime擇時overlay候選1：全市場廣度水位regime(4位數代號個股%站上200MA<0.50→曝險0.50,否則1.00)"
+  },
+  {
+   "family": "regime_overlay_margin_growth",
+   "n_trials": 1,
+   "ids": [
+    249
+   ],
+   "batch1_overlap": [
+    249
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "regime擇時overlay候選4：全市場融資餘額12週成長率下檔regime(>expanding第80百分位=過熱→曝險0.50,方向事前綁定)"
+  },
+  {
+   "family": "regime_overlay_realized_vol",
+   "n_trials": 1,
+   "ids": [
+    247
+   ],
+   "batch1_overlap": [
+    247
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "regime擇時overlay候選3：TAIEX已實現波動度regime單獨測試(vol20>expanding中位數→曝險0.50,否則1.00)"
+  },
+  {
+   "family": "sector_rotation_accel_gate73_gate2",
+   "n_trials": 1,
+   "ids": [
+    282
+   ],
+   "batch1_overlap": [
+    282
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "`HYPOTHESIS_QUEUE.md` #73 產業金流加速度輪動（月頻、accel前20%產業）第2關配對式隨機控制組"
+  },
+  {
+   "family": "short_sale_utilization_gate5_loo",
+   "n_trials": 1,
+   "ids": [
+    135
+   ],
+   "batch1_overlap": [
+    "關鍵字:short_sale_utilization"
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "`short_sale_utilization_gate5_loo`第5/6關leave-one-out+逐年一致性（`HYPOTHESIS_QUEUE.md`"
+  },
+  {
+   "family": "short_sale_utilization_gates",
+   "n_trials": 1,
+   "ids": [
+    134
+   ],
+   "batch1_overlap": [
+    "關鍵字:short_sale_utilization"
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "`short_sale_utilization_gates`第3關參數密集高原（`HYPOTHESIS_QUEUE.md`#36接續#133，融券使用率最低分位"
+  },
+  {
+   "family": "名稱:ml_pricevol_tw2008",
+   "n_trials": 1,
+   "ids": [
+    475
+   ],
+   "batch1_overlap": [
+    "關鍵字:ml_pricevol"
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "ml_pricevol_tw2008_2012_prereg"
+  },
+  {
+   "family": "名稱:trend_leverage_us_",
+   "n_trials": 1,
+   "ids": [
+    411
+   ],
+   "batch1_overlap": [
+    "關鍵字:trend_leverage"
+   ],
+   "status": "第一批已做",
+   "kind": "regime→0050 曝險",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "trend_leverage_us_spy_prereg"
+  },
+  {
+   "family": "regime_overlay_trend_filter",
+   "n_trials": 6,
+   "ids": [
+    271,
+    272,
+    273,
+    274,
+    275,
+    349
+   ],
+   "batch1_overlap": [
+    349
+   ],
+   "status": "第一批已做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 5,
+    "FAIL": 1
+   },
+   "sample": "regime.候選2/#243 200MA趨勢濾網(TAIEX現貨) 成本.二重跑"
+  },
+  {
+   "family": "margin_utilization_regime",
+   "n_trials": 3,
+   "ids": [
+    133,
+    382,
+    387
+   ],
+   "batch1_overlap": [
+    133
+   ],
+   "status": "第一批已做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 1,
+    "FAIL": 2
+   },
+   "sample": "`short_sale_utilization_portfolio_v1`第2關隨機控制組（`HYPOTHESIS_QUEUE.md`#36接續#129，融券使"
+  },
+  {
+   "family": "odd_lot_imbalance",
+   "n_trials": 3,
+   "ids": [
+    232,
+    383,
+    388
+   ],
+   "batch1_overlap": [
+    232,
+    383
+   ],
+   "status": "第一批已做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "CHEAP_PASS": 1,
+    "FAIL": 2
+   },
+   "sample": "#67盤中零股交易比重(Odd-Lot Imbalance) portfolio層構造 gate2"
+  },
+  {
+   "family": "short_sale_utilization",
+   "n_trials": 2,
+   "ids": [
+    384,
+    389
+   ],
+   "batch1_overlap": [
+    384
+   ],
+   "status": "第一批已做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 2
+   },
+   "sample": "short_sale_utilization_portfolio_v1_new_engine_scale_recheck"
+  },
+  {
+   "family": "HQ#133",
+   "n_trials": 1,
+   "ids": [
+    137
+   ],
+   "batch1_overlap": [
+    137
+   ],
+   "status": "第一批已做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "`short_sale_utilization`整體最終alpha顯著性判定（`HYPOTHESIS_QUEUE.md`#36結案，統整#129/#133/#1"
+  },
+  {
+   "family": "HQ#423",
+   "n_trials": 1,
+   "ids": [
+    425
+   ],
+   "batch1_overlap": [
+    425
+   ],
+   "status": "第一批已做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "bb90_oos_2025_result"
+  },
+  {
+   "family": "HQ#427",
+   "n_trials": 1,
+   "ids": [
+    428
+   ],
+   "batch1_overlap": [
+    428
+   ],
+   "status": "第一批已做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "其他": 1
+   },
+   "sample": "s3c6_oos_2025_result"
+  },
+  {
+   "family": "HQ#445",
+   "n_trials": 1,
+   "ids": [
+    446
+   ],
+   "batch1_overlap": [
+    446
+   ],
+   "status": "第一批已做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "core_tilt_v2_stage1_result"
+  },
+  {
+   "family": "core_tilt_v2_stage1",
+   "n_trials": 1,
+   "ids": [
+    445
+   ],
+   "batch1_overlap": [
+    445
+   ],
+   "status": "第一批已做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "core_tilt_v2_stage1_prereg"
+  },
+  {
+   "family": "margin_debt_level_train_val_heterogeneity",
+   "n_trials": 1,
+   "ids": [
+    142
+   ],
+   "batch1_overlap": [
+    "關鍵字:margin_debt_level"
+   ],
+   "status": "第一批已做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "CHEAP_PASS": 1
+   },
+   "sample": "`margin_debt_level_v1`疑慮①TRAIN/VAL異質性查證（#140/#141保留疑慮①，接續round377「下一步(a)」，非新假說）"
+  },
+  {
+   "family": "us_universe_dispersion_check",
+   "n_trials": 1,
+   "ids": [
+    171
+   ],
+   "batch1_overlap": [
+    171
+   ],
+   "status": "第一批已做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "PASS": 1
+   },
+   "sample": "「宇宙離散度」假說直接檢驗——比較乾淨分層抽樣宇宙（#20/#21用）與舊熱門股偏誤宇宙（#17/#128用）在TRAIN/VAL兩期的橫斷面報酬離散度（`US"
+  },
+  {
+   "family": "weinstein_v2_alpha",
+   "n_trials": 1,
+   "ids": [
+    393
+   ],
+   "batch1_overlap": [
+    393
+   ],
+   "status": "第一批已做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "weinstein_v2_alpha_gate_engine_fix_recheck"
+  },
+  {
+   "family": "名稱:core_tilt_backtest",
+   "n_trials": 1,
+   "ids": [
+    283
+   ],
+   "batch1_overlap": [
+    283
+   ],
+   "status": "第一批已做",
+   "kind": "非策略，跳過",
+   "verdicts": {
+    "FAIL": 1
+   },
+   "sample": "core_tilt_backtest 決定性驗證：重建組合(純市值前50大) vs 0050真實日報酬"
+  }
+ ]
+}

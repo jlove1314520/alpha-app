@@ -1,3 +1,18 @@
+## 2026-11-07 03:01～ DevQueue 20261107-030102（研究帽）先.一五五-2 PQ② 收尾＋先.一五五-3 第二批清單
+
+等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
+
+- **先.一五五-2（改 `- [!]`）**：PQ ②全期重新優化完成（`python research/reaudit_ext2025_pq.py --skip-build`，零請求、152 秒、10,368 格，5,671 格 MDD>50%）。
+  - 結果：挑出的最優組＝原最優組（θ20%／k1／N20／H120／strict＋peak／止損 15%／1×），全期 +4.7%／−8.3%／Sharpe 0.85、52 筆——加進 2025 起資料沒改變排名；同組 3× 全期 +12.8%／−24.0%；MDD≤50% 下年化最高＝N10／不設止損／3× +20.8%／−49.2%（貼天條一邊緣）。無天條一越線。
+  - 證據：`research/data/reaudit_ext2025_pq.json`、`research/data/panic_pq_ext2025/grid_results.csv`、log `run_20261107_0301.log`（本機）；寫進 `REAUDIT_OPTIMIZED.md`「還沒補跑的列」PQ 行。
+  - 照實：開工時我用 `--help` 想看參數，腳本不認得這個旗標、直接開跑重建，被管線截斷；元件檔時間戳沒變（沒覆寫）、行程封死 socket，零請求。
+  - BLOCKED：可補跑的列已全部做完，剩 F7、F8、F9、F11、F15、F16、F18 等 **先.一五五-2a** 補資料提案（24 小時預設放行約 11-08 00:30 後）。因為 `dev_queue_runner block` 會經輪替標到別項，這次手動改成 `- [!]`。推播等 7 列補完才發。
+- **先.一五五-3（維持 `- [ ]`，①②完成）**：新 `research/reaudit_batch3_inventory.py`（只讀帳本、零請求、不寫帳本）把 489 筆試驗自動分成 263 族：第一批已涵蓋 52、第二批待做 162、非策略跳過 49；全清單寫進 `REAUDIT_OPTIMIZED.md` 第 4 節。
+  - [自行裁量] 分族＝同因子名／同腳本／同假說編號；第一批對照用編號＋名稱欄關鍵字（比備註會誤吞，第一版誤吞到 74 族），4 族人工排除；自動分類有誤判，每批開做前人工複核。
+  - 第 1 批 10 族（下一輪做③掃參數）：f_eps_surprise、f_revenue_surprise、f_eps_growth、f_value_pe、f_value_pb、f_low_vol、f_rel_strength、f_52w_high_prox、f_dividend_yield_ttm、f_gross_profitability。
+- 冒煙：`node scripts/smoke_test.mjs` rc=0、全部項目 [x]、最後一項「整個測試過程結束後仍無累積的 uncaught error」通過（03:05～03:14）。commit：c98167a81f3（先.一五五-2）＋本 commit（先.一五五-3）。
+- 收工原因：權威清單下一項是 先.一三五-1me [開發]，一輪只戴一頂帽子。佇列 `- [ ]` 仍 ≥12，DevQueue 可執行非研究項數未變，本輪不補件。
+
 ## 2026-11-07 02:31～02:50 DevQueue 20261107-023102（開發帽）先.一三五-1mb 半年報公司近四季 EPS
 
 等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
