@@ -195,8 +195,23 @@ def build() -> dict:
                                 "mdd": None if m is None else round(m, 4), "points": weekly_points(pq) if ok else []},
                    "paper": paper_block(start, today, "PQ")})
     return {"generated_at": datetime.now(TW).isoformat(timespec="seconds"), "track": "紙上優化軌（先.一五四-1）",
-            "start": start, "note": NOTE, "tracks": tracks, "last_error": "；".join(errs) or None,
-            "external_requests": 0}
+            "start": start, "note": NOTE, "tracks": tracks, "candidates": load_candidates(errs),
+            "last_error": "；".join(errs) or None, "external_requests": 0}
+
+
+CANDIDATES = ROOT / "research" / "data" / "paper_opt_candidates.json"
+
+
+def load_candidates(errs: list) -> list:
+    """候選欄（先.一五五-3：墓園重審第二批新進前 10 名，等 先.一五四 系列建每日訊號產生器後才正式上紙上）。
+    來源 research/data/paper_opt_candidates.json（reaudit 腳本寫）；讀不到只記警告、回空清單（十二節）。"""
+    try:
+        if not CANDIDATES.exists():
+            return []
+        return json.loads(CANDIDATES.read_text(encoding="utf-8")).get("candidates", [])
+    except (OSError, ValueError) as e:
+        errs.append(f"候選欄讀取失敗 {type(e).__name__}")
+        return []
 
 
 def main() -> int:

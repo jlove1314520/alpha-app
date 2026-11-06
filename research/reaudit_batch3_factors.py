@@ -11,7 +11,7 @@
   組合層 L {1,1.5,2,3} × 組合止損 {無,10%,20%,30%}（融資 6.5%/年，3× 超過台股融資上限只當參考）。
 
 用法：python research/reaudit_batch3_factors.py run f_eps_surprise f_value_pe ...   （有斷點快取，時間到存檔離開）
-     python research/reaudit_batch3_factors.py summarize                          （彙總已跑完的族）
+     python research/reaudit_batch3_factors.py summarize [1|2]                    （彙總已跑完的族；第 2 批寫第 6 節）
 環境變數 REAUDIT_DEADLINE＝epoch 秒，到了就不再開新格。
 """
 from __future__ import annotations
@@ -44,6 +44,10 @@ OUT_JSON = HERE / "data" / "reaudit_batch3_batch1.json"
 REBALS, GATES, TOPNS, PSTOPS, DIRS = (21, 63), (1, 0), (10, 20, 30), (0.15, 1.0), (1, -1)
 BATCH1 = ["f_eps_surprise", "f_revenue_surprise", "f_eps_growth", "f_value_pe", "f_value_pb", "f_low_vol",
           "f_rel_strength", "f_52w_high_prox", "f_dividend_yield_ttm", "f_gross_profitability"]
+# 第 2 批（DevQueue 20261107-060102）：第 4 節清單裡 pkl 已有因子欄的 10 族（曾 PASS／CHEAP_PASS 優先，其餘 FAIL 族補滿）
+BATCH2 = ["f_bab", "f_inst_flow", "f_margin_utilization", "f_foreign_streak", "f_idio_vol", "f_ma_breakout",
+          "f_short_margin_ratio", "f_residual_momentum", "f_short_reversal_1m", "f_short_term_reversal_1w"]
+BATCHES = {"1": BATCH1, "2": BATCH2}
 prog = S.prog
 
 
@@ -121,11 +125,15 @@ def run(facs, deadline):
     return True
 
 
-def summarize():
+def summarize(batch="1"):
+    global OUT_JSON, MK_B, MK_E
+    if batch != "1":
+        OUT_JSON = HERE / "data" / f"reaudit_batch3_batch{batch}.json"
+        MK_B, MK_E = f"<!-- BATCH3-B{batch}-BEGIN -->", f"<!-- BATCH3-B{batch}-END -->"
     sys.argv = [sys.argv[0], "--formula", "421"]
     import leveraged_bb90_backtest as LB
     fams, rf_cache = [], {}
-    for fac in BATCH1:
+    for fac in BATCHES[batch]:
         cp = cells_path(fac)
         if not cp.exists():
             continue
@@ -173,6 +181,7 @@ def summarize():
            "notes": "樣本內最優化（描述性）；宇宙為 #133 抽樣 236 檔（今天的名冊抽樣，存活者偏誤未完全排除）；只做多頭；"
                     "3× 超過台股融資上限只當參考；融資追繳以權益歸零近似；交易次數＝個股賣出筆數、勝率＝賣出已實現損益>0 比例。"}
     OUT_JSON.write_text(json.dumps(out, ensure_ascii=False, indent=2, default=float), encoding="utf-8")
+    out["batch"] = batch
     plot_and_render(out, LB)
     for f in fams:
         b = f["best_by_calmar"]
@@ -212,7 +221,7 @@ def plot_and_render(out, LB):
     curves_dir = HERE / "data" / "reaudit_curves"
     curves_dir.mkdir(parents=True, exist_ok=True)
     old = _old_table()
-    lines = [MK_B, "", "## 5. 第二批第 1 批 10 族結果（先.一五五-3 ③，`research/reaudit_batch3_factors.py`，零新外部請求）", "",
+    lines = [MK_B, "", f"## {4 + int(out.get('batch', '1'))}. 第二批第 {out.get('batch', '1')} 批 10 族結果（先.一五五-3 ③，" "`research/reaudit_batch3_factors.py`，零新外部請求）", "",
              f"> 產生：{out['generated_at']}；期間 {out['data_start']}～{out['data_end']}（**2025 起延長尚未做**，見下方待辦）。"
              "做法同 F13：#133 抽樣 236 檔、`research/backtest/` 引擎（下一交易日成交、漲跌停不成交、全成本）、只做多頭；"
              "順向與反向都掃。引擎 48 格 × 組合層 16 格＝每族 768 格挑最好（多重比較懲罰只當參考，不判死）。"
@@ -253,6 +262,6 @@ def plot_and_render(out, LB):
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2 and sys.argv[1] == "summarize":
-        sys.exit(summarize())
+        sys.exit(summarize(sys.argv[2] if len(sys.argv) > 2 else "1"))
     dl = float(os.environ.get("REAUDIT_DEADLINE", time.time() + 1800))
     sys.exit(0 if run(sys.argv[2:] or BATCH1, dl) else 2)

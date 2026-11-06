@@ -1,3 +1,17 @@
+## 2026-11-07 06:01～ DevQueue 20261107-060102（研究帽）先.一五五-3 墓園重審第二批：第 1 批延長＋候選欄＋第 2 批 10 族
+
+等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
+
+- **先.一五五-3**（維持 - [ ]，零新外部請求，不寫 TRIALS_LEDGER，紙上優化軌描述性，非投資建議）：
+  - (a) 新 `research/reaudit_batch3_ext2025.py`：第 1 批價量三族延長到 2026-09-24（價格接法同 F12／F13 延長；因子照 factors.py 原公式重算，2024 底前與原欄核對差 0）。第 1 批挑出的同一組參數看 2025 起：f_52w_high_prox +14.7%／−23.0%、f_low_vol +3.7%／−7.2%、**f_rel_strength −29.4%／−47.1%，全期 MDD −50.5% 越過天條一**（全期重挑 1× 不設停損 +23.7%／−31.2%）。f_low_vol 47/48 格（時間到存斷點）。結果在 `research/REAUDIT_OPTIMIZED.md` 5a 節。
+  - (b) `research/paper_opt_track.py` 新增 `candidates` 欄（讀本機 `research/data/paper_opt_candidates.json`，讀不到只記警告、不影響主流程）；`data/paper_opt_track.json` 候選 16 支（第 1 批 8＋第 2 批 8），f_rel_strength 標 `violates_survival_extended`。[自行裁量] 「前 10 名」用 2015～2024 綜合分數跟第 0 節比，並列所以超過 10 支。紙上 8 支＋候選 16 支＝24，在上限 30 內。
+  - (d) 第 2 批 10 族（f_bab、f_inst_flow、f_margin_utilization、f_foreign_streak、f_idio_vol、f_ma_breakout、f_short_margin_ratio、f_residual_momentum、f_short_reversal_1m、f_short_term_reversal_1w）全部 48/48（2015～2024），`research/reaudit_batch3_factors.py summarize 2` 寫第 6 節。最好的：f_idio_vol +6.5%／−7.5%／Sharpe 1.37、f_residual_momentum +14.9%／−16.6%、f_inst_flow（反向 2×）+19.9%／−25.7%；3× 的幾族（兩個短期反轉、f_short_margin_ratio）超過台股融資上限只當參考。沒有最佳組越過天條一。
+  - (c) 推播：第 2 批完成已送（1 個訂閱成功）。
+  - 過程：一開始同時開 7 個回測行程，mem_guard 在可用記憶體 2.71GB 時砍掉 3 個延長行程（斷點快取還在），改成依序重跑後完成。
+  - 下一輪：f_low_vol 剩 1 格；第 1 批財報 7 族與第 2 批 10 族延長到 2025 起；第 3 批（f_accruals 等 5 個 pkl 已有欄＋regime 類）。
+- 冒煙：`node scripts/smoke_test.mjs` rc=0、186 項 [x]、沒有未過項（06:17～06:25，`data/paper_opt_track.json` 加候選欄後跑；之後只更新候選欄內容）。
+- 收工原因：時間上限（06:46）。
+
 ## 2026-11-07 05:01～ DevQueue 20261107-050102（開發帽）先.一三五-1mf 已不在上市櫃的代號不出本益比
 
 等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
