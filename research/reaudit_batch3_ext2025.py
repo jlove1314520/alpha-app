@@ -42,24 +42,66 @@ START = "2015-01-01"
 prog = E.prog
 
 
+# 第 2 批價量因子延長（DevQueue 20261107-073102）：公式照 factors.py 原文抄（窗口常數直接 import），
+# 2024 底前逐值跟 pkl 核對，差 >1e-6 就停，不靠人眼保證抄對。
+PRICE_FACS = FACS + ["f_idio_vol", "f_bab", "f_residual_momentum", "f_short_reversal_1m",
+                     "f_short_term_reversal_1w", "f_ma_breakout", "f_amihud_illiq"]
+
+
+def _factor_series(d, mc, fac):
+    import factors as F
+    px = d["adj_close"].astype(float)
+    r = px.pct_change()
+    if fac == "f_low_vol":
+        return -r.rolling(60, min_periods=60).std()
+    if fac == "f_52w_high_prox":
+        return px / px.rolling(252, min_periods=252).max()
+    if fac == "f_rel_strength":
+        m = d["date"].map(mc).astype(float)
+        return (px / px.shift(60) - 1) - (m / m.shift(60) - 1)
+    if fac == "f_short_reversal_1m":
+        return -(px / px.shift(F.SHORT_REVERSAL_WINDOW) - 1)
+    if fac == "f_short_term_reversal_1w":
+        return -(px / px.shift(F.SHORT_TERM_REVERSAL_1W_WINDOW) - 1)
+    if fac == "f_ma_breakout":
+        ma = px.rolling(F.MA_WINDOW, min_periods=F.MA_WINDOW).mean()
+        v = d["Trading_Volume"].astype(float)
+        return (px / ma - 1) * (v.rolling(F.VOL_SHORT_WINDOW, min_periods=F.VOL_SHORT_WINDOW).mean()
+                                / v.rolling(F.VOL_LONG_WINDOW, min_periods=F.VOL_LONG_WINDOW).mean())
+    if fac == "f_amihud_illiq":
+        tm = d["Trading_money"].astype(float)
+        il = np.where(tm > 0, r.abs() / tm, np.nan)
+        return pd.Series(il, index=d.index).rolling(F.AMIHUD_WINDOW, min_periods=F.AMIHUD_WINDOW).mean()
+    m = d["date"].map(mc).astype(float)
+    mr = m.pct_change()
+    W = F.LOW_VOL_WINDOW
+    if fac in ("f_idio_vol", "f_bab"):
+        vs = r.rolling(W, min_periods=W).var()
+        vm = mr.rolling(W, min_periods=W).var()
+        beta = r.rolling(W, min_periods=W).cov(mr) / vm
+        if fac == "f_bab":
+            return -beta
+        return -np.sqrt((vs - beta ** 2 * vm).clip(lower=0.0))
+    if fac == "f_residual_momentum":
+        W2 = F.RESIDUAL_MOMENTUM_WINDOW
+        beta = r.rolling(W2, min_periods=W2).cov(mr) / mr.rolling(W2, min_periods=W2).var()
+        return (px / px.shift(W2) - 1) - beta * (m / m.shift(W2) - 1)
+    raise ValueError(f"{fac} 不是可直接重算的價量因子")
+
+
 def recompute(ext, mk, fac):
     mc = mk.set_index("date")["close"].astype(float)
     worst = 0.0
     for sid, d in ext.items():
-        px = d["adj_close"].astype(float)
-        if fac == "f_low_vol":
-            v = -px.pct_change().rolling(60, min_periods=60).std()
-        elif fac == "f_52w_high_prox":
-            v = px / px.rolling(252, min_periods=252).max()
-        else:
-            m = d["date"].map(mc).astype(float)
-            v = (px / px.shift(60) - 1) - (m / m.shift(60) - 1)
+        v = _factor_series(d, mc, fac)
         pre = (d["date"] <= "2024-12-31") & (d["date"] >= START)
         if fac in d.columns:
             a, b = d.loc[pre, fac].astype(float), v[pre]
             both = a.notna() & b.notna()
             if both.any():
-                worst = max(worst, float((a[both] - b[both]).abs().max()))
+                scale = max(float(a[both].abs().median()), 1e-300) if fac == "f_amihud_illiq" else 1.0
+                rel = (a[both] - b[both]).abs() / np.maximum(scale, a[both].abs() if fac == "f_amihud_illiq" else 1.0)
+                worst = max(worst, float(rel.max()))
         d[fac] = v
     return worst
 
@@ -124,9 +166,14 @@ def summarize():
     sys.argv = [sys.argv[0], "--formula", "421"]
     import leveraged_bb90_backtest as LB
     LB.END = "2099-12-31"  # 同 reaudit_ext2025_engine：只在本行程延長央行定存讀取範圍，不改原檔
-    old = {f["factor"]: f for f in json.loads(B.OUT_JSON.read_text(encoding="utf-8"))["families"]}
+    old = {}
+    for pj in (B.OUT_JSON, HERE / "data" / "reaudit_batch3_batch2.json", HERE / "data" / "reaudit_batch3_batch3.json"):
+        if pj.exists():
+            old.update({f["factor"]: f for f in json.loads(pj.read_text(encoding="utf-8"))["families"]})
     fams = []
-    for fac in FACS:
+    for fac in PRICE_FACS:
+        if fac not in old or not old[fac].get("best_by_calmar"):
+            continue
         cp = CELLS_DIR / f"{fac}.json"
         if not cp.exists():
             continue
@@ -153,6 +200,9 @@ def summarize():
         ob = old[fac]["best_by_calmar"]
         segs = {}
         for tag, pick in (("prev_best", ob), ("new_best", best)):
+            if pick["key"] not in cache:  # 時間到存斷點、那格還沒跑到（下一輪接續）
+                segs[tag] = None
+                continue
             c = cache[pick["key"]]
             dates = pd.to_datetime(pd.Series(c["dates"]))
             eq = np.array(c["equity"], float); eq = eq / eq[0]
@@ -170,6 +220,9 @@ def summarize():
     render(out)
     for f in fams:
         p, n = f["segments"]["prev_best"], f["segments"]["new_best"]
+        if p is None:
+            prog(f"{f['factor']} {f['cells_done']}/48 舊最優那格未跑到｜目前最優 {n['key']} L={n['L']} {n['full']['cagr']:+.1%}/{n['full']['mdd']:.1%}")
+            continue
         prog(f"{f['factor']} {f['cells_done']}/48 舊最優 {p['key']} 全期 {p['full']['cagr']:+.1%}/{p['full']['mdd']:.1%} 2025起 "
              + (f"{p['from2025']['cagr']:+.1%}/{p['from2025']['mdd']:.1%}" if p['from2025'] else "—")
              + f"｜新最優 {n['key']} L={n['L']} {n['full']['cagr']:+.1%}/{n['full']['mdd']:.1%}")
@@ -182,7 +235,7 @@ def _f(x, pct=True):
 
 def render(out):
     md = B.MD
-    L = [MK_B, "", "### 5a. 第 1 批價量三族延長到 2025 起（`research/reaudit_batch3_ext2025.py`，零新外部請求）", "",
+    L = [MK_B, "", "### 5a. 第 1／2 批價量因子延長到 2025 起（`research/reaudit_batch3_ext2025.py`，零新外部請求）", "",
          f"> 產生：{out['generated_at']}。價格 2025 起接本機 FinMind 快取（同 F12／F13 延長作法；2024 底仍掛牌但沒有 2025 起價格的 45 檔"
          "從 2024-11-15 起不給分數），因子照 factors.py 原公式在延長價格上重算，2024 底前與原欄核對差 0。"
          "「舊最優」＝第 5 節只看 2024 底前挑出的那一組，延長後原封不動看 2025 起表現（這一段等於沒參與挑格）；"
@@ -191,6 +244,11 @@ def render(out):
          "|---|---|---|---|---|---|---|---|---|"]
     for f in out["families"]:
         p, n = f["segments"]["prev_best"], f["segments"]["new_best"]
+        if p is None:
+            nf = n["full"]
+            L.append(f"| {f['factor']} | {f['cells_done']}/48 | 舊最優那格未跑到（下一輪接續） | — | — | — | "
+                     f"{n['key']} L={n['L']:g} 止損={n['stop']} | {_f(nf['cagr'])}／{_f(nf['mdd'])}／{_f(nf['sharpe'], False)} | {n['end']} |")
+            continue
         pp, pf, nf = p["pre2025"] or {}, p["from2025"] or {}, n["full"]
         L.append(f"| {f['factor']} | {f['cells_done']}/48 | {p['key']} L={p['L']:g} 止損={p['stop']} | {_f(pp.get('cagr'))}／{_f(pp.get('mdd'))} | "
                  f"{_f(pf.get('cagr'))}／{_f(pf.get('mdd'))}／{_f(pf.get('sharpe'), False)} | {_f(p['full']['cagr'])}／{_f(p['full']['mdd'])} | "
@@ -212,7 +270,7 @@ def write_candidates():
     if OUT_JSON.exists():
         ext = {f["factor"]: f for f in json.loads(OUT_JSON.read_text(encoding="utf-8"))["families"]}
     cands = []
-    for batch in ("1", "2"):
+    for batch in ("1", "2", "3"):
         pj = B.OUT_JSON if batch == "1" else HERE / "data" / f"reaudit_batch3_batch{batch}.json"
         if not pj.exists():
             continue

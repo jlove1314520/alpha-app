@@ -47,7 +47,11 @@ BATCH1 = ["f_eps_surprise", "f_revenue_surprise", "f_eps_growth", "f_value_pe", 
 # 第 2 批（DevQueue 20261107-060102）：第 4 節清單裡 pkl 已有因子欄的 10 族（曾 PASS／CHEAP_PASS 優先，其餘 FAIL 族補滿）
 BATCH2 = ["f_bab", "f_inst_flow", "f_margin_utilization", "f_foreign_streak", "f_idio_vol", "f_ma_breakout",
           "f_short_margin_ratio", "f_residual_momentum", "f_short_reversal_1m", "f_short_term_reversal_1w"]
-BATCHES = {"1": BATCH1, "2": BATCH2}
+# 第 3 批（DevQueue 20261107-073102）：pkl 已有因子欄、第 4 節「待做」的 5 族＋人工複核改類的 f_inst_streak_days
+# 〔自行裁量：清單自動標「非策略」，但它是 pkl 現成因子欄、可直接轉成前 N 檔等權月換股，人工複核改列入〕
+BATCH3 = ["f_accruals", "f_amihud_illiq", "f_asset_growth", "f_gross_margin_stability", "f_listing_age_days",
+          "f_inst_streak_days"]
+BATCHES = {"1": BATCH1, "2": BATCH2, "3": BATCH3}
 prog = S.prog
 
 
@@ -221,7 +225,7 @@ def plot_and_render(out, LB):
     curves_dir = HERE / "data" / "reaudit_curves"
     curves_dir.mkdir(parents=True, exist_ok=True)
     old = _old_table()
-    lines = [MK_B, "", f"## {4 + int(out.get('batch', '1'))}. 第二批第 {out.get('batch', '1')} 批 10 族結果（先.一五五-3 ③，" "`research/reaudit_batch3_factors.py`，零新外部請求）", "",
+    lines = [MK_B, "", f"## {4 + int(out.get('batch', '1'))}. 第二批第 {out.get('batch', '1')} 批 {len(out.get('families', [])) or 10} 族結果（先.一五五-3 ③，" "`research/reaudit_batch3_factors.py`，零新外部請求）", "",
              f"> 產生：{out['generated_at']}；期間 {out['data_start']}～{out['data_end']}（**2025 起延長尚未做**，見下方待辦）。"
              "做法同 F13：#133 抽樣 236 檔、`research/backtest/` 引擎（下一交易日成交、漲跌停不成交、全成本）、只做多頭；"
              "順向與反向都掃。引擎 48 格 × 組合層 16 格＝每族 768 格挑最好（多重比較懲罰只當參考，不判死）。"

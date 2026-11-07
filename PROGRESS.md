@@ -1,3 +1,15 @@
+## 2026-11-07 07:31～ DevQueue 20261107-073102（研究帽）先.一五五-3 墓園重審第二批：第 3 批 6 族＋第 2 批價量延長
+
+等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
+
+- **先.一五五-3**（維持 - [ ]，零新外部請求，不寫 TRIALS_LEDGER，紙上優化軌描述性，非投資建議）：
+  - 第 3 批 6 族 48/48（2015～2024），REAUDIT_OPTIMIZED.md 第 7 節：f_accruals（反向）+8.7%／−14.0%、f_inst_streak_days +10.1%／−16.3%、f_gross_margin_stability +10.0%／−16.8%、f_listing_age_days +6.8%／−13.0%、f_asset_growth +8.8%／−22.0%、f_amihud_illiq（反向 3×）+18.9%／−43.2%。
+  - [自行裁量] f_inst_streak_days 清單自動標「非策略」，人工複核後改列入（pkl 現成因子欄，可直接轉前 N 檔等權）；本批只有 6 族，因 pkl 已有欄的待做族只剩這些。
+  - `reaudit_batch3_ext2025.py` 改通用價量重算（7 個新因子 2024 底前與 pkl 核對差 0）；延長到 2026-09-24：f_low_vol 補完、f_idio_vol／f_bab／f_residual_momentum／f_ma_breakout／f_amihud_illiq 48/48，兩個反轉 23／21 格（時間到存斷點）。f_amihud_illiq 舊最優（3×）全期 MDD −59.8% 越過天條一；f_ma_breakout 2025 起 +32.4%／−26.6%。
+  - 候選欄 20 支寫進 `data/paper_opt_track.json`；推播已送。
+- 冒煙：`node scripts/smoke_test.mjs` rc=0、186 項 PASS、0 FAIL（07:46～07:55，回測並行中跑；之後只更新候選欄內容）。
+- 收工原因：時間上限（08:16）；下一項留下一輪。
+
 ## 2026-11-07 07:01～ DevQueue 20261107-070102（維運帽）先.一三五-1mc 舊報價列是否被當成真漲跌顯示
 
 等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
