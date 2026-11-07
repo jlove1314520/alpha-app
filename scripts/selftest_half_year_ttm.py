@@ -13,6 +13,10 @@ spec = importlib.util.spec_from_file_location("usf", ROOT / ".github/scripts/upd
 usf = importlib.util.module_from_spec(spec); spec.loader.exec_module(usf)
 
 raw = json.loads((ROOT / "data/stock_detail.json").read_text(encoding="utf-8"))["stocks"]
+# 先.一三五-1mk：每日管線已把 period 標記寫進正式檔，「未標記」對照組要先剝掉標記，不能直接拿原檔
+for _c in ["2249", "2330", "2758", "6898", "2760", "6565", "6812", "7752", "6911"]:
+    for _q in ((raw.get(_c) or {}).get("financials") or {}).get("quarters") or []:
+        _q.pop("period", None); _q.pop("period_basis", None)
 codes = ["2249", "2330", "2758", "6898", "2760", "6565", "6812", "7752", "6911"]
 ME = ["2760", "6565", "6812", "7752", "6911"]
 mrev = usf.load_month_revenue_map()
@@ -94,6 +98,28 @@ for label, src in (("tagged", tagged), ("untagged", {c: raw[c] for c in codes}))
         ok(gaps == [], "稽核標記後 9 檔都不列 e_quarters_gap")
     else:
         ok(gaps == ["2249", "2758", "2760", "6565", "6812", "6898", "6911", "7752"], "稽核未標記時與改版前相同（半年報 8 檔列 gap）")
+
+# 先.一三五-1mk：離線路徑（--offline-merge-backfill）也要標半年報。拿掉標記的副本寫到暫存檔，跑完再比對（不動正式檔）
+import tempfile
+with tempfile.TemporaryDirectory() as td:
+    tmp = Path(td) / "stock_detail.json"
+    full = json.loads((ROOT / "data/stock_detail.json").read_text(encoding="utf-8"))
+    for c in codes:
+        for q in full["stocks"][c]["financials"]["quarters"]:
+            q.pop("period", None); q.pop("period_basis", None)
+    tmp.write_text(json.dumps(full, ensure_ascii=False), encoding="utf-8")
+    orig_out = usf.OUT_PATH
+    usf.OUT_PATH = tmp
+    try:
+        usf.offline_merge_backfill()
+    finally:
+        usf.OUT_PATH = orig_out
+    off = json.loads(tmp.read_text(encoding="utf-8"))
+    hy = off["meta"].get("financials_half_year_period") or {}
+    ok(hy.get("mode") == "offline" and "2249" in (hy.get("tagged_codes") or []), "離線路徑 meta 有 mode=offline 半年報紀錄")
+    ok([(q["year"], q["quarter"], q.get("period")) for q in off["stocks"]["2249"]["financials"]["quarters"]][-4:] ==
+       [(q["year"], q["quarter"], q.get("period")) for q in q2249][-4:], "離線路徑 2249 標記與每日路徑相同")
+    ok(not any(q.get("period") for q in off["stocks"]["2330"]["financials"]["quarters"]), "離線路徑 2330 不標")
 
 print("自測", "全部通過" if not fails else f"失敗 {len(fails)} 項")
 sys.exit(1 if fails else 0)

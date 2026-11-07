@@ -943,9 +943,22 @@ def offline_merge_backfill() -> None:
         payload["meta"]["roe_recomputed_after_backfill_merge"] = {
             "note": "併入回補季的檔用合併後近四季重算 ROE；最後一季須等於 latest_cum、四季須連續，否則 None（先.一三五-1md）",
             "recomputed_count": len(_r["recomputed"]), "set_none_count": len(_r["set_none"]), "errors": _r["errors"]}
-        payload["meta"]["roe_cleared_nonconsecutive_codes"] = clear_stale_nonconsecutive_roe(stocks)
     except Exception as e:  # 十二節：重算自己出錯只警告
         print(f"[warn] 回補季併入後 ROE 重算失敗：{e}")
+    # 先.一三五-1mk：跟每日路徑同順序——ROE 重算 → 半年報標記 → ROE 連續性清理，各自 try（十二節）
+    try:
+        _hy = tag_half_year_periods(stocks, load_month_revenue_map())
+        payload["meta"]["financials_half_year_period"] = {
+            "note": "同一年 quarters 只有 Q2／Q4 兩筆（半年報公司）時，Q2 標 period=H1（上半年）、Q4 標 period=H2（下半年），數值不改（先.一三五-1mb）；"
+                    "另以月營收證明（營收＝半年月營收加總）或前一年已是半年報＋今年只有 Q2 標記，period_basis 記證據類型（先.一三五-1me）",
+            "tagged_count": len(_hy["tagged_codes"]), "tagged_codes": _hy["tagged_codes"], "basis_count": _hy["basis_count"],
+            "generated_at": datetime.now(TW_TZ).isoformat(), "mode": "offline"}
+    except Exception as e:
+        print(f"[warn] 半年報標記失敗：{e}")
+    try:
+        payload["meta"]["roe_cleared_nonconsecutive_codes"] = clear_stale_nonconsecutive_roe(stocks)
+    except Exception as e:
+        print(f"[warn] ROE 連續性複查失敗：{e}")
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
     print(f"離線併入回補季：{len(st['merged_codes'])} 檔、{st['rows_added']} 季；拒絕 {len(st['rejected'])} 檔")
 
@@ -1074,7 +1087,8 @@ def main():
         payload["meta"]["financials_half_year_period"] = {
             "note": "同一年 quarters 只有 Q2／Q4 兩筆（半年報公司）時，Q2 標 period=H1（上半年）、Q4 標 period=H2（下半年），數值不改（先.一三五-1mb）；"
                     "另以月營收證明（營收＝半年月營收加總）或前一年已是半年報＋今年只有 Q2 標記，period_basis 記證據類型（先.一三五-1me）",
-            "tagged_count": len(_hy["tagged_codes"]), "tagged_codes": _hy["tagged_codes"], "basis_count": _hy["basis_count"]}
+            "tagged_count": len(_hy["tagged_codes"]), "tagged_codes": _hy["tagged_codes"], "basis_count": _hy["basis_count"],
+            "generated_at": datetime.now(TW_TZ).isoformat(), "mode": "daily"}
     except Exception as e:
         print(f"[warn] 半年報標記失敗：{e}")
         errors.append(f"half_year_period: {e}")
