@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-11-06T18:30:01+08:00",
+  "generated_at": "2026-11-07T18:30:01+08:00",
   "errors": [],
   "supplemented": {},
   "primary": "shioaji",
@@ -16,7 +16,7 @@
   },
   "expired_dropped": 0,
   "counts": {
-   "disposal": 11,
+   "disposal": 8,
    "notice": 71
   },
   "note": "處置股＝交易所公告分盤撮合（每 N 分鐘撮合一次）與預收款券；注意股＝當日公布注意交易資訊。App 個股頁紅標、AI 選股候選排除處置期間內個股。非投資建議。"
@@ -55,39 +55,6 @@
    "exchange": "OTC",
    "source": "shioaji_punish"
   },
-  "3441": {
-   "start": "2026-10-29",
-   "end": "2026-11-06",
-   "announced": "2026-10-28",
-   "interval": "2分鐘",
-   "unit_limit": null,
-   "total_limit": null,
-   "reason": "連續5個營業日達本中心「公布注意交易資訊」標準，且最近30個營業日內曾發布處置，且該連續期間曾達沖銷標準。",
-   "exchange": "OTC",
-   "source": "shioaji_punish"
-  },
-  "3691": {
-   "start": "2026-11-02",
-   "end": "2026-11-06",
-   "announced": "2026-10-30",
-   "interval": "2分鐘",
-   "unit_limit": 10.0,
-   "total_limit": 30.0,
-   "reason": "連續3個營業日達本中心「公布注意交易資訊」標準。",
-   "exchange": "OTC",
-   "source": "shioaji_punish"
-  },
-  "36913": {
-   "start": "2026-11-02",
-   "end": "2026-11-06",
-   "announced": "2026-10-30",
-   "interval": "2分鐘",
-   "unit_limit": 10.0,
-   "total_limit": 30.0,
-   "reason": "該轉換公司債之標的證券上櫃股票碩禾電子材料股份有限公司(代號：3691)經本中心發布處置  * 處置起訖期間： 自115年11月2日起5個營業日(115年11月2日至115年11月6日)，如遇： (1)有價證券最後交易日在處置期間，僅處置至其最後交易日； (2)休市、有價證券停止買賣、全日暫停交易，則順延執行。",
-   "exchange": "OTC",
-   "source": "shioaji_punish"
-  },
   "4526": {
    "start": "2026-10-30",
    "end": "2026-11-09",
@@ -111,13 +78,13 @@
    "source": "shioaji_punish"
   },
   "8099": {
-   "start": "2026-11-02",
-   "end": "2026-11-06",
-   "announced": "2026-10-30",
+   "start": "2026-11-05",
+   "end": "2026-11-11",
+   "announced": "2026-11-04",
    "interval": "2分鐘",
-   "unit_limit": 10.0,
-   "total_limit": 30.0,
-   "reason": "連續3個營業日達本中心「公布注意交易資訊」標準。",
+   "unit_limit": null,
+   "total_limit": null,
+   "reason": "連續3個營業日達本中心「公布注意交易資訊」標準，且最近30個營業日內曾發布處置。",
    "exchange": "OTC",
    "source": "shioaji_punish"
   },
