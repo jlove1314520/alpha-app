@@ -1,3 +1,10 @@
+## 2026-11-07 21:31～21:5x DevQueue 20261107-213102（研究帽）先.一五五-3 f_value_pb 延長到 2025 起
+等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增、無結案）。
+- **先.一五五-3**（維持 `- [ ]`，零外部請求）：`research/reaudit_batch3_ext2025.py run f_value_pb` 延長到 2026-09-24 跑完 48/48。第 1 批挑出的同參數（順向 21 日、擇時、20 檔、組合止損 10%、1×）全期 +7.6%／−18.0%／Sh 0.76，2025 起 −2.1%／−14.4%；全期重挑仍同一組。候選欄 26 支名單不變、`data/paper_opt_track.json` 重產（8 支對上、last_error=None）。第 1 批 10 族延長全部完成。
+- 冒煙：`node scripts/smoke_test.mjs` exit=0，188 項 PASS、無 FAIL。
+- 本輪非新批次，未推播。下一步：籌碼類 2025 起分批抓（FinMind 開工時 304/hr，本輪未抓）→ regime 延長 → 第 6 批事件類。
+- `data/STATUS.json`：無資料源／面板異動，本輪不更新。
+
 ## 2026-11-07 21:01～21:2x DevQueue 20261107-210102（維運帽）先.一三五-1mk 離線路徑補跑半年報標記
 等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增、無結案）。
 - **先.一三五-1mk**（`- [x]`，commit 5cf0303c89a，零外部請求）：`.github/scripts/update_stock_financials.py` `offline_merge_backfill()` 改成跟每日路徑同順序「ROE 重算 → `tag_half_year_periods()` → `clear_stale_nonconsecutive_roe()`」，三段各自 try/except（十二節；原本 ROE 重算與連續性清理包同一個 try，前者出錯會連帶跳過後者，一併拆開）；`meta.financials_half_year_period` 加 `mode`（offline／daily）與 `generated_at`。
