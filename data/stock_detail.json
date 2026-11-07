@@ -1995,7 +1995,7 @@
         "8299": "eps 加總 187.37 vs 官方累計 187.43",
         "8435": "eps 加總 2.84 vs 官方累計 2.88"
       },
-      "generated_at": "2026-11-07T22:04:19.996628+08:00",
+      "generated_at": "2026-11-08T00:06:49.432590+08:00",
       "mode": "offline"
     },
     "financials_half_year_period": {
@@ -2219,7 +2219,7 @@
         "month_revenue": 17,
         "prior_year_half": 4
       },
-      "generated_at": "2026-11-07T22:04:20.115434+08:00",
+      "generated_at": "2026-11-08T00:06:49.547342+08:00",
       "mode": "offline"
     },
     "roe_recomputed_after_backfill_merge": {
@@ -2233,7 +2233,18 @@
       "fixed_rows": 0,
       "fixed_codes": [],
       "left_unverifiable": 261,
-      "generated_at": "2026-11-07T22:04:20.118236+08:00",
+      "generated_at": "2026-11-08T00:06:49.551136+08:00",
+      "mode": "offline"
+    },
+    "financials_backfill_eps_outlier_fix": {
+      "note": "回補季 EPS 推得股數低於前後兩季（兩季彼此一致）平均 >30% 時，EPS 改成淨利÷相鄰季平均股數，原值存 eps_raw（先.一三五-1mu）",
+      "fixed_rows": 1,
+      "fixed": {
+        "6667": [
+          "2025Q4 7.01→3.83"
+        ]
+      },
+      "generated_at": "2026-11-08T00:06:49.558226+08:00",
       "mode": "offline"
     }
   },
@@ -229930,8 +229941,10 @@
             "gross_margin_pct": 19.2,
             "op_margin_pct": 10.95,
             "net_income_parent": 186968000.0,
-            "eps": 7.01,
-            "source": "q1_from_backfill"
+            "eps": 3.83,
+            "source": "q1_from_backfill",
+            "eps_raw": 7.01,
+            "eps_basis": "net_div_neighbor_shares"
           },
           {
             "year": 2026,

@@ -972,6 +972,64 @@ def fix_h2_cumulative_eps(stocks: dict) -> dict:
     return stats
 
 
+BF_EPS_OUTLIER_MIN_ABS = 0.2   # |EPS| 太小時推得的股數不可靠，不判定
+BF_EPS_NEIGHBOR_AGREE = 0.10   # 前後兩季推得股數彼此相差上限
+BF_EPS_OUTLIER_DEV = 0.30      # 該季推得股數偏離前後兩季平均的下限
+
+
+def _implied_shares(r: dict):
+    e, n = r.get("eps"), r.get("net_income_parent")
+    if not isinstance(e, (int, float)) or not isinstance(n, (int, float)) or abs(e) < BF_EPS_OUTLIER_MIN_ABS or n == 0:
+        return None
+    sh = n / e
+    return sh if sh > 0 else None
+
+
+def fix_isolated_backfill_eps_outliers(stocks: dict) -> dict:
+    """先.一三五-1mu（2026-11-08）：回補檔（FinMind）偶有單季 EPS 與歸母淨利對不上
+    （例 6667 2025Q4 EPS 7.01，淨利÷股數約 3.79；用 BWIBBU 本益比反推官方近四季 EPS 14.63，改 3.79 後我方 14.68 對得上）。
+    只處理 source=q1_from_backfill、非半年報（period 空）的列；前一季與後一季（連續季度）推得股數（淨利÷EPS）彼此相差 ≤10%，
+    而該季推得股數低於兩者平均 >30%（EPS 偏高；EPS 偏低可由特別股股利解釋，不動） → EPS 改成「淨利÷相鄰兩季平均股數」，原值存 eps_raw、eps_basis＝net_div_neighbor_shares。
+    持續性的股數基準改變（例 8937 變更面額、EPS 追溯調整，前後季股數本身就不一致）不會觸發，照實保留原值。
+    官方列一律不改；已修過的列推得股數已與鄰季一致，重跑不會再改（冪等）。單檔出錯只略過（十二節）。"""
+    stats = {"fixed_rows": 0, "fixed": {}}
+    for code, s in stocks.items():
+        try:
+            qs = [r for r in ((((s or {}).get("financials") or {}).get("quarters")) or []) if isinstance(r, dict)]
+            idx = {(r.get("year"), r.get("quarter")): r for r in qs if r.get("year") and r.get("quarter")}
+            for r in qs:
+                if r.get("source") != SRC_Q_FROM_BACKFILL or r.get("period"):
+                    continue
+                y, q = r.get("year"), r.get("quarter")
+                if not y or not q:
+                    continue
+                k = int(y) * 4 + int(q) - 1
+                prev = idx.get(((k - 1) // 4, (k - 1) % 4 + 1))
+                nxt = idx.get(((k + 1) // 4, (k + 1) % 4 + 1))
+                if prev is None or nxt is None or prev.get("period") or nxt.get("period"):
+                    continue
+                sp, sn, si = _implied_shares(prev), _implied_shares(nxt), _implied_shares(r)
+                n = r.get("net_income_parent")
+                if sp is None or sn is None or not isinstance(n, (int, float)) or not isinstance(r.get("eps"), (int, float)):
+                    continue
+                avg = (sp + sn) / 2
+                if abs(sp - sn) / avg > BF_EPS_NEIGHBOR_AGREE:
+                    continue
+                # 只修「EPS 偏高（推得股數偏低）」：EPS 偏低可由特別股股利正當解釋（例金控 2882／2881 Q2），不動；
+                # |EPS| 太小（si 為 None）推不出可靠股數，不判定。
+                if si is None or (avg - si) / avg <= BF_EPS_OUTLIER_DEV:
+                    continue
+                new_eps = round(n / avg, 2)
+                r["eps_raw"] = r["eps"]
+                r["eps"] = new_eps
+                r["eps_basis"] = "net_div_neighbor_shares"
+                stats["fixed_rows"] += 1
+                stats["fixed"].setdefault(str(code), []).append(f"{y}Q{q} {r['eps_raw']}→{new_eps}")
+        except Exception as e:  # 單檔出錯只略過（十二節）
+            print(f"[warn] {code} 回補季 EPS 離群修正失敗：{e}")
+    return stats
+
+
 def offline_merge_backfill() -> None:
     """零外部請求：只讀既有 stock_detail.json＋financials_backfill.json，併回補季後寫回（本機重產／驗證用）。"""
     payload = load_existing()
@@ -1007,6 +1065,14 @@ def offline_merge_backfill() -> None:
             "generated_at": datetime.now(TW_TZ).isoformat(), "mode": "offline"}
     except Exception as e:
         print(f"[warn] H2 累計 EPS 修正失敗：{e}")
+    try:  # 先.一三五-1mu：回補季單季 EPS 與淨利對不上（孤立離群）時改用相鄰季股數；自身失敗只警告（十二節）
+        _bo = fix_isolated_backfill_eps_outliers(stocks)
+        payload["meta"]["financials_backfill_eps_outlier_fix"] = {
+            "note": "回補季 EPS 推得股數低於前後兩季（兩季彼此一致）平均 >30% 時，EPS 改成淨利÷相鄰季平均股數，原值存 eps_raw（先.一三五-1mu）",
+            "fixed_rows": _bo["fixed_rows"], "fixed": _bo["fixed"],
+            "generated_at": datetime.now(TW_TZ).isoformat(), "mode": "offline"}
+    except Exception as e:
+        print(f"[warn] 回補季 EPS 離群修正失敗：{e}")
     try:
         payload["meta"]["roe_cleared_nonconsecutive_codes"] = clear_stale_nonconsecutive_roe(stocks)
     except Exception as e:
@@ -1153,6 +1219,15 @@ def main():
     except Exception as e:
         print(f"[warn] H2 累計 EPS 修正失敗：{e}")
         errors.append(f"h2_eps_fix: {e}")
+    try:  # 先.一三五-1mu：回補季單季 EPS 與淨利對不上（孤立離群）時改用相鄰季股數；自身失敗只警告（十二節）
+        _bo = fix_isolated_backfill_eps_outliers(stocks)
+        payload["meta"]["financials_backfill_eps_outlier_fix"] = {
+            "note": "回補季 EPS 推得股數低於前後兩季（兩季彼此一致）平均 >30% 時，EPS 改成淨利÷相鄰季平均股數，原值存 eps_raw（先.一三五-1mu）",
+            "fixed_rows": _bo["fixed_rows"], "fixed": _bo["fixed"],
+            "generated_at": datetime.now(TW_TZ).isoformat(), "mode": "daily"}
+    except Exception as e:
+        print(f"[warn] 回補季 EPS 離群修正失敗：{e}")
+        errors.append(f"backfill_eps_outlier_fix: {e}")
     try:
         payload["meta"]["roe_cleared_nonconsecutive_codes"] = clear_stale_nonconsecutive_roe(stocks)
     except Exception as e:  # 這道清理自己出錯只記警告，不擋寫檔（十二節）
