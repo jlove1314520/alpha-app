@@ -1,3 +1,18 @@
+## 2026-11-07 10:01～ DevQueue 20261107-100102（維運帽）先.一三五-1md 個股 ROE 改用併入回補季後的季度重算
+
+等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
+
+- **先.一三五-1md**（`- [x]`，零外部請求，commit c5914fdd85c）：
+  - 根因：`compute_roe_ttm()` 在併入回補季之前算，1lw 併入後 2883 等檔季度已到 2026Q2，但 roe_ttm_pct 還是 None。
+  - 修法：`.github/scripts/update_stock_financials.py` 新增 `_codes_with_backfill_quarters()`＋`recompute_roe_after_backfill_merge()`，每日 main() 與 `--offline-merge-backfill` 併入回補季後重算；最後一個有淨利的季度須等於 latest_cum、四季須連續，否則 None；離線模式也補跑 `clear_stale_nonconsecutive_roe()`。meta 記 `roe_recomputed_after_backfill_merge`。
+  - 證據：離線重產重算有值 690 檔、清成 None 151 檔；和 HEAD 比只有 None→有值 610 檔、既有值 0 檔被改；2883＝11.30%；3260 65.6%、6550 −83.0% 逐筆核對單位（權益仟元→元）一致。自測 `scripts/selftest_roe_after_backfill_merge.py` 8 項全過。
+  - [自行裁量] 重算名單用「quarters 帶回補季的檔」，不是「本輪新併入的檔」——1lw 已併入的檔不會再被列為新併入，只看新併入會漏掉 2883。
+  - 順手在 先.一三五-1mk 補記：ROE 連續性清理那一半已隨本項補上，剩半年報標記。
+- 冒煙：`node scripts/smoke_test.mjs` exit 0，187 項全過。
+- 佇列深度：`- [ ]` 29 項、DevQueue 可執行非研究 6 項，兩個門檻都達到，不補件。
+- 維運帽產物：本輪沒動資料源與面板，`data/STATUS.json` 不更新。
+- 收工原因：權威清單下一項 先.一五五-3 是 [研究]，留給下一輪戴研究帽。
+
 ## 2026-11-07 09:01～ DevQueue 20261107-090102（研究帽）先.一五五-3 墓園重審第二批：反轉延長補完＋財報類延長起步
 
 等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
