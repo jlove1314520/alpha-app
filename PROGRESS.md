@@ -1,3 +1,14 @@
+## 2026-11-07 21:01～21:2x DevQueue 20261107-210102（維運帽）先.一三五-1mk 離線路徑補跑半年報標記
+等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增、無結案）。
+- **先.一三五-1mk**（`- [x]`，commit 5cf0303c89a，零外部請求）：`.github/scripts/update_stock_financials.py` `offline_merge_backfill()` 改成跟每日路徑同順序「ROE 重算 → `tag_half_year_periods()` → `clear_stale_nonconsecutive_roe()`」，三段各自 try/except（十二節；原本 ROE 重算與連續性清理包同一個 try，前者出錯會連帶跳過後者，一併拆開）；`meta.financials_half_year_period` 加 `mode`（offline／daily）與 `generated_at`。
+  - 證據：重跑 `--offline-merge-backfill`：標記 211 檔、basis q2_q4_pair 1362／month_revenue 17／prior_year_half 4、roe_cleared＝[]，**與重跑前完全相同**；`stocks` 逐鍵比對無差異，只有 meta 兩鍵更新；meta 現有 `mode=offline` 紀錄（心跳）。
+  - 自測 `python scripts/selftest_half_year_ttm.py`：29 項全 PASS（新增離線路徑 3 項，用暫存檔、不動正式檔）。
+  - [自行裁量] 同支自測原有 3 項 FAIL（App／稽核「沒有 period 標記」對照組）是夾具過期：每日管線已把標記寫進正式檔，對照組直接讀原檔就不再是未標記；改成先剝掉 9 檔標記再測，測試意圖與門檻不變。
+  - 冒煙：`node scripts/smoke_test.mjs` exit=0，188 項全 [x]、無 FAIL。
+- 下一項 先.一五五-3 是 [研究] 類，依一輪一頂帽子收工。
+- 補件：`- [ ]` 28 項（≥12），但 DevQueue 可執行的非研究項只有 4 項（<6）→ 補 2 條（來源①數字可能錯，皆出自 `data/audit_report.json`）：先.一三五-1ms（e_pe 39→66 筆分類）、先.一三五-1mt（a_price_source unverifiable 4,510 筆組成拆解）。查過但沒補的：e_quarters_gap 5 筆／e_quarters_stale 22 筆——稽核檔是 05:23 產的，當時半年報標記與回補季尚未寫進 stock_detail（例：2885 現已到 2026Q2、2237 已標 H1／H2），下次每晚稽核會自然消化，不算新缺口；BACKLOG／DATA_GAP_PLAN 甲類已無待做項。
+- `data/STATUS.json`：無資料源／面板異動，本輪不更新。
+
 ## 2026-11-07 20:46 DevQueue 20261107-200102（研究帽）
 等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md`，本輪未新增、未結案）。
 - **先.一五五-3 墓園重審第二批（維持 - [ ]）**：PER 2025 起 236 檔補齊（本輪約 70 次 FinMind，用量 224～298/hr、共用節流、全 200）；`research/reaudit_ext2025_fin_factors.py` 新增 f_value_pe／pb（公式逐字照 factors.py、逐日同日合併），2024 底前與 pkl 不一致 0 檔；f_value_pe 延長到 2026-09-24 48/48：原最優組全期 +19.4%／−44.6%、2025 起 +25.8%／−35.4%，全期重挑 1× +7.7%／−15.2%。候選 26 支不變、paper_opt_track 重產 last_error=None。
