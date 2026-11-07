@@ -43,8 +43,14 @@ ADR 比率是固定值（公司股本結構變動才會改，不是每天變的�
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
+
+try:
+    from zoneinfo import ZoneInfo
+    _ET = ZoneInfo("America/New_York")
+except Exception:  # noqa: BLE001 — 沒有時區資料就不判斷錯開（fail open，只少一個旗標）
+    _ET = None
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 DATA_DIR = REPO_ROOT / "data"
@@ -83,12 +89,72 @@ def _pos(v) -> bool:
     return isinstance(v, (int, float)) and not isinstance(v, bool) and v == v and 0 < v < float("inf")
 
 
+def _us_quote_date(qt) -> date | None:
+    """美股報價時間 → 美東日期。epoch 秒（Finnhub）或 ISO 字串都接受；認不得回 None。"""
+    try:
+        if isinstance(qt, (int, float)) and not isinstance(qt, bool) and qt > 0:
+            if _ET is None:
+                return None
+            return datetime.fromtimestamp(qt, tz=timezone.utc).astimezone(_ET).date()
+        if isinstance(qt, str) and len(qt) >= 10:
+            return date.fromisoformat(qt[:10])
+    except Exception:  # noqa: BLE001
+        return None
+    return None
+
+
+def _tw_trading_lag(tw_date_s, us_date: date | None, calendar: dict):
+    """先.一三五-1mi：台股收盤日比「美股報價日（美東）當天或之前最近一個台股交易日」晚幾個台股交易日。
+
+    回傳 (落後交易日數, 應對齊的台股交易日 ISO)；落後 0 回 (0, …)；日曆缺該年份／日期認不得 → (None, None)，
+    不判斷（fail open）。台北比美東早 12～13 小時，美東 D 日任何報價時點台股 D 日都已收盤，故同日即對齊。
+    """
+    try:
+        if us_date is None or not tw_date_s:
+            return None, None
+        tw_d = date.fromisoformat(str(tw_date_s)[:10])
+        tw_cal = (calendar or {}).get("tw") or {}
+
+        def closed_set(y):
+            yr = tw_cal.get(str(y))
+            if not isinstance(yr, dict) or not isinstance(yr.get("closed"), list):
+                return None
+            return set(yr["closed"])
+
+        def is_trading(d):
+            if d.weekday() >= 5:
+                return False
+            cs = closed_set(d.year)
+            if cs is None:
+                raise LookupError(d.year)
+            return d.isoformat() not in cs
+
+        target = us_date
+        for _ in range(30):
+            if is_trading(target):
+                break
+            target -= timedelta(days=1)
+        else:
+            return None, None
+        if tw_d >= target:
+            return 0, target.isoformat()
+        lag, d = 0, target
+        while d > tw_d and lag < 60:
+            if is_trading(d):
+                lag += 1
+            d -= timedelta(days=1)
+        return lag, target.isoformat()
+    except Exception:  # noqa: BLE001 — 日曆缺年份或格式不對：不判斷，不擋計算
+        return None, None
+
+
 def main():
     quotes_us = load_json(DATA_DIR / "quotes_us.json")
     # 先.八十一-13：台股價改讀 quotes_all_tw.json（全市場盤後收盤，四檔都涵蓋）。原本讀 quotes_tw.json 只涵蓋
     # 少數自選代號，2303／3711 長期顯示「台股報價缺失」；且盤中小檔與美股收盤時點不一致。
     quotes_tw = load_json(DATA_DIR / "quotes_all_tw.json")
     fx = load_json(DATA_DIR / "fx.json")
+    calendar = load_json(DATA_DIR / "trading_calendar.json")
 
     us_quotes = quotes_us.get("quotes", {})
     tw_quotes = quotes_tw.get("quotes", {})
@@ -128,20 +194,30 @@ def main():
         tw_price = tw_q["close"]
         implied_tw_price = us_price * fx_rate / ratio
         premium_pct = (implied_tw_price - tw_price) / tw_price * 100
-        rows[us_ticker] = {
+        tw_quote_date = tw_q.get("as_of") or tw_q.get("date")
+        lag, tw_expected = _tw_trading_lag(tw_quote_date, _us_quote_date(us_q.get("quote_time")), calendar)
+        row = {
             "tw_code": tw_code,
             "ratio": ratio,
             "source": info["source"],
             "us_price": us_price,
             "us_quote_time": us_q.get("quote_time"),
             "tw_price": tw_price,
-            "tw_quote_date": tw_q.get("as_of") or tw_q.get("date"),
+            "tw_quote_date": tw_quote_date,
             "tw_price_kind": "台股盤後收盤（quotes_all_tw.json）",
             "fx_rate": fx_rate,
             "fx_date": fx_date,
             "implied_tw_price": round(implied_tw_price, 3),
             "premium_pct": round(premium_pct, 3),
         }
+        # 先.一三五-1mi：整份 quotes_all_tw 還沒更新到美股報價日對應的台股交易日（10/14、10/28 兩次實例），
+        # 溢價照算但標明非同日，App 在 % 後灰字標「台股 MM/DD」。
+        if lag:
+            row["tw_date_mismatch"] = True
+            row["tw_lag_trading_days"] = lag
+            row["tw_expected_date"] = tw_expected
+            print(f"  ・{us_ticker}: 台股收盤日 {tw_quote_date} 比對齊日 {tw_expected} 晚 {lag} 個台股交易日（非同日）")
+        rows[us_ticker] = row
         print(f"  ・{us_ticker}: implied={implied_tw_price:.2f} tw={tw_price} premium={premium_pct:.2f}%")
 
     if not rows:

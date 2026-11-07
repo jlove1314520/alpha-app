@@ -1,3 +1,11 @@
+## 2026-11-07 13:01～ DevQueue 20261107-130102（維運帽）先.一三五-1mi ADR 溢價標「台股 MM/DD、非同日」
+等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
+- **先.一三五-1mi**（`- [x]`，零外部請求）：`.github/scripts/compute_adr_premium.py` 讀 `data/trading_calendar.json`，算「美股報價日（美東）當天或之前最近一個台股交易日」；台股收盤日早於它 → 該列加 `tw_date_mismatch`／`tw_lag_trading_days`／`tw_expected_date`，溢價照算。`app-market.js` 有旗標時在 % 後灰字標「台股 MM/DD、非同日」。日曆缺年份或日期認不得就不判斷（fail open）。
+  - 證據：`scripts/selftest_compute_adr_premium.py` 30 過 0 失敗（新增情境六 8 項：台股 10/13 對美股 10/14 帶旗標落後 1；10/09 台股休市不帶；同日不帶；跨兩日落後 2；日曆缺年份不判斷）。本機實跑 4/4 照常、目前無錯開。冒煙 `node scripts/smoke_test.mjs` exit 0、188 項全 [x]、無未通過項。
+  - [自行裁量] 選「照算＋標非同日」不選「不算」：歷史兩次都只差一個交易日，數字仍有參考價值，標清楚日期即可。
+- 九節維運產物：`data/STATUS.json` 本輪無產出——資料源與面板來源無異動，該檔由排程 `generate_status_json.py` 產生。
+- 下一項是 [研究]（先.一五五-3），依一輪一帽收工。BLOCKED：無新增。
+
 ## 2026-11-07 12:01～12:4x DevQueue 20261107-120102（研究帽）先.一五五-3 墓園重審：財報類延長收尾
 等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
 - **先.一五五-3**（維持 `- [ ]`，零外部請求）：`research/reaudit_batch3_ext2025.py run` 把 f_gross_margin_stability 補完 48/48（2024 底前與 pkl 不一致 0 檔）、f_asset_growth 48/48（5 檔只差 2024Q2，2024 底前沿用 pkl），期間延長到 2026-09-24。

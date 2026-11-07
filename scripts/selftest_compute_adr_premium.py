@@ -122,5 +122,36 @@ with tempfile.TemporaryDirectory() as td:
                                      for e in doc5["errors"]), doc5["errors"])
     check("CHT 未落後照常計算", doc5["rows"].get("CHT", {}).get("premium_pct") == 0.0)
 
+    print("情境六（先.一三五-1mi）：整份台股收盤比美股報價日晚一個台股交易日 → 帶旗標；台股假日不帶")
+    d6 = base / "d6"
+    cal = {"tw": {"2026": {"closed": ["2026-10-09", "2026-10-10"]}}}
+    # 2026-10-14 16:00 美東（EDT）＝20:00 UTC；2026-10-09 16:00 美東＝20:00 UTC
+    t_1014 = 1792008000
+    t_1009 = 1791576000
+    setup(d6, us={"quotes": {"TSM": {"price": 200.0, "quote_time": t_1014}, "UMC": {"price": 8.0, "quote_time": t_1009},
+                             "CHT": {"price": 40.0, "quote_time": t_1014}}},
+          tw={"quotes": {"2330": {"close": 1200.0, "as_of": "2026-10-13"}, "2303": {"close": 50.0, "as_of": "2026-10-08"},
+                         "2412": {"close": 128.0, "as_of": "2026-10-14"}}},
+          fx={"usd_twd": {"rate": 32.0}})
+    (d6 / "trading_calendar.json").write_text(json.dumps(cal), encoding="utf-8")
+    check("epoch 換算美東日期正確（自測常數）",
+          str(A._us_quote_date(t_1014)) == "2026-10-14" and str(A._us_quote_date(t_1009)) == "2026-10-09",
+          (A._us_quote_date(t_1014), A._us_quote_date(t_1009)))
+    rc, err = run(d6, out)
+    doc6 = json.loads(out.read_text(encoding="utf-8"))
+    r6 = doc6["rows"]
+    check("沒有未處理例外", err is None, repr(err))
+    check("台股晚一交易日（10/13 對美股 10/14）→ 帶 tw_date_mismatch、落後 1、應對齊 10/14",
+          r6.get("TSM", {}).get("tw_date_mismatch") is True and r6["TSM"].get("tw_lag_trading_days") == 1
+          and r6["TSM"].get("tw_expected_date") == "2026-10-14", r6.get("TSM"))
+    check("溢價仍照算（不丟列）", abs(r6.get("TSM", {}).get("premium_pct", 0) - 6.667) < 1e-9)
+    check("台股假日（美股 10/09、台股休市，台股收盤 10/08）→ 不帶旗標",
+          "UMC" in r6 and "tw_date_mismatch" not in r6["UMC"], r6.get("UMC"))
+    check("同日（10/14 對 10/14）→ 不帶旗標", "CHT" in r6 and "tw_date_mismatch" not in r6["CHT"], r6.get("CHT"))
+    lag, _ = A._tw_trading_lag("2026-10-12", A._us_quote_date(t_1014), cal)
+    check("跨兩個交易日（10/12 對 10/14）落後 2", lag == 2, lag)
+    lag, _ = A._tw_trading_lag("2026-10-13", A._us_quote_date(t_1014), {})
+    check("日曆缺年份 → 不判斷（None，不擋計算）", lag is None, lag)
+
 print(f"\n合計 {ok} 過、{fail} 失敗")
 sys.exit(1 if fail else 0)

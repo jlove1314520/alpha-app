@@ -581,7 +581,10 @@
     if(!row)return `<div class="f"><span>${label}</span><b style="font-weight:400;font-size:12px;color:var(--ink-3)">${errReason||'查無資料'}</b></div>`;
     const cls=row.premium_pct>=0?'pos':'neg';
     const pctTxt=`${row.premium_pct>=0?'+':''}${row.premium_pct.toFixed(2)}%`;
-    return `<div class="f"><span>${label}</span><b class="${cls}" title="ADR比率1:${row.ratio}／${row.source}">${pctTxt}</b></div>`;
+    // 先.一三五-1mi：台股收盤日早於美股報價日對應的台股交易日 → % 後灰字標「台股 MM/DD」，提醒非同日比較
+    const mis=row.tw_date_mismatch&&row.tw_quote_date
+      ?`<span style="font-weight:400;font-size:11px;color:var(--ink-3);margin-left:4px" title="台股收盤日 ${row.tw_quote_date}，晚於應對齊的 ${row.tw_expected_date||''}（落後 ${row.tw_lag_trading_days||'?'} 個台股交易日），非同日比較">台股 ${String(row.tw_quote_date).slice(5).replace('-','/')}、非同日</span>`:'';
+    return `<div class="f"><span>${label}</span><b class="${cls}" title="ADR比率1:${row.ratio}／${row.source}">${pctTxt}${mis}</b></div>`;
   }
   async function loadMarketAdrPremium(){
     const el=document.getElementById('adr-rows');if(!el)return;
