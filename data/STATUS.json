@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-07T15:24:41.733802+08:00",
+  "updated_at": "2026-11-07T22:26:08.103684+08:00",
   "latest_commit": "a83d2b8",
   "data_files_defaults": "data_files 沒寫 source＝通用解析（讀 generated_at）；沒寫 detail＝無補充說明",
   "data_files": [
@@ -123,7 +123,7 @@
     },
     {
       "path": "data/disposal_flags.json",
-      "generated_at": "2026-11-06T18:30:01+08:00",
+      "generated_at": "2026-11-07T18:30:01+08:00",
       "records": 71,
       "source": "通用解析（讀 meta.generated_at）",
       "status": "ok"
@@ -138,14 +138,14 @@
     },
     {
       "path": "data/events.json",
-      "generated_at": "2026-11-07T14:05:09.678396+08:00",
+      "generated_at": "2026-11-07T21:05:04.392254+08:00",
       "records": 10940,
       "source": "通用解析（讀 fetched_at）",
       "status": "ok"
     },
     {
       "path": "data/events_search.json",
-      "generated_at": "2026-11-07T14:05:09.678396+08:00",
+      "generated_at": "2026-11-07T21:05:04.392254+08:00",
       "records": 10940,
       "source": "通用解析（讀 top.fetched_at）",
       "status": "ok"
@@ -160,7 +160,7 @@
     },
     {
       "path": "data/factory_stability.json",
-      "generated_at": "2026-11-07T15:07:02.491244+08:00",
+      "generated_at": "2026-11-07T22:17:02.156724+08:00",
       "records": 53,
       "status": "ok"
     },
@@ -253,7 +253,7 @@
     },
     {
       "path": "data/ir_events.json",
-      "generated_at": "2026-11-07T14:05:09.678396+08:00",
+      "generated_at": "2026-11-07T21:05:04.392254+08:00",
       "records": 505,
       "source": "通用解析（讀 fetched_at）",
       "status": "ok"
@@ -318,22 +318,22 @@
     },
     {
       "path": "data/news.json",
-      "generated_at": "2026-11-07T14:05:09.678396+08:00",
+      "generated_at": "2026-11-07T21:05:04.392254+08:00",
       "records": 300,
       "source": "通用解析（讀 fetched_at）",
       "status": "ok"
     },
     {
       "path": "data/news_evidence.json",
-      "generated_at": "2026-11-07T14:07:43.173486+08:00",
-      "records": 72963,
+      "generated_at": "2026-11-07T21:06:44.088009+08:00",
+      "records": 73105,
       "source": "通用解析（讀 meta.generated_at）",
       "status": "ok"
     },
     {
       "path": "data/news_urls.json",
-      "generated_at": "2026-11-07T14:05:30.223713+08:00",
-      "records": 72884,
+      "generated_at": "2026-11-07T21:05:25.337299+08:00",
+      "records": 73026,
       "source": "通用解析（讀 meta.generated_at）",
       "status": "ok"
     },
@@ -374,7 +374,7 @@
       "path": "data/paper_12.json",
       "generated_at": "2026-11-06T17:32:01+08:00",
       "records": null,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/paper_13.json",
@@ -464,12 +464,12 @@
       "path": "data/paper_9.json",
       "generated_at": "2026-11-06T18:30:15+08:00",
       "records": 12,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/paper_opt_track.json",
-      "generated_at": "2026-11-07T14:02:53+08:00",
-      "records": 20,
+      "generated_at": "2026-11-07T21:48:00+08:00",
+      "records": 26,
       "status": "ok"
     },
     {
@@ -599,7 +599,7 @@
     },
     {
       "path": "data/sec_access_status.json",
-      "generated_at": "2026-11-07T09:17:24+08:00",
+      "generated_at": "2026-11-07T16:55:58+08:00",
       "records": 6,
       "status": "ok"
     },
@@ -670,7 +670,7 @@
     },
     {
       "path": "data/status_lite.json",
-      "generated_at": "2026-11-07T01:19:29+00:00",
+      "generated_at": "2026-11-07T07:24:43+00:00",
       "records": 1,
       "status": "stale"
     },
@@ -753,7 +753,7 @@
     },
     {
       "path": "data/themes.json",
-      "generated_at": "2026-11-07T14:07:51.703892+08:00",
+      "generated_at": "2026-11-07T21:06:51.332363+08:00",
       "records": 196,
       "source": "通用解析（讀 meta.generated_at）",
       "status": "ok"
@@ -827,8 +827,8 @@
     },
     {
       "path": "data/us_financials.json",
-      "generated_at": "2026-10-31T16:32:12+08:00",
-      "records": 252,
+      "generated_at": "2026-11-07T16:55:58+08:00",
+      "records": 253,
       "status": "ok"
     },
     {
@@ -848,8 +848,8 @@
     },
     {
       "path": "data/us_scores_v0.json",
-      "generated_at": "2026-10-31T16:32:24+08:00",
-      "records": 252,
+      "generated_at": "2026-11-07T16:56:08+08:00",
+      "records": 253,
       "source": "通用解析（讀 meta.generated_at）",
       "status": "ok"
     },
@@ -871,7 +871,7 @@
       "path": "data/warrant_backup_status.json",
       "generated_at": "2026-11-06T17:32:01+08:00",
       "records": 4,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/weekly_report.json",
@@ -969,7 +969,7 @@
     }
   ],
   "schedule_health": {
-    "checked_at": "2026-11-07T15:24:41+08:00",
+    "checked_at": "2026-11-07T22:26:08+08:00",
     "any_overdue": true,
     "overdue_names": [
       "美股即時報價（本機IBKR）"
@@ -1094,8 +1094,8 @@
     "status": "ok",
     "reason": "在 GitHub Actions runner 上執行，沒有本機產出檔",
     "note": "在沒有本機產出檔的環境（例如 GitHub Actions runner）跑這支時，這一段必然取不到值，屬預期行為，不是故障。本機管線新鮮度請看本機產生的版本或 data/audit_report.json 的 local_task_health。",
-    "status_checked_at": "2026-11-07T07:24:41.733802+00:00",
-    "status_age_hours": 6.1
+    "status_checked_at": "2026-11-07T14:26:08.103684+00:00",
+    "status_age_hours": 13.1
   },
   "adjustment_anomaly_warnings": {
     "n_warnings": 7032,
@@ -1489,14 +1489,14 @@
   "any_overdue": true,
   "updated_by": "scripts/check_local_schedule_heartbeat.py（local_schedule_watchdog.yml 每 30 分鐘）",
   "local_schedule_heartbeat": {
-    "checked_at": "2026-11-07T07:24:41.599537+00:00",
+    "checked_at": "2026-11-07T14:26:07.976645+00:00",
     "stall_threshold_minutes": 60,
     "track_stall_threshold_minutes": 360,
     "tracks": {
       "devqueue": {
-        "last_commit_sha": "3b934637c8a740e15b73dd91e9c2c86d601567e2",
-        "last_commit_at": "2026-11-07T06:51:13+00:00",
-        "minutes_since": 33.5,
+        "last_commit_sha": "7358cdfb956050fd1f241bb751bfe1aa6edf508d",
+        "last_commit_at": "2026-11-07T13:57:30+00:00",
+        "minutes_since": 28.6,
         "track_stalled": false
       },
       "marathon": {
@@ -1512,9 +1512,9 @@
         "track_stalled": true
       },
       "connectivity": {
-        "last_commit_sha": "7713f97d4c3ae85ed6209c92e5bc16d65fc7f3c7",
-        "last_commit_at": "2026-11-07T07:07:17+00:00",
-        "minutes_since": 17.4,
+        "last_commit_sha": "63dce4628fbef16daf576302a030bc1f42783171",
+        "last_commit_at": "2026-11-07T14:17:15+00:00",
+        "minutes_since": 8.9,
         "track_stalled": false
       },
       "market_catchup": {
@@ -1526,16 +1526,16 @@
     },
     "claude_auth": {
       "overall_status": "STALLED_3H",
-      "detail": "marathon:STALLED_3H(428.15h)",
+      "detail": "marathon:STALLED_3H(435.17h)",
       "launchers": {
         "devqueue": {
           "status": "OK",
           "last_reason": "OK",
           "last_detail": "OK/0",
-          "last_cycle_id": "20261107-143102",
-          "last_attempt_at": "2026-11-07T14:51:12+08:00",
-          "last_ok_at": "2026-11-07T14:51:12+08:00",
-          "hours_since_last_attempt": 0.56
+          "last_cycle_id": "20261107-213102",
+          "last_attempt_at": "2026-11-07T21:57:29+08:00",
+          "last_ok_at": "2026-11-07T21:57:29+08:00",
+          "hours_since_last_attempt": 0.48
         },
         "marathon": {
           "status": "STALLED_3H",
@@ -1544,7 +1544,7 @@
           "last_cycle_id": "20261020-191357",
           "last_attempt_at": "2026-10-20T19:15:45+08:00",
           "last_ok_at": "2026-10-20T19:15:45+08:00",
-          "hours_since_last_attempt": 428.15
+          "hours_since_last_attempt": 435.17
         },
         "hypothesis_queue": {
           "status": "STALLED_3H",
@@ -1553,17 +1553,17 @@
           "last_cycle_id": "2026-10-20 19:25:14",
           "last_attempt_at": "2026-10-20T19:25:15+08:00",
           "last_ok_at": "2026-10-20T19:25:15+08:00",
-          "hours_since_last_attempt": 427.99
+          "hours_since_last_attempt": 435.01
         }
       },
-      "checked_at": "2026-11-07T07:24:41.599537+00:00"
+      "checked_at": "2026-11-07T14:26:07.976645+00:00"
     },
     "ibkr_quotes": {
       "last_commit_sha": null,
       "last_commit_at": null,
       "minutes_since": null,
       "file_fetched_at": "2026-10-18T11:01:05.500839+08:00",
-      "file_minutes_since": 29063.6,
+      "file_minutes_since": 29485.0,
       "note": "只記錄不判定停擺——盤外時段與IBKR Gateway每週人工登入空窗都會讓這個數字變大，那是預期行為不是故障，見本檔案docstring。2026-10-01【先.六-三】起IBKR排程盤中最多每30分鐘才commit一次（commit洪水修法），所以minutes_since在盤中落在30分鐘內是正常；file_fetched_at是已commit的quotes_ibkr.json內的抓取時間，同樣只記錄、不得拿來當停擺判定（停擺判定只看三軌）"
     },
     "stalled": false,
@@ -1573,10 +1573,10 @@
       "market_catchup"
     ],
     "judged_by": "any_of_local_heartbeats",
-    "stall_minutes": 17.4,
+    "stall_minutes": 8.9,
     "note": "本機排程最後活動時間；2026-09-27【乾.三主體第八點】裁示改為「DevQueue／Marathon／Hypothesis-queue三軌任一有新鮮心跳（≤60分鐘）即視為本機整體存活」（取代原本只看DevQueue單一訊號的版本，因為DevQueue的既有碰撞防護機制在互動視窗長時間編輯檔案時會正確YIELD但不留心跳，容易誤判——詳見PENDING_QUEUE.md查.一條目的根因分析）。個別軌道超過360分鐘另外標記track_stalled警告，不影響本機整體存活的判定，但值得單獨留意。偵測放在雲端是因為本機push被卡住時無法自己通知任何人。"
   },
-  "data_files_checked_at": "2026-11-07T15:24:41.733802+08:00",
+  "data_files_checked_at": "2026-11-07T22:26:08.103684+08:00",
   "orphan_processes": {
     "count": 0,
     "total_private_mb": 0,
