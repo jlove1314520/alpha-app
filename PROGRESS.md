@@ -1,3 +1,10 @@
+## 2026-11-07 12:01～12:4x DevQueue 20261107-120102（研究帽）先.一五五-3 墓園重審：財報類延長收尾
+等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
+- **先.一五五-3**（維持 `- [ ]`，零外部請求）：`research/reaudit_batch3_ext2025.py run` 把 f_gross_margin_stability 補完 48/48（2024 底前與 pkl 不一致 0 檔）、f_asset_growth 48/48（5 檔只差 2024Q2，2024 底前沿用 pkl），期間延長到 2026-09-24。
+  - 證據：同參數全期／2025 起：f_gross_margin_stability +9.6%／−21.1%、+7.7%／−17.3%（全期重挑 +8.4%／−15.3%）；f_asset_growth +6.2%／−31.4%、−7.3%／−20.3%（重挑同組 +5.8%／−27.1%）。summarize＋candidates（20 支不變）＋`paper_opt_track.py`（8 支回測全對上、last_error=None）重產；冒煙結果見 commit 訊息。
+  - 下一輪：f_revenue_surprise 接月營收快取；f_value_pe／pb／f_dividend_yield_ttm 需 FinMind（先查額度）；籌碼類查本機快取；第 4 批 regime→0050。
+- 收工補件：`- [ ]` 門檻本輪未重算（時間到），留下一輪。
+
 ## 2026-11-07 11:31～11:50 DevQueue 20261107-113102（開發帽）先.一三五-1mb 個股頁興櫃股財報註記
 等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
 - **先.一三五-1mb**（`- [x]`，commit 898eba3f454，零外部請求）：`app-stock.js` 財報區不在上市櫃名冊的代號，讀 `loadCompanyInfo()` 分興櫃（`industry_source=tpex_t187ap03_R`）／已下市；落後超過 2 季時毛利率／營益率註記改為「（2024Q4，興櫃股：官方開放財報只涵蓋上市櫃，此為舊資料、不再更新）」或「已下市：此為舊資料、不再更新」。順帶修正 1lz 把興櫃股來源欄誤寫「此代號已下市」。
