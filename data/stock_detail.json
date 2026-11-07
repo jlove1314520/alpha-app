@@ -1995,7 +1995,7 @@
         "8299": "eps 加總 187.37 vs 官方累計 187.43",
         "8435": "eps 加總 2.84 vs 官方累計 2.88"
       },
-      "generated_at": "2026-11-08T00:06:49.432590+08:00",
+      "generated_at": "2026-11-08T02:34:52.827271+08:00",
       "mode": "offline"
     },
     "financials_half_year_period": {
@@ -2219,7 +2219,7 @@
         "month_revenue": 17,
         "prior_year_half": 4
       },
-      "generated_at": "2026-11-08T00:06:49.547342+08:00",
+      "generated_at": "2026-11-08T02:34:52.971259+08:00",
       "mode": "offline"
     },
     "roe_recomputed_after_backfill_merge": {
@@ -2233,18 +2233,154 @@
       "fixed_rows": 0,
       "fixed_codes": [],
       "left_unverifiable": 261,
-      "generated_at": "2026-11-08T00:06:49.551136+08:00",
+      "generated_at": "2026-11-08T02:34:52.977245+08:00",
       "mode": "offline"
     },
     "financials_backfill_eps_outlier_fix": {
       "note": "回補季 EPS 推得股數低於前後兩季（兩季彼此一致）平均 >30% 時，EPS 改成淨利÷相鄰季平均股數，原值存 eps_raw（先.一三五-1mu）",
-      "fixed_rows": 1,
-      "fixed": {
-        "6667": [
-          "2025Q4 7.01→3.83"
-        ]
+      "fixed_rows": 0,
+      "fixed": {},
+      "generated_at": "2026-11-08T02:34:52.986002+08:00",
+      "mode": "offline"
+    },
+    "financials_share_base_restate": {
+      "note": "近四季 EPS 跨越股數基準持續跳變（推得股數倍數 ≥1.5 或 ≤0.67、跳變後 ≥2 季在新水準）且以官方本益比×收盤反推的近四季 EPS 證實「舊季 EPS÷倍數」才對得上時，舊基準季 EPS 追溯調整成新基準，原值存 eps_pre_restate、eps_basis=restated_share_base；只改 EPS 不改淨利；對不上的列在 not_restated 只記錄（先.一三五-1mx）",
+      "detected": 17,
+      "restated_this_run": 0,
+      "restated_rows_this_run": 0,
+      "restated_rows_present": 4,
+      "restated_codes": {},
+      "not_restated": {
+        "2327": {
+          "break_at": "2025Q3",
+          "factor": 3.997,
+          "official_ttm": 14.8472,
+          "ttm_old": 14.87,
+          "ttm_restated": 14.87,
+          "status": "outside_window"
+        },
+        "2607": {
+          "break_at": "2025Q3",
+          "factor": 0.501,
+          "official_ttm": 5.009,
+          "ttm_old": 4.9,
+          "ttm_restated": 4.9,
+          "status": "outside_window"
+        },
+        "3057": {
+          "break_at": "2025Q3",
+          "factor": 0.659,
+          "official_ttm": null,
+          "ttm_old": -1.54,
+          "ttm_restated": -1.54,
+          "status": "outside_window"
+        },
+        "3321": {
+          "break_at": "2026Q1",
+          "factor": 1.577,
+          "official_ttm": null,
+          "ttm_old": -1.11,
+          "ttm_restated": -0.8,
+          "status": "no_official"
+        },
+        "3593": {
+          "break_at": "2025Q3",
+          "factor": 0.626,
+          "official_ttm": null,
+          "ttm_old": -1.59,
+          "ttm_restated": -1.59,
+          "status": "outside_window"
+        },
+        "6541": {
+          "break_at": "2025Q1",
+          "factor": 1.551,
+          "official_ttm": null,
+          "ttm_old": -5.59,
+          "ttm_restated": -5.59,
+          "status": "outside_window"
+        },
+        "8422": {
+          "break_at": "2026Q1",
+          "factor": 12.032,
+          "official_ttm": 0.96,
+          "ttm_old": -8.21,
+          "ttm_restated": 0.21,
+          "status": "neither"
+        },
+        "4763": {
+          "break_at": "2025Q2",
+          "factor": 10.011,
+          "official_ttm": 4.1683,
+          "ttm_old": 4.17,
+          "ttm_restated": 4.17,
+          "status": "outside_window"
+        },
+        "3521": {
+          "break_at": "2025Q1",
+          "factor": 1.668,
+          "official_ttm": 1.709,
+          "ttm_old": 2.18,
+          "ttm_restated": 2.18,
+          "status": "outside_window"
+        },
+        "4170": {
+          "break_at": "2023Q4",
+          "factor": 0.63,
+          "official_ttm": null,
+          "status": "not_consecutive"
+        },
+        "5271": {
+          "break_at": "2024Q2",
+          "factor": 0.633,
+          "official_ttm": null,
+          "status": "not_consecutive"
+        },
+        "5314": {
+          "break_at": "2025Q1",
+          "factor": 19.821,
+          "official_ttm": 4.6333,
+          "ttm_old": 4.64,
+          "ttm_restated": 4.64,
+          "status": "outside_window"
+        },
+        "6539": {
+          "break_at": "2024Q2",
+          "factor": 0.306,
+          "official_ttm": null,
+          "status": "not_consecutive"
+        },
+        "6734": {
+          "break_at": "2024Q2",
+          "factor": 0.427,
+          "official_ttm": null,
+          "status": "not_consecutive"
+        },
+        "8932": {
+          "break_at": "2026Q1",
+          "factor": 2.197,
+          "official_ttm": 2.1098,
+          "ttm_old": 1.26,
+          "ttm_restated": 1.19,
+          "status": "neither"
+        },
+        "8937": {
+          "break_at": "2025Q2",
+          "factor": 5.496,
+          "official_ttm": 0.06,
+          "ttm_old": 0.06,
+          "ttm_restated": 0.06,
+          "status": "outside_window"
+        },
+        "6586": {
+          "break_at": "2024Q2",
+          "factor": 2.374,
+          "official_ttm": null,
+          "status": "not_consecutive"
+        }
       },
-      "generated_at": "2026-11-08T00:06:49.558226+08:00",
+      "skipped_rows_with_other_basis": [],
+      "errors": [],
+      "generated_at": "2026-11-08T02:34:53.096016+08:00",
       "mode": "offline"
     }
   },
@@ -258446,8 +258582,11 @@
             "gross_margin_pct": -20.52,
             "op_margin_pct": -90.09,
             "net_income_parent": -7543000.0,
-            "eps": -0.08,
-            "source": "q1_from_backfill"
+            "eps": -0.02,
+            "source": "q1_from_backfill",
+            "eps_pre_restate": -0.08,
+            "eps_basis": "restated_share_base",
+            "restate_factor": 4.239
           },
           {
             "year": 2025,
@@ -258456,8 +258595,11 @@
             "gross_margin_pct": -49.47,
             "op_margin_pct": -141.86,
             "net_income_parent": -181397000.0,
-            "eps": -1.79,
-            "source": "q1_from_backfill"
+            "eps": -0.42,
+            "source": "q1_from_backfill",
+            "eps_pre_restate": -1.79,
+            "eps_basis": "restated_share_base",
+            "restate_factor": 4.239
           },
           {
             "year": 2025,
@@ -258466,8 +258608,11 @@
             "gross_margin_pct": -95.61,
             "op_margin_pct": -263.49,
             "net_income_parent": 22725000.0,
-            "eps": 0.23,
-            "source": "q1_from_backfill"
+            "eps": 0.05,
+            "source": "q1_from_backfill",
+            "eps_pre_restate": 0.23,
+            "eps_basis": "restated_share_base",
+            "restate_factor": 4.239
           },
           {
             "year": 2025,
@@ -258476,8 +258621,11 @@
             "gross_margin_pct": -99.85,
             "op_margin_pct": -626.04,
             "net_income_parent": 92239000.0,
-            "eps": 0.92,
-            "source": "q1_from_backfill"
+            "eps": 0.22,
+            "source": "q1_from_backfill",
+            "eps_pre_restate": 0.92,
+            "eps_basis": "restated_share_base",
+            "restate_factor": 4.239
           },
           {
             "year": 2026,

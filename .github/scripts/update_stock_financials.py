@@ -1030,6 +1030,198 @@ def fix_isolated_backfill_eps_outliers(stocks: dict) -> dict:
     return stats
 
 
+# 先.一三五-1mx（2026-11-08）：股數基準持續跳變（變更面額／股票分割、EPS 追溯調整）
+SHIFT_MIN_ABS_EPS = 0.05     # |EPS| 太小推得股數不可靠，不當判定點
+SHIFT_RATIO_HI = 1.5         # 新／舊推得股數倍數 ≥1.5 或 ≤0.67 才算跳變
+SHIFT_RATIO_LO = 0.67
+SHIFT_LEVEL_TOL = 0.15       # 同一水準內各季推得股數與中位數相差上限
+SHIFT_MIN_NEW_POINTS = 2     # 跳變後至少 2 季都在新水準（排除金控 Q2 特別股股利這類單季偏離）
+SHIFT_MIN_OLD_POINTS = 2     # 跳變前也至少 2 季在舊水準（排除單季孤立離群被誤認成基準改變）
+SHIFT_MATCH_REL = 0.10       # 對官方近四季 EPS 的容忍（相對）
+SHIFT_MATCH_ABS = 0.03       # 對官方近四季 EPS 的容忍（絕對，EPS 很小時用）
+FUNDAMENTALS_PATH = REPO_ROOT / "data" / "fundamentals.json"
+QUOTES_ALL_TW_PATH = REPO_ROOT / "data" / "quotes_all_tw.json"
+
+
+def _median(xs):
+    xs = sorted(xs)
+    n = len(xs)
+    return xs[n // 2] if n % 2 else (xs[n // 2 - 1] + xs[n // 2]) / 2
+
+
+def _shift_implied_shares(r: dict):
+    e, n = r.get("eps"), r.get("net_income_parent")
+    if not isinstance(e, (int, float)) or not isinstance(n, (int, float)) or abs(e) < SHIFT_MIN_ABS_EPS or n == 0:
+        return None
+    sh = n / e
+    return sh if sh > 0 else None
+
+
+def load_official_ttm_eps_map(fund_path: Path | None = None, quotes_path: Path | None = None) -> dict:
+    """零外部請求：官方本益比（fundamentals.json ratios.per，來自 BWIBBU／TPEx 本益比）× 同日收盤（quotes_all_tw.json）
+    反推官方近四季 EPS＝收盤÷本益比。日期不同或缺值就不收（不拿不同日的價格硬湊）。讀不到檔回空 dict。"""
+    out = {}
+    try:
+        fund = json.loads((fund_path or FUNDAMENTALS_PATH).read_text(encoding="utf-8")).get("fundamentals") or {}
+        quotes = json.loads((quotes_path or QUOTES_ALL_TW_PATH).read_text(encoding="utf-8")).get("quotes") or {}
+    except Exception as e:  # 十二節：讀不到只警告，回空（不做任何調整）
+        print(f"[warn] 官方本益比／收盤讀取失敗，股數基準追溯調整本次略過：{e}")
+        return out
+    for code, f in fund.items():
+        try:
+            ra = (f or {}).get("ratios") or {}
+            per, q = ra.get("per"), quotes.get(code) or {}
+            close = q.get("close")
+            if not isinstance(per, (int, float)) or per <= 0 or not isinstance(close, (int, float)) or close <= 0:
+                continue
+            if not ra.get("date") or ra.get("date") != (q.get("as_of") or q.get("date")):
+                continue
+            out[str(code)] = round(close / per, 4)
+        except Exception as e:
+            print(f"[warn] {code} 官方近四季 EPS 反推失敗：{e}")
+    return out
+
+
+def detect_share_base_shift(quarters: list) -> dict | None:
+    """找「最後一次」持續性的股數基準跳變：相鄰判定點推得股數（淨利÷EPS）倍數 ≥1.5 或 ≤0.67，
+    跳變後至少 2 個判定點都在新水準（±15%）、跳變前也至少 2 個判定點在舊水準（±15%，連續區段）。
+    回傳 break_at、factor（新÷舊）、old_rows（要追溯調整的舊基準季 (year, quarter)：從跳變往回、
+    推得股數在舊水準或 |EPS| 太小無法判定的連續列）。沒有就回 None。不改資料。"""
+    qs = sorted([r for r in (quarters or []) if isinstance(r, dict) and r.get("year") and r.get("quarter")],
+                key=lambda r: (int(r["year"]), int(r["quarter"])))
+    pts = [(i, _shift_implied_shares(r)) for i, r in enumerate(qs)]
+    pts = [(i, s) for i, s in pts if s is not None]
+    if len(pts) < SHIFT_MIN_NEW_POINTS + 1:
+        return None
+    for j in range(len(pts) - SHIFT_MIN_NEW_POINTS, 0, -1):
+        new_vals = [s for _, s in pts[j:]]
+        new_med = _median(new_vals)
+        if any(abs(s - new_med) / new_med > SHIFT_LEVEL_TOL for s in new_vals):
+            continue
+        prev_s = pts[j - 1][1]
+        ratio = new_med / prev_s
+        if SHIFT_RATIO_LO < ratio < SHIFT_RATIO_HI:
+            continue
+        old_vals = []
+        for _, s in reversed(pts[:j]):
+            if abs(s - prev_s) / prev_s > SHIFT_LEVEL_TOL:
+                break
+            old_vals.append(s)
+        if len(old_vals) < SHIFT_MIN_OLD_POINTS:  # 舊水準只有 1 點＝孤立離群（例 2329／3583 官方 2025Q4），不是基準改變
+            continue
+        old_med = _median(old_vals)
+        factor = new_med / old_med
+        if SHIFT_RATIO_LO < factor < SHIFT_RATIO_HI:
+            continue
+        bi = pts[j][0]
+        old_rows = []
+        for r in reversed(qs[:bi]):
+            if not isinstance(r.get("eps"), (int, float)):
+                break
+            s = _shift_implied_shares(r)
+            if s is not None and abs(s - old_med) / old_med > SHIFT_LEVEL_TOL:
+                break
+            old_rows.append((int(r["year"]), int(r["quarter"])))
+        if not old_rows:
+            return None
+        b = qs[bi]
+        return {"break_at": f"{b['year']}Q{b['quarter']}", "factor": factor, "old_shares": old_med,
+                "new_shares": new_med, "old_rows": old_rows, "new_points": len(new_vals), "old_points": len(old_vals)}
+    return None
+
+
+def verify_share_base_shift(quarters: list, shift: dict, official_ttm) -> dict:
+    """用官方近四季 EPS（收盤÷本益比）核對：近四季（需連續、非半年報）用原值加總 vs 舊基準季÷倍數後加總，
+    只有「調整後對得上、原值對不上」才回 status=matched；其他照實回 old_matches／neither／no_official／outside_window／not_consecutive。"""
+    qs = sorted([r for r in (quarters or []) if isinstance(r, dict) and r.get("year") and r.get("quarter")],
+                key=lambda r: (int(r["year"]), int(r["quarter"])))
+    last4 = qs[-4:]
+    if len(last4) < 4 or any(r.get("period") for r in last4) or any(not isinstance(r.get("eps"), (int, float)) for r in last4):
+        return {"status": "not_consecutive"}
+    ks = [int(r["year"]) * 4 + int(r["quarter"]) for r in last4]
+    if ks != list(range(ks[0], ks[0] + 4)):
+        return {"status": "not_consecutive"}
+    old = set(tuple(x) for x in shift["old_rows"])
+    in_win = [r for r in last4 if (int(r["year"]), int(r["quarter"])) in old]
+    ttm_old = round(sum(r["eps"] for r in last4), 2)
+    # 已被其他修正改過 EPS 的列（有 eps_basis）實際不會調整，核對時也照原值算，跟 restate 行為一致
+    ttm_new = round(sum(round(r["eps"] / shift["factor"], 2)
+                        if (int(r["year"]), int(r["quarter"])) in old and not r.get("eps_basis") else r["eps"]
+                        for r in last4), 2)
+    res = {"ttm_old": ttm_old, "ttm_restated": ttm_new}
+    if not in_win:
+        res["status"] = "outside_window"
+        return res
+    if not isinstance(official_ttm, (int, float)):
+        res["status"] = "no_official"
+        return res
+
+    def ok(x):
+        return abs(x - official_ttm) <= max(SHIFT_MATCH_ABS, SHIFT_MATCH_REL * abs(official_ttm))
+
+    res["status"] = "matched" if ok(ttm_new) and not ok(ttm_old) else ("old_matches" if ok(ttm_old) else "neither")
+    return res
+
+
+def restate_share_base_shift(stocks: dict, official_map: dict | None = None) -> dict:
+    """先.一三五-1mx：近四季 EPS 跨越股數基準改變（例 8937 合騏*：2025 各季約 1 億股、2026 起約 4.2 億股，
+    官方本益比反推近四季 EPS 0.06、我方混用新舊基準 0.94）。偵測到持續跳變、且用官方近四季 EPS 證實
+    「舊季 EPS÷倍數」才對得上（status=matched）時，把舊基準季 EPS 追溯調整成新基準：原值存 eps_pre_restate、
+    eps＝round(原值÷倍數, 2)、eps_basis＝restated_share_base、restate_factor 記倍數。只改 EPS，不改淨利。
+    已被其他修正改過 EPS 的列（有 eps_basis，例 6667 的 net_div_neighbor_shares）不動。
+    對不上的只記錄。調整後舊季推得股數已在新水準，重跑不會再偵測到（冪等）。單檔出錯只略過（十二節）。"""
+    if official_map is None:
+        official_map = load_official_ttm_eps_map()
+    stats = {"detected": 0, "restated_codes": {}, "restated_rows": 0, "not_restated": {}, "skipped_rows_with_other_basis": [],
+             "restated_rows_present": 0, "errors": []}
+    for code, s in stocks.items():
+        try:
+            qs = [r for r in ((((s or {}).get("financials") or {}).get("quarters")) or []) if isinstance(r, dict)]
+            stats["restated_rows_present"] += sum(1 for r in qs if r.get("eps_basis") == "restated_share_base")
+            sh = detect_share_base_shift(qs)
+            if not sh:
+                continue
+            stats["detected"] += 1
+            v = verify_share_base_shift(qs, sh, official_map.get(str(code)))
+            if v["status"] != "matched":
+                stats["not_restated"][str(code)] = {"break_at": sh["break_at"], "factor": round(sh["factor"], 3),
+                                                    "official_ttm": official_map.get(str(code)), **v}
+                continue
+            old = set(tuple(x) for x in sh["old_rows"])
+            changed = []
+            for r in qs:
+                if (int(r.get("year") or 0), int(r.get("quarter") or 0)) not in old:
+                    continue
+                if r.get("eps_basis"):
+                    stats["skipped_rows_with_other_basis"].append(f"{code} {r['year']}Q{r['quarter']} {r['eps_basis']}")
+                    continue
+                r["eps_pre_restate"] = r["eps"]
+                r["eps"] = round(r["eps"] / sh["factor"], 2)
+                r["eps_basis"] = "restated_share_base"
+                r["restate_factor"] = round(sh["factor"], 4)
+                changed.append(f"{r['year']}Q{r['quarter']} {r['eps_pre_restate']}→{r['eps']}")
+            if changed:
+                stats["restated_rows"] += len(changed)
+                stats["restated_rows_present"] += len(changed)
+                stats["restated_codes"][str(code)] = {"break_at": sh["break_at"], "factor": round(sh["factor"], 3),
+                                                      "official_ttm": official_map.get(str(code)), "ttm_before": v["ttm_old"],
+                                                      "ttm_after": v["ttm_restated"], "rows": changed}
+        except Exception as e:  # 單檔出錯只略過（十二節）
+            print(f"[warn] {code} 股數基準追溯調整失敗：{e}")
+            stats["errors"].append(f"{code}: {e}")
+    return stats
+
+
+def _share_base_meta(st: dict, mode: str) -> dict:
+    return {"note": "近四季 EPS 跨越股數基準持續跳變（推得股數倍數 ≥1.5 或 ≤0.67、跳變後 ≥2 季在新水準）且以官方本益比×收盤反推的近四季 EPS 證實"
+                    "「舊季 EPS÷倍數」才對得上時，舊基準季 EPS 追溯調整成新基準，原值存 eps_pre_restate、eps_basis=restated_share_base；只改 EPS 不改淨利；"
+                    "對不上的列在 not_restated 只記錄（先.一三五-1mx）",
+            "detected": st["detected"], "restated_this_run": len(st["restated_codes"]), "restated_rows_this_run": st["restated_rows"],
+            "restated_rows_present": st["restated_rows_present"], "restated_codes": st["restated_codes"],
+            "not_restated": st["not_restated"], "skipped_rows_with_other_basis": st["skipped_rows_with_other_basis"],
+            "errors": st["errors"], "generated_at": datetime.now(TW_TZ).isoformat(), "mode": mode}
+
+
 def offline_merge_backfill() -> None:
     """零外部請求：只讀既有 stock_detail.json＋financials_backfill.json，併回補季後寫回（本機重產／驗證用）。"""
     payload = load_existing()
@@ -1073,6 +1265,10 @@ def offline_merge_backfill() -> None:
             "generated_at": datetime.now(TW_TZ).isoformat(), "mode": "offline"}
     except Exception as e:
         print(f"[warn] 回補季 EPS 離群修正失敗：{e}")
+    try:  # 先.一三五-1mx：股數基準持續跳變且官方近四季 EPS 證實時，舊季 EPS 追溯調整；自身失敗只警告（十二節）
+        payload["meta"]["financials_share_base_restate"] = _share_base_meta(restate_share_base_shift(stocks), "offline")
+    except Exception as e:
+        print(f"[warn] 股數基準追溯調整失敗：{e}")
     try:
         payload["meta"]["roe_cleared_nonconsecutive_codes"] = clear_stale_nonconsecutive_roe(stocks)
     except Exception as e:
@@ -1228,6 +1424,11 @@ def main():
     except Exception as e:
         print(f"[warn] 回補季 EPS 離群修正失敗：{e}")
         errors.append(f"backfill_eps_outlier_fix: {e}")
+    try:  # 先.一三五-1mx：股數基準持續跳變且官方近四季 EPS 證實時，舊季 EPS 追溯調整；自身失敗只警告（十二節）
+        payload["meta"]["financials_share_base_restate"] = _share_base_meta(restate_share_base_shift(stocks), "daily")
+    except Exception as e:
+        print(f"[warn] 股數基準追溯調整失敗：{e}")
+        errors.append(f"share_base_restate: {e}")
     try:
         payload["meta"]["roe_cleared_nonconsecutive_codes"] = clear_stale_nonconsecutive_roe(stocks)
     except Exception as e:  # 這道清理自己出錯只記警告，不擋寫檔（十二節）
