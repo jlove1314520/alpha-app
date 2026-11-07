@@ -1,3 +1,18 @@
+## 2026-11-08 02:01～ DevQueue 20261108-020102（研究帽）先.一五五-3 第 4 批 regime 延長到 2025 起
+
+等待總司令審閱：0 件（本輪無新增等待項）。
+
+- **做了什麼**：新 `research/reaudit_batch4_ext2025.py`（模擬只呼叫 `reaudit_batch4_regime` 的 transforms／to_daily／run_sim／stats，不改核心檔；0050 延長到 2026-10-05）。延長 5 族：fred_yield_curve（本機 FRED T10Y2Y 快取到 2026-10-16，零請求）、copper_gold_ratio、HQ#76（VIX9D/VIX）、hy_etf_ratio（HYG/IEF）——yfinance HG=F／GC=F／^VIX9D／^VIX／HYG／IEF 各 1 次＝6 次，快取 `research/data/raw_yf/EXT_*.parquet`，已記進 `C:\alpha\CLAUDE.md` 頻率清單 yfinance 節。
+- **結果**（第 4 批挑出的同參數，全期／2025 起；參數用全期挑、2025 起不是樣本外）：
+  - **fred_yield_curve（3×）全期 +59.8%／−70.8% 越過天條一**（2025 起 +182.1%／−40.6%）；≤2× 重挑：chg21、利差 21 日變化低於 20 百分位避險、避險曝險 0.5、2×、止損 20% → +48.5%／−34.6%（2025 起 +159.8%）。候選標 violates_survival_extended，上紙上改用 extended_rebest_L2。
+  - copper_gold_ratio（2×）+47.7%／−37.0%／Sh 1.39、2025 起 +108.5%／−29.0%，全期重挑仍同一組。
+  - HQ#76 +32.4%／−45.8%（重挑 +25.3%／−34.8%）；hy_etf_ratio +17.7%／−46.9%（重挑 +15.7%／−31.1%）。
+  - 同期 0050 約 +24.8%／−34.0%，2025 起 +67.3%／−27.5%。
+- **證據**：2024 底前訊號與原對齊檔核對最大差：fred 0、HQ#76 2e-16、hy 1.5e-6、銅金 3.9e-5。結果 `research/REAUDIT_OPTIMIZED.md` 8a 節（BATCH3-B4X 標記間）、`research/data/reaudit_batch3_batch4_ext2025.json`；候選欄 B4R- 條目更新；`python research/paper_opt_track.py` 8 支對上、last_error=None。冒煙 `node scripts/smoke_test.mjs` 188 項全 [x]。
+- **[自行裁量]**：fx_twd 需 FinMind 2 次，用量 ≥300 就略過（同籌碼續抓門檻）；HYG/IEF/VIX 用原假說同一取法（Ticker.history auto_adjust=True），銅金用 download 未還原（期貨無配息，差 3.9e-5）。另修 PENDING_QUEUE 兩處 `C:\alpha` 被寫成控制字元的亂碼（本輪一處、舊的一處）。
+- **BLOCKED／未做**：籌碼續抓（`fetch_chip_2025_resume.py` 背景跑到 02:38）全程用量 394～443/hr（另一程序 finmind_warmup 在打），0 次請求，斷點仍融資券 2338、尚餘約 172 次。option_pcr 延長需期交所資料，未接。
+- **下一輪接續**：籌碼續抓（<300 才開抓）→ 籌碼五族 run；`python research/reaudit_batch4_ext2025.py`（用量 <300 時補 fx_twd）；第 6 批事件類。
+
 ## 2026-11-08 01:31～ DevQueue 20261108-013102（維運帽）先.一五五-3c FinMind 用量計數被覆蓋
 
 等待總司令審閱：0 件（本輪無新增等待項）。
