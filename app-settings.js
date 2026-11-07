@@ -595,7 +595,9 @@
     {label:'美股四大指數',file:'data/market_us.json',kind:'daily',tz:'UTC',mkt:'us',grace:3},
     {label:'美股類股SIC對映',file:'data/us_sic.json',kind:'daily',tz:'UTC',mkt:'us',grace:3},
     {label:'台股ADR溢價',file:'data/adr_premium.json',kind:'intraday',tz:'America/New_York',open:[9,30],close:[16,0]},
-    {label:'匯率 USD/TWD',file:'data/fx.json',kind:'daily',tz:'UTC',mkt:'tw',grace:3},
+    // 先.一三五-1mp（2026-11-07）：fx.json 每班都會重寫 fetched_at，即使央行匯率日期停滯也照樣綠燈（10/23～10/26 實例：
+    // usd_twd.date 停在 10/22）。加可選欄位 dataDate：有就改用資料日期對台股交易日判新鮮，沒有（讀不到）才照舊看 fetched_at。
+    {label:'匯率 USD/TWD',file:'data/fx.json',kind:'daily',tz:'UTC',mkt:'tw',grace:3,dataDate:d=>d&&d.usd_twd&&d.usd_twd.date},
     {label:'大盤融資維持率',file:'data/margin_maintenance.json',kind:'daily',tz:'UTC',mkt:'tw',grace:3},
     {label:'前瞻選股台帳',file:'data/picks_ledger.json',kind:'daily',tz:'UTC',mkt:'tw',grace:3},
     {label:'策略前向紙上績效',file:'data/strategy_performance.json',kind:'daily',tz:'UTC',mkt:'tw',grace:3},
@@ -671,6 +673,22 @@
     }
     const status=!ts?'missing':(ts>=due?'ok':'overdue');
     return {status,due,rule};
+  }
+  // 先.一三五-1mp：用資料日期（YYYY-MM-DD）對台股交易日判新鮮。今天是交易日且台北 18:00 前，允許落後 1 個交易日（今天的牌告還沒出）；
+  // 其他時間必須是最近一個交易日。交易日判定沿用 app.js 的 tradingDaysSince／isTradingDay／TW_HOLIDAYS（同一全域範圍）。
+  // 傳 now 進來（自測用）；本函式自己出錯由呼叫端 allSettled 隔離，只影響這一列。
+  function _freshnessJudgeDataDate(dateStr,now){
+    const tz='Asia/Taipei';
+    if(!dateStr||!/^\d{4}-\d{2}-\d{2}$/.test(dateStr))return {status:'missing',due:null,rule:'讀不到資料日期'};
+    const y=+dateStr.slice(0,4),m=+dateStr.slice(5,7),d=+dateStr.slice(8,10);
+    const z=_zonedParts(now,tz),today=_ymd(z);
+    // 逐日比日期字串（不比時刻），今天不論幾點都算進去；每天取台北中午避免跨日
+    let lag=0;
+    for(let i=1;i<400;i++){const c=new Date(Date.UTC(y,m-1,d+i,4,0,0));if(_ymd(_zonedParts(c,tz))>today)break;if(isTradingDay(c,tz,TW_HOLIDAYS))lag++;}
+    const before18=isTradingDay(now,tz,TW_HOLIDAYS)&&z.h<18;
+    const allow=before18?1:0;
+    const rule='資料日期須為最近一個台股交易日'+(before18?'（台北 18:00 前允許前一交易日）':'')+(lag>allow?'；目前落後 '+lag+' 個交易日':'');
+    return {status:lag>allow?'overdue':'ok',due:null,rule};
   }
   function _extractFreshnessTs(d){
     if(!d)return null;
@@ -1016,7 +1034,17 @@
       }else{
         const r=await fetch(item.file+'?t='+Date.now());
         if(!r.ok)throw new Error('HTTP '+r.status);
-        ts=_extractFreshnessTs(await r.json());
+        const doc=await r.json();
+        ts=_extractFreshnessTs(doc);
+        if(item.dataDate){
+          let dd=null;
+          try{dd=item.dataDate(doc);}catch(e){console.warn('[loadDataFreshness:dataDate '+item.file+']',e);recordGlobalError('loadDataFreshness:dataDate',e);}
+          if(dd){
+            const j=_freshnessJudgeDataDate(dd,now);
+            return Object.assign({item,ts,via:'依資料日期判定（檔案寫入 '+(ts?fmtTzMMDDHHMM(ts,'Asia/Taipei'):'—')+'）',tsLabel:'資料日 '+dd},j);
+          }
+          via='讀不到資料日期，退回看檔案寫入時間';
+        }
       }
       return Object.assign({item,ts,via},_freshnessJudge(item,ts,now));
     }));
@@ -1036,7 +1064,7 @@
       return `<div class="fresh-row" data-file="${r.item.file}" data-status="${r.status}" style="display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid rgba(128,128,128,.15)">`
         +`<div style="min-width:0"><div style="font-size:12px;font-weight:600;color:${bad?FRESH_BAD_COLOR:'var(--ink)'}">${r.item.label}${r.item.local?' <span style="font-size:10px;opacity:.7">本機</span>':''}</div>`
         +`<div style="font-size:10px;opacity:.75;color:${bad?FRESH_BAD_COLOR:'inherit'}">${sub}</div></div>`
-        +`<div style="text-align:right;white-space:nowrap;font-size:12px">${badge}<div style="font-size:10px;opacity:.8;color:${bad?FRESH_BAD_COLOR:'inherit'}">${fmt(r.ts)}</div></div></div>`;
+        +`<div style="text-align:right;white-space:nowrap;font-size:12px">${badge}<div style="font-size:10px;opacity:.8;color:${bad?FRESH_BAD_COLOR:'inherit'}">${r.tsLabel||fmt(r.ts)}</div></div></div>`;
     }).join('');
     const badRows=rows.filter(r=>r.status!=='ok');
     const sum=document.getElementById('data-freshness-summary');
