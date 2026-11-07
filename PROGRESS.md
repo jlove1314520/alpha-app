@@ -5,6 +5,13 @@
 - 冒煙測試：第一次被我外加的 `timeout 300` 中途砍掉瀏覽器（117 起 browser closed，非測試 FAIL）；不加限制重跑 `node scripts/smoke_test.mjs` exit=0，188 項 PASS、無 FAIL。
 - `data/STATUS.json`：無資料源／面板異動，本輪不更新。下一項先.一五五-3 是 [研究] 類，依一輪一頂帽子收工；佇列 `- [ ]` 29 項，不需補件。
 
+## 2026-11-07 20:46 DevQueue 20261107-200102（研究帽）
+等待總司令審閱：0 件（本輪未新增）。
+- **先.一五五-3 墓園重審第二批（維持 - [ ]）**：PER 2025 起 236 檔補齊（本輪約 70 次 FinMind，用量 224～298/hr、共用節流、全 200）；`research/reaudit_ext2025_fin_factors.py` 新增 f_value_pe／pb（公式逐字照 factors.py、逐日同日合併），2024 底前與 pkl 不一致 0 檔；f_value_pe 延長到 2026-09-24 48/48：原最優組全期 +19.4%／−44.6%、2025 起 +25.8%／−35.4%，全期重挑 1× +7.7%／−15.2%。候選 26 支不變、paper_opt_track 重產 last_error=None。
+- 冒煙：188 PASS、0 FAIL（第一次跟回測同時跑時瀏覽器被關，回測結束後重跑全過）。
+- [自行裁量] f_value_pb 回測留下一輪（剩 6 分鐘跑不完 48 格）；本輪非新批次，未推播。
+- 下一步：`run f_value_pb` → 籌碼類分批 → regime 延長 → 第 6 批事件類。
+
 ## 2026-11-07 18:31～19:0x DevQueue 20261107-183102（研究帽）先.一五五-3 殖利率因子延長到 2025 起
 等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
 - **先.一五五-3**（維持 `- [ ]`，零外部請求）：`research/reaudit_ext2025_fin_factors.py` 新增 f_dividend_yield_ttm（分子直接呼叫 `factors._dividend_yield_ttm_cash_from_df`、本機股利快取合併；分母＝當日原始收盤），

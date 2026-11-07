@@ -22,7 +22,7 @@ from pit import _next_month_10th, _pivot_with_statutory_pit
 from reaudit_ext2025_roe_factor import _raw
 
 FIN_FACS = ["f_gross_profitability", "f_gross_margin_stability", "f_asset_growth", "f_accruals", "f_eps_growth", "f_eps_surprise",
-            "f_revenue_surprise", "f_dividend_yield_ttm"]
+            "f_revenue_surprise", "f_dividend_yield_ttm", "f_value_pe", "f_value_pb"]
 
 RAW = Path(__file__).resolve().parent / "data" / "raw"
 
@@ -126,8 +126,26 @@ def fin_pit(sid, fac):
     raise ValueError(fac)
 
 
+def _per_daily(df, sid, fac):
+    """（DevQueue 20261107-200102）f_value_pe／pb：照 factors.py (k)/(l) 逐字——TaiwanStockPER 逐日資料以 date 同日合併
+    （不是 as-of），PBR／PER>0 才取負號、否則 NaN。本機快取全部檔案合併，同一天以起日最早的檔為準（舊檔優先，新檔只補 2025 起）。"""
+    fs = sorted(RAW.glob(f"TaiwanStockPER__{sid}__*.parquet"))
+    parts = [pd.read_parquet(f) for f in fs]
+    parts = [x for x in parts if not x.empty and {"date", "PER", "PBR"} <= set(x.columns)]
+    if not parts:
+        return np.full(len(df), np.nan)
+    per = pd.concat(parts, ignore_index=True)
+    per["date"] = pd.to_datetime(per["date"])
+    per = per.drop_duplicates("date", keep="first").set_index("date")
+    col = "PBR" if fac == "f_value_pb" else "PER"
+    x = pd.to_numeric(per[col], errors="coerce").reindex(pd.to_datetime(df["date"])).to_numpy(dtype=float)
+    return np.where(x > 0, -x, np.nan)
+
+
 def attach(df, sid, fac):
     """照 factors._asof_join：先丟掉 NaN 季，每個交易日接 pit_date<=當日 的最新一季值。"""
+    if fac in ("f_value_pe", "f_value_pb"):
+        return _per_daily(df, sid, fac)
     p = fin_pit(sid, fac).dropna()
     if p.empty:
         return np.full(len(df), np.nan)
