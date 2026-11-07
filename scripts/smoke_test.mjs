@@ -299,6 +299,36 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) {
     interactionErrors.push(`類股卡: ${e.message || e}`);
   }
+  // 184.【2026-11-07 先.一三五-1mh】類股成分股清單：落後股（is_stale／close≤0）顯示「資料停在」、不顯示漲跌%與成交值。
+  // 暫時把某一檔成分股的報價換成落後列（2024-12-31、close 0、漲跌 −100%），測完原樣還原。
+  {
+    const shErrs = []; let shInfo = "";
+    try {
+      const r = await page.evaluate(async () => {
+        await loadQuotesAllTw(); const companies = await loadCompanyInfo();
+        const sector = Object.keys(SECTOR_TO_INDUSTRY).find((s) => Object.keys(companies).some((c) => SECTOR_TO_INDUSTRY[s].includes((companies[c] || {}).industry)));
+        if (!sector) return { err: "找不到有成分股的類股" };
+        const code = Object.keys(companies).find((c) => SECTOR_TO_INDUSTRY[sector].includes((companies[c] || {}).industry));
+        const qs = QUOTES_ALL_TW_CACHE.quotes, had = Object.prototype.hasOwnProperty.call(qs, code), orig = qs[code];
+        qs[code] = { close: 0, change_pct: -100, turnover: 123456789, as_of: "2024-12-31", date: "2024-12-31", is_stale: true, stale_days: 675 };
+        try {
+          await openSectorList(sector);
+          const row = [...document.querySelectorAll("#sector-sheet-list .row")].find((x) => x.querySelector(".nm span")?.textContent === code);
+          const nums = row ? [...row.querySelectorAll(".num")].map((x) => x.textContent.trim()) : [];
+          return { sector, code, txt: row ? row.textContent.replace(/\s+/g, " ").trim() : null, chg: nums[0] || "", turn: nums[1] || "" };
+        } finally { if (had) qs[code] = orig; else delete qs[code]; window.closeSectorSheet && window.closeSectorSheet(); }
+      });
+      if (r.err) shErrs.push(r.err);
+      else if (!r.txt) shErrs.push(`${r.sector} 清單找不到 ${r.code} 那一列`);
+      else {
+        if (!/資料停在 2024-12-31/.test(r.txt)) shErrs.push(`落後股沒標「資料停在」：${r.txt}`);
+        if (/%/.test(r.chg)) shErrs.push(`落後股仍顯示漲跌%：${r.chg}`);
+        if (r.turn !== "—") shErrs.push(`落後股仍顯示成交值：${r.turn}`);
+        shInfo = `${r.sector}／${r.code}：${r.txt}`;
+      }
+    } catch (e) { shErrs.push(`測試本身出錯：${e.message || e}`); }
+    record("184. 類股成分股清單：落後股（is_stale／close≤0）顯示「資料停在」、不顯示漲跌%與成交值（先.一三五-1mh）", shErrs.length === 0, shErrs.length ? shErrs.join("; ") : shInfo);
+  }
   // 6b. 選股排行列（picks-list的row，點擊應該打開個股評分報告畫面 #scr-report）
   try {
     await page.evaluate(() => window.go("picks"));
