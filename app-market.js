@@ -584,7 +584,11 @@
     // 先.一三五-1mi：台股收盤日早於美股報價日對應的台股交易日 → % 後灰字標「台股 MM/DD」，提醒非同日比較
     const mis=row.tw_date_mismatch&&row.tw_quote_date
       ?`<span style="font-weight:400;font-size:11px;color:var(--ink-3);margin-left:4px" title="台股收盤日 ${row.tw_quote_date}，晚於應對齊的 ${row.tw_expected_date||''}（落後 ${row.tw_lag_trading_days||'?'} 個台股交易日），非同日比較">台股 ${String(row.tw_quote_date).slice(5).replace('-','/')}、非同日</span>`:'';
-    return `<div class="f"><span>${label}</span><b class="${cls}" title="ADR比率1:${row.ratio}／${row.source}">${pctTxt}${mis}</b></div>`;
+    // 先.一三五-1mn：匯率日期早於台股收盤日 ≥1 個台股交易日 → % 後灰字標「匯率 MM/DD」，提醒用的是舊匯率
+    const fxd=String(row.fx_date||'');
+    const fxLag=row.fx_date_lag_trading_days&&fxd
+      ?`<span style="font-weight:400;font-size:11px;color:var(--ink-3);margin-left:4px" title="匯率日期 ${fxd}，比台股收盤日 ${row.tw_quote_date||''} 早 ${row.fx_date_lag_trading_days} 個台股交易日，溢價用的是舊匯率">匯率 ${fxd.slice(5,10).replace('-','/')}</span>`:'';
+    return `<div class="f"><span>${label}</span><b class="${cls}" title="ADR比率1:${row.ratio}／${row.source}">${pctTxt}${mis}${fxLag}</b></div>`;
   }
   async function loadMarketAdrPremium(){
     const el=document.getElementById('adr-rows');if(!el)return;

@@ -112,7 +112,7 @@ def _tw_trading_lag(tw_date_s, us_date: date | None, calendar: dict):
     try:
         if us_date is None or not tw_date_s:
             return None, None
-        tw_d = date.fromisoformat(str(tw_date_s)[:10])
+        tw_d = date.fromisoformat(_norm_date(tw_date_s))  # 先.一三五-1mn：YYYYMMDD 也認得
         tw_cal = (calendar or {}).get("tw") or {}
 
         def closed_set(y):
@@ -146,6 +146,30 @@ def _tw_trading_lag(tw_date_s, us_date: date | None, calendar: dict):
         return lag, target.isoformat()
     except Exception:  # noqa: BLE001 — 日曆缺年份或格式不對：不判斷，不擋計算
         return None, None
+
+
+def _norm_date(v) -> str | None:
+    """先.一三五-1mn：日期字串正規化成 ISO（10 月初部分版本台股日期是 YYYYMMDD）；認不得回 None。"""
+    try:
+        t = str(v or "").strip()
+        if len(t) >= 8 and t[:8].isdigit():
+            return f"{t[:4]}-{t[4:6]}-{t[6:8]}"
+        return date.fromisoformat(t[:10]).isoformat()
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _fx_trading_lag(fx_date_s, tw_date_s, calendar: dict):
+    """先.一三五-1mn：匯率日期比台股收盤日落後幾個台股交易日（沿用 _tw_trading_lag）；不判斷 → None。
+
+    央行 FTDOpenData015 台北傍晚（實測約 17:30 後）才有當日值，台股 13:30 收盤後到那之前的班次會拿前一日匯率。
+    """
+    tw_iso = _norm_date(tw_date_s)
+    fx_iso = _norm_date(fx_date_s)
+    if not tw_iso or not fx_iso:
+        return None
+    lag, _ = _tw_trading_lag(fx_iso, date.fromisoformat(tw_iso), calendar)
+    return lag
 
 
 def main():
@@ -217,6 +241,11 @@ def main():
             row["tw_lag_trading_days"] = lag
             row["tw_expected_date"] = tw_expected
             print(f"  ・{us_ticker}: 台股收盤日 {tw_quote_date} 比對齊日 {tw_expected} 晚 {lag} 個台股交易日（非同日）")
+        # 先.一三五-1mn：匯率日期早於台股收盤日 ≥1 個台股交易日 → 溢價用的是舊匯率，標旗標，App 在 % 後灰字標「匯率 MM/DD」。
+        fx_lag = _fx_trading_lag(fx_date, tw_quote_date, calendar)
+        if fx_lag:
+            row["fx_date_lag_trading_days"] = fx_lag
+            print(f"  ・{us_ticker}: 匯率日期 {fx_date} 比台股收盤日 {tw_quote_date} 晚 {fx_lag} 個台股交易日（舊匯率）")
         rows[us_ticker] = row
         print(f"  ・{us_ticker}: implied={implied_tw_price:.2f} tw={tw_price} premium={premium_pct:.2f}%")
 

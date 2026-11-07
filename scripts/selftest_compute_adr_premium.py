@@ -153,5 +153,28 @@ with tempfile.TemporaryDirectory() as td:
     lag, _ = A._tw_trading_lag("2026-10-13", A._us_quote_date(t_1014), {})
     check("日曆缺年份 → 不判斷（None，不擋計算）", lag is None, lag)
 
+    print("情境七（先.一三五-1mn）：匯率日期早於台股收盤日 → 帶 fx_date_lag_trading_days；同日不帶")
+    d7 = base / "d7"
+    setup(d7, us={"quotes": {"TSM": {"price": 200.0, "quote_time": t_1014}}},
+          tw={"quotes": {"2330": {"close": 1200.0, "as_of": "2026-10-14"}}},
+          fx={"usd_twd": {"rate": 32.0, "date": "2026-10-13"}})
+    (d7 / "trading_calendar.json").write_text(json.dumps(cal), encoding="utf-8")
+    rc, err = run(d7, out)
+    r7 = json.loads(out.read_text(encoding="utf-8"))["rows"]
+    check("匯率晚一交易日（匯率 10/13、台股 10/14）→ 帶旗標、落後 1",
+          err is None and r7.get("TSM", {}).get("fx_date_lag_trading_days") == 1, (err, r7.get("TSM")))
+    check("溢價照算（不丟列）", abs(r7.get("TSM", {}).get("premium_pct", 0) - 6.667) < 1e-3, r7.get("TSM"))
+    setup(d7, fx={"usd_twd": {"rate": 32.0, "date": "2026-10-14"}})
+    rc, err = run(d7, out)
+    r7 = json.loads(out.read_text(encoding="utf-8"))["rows"]
+    check("匯率同日（10/14 對 10/14）→ 不帶旗標", "TSM" in r7 and "fx_date_lag_trading_days" not in r7["TSM"], r7.get("TSM"))
+    v = A._fx_trading_lag("2026-10-08", "2026-10-13", cal)
+    check("匯率 10/08 對台股 10/13（10/09、10/10 休市不算，只算 10/12、10/13）→ 落後 2", v == 2, v)
+    v = A._fx_trading_lag("2026-10-08", "20261012", cal)
+    check("台股日期 YYYYMMDD 先正規化（20261012 對匯率 2026-10-08）→ 落後 1", v == 1, v)
+    check("匯率比台股新（10/14 對 10/13）→ 0", A._fx_trading_lag("2026-10-14", "2026-10-13", cal) == 0)
+    check("匯率日期缺 → 不判斷（None）", A._fx_trading_lag(None, "2026-10-14", cal) is None)
+    check("日曆缺年份 → 不判斷（None）", A._fx_trading_lag("2026-10-13", "2026-10-14", {}) is None)
+
 print(f"\n合計 {ok} 過、{fail} 失敗")
 sys.exit(1 if fail else 0)

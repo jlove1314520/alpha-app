@@ -1,3 +1,11 @@
+## 2026-11-07 14:31～14:5x DevQueue 20261107-143102（維運帽）先.一三五-1mn ADR 溢價標「匯率 MM/DD」（舊匯率）
+等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
+- **先.一三五-1mn**（`- [x]`，零外部請求）：`.github/scripts/compute_adr_premium.py` 新增 `_norm_date()`（YYYYMMDD→ISO，`_tw_trading_lag` 也改用）與 `_fx_trading_lag()`（沿用 `_tw_trading_lag`）；匯率日期比台股收盤日落後 ≥1 個台股交易日 → 該列加 `fx_date_lag_trading_days`，`app-market.js` `adrRowHtml` 在 % 後灰字標「匯率 MM/DD」。
+  - 證據：`scripts/selftest_compute_adr_premium.py` 38 過 0 失敗（新增情境七 8 項：匯率 10/13 對台股 10/14 帶旗標落後 1、同日不帶、10/08 對 10/13 跨休市落後 2、YYYYMMDD 正規化、匯率較新→0、缺日期／缺日曆→None）；冒煙 `node scripts/smoke_test.mjs` 188 過 0 失敗、exit 0。
+  - 央行檔發布時間（git 歷史 `data/fx.json`）：台北約 17:30 後班次才有當日匯率，早上 08 點班次拿前一日屬正常；另發現 10/23、10/26 兩個交易日停在 10/22 到 10/27 才更新。
+  - [自行裁量] 第一次自測預期寫錯（10/08 對 10/13 我寫 1，實為 2，中間有 10/12、10/13 兩個交易日），改的是測試預期、不是程式。本機重算的 `data/adr_premium.json` 已還原不提交（應由排程產生）。
+- 收工補件：本項打勾後 DevQueue 可執行非研究項剩 4（<6），補 2 項：先.一三五-1mo（fx.json 10/23、10/26 停滯查原因，來源①）、先.一三五-1mp（資料健康頁 fx.json 只看 fetched_at、日期停滯仍綠燈，來源②）。`- [ ]` 合計 30。權威清單下一項是 [研究]（先.一五五-3），本輪戴維運帽，收工。BLOCKED：無。
+
 ## 2026-11-07 13:31～14:1x DevQueue 20261107-133102（研究帽）先.一五五-3 墓園重審：月營收意外／上市天數延長到 2025 起
 等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
 - **先.一五五-3**（維持 `- [ ]`，零外部請求）：`research/reaudit_ext2025_fin_factors.py` 新增 f_revenue_surprise（本機月營收快取全部合併、舊檔優先；pit_date 照 pit.month_revenue_pit；公式逐字照 factors._revenue_surprise_sue），`research/reaudit_batch3_ext2025.py` 新增 f_listing_age_days（直接呼叫 factors._listing_age_days）。兩族都延長到 2026-09-24、48/48 跑完。
