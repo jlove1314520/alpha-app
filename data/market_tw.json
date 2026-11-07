@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-11-06T17:42:32+00:00",
+  "fetched_at": "2026-11-07T01:15:31+00:00",
   "errors": [],
   "expected_trading_day": "2026-11-06",
   "taiex": {
@@ -7,7 +7,7 @@
     "close": 39701.64,
     "change_pct": -4.51,
     "data_date": "2026-11-06",
-    "source": "TWSE rwd MI_INDEX（openapi 落後，改用帶日期官方端點）",
+    "source": "TWSE openapi MI_INDEX",
     "sparkline_source": "TWSE FMTQIK（官方逐月）",
     "sparkline": [
       49806.37,
@@ -417,13 +417,13 @@
   },
   "tx_futures": {
     "contract_month": "202611",
-    "last": 41915.0,
-    "change": -1288.0,
-    "change_pct": -2.98,
-    "settlement_price": 41882.0,
+    "last": 39786.0,
+    "change": -2096.0,
+    "change_pct": -5.0,
+    "settlement_price": 39652.0,
     "trading_session": "一般",
-    "date": "20261105",
-    "data_date": "2026-11-05",
+    "date": "20261106",
+    "data_date": "2026-11-06",
     "sparkline": [
       49349.0,
       49309.0,
@@ -442,7 +442,8 @@
       45256.0,
       43376.0,
       43204.0,
-      41915.0
+      41915.0,
+      39786.0
     ],
     "sparkline_dates": [
       "2026-10-08",
@@ -462,20 +463,21 @@
       "2026-11-02",
       "2026-11-03",
       "2026-11-04",
-      "2026-11-05"
+      "2026-11-05",
+      "2026-11-06"
     ],
     "sparkline_note": "近月連續序列，未做轉倉調整"
   },
   "futures": {
     "TX": {
       "contract_month": "202611",
-      "last": 41915.0,
-      "change": -1288.0,
-      "change_pct": -2.98,
-      "settlement_price": 41882.0,
+      "last": 39786.0,
+      "change": -2096.0,
+      "change_pct": -5.0,
+      "settlement_price": 39652.0,
       "trading_session": "一般",
-      "date": "20261105",
-      "data_date": "2026-11-05",
+      "date": "20261106",
+      "data_date": "2026-11-06",
       "sparkline": [
         49349.0,
         49309.0,
@@ -494,7 +496,8 @@
         45256.0,
         43376.0,
         43204.0,
-        41915.0
+        41915.0,
+        39786.0
       ],
       "sparkline_dates": [
         "2026-10-08",
@@ -514,40 +517,41 @@
         "2026-11-02",
         "2026-11-03",
         "2026-11-04",
-        "2026-11-05"
+        "2026-11-05",
+        "2026-11-06"
       ],
       "sparkline_note": "近月連續序列，未做轉倉調整"
     },
     "MTX": {
       "contract_month": "202611",
-      "last": 41917.0,
-      "change": -1286.0,
-      "change_pct": -2.98,
-      "settlement_price": 41882.0,
+      "last": 39776.0,
+      "change": -2106.0,
+      "change_pct": -5.03,
+      "settlement_price": 39652.0,
       "trading_session": "一般",
-      "date": "20261105"
+      "date": "20261106"
     },
     "TE": {
       "contract_month": "202611",
-      "last": 2567.05,
-      "change": -95.6,
-      "change_pct": -3.59,
-      "settlement_price": 2574.15,
+      "last": 2424.25,
+      "change": -149.9,
+      "change_pct": -5.82,
+      "settlement_price": 2424.25,
       "trading_session": "一般",
-      "date": "20261105"
+      "date": "20261106"
     },
     "TF": {
       "contract_month": "202611",
-      "last": 3669.8,
-      "change": 38.0,
-      "change_pct": 1.05,
-      "settlement_price": 3662.8,
+      "last": 3525.6,
+      "change": -137.2,
+      "change_pct": -3.75,
+      "settlement_price": 3525.6,
       "trading_session": "一般",
-      "date": "20261105"
+      "date": "20261106"
     }
   },
   "data_date": "2026-11-06",
-  "stale_note": "台指期資料停在 11/05",
+  "stale_note": null,
   "institutional": {
     "date": "20261106",
     "foreign_net_lots": -205605.6,
