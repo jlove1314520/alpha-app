@@ -128,6 +128,49 @@ def disp_events(px, repeat_only):
     return ev
 
 
+def buyback_events(px):
+    """MOPS 庫藏股（本機 data/raw_mops_buyback/*.parquet，民國 104H1～114H1）：董事會決議日＝觀察日，strength＝預定買回總金額。"""
+    import glob
+    rows = []
+    for f in glob.glob(str(D / "raw_mops_buyback" / "*.parquet")):
+        x = pd.read_parquet(f)
+        for _, r in x.iterrows():
+            sid = str(r["stock_id"]).strip()
+            if sid not in px.columns:
+                continue
+            try:
+                dt = _roc(str(r["board_resolution_date"]).strip())
+                amt = float(str(r["max_total_amount"]).replace(",", "") or 0)
+            except (ValueError, TypeError):
+                continue
+            rows.append({"date": dt, "sid": sid, "strength": amt})
+    ev = pd.DataFrame(rows).drop_duplicates(["date", "sid"])
+    # 觀察日非交易日 → 歸到之後第一個交易日（sim 會在其下一個交易日收盤進場）
+    k = np.searchsorted(px.index, ev["date"].to_numpy(), side="left")
+    ev = ev[k < len(px.index)].copy()
+    ev["date"] = px.index[k[k < len(px.index)]]
+    return ev
+
+
+def reduction_events(px, kind):
+    """FinMind 減資恢復買賣參考價（本機快取，2003／2010 起～latest）：恢復買賣日事先公告，觀察日＝恢復日前一個交易日，
+    sim 於恢復日收盤進場。kind：cash＝現金退還、loss＝彌補虧損。"""
+    import glob
+    fs = glob.glob(str(D / "raw" / "TaiwanStockCapitalReductionReferencePrice__*.parquet"))
+    x = pd.concat([pd.read_parquet(f) for f in fs], ignore_index=True)
+    if x.empty:
+        return pd.DataFrame(columns=["date", "sid", "strength"])
+    x = x.drop_duplicates(["date", "stock_id"])
+    want = "Cash" if kind == "cash" else "losses"
+    x = x[x["ReasonforCapitalReduction"].astype(str).str.contains(want) & x["stock_id"].isin(px.columns)]
+    rows = []
+    for _, r in x.iterrows():
+        k = int(np.searchsorted(px.index, pd.Timestamp(r["date"]), side="left"))
+        if 1 <= k < len(px.index):
+            rows.append({"date": px.index[k - 1], "sid": r["stock_id"], "strength": 1.0})
+    return pd.DataFrame(rows)
+
+
 def sim(px, ret, gate, rf, ev, H, nmax, use_gate, end=None):
     idx = px.index
     i0 = int(np.searchsorted(idx, pd.Timestamp(START)))
@@ -203,7 +246,8 @@ def seg(dates, c, a, b):
 
 
 FAMS = [("E-rev", "月營收意外事件（monthly_revenue_event_study）"), ("E-eps", "EPS 意外事件（event_driven_sue／pead）"),
-        ("E-52w", "52 週新高突破事件（f_52w_high_prox 事件版）"), ("E-disp", "處置股解除後（HQ#47／paper_10，只到 2024）")]
+        ("E-52w", "52 週新高突破事件（f_52w_high_prox 事件版）"), ("E-disp", "處置股解除後（HQ#47／paper_10，只到 2024）"),
+        ("E-buyback", "庫藏股決議（buyback_car／HQ#40，只到 2025-06）"), ("E-reduct", "減資恢復買賣（capital_reduction_car／#71）")]
 HS = (5, 10, 21, 63)
 NS = (10, 20)
 
@@ -228,9 +272,13 @@ def main(only=None):
             variants = {q: base[base["strength"] >= q] for q in (0.8, 0.9)}
         elif fid == "E-52w":
             variants = {W: high_events(px, W) for W in (126, 252)}
+        elif fid == "E-buyback":
+            variants = {"all": buyback_events(px)}
+        elif fid == "E-reduct":
+            variants = {q: reduction_events(px, q) for q in ("cash", "loss")}
         else:
             variants = {"all": disp_events(px, False), "repeat": disp_events(px, True)}
-        end = "2024-12-31" if fid == "E-disp" else None
+        end = {"E-disp": "2024-12-31", "E-buyback": "2025-06-30"}.get(fid)
         rows = []
         for (q, ev), H, n, g in itertools.product(variants.items(), HS, NS, (False, True)):
             dates, eq, tr, wr = sim(px, ret, gate, rf, ev, H, n, g, end)
@@ -281,10 +329,11 @@ def render(out):
     lines += ["", "明細 `research/data/reaudit_batch3_batch7.json`。3× 超過融資上限只當參考。勝率＝出場淨值＞進場金額的比例（含成本）。",
               "**讀法提醒**：E-rev 2025 起 +100% 以上主要來自少數記憶體／PCB 股（2337、3037、6182、6446、8021 單筆 63 日 +117%～+275%），"
               "2025 起 q=0.9 事件 267 筆 63 日報酬中位數只有 +5.0%、平均 +16.3%，獲利高度集中，紙上要預期落差；"
+              "庫藏股（164 筆）與減資（11 筆）在 236 檔抽樣裡事件太少、大多空手，Calmar 虛高、年化只有 1% 上下，不進候選（交易數 <100）；要做得改用全市場宇宙。"
               "月營收沒有公布時間的列 PIT＝次月 10 日（2025 起 159/267 筆落在 10 日）。E-eps 最佳組年化低（+6.6%）但回撤極小。",
               "**本批開發時抓到並修掉的錯（照實記錄）**：①pandas 3 的 `stack()` 保留 NaN，第一版把非事件列也當事件（73 萬筆）；"
               "②價格表日期是全樣本聯集，個股零星缺日讓 `rolling(min_periods=W)` 整段 NaN、`pct_change()` 丟掉跨缺口報酬，改成逐檔在自己有價日上算。"
-              "②也影響第 6 批（`reaudit_batch6_portfolio.py` 用 `px.pct_change()`），見 先.一五五-3 條目下一輪接續。",
+              "②也影響第 6 批（`reaudit_batch6_portfolio.py` 用 `px.pct_change()`），本輪已修並重跑，第 10 節為修正後數字。",
               "", "<!-- BATCH3-B7-END -->"]
     block = "\n".join(lines)
     txt = MD.read_text(encoding="utf-8")
@@ -306,7 +355,7 @@ def write_candidates():
     new = []
     for f in out["families"]:
         b = f["best"]
-        if b["calmar"] < 0.6:
+        if b["calmar"] < 0.6 or b["trades"] < 100:  # 〔自行裁量〕事件稀少、大多空手的族 Calmar 會虛高（減資 7 筆），交易數 <100 不進候選
             continue
         note = ["樣本內最優化（偏樂觀，參數用全期含 2025 起挑）", "#133 抽樣 236 檔事件後固定持有"]
         if b["L"] > 2:
