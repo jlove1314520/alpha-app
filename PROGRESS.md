@@ -1,3 +1,11 @@
+## 2026-11-07 11:10 DevQueue 20261107-103102（研究帽）
+等待總司令審閱：見 research/AWAITING_REVIEW.md（本輪未新增）
+- **先.一五五-3 墓園重審第二批**（維持 `- [ ]`，零外部請求，不寫 TRIALS_LEDGER）：財報因子延長到 2026-09-24 續跑——f_gross_profitability 補完 48/48、f_eps_surprise 48/48、f_accruals 48/48；f_gross_margin_stability 5/48 於 11:03 時間到存斷點。
+  - 結果：f_eps_surprise 原組全期 +8.7%／−25.2%、2025 起 +17.3%／−25.2%；f_accruals（反向）原組 2025 起 −2.9%／−10.4%，全期重挑順向 1× +8.0%／−17.4%。無新越過天條一者。
+  - REAUDIT_OPTIMIZED.md 5a 節、候選欄 20 支、`data/paper_opt_track.json` 重產（8 支回測全對上）。
+  - [自行裁量] 應計 4 檔（6412／8426／1308／5439）只差 2024Q2，2024 底前沿用 pkl 原值（同上一輪規則）。
+  - 下一輪：f_gross_margin_stability 剩 43 格 → f_asset_growth。
+
 ## 2026-11-07 10:01～ DevQueue 20261107-100102（維運帽）先.一三五-1md 個股 ROE 改用併入回補季後的季度重算
 
 等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
