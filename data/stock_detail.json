@@ -1995,7 +1995,7 @@
         "8299": "eps 加總 187.37 vs 官方累計 187.43",
         "8435": "eps 加總 2.84 vs 官方累計 2.88"
       },
-      "generated_at": "2026-11-07T21:01:46.744368+08:00",
+      "generated_at": "2026-11-07T22:04:19.996628+08:00",
       "mode": "offline"
     },
     "financials_half_year_period": {
@@ -2219,7 +2219,7 @@
         "month_revenue": 17,
         "prior_year_half": 4
       },
-      "generated_at": "2026-11-07T21:01:46.879969+08:00",
+      "generated_at": "2026-11-07T22:04:20.115434+08:00",
       "mode": "offline"
     },
     "roe_recomputed_after_backfill_merge": {
@@ -2227,6 +2227,14 @@
       "recomputed_count": 690,
       "set_none_count": 151,
       "errors": {}
+    },
+    "financials_h2_eps_fix": {
+      "note": "H2 列 EPS 對得上全年累計、對不上下半年單期（以 H1 淨利÷EPS 推股數）時，改成全年−上半年，原值存 eps_annual_cum（先.一三五-1ms）",
+      "fixed_rows": 0,
+      "fixed_codes": [],
+      "left_unverifiable": 261,
+      "generated_at": "2026-11-07T22:04:20.118236+08:00",
+      "mode": "offline"
     }
   },
   "stocks": {
@@ -31931,9 +31939,11 @@
             "gross_margin_pct": 17.32,
             "op_margin_pct": 14.82,
             "net_income_parent": 668789000.0,
-            "eps": 10.62,
+            "eps": 4.65,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 10.62,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2025,
@@ -83237,9 +83247,11 @@
             "gross_margin_pct": 30.03,
             "op_margin_pct": -27.1,
             "net_income_parent": -154376000.0,
-            "eps": -3.08,
+            "eps": -2.13,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -3.08,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2025,
@@ -85886,9 +85898,11 @@
             "gross_margin_pct": 15.09,
             "op_margin_pct": -5.77,
             "net_income_parent": 24130000.0,
-            "eps": -0.1,
+            "eps": 0.36,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.1,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2025,
@@ -114566,9 +114580,11 @@
             "gross_margin_pct": 11.89,
             "op_margin_pct": -1.62,
             "net_income_parent": 22424000.0,
-            "eps": 1.36,
+            "eps": 0.64,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.36,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2025,
@@ -116418,9 +116434,11 @@
             "gross_margin_pct": 49.81,
             "op_margin_pct": 28.49,
             "net_income_parent": 73664000.0,
-            "eps": 1.66,
+            "eps": 0.85,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.66,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -116440,9 +116458,11 @@
             "gross_margin_pct": 43.89,
             "op_margin_pct": 22.06,
             "net_income_parent": 21229000.0,
-            "eps": 0.97,
+            "eps": 0.22,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.97,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2025,
@@ -117540,9 +117560,11 @@
             "gross_margin_pct": 9.6,
             "op_margin_pct": 1.7,
             "net_income_parent": 13776000.0,
-            "eps": 1.71,
+            "eps": 0.4,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.71,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2025,
@@ -143116,9 +143138,11 @@
             "gross_margin_pct": 14.84,
             "op_margin_pct": 6.49,
             "net_income_parent": 134213000.0,
-            "eps": 2.07,
+            "eps": 1.32,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.07,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -143138,9 +143162,11 @@
             "gross_margin_pct": 14.57,
             "op_margin_pct": 5.58,
             "net_income_parent": 91220000.0,
-            "eps": 2.6,
+            "eps": 0.89,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.6,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -143160,9 +143186,11 @@
             "gross_margin_pct": 13.78,
             "op_margin_pct": 5.12,
             "net_income_parent": 133369000.0,
-            "eps": 2.0,
+            "eps": 1.3,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.0,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -143182,9 +143210,11 @@
             "gross_margin_pct": 14.39,
             "op_margin_pct": 2.79,
             "net_income_parent": -16552000.0,
-            "eps": 0.32,
+            "eps": -0.16,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.32,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -143211,9 +143241,11 @@
             "gross_margin_pct": 50.98,
             "op_margin_pct": 2.94,
             "net_income_parent": 50746000.0,
-            "eps": 3.83,
+            "eps": 2.73,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 3.83,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -143233,9 +143265,11 @@
             "gross_margin_pct": 50.1,
             "op_margin_pct": 3.28,
             "net_income_parent": 3257000.0,
-            "eps": -5.42,
+            "eps": 0.17,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -5.42,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -143277,9 +143311,11 @@
             "gross_margin_pct": 46.69,
             "op_margin_pct": 3.21,
             "net_income_parent": -22797000.0,
-            "eps": 0.84,
+            "eps": -1.11,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.84,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -143350,9 +143386,11 @@
             "gross_margin_pct": 38.36,
             "op_margin_pct": 7.4,
             "net_income_parent": 15005000.0,
-            "eps": 1.68,
+            "eps": 0.84,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.68,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -143372,9 +143410,11 @@
             "gross_margin_pct": 34.78,
             "op_margin_pct": 6.1,
             "net_income_parent": 18129000.0,
-            "eps": 2.16,
+            "eps": 1.06,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.16,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null,
@@ -144851,9 +144891,11 @@
             "gross_margin_pct": 13.72,
             "op_margin_pct": 9.44,
             "net_income_parent": 34604000.0,
-            "eps": 1.67,
+            "eps": 1.13,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.67,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -144895,9 +144937,11 @@
             "gross_margin_pct": -2.08,
             "op_margin_pct": -7.79,
             "net_income_parent": -13474000.0,
-            "eps": -1.3,
+            "eps": -0.4,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.3,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -145489,9 +145533,11 @@
             "gross_margin_pct": 33.94,
             "op_margin_pct": 10.76,
             "net_income_parent": 32450000.0,
-            "eps": 1.05,
+            "eps": 0.34,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.05,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2025,
@@ -147682,9 +147728,11 @@
             "gross_margin_pct": 18.17,
             "op_margin_pct": 8.7,
             "net_income_parent": 43992000.0,
-            "eps": 3.13,
+            "eps": 1.05,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 3.13,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -147704,9 +147752,11 @@
             "gross_margin_pct": 25.96,
             "op_margin_pct": 19.71,
             "net_income_parent": 162980000.0,
-            "eps": 7.02,
+            "eps": 3.88,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 7.02,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -147726,9 +147776,11 @@
             "gross_margin_pct": 19.55,
             "op_margin_pct": 11.27,
             "net_income_parent": 50149000.0,
-            "eps": 2.28,
+            "eps": 0.81,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.28,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -147921,9 +147973,11 @@
             "gross_margin_pct": 32.18,
             "op_margin_pct": 16.03,
             "net_income_parent": 26393000.0,
-            "eps": 3.9,
+            "eps": 1.96,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 3.9,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -147943,9 +147997,11 @@
             "gross_margin_pct": 37.02,
             "op_margin_pct": 18.88,
             "net_income_parent": 30826000.0,
-            "eps": 4.98,
+            "eps": 2.29,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 4.98,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -147965,9 +148021,11 @@
             "gross_margin_pct": 40.41,
             "op_margin_pct": 22.71,
             "net_income_parent": 40389000.0,
-            "eps": 5.21,
+            "eps": 2.99,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 5.21,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -148017,9 +148075,11 @@
             "gross_margin_pct": 16.55,
             "op_margin_pct": 8.97,
             "net_income_parent": 75794000.0,
-            "eps": 9.8,
+            "eps": 3.76,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 9.8,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -148167,9 +148227,11 @@
             "gross_margin_pct": 37.4,
             "op_margin_pct": -34.44,
             "net_income_parent": -34988000.0,
-            "eps": 0.17,
+            "eps": -0.45,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.17,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -148189,9 +148251,11 @@
             "gross_margin_pct": -12.46,
             "op_margin_pct": -145.1,
             "net_income_parent": -201723000.0,
-            "eps": -3.44,
+            "eps": -2.21,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -3.44,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -148211,9 +148275,11 @@
             "gross_margin_pct": 19.47,
             "op_margin_pct": -39.07,
             "net_income_parent": -115493000.0,
-            "eps": -3.0,
+            "eps": -1.22,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -3.0,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -148233,9 +148299,11 @@
             "gross_margin_pct": 6.58,
             "op_margin_pct": -59.6,
             "net_income_parent": 60097000.0,
-            "eps": 0.36,
+            "eps": 0.63,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.36,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null,
@@ -148307,9 +148375,11 @@
             "gross_margin_pct": 17.71,
             "op_margin_pct": -5.23,
             "net_income_parent": -39215000.0,
-            "eps": 0.73,
+            "eps": -0.66,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.73,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -148329,9 +148399,11 @@
             "gross_margin_pct": 13.85,
             "op_margin_pct": -10.86,
             "net_income_parent": -102455000.0,
-            "eps": -2.12,
+            "eps": -1.68,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -2.12,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "equity_parent_latest": 1195926000.0,
@@ -148779,9 +148851,11 @@
             "gross_margin_pct": -53.77,
             "op_margin_pct": -460.8,
             "net_income_parent": -46940000.0,
-            "eps": -0.9,
+            "eps": -0.3,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.9,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -149512,9 +149586,11 @@
             "gross_margin_pct": 7.03,
             "op_margin_pct": 3.15,
             "net_income_parent": 17064000.0,
-            "eps": 0.43,
+            "eps": 0.21,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.43,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -149534,9 +149610,11 @@
             "gross_margin_pct": 5.44,
             "op_margin_pct": 2.34,
             "net_income_parent": 18615000.0,
-            "eps": 0.46,
+            "eps": 0.23,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.46,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -150320,9 +150398,11 @@
             "gross_margin_pct": 30.56,
             "op_margin_pct": -26.82,
             "net_income_parent": -28651000.0,
-            "eps": -2.6,
+            "eps": -1.16,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -2.6,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -151755,9 +151835,11 @@
             "gross_margin_pct": 43.85,
             "op_margin_pct": 3.66,
             "net_income_parent": 25482000.0,
-            "eps": 2.29,
+            "eps": 1.25,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.29,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2026,
@@ -151805,9 +151887,11 @@
             "gross_margin_pct": 61.78,
             "op_margin_pct": 25.46,
             "net_income_parent": 20359000.0,
-            "eps": 3.54,
+            "eps": 1.56,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 3.54,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -151827,9 +151911,11 @@
             "gross_margin_pct": 62.59,
             "op_margin_pct": 13.43,
             "net_income_parent": 6354000.0,
-            "eps": 1.78,
+            "eps": 0.49,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.78,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2025,
@@ -151849,9 +151935,11 @@
             "gross_margin_pct": -11.02,
             "op_margin_pct": -21.13,
             "net_income_parent": -61268000.0,
-            "eps": -5.84,
+            "eps": -4.71,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -5.84,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2026,
@@ -153146,9 +153234,11 @@
             "gross_margin_pct": 45.35,
             "op_margin_pct": 12.96,
             "net_income_parent": 41427000.0,
-            "eps": 0.93,
+            "eps": 0.69,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.93,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -153190,9 +153280,11 @@
             "gross_margin_pct": 53.12,
             "op_margin_pct": 23.02,
             "net_income_parent": 110386000.0,
-            "eps": 3.51,
+            "eps": 1.84,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 3.51,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -153212,9 +153304,11 @@
             "gross_margin_pct": 51.82,
             "op_margin_pct": 21.03,
             "net_income_parent": 96867000.0,
-            "eps": 3.16,
+            "eps": 1.61,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 3.16,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -154996,9 +155090,11 @@
             "gross_margin_pct": 31.3,
             "op_margin_pct": 6.5,
             "net_income_parent": 51881000.0,
-            "eps": 1.26,
+            "eps": 0.69,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.26,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -155018,9 +155114,11 @@
             "gross_margin_pct": 37.61,
             "op_margin_pct": 7.61,
             "net_income_parent": 75893000.0,
-            "eps": 1.81,
+            "eps": 1.01,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.81,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -155040,9 +155138,11 @@
             "gross_margin_pct": 39.25,
             "op_margin_pct": 9.61,
             "net_income_parent": 83857000.0,
-            "eps": 1.45,
+            "eps": 1.12,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.45,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -155062,9 +155162,11 @@
             "gross_margin_pct": 35.92,
             "op_margin_pct": 6.71,
             "net_income_parent": 71800000.0,
-            "eps": 1.6,
+            "eps": 0.96,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.6,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -155376,9 +155478,11 @@
             "gross_margin_pct": 13.69,
             "op_margin_pct": 2.52,
             "net_income_parent": 670000.0,
-            "eps": 0.26,
+            "eps": 0.02,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.26,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -155442,9 +155546,11 @@
             "gross_margin_pct": 5.94,
             "op_margin_pct": -8.89,
             "net_income_parent": -30458000.0,
-            "eps": -1.94,
+            "eps": -1.37,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.94,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "equity_parent_latest": 94803000.0,
@@ -156294,9 +156400,11 @@
             "gross_margin_pct": 63.43,
             "op_margin_pct": 23.81,
             "net_income_parent": 103743000.0,
-            "eps": 7.32,
+            "eps": 3.93,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 7.32,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2025,
@@ -156949,9 +157057,11 @@
             "gross_margin_pct": 53.94,
             "op_margin_pct": 21.88,
             "net_income_parent": 28091000.0,
-            "eps": 0.86,
+            "eps": 0.34,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.86,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -165655,9 +165765,11 @@
             "gross_margin_pct": 52.92,
             "op_margin_pct": 39.61,
             "net_income_parent": 129647000.0,
-            "eps": 7.14,
+            "eps": 3.79,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 7.14,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2025,
@@ -170581,9 +170693,11 @@
             "gross_margin_pct": 20.93,
             "op_margin_pct": 6.17,
             "net_income_parent": 16280000.0,
-            "eps": 2.26,
+            "eps": 0.69,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.26,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -170603,9 +170717,11 @@
             "gross_margin_pct": 22.2,
             "op_margin_pct": -3.22,
             "net_income_parent": -469000.0,
-            "eps": 1.05,
+            "eps": -0.04,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.05,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -170625,9 +170741,11 @@
             "gross_margin_pct": 36.81,
             "op_margin_pct": 12.2,
             "net_income_parent": 11657000.0,
-            "eps": 0.18,
+            "eps": 0.43,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.18,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -170647,9 +170765,11 @@
             "gross_margin_pct": 27.76,
             "op_margin_pct": -1.9,
             "net_income_parent": -1846000.0,
-            "eps": -1.28,
+            "eps": -0.07,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.28,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -171892,9 +172012,11 @@
             "gross_margin_pct": 8.74,
             "op_margin_pct": 4.41,
             "net_income_parent": 65568000.0,
-            "eps": 3.18,
+            "eps": 1.93,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 3.18,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -171914,9 +172036,11 @@
             "gross_margin_pct": 9.78,
             "op_margin_pct": 5.58,
             "net_income_parent": 120498000.0,
-            "eps": 6.51,
+            "eps": 3.55,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 6.51,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -171936,9 +172060,11 @@
             "gross_margin_pct": 9.02,
             "op_margin_pct": 5.31,
             "net_income_parent": 132037000.0,
-            "eps": 7.04,
+            "eps": 3.89,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 7.04,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -171958,9 +172084,11 @@
             "gross_margin_pct": 11.53,
             "op_margin_pct": 7.28,
             "net_income_parent": 183895000.0,
-            "eps": 9.89,
+            "eps": 5.41,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 9.89,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -172212,9 +172340,11 @@
             "gross_margin_pct": 18.42,
             "op_margin_pct": 7.11,
             "net_income_parent": 60345000.0,
-            "eps": 2.16,
+            "eps": 1.22,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.16,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -172256,9 +172386,11 @@
             "gross_margin_pct": 18.8,
             "op_margin_pct": 8.79,
             "net_income_parent": 95327000.0,
-            "eps": 2.54,
+            "eps": 1.76,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.54,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -172278,9 +172410,11 @@
             "gross_margin_pct": 18.63,
             "op_margin_pct": 8.37,
             "net_income_parent": 95664000.0,
-            "eps": 3.95,
+            "eps": 1.76,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 3.95,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -175468,9 +175602,11 @@
             "gross_margin_pct": 18.32,
             "op_margin_pct": 7.99,
             "net_income_parent": 46341000.0,
-            "eps": 1.18,
+            "eps": 0.77,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.18,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -175490,9 +175626,11 @@
             "gross_margin_pct": 9.8,
             "op_margin_pct": -2.32,
             "net_income_parent": -12848000.0,
-            "eps": 0.22,
+            "eps": -0.22,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.22,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -175512,9 +175650,11 @@
             "gross_margin_pct": 13.41,
             "op_margin_pct": -0.98,
             "net_income_parent": -2033000.0,
-            "eps": -0.55,
+            "eps": -0.03,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.55,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -175534,9 +175674,11 @@
             "gross_margin_pct": 18.39,
             "op_margin_pct": 2.18,
             "net_income_parent": 9483000.0,
-            "eps": 0.48,
+            "eps": 0.15,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.48,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null,
@@ -175713,9 +175855,11 @@
             "gross_margin_pct": 48.46,
             "op_margin_pct": -4.25,
             "net_income_parent": -8222000.0,
-            "eps": 0.74,
+            "eps": -0.14,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.74,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -175735,9 +175879,11 @@
             "gross_margin_pct": 27.4,
             "op_margin_pct": -43.61,
             "net_income_parent": -67106000.0,
-            "eps": -0.89,
+            "eps": -1.12,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.89,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -175757,9 +175903,11 @@
             "gross_margin_pct": 30.63,
             "op_margin_pct": -62.68,
             "net_income_parent": -103289000.0,
-            "eps": -3.32,
+            "eps": -1.72,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -3.32,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -175779,9 +175927,11 @@
             "gross_margin_pct": -4.29,
             "op_margin_pct": -84.65,
             "net_income_parent": -114804000.0,
-            "eps": -3.69,
+            "eps": -1.92,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -3.69,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -177543,9 +177693,11 @@
             "gross_margin_pct": 18.63,
             "op_margin_pct": -5.12,
             "net_income_parent": 83978000.0,
-            "eps": 1.41,
+            "eps": 0.57,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.41,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -177565,9 +177717,11 @@
             "gross_margin_pct": 9.13,
             "op_margin_pct": -15.02,
             "net_income_parent": -211829000.0,
-            "eps": -1.18,
+            "eps": -1.44,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.18,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -178623,9 +178777,11 @@
             "gross_margin_pct": 2.16,
             "op_margin_pct": -110.5,
             "net_income_parent": -11660000.0,
-            "eps": 0.12,
+            "eps": -0.17,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.12,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -178645,9 +178801,11 @@
             "gross_margin_pct": 11.81,
             "op_margin_pct": -51.07,
             "net_income_parent": -10389000.0,
-            "eps": -0.37,
+            "eps": -0.15,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.37,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -178689,9 +178847,11 @@
             "gross_margin_pct": 37.43,
             "op_margin_pct": -31.48,
             "net_income_parent": -27018000.0,
-            "eps": -0.92,
+            "eps": -0.62,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.92,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -179921,9 +180081,11 @@
             "gross_margin_pct": 20.45,
             "op_margin_pct": -210.78,
             "net_income_parent": -96080000.0,
-            "eps": -1.29,
+            "eps": -0.66,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.29,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -179972,9 +180134,11 @@
             "gross_margin_pct": 43.63,
             "op_margin_pct": 4.24,
             "net_income_parent": 5110000.0,
-            "eps": 0.41,
+            "eps": 0.17,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.41,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -182014,9 +182178,11 @@
             "gross_margin_pct": -1.71,
             "op_margin_pct": -40.28,
             "net_income_parent": -78063000.0,
-            "eps": -2.52,
+            "eps": -2.14,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -2.52,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -184244,9 +184410,11 @@
             "gross_margin_pct": 35.91,
             "op_margin_pct": -2.7,
             "net_income_parent": -6621000.0,
-            "eps": 1.16,
+            "eps": -0.09,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.16,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -184266,9 +184434,11 @@
             "gross_margin_pct": 34.36,
             "op_margin_pct": 8.38,
             "net_income_parent": 205689000.0,
-            "eps": 4.84,
+            "eps": 2.61,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 4.84,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -184288,9 +184458,11 @@
             "gross_margin_pct": 26.16,
             "op_margin_pct": -32.08,
             "net_income_parent": -172280000.0,
-            "eps": -1.7,
+            "eps": -2.18,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.7,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -184310,9 +184482,11 @@
             "gross_margin_pct": 37.82,
             "op_margin_pct": 17.26,
             "net_income_parent": 218444000.0,
-            "eps": 0.51,
+            "eps": 2.77,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.51,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -185529,9 +185703,11 @@
             "gross_margin_pct": 24.18,
             "op_margin_pct": 6.93,
             "net_income_parent": 59037000.0,
-            "eps": 1.55,
+            "eps": 1.04,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.55,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -185551,9 +185727,11 @@
             "gross_margin_pct": 22.22,
             "op_margin_pct": 4.39,
             "net_income_parent": 28424000.0,
-            "eps": 0.81,
+            "eps": 0.48,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.81,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -185573,9 +185751,11 @@
             "gross_margin_pct": 8.31,
             "op_margin_pct": -12.26,
             "net_income_parent": -66018000.0,
-            "eps": -1.87,
+            "eps": -1.1,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.87,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -185913,9 +186093,11 @@
             "gross_margin_pct": 37.29,
             "op_margin_pct": 27.31,
             "net_income_parent": 272926000.0,
-            "eps": 8.2,
+            "eps": 6.19,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 8.2,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -185935,9 +186117,11 @@
             "gross_margin_pct": 34.18,
             "op_margin_pct": 22.44,
             "net_income_parent": 146280000.0,
-            "eps": 7.13,
+            "eps": 3.32,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 7.13,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -185957,9 +186141,11 @@
             "gross_margin_pct": 41.78,
             "op_margin_pct": 30.17,
             "net_income_parent": 181154000.0,
-            "eps": 8.42,
+            "eps": 4.11,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 8.42,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -186197,9 +186383,11 @@
             "gross_margin_pct": 15.86,
             "op_margin_pct": -28.74,
             "net_income_parent": -26102000.0,
-            "eps": -2.67,
+            "eps": -0.71,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -2.67,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -186709,9 +186897,11 @@
             "gross_margin_pct": 30.19,
             "op_margin_pct": -12.93,
             "net_income_parent": -42877000.0,
-            "eps": -2.78,
+            "eps": -1.43,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -2.78,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -186731,9 +186921,11 @@
             "gross_margin_pct": 30.44,
             "op_margin_pct": -13.33,
             "net_income_parent": -32716000.0,
-            "eps": -1.45,
+            "eps": -1.06,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.45,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -186769,9 +186961,11 @@
             "gross_margin_pct": 22.76,
             "op_margin_pct": 5.45,
             "net_income_parent": 23263000.0,
-            "eps": 3.1,
+            "eps": 0.9,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 3.1,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -186791,9 +186985,11 @@
             "gross_margin_pct": 22.96,
             "op_margin_pct": 4.09,
             "net_income_parent": 17901000.0,
-            "eps": 2.66,
+            "eps": 0.7,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.66,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -188444,9 +188640,11 @@
             "gross_margin_pct": 58.04,
             "op_margin_pct": 23.81,
             "net_income_parent": 45036000.0,
-            "eps": 0.63,
+            "eps": 0.94,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.63,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -188466,9 +188664,11 @@
             "gross_margin_pct": 55.13,
             "op_margin_pct": 9.25,
             "net_income_parent": 12529000.0,
-            "eps": 0.61,
+            "eps": 0.26,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.61,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -192020,9 +192220,11 @@
             "gross_margin_pct": 37.12,
             "op_margin_pct": 17.33,
             "net_income_parent": 23850000.0,
-            "eps": -0.33,
+            "eps": 0.72,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.33,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -192042,9 +192244,11 @@
             "gross_margin_pct": 35.72,
             "op_margin_pct": -0.84,
             "net_income_parent": 11870000.0,
-            "eps": 2.08,
+            "eps": 0.36,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.08,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -194891,9 +195095,11 @@
             "gross_margin_pct": 42.3,
             "op_margin_pct": -2.8,
             "net_income_parent": -2564000.0,
-            "eps": -1.01,
+            "eps": -0.07,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.01,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -194913,9 +195119,11 @@
             "gross_margin_pct": 45.29,
             "op_margin_pct": 4.02,
             "net_income_parent": 12550000.0,
-            "eps": 1.04,
+            "eps": 0.36,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.04,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -194935,9 +195143,11 @@
             "gross_margin_pct": 51.55,
             "op_margin_pct": 13.18,
             "net_income_parent": 41902000.0,
-            "eps": 2.86,
+            "eps": 1.58,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.86,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -194957,9 +195167,11 @@
             "gross_margin_pct": 48.56,
             "op_margin_pct": 1.22,
             "net_income_parent": 4443000.0,
-            "eps": 0.67,
+            "eps": 0.17,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.67,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -195131,9 +195343,11 @@
             "gross_margin_pct": 28.17,
             "op_margin_pct": 4.84,
             "net_income_parent": 13358000.0,
-            "eps": 1.53,
+            "eps": 0.48,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.53,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -195153,9 +195367,11 @@
             "gross_margin_pct": 25.57,
             "op_margin_pct": 8.1,
             "net_income_parent": 27396000.0,
-            "eps": 2.02,
+            "eps": 0.98,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.02,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -195175,9 +195391,11 @@
             "gross_margin_pct": 18.08,
             "op_margin_pct": -2.13,
             "net_income_parent": -28815000.0,
-            "eps": 0.01,
+            "eps": -1.03,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.01,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -195197,9 +195415,11 @@
             "gross_margin_pct": 18.89,
             "op_margin_pct": -7.22,
             "net_income_parent": -48807000.0,
-            "eps": -3.32,
+            "eps": -1.62,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -3.32,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -195526,9 +195746,11 @@
             "gross_margin_pct": 30.71,
             "op_margin_pct": 8.38,
             "net_income_parent": 25634000.0,
-            "eps": 3.07,
+            "eps": 1.13,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 3.07,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -195859,9 +196081,11 @@
             "gross_margin_pct": 27.95,
             "op_margin_pct": 13.96,
             "net_income_parent": 21746000.0,
-            "eps": 1.65,
+            "eps": 0.86,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.65,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -195881,9 +196105,11 @@
             "gross_margin_pct": 21.09,
             "op_margin_pct": 5.3,
             "net_income_parent": 22473000.0,
-            "eps": 2.85,
+            "eps": 0.89,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.85,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -195903,9 +196129,11 @@
             "gross_margin_pct": 22.47,
             "op_margin_pct": 8.47,
             "net_income_parent": 17792000.0,
-            "eps": 1.28,
+            "eps": 0.7,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.28,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -195925,9 +196153,11 @@
             "gross_margin_pct": 25.4,
             "op_margin_pct": 9.31,
             "net_income_parent": 17590000.0,
-            "eps": 2.87,
+            "eps": 0.7,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.87,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -195954,9 +196184,11 @@
             "gross_margin_pct": 21.05,
             "op_margin_pct": -11.91,
             "net_income_parent": -43136000.0,
-            "eps": -1.63,
+            "eps": -0.92,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.63,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -195976,9 +196208,11 @@
             "gross_margin_pct": 20.52,
             "op_margin_pct": -14.69,
             "net_income_parent": -33776000.0,
-            "eps": -1.18,
+            "eps": -0.69,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.18,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -195998,9 +196232,11 @@
             "gross_margin_pct": 26.96,
             "op_margin_pct": -6.8,
             "net_income_parent": -33855000.0,
-            "eps": -0.82,
+            "eps": -0.49,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.82,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -206889,9 +207125,11 @@
             "gross_margin_pct": 14.75,
             "op_margin_pct": 5.97,
             "net_income_parent": 114375000.0,
-            "eps": 11.94,
+            "eps": 5.71,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 11.94,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2025,
@@ -218738,9 +218976,11 @@
             "gross_margin_pct": 1.79,
             "op_margin_pct": -9.7,
             "net_income_parent": 304267000.0,
-            "eps": 2.62,
+            "eps": 3.82,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.62,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -218760,9 +219000,11 @@
             "gross_margin_pct": 12.11,
             "op_margin_pct": -0.5,
             "net_income_parent": -5524000.0,
-            "eps": 0.29,
+            "eps": -0.07,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.29,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -218804,9 +219046,11 @@
             "gross_margin_pct": 14.98,
             "op_margin_pct": 3.95,
             "net_income_parent": 59846000.0,
-            "eps": 1.33,
+            "eps": 0.79,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.33,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -221262,9 +221506,11 @@
             "gross_margin_pct": 20.89,
             "op_margin_pct": 5.57,
             "net_income_parent": 72997000.0,
-            "eps": 2.62,
+            "eps": 1.57,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.62,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2025,
@@ -223024,9 +223270,11 @@
             "gross_margin_pct": 9.76,
             "op_margin_pct": 7.59,
             "net_income_parent": 22334000.0,
-            "eps": 1.37,
+            "eps": 0.89,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.37,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -223046,9 +223294,11 @@
             "gross_margin_pct": 12.78,
             "op_margin_pct": 6.7,
             "net_income_parent": 23815000.0,
-            "eps": 1.52,
+            "eps": 0.71,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.52,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -223068,9 +223318,11 @@
             "gross_margin_pct": 12.61,
             "op_margin_pct": 6.79,
             "net_income_parent": 23219000.0,
-            "eps": 1.28,
+            "eps": 0.69,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.28,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -223090,9 +223342,11 @@
             "gross_margin_pct": 12.25,
             "op_margin_pct": 7.01,
             "net_income_parent": 25787000.0,
-            "eps": 1.49,
+            "eps": 0.78,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.49,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -223693,9 +223947,11 @@
             "gross_margin_pct": 64.96,
             "op_margin_pct": -7.01,
             "net_income_parent": -2270000.0,
-            "eps": -0.64,
+            "eps": -0.08,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.64,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -223715,9 +223971,11 @@
             "gross_margin_pct": 65.79,
             "op_margin_pct": 25.66,
             "net_income_parent": 14057000.0,
-            "eps": 1.02,
+            "eps": 0.54,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.02,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -223737,9 +223995,11 @@
             "gross_margin_pct": 58.22,
             "op_margin_pct": 24.22,
             "net_income_parent": 10357000.0,
-            "eps": 0.87,
+            "eps": 0.39,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.87,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -223759,9 +224019,11 @@
             "gross_margin_pct": 60.13,
             "op_margin_pct": 11.72,
             "net_income_parent": 6112000.0,
-            "eps": 0.75,
+            "eps": 0.24,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.75,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -223933,9 +224195,11 @@
             "gross_margin_pct": 56.45,
             "op_margin_pct": 23.49,
             "net_income_parent": 168205000.0,
-            "eps": 5.14,
+            "eps": 2.84,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 5.14,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -223955,9 +224219,11 @@
             "gross_margin_pct": 56.2,
             "op_margin_pct": 19.69,
             "net_income_parent": 133235000.0,
-            "eps": 4.69,
+            "eps": 2.18,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 4.69,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -223977,9 +224243,11 @@
             "gross_margin_pct": 48.02,
             "op_margin_pct": 3.78,
             "net_income_parent": 37631000.0,
-            "eps": 2.72,
+            "eps": 0.63,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.72,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -223999,9 +224267,11 @@
             "gross_margin_pct": 71.76,
             "op_margin_pct": 24.2,
             "net_income_parent": 63812000.0,
-            "eps": 4.93,
+            "eps": 3.57,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 4.93,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null,
@@ -224174,9 +224444,11 @@
             "gross_margin_pct": 29.59,
             "op_margin_pct": 5.68,
             "net_income_parent": 8439000.0,
-            "eps": 0.99,
+            "eps": 0.22,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.99,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -224218,9 +224490,11 @@
             "gross_margin_pct": 30.52,
             "op_margin_pct": 11.02,
             "net_income_parent": 25731000.0,
-            "eps": 0.88,
+            "eps": 0.57,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.88,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -224240,9 +224514,11 @@
             "gross_margin_pct": 31.51,
             "op_margin_pct": 12.1,
             "net_income_parent": 44612000.0,
-            "eps": 1.81,
+            "eps": 0.84,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.81,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -224816,9 +225092,11 @@
             "gross_margin_pct": 18.31,
             "op_margin_pct": -130.82,
             "net_income_parent": -92177000.0,
-            "eps": -3.88,
+            "eps": -1.36,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -3.88,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -224838,9 +225116,11 @@
             "gross_margin_pct": -75.76,
             "op_margin_pct": -508.22,
             "net_income_parent": -146033000.0,
-            "eps": -3.4,
+            "eps": -2.22,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -3.4,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -224899,9 +225179,11 @@
             "gross_margin_pct": 64.17,
             "op_margin_pct": -5.99,
             "net_income_parent": -6801000.0,
-            "eps": -1.17,
+            "eps": -0.26,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.17,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -224943,9 +225225,11 @@
             "gross_margin_pct": 46.23,
             "op_margin_pct": 6.68,
             "net_income_parent": 18599000.0,
-            "eps": 1.0,
+            "eps": 0.68,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.0,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2026,
@@ -225587,9 +225871,11 @@
             "gross_margin_pct": 54.83,
             "op_margin_pct": -1737.64,
             "net_income_parent": -109024000.0,
-            "eps": -2.37,
+            "eps": -1.23,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -2.37,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -225609,9 +225895,11 @@
             "gross_margin_pct": 47.77,
             "op_margin_pct": -2233.57,
             "net_income_parent": -111930000.0,
-            "eps": -2.31,
+            "eps": -1.19,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -2.31,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -225631,9 +225919,11 @@
             "gross_margin_pct": 26.18,
             "op_margin_pct": -886.01,
             "net_income_parent": -67001000.0,
-            "eps": -1.26,
+            "eps": -0.61,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.26,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -225660,9 +225950,11 @@
             "gross_margin_pct": 41.76,
             "op_margin_pct": 29.5,
             "net_income_parent": 62467000.0,
-            "eps": 5.5,
+            "eps": 3.92,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 5.5,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -225682,9 +225974,11 @@
             "gross_margin_pct": 49.42,
             "op_margin_pct": 31.94,
             "net_income_parent": 37435000.0,
-            "eps": 3.93,
+            "eps": 2.35,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 3.93,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -225704,9 +225998,11 @@
             "gross_margin_pct": 42.82,
             "op_margin_pct": 12.06,
             "net_income_parent": 10040000.0,
-            "eps": 0.31,
+            "eps": 0.62,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.31,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -226275,9 +226571,11 @@
             "gross_margin_pct": -243.01,
             "op_margin_pct": -714.72,
             "net_income_parent": -34006000.0,
-            "eps": -2.18,
+            "eps": -1.2,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -2.18,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -226341,9 +226639,11 @@
             "gross_margin_pct": 56.33,
             "op_margin_pct": 14.35,
             "net_income_parent": 12724000.0,
-            "eps": 0.75,
+            "eps": 0.26,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.75,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -226654,9 +226954,11 @@
             "gross_margin_pct": 27.01,
             "op_margin_pct": 10.45,
             "net_income_parent": 36809000.0,
-            "eps": 2.76,
+            "eps": 1.76,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.76,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -226676,9 +226978,11 @@
             "gross_margin_pct": 22.97,
             "op_margin_pct": 1.02,
             "net_income_parent": -3123000.0,
-            "eps": 0.26,
+            "eps": -0.15,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.26,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -226720,9 +227024,11 @@
             "gross_margin_pct": 24.18,
             "op_margin_pct": 7.49,
             "net_income_parent": 35208000.0,
-            "eps": 2.78,
+            "eps": 1.68,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.78,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -227619,9 +227925,11 @@
             "gross_margin_pct": -84.9,
             "op_margin_pct": -469.04,
             "net_income_parent": -37115000.0,
-            "eps": -3.34,
+            "eps": -0.98,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -3.34,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -227663,9 +227971,11 @@
             "gross_margin_pct": 37.06,
             "op_margin_pct": -177.42,
             "net_income_parent": -69574000.0,
-            "eps": -2.07,
+            "eps": -1.07,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -2.07,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -227685,9 +227995,11 @@
             "gross_margin_pct": 58.73,
             "op_margin_pct": -6905.06,
             "net_income_parent": -38517000.0,
-            "eps": -0.73,
+            "eps": -0.45,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.73,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -227858,9 +228170,11 @@
             "gross_margin_pct": 28.82,
             "op_margin_pct": 25.35,
             "net_income_parent": 53652000.0,
-            "eps": 0.94,
+            "eps": 1.79,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.94,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -227902,9 +228216,11 @@
             "gross_margin_pct": -1.53,
             "op_margin_pct": -12.45,
             "net_income_parent": -21045000.0,
-            "eps": -2.44,
+            "eps": -0.52,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -2.44,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -228574,9 +228890,11 @@
             "gross_margin_pct": -34.84,
             "op_margin_pct": -54.41,
             "net_income_parent": -58582000.0,
-            "eps": -1.69,
+            "eps": -1.2,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.69,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -229742,9 +230060,11 @@
             "gross_margin_pct": 19.99,
             "op_margin_pct": -7.59,
             "net_income_parent": -14659000.0,
-            "eps": 0.03,
+            "eps": -0.56,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.03,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -229764,9 +230084,11 @@
             "gross_margin_pct": 7.26,
             "op_margin_pct": -17.25,
             "net_income_parent": -56252000.0,
-            "eps": -3.23,
+            "eps": -2.14,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -3.23,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -229933,9 +230255,11 @@
             "gross_margin_pct": 43.39,
             "op_margin_pct": 9.5,
             "net_income_parent": 26762000.0,
-            "eps": -0.26,
+            "eps": 0.56,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.26,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -229977,9 +230301,11 @@
             "gross_margin_pct": 38.63,
             "op_margin_pct": -4.48,
             "net_income_parent": -22079000.0,
-            "eps": -1.03,
+            "eps": -0.4,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.03,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "equity_parent_latest": 1022368000.0,
@@ -231388,9 +231714,11 @@
             "gross_margin_pct": 4.61,
             "op_margin_pct": 1.67,
             "net_income_parent": 38597000.0,
-            "eps": 1.13,
+            "eps": 0.82,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.13,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -231410,9 +231738,11 @@
             "gross_margin_pct": 3.56,
             "op_margin_pct": 1.25,
             "net_income_parent": 36153000.0,
-            "eps": 1.19,
+            "eps": 0.67,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.19,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -231432,9 +231762,11 @@
             "gross_margin_pct": 5.23,
             "op_margin_pct": 0.89,
             "net_income_parent": 8924000.0,
-            "eps": 0.71,
+            "eps": 0.12,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.71,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -231891,9 +232223,11 @@
             "gross_margin_pct": 9.86,
             "op_margin_pct": -0.19,
             "net_income_parent": 4224000.0,
-            "eps": -0.31,
+            "eps": 0.21,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.31,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -231913,9 +232247,11 @@
             "gross_margin_pct": 20.32,
             "op_margin_pct": 6.97,
             "net_income_parent": 18866000.0,
-            "eps": 1.33,
+            "eps": 0.89,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.33,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -231935,9 +232271,11 @@
             "gross_margin_pct": 16.13,
             "op_margin_pct": 3.69,
             "net_income_parent": 17495000.0,
-            "eps": 3.2,
+            "eps": 0.78,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 3.2,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -232365,9 +232703,11 @@
             "gross_margin_pct": 48.37,
             "op_margin_pct": 17.08,
             "net_income_parent": 31452000.0,
-            "eps": 2.13,
+            "eps": 0.98,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.13,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2025,
@@ -232514,9 +232854,11 @@
             "gross_margin_pct": 24.93,
             "op_margin_pct": -141.72,
             "net_income_parent": -23484000.0,
-            "eps": -1.4,
+            "eps": -0.45,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.4,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -232536,9 +232878,11 @@
             "gross_margin_pct": 46.37,
             "op_margin_pct": -66.71,
             "net_income_parent": -17371000.0,
-            "eps": -0.09,
+            "eps": -0.32,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.09,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -232558,9 +232902,11 @@
             "gross_margin_pct": 12.54,
             "op_margin_pct": -300.72,
             "net_income_parent": -28900000.0,
-            "eps": -1.15,
+            "eps": -0.52,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.15,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -232580,9 +232926,11 @@
             "gross_margin_pct": 42.49,
             "op_margin_pct": -148.27,
             "net_income_parent": -18563000.0,
-            "eps": -2.05,
+            "eps": -0.76,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -2.05,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -232763,9 +233111,11 @@
             "gross_margin_pct": 20.07,
             "op_margin_pct": 7.86,
             "net_income_parent": 131168000.0,
-            "eps": 4.6,
+            "eps": 2.19,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 4.6,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -232785,9 +233135,11 @@
             "gross_margin_pct": 24.01,
             "op_margin_pct": 10.86,
             "net_income_parent": 162887000.0,
-            "eps": 3.67,
+            "eps": 2.71,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 3.67,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -233052,9 +233404,11 @@
             "gross_margin_pct": 42.48,
             "op_margin_pct": 6.05,
             "net_income_parent": 6798000.0,
-            "eps": 1.08,
+            "eps": 0.44,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.08,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null,
@@ -233162,9 +233516,11 @@
             "gross_margin_pct": 13.37,
             "op_margin_pct": 5.65,
             "net_income_parent": 38721000.0,
-            "eps": 3.2,
+            "eps": 1.3,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 3.2,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -233184,9 +233540,11 @@
             "gross_margin_pct": 9.73,
             "op_margin_pct": 4.38,
             "net_income_parent": 34934000.0,
-            "eps": 1.83,
+            "eps": 1.05,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.83,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -233206,9 +233564,11 @@
             "gross_margin_pct": 13.1,
             "op_margin_pct": 5.87,
             "net_income_parent": 34142000.0,
-            "eps": 1.63,
+            "eps": 1.03,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.63,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -233228,9 +233588,11 @@
             "gross_margin_pct": 14.03,
             "op_margin_pct": 6.92,
             "net_income_parent": 64684000.0,
-            "eps": 3.61,
+            "eps": 1.88,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 3.61,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null,
@@ -233407,9 +233769,11 @@
             "gross_margin_pct": 17.65,
             "op_margin_pct": -5.03,
             "net_income_parent": -69325000.0,
-            "eps": 0.82,
+            "eps": -2.03,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.82,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -233429,9 +233793,11 @@
             "gross_margin_pct": 17.25,
             "op_margin_pct": -1.81,
             "net_income_parent": -4053000.0,
-            "eps": 1.75,
+            "eps": -0.2,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.75,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -233451,9 +233817,11 @@
             "gross_margin_pct": 16.14,
             "op_margin_pct": -2.07,
             "net_income_parent": -34474000.0,
-            "eps": -1.64,
+            "eps": -0.9,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.64,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -233503,9 +233871,11 @@
             "gross_margin_pct": 73.78,
             "op_margin_pct": 9.45,
             "net_income_parent": 14822000.0,
-            "eps": 1.32,
+            "eps": 1.1,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.32,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -234272,9 +234642,11 @@
             "gross_margin_pct": 1.39,
             "op_margin_pct": -16.54,
             "net_income_parent": -113040000.0,
-            "eps": -2.37,
+            "eps": -1.43,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -2.37,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -234316,9 +234688,11 @@
             "gross_margin_pct": 18.32,
             "op_margin_pct": 4.3,
             "net_income_parent": 78411000.0,
-            "eps": 0.05,
+            "eps": 0.8,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.05,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null,
@@ -234368,9 +234742,11 @@
             "gross_margin_pct": 86.76,
             "op_margin_pct": 5.93,
             "net_income_parent": 10340000.0,
-            "eps": 1.3,
+            "eps": 0.63,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.3,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -234390,9 +234766,11 @@
             "gross_margin_pct": 86.13,
             "op_margin_pct": -6.34,
             "net_income_parent": -9247000.0,
-            "eps": 0.01,
+            "eps": -0.56,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.01,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -234441,9 +234819,11 @@
             "gross_margin_pct": 15.8,
             "op_margin_pct": -3.92,
             "net_income_parent": -4036000.0,
-            "eps": 0.2,
+            "eps": -0.21,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.2,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -234952,9 +235332,11 @@
             "gross_margin_pct": 22.98,
             "op_margin_pct": 7.62,
             "net_income_parent": 30108000.0,
-            "eps": 1.19,
+            "eps": 0.43,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.19,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -234974,9 +235356,11 @@
             "gross_margin_pct": 17.2,
             "op_margin_pct": -0.11,
             "net_income_parent": -165825000.0,
-            "eps": -0.76,
+            "eps": -2.2,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.76,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -235021,9 +235405,11 @@
             "gross_margin_pct": 7.02,
             "op_margin_pct": -50.65,
             "net_income_parent": -80558000.0,
-            "eps": 10.81,
+            "eps": -2.69,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 10.81,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -235043,9 +235429,11 @@
             "gross_margin_pct": -20.07,
             "op_margin_pct": -120.57,
             "net_income_parent": -129299000.0,
-            "eps": -6.83,
+            "eps": -4.24,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -6.83,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -235065,9 +235453,11 @@
             "gross_margin_pct": -0.89,
             "op_margin_pct": -82.05,
             "net_income_parent": -81374000.0,
-            "eps": -6.2,
+            "eps": -2.65,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -6.2,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -235889,9 +236279,11 @@
             "gross_margin_pct": 25.04,
             "op_margin_pct": 10.55,
             "net_income_parent": 17160000.0,
-            "eps": 1.0,
+            "eps": 1.35,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.0,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -235911,9 +236303,11 @@
             "gross_margin_pct": 22.25,
             "op_margin_pct": 8.48,
             "net_income_parent": 12781000.0,
-            "eps": 0.04,
+            "eps": 1.0,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.04,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -236079,9 +236473,11 @@
             "gross_margin_pct": 50.88,
             "op_margin_pct": 21.97,
             "net_income_parent": 46250000.0,
-            "eps": 1.96,
+            "eps": 2.17,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.96,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -236174,9 +236570,11 @@
             "gross_margin_pct": 40.13,
             "op_margin_pct": 16.68,
             "net_income_parent": 30297000.0,
-            "eps": 5.04,
+            "eps": 1.64,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 5.04,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -236196,9 +236594,11 @@
             "gross_margin_pct": 45.66,
             "op_margin_pct": 25.49,
             "net_income_parent": 69151000.0,
-            "eps": 6.04,
+            "eps": 3.75,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 6.04,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -236218,9 +236618,11 @@
             "gross_margin_pct": 49.54,
             "op_margin_pct": 29.06,
             "net_income_parent": 85972000.0,
-            "eps": 8.62,
+            "eps": 4.67,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 8.62,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -236240,9 +236642,11 @@
             "gross_margin_pct": 44.55,
             "op_margin_pct": 22.25,
             "net_income_parent": 67742000.0,
-            "eps": 7.15,
+            "eps": 3.68,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 7.15,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -236313,9 +236717,11 @@
             "gross_margin_pct": 34.76,
             "op_margin_pct": 5.99,
             "net_income_parent": 19052000.0,
-            "eps": 0.55,
+            "eps": 0.75,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.55,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -236335,9 +236741,11 @@
             "gross_margin_pct": 34.67,
             "op_margin_pct": 9.33,
             "net_income_parent": 58952000.0,
-            "eps": 4.14,
+            "eps": 2.33,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 4.14,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -236364,9 +236772,11 @@
             "gross_margin_pct": -3.79,
             "op_margin_pct": -52.62,
             "net_income_parent": -102363000.0,
-            "eps": -2.84,
+            "eps": -3.5,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -2.84,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -236386,9 +236796,11 @@
             "gross_margin_pct": -16.62,
             "op_margin_pct": -88.54,
             "net_income_parent": -81082000.0,
-            "eps": -4.88,
+            "eps": -2.8,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -4.88,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -236430,9 +236842,11 @@
             "gross_margin_pct": 44.35,
             "op_margin_pct": -8.43,
             "net_income_parent": -11047000.0,
-            "eps": 0.18,
+            "eps": -0.4,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.18,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -236459,9 +236873,11 @@
             "gross_margin_pct": 20.25,
             "op_margin_pct": 1.38,
             "net_income_parent": 4056000.0,
-            "eps": 0.79,
+            "eps": 0.19,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.79,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -236481,9 +236897,11 @@
             "gross_margin_pct": 28.04,
             "op_margin_pct": 5.74,
             "net_income_parent": 25370000.0,
-            "eps": 2.38,
+            "eps": 1.17,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.38,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -236503,9 +236921,11 @@
             "gross_margin_pct": 26.84,
             "op_margin_pct": -0.4,
             "net_income_parent": -943000.0,
-            "eps": 0.64,
+            "eps": -0.05,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.64,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -236525,9 +236945,11 @@
             "gross_margin_pct": 37.5,
             "op_margin_pct": 15.25,
             "net_income_parent": 68643000.0,
-            "eps": 3.74,
+            "eps": 3.14,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 3.74,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -236862,9 +237284,11 @@
             "gross_margin_pct": 17.59,
             "op_margin_pct": 11.53,
             "net_income_parent": 706265000.0,
-            "eps": 15.43,
+            "eps": 11.61,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 15.43,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -236884,9 +237308,11 @@
             "gross_margin_pct": 16.8,
             "op_margin_pct": 9.82,
             "net_income_parent": 642607000.0,
-            "eps": 21.05,
+            "eps": 10.57,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 21.05,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -236906,9 +237332,11 @@
             "gross_margin_pct": 22.3,
             "op_margin_pct": 14.39,
             "net_income_parent": 988625000.0,
-            "eps": 28.11,
+            "eps": 15.98,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 28.11,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -237117,9 +237545,11 @@
             "gross_margin_pct": 34.81,
             "op_margin_pct": 16.99,
             "net_income_parent": 121523000.0,
-            "eps": 6.87,
+            "eps": 3.47,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 6.87,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -237139,9 +237569,11 @@
             "gross_margin_pct": 33.26,
             "op_margin_pct": 3.4,
             "net_income_parent": 36232000.0,
-            "eps": 3.3,
+            "eps": 0.87,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 3.3,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -237161,9 +237593,11 @@
             "gross_margin_pct": 11.15,
             "op_margin_pct": -11.19,
             "net_income_parent": -62463000.0,
-            "eps": -14.97,
+            "eps": -1.08,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -14.97,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -237234,9 +237668,11 @@
             "gross_margin_pct": 13.18,
             "op_margin_pct": 2.45,
             "net_income_parent": 47432000.0,
-            "eps": 1.77,
+            "eps": 0.61,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.77,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -237256,9 +237692,11 @@
             "gross_margin_pct": 20.29,
             "op_margin_pct": 5.92,
             "net_income_parent": 74268000.0,
-            "eps": 1.42,
+            "eps": 0.94,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.42,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -237619,9 +238057,11 @@
             "gross_margin_pct": 22.0,
             "op_margin_pct": 5.68,
             "net_income_parent": 24740000.0,
-            "eps": 1.67,
+            "eps": 1.23,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.67,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -237663,9 +238103,11 @@
             "gross_margin_pct": 24.88,
             "op_margin_pct": -1.87,
             "net_income_parent": 9383000.0,
-            "eps": 0.63,
+            "eps": 0.41,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.63,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -237927,9 +238369,11 @@
             "gross_margin_pct": 40.73,
             "op_margin_pct": 10.69,
             "net_income_parent": 4781000.0,
-            "eps": 2.67,
+            "eps": 0.29,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.67,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -237949,9 +238393,11 @@
             "gross_margin_pct": 37.84,
             "op_margin_pct": -5.25,
             "net_income_parent": -4736000.0,
-            "eps": 0.29,
+            "eps": -0.37,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.29,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -238022,9 +238468,11 @@
             "gross_margin_pct": 62.27,
             "op_margin_pct": 29.45,
             "net_income_parent": 34125000.0,
-            "eps": 2.23,
+            "eps": 1.62,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.23,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -238462,9 +238910,11 @@
             "gross_margin_pct": 58.41,
             "op_margin_pct": -66.14,
             "net_income_parent": -15178000.0,
-            "eps": -1.8,
+            "eps": -1.0,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.8,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -238491,9 +238941,11 @@
             "gross_margin_pct": 56.79,
             "op_margin_pct": 25.26,
             "net_income_parent": 73400000.0,
-            "eps": 10.5,
+            "eps": 2.67,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 10.5,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -238513,9 +238965,11 @@
             "gross_margin_pct": 41.23,
             "op_margin_pct": -16.65,
             "net_income_parent": -11232000.0,
-            "eps": -0.95,
+            "eps": -0.42,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.95,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -238535,9 +238989,11 @@
             "gross_margin_pct": 51.53,
             "op_margin_pct": -8.84,
             "net_income_parent": -33986000.0,
-            "eps": -2.37,
+            "eps": -1.25,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -2.37,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -238557,9 +239013,11 @@
             "gross_margin_pct": 47.23,
             "op_margin_pct": 2.08,
             "net_income_parent": -7679000.0,
-            "eps": -1.85,
+            "eps": -0.28,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.85,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -239405,9 +239863,11 @@
             "gross_margin_pct": 52.56,
             "op_margin_pct": 25.71,
             "net_income_parent": 64550000.0,
-            "eps": 4.84,
+            "eps": 3.33,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 4.84,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -239449,9 +239909,11 @@
             "gross_margin_pct": 52.64,
             "op_margin_pct": 2.28,
             "net_income_parent": 3793000.0,
-            "eps": 0.44,
+            "eps": 0.14,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.44,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -239471,9 +239933,11 @@
             "gross_margin_pct": 60.81,
             "op_margin_pct": 25.59,
             "net_income_parent": 32706000.0,
-            "eps": 2.13,
+            "eps": 1.24,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.13,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -239639,9 +240103,11 @@
             "gross_margin_pct": 89.05,
             "op_margin_pct": 17.88,
             "net_income_parent": 30213000.0,
-            "eps": 2.61,
+            "eps": 1.4,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.61,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -239661,9 +240127,11 @@
             "gross_margin_pct": 86.29,
             "op_margin_pct": 12.09,
             "net_income_parent": 25018000.0,
-            "eps": 2.17,
+            "eps": 1.09,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.17,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -239683,9 +240151,11 @@
             "gross_margin_pct": 90.16,
             "op_margin_pct": 13.49,
             "net_income_parent": 22486000.0,
-            "eps": 1.23,
+            "eps": 0.98,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.23,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -239894,9 +240364,11 @@
             "gross_margin_pct": 55.19,
             "op_margin_pct": 26.16,
             "net_income_parent": 40614000.0,
-            "eps": 3.63,
+            "eps": 1.63,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 3.63,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -239916,9 +240388,11 @@
             "gross_margin_pct": 49.99,
             "op_margin_pct": 13.29,
             "net_income_parent": 20587000.0,
-            "eps": 1.0,
+            "eps": 0.75,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.0,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -239938,9 +240412,11 @@
             "gross_margin_pct": 47.93,
             "op_margin_pct": 17.34,
             "net_income_parent": 31234000.0,
-            "eps": 1.8,
+            "eps": 1.04,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.8,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "equity_parent_latest": 513794000.0,
@@ -240402,9 +240878,11 @@
             "gross_margin_pct": 21.73,
             "op_margin_pct": 12.78,
             "net_income_parent": 51538000.0,
-            "eps": 7.17,
+            "eps": 2.75,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 7.17,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -241130,9 +241608,11 @@
             "gross_margin_pct": 33.08,
             "op_margin_pct": 17.29,
             "net_income_parent": 16322000.0,
-            "eps": 2.21,
+            "eps": 0.82,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.21,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -241152,9 +241632,11 @@
             "gross_margin_pct": 33.34,
             "op_margin_pct": 13.05,
             "net_income_parent": 22092000.0,
-            "eps": 2.74,
+            "eps": 1.1,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.74,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2025,
@@ -241502,9 +241984,11 @@
             "gross_margin_pct": -5.43,
             "op_margin_pct": -39893.8,
             "net_income_parent": -45930000.0,
-            "eps": -1.75,
+            "eps": -1.03,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.75,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -242142,9 +242626,11 @@
             "gross_margin_pct": 19.89,
             "op_margin_pct": -39.77,
             "net_income_parent": -19563000.0,
-            "eps": -1.11,
+            "eps": -0.56,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.11,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -242524,9 +243010,11 @@
             "gross_margin_pct": 26.63,
             "op_margin_pct": -0.33,
             "net_income_parent": 33338000.0,
-            "eps": 2.69,
+            "eps": 1.0,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.69,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -242546,9 +243034,11 @@
             "gross_margin_pct": 8.19,
             "op_margin_pct": -16.7,
             "net_income_parent": -33523000.0,
-            "eps": -1.25,
+            "eps": -0.99,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.25,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -243019,9 +243509,11 @@
             "gross_margin_pct": 54.31,
             "op_margin_pct": -385958.62,
             "net_income_parent": -315290000.0,
-            "eps": -0.87,
+            "eps": -0.55,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.87,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -243057,9 +243549,11 @@
             "gross_margin_pct": 13.73,
             "op_margin_pct": 3.38,
             "net_income_parent": 15360000.0,
-            "eps": 1.87,
+            "eps": 1.18,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.87,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -243079,9 +243573,11 @@
             "gross_margin_pct": 16.89,
             "op_margin_pct": 5.77,
             "net_income_parent": 24102000.0,
-            "eps": 0.7,
+            "eps": 1.77,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.7,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null,
@@ -243438,9 +243934,11 @@
             "gross_margin_pct": 27.2,
             "op_margin_pct": -5.4,
             "net_income_parent": -4046000.0,
-            "eps": -1.41,
+            "eps": -0.24,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.41,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "equity_parent_latest": 121651000.0,
@@ -243641,9 +244139,11 @@
             "gross_margin_pct": 6.61,
             "op_margin_pct": -1.84,
             "net_income_parent": -20632000.0,
-            "eps": 0.23,
+            "eps": -0.32,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.23,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -244002,9 +244502,11 @@
             "gross_margin_pct": 9.36,
             "op_margin_pct": -4.83,
             "net_income_parent": -6350000.0,
-            "eps": -0.73,
+            "eps": -0.29,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.73,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -244024,9 +244526,11 @@
             "gross_margin_pct": 17.28,
             "op_margin_pct": -2.05,
             "net_income_parent": -2004000.0,
-            "eps": 0.13,
+            "eps": -0.09,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.13,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -244068,9 +244572,11 @@
             "gross_margin_pct": 19.91,
             "op_margin_pct": 5.04,
             "net_income_parent": 11516000.0,
-            "eps": 0.89,
+            "eps": 0.53,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.89,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -244141,9 +244647,11 @@
             "gross_margin_pct": 28.16,
             "op_margin_pct": 21.3,
             "net_income_parent": 41994000.0,
-            "eps": 1.2,
+            "eps": 0.42,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.2,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -244163,9 +244671,11 @@
             "gross_margin_pct": 14.12,
             "op_margin_pct": -24.85,
             "net_income_parent": -27573000.0,
-            "eps": -0.07,
+            "eps": -0.27,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.07,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -244192,9 +244702,11 @@
             "gross_margin_pct": 38.37,
             "op_margin_pct": 4.9,
             "net_income_parent": 6781000.0,
-            "eps": 0.53,
+            "eps": 0.23,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.53,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -244214,9 +244726,11 @@
             "gross_margin_pct": 29.41,
             "op_margin_pct": -39.98,
             "net_income_parent": -45235000.0,
-            "eps": -2.21,
+            "eps": -1.44,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -2.21,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -244258,9 +244772,11 @@
             "gross_margin_pct": 21.3,
             "op_margin_pct": -37.26,
             "net_income_parent": -41386000.0,
-            "eps": -2.02,
+            "eps": -1.29,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -2.02,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "equity_parent_latest": 424747000.0,
@@ -244863,9 +245379,11 @@
             "gross_margin_pct": 46.38,
             "op_margin_pct": -0.87,
             "net_income_parent": -605000.0,
-            "eps": -0.27,
+            "eps": -0.02,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.27,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -244907,9 +245425,11 @@
             "gross_margin_pct": 40.3,
             "op_margin_pct": -9.39,
             "net_income_parent": -5535000.0,
-            "eps": -0.38,
+            "eps": -0.18,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.38,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -244929,9 +245449,11 @@
             "gross_margin_pct": 43.85,
             "op_margin_pct": 10.37,
             "net_income_parent": 11267000.0,
-            "eps": 0.03,
+            "eps": 0.37,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.03,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -245192,9 +245714,11 @@
             "gross_margin_pct": 25.72,
             "op_margin_pct": 1.55,
             "net_income_parent": 14878000.0,
-            "eps": 0.61,
+            "eps": 0.14,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.61,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -245214,9 +245738,11 @@
             "gross_margin_pct": 23.97,
             "op_margin_pct": 1.7,
             "net_income_parent": -26110000.0,
-            "eps": 0.01,
+            "eps": -0.26,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 0.01,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -245243,9 +245769,11 @@
             "gross_margin_pct": 39.1,
             "op_margin_pct": -19.34,
             "net_income_parent": -14407000.0,
-            "eps": -0.54,
+            "eps": -0.33,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.54,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -245265,9 +245793,11 @@
             "gross_margin_pct": 37.15,
             "op_margin_pct": -26.29,
             "net_income_parent": -19790000.0,
-            "eps": -0.98,
+            "eps": -0.45,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.98,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -245287,9 +245817,11 @@
             "gross_margin_pct": 29.95,
             "op_margin_pct": -39.22,
             "net_income_parent": -43976000.0,
-            "eps": -1.6,
+            "eps": -0.95,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.6,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -245573,9 +246105,11 @@
             "gross_margin_pct": 44.8,
             "op_margin_pct": 27.44,
             "net_income_parent": 76054000.0,
-            "eps": 5.27,
+            "eps": 2.81,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 5.27,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2025,
@@ -249625,9 +250159,11 @@
             "gross_margin_pct": 47.86,
             "op_margin_pct": 23.56,
             "net_income_parent": 66012000.0,
-            "eps": 5.5,
+            "eps": 3.09,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 5.5,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2025,
@@ -250064,9 +250600,11 @@
             "gross_margin_pct": 25.23,
             "op_margin_pct": 9.33,
             "net_income_parent": 93407000.0,
-            "eps": 2.06,
+            "eps": 1.47,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.06,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -250086,9 +250624,11 @@
             "gross_margin_pct": 24.57,
             "op_margin_pct": 0.1,
             "net_income_parent": 27192000.0,
-            "eps": 1.39,
+            "eps": 0.42,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.39,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -250108,9 +250648,11 @@
             "gross_margin_pct": 19.36,
             "op_margin_pct": -39.97,
             "net_income_parent": -96079000.0,
-            "eps": -2.6,
+            "eps": -1.51,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -2.6,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -250130,9 +250672,11 @@
             "gross_margin_pct": 26.06,
             "op_margin_pct": -11.34,
             "net_income_parent": -11619000.0,
-            "eps": -1.05,
+            "eps": -0.18,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.05,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -252892,9 +253436,11 @@
             "gross_margin_pct": 44.73,
             "op_margin_pct": 0.3,
             "net_income_parent": 18861000.0,
-            "eps": 1.85,
+            "eps": 0.19,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.85,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -252914,9 +253460,11 @@
             "gross_margin_pct": 58.21,
             "op_margin_pct": 23.63,
             "net_income_parent": 448617000.0,
-            "eps": 6.71,
+            "eps": 4.45,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 6.71,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -252936,9 +253484,11 @@
             "gross_margin_pct": 55.95,
             "op_margin_pct": 25.08,
             "net_income_parent": 413094000.0,
-            "eps": 9.52,
+            "eps": 4.1,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 9.52,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -252958,9 +253508,11 @@
             "gross_margin_pct": 54.14,
             "op_margin_pct": 19.64,
             "net_income_parent": 383314000.0,
-            "eps": 8.86,
+            "eps": 3.8,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 8.86,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null,
@@ -255930,9 +256482,11 @@
             "gross_margin_pct": 26.47,
             "op_margin_pct": -25.98,
             "net_income_parent": -23919000.0,
-            "eps": -3.09,
+            "eps": -2.08,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -3.09,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -258607,9 +259161,11 @@
             "gross_margin_pct": 15.01,
             "op_margin_pct": 11.62,
             "net_income_parent": 3707669000.0,
-            "eps": 2.07,
+            "eps": 1.42,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.07,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2022,
@@ -258629,9 +259185,11 @@
             "gross_margin_pct": -1.64,
             "op_margin_pct": -5.15,
             "net_income_parent": -1704506000.0,
-            "eps": -0.2,
+            "eps": -0.65,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.2,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -258651,9 +259209,11 @@
             "gross_margin_pct": -10.76,
             "op_margin_pct": -14.27,
             "net_income_parent": -2638223000.0,
-            "eps": -1.29,
+            "eps": -1.0,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.29,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -258673,9 +259233,11 @@
             "gross_margin_pct": -3.09,
             "op_margin_pct": -7.01,
             "net_income_parent": -1958262000.0,
-            "eps": -1.18,
+            "eps": -0.75,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -1.18,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null,
@@ -276550,9 +277112,11 @@
             "gross_margin_pct": 34.01,
             "op_margin_pct": 26.91,
             "net_income_parent": 380271000.0,
-            "eps": 18.68,
+            "eps": 11.53,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 18.68,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2025,
@@ -278449,9 +279013,11 @@
             "gross_margin_pct": 51.73,
             "op_margin_pct": 74.69,
             "net_income_parent": 122076000.0,
-            "eps": 9.51,
+            "eps": 4.91,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 9.51,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2025,
@@ -303368,9 +303934,11 @@
             "gross_margin_pct": 27.3,
             "op_margin_pct": 11.04,
             "net_income_parent": 75357000.0,
-            "eps": 1.84,
+            "eps": 1.25,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.84,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2023,
@@ -303390,9 +303958,11 @@
             "gross_margin_pct": 27.73,
             "op_margin_pct": 8.79,
             "net_income_parent": 53203000.0,
-            "eps": 1.23,
+            "eps": 0.88,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.23,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -303412,9 +303982,11 @@
             "gross_margin_pct": 25.83,
             "op_margin_pct": 5.52,
             "net_income_parent": 38222000.0,
-            "eps": 1.13,
+            "eps": 0.64,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.13,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "equity_parent_latest": 1081150000.0,
@@ -303496,9 +304068,11 @@
             "gross_margin_pct": 46.52,
             "op_margin_pct": -5253.56,
             "net_income_parent": -112249000.0,
-            "eps": -0.99,
+            "eps": -0.52,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -0.99,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "equity_parent_latest": 2748710000.0,
@@ -303745,9 +304319,11 @@
             "gross_margin_pct": 48.2,
             "op_margin_pct": 17.66,
             "net_income_parent": 357545000.0,
-            "eps": 6.71,
+            "eps": 3.48,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 6.71,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -304561,9 +305137,11 @@
             "gross_margin_pct": 26.8,
             "op_margin_pct": -89.99,
             "net_income_parent": -88007000.0,
-            "eps": -5.76,
+            "eps": -2.83,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -5.76,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -304583,9 +305161,11 @@
             "gross_margin_pct": 43.73,
             "op_margin_pct": -72.9,
             "net_income_parent": -64972000.0,
-            "eps": -4.28,
+            "eps": -1.88,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": -4.28,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null
@@ -304760,9 +305340,11 @@
             "gross_margin_pct": 28.71,
             "op_margin_pct": 7.63,
             "net_income_parent": 16187000.0,
-            "eps": 1.66,
+            "eps": 0.84,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.66,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null,
@@ -304799,9 +305381,11 @@
             "gross_margin_pct": 24.57,
             "op_margin_pct": 1.92,
             "net_income_parent": 8873000.0,
-            "eps": 1.29,
+            "eps": 0.38,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 1.29,
+            "eps_basis": "annual_minus_h1"
           },
           {
             "year": 2024,
@@ -304821,9 +305405,11 @@
             "gross_margin_pct": 35.31,
             "op_margin_pct": 9.92,
             "net_income_parent": 28292000.0,
-            "eps": 2.76,
+            "eps": 1.26,
             "period": "H2",
-            "period_basis": "q2_q4_pair"
+            "period_basis": "q2_q4_pair",
+            "eps_annual_cum": 2.76,
+            "eps_basis": "annual_minus_h1"
           }
         ],
         "roe_ttm_pct": null

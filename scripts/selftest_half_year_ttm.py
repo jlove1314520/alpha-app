@@ -2,7 +2,7 @@
 零外部請求：只讀本機 data/stock_detail.json（記憶體內標記，不寫回）。
 檢查：① 2249 標記後 TTM＝4.95＋4.01＋1.33（App 與稽核兩邊）② 一般連續四季（2330）結果與改版前相同
 ③ 沒有 period 標記時照舊回 null（不靠結構猜）。
-先.一三五-1me 追加：④ 仍是半年報、今年只有 Q2（2758 型）→ TTM＝去年 H2＋今年 H1（2758＝2.29＋0.33，證據 prior_year_half）
+先.一三五-1me 追加：④ 仍是半年報、今年只有 Q2（2758 型）→ TTM＝去年 H2＋今年 H1（2758＝1.25＋0.33；1.25＝全年 2.29−上半年 1.04，先.一三五-1ms，證據 prior_year_half）
 ⑤ 2760／6565／6812／7752／6911 以月營收證明（period_basis=month_revenue）⑥ 月營收對不上（改成單季量級）就不標。"""
 import copy, importlib.util, json, subprocess, sys
 from pathlib import Path
@@ -72,7 +72,8 @@ ok(res["2249"] and abs(res["2249"]["eps"] - (4.95 + 4.01 + 1.33)) < 1e-9 and res
 ok(res["6898"] and abs(res["6898"]["eps"] - (2.64 + 1.27 + 1.53)) < 1e-9, "App 6898 TTM＝2.64＋1.27＋1.53")
 q2330 = raw["2330"]["financials"]["quarters"][-4:]
 ok(res["2330"] and abs(res["2330"]["eps"] - sum(q["eps"] for q in q2330)) < 1e-9, "App 2330 連續四季結果不變")
-ok(res["2758"] and abs(res["2758"]["eps"] - (2.29 + 0.33)) < 1e-9 and res["2758"]["label"] == "2025下半年~2026上半年", "App 2758 TTM＝2.29＋0.33")
+ok(res["2758"] and abs(res["2758"]["eps"] - (1.25 + 0.33)) < 1e-9 and res["2758"]["label"] == "2025下半年~2026上半年", "App 2758 TTM＝1.25＋0.33")
+# 先.一三五-1ms：2025 H2 原存全年累計 2.29，已改成全年−上半年＝2.29−1.04＝1.25（fix_h2_cumulative_eps），期望值跟著改
 ok(res["2758_untagged"] is None, "App 2758 沒有 period 標記照舊 null")
 ok(abs(res["6911"]["eps"] - (0.39 + 0.43)) < 1e-9, "App 6911 TTM＝0.39＋0.43")
 for c in ME:

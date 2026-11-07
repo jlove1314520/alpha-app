@@ -928,6 +928,50 @@ def tag_half_year_periods(stocks: dict, month_rev: dict | None = None) -> dict:
     return stats
 
 
+H2_EPS_TOL_ABS = 0.05   # EPS 只存到小數 2 位，絕對誤差下限
+H2_EPS_TOL_REL = 0.08   # 相對誤差上限
+H2_EPS_MIN_H1 = 0.2     # 上半年 |EPS| 太小時推得的股數不可靠，不判定
+
+
+def fix_h2_cumulative_eps(stocks: dict) -> dict:
+    """先.一三五-1ms（2026-11-07）：半年報公司的 H2（Q4）列，歸母淨利是下半年單期，但 EPS 多半是全年累計
+    （stock_detail 實測 429 列可判定者，289 列對得上全年累計、39 列對得上下半年單期）。近四季 EPS 用 H2 組 TTM 時會多算半年。
+    判定（只在證據充分時才改）：同年有 H1 列，股數＝H1 歸母淨利÷H1 EPS（>0、|H1 EPS|≥0.2），
+    H2 EPS 對得上（H1＋H2 淨利）÷股數、對不上 H2 淨利÷股數 → H2 EPS 改成「全年−上半年」，原值存 eps_annual_cum、eps_basis 記
+    annual_minus_h1。對不上或無法判定一律不改。每次都重新用證據判定（已改成單期的列對不上全年累計，重跑不會重複扣）。單檔出錯只略過（十二節）。"""
+    stats = {"fixed_rows": 0, "fixed_codes": [], "left_unverifiable": 0}
+    for code, s in stocks.items():
+        try:
+            qs = [r for r in ((((s or {}).get("financials") or {}).get("quarters")) or []) if isinstance(r, dict)]
+            hit = False
+            for r in qs:
+                if r.get("period") != "H2":
+                    continue
+                h1 = next((x for x in qs if x.get("year") == r.get("year") and x.get("period") == "H1"), None)
+                vals = (h1 or {}).get("eps"), (h1 or {}).get("net_income_parent"), r.get("eps"), r.get("net_income_parent")
+                if h1 is None or any(not isinstance(v, (int, float)) for v in vals):
+                    stats["left_unverifiable"] += 1
+                    continue
+                e1, n1, e2, n2 = vals
+                if abs(e1) < H2_EPS_MIN_H1 or n1 == 0 or n1 / e1 <= 0:
+                    stats["left_unverifiable"] += 1
+                    continue
+                sh = n1 / e1
+                tol = max(H2_EPS_TOL_ABS, H2_EPS_TOL_REL * abs(e2))
+                if abs(e2 - (n1 + n2) / sh) < tol and abs(e2 - n2 / sh) > tol:
+                    r["eps_annual_cum"] = e2
+                    r["eps"] = round(e2 - e1, 2)
+                    r["eps_basis"] = "annual_minus_h1"
+                    stats["fixed_rows"] += 1
+                    hit = True
+            if hit:
+                stats["fixed_codes"].append(str(code))
+        except Exception as e:  # 單檔出錯只略過（十二節）
+            print(f"[warn] {code} H2 累計 EPS 修正失敗：{e}")
+    stats["fixed_codes"].sort()
+    return stats
+
+
 def offline_merge_backfill() -> None:
     """零外部請求：只讀既有 stock_detail.json＋financials_backfill.json，併回補季後寫回（本機重產／驗證用）。"""
     payload = load_existing()
@@ -955,6 +999,14 @@ def offline_merge_backfill() -> None:
             "generated_at": datetime.now(TW_TZ).isoformat(), "mode": "offline"}
     except Exception as e:
         print(f"[warn] 半年報標記失敗：{e}")
+    try:  # 先.一三五-1ms：H2 列 EPS 是全年累計時改成全年−上半年；自身失敗只警告（十二節）
+        _h2 = fix_h2_cumulative_eps(stocks)
+        payload["meta"]["financials_h2_eps_fix"] = {
+            "note": "H2 列 EPS 對得上全年累計、對不上下半年單期（以 H1 淨利÷EPS 推股數）時，改成全年−上半年，原值存 eps_annual_cum（先.一三五-1ms）",
+            "fixed_rows": _h2["fixed_rows"], "fixed_codes": _h2["fixed_codes"], "left_unverifiable": _h2["left_unverifiable"],
+            "generated_at": datetime.now(TW_TZ).isoformat(), "mode": "offline"}
+    except Exception as e:
+        print(f"[warn] H2 累計 EPS 修正失敗：{e}")
     try:
         payload["meta"]["roe_cleared_nonconsecutive_codes"] = clear_stale_nonconsecutive_roe(stocks)
     except Exception as e:
@@ -1092,6 +1144,15 @@ def main():
     except Exception as e:
         print(f"[warn] 半年報標記失敗：{e}")
         errors.append(f"half_year_period: {e}")
+    try:  # 先.一三五-1ms：H2 列 EPS 是全年累計時改成全年−上半年；自身失敗只警告（十二節）
+        _h2 = fix_h2_cumulative_eps(stocks)
+        payload["meta"]["financials_h2_eps_fix"] = {
+            "note": "H2 列 EPS 對得上全年累計、對不上下半年單期（以 H1 淨利÷EPS 推股數）時，改成全年−上半年，原值存 eps_annual_cum（先.一三五-1ms）",
+            "fixed_rows": _h2["fixed_rows"], "fixed_codes": _h2["fixed_codes"], "left_unverifiable": _h2["left_unverifiable"],
+            "generated_at": datetime.now(TW_TZ).isoformat(), "mode": "daily"}
+    except Exception as e:
+        print(f"[warn] H2 累計 EPS 修正失敗：{e}")
+        errors.append(f"h2_eps_fix: {e}")
     try:
         payload["meta"]["roe_cleared_nonconsecutive_codes"] = clear_stale_nonconsecutive_roe(stocks)
     except Exception as e:  # 這道清理自己出錯只記警告，不擋寫檔（十二節）
