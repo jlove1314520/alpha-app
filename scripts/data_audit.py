@@ -252,6 +252,15 @@ class Audit:
         })
 
 
+# 先.一三五-1mt（2026-11-07）：a_price_source 的「無法查核」按 市場｜檔案｜原因 拆解計數，只記錄組成、不改判定與門檻。
+A_PRICE_SOURCE_UNVERIFIABLE: dict = {}
+
+
+def _apu(board, fname, reason):
+    k = f"{board or '?'}｜{fname}｜{reason}"
+    A_PRICE_SOURCE_UNVERIFIABLE[k] = A_PRICE_SOURCE_UNVERIFIABLE.get(k, 0) + 1
+
+
 def check_a_price_sources(a, universe, ref, names, loc, ref_date=None):
     """(a) 所有頁面的「現價」必須來自同一個真值。
 
@@ -365,6 +374,8 @@ def check_a_price_sources(a, universe, ref, names, loc, ref_date=None):
                 rd = _ref_day(code)
                 if (sd and rd and sd != rd) or (not (sd and rd) and not snapshot_ok):
                     a.note("a_price_source", unverifiable=1)
+                    _apu(ref[code].get("board"), fname,
+                         "快照日期≠官方參考日" if (sd and rd) else "快照已比官方參考日新（以 price_history 判斷）")
                     continue
             try:
                 ours = num(getter(code))
@@ -372,6 +383,15 @@ def check_a_price_sources(a, universe, ref, names, loc, ref_date=None):
                 ours = None
             if ours is None:
                 a.note("a_price_source", unverifiable=1)
+                if fname == "price_history.json":
+                    _r = "price_history 沒有官方參考日那天" if loc["price_hist"].get(code) else "price_history 沒有這檔"
+                elif fname == "quotes_tw.json":
+                    _r = "quotes_tw 沒有這檔（只含自選／觀察清單）" if code not in loc["quotes_tw"] else "quotes_tw 值為空"
+                elif fname == "quotes_all_tw.json":
+                    _r = "is_stale 過期列" if (loc["quotes_all"].get(code) or {}).get("is_stale") else "沒有這檔或值為空"
+                else:
+                    _r = "stale_dates 落後列" if code in loc.get("sparks_stale_dates", {}) else "沒有這檔或值為空"
+                _apu(ref[code].get("board"), fname, _r)
                 continue
             a.note("a_price_source", checked=1)
             d = rel_diff(ours, official)
@@ -886,6 +906,8 @@ def main():
         # violation_rate 也不進 informational_only_checks，見
         # check_a4_mixed_date() docstring。
         "a4_mixed_date": a4_mixed_date,
+        # 先.一三五-1mt：a_price_source 無法查核的組成（市場｜檔案｜原因），只供查閱、不計入任何門檻
+        "a_price_source_unverifiable_breakdown": dict(sorted(A_PRICE_SOURCE_UNVERIFIABLE.items(), key=lambda kv: -kv[1])),
         "total_violations": len(a.violations),
         "by_check": a.stats,
         "top_20": sorted(a.violations, key=sev)[:20],

@@ -1,3 +1,14 @@
+## 2026-11-07 22:01～22:4x DevQueue 20261107-220102（維運帽）先.一三五-1ms e_pe 分類＋修 H2 累計 EPS、先.一三五-1mt a_price_source 無法查核拆解
+等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增、無結案）。
+- **先.一三五-1ms**（`- [x]`，commit 0327e5243b6，零外部請求）：e_pe 增量發生在 11/06 23:00（696／38）→ 11/07 04:58 夜間稽核（1241／66）；新增 29 檔全部是回補季併入（先.一三五-1lw）後才變得可檢查的股票，新舊組違規率 5.3%／5.5%、官方÷我方本益比中位數 1.138／1.118 → 既有官方基準差，不是新錯誤類型。6667／8937 回補季數值疑點轉 先.一三五-1mu。
+  - 順帶抓到我方 TTM 算錯：半年報 H2（Q4）列淨利是下半年單期、EPS 卻存全年累計（289 列對得上全年累計、39 列對得上單期）。`.github/scripts/update_stock_financials.py` 新增 `fix_h2_cumulative_eps()`（每日／離線兩路徑、各自 try），證據充分才改成全年−上半年、原值存 `eps_annual_cum`；冪等（重跑 0 列、內容相同）。離線重產 `data/stock_detail.json` 289 列／130 檔；例 2758 近四季 EPS 2.62→1.58。稽核算法未改。
+  - 證據：`scripts/selftest_h2_cum_eps.py` 7/7 PASS；`scripts/selftest_half_year_ttm.py` 全過（2758 期望值原寫死修正前錯值 2.29＋0.33，改 1.25＋0.33 並加註——是改正期望值，不是放寬）；冒煙 188 PASS／0 FAIL、exit=0。
+  - [自行裁量] 沒等下一份夜間稽核：audit.yml 只排週一～五，下一份要 11/10；差集用的兩份報告已存在，結論不受影響。
+- **先.一三五-1mt**（`- [x]`，零外部請求）：近似重建（11/07 04:58 當時檔案＋company_info 分上市櫃）得組成：上市三個快照檔因 TWSE STOCK_DAY_ALL 參考日 11/05 落後我方快照 11/06 → 約 3,741 筆（83%）；上櫃 quotes_tw 只含自選清單 → 約 799 筆（18%）。都是合理無法查核，沒有覆蓋漏洞。`scripts/data_audit.py` 加 `a_price_source_unverifiable_breakdown`（只記錄、不改判定與門檻），11/10 夜間稽核起有精確數字；自測 `scripts/selftest_audit_price_source_breakdown.py` 5/5 PASS；冒煙 188 PASS／0 FAIL、exit=0。
+- 補件：`- [ ]` 29 項（≥12）；DevQueue 可執行 5→補 1 條到 6（①數字可能錯）：先.一三五-1mv（H2 列無法用 H1 判定的 261 列改用相鄰季推股數）。另 先.一三五-1mu 由 1ms 分類「其他」轉出。
+- `data/STATUS.json`：known_limitations 加一條 H2 累計 EPS 修正說明。
+- 下一項 先.一三五-1mq／1mr 是 [開發] 類，時間不足（各需一次約 9 分鐘冒煙）留下一輪。
+
 ## 2026-11-07 21:31～21:5x DevQueue 20261107-213102（研究帽）先.一五五-3 f_value_pb 延長到 2025 起
 等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增、無結案）。
 - **先.一五五-3**（維持 `- [ ]`，零外部請求）：`research/reaudit_batch3_ext2025.py run f_value_pb` 延長到 2026-09-24 跑完 48/48。第 1 批挑出的同參數（順向 21 日、擇時、20 檔、組合止損 10%、1×）全期 +7.6%／−18.0%／Sh 0.76，2025 起 −2.1%／−14.4%；全期重挑仍同一組。候選欄 26 支名單不變、`data/paper_opt_track.json` 重產（8 支對上、last_error=None）。第 1 批 10 族延長全部完成。
