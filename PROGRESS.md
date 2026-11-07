@@ -1,3 +1,17 @@
+## 2026-11-07 09:01～ DevQueue 20261107-090102（研究帽）先.一五五-3 墓園重審第二批：反轉延長補完＋財報類延長起步
+
+等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
+
+- **先.一五五-3**（維持 - [ ]，零新外部請求，不寫 TRIALS_LEDGER，紙上優化軌描述性，非投資建議）：
+  - f_short_reversal_1m、f_short_term_reversal_1w 延長到 2026-09-24 補完 48/48（2024 底前與 pkl 差 0）。同參數（反向 3×）2025 起：1m +21.7%／−44.0%、1w +40.0%／−40.9%。
+  - 新 `research/reaudit_ext2025_fin_factors.py`：財報 6 族（毛利／總資產、毛利率穩定度、資產成長、應計、EPS 成長、EPS 意外）照 F13 作法讀本機快取延長，公式逐字照 factors.py。
+  - [自行裁量] 5 檔只差 2024Q2 一季（快取版本不同，最大差 0.014）→ 2024 底前沿用 pkl 原值、2025 起用重算值，不一致 >5% 才停。
+  - f_eps_growth 48/48：原 3× 最優組延長後全期 MDD −55.1% **越過天條一**，候選欄已標；重挑 1.5× +17.1%／−31.5%。f_gross_profitability 45/48：原組 2025 起 −9.2%／−16.1%。
+  - REAUDIT_OPTIMIZED.md 5a 節重寫、候選欄 20 支、`data/paper_opt_track.json` 重產。
+  - 下一輪：f_gross_profitability 剩 3 格，f_eps_surprise／f_accruals／f_gross_margin_stability／f_asset_growth 各 0/48（已過核對）。
+- 冒煙：第一次 186 過／1 FAIL（#131 by_code 一致性：TDCC 週更只 commit holders.json、by_code/_meta 未重產，同 先.一〇三-15ak 根因，與本輪研究改動無關）；本機 `python scripts/build_by_code.py`（零請求，只更新 `_meta.json`）後重跑 187 項全過、exit 0。
+- 收工原因：09:46 時間上限；下一項是否 [研究] 未及查，留下一輪。
+
 ## 2026-11-07 08:31～ DevQueue 20261107-083102（維運帽）先.一三五-1mc 回補季 EPS 放行＋1mg ADR 溢價擋落後台股＋1mh 前端落後報價核對
 
 等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。

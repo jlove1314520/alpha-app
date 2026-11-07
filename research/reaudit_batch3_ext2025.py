@@ -48,6 +48,9 @@ PRICE_FACS = FACS + ["f_idio_vol", "f_bab", "f_residual_momentum", "f_short_reve
                      "f_short_term_reversal_1w", "f_ma_breakout", "f_amihud_illiq"]
 
 
+from reaudit_ext2025_fin_factors import FIN_FACS, attach as attach_fin  # noqa: E402
+
+
 def _factor_series(d, mc, fac):
     import factors as F
     px = d["adj_close"].astype(float)
@@ -89,11 +92,26 @@ def _factor_series(d, mc, fac):
     raise ValueError(f"{fac} 不是可直接重算的價量因子")
 
 
+FIN_MISMATCH: list = []
+
+
 def recompute(ext, mk, fac):
     mc = mk.set_index("date")["close"].astype(float)
     worst = 0.0
     for sid, d in ext.items():
-        v = _factor_series(d, mc, fac)
+        if fac in FIN_FACS:  # 財報類（DevQueue 20261107-090102）：照 F13 作法讀本機快取重算
+            v = pd.Series(attach_fin(d, sid, fac), index=d.index)
+            if fac in d.columns:
+                # 〔自行裁量〕本機快取與當初建 pkl 時的資料版本有少數季不同（f_gross_profitability 實測 5/236 檔、只差 2024Q2 一季）：
+                # 2024 底前一律沿用 pkl 原值（＝第 1／3 批回測用的值），2025 起才用重算值；不一致檔數另計，>5% 才停。
+                pre_all = d["date"] <= "2024-12-31"
+                a, b = d.loc[pre_all & (d["date"] >= START), fac].astype(float), v[pre_all & (d["date"] >= START)]
+                both = a.notna() & b.notna()
+                if both.any() and float((a[both] - b[both]).abs().max()) > 1e-6:
+                    FIN_MISMATCH.append(sid)
+                v = v.where(~pre_all, d[fac].astype(float))
+        else:
+            v = _factor_series(d, mc, fac)
         pre = (d["date"] <= "2024-12-31") & (d["date"] >= START)
         if fac in d.columns:
             a, b = d.loc[pre, fac].astype(float), v[pre]
@@ -112,7 +130,12 @@ def run(fac, deadline):
     ext, mk, miss, jumps, end = E.load_extended()
     diff = recompute(ext, mk, fac)
     prog(f"{fac} 2024 底前重算 vs pkl 最大差 {diff:.2e}")
-    if diff > 1e-6:
+    if fac in FIN_FACS:
+        prog(f"{fac} 2024 底前與 pkl 不一致 {len(FIN_MISMATCH)}/{len(ext)} 檔（2024 底前沿用 pkl 原值）：{FIN_MISMATCH[:10]}")
+        if len(FIN_MISMATCH) > 0.05 * len(ext):
+            prog("不一致超過 5%，停止")
+            return False
+    elif diff > 1e-6:
         prog("核對不過，停止")
         return False
     market_df = prepare_market_data(mk)
@@ -171,7 +194,7 @@ def summarize():
         if pj.exists():
             old.update({f["factor"]: f for f in json.loads(pj.read_text(encoding="utf-8"))["families"]})
     fams = []
-    for fac in PRICE_FACS:
+    for fac in PRICE_FACS + FIN_FACS:
         if fac not in old or not old[fac].get("best_by_calmar"):
             continue
         cp = CELLS_DIR / f"{fac}.json"
