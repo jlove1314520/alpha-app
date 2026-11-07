@@ -270,6 +270,73 @@ def _save_rate_limit_state(state: dict) -> None:
     RATE_LIMIT_STATE_PATH.write_text(text, encoding="utf-8")
 
 
+# 先.一五五-3c（2026-11-08）：分鐘桶旁路檔。data/rate_limit_state.json 是 git 追蹤檔，本機各排程的
+# `git pull --autostash`／`checkout HEAD -- <機器寫檔>` 會把工作樹換回 HEAD 版（HEAD 的 finmind 桶是雲端
+# 一千多分鐘前的舊桶），下一個寫入者一修剪就只剩新桶 → calls_last_hour() 低估（11/08 實測送 150 次只回 6）。
+# 跨行程鎖擋不住 git，所以同一把鎖內另存一份到 git 不碰的 research/data/（已 gitignore），讀寫時逐桶取大值合併；
+# last_request_at 也取大值，避免被換回舊值後間隔失守。旁路檔任何失敗只降級成警告（十二節）。
+_DEFAULT_STATE_PATH = Path(__file__).parent.parent / "data" / "rate_limit_state.json"
+
+
+def _calls_sidecar_path() -> Path:
+    """正式狀態檔→research/data/finmind_calls_local.json；自測把狀態檔換到暫存目錄時，旁路檔跟著放旁邊，不汙染正式計數。"""
+    if Path(RATE_LIMIT_STATE_PATH) == _DEFAULT_STATE_PATH:
+        return Path(__file__).parent / "data" / "finmind_calls_local.json"
+    return Path(RATE_LIMIT_STATE_PATH).with_name(Path(RATE_LIMIT_STATE_PATH).name + ".calls_local.json")
+
+
+def _load_calls_sidecar() -> dict:
+    try:
+        sp = _calls_sidecar_path()
+        if sp.exists():
+            d = json.loads(sp.read_text(encoding="utf-8"))
+            return d if isinstance(d, dict) else {}
+    except Exception as e:  # noqa: BLE001 -- 旁路檔壞掉只警告（十二節）
+        print(f"[rate_limit] 警告：讀分鐘桶旁路檔失敗（{e!r}），本次只用狀態檔", file=sys.stderr)
+    return {}
+
+
+def _merge_calls_sidecar(src: dict, source: str, now: float, side: dict | None = None) -> None:
+    """把旁路檔的分鐘桶／last_request_at 逐桶取大值併回 src（就地修改，只留最近 60 分鐘）。"""
+    try:
+        side = _load_calls_sidecar() if side is None else side
+        s = side.get(source) or {}
+        cur = int(now // 60)
+        b = src.setdefault("calls_by_minute", {})
+        for k, v in (s.get("calls_by_minute") or {}).items():
+            if int(k) > cur - 60 and int(v) > int(b.get(k, 0)):
+                b[k] = int(v)
+        for k in [k for k in b if int(k) <= cur - 60]:
+            del b[k]
+        lr = s.get("last_request_at")
+        if lr and (not src.get("last_request_at") or lr > src["last_request_at"]):
+            src["last_request_at"] = lr
+    except Exception as e:  # noqa: BLE001
+        print(f"[rate_limit] 警告：合併分鐘桶旁路檔失敗（{e!r}）", file=sys.stderr)
+
+
+def _save_calls_sidecar(src: dict, source: str) -> None:
+    """呼叫端要持有 _rate_limit_lock。原子換檔；失敗只警告。"""
+    try:
+        sp = _calls_sidecar_path()
+        sp.parent.mkdir(parents=True, exist_ok=True)
+        side = _load_calls_sidecar()
+        side[source] = {"calls_by_minute": dict(src.get("calls_by_minute") or {}),
+                        "last_request_at": src.get("last_request_at")}
+        tmp = sp.with_name(f"{sp.name}.{os.getpid()}.tmp")
+        tmp.write_text(json.dumps(side, ensure_ascii=False), encoding="utf-8")
+        for _ in range(5):
+            try:
+                os.replace(tmp, sp)
+                return
+            except PermissionError:
+                time.sleep(0.05)
+        sp.write_text(json.dumps(side, ensure_ascii=False), encoding="utf-8")
+        tmp.unlink(missing_ok=True)
+    except Exception as e:  # noqa: BLE001
+        print(f"[rate_limit] 警告：寫分鐘桶旁路檔失敗（{e!r}）", file=sys.stderr)
+
+
 def _bump_call_counter(src: dict, now: float) -> None:
     """【先.十-二】全域每小時用量計數：以「分鐘桶」記在共用狀態檔 sources.<source>.calls_by_minute
     （桶鍵=epoch分鐘，只留最近60分鐘，檔案不會膨脹）。所有 FinMind 呼叫（本client、backfill）
@@ -288,7 +355,10 @@ def calls_last_hour(source: str = SOURCE_KEY, now: float | None = None) -> int:
     """滾動1小時內（含目前這分鐘）經共用狀態檔記錄的呼叫總數；讀不到回0。"""
     try:
         now = time.time() if now is None else now
-        b = _load_rate_limit_state()["sources"].get(source, {}).get("calls_by_minute", {})
+        src = dict(_load_rate_limit_state()["sources"].get(source, {}))
+        src["calls_by_minute"] = dict(src.get("calls_by_minute") or {})
+        _merge_calls_sidecar(src, source, now)  # 先.一五五-3c：狀態檔被 git 換回舊版時靠旁路檔補回
+        b = src["calls_by_minute"]
         cur = int(now // 60)
         return sum(int(v) for k, v in b.items() if cur - 60 < int(k) <= cur)
     except Exception:  # noqa: BLE001
@@ -316,6 +386,7 @@ def _rate_limit_wait_or_raise(source: str = SOURCE_KEY) -> None:
                 )
             interval = _min_interval_sec(state)
             src = state["sources"].setdefault(source, src)
+            _merge_calls_sidecar(src, source, now)  # 先.一五五-3c
             last = src.get("last_request_at")
             wait = (interval - (now - last)) if last else 0.0
             if wait <= 0:
@@ -323,6 +394,7 @@ def _rate_limit_wait_or_raise(source: str = SOURCE_KEY) -> None:
                 _bump_call_counter(src, now)
                 state["sources"][source] = src
                 _save_rate_limit_state(state)
+                _save_calls_sidecar(src, source)  # 先.一五五-3c
                 return
         time.sleep(wait)
 

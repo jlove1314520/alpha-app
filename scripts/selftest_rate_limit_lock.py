@@ -11,6 +11,9 @@ B. 混合三支行程：finmind_client（finmind×10）＋backfill_price_history
 C. 鎖本身壞掉（鎖檔目錄不存在）→ 只印警告、照常放行（十二節 fail open）。
 D. 過期鎖（前一個行程死掉留下）→ 自動清掉後取得鎖。
 E. record_block 在鎖內寫入封鎖 → 下一次 wait 拋 RuntimeError。
+F. 精簡版與 finmind_client 同時跑。
+G. 先.一五五-3c：兩支行程（finmind_client＋backfill_price_history_gaps）並行各 10 次，同時另一支行程
+   不拿鎖、每 0.15 秒把狀態檔整份換回「HEAD 舊版」（模擬 git autostash／checkout HEAD）→ calls_last_hour()＝20。
 用法：python scripts/selftest_rate_limit_lock.py（全過 exit 0）
 """
 from __future__ import annotations
@@ -84,6 +87,17 @@ def _worker(key: str, source: str, state_path: str, q) -> None:
         q.put((key, source, granted, None))
     except Exception as e:  # noqa: BLE001
         q.put((key, source, [], repr(e)))
+
+
+def _git_resetter(state_path: str, head_text: str, stop_after: float) -> None:
+    """模擬 git 把追蹤中的狀態檔換回 HEAD 版（不拿鎖，git 本來就不認這把鎖）。"""
+    end = time.time() + stop_after
+    while time.time() < end:
+        try:
+            Path(state_path).write_text(head_text, encoding="utf-8")
+        except OSError:
+            pass
+        time.sleep(0.15)
 
 
 def _p5_gate(m, source):
@@ -205,6 +219,26 @@ def main() -> int:
         f_ok = f_ok and g >= 3.0 - 1e-6
         print(f"  {'PASS' if g >= 3.0 - 1e-6 else 'FAIL'} taifex_openapi 跨兩支程式 {len(ts)} 次放行，最小間隔 {g:.3f} 秒（下限 3.0）")
         ok &= f_ok
+
+        print("G. 狀態檔被 git 換回舊版（先.一五五-3c）→ 分鐘桶旁路檔補回")
+        sp = td / "g.json"
+        old_min = int(time.time() // 60) - 1500
+        head_text = json.dumps({"sources": {"finmind": {"calls_by_minute": {str(old_min): 9}, "last_request_at": old_min * 60.0}}})
+        sp.write_text(head_text, encoding="utf-8")
+        ctx = mp.get_context("spawn")
+        rp = ctx.Process(target=_git_resetter, args=(str(sp), head_text, 4.0 * N * INTERVAL + 2))
+        rp.start()
+        res = _run([("fm", "finmind"), ("bf", "finmind")], sp)
+        rp.join(timeout=60)
+        errs = [r[3] for r in res if r[3]]
+        sp.write_text(head_text, encoding="utf-8")  # 最後再換回一次舊版，確認光靠旁路檔也數得對
+        m = _load("fm", sp)
+        c_side = m.calls_last_hour("finmind")
+        c_state = _calls(sp, "finmind") - 9
+        g_ok = not errs and c_side == 2 * N
+        print(f"  {'PASS' if g_ok else 'FAIL'} calls_last_hour()＝{c_side}（應為 {2 * N}；只看狀態檔＝{c_state}，即修正前會回的數）{errs or ''}")
+        g_ok = _check_intervals([t for r in res for t in r[2]], "finmind 間隔（狀態檔被換回期間）") and g_ok
+        ok &= g_ok
 
     print("全部通過" if ok else "有失敗")
     return 0 if ok else 1

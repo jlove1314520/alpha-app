@@ -1,3 +1,14 @@
+## 2026-11-08 01:31～ DevQueue 20261108-013102（維運帽）先.一五五-3c FinMind 用量計數被覆蓋
+
+等待總司令審閱：0 件（本輪無新增等待項）。
+
+- **做了什麼**：查根因——`research/finmind_client.py`／`research/backfill_price_history_gaps.py` 的「重讀→改→寫」早已在跨行程鎖內，**不是缺鎖**。真正原因是 `data/rate_limit_state.json` 是 git 追蹤檔：本機排程的 `git pull --autostash`、`local_git_commit` 的 `checkout HEAD -- <機器寫檔>` 會把工作樹換回 HEAD 版，而 HEAD 版的 finmind 分鐘桶是雲端 1,541～1,587 分鐘前的舊桶，下一個寫入者一修剪就只剩新桶（11/08 00:32～01:02 送的 150 次整段消失）。git 不認這把鎖，所以加鎖擋不住。修法：同一把鎖內把分鐘桶與 `last_request_at` 另存旁路檔 `research/data/finmind_calls_local.json`（gitignore、git 不碰），送請求前與 `calls_last_hour()` 讀時逐桶取大值合併；旁路檔失敗只警告（十二節）。
+- **證據**：`python scripts/selftest_rate_limit_lock.py` 新增 G（兩行程並行各 10 次、另一行程不拿鎖每 0.15 秒把狀態檔換回 HEAD 舊版）→ `calls_last_hour()`＝20，只看狀態檔＝0（修正前會回的數）；間隔仍 ≥ 下限；A～F 全過。冒煙 `node scripts/smoke_test.mjs` 第一次在第 178 項後瀏覽器被關閉（`page.evaluate: Target page … closed`，非測試項 FAIL），重跑 188 PASS、exit 0。
+- **[自行裁量]**：用旁路檔、不把狀態檔移出 git（雲端 workflow 與 STATUS.json 仍讀它，移出影響面大）；只改走 finmind 每小時計數的兩支程式，其他官方端點精簡版只靠最小間隔、未改。
+- **限制**：旁路檔本輪起才累積，修正前遺失的桶補不回；接下來 60 分鐘內計數仍可能低估。01:22 起跑的 `finmind_warmup.py` 舊行程結束後，下一輪排程才載入新版。另：每分鐘約 10 次在打 FinMind 的就是 `finmind_warmup.py`（排程每 15 分鐘一支）。
+- **BLOCKED**：無。
+- **下一項**：權威清單下一項是 先.一五五-3（[研究]），依一輪一帽收工、留給下一輪。佇列 `- [ ]` 31 項、非研究可執行 7 項，未補件。
+
 ## 2026-11-08 00:31～01:15 DevQueue 20261108-003102（研究帽）先.一五五-3 籌碼類抓取第 2 批
 
 等待總司令審閱：0 件（本輪無新增等待項）。
