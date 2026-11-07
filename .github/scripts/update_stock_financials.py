@@ -1032,6 +1032,104 @@ def fix_isolated_backfill_eps_outliers(stocks: dict) -> dict:
     return stats
 
 
+# 先.一三五-1mz（2026-11-08）：官方列（非回補）單季 EPS 孤立離群
+OF_EPS_MIN_RESIDUAL = 0.2      # 偏高幅度 |原 EPS − 新 EPS| 太小時，「等於同年較早季 EPS」可能是巧合，不採機制證據
+OF_EPS_PRIOR_MATCH_REL = 0.05  # 偏高幅度與同年較早季 EPS（或其加總）相符的容忍（相對）
+OF_EPS_PRIOR_MATCH_ABS = 0.03  # 同上（絕對）
+OF_EPS_WIDE_TOL = 0.15         # 再往外一季（k±2）推得股數與相鄰兩季平均相差上限（排除整段股數都亂跳的檔，例 6514）
+
+
+def fix_isolated_official_eps_outliers(stocks: dict, official_map: dict | None = None) -> dict:
+    """先.一三五-1mz：官方列（source 不是 q1_from_backfill、非半年報、還沒被其他修正改過）單季 EPS 孤立偏高。
+    成因（零外部請求查證）：這些列是早期離散化寫入的「累計 EPS − 同年較早季」，當時較早季 EPS 是 None，
+    舊版 `or 0` 把它當 0 少減一季（先.一二五-1 已修產生端，但已寫入的舊列沒重算）——
+    例 3583 2025Q4 7.77＝真 Q4 約 4.10＋Q3 3.66；2072 2025Q2 5.21＝真 Q2 約 2.71＋Q1 2.49；2729 2024Q4 4.34＝約 1.45＋Q3 2.89。
+    判定比照 fix_isolated_backfill_eps_outliers（前後季推得股數彼此差 ≤10%、該季低於平均 >30%），另加：
+    ① 再外一季（k±2，非半年報、可推股數者至少一筆）也要在平均 ±15% 內；
+    ② 需有證據才改：(a) 偏高幅度（≥0.2）等於同年某些較早季 EPS 加總（少減一季的機制證據），或
+       (b) 該列在近四季內，官方本益比反推近四季 EPS 用新值對得上、原值對不上（容忍同 先.一三五-1mx）；
+       在近四季內而官方數字對得上原值 → 不改。沒有證據 → 照實列 left_unverified，不改。
+    EPS 改成淨利÷相鄰兩季平均股數，原值存 eps_raw、eps_basis＝official_net_div_neighbor_shares、eps_fix_evidence 記證據。
+    只修偏高（偏低可由特別股股利解釋，例金控 Q2）；重跑冪等（有 eps_basis／eps_raw 的列不動）。單檔出錯只略過（十二節）。"""
+    import itertools
+    stats = {"fixed_rows": 0, "fixed": {}, "left_unverified": []}
+    if official_map is None:
+        official_map = load_official_ttm_eps_map()
+
+    def match_official(x, off):
+        return abs(x - off) <= max(SHIFT_MATCH_ABS, SHIFT_MATCH_REL * abs(off))
+
+    for code, s in stocks.items():
+        try:
+            qs = [r for r in ((((s or {}).get("financials") or {}).get("quarters")) or [])
+                  if isinstance(r, dict) and r.get("year") and r.get("quarter")]
+            idx = {(int(r["year"]), int(r["quarter"])): r for r in qs}
+
+            def at(k):
+                return idx.get((k // 4, k % 4 + 1))
+            srt = sorted(qs, key=lambda r: (int(r["year"]), int(r["quarter"])))
+            last4 = srt[-4:]
+            ks4 = [int(r["year"]) * 4 + int(r["quarter"]) for r in last4]
+            last4_ok = (len(last4) == 4 and ks4 == list(range(ks4[0], ks4[0] + 4))
+                        and not any(r.get("period") for r in last4)
+                        and all(isinstance(r.get("eps"), (int, float)) for r in last4))
+            for r in qs:
+                if r.get("source") == SRC_Q_FROM_BACKFILL or r.get("period") or r.get("eps_basis") or "eps_raw" in r:
+                    continue
+                y, q = int(r["year"]), int(r["quarter"])
+                k = y * 4 + q - 1
+                prev, nxt = at(k - 1), at(k + 1)
+                if prev is None or nxt is None or prev.get("period") or nxt.get("period"):
+                    continue
+                sp, sn, si = _implied_shares(prev), _implied_shares(nxt), _implied_shares(r)
+                n, e = r.get("net_income_parent"), r.get("eps")
+                if sp is None or sn is None or si is None or not isinstance(n, (int, float)) or not isinstance(e, (int, float)):
+                    continue
+                avg = (sp + sn) / 2
+                if abs(sp - sn) / avg > BF_EPS_NEIGHBOR_AGREE or (avg - si) / avg <= BF_EPS_OUTLIER_DEV:
+                    continue
+                label = f"{code} {y}Q{q}"
+                wide = [_implied_shares(w) for w in (at(k - 2), at(k + 2)) if w is not None and not w.get("period")]
+                wide = [w for w in wide if w is not None]
+                if not wide or any(abs(w - avg) / avg > OF_EPS_WIDE_TOL for w in wide):
+                    stats["left_unverified"].append(f"{label} eps={e}：再外一季股數不一致或缺")
+                    continue
+                new_eps = round(n / avg, 2)
+                residual = e - new_eps
+                evidence = []
+                if abs(residual) >= OF_EPS_PRIOR_MATCH_ABS and abs(residual) >= OF_EPS_MIN_RESIDUAL:
+                    same = [(qq, idx[(y, qq)]["eps"]) for qq in range(1, q)
+                            if (y, qq) in idx and isinstance(idx[(y, qq)].get("eps"), (int, float))]
+                    for L in range(1, len(same) + 1):
+                        hit = next((c for c in itertools.combinations(same, L)
+                                    if abs(sum(x for _, x in c) - residual) <= max(OF_EPS_PRIOR_MATCH_ABS, OF_EPS_PRIOR_MATCH_REL * abs(residual))), None)
+                        if hit:
+                            evidence.append("cum_missed_prior:" + "+".join(f"Q{qq}" for qq, _ in hit))
+                            break
+                off = official_map.get(str(code))
+                ttm_note = None
+                if last4_ok and r in last4 and isinstance(off, (int, float)):
+                    ttm_old = round(sum(x["eps"] for x in last4), 2)
+                    ttm_new = round(ttm_old - e + new_eps, 2)
+                    if match_official(ttm_old, off):
+                        stats["left_unverified"].append(f"{label} eps={e}：官方近四季 {off} 對得上原值 {ttm_old}，不改")
+                        continue
+                    if match_official(ttm_new, off):
+                        evidence.append("official_ttm")
+                        ttm_note = {"official": off, "ttm_old": ttm_old, "ttm_new": ttm_new}
+                if not evidence:
+                    stats["left_unverified"].append(f"{label} eps={e}（推估 {new_eps}）：無機制證據、官方近四季也無法核對")
+                    continue
+                r["eps_raw"] = e
+                r["eps"] = new_eps
+                r["eps_basis"] = "official_net_div_neighbor_shares"
+                r["eps_fix_evidence"] = evidence + ([f"official_ttm {ttm_note['ttm_old']}→{ttm_note['ttm_new']} vs {ttm_note['official']}"] if ttm_note else [])
+                stats["fixed_rows"] += 1
+                stats["fixed"].setdefault(str(code), []).append(f"{y}Q{q} {e}→{new_eps}（{'、'.join(evidence)}）")
+        except Exception as ex:  # 單檔出錯只略過（十二節）
+            print(f"[warn] {code} 官方列 EPS 離群修正失敗：{ex}")
+    return stats
+
 # 先.一三五-1mx（2026-11-08）：股數基準持續跳變（變更面額／股票分割、EPS 追溯調整）
 SHIFT_MIN_ABS_EPS = 0.05     # |EPS| 太小推得股數不可靠，不當判定點
 SHIFT_RATIO_HI = 1.5         # 新／舊推得股數倍數 ≥1.5 或 ≤0.67 才算跳變
@@ -1322,6 +1420,15 @@ def offline_merge_backfill() -> None:
             "generated_at": datetime.now(TW_TZ).isoformat(), "mode": "offline"}
     except Exception as e:
         print(f"[warn] 回補季 EPS 離群修正失敗：{e}")
+    try:  # 先.一三五-1mz：官方列單季 EPS 孤立偏高（舊離散化少減一季）且有證據時改用相鄰季股數；自身失敗只警告（十二節）
+        _of = fix_isolated_official_eps_outliers(stocks)
+        payload["meta"]["financials_official_eps_outlier_fix"] = {
+            "note": "官方列 EPS 推得股數低於前後兩季（兩季彼此一致、再外一季也一致）平均 >30%，且偏高幅度等於同年較早季 EPS（舊離散化少減一季）"
+                    "或官方本益比反推近四季 EPS 證實時，EPS 改成淨利÷相鄰季平均股數，原值存 eps_raw（先.一三五-1mz）",
+            "fixed_rows": _of["fixed_rows"], "fixed": _of["fixed"], "left_unverified": _of["left_unverified"],
+            "generated_at": datetime.now(TW_TZ).isoformat(), "mode": "offline"}
+    except Exception as e:
+        print(f"[warn] 官方列 EPS 離群修正失敗：{e}")
     try:  # 先.一三五-1mx：股數基準持續跳變且官方近四季 EPS 證實時，舊季 EPS 追溯調整；自身失敗只警告（十二節）
         payload["meta"]["financials_share_base_restate"] = _share_base_meta(restate_share_base_shift(stocks), "offline")
     except Exception as e:
@@ -1487,6 +1594,16 @@ def main():
     except Exception as e:
         print(f"[warn] 回補季 EPS 離群修正失敗：{e}")
         errors.append(f"backfill_eps_outlier_fix: {e}")
+    try:  # 先.一三五-1mz：官方列單季 EPS 孤立偏高（舊離散化少減一季）且有證據時改用相鄰季股數；自身失敗只警告（十二節）
+        _of = fix_isolated_official_eps_outliers(stocks)
+        payload["meta"]["financials_official_eps_outlier_fix"] = {
+            "note": "官方列 EPS 推得股數低於前後兩季（兩季彼此一致、再外一季也一致）平均 >30%，且偏高幅度等於同年較早季 EPS（舊離散化少減一季）"
+                    "或官方本益比反推近四季 EPS 證實時，EPS 改成淨利÷相鄰季平均股數，原值存 eps_raw（先.一三五-1mz）",
+            "fixed_rows": _of["fixed_rows"], "fixed": _of["fixed"], "left_unverified": _of["left_unverified"],
+            "generated_at": datetime.now(TW_TZ).isoformat(), "mode": "daily"}
+    except Exception as e:
+        print(f"[warn] 官方列 EPS 離群修正失敗：{e}")
+        errors.append(f"official_eps_outlier_fix: {e}")
     try:  # 先.一三五-1mx：股數基準持續跳變且官方近四季 EPS 證實時，舊季 EPS 追溯調整；自身失敗只警告（十二節）
         payload["meta"]["financials_share_base_restate"] = _share_base_meta(restate_share_base_shift(stocks), "daily")
     except Exception as e:
