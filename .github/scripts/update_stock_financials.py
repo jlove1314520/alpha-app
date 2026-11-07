@@ -935,6 +935,36 @@ H2_EPS_TOL_REL = 0.08   # 相對誤差上限
 H2_EPS_MIN_H1 = 0.2     # 上半年 |EPS| 太小時推得的股數不可靠，不判定
 
 
+H2_EPS_NEIGHBOR_AGREE = 0.10  # 前後相鄰列推得股數彼此相差上限
+
+
+def _h2_neighbor_shares(qs: list, r: dict, h1: dict):
+    """先.一三五-1mv（2026-11-08）：H1 EPS 太小（|EPS|<0.2）推不出股數時，改用相鄰列推股數：
+    前一側＝排在該 H2 之前、年份 ≥ 前一年、非 H2、非同年 H1 的最近一列；後一側＝次年第一筆非 H2 列。
+    各自需 |EPS|≥0.2 且淨利÷EPS>0；兩側都有時相差須 ≤10%（取平均），只有一側就用那一側；都沒有回 None（不判定）。"""
+    y, q = r.get("year"), r.get("quarter")
+    if not isinstance(y, int) or not isinstance(q, int):
+        return None
+    srt = sorted((x for x in qs if isinstance(x.get("year"), int) and isinstance(x.get("quarter"), int)),
+                 key=lambda x: (x["year"], x["quarter"]))
+    prev = [x for x in srt if (x["year"], x["quarter"]) < (y, q) and x["year"] >= y - 1
+            and x.get("period") != "H2" and x is not h1]
+    nxt = [x for x in srt if x["year"] == y + 1 and x.get("period") != "H2"]
+    cand = []
+    for x in (prev[-1] if prev else None, nxt[0] if nxt else None):
+        if x is None:
+            continue
+        e, n = x.get("eps"), x.get("net_income_parent")
+        if isinstance(e, (int, float)) and isinstance(n, (int, float)) and abs(e) >= H2_EPS_MIN_H1 and n != 0 and n / e > 0:
+            cand.append(n / e)
+    if not cand:
+        return None
+    avg = sum(cand) / len(cand)
+    if len(cand) == 2 and abs(cand[0] - cand[1]) / avg > H2_EPS_NEIGHBOR_AGREE:
+        return None
+    return avg
+
+
 def fix_h2_cumulative_eps(stocks: dict) -> dict:
     """先.一三五-1ms（2026-11-07）：半年報公司的 H2（Q4）列，歸母淨利是下半年單期，但 EPS 多半是全年累計
     （stock_detail 實測 429 列可判定者，289 列對得上全年累計、39 列對得上下半年單期）。近四季 EPS 用 H2 組 TTM 時會多算半年。
@@ -956,15 +986,22 @@ def fix_h2_cumulative_eps(stocks: dict) -> dict:
                     continue
                 e1, n1, e2, n2 = vals
                 if abs(e1) < H2_EPS_MIN_H1 or n1 == 0 or n1 / e1 <= 0:
-                    stats["left_unverifiable"] += 1
-                    continue
-                sh = n1 / e1
+                    sh = _h2_neighbor_shares(qs, r, h1)
+                    if sh is None:
+                        stats["left_unverifiable"] += 1
+                        continue
+                    basis = "annual_minus_h1_neighbor_shares"
+                else:
+                    sh = n1 / e1
+                    basis = "annual_minus_h1"
                 tol = max(H2_EPS_TOL_ABS, H2_EPS_TOL_REL * abs(e2))
                 if abs(e2 - (n1 + n2) / sh) < tol and abs(e2 - n2 / sh) > tol:
                     r["eps_annual_cum"] = e2
                     r["eps"] = round(e2 - e1, 2)
-                    r["eps_basis"] = "annual_minus_h1"
+                    r["eps_basis"] = basis
                     stats["fixed_rows"] += 1
+                    if basis != "annual_minus_h1":
+                        stats["fixed_by_neighbor_shares"] = stats.get("fixed_by_neighbor_shares", 0) + 1
                     hit = True
             if hit:
                 stats["fixed_codes"].append(str(code))
@@ -1407,8 +1444,8 @@ def offline_merge_backfill() -> None:
     try:  # 先.一三五-1ms：H2 列 EPS 是全年累計時改成全年−上半年；自身失敗只警告（十二節）
         _h2 = fix_h2_cumulative_eps(stocks)
         payload["meta"]["financials_h2_eps_fix"] = {
-            "note": "H2 列 EPS 對得上全年累計、對不上下半年單期（以 H1 淨利÷EPS 推股數）時，改成全年−上半年，原值存 eps_annual_cum（先.一三五-1ms）",
-            "fixed_rows": _h2["fixed_rows"], "fixed_codes": _h2["fixed_codes"], "left_unverifiable": _h2["left_unverifiable"],
+            "note": "H2 列 EPS 對得上全年累計、對不上下半年單期（以 H1 淨利÷EPS 推股數；H1 EPS 太小改用相鄰列推股數，eps_basis 記 annual_minus_h1_neighbor_shares）時，改成全年−上半年，原值存 eps_annual_cum（先.一三五-1ms／1mv）",
+            "fixed_rows": _h2["fixed_rows"], "fixed_by_neighbor_shares": _h2.get("fixed_by_neighbor_shares", 0), "fixed_codes": _h2["fixed_codes"], "left_unverifiable": _h2["left_unverifiable"],
             "generated_at": datetime.now(TW_TZ).isoformat(), "mode": "offline"}
     except Exception as e:
         print(f"[warn] H2 累計 EPS 修正失敗：{e}")
@@ -1579,8 +1616,8 @@ def main():
     try:  # 先.一三五-1ms：H2 列 EPS 是全年累計時改成全年−上半年；自身失敗只警告（十二節）
         _h2 = fix_h2_cumulative_eps(stocks)
         payload["meta"]["financials_h2_eps_fix"] = {
-            "note": "H2 列 EPS 對得上全年累計、對不上下半年單期（以 H1 淨利÷EPS 推股數）時，改成全年−上半年，原值存 eps_annual_cum（先.一三五-1ms）",
-            "fixed_rows": _h2["fixed_rows"], "fixed_codes": _h2["fixed_codes"], "left_unverifiable": _h2["left_unverifiable"],
+            "note": "H2 列 EPS 對得上全年累計、對不上下半年單期（以 H1 淨利÷EPS 推股數；H1 EPS 太小改用相鄰列推股數，eps_basis 記 annual_minus_h1_neighbor_shares）時，改成全年−上半年，原值存 eps_annual_cum（先.一三五-1ms／1mv）",
+            "fixed_rows": _h2["fixed_rows"], "fixed_by_neighbor_shares": _h2.get("fixed_by_neighbor_shares", 0), "fixed_codes": _h2["fixed_codes"], "left_unverifiable": _h2["left_unverifiable"],
             "generated_at": datetime.now(TW_TZ).isoformat(), "mode": "daily"}
     except Exception as e:
         print(f"[warn] H2 累計 EPS 修正失敗：{e}")

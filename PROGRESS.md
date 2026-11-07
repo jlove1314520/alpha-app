@@ -1,3 +1,14 @@
+## 2026-11-08 07:01～ DevQueue 20261108-070101（維運帽）先.一三五-1mv H2 列 EPS 用相鄰列推股數
+
+等待總司令審閱：9 件（`research/AWAITING_REVIEW.md`「等待中」表，本輪無新增）。
+
+### 先.一三五-1mv（本收工 commit）
+- **做了什麼**：先只讀統計（零外部請求）：先.一三五-1ms 判定不了的 261 列 H2 EPS，用相鄰列（淨利÷EPS）推股數分三類——**對得上全年累計 22 列**（16 列在該檔最新四筆內，例 6947 2025H2 0.70→0.56、1594 2024H2 −0.01→0.15）、**對得上單期 7 列**、**仍無法判定 232 列**（H2 本身 EPS／淨利缺值 173、相鄰推不出股數 15、相鄰兩側股數相差 >10% 13、兩者皆符 13、兩者皆不符 10、同年無 H1 淨利且不符單期 8）。有落在近四季窗口 → 擴充 `.github/scripts/update_stock_financials.py::fix_h2_cumulative_eps()`：H1 EPS 太小時改用新函式 `_h2_neighbor_shares()`，`eps_basis` 記 `annual_minus_h1_neighbor_shares`、原值存 `eps_annual_cum`；離線重產 `data/stock_detail.json`，修 22 列／21 檔（meta `financials_h2_eps_fix.fixed_by_neighbor_shares`=22、left_unverifiable 261→212）。`data/STATUS.json` known_limitations 補一筆。
+- **證據**：自測 `scripts/selftest_h2_cum_eps.py` 11 項全過（新增 G 相鄰股數修正／H 兩側不一致不動／I 單期不動／J 相鄰列太舊不動）；冒煙 `node scripts/smoke_test.mjs` exit 0、最後 15 行全 `[x]`（含第 12 項「整個測試過程結束後仍無累積的 uncaught error」）。
+- **[自行裁量]**：只有一側相鄰列也採用（原函式本來就只用 H1 單一來源；要求兩側都有只剩 8 列，最新年度列會漏掉），但前一側限前一年以內。同年無 H1 淨利的列只能證明單期，一律不改。
+- 附記：offline 重跑後 `financials_official_eps_outlier_fix.fixed_rows` 4→0 是既有冪等行為（那 4 列早已修過、`eps_raw` 仍在），非本條造成。
+- **收工**：權威清單下一項 先.一五五-3 是 [研究]，依一輪一帽收工，留給下一輪研究帽。
+
 ## 2026-11-08 06:01～ DevQueue 20261108-060101（研究帽）先.一五五-3 墓園重審第 7 批（事件類）＋修第 6 批
 
 等待總司令審閱：9 件（`research/AWAITING_REVIEW.md`「等待中」表，本輪無新增）。交辦佇列 `- [ ]` 29 項（≥12，未補件）。
