@@ -1,3 +1,13 @@
+## 2026-11-08 00:31～01:15 DevQueue 20261108-003102（研究帽）先.一五五-3 籌碼類抓取第 2 批
+
+等待總司令審閱：0 件（本輪無新增等待項）。
+
+- **做了什麼**：`REAUDIT_DEADLINE=01:05 CHIP_MAX_CALLS=150 python research/fetch_chip_2025_resume.py`，開工用量 138/hr，送 150 次全 200：法人買賣超 86 次（**236/236 抓齊**）、融資融券 64 次（24 個空表多為 ETF）。斷點＝融資券 2338，尚餘約 172 次。
+- **發現**：收工時 `calls_last_hour()` 回 6、狀態檔 finmind 分鐘桶只剩最近 8 分鐘，且另一程序每分鐘約 10 次在打 FinMind → 多寫入者互蓋，用量計數低估。補件 先.一五五-3c（[自走補入]，DevQueue 可執行）。
+- **證據**：抓取 log `research/data/chip_fetch_20261108-003102.log`（本機、gitignore）；冒煙 `node scripts/smoke_test.mjs` exit 0 全 PASS。
+- **BLOCKED**：無。
+- **下一輪**：續跑 `fetch_chip_2025_resume.py`（約再 1～2 輪）→ 籌碼五族延長回測。時間到收工，下一項不接。
+
 ## 2026-11-08 00:01～00:2x DevQueue 20261108-000102（維運帽）先.一三五-1mu 回補季 EPS 疑點兩檔
 
 等待總司令審閱：0 件（本輪無新增等待項）。
