@@ -93,7 +93,8 @@ def weights(kind, hist):
 
 
 def sim(px, gate, rf, kind, rb, look, use_gate):
-    ret = px.pct_change()
+    # 逐檔在自己有價日上算（pandas 3 的 pct_change 不補值，日期聯集裡的個股零星缺日會丟掉跨缺口報酬；DevQueue 20261108-060101 修）
+    ret = px.apply(lambda s: s.dropna().pct_change().reindex(s.index))
     idx = px.index
     i0 = int(np.searchsorted(idx, pd.Timestamp(START)))
     eq = np.ones(len(idx) - i0)
