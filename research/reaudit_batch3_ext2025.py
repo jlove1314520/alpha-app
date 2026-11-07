@@ -49,7 +49,7 @@ PRICE_FACS = FACS + ["f_idio_vol", "f_bab", "f_residual_momentum", "f_short_reve
                      "f_listing_age_days"]
 
 
-from reaudit_ext2025_fin_factors import FIN_FACS, attach as attach_fin  # noqa: E402
+from reaudit_ext2025_fin_factors import CHIP_FACS, FIN_FACS, attach as attach_fin, chip_coverage  # noqa: E402
 
 
 def _factor_series(d, mc, fac, sid=None):
@@ -131,13 +131,20 @@ def run(fac, deadline):
     from backtest.engine import BacktestConfig, run_backtest
     from strategies.weinstein_stage2 import prepare_market_data
     ext, mk, miss, jumps, end = E.load_extended()
+    if fac in CHIP_FACS:  # （DevQueue 20261107-230102）2025 起法人／融資券快取沒抓齊就不跑，避免缺檔被 fillna(0) 當成零買賣超
+        lack = [sid for sid in ext if not all(chip_coverage(sid).values())]
+        if lack:
+            prog(f"{fac} 2025 起籌碼快取尚缺 {len(lack)}/{len(ext)} 檔（先跑 research/fetch_chip_2025_resume.py），不跑")
+            return False
     diff = recompute(ext, mk, fac)
     prog(f"{fac} 2024 底前重算 vs pkl 最大差 {diff:.2e}")
     if fac in FIN_FACS:
         prog(f"{fac} 2024 底前與 pkl 不一致 {len(FIN_MISMATCH)}/{len(ext)} 檔（2024 底前沿用 pkl 原值）：{FIN_MISMATCH[:10]}")
         # 〔自行裁量〕f_dividend_yield_ttm 的 pkl 早於 10/22（分母改原始收盤）與 10/27（補公積配息）兩次 factors.py 修正，
         # 且 84 檔 pkl 分母是 yfinance 還原價，2024 底前不一致是預期內（實測 72/236）；照舊沿用 pkl，不套 5% 停止，報告照實揭露。
-        if len(FIN_MISMATCH) > 0.05 * len(ext) and fac != "f_dividend_yield_ttm":
+        # 〔自行裁量〕籌碼類建 pkl 時主路徑是 T86 本機快取、FinMind 只補缺日，這裡只用 FinMind 路徑，2024 底前有差是預期內；
+        # 同殖利率作法：2024 底前沿用 pkl、不套 5% 停止，不一致檔數照實揭露。
+        if len(FIN_MISMATCH) > 0.05 * len(ext) and fac != "f_dividend_yield_ttm" and fac not in CHIP_FACS:
             prog("不一致超過 5%，停止")
             return False
     elif diff > 1e-6:

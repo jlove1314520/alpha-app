@@ -23,6 +23,9 @@ from reaudit_ext2025_roe_factor import _raw
 
 FIN_FACS = ["f_gross_profitability", "f_gross_margin_stability", "f_asset_growth", "f_accruals", "f_eps_growth", "f_eps_surprise",
             "f_revenue_surprise", "f_dividend_yield_ttm", "f_value_pe", "f_value_pb"]
+# （DevQueue 20261107-230102）籌碼類：法人買賣超＋融資融券，日資料當日盤後公布、當日即 pit（同 factors.py 註解）。
+CHIP_FACS = ["f_inst_flow", "f_foreign_streak", "f_inst_streak_days", "f_margin_utilization", "f_short_margin_ratio"]
+FIN_FACS = FIN_FACS + CHIP_FACS
 
 RAW = Path(__file__).resolve().parent / "data" / "raw"
 
@@ -142,8 +145,111 @@ def _per_daily(df, sid, fac):
     return np.where(x > 0, -x, np.nan)
 
 
+def _chip_raw(ds, sid, key):
+    """本機 {ds}__{sid}__*.parquet 全部合併；同一 key 以起日最早的檔為準（舊檔優先，2025-01-01 起新檔只補新日期）。"""
+    fs = sorted(RAW.glob(f"{ds}__{sid}__*.parquet"), key=lambda f: (f.stem.split("__")[2:4], f.name))
+    parts = [pd.read_parquet(f) for f in fs]
+    parts = [x for x in parts if not x.empty and "date" in x.columns]
+    if not parts:
+        return pd.DataFrame()
+    x = pd.concat(parts, ignore_index=True)
+    x["date"] = x["date"].astype(str).str[:10]
+    return x.drop_duplicates(key, keep="first")
+
+
+def _inst_wide(sid):
+    """逐字照 factors._finmind_institutional_wide（FinMind 路徑；建 pkl 時主路徑是 T86 本機快取，
+    所以 2024 底前由呼叫端沿用 pkl 原值，只取 2025 起）。"""
+    cols = ["date", "foreign_net", "trust_net", "dealer_net", "total_net"]
+    raw = _chip_raw("TaiwanStockInstitutionalInvestorsBuySell", sid, ["date", "name"])
+    if raw.empty:
+        return pd.DataFrame(columns=cols)
+    raw = raw.copy()
+    raw["net"] = raw["buy"] - raw["sell"]
+
+    def _cat(name):
+        if name == "Foreign_Investor":
+            return "foreign_net"
+        if name == "Investment_Trust":
+            return "trust_net"
+        if name in ("Dealer_self", "Dealer_Hedging"):
+            return "dealer_net"
+        return None
+
+    raw["cat"] = raw["name"].map(_cat)
+    raw = raw.dropna(subset=["cat"])
+    if raw.empty:
+        return pd.DataFrame(columns=cols)
+    wide = raw.pivot_table(index="date", columns="cat", values="net", aggfunc="sum").reset_index()
+    for c in ("foreign_net", "trust_net", "dealer_net"):
+        if c not in wide.columns:
+            wide[c] = 0.0
+    wide["total_net"] = wide[["foreign_net", "trust_net", "dealer_net"]].sum(axis=1)
+    return wide[cols]
+
+
+def _chip_attach(df, sid, fac):
+    if fac in ("f_inst_flow", "f_foreign_streak", "f_inst_streak_days"):  # 照 factors.prepare_factors 第 839～848 行
+        d = pd.DataFrame({"date": pd.to_datetime(df["date"]).dt.strftime("%Y-%m-%d").to_numpy(),
+                          "Trading_Volume": pd.to_numeric(df["Trading_Volume"], errors="coerce").to_numpy(),
+                          "Trading_money": pd.to_numeric(df["Trading_money"], errors="coerce").to_numpy(),
+                          "close": pd.to_numeric(df["close"], errors="coerce").to_numpy()})
+        d = d.merge(_inst_wide(sid), on="date", how="left")
+        for c in ("foreign_net", "trust_net", "dealer_net", "total_net"):
+            d[c] = d[c].fillna(0.0)
+        if fac == "f_foreign_streak":
+            avg_vol20 = d["Trading_Volume"].rolling(F.FOREIGN_STREAK_VOL_WINDOW, min_periods=1).mean().to_numpy()
+            return F._foreign_streak_strength(d["foreign_net"].to_numpy(), avg_vol20)
+        if fac == "f_inst_streak_days":
+            return F._consecutive_positive_streak_days(d["total_net"].to_numpy())
+        W = F.INST_FLOW_WINDOW
+        net_amount = d["total_net"] * d["close"]
+        value20 = d["Trading_money"].rolling(W, min_periods=W).mean()
+        return (net_amount.rolling(W, min_periods=W).sum() / (value20 * W)).to_numpy()
+    # 融資使用率／券資比：照 factors._margin_utilization／_short_margin_ratio，當日即 pit，as-of 接
+    raw = _chip_raw("TaiwanStockMarginPurchaseShortSale", sid, ["date"])
+    if fac == "f_margin_utilization":
+        num, den = "MarginPurchaseTodayBalance", "MarginPurchaseLimit"
+    else:
+        num, den = "ShortSaleTodayBalance", "MarginPurchaseTodayBalance"
+    if raw.empty or not {num, den} <= set(raw.columns):
+        return np.full(len(df), np.nan)
+    m = raw[["date", num, den]].copy()
+    m[num] = pd.to_numeric(m[num], errors="coerce")
+    m[den] = pd.to_numeric(m[den], errors="coerce")
+    m = m[m[den] > 0]
+    if m.empty:
+        return np.full(len(df), np.nan)
+    p = pd.DataFrame({"_t": pd.to_datetime(m["date"]), "v": (m[num] / m[den]).to_numpy()}).dropna().sort_values("_t")
+    left = pd.DataFrame({"_t": pd.to_datetime(df["date"]), "_i": np.arange(len(df))}).sort_values("_t")
+    j = pd.merge_asof(left, p, on="_t", direction="backward")
+    out = np.full(len(df), np.nan)
+    out[j["_i"].to_numpy()] = j["v"].to_numpy()
+    return out
+
+
+_RAW_NAMES = None
+
+
+def chip_coverage(sid):
+    """2025 起新檔是否已在本機（法人、融資券各一）。raw 目錄檔案很多，只列一次目錄（每次 glob 太慢）。"""
+    global _RAW_NAMES
+    if _RAW_NAMES is None:
+        import os
+        _RAW_NAMES = set(os.listdir(RAW))
+    out = {}
+    for ds in ("TaiwanStockInstitutionalInvestorsBuySell", "TaiwanStockMarginPurchaseShortSale"):
+        pre = f"{ds}__{sid}__"
+        out[ds] = any(n.startswith(pre) and n.endswith(".parquet") and len(n[:-8].split("__")) == 4
+                      and n[:-8].split("__")[2] <= "2025-01-01" and n[:-8].split("__")[3] >= "2026-09-24"
+                      for n in _RAW_NAMES)
+    return out
+
+
 def attach(df, sid, fac):
     """照 factors._asof_join：先丟掉 NaN 季，每個交易日接 pit_date<=當日 的最新一季值。"""
+    if fac in CHIP_FACS:
+        return _chip_attach(df, sid, fac)
     if fac in ("f_value_pe", "f_value_pb"):
         return _per_daily(df, sid, fac)
     p = fin_pit(sid, fac).dropna()
