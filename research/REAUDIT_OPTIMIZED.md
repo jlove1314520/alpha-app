@@ -552,3 +552,27 @@ TRIALS_LEDGER＋TRIALS_REGISTRY 共 **489** 筆試驗（編號 1～489），自�
 「併入總表約第幾名」＝綜合分數（年化÷|MDD|）跟第 0 節 18 族比；期間只到 2024 底，跟第 0 節各族期間不同，只當粗排。格數未滿 48 的族是本輪時間到、下一輪接續，數字會再變。
 
 <!-- BATCH3-B3-END -->
+
+<!-- BATCH3-B4-BEGIN -->
+
+## 8. 第二批第 4 批 regime→0050 類 10 族結果（先.一五五-3 ③，`research/reaudit_batch4_regime.py`，零新外部請求）
+
+> 產生：2026-11-07T15:07:45；期間＝各族訊號實際有值起～2024-12-31（對齊檔只到 2024 底，**2025 起延長尚未做**）。做法：訊號觀察日後第 2 個交易日起生效（隔日收盤調倉）、expanding 百分位門檻（不偷看未來）；轉換（水位／變化）×方向×門檻 70/80/90×避險曝險 0/0.5 × 槓桿 1/1.5/2/3 × 組合止損 不設/10/20/30%。0050 含息、成本照實（滑價＋手續費＋賣出證交稅）、槓桿借款＝台灣無風險利率＋年 1%。樣本內最優化一定偏樂觀；多重比較只當參考。3× 超過台股融資上限只當參考。非投資建議。
+
+| 族 | 期間起 | 最好的一組（Calmar，MDD≤50%） | 年化 | MDD | Sharpe | 勝率 | 交易次數 | 綜合分數 | 併入總表約第幾名 | 1× 不設止損最好 年化／MDD | 同期 0050 年化／MDD | 同槓桿不擇時 年化／MDD | 越線格數 | 曲線 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| fut（#18 等 0050 多時間框架動能投票（fut 家族改做現股 0050）） | 2004-06-17 | lookbacks=20/60/250，votes_needed=2，riskoff_exposure=0.5，L=1.0，stop=0.1 | +9.1% | -31.3% | 0.67 | 48% | 166 | 0.29 | 約第 17 名 | +8.6%／-38.6% | +11.5%／-55.8% | +11.5%／-55.8% | 175 | [png](data/reaudit_curves/batch3_b4_fut.png) |
+| HQ#76（#76 VIX 期限結構（VIX9D/VIX）） | 2012-02-02 | transform=chg21，riskoff_when=高，pct_threshold=0.9，riskoff_exposure=0.5，L=2.0，stop=0.2 | +24.1% | -49.1% | 0.89 | 52% | 147 | 0.49 | 約第 12 名 | +11.5%／-32.0% | +14.2%／-34.0% | +24.5%／-58.5% | 349 | [png](data/reaudit_curves/batch3_b4_HQ76.png) |
+| fx_twd（#32 美元兌台幣變化） | 2016-02-23 | transform=level，riskoff_when=高，pct_threshold=0.9，riskoff_exposure=0.0，L=2.0，stop=0.1 | +30.5% | -32.7% | 1.12 | 53% | 36 | 0.93 | 約第 3 名 | +18.8%／-28.0% | +17.8%／-34.0% | +32.1%／-58.5% | 224 | [png](data/reaudit_curves/batch3_b4_fx_twd.png) |
+| option_pcr_overlay（#31 台指選擇權 PCR 擇時） | 2016-01-15 | transform=chg21，riskoff_when=低，pct_threshold=0.9，riskoff_exposure=0.5，L=2.0，stop=0.1 | +17.9% | -34.4% | 0.74 | 45% | 166 | 0.52 | 約第 10 名 | +13.4%／-32.3% | +18.5%／-34.0% | +33.6%／-58.5% | 397 | [png](data/reaudit_curves/batch3_b4_option_pcr_overlay.png) |
+| copper_gold_ratio（#34 銅金比） | 2016-01-26 | transform=level，riskoff_when=高，pct_threshold=0.8，riskoff_exposure=0.0，L=2.0，stop=0.2 | +39.3% | -35.7% | 1.29 | 45% | 31 | 1.10 | 約第 1 名 | +18.9%／-28.2% | +18.4%／-34.0% | +33.3%／-58.5% | 250 | [png](data/reaudit_curves/batch3_b4_copper_gold_ratio.png) |
+| fred_yield_curve（#33 美債 10Y-2Y 利差） | 2016-01-28 | transform=chg63，riskoff_when=低，pct_threshold=0.9，riskoff_exposure=0.5，L=3.0，stop=0.3 | +52.7% | -49.4% | 1.15 | 62% | 39 | 1.07 | 約第 1 名 | +19.0%／-28.2% | +18.5%／-34.0% | +47.3%／-74.7% | 214 | [png](data/reaudit_curves/batch3_b4_fred_yield_curve.png) |
+| hy_etf_ratio（#78 HYG/IEF 信用比值） | 2008-05-02 | transform=chg21，riskoff_when=高，pct_threshold=0.9，riskoff_exposure=0.5，L=2.0，stop=0.1 | +14.6% | -37.9% | 0.62 | 51% | 116 | 0.38 | 約第 16 名 | +10.9%／-34.0% | +10.5%／-52.4% | +15.5%／-79.8% | 384 | [png](data/reaudit_curves/batch3_b4_hy_etf_ratio.png) |
+| spillover_overnight（#19 美股隔夜報酬外溢） | 2011-01-17 | transform=level，riskoff_when=低，pct_threshold=0.9，riskoff_exposure=0.5，L=1.5，stop=0.2 | +10.2% | -33.7% | 0.54 | 47% | 221 | 0.30 | 約第 16 名 | +8.4%／-35.8% | +12.1%／-34.0% | +15.8%／-47.6% | 466 | [png](data/reaudit_curves/batch3_b4_spillover_overnight.png) |
+| cbi_signal（#81 景氣對策信號分數） | 2003-07-02 | transform=chg3，riskoff_when=低，pct_threshold=0.8，riskoff_exposure=0.0，L=1.0，stop=不設 | +13.5% | -28.2% | 0.87 | 94% | 18 | 0.48 | 約第 12 名 | +13.5%／-28.2% | +11.5%／-55.8% | +11.5%／-55.8% | 406 | [png](data/reaudit_curves/batch3_b4_cbi_signal.png) |
+| dgbas_unemployment（#80 台灣失業率 YoY） | 2003-07-02 | transform=level，riskoff_when=高，pct_threshold=0.9，riskoff_exposure=0.5，L=2.0，stop=0.1 | +15.9% | -40.1% | 0.66 | 47% | 75 | 0.40 | 約第 16 名 | — | +11.5%／-55.8% | +17.1%／-83.7% | 494 | [png](data/reaudit_curves/batch3_b4_dgbas_unemployment.png) |
+
+「併入總表約第幾名」＝綜合分數（年化÷|MDD|）跟第 0 節 18 族比；各族期間不同（2003～2016 起不等），只當粗排。交易次數＝減碼／出場次數；勝率＝每段持有期間結束時淨值高於進場時的比例。
+**讀法提醒**：2016～2024 是大多頭，「同槓桿不擇時」本身年化就很高、但 MDD 多半越過 50%；這批最好的組合主要價值是把回撤壓回 50% 內，年化贏過同槓桿不擇時的只有少數族（看最後兩欄）。fut 族（多時間框架動能）改在 0050 現股上做，期間含 2008。第一版訊號只 shift 1 天，美股隔夜外溢族因此偷吃到台股開盤跳空（年化 +91.9%），已改成觀察日後第 2 個交易日生效並重跑。
+
+<!-- BATCH3-B4-END -->

@@ -1,3 +1,13 @@
+## 2026-11-07 15:01～15:2x DevQueue 20261107-150102（研究帽）先.一五五-3 墓園重審第二批第 4 批（regime→0050）
+等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
+- **先.一五五-3**（維持 `- [ ]`，零外部請求）：FinMind 過去一小時已用 450/600（另一程序在打），[自行裁量] 本輪不加打 PER／籌碼請求，改做第 4 批 regime→0050。
+  - 新 `research/reaudit_batch4_regime.py`：讀本機既有 `research/data/*_aligned.csv` 訊號＋`reaudit_optimized_batch1` 的 0050 含息／台灣無風險利率，10 族各 576 格（fut 256 格），期間各族訊號起～2024-12-31；結果寫 `research/REAUDIT_OPTIMIZED.md` 第 8 節。
+  - Calmar 最好：銅金比 2× +39.3%／−35.7%、美債 10Y-2Y 利差 3× +52.7%／−49.4%（3× 超融資上限只當參考）、美元兌台幣 2× +30.5%／−32.7%、PCR 2× +17.9%／−34.4%；其餘 6 族綜合分數在總表 12 名以後。同期 2× 0050 不擇時 +33%／−58.5%——這批的主要價值是把回撤壓回 50% 內。
+  - [自行裁量] 訊號一律觀察日後第 2 個交易日生效：第一版只 shift 1，美股隔夜外溢族偷吃台股開盤跳空跑出 +91.9%，修正後 +10.2%（不如 0050）。
+  - 候選欄新增 4 支（B4R-），`reaudit_batch3_ext2025.py candidates` 改成保留 B4R- 條目；`paper_opt_track.py` 重產 8 支對上、last_error=None。推播已送。
+  - 下一輪：regime 族延長到 2025 起（對齊檔只到 2024 底）；PER／籌碼 2025 起分批抓（先看 FinMind 用量）；第 5 批。
+  - 冒煙：`node scripts/smoke_test.mjs` 188 過 0 失敗、exit 0（「冒煙測試結果：全部通過」15:26）。
+
 ## 2026-11-07 14:31～14:5x DevQueue 20261107-143102（維運帽）先.一三五-1mn ADR 溢價標「匯率 MM/DD」（舊匯率）
 等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
 - **先.一三五-1mn**（`- [x]`，零外部請求）：`.github/scripts/compute_adr_premium.py` 新增 `_norm_date()`（YYYYMMDD→ISO，`_tw_trading_lag` 也改用）與 `_fx_trading_lag()`（沿用 `_tw_trading_lag`）；匯率日期比台股收盤日落後 ≥1 個台股交易日 → 該列加 `fx_date_lag_trading_days`，`app-market.js` `adrRowHtml` 在 % 後灰字標「匯率 MM/DD」。

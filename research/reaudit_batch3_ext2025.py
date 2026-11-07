@@ -328,6 +328,9 @@ def write_candidates():
                           {k: round(v, 4) for k, v in seg["full"].items()},
                           "violates_survival_extended": bool(seg and seg["full"]["mdd"] < -0.50),
                           "notes": "；".join(note)})
+    if CAND.exists():  # 第 4 批 regime 族（reaudit_batch4_regime.py 寫的 B4R- 條目）原樣保留
+        cands += [c for c in json.loads(CAND.read_text(encoding="utf-8")).get("candidates", [])
+                  if str(c.get("id", "")).startswith("B4R-")]
     cands.sort(key=lambda c: c["rank_in_table"])
     CAND.write_text(json.dumps({"generated_at": datetime.now().isoformat(timespec="seconds"),
                                 "rule": "綜合分數（年化÷|MDD|）併入 REAUDIT_OPTIMIZED.md 第 0 節總表約前 10 名者；非投資建議",
