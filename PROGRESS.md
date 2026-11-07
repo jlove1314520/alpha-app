@@ -1,3 +1,25 @@
+## 2026-11-08 02:31～ DevQueue 20261108-023102（維運帽）先.一三五-1mx 股數基準追溯調整＋先.一三五-1my 面額非 10 元股數
+
+等待總司令審閱：9 件（`research/AWAITING_REVIEW.md`「等待中」表，本輪無新增；最舊 先.一三五-1ae-a 自 10/28 起、最新 先.一五五-2a 自 11/07 起）。
+
+### 先.一三五-1mx 近四季 EPS 跨越股數基準改變（commit 564d551dfe6）
+- **做了什麼**：`.github/scripts/update_stock_financials.py` 新增 `detect_share_base_shift()`（淨利÷EPS 推得股數持續跳變：跳變前後各 ≥2 季、倍數 ≥1.5 或 ≤0.67）、`load_official_ttm_eps_map()`（fundamentals.json 本益比÷同日 quotes_all_tw.json 收盤）、`verify_share_base_shift()`、`restate_share_base_shift()`；只有「舊季 EPS÷倍數後對得上官方近四季 EPS、原值對不上」才改：原值存 `eps_pre_restate`、`eps_basis=restated_share_base`，只改 EPS 不改淨利；已有 eps_basis 的列（6667 型）不動。每日與離線兩條路徑都接，各自 try（十二節）。全市場掃描腳本 `scripts/probe_eps_share_base_shift.py`。
+- **結果**：17 檔持續跳變；近四季窗口內有官方可核對 3 檔：**8937 matched**（倍數 4.239，TTM 0.94→0.06＝官方 0.06），8422／8932 兩邊都對不上只記錄；其餘不在窗口／不連續／虧損無本益比只記錄。`data/stock_detail.json` 離線重產只有 8937 變動，重跑冪等。
+- **[自行裁量]**：第一版只要求跳變後 ≥2 季，掃出 108 檔、2329／3583 被判 matched，逐檔看是**官方 2025Q4 單季 EPS 孤立離群**（前後季股數同一水準），不是基準改變 → 加「跳變前也 ≥2 季在舊水準」；孤立離群（官方列 10 筆）另開 **先.一三五-1mz**。
+- **證據**：`scripts/selftest_share_base_restate.py` 19/19 PASS；既有四支財報自測全過；冒煙 188 過、0 失敗、exit 0。
+
+### 先.一三五-1my shares_outstanding_approx 面額非 10 元（commit 9be9348588d）
+- **做了什麼**：新增 `fix_shares_by_implied_eps()`：最近兩季推得股數（|EPS|≥0.05、兩季相差 ≤15%）比股本÷10 多 >30% → 改用推得股數（仟股），`shares_basis=implied_from_eps`、原值存 `shares_from_capital_div10`；回到 30% 內還原；股本÷10 重寫的兩處同時清掉舊標記。
+- **結果**：向上 18 檔改（倍數集中 2／4／10／20＝面額 5／2.5／1／0.5 元；8937 107,920→421,914 仟股、2327 約 4 倍）；向下 6 檔（6669 0.32、1235、3095、1608、9943、5227）只記錄。下游：`generate_scores_future` 這 18 檔法人買超佔股本比下一班起變小（原高估 2～24 倍）；`build_research` 深度設定 10 檔不在名單內；App 端沒讀這欄。
+- **[自行裁量]**：向下只記錄（面額 >10 元罕見，較像股本欄位或加權股數差異）；|EPS| 門檻用 0.05 而非條目建議的 0.2（8937 最近兩季 EPS −0.07／−0.14，用 0.2 會漏掉起因個案），改加兩季一致守門。
+- **證據**：`scripts/selftest_shares_implied.py` 10/10 PASS；其他五支財報自測全過；冒煙 188 過、0 失敗、exit 0。
+
+### 收工
+- 維運帽產物：`data/STATUS.json` known_limitations 加一條（股數基準／推得股數／1mz 未處理）。
+- 權威清單下一項是 [研究] 先.一五五-3，依一輪一頂帽子收工，留給下一輪研究帽。
+- 佇列深度：`- [ ]` 30 項（≥12）、DevQueue 可執行非研究 6 項（≥6），不需補件；本輪新補 先.一三五-1mz（來源①數字可能錯——1mx 副帶發現）。
+- BLOCKED：無。零外部請求。
+
 ## 2026-11-08 02:01～ DevQueue 20261108-020102（研究帽）先.一五五-3 第 4 批 regime 延長到 2025 起
 
 等待總司令審閱：0 件（本輪無新增等待項）。
