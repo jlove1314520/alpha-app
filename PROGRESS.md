@@ -1,3 +1,15 @@
+## 2026-11-07 18:01～18:3x DevQueue 20261107-180102（開發帽）先.一三五-1mp 資料健康頁匯率改看資料日期
+等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
+- **先.一三五-1mp**（`- [x]`，commit 523f6b68d76，零外部請求）：`app-settings.js` FRESHNESS_ITEMS 的 fx.json 列加可選欄位 `dataDate`（取 `usd_twd.date`），
+  新增 `_freshnessJudgeDataDate()`：逐日比台北日期字串、扣 `TW_HOLIDAYS`（已併 trading_calendar 的休市＋臨時休市），今天是交易日且 18:00 前允許落後 1 個交易日，
+  其他時候須是最近交易日；右欄改顯示「資料日 YYYY-MM-DD」、說明附檔案寫入時間。讀不到資料日期才退回 fetched_at；其他列不動。
+  - 證據：新自測 `node scripts/selftest_fx_freshness.mjs` 9 項全 PASS（直接呼叫 7 案例＋畫面假檔 2 案例：fetched_at=現在、資料日停 11/03＝落後 3 交易日 → `data-status=overdue`「逾期」；資料日 11/06 → 正常）。
+  - [自行裁量] 第一版逐日比「時刻」導致今天中午前不計入（11/05@11/09 10:00 誤判正常），改成比日期字串。條目原述「10/23～10/26 停 3 交易日」實為 10/23 臨時休市、10/26 休市，自測改用 10/29 19:00 驗證。
+  - 自測要點：Playwright 需 `serviceWorkers:'block'`＋`__ALPHA_FETCH_MEMCACHE_OFF`，否則假檔被 SW／60 秒記憶體快取擋住。
+  - 冒煙：`node scripts/smoke_test.mjs` 188 項 PASS、0 FAIL、exit 0。
+- 下一項是 先.一五五-3［研究］，依一輪一帽收工，留給下一輪研究帽。
+- 收工補件：非研究 DevQueue 可執行只剩 4 項（< 6），補 2 項（②畫面問題，同型）：先.一三五-1mq（market_tw.json 改看 `data_date`）、先.一三五-1mr（strategy_performance.json 改看 `as_of_trading_date`）。`- [ ]` 共 30 項。
+
 ## 2026-11-07 17:01～17:4x DevQueue 20261107-170102（研究帽）先.一五五-3 墓園重審第二批第 5 批（0050 價格擇時）＋PER 續抓
 等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
 - **先.一五五-3**（維持 `- [ ]`）：開工時 FinMind 過去一小時 319 次（另一程序每分鐘約 10 次），[自行裁量] 先做零請求的第 5 批。
