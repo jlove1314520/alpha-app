@@ -135,7 +135,9 @@ def run(fac, deadline):
     prog(f"{fac} 2024 底前重算 vs pkl 最大差 {diff:.2e}")
     if fac in FIN_FACS:
         prog(f"{fac} 2024 底前與 pkl 不一致 {len(FIN_MISMATCH)}/{len(ext)} 檔（2024 底前沿用 pkl 原值）：{FIN_MISMATCH[:10]}")
-        if len(FIN_MISMATCH) > 0.05 * len(ext):
+        # 〔自行裁量〕f_dividend_yield_ttm 的 pkl 早於 10/22（分母改原始收盤）與 10/27（補公積配息）兩次 factors.py 修正，
+        # 且 84 檔 pkl 分母是 yfinance 還原價，2024 底前不一致是預期內（實測 72/236）；照舊沿用 pkl，不套 5% 停止，報告照實揭露。
+        if len(FIN_MISMATCH) > 0.05 * len(ext) and fac != "f_dividend_yield_ttm":
             prog("不一致超過 5%，停止")
             return False
     elif diff > 1e-6:

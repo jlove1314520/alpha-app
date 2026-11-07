@@ -1,3 +1,11 @@
+## 2026-11-07 18:31～19:0x DevQueue 20261107-183102（研究帽）先.一五五-3 殖利率因子延長到 2025 起
+等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
+- **先.一五五-3**（維持 `- [ ]`，零外部請求）：`research/reaudit_ext2025_fin_factors.py` 新增 f_dividend_yield_ttm（分子直接呼叫 `factors._dividend_yield_ttm_cash_from_df`、本機股利快取合併；分母＝當日原始收盤），
+  延長到 2026-09-24 跑完 48/48。同參數全期 +6.9%／−10.9%、2025 起 +1.3%／−5.2%；全期重挑仍同組。候選欄 26 支名單不變、`data/paper_opt_track.json` 重產（8 支對上、last_error=None）。
+  〔自行裁量〕2024 底前與 pkl 不一致 72/236 檔（pkl 早於 10/22、10/27 兩次殖利率公式修正，84 檔分母是 yfinance 還原價），2024 底前沿用 pkl、2025 起用現行公式，不套 5% 停止。
+- PER 續抓：新 `research/fetch_per_2025_resume.py`（送前查用量，<300 才開抓、>450 停、19:00 截止）；本輪 FinMind 用量一直 349～383（另一程序在打），**0 次請求**，斷點仍 6218、尚餘 70 檔。BLOCKED 原因＝額度，解除條件＝`calls_last_hour()`<300。
+- 冒煙測試：`node scripts/smoke_test.mjs` exit=0，188 項全 [x]、無 FAIL。
+
 ## 2026-11-07 18:01～18:3x DevQueue 20261107-180102（開發帽）先.一三五-1mp 資料健康頁匯率改看資料日期
 等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
 - **先.一三五-1mp**（`- [x]`，commit 523f6b68d76，零外部請求）：`app-settings.js` FRESHNESS_ITEMS 的 fx.json 列加可選欄位 `dataDate`（取 `usd_twd.date`），

@@ -22,7 +22,7 @@ from pit import _next_month_10th, _pivot_with_statutory_pit
 from reaudit_ext2025_roe_factor import _raw
 
 FIN_FACS = ["f_gross_profitability", "f_gross_margin_stability", "f_asset_growth", "f_accruals", "f_eps_growth", "f_eps_surprise",
-            "f_revenue_surprise"]
+            "f_revenue_surprise", "f_dividend_yield_ttm"]
 
 RAW = Path(__file__).resolve().parent / "data" / "raw"
 
@@ -115,6 +115,14 @@ def fin_pit(sid, fac):
         rev["yoy_std"] = rev["yoy"].rolling(W, min_periods=W).std()
         rev["v"] = rev["yoy"] / rev["yoy_std"]
         return rev[["pit_date", "v"]]
+    if fac == "f_dividend_yield_ttm":  # （DevQueue 20261107-183102）分子照 factors._dividend_yield_ttm_cash_from_df
+        fs = sorted(RAW.glob(f"TaiwanStockDividend__{sid}__*.parquet"))
+        parts = [pd.read_parquet(f) for f in fs]
+        parts = [x for x in parts if not x.empty]
+        if not parts:
+            return empty
+        t = F._dividend_yield_ttm_cash_from_df(pd.concat(parts, ignore_index=True))
+        return t.rename(columns={"ttm_cash_dividend": "v"})[["pit_date", "v"]]
     raise ValueError(fac)
 
 
@@ -128,4 +136,7 @@ def attach(df, sid, fac):
     j = pd.merge_asof(left, p[["_t", "v"]], on="_t", direction="backward")
     out = np.full(len(df), np.nan)
     out[j["_i"].to_numpy()] = j["v"].to_numpy()
+    if fac == "f_dividend_yield_ttm":  # 分母＝當日原始收盤（2025 起列是 FinMind 原始 close；同 factors._raw_close_for_yield 原則）
+        c = pd.to_numeric(df["close"], errors="coerce").to_numpy(dtype=float)
+        out = np.where(c > 0, out / c, np.nan)
     return out
