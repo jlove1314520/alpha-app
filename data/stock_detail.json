@@ -1995,8 +1995,8 @@
         "8299": "eps 加總 187.37 vs 官方累計 187.43",
         "8435": "eps 加總 2.84 vs 官方累計 2.88"
       },
-      "generated_at": "2026-11-07T09:15:30.670487+08:00",
-      "mode": "daily"
+      "generated_at": "2026-11-07T10:02:02.028312+08:00",
+      "mode": "offline"
     },
     "financials_half_year_period": {
       "note": "同一年 quarters 只有 Q2／Q4 兩筆（半年報公司）時，Q2 標 period=H1（上半年）、Q4 標 period=H2（下半年），數值不改（先.一三五-1mb）；另以月營收證明（營收＝半年月營收加總）或前一年已是半年報＋今年只有 Q2 標記，period_basis 記證據類型（先.一三五-1me）",
@@ -2219,6 +2219,12 @@
         "month_revenue": 17,
         "prior_year_half": 4
       }
+    },
+    "roe_recomputed_after_backfill_merge": {
+      "note": "併入回補季的檔用合併後近四季重算 ROE；最後一季須等於 latest_cum、四季須連續，否則 None（先.一三五-1md）",
+      "recomputed_count": 690,
+      "set_none_count": 151,
+      "errors": {}
     }
   },
   "stocks": {
@@ -131980,7 +131986,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.3,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -132124,7 +132130,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.21,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -132268,7 +132274,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.94,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -132412,7 +132418,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.48,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -132892,7 +132898,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 3.33,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -133038,7 +133044,7 @@
           }
         ],
         "equity_parent_latest": 19549859.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 21.12,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
         "latest_cum": {
@@ -133181,7 +133187,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.6,
         "equity_parent_latest": 40492200.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -133468,7 +133474,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 12.23,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -133868,7 +133874,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.94,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -134075,7 +134081,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 6.43,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -134394,7 +134400,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 8.28,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -134819,7 +134825,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.48,
         "equity_parent_latest": 40408733.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -135044,7 +135050,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.21,
         "equity_parent_latest": 8652506.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -135188,7 +135194,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 13.59,
         "equity_parent_latest": 2514435.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -135520,7 +135526,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 20.01,
         "equity_parent_latest": 583004.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -135664,7 +135670,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.96,
         "equity_parent_latest": 7985846.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -135808,7 +135814,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.8,
         "equity_parent_latest": 7297154.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -136414,7 +136420,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 6.71,
         "equity_parent_latest": 2770644.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -136559,7 +136565,7 @@
           }
         ],
         "equity_parent_latest": 4198589.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 13.26,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
         "latest_cum": {
@@ -136702,7 +136708,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -7.51,
         "equity_parent_latest": 2957379.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -136846,7 +136852,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -8.77,
         "equity_parent_latest": 2776434.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -136990,7 +136996,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -9.34,
         "equity_parent_latest": 11699669.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -137220,7 +137226,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 2.16,
         "equity_parent_latest": 7955837.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -137364,7 +137370,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 19.52,
         "equity_parent_latest": 1763243.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -137508,7 +137514,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 2.04,
         "equity_parent_latest": 6463102.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -137653,7 +137659,7 @@
           }
         ],
         "equity_parent_latest": 2763057.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.86,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
         "latest_cum": {
@@ -137796,7 +137802,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -7.73,
         "equity_parent_latest": 2537130.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -138112,7 +138118,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.25,
         "equity_parent_latest": 8342339.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -138256,7 +138262,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -3.0,
         "equity_parent_latest": 5835268.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -138400,7 +138406,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -38.19,
         "equity_parent_latest": 505410.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -138544,7 +138550,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.98,
         "equity_parent_latest": 3118317.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -138688,7 +138694,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -8.0,
         "equity_parent_latest": 1826633.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -138832,7 +138838,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -12.88,
         "equity_parent_latest": 539440.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -139635,7 +139641,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 14.29,
         "equity_parent_latest": 3269877.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -139825,7 +139831,7 @@
           }
         ],
         "equity_parent_latest": 2370449.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 26.9,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
         "latest_cum": {
@@ -140106,7 +140112,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 6.93,
         "equity_parent_latest": 3646665.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -140250,7 +140256,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 7.57,
         "equity_parent_latest": 1071782.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -140394,7 +140400,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.89,
         "equity_parent_latest": 2041196.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -140538,7 +140544,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.28,
         "equity_parent_latest": 4935985.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -140682,7 +140688,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -16.48,
         "equity_parent_latest": 2422263.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -140826,7 +140832,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.52,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -140970,7 +140976,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -24.52,
         "equity_parent_latest": 3659728.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -141176,7 +141182,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -83.0,
         "equity_parent_latest": 4540895.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -141320,7 +141326,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 20.41,
         "equity_parent_latest": 17697906.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -141464,7 +141470,7 @@
             "source": "official_cum_minus_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.86,
         "equity_parent_latest": 3716696.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -141672,7 +141678,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 8.09,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -141966,7 +141972,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 13.28,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -142110,7 +142116,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 14.85,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -142318,7 +142324,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 13.17,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -142462,7 +142468,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 14.51,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -142606,7 +142612,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 13.84,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -142751,7 +142757,7 @@
           }
         ],
         "equity_parent_latest": 154541038.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 8.55,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -143025,7 +143031,7 @@
           }
         ],
         "equity_parent_latest": 2804797.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.09,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -143456,7 +143462,7 @@
           }
         ],
         "equity_parent_latest": 1899193.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 3.05,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -143869,7 +143875,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -16.94,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -144169,7 +144175,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 18.17,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -144469,7 +144475,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 1.97,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -144614,7 +144620,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -20.41,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -144759,7 +144765,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.43,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -144999,7 +145005,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -3.09,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -145546,7 +145552,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.91,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -145686,7 +145692,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -16.71,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -145831,7 +145837,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.66,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -145976,7 +145982,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 24.57,
         "equity_parent_latest": 16215878.0,
         "prev_cum": null,
         "latest_cum": {
@@ -146121,7 +146127,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 13.28,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -146421,7 +146427,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 1.52,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -146566,7 +146572,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 14.74,
         "equity_parent_latest": 13699234.0,
         "prev_cum": null,
         "latest_cum": {
@@ -146865,7 +146871,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.17,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -147010,7 +147016,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 0.18,
         "equity_parent_latest": 928153.0,
         "prev_cum": null,
         "latest_cum": {
@@ -147156,7 +147162,7 @@
           }
         ],
         "equity_parent_latest": 1809107.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 13.38,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -147300,7 +147306,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 7.52,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -147445,7 +147451,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -68.06,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -147590,7 +147596,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.71,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -149099,7 +149105,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 12.64,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -149244,7 +149250,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 28.18,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -149389,7 +149395,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.08,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -149771,7 +149777,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -2.66,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -149916,7 +149922,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -25.96,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -150061,7 +150067,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.65,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -150206,7 +150212,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 8.98,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -150447,7 +150453,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -6.84,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -150593,7 +150599,7 @@
           }
         ],
         "equity_parent_latest": 128296.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -38.07,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -150803,7 +150809,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 15.16,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -150948,7 +150954,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 36.25,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -151188,7 +151194,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 35.13,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -151328,7 +151334,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.27,
         "equity_parent_latest": 1827401.0,
         "prev_cum": null,
         "latest_cum": {
@@ -151473,7 +151479,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 24.06,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -151618,7 +151624,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 18.87,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -152403,7 +152409,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -12.87,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -152548,7 +152554,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.84,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -153294,7 +153300,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 6.57,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -153396,7 +153402,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.23,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -153536,7 +153542,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 29.96,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -153681,7 +153687,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 0.27,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -153815,7 +153821,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.11,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -153960,7 +153966,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -4.98,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -154105,7 +154111,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.98,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -154404,7 +154410,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.86,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -154550,7 +154556,7 @@
           }
         ],
         "equity_parent_latest": 386387.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -10.86,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -154904,7 +154910,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.0,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -155144,7 +155150,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 8.24,
         "equity_parent_latest": 43810424.0,
         "prev_cum": null,
         "latest_cum": {
@@ -155289,7 +155295,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -2.12,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -155669,7 +155675,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 6.95,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -156048,7 +156054,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 36.34,
         "equity_parent_latest": 1934214.0,
         "prev_cum": null,
         "latest_cum": {
@@ -156352,7 +156358,7 @@
           }
         ],
         "equity_parent_latest": 954268.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 23.1,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -156491,7 +156497,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 2.37,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -156636,7 +156642,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 35.51,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -157031,7 +157037,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 39.56,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -157176,7 +157182,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 14.08,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -157400,7 +157406,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -1.64,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -157545,7 +157551,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -8.99,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -158000,7 +158006,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 29.55,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -158145,7 +158151,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 15.71,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -158290,7 +158296,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.9,
         "equity_parent_latest": 2159839.0,
         "prev_cum": null,
         "latest_cum": {
@@ -158435,7 +158441,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -3.93,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -158724,7 +158730,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.9,
         "equity_parent_latest": 15122518.0,
         "prev_cum": null,
         "latest_cum": {
@@ -159023,7 +159029,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.75,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -159169,7 +159175,7 @@
           }
         ],
         "equity_parent_latest": 1790036.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.21,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -159313,7 +159319,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -0.16,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -159603,7 +159609,7 @@
           }
         ],
         "equity_parent_latest": 39363650.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 65.6,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -159902,7 +159908,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -0.6,
         "equity_parent_latest": 481161.0,
         "prev_cum": null,
         "latest_cum": {
@@ -160202,7 +160208,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 1.74,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -160347,7 +160353,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 12.58,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -160492,7 +160498,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -4.42,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -160638,7 +160644,7 @@
           }
         ],
         "equity_parent_latest": 4746979.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 8.34,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -160782,7 +160788,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 21.39,
         "equity_parent_latest": 2498849.0,
         "prev_cum": null,
         "latest_cum": {
@@ -160927,7 +160933,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 80.7,
         "equity_parent_latest": 15115348.0,
         "prev_cum": null,
         "latest_cum": {
@@ -161072,7 +161078,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.33,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -161217,7 +161223,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 19.86,
         "equity_parent_latest": 2371789.0,
         "prev_cum": null,
         "latest_cum": {
@@ -161362,7 +161368,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.81,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -161507,7 +161513,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -1.49,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -161652,7 +161658,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.5,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -161797,7 +161803,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -10.83,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -161942,7 +161948,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -6.46,
         "equity_parent_latest": 2391287.0,
         "prev_cum": null,
         "latest_cum": {
@@ -162087,7 +162093,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 30.43,
         "equity_parent_latest": 13264321.0,
         "prev_cum": null,
         "latest_cum": {
@@ -162233,7 +162239,7 @@
           }
         ],
         "equity_parent_latest": 974171.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -23.49,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -162377,7 +162383,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.05,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -162522,7 +162528,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -17.9,
         "equity_parent_latest": 306441.0,
         "prev_cum": null,
         "latest_cum": {
@@ -162817,7 +162823,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.82,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -162963,7 +162969,7 @@
           }
         ],
         "equity_parent_latest": 3918018.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -6.29,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -163107,7 +163113,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -2.34,
         "equity_parent_latest": 5717152.0,
         "prev_cum": null,
         "latest_cum": {
@@ -163407,7 +163413,7 @@
           }
         ],
         "equity_parent_latest": 787024.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -4.48,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -163551,7 +163557,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 6.4,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -163775,7 +163781,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 8.52,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -163920,7 +163926,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 24.78,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -164592,7 +164598,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.73,
         "equity_parent_latest": 829052.0,
         "prev_cum": null,
         "latest_cum": {
@@ -164817,7 +164823,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 8.89,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -165117,7 +165123,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -4.73,
         "equity_parent_latest": 1411692.0,
         "prev_cum": null,
         "latest_cum": {
@@ -165262,7 +165268,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 15.95,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -165407,7 +165413,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.92,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -165553,7 +165559,7 @@
           }
         ],
         "equity_parent_latest": 3251000.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 8.39,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -165702,7 +165708,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.49,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -165842,7 +165848,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 0.04,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -165987,7 +165993,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 22.0,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -166132,7 +166138,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 19.06,
         "equity_parent_latest": 4541213.0,
         "prev_cum": null,
         "latest_cum": {
@@ -166277,7 +166283,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 7.15,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -166423,7 +166429,7 @@
           }
         ],
         "equity_parent_latest": 2492897.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.78,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -166568,7 +166574,7 @@
           }
         ],
         "equity_parent_latest": 427978.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -16.4,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -166712,7 +166718,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -17.52,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -166857,7 +166863,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 8.54,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -167002,7 +167008,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 2.61,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -167147,7 +167153,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -1.11,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -167292,7 +167298,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 14.06,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -167437,7 +167443,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -29.2,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -167582,7 +167588,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -22.87,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -168271,7 +168277,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 2.45,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -168416,7 +168422,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 18.61,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -168562,7 +168568,7 @@
           }
         ],
         "equity_parent_latest": 6185758.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 0.41,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -168845,7 +168851,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -2.3,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -169754,7 +169760,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 22.89,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -170054,7 +170060,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 6.17,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -170199,7 +170205,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 13.17,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -170344,7 +170350,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 7.94,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -170489,7 +170495,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.33,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -170729,7 +170735,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 55.7,
         "equity_parent_latest": 446838.0,
         "prev_cum": null,
         "latest_cum": {
@@ -170874,7 +170880,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.16,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -171019,7 +171025,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -20.2,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -171414,7 +171420,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -27.51,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -171516,7 +171522,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -9.93,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -171661,7 +171667,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -3.24,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -171806,7 +171812,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -7.89,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -172120,7 +172126,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -2.98,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -172360,7 +172366,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 0.77,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -172505,7 +172511,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -13.93,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -172650,7 +172656,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -24.16,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -173045,7 +173051,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.0,
         "equity_parent_latest": 12989000.0,
         "prev_cum": null,
         "latest_cum": {
@@ -173270,7 +173276,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 17.23,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -173415,7 +173421,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 8.36,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -173561,7 +173567,7 @@
           }
         ],
         "equity_parent_latest": 4976334.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 14.51,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -173705,7 +173711,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.15,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -173850,7 +173856,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 12.62,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -174074,7 +174080,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -6.78,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -174219,7 +174225,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 33.25,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -174364,7 +174370,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -81.94,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -174509,7 +174515,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -12.27,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -174649,7 +174655,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -0.09,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -174949,7 +174955,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 0.19,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -175861,7 +175867,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -11.01,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -176161,7 +176167,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.94,
         "equity_parent_latest": 17155560.0,
         "prev_cum": null,
         "latest_cum": {
@@ -176450,7 +176456,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 13.31,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -176595,7 +176601,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.51,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -176740,7 +176746,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 14.13,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -176964,7 +176970,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -11.57,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -177104,7 +177110,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.25,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -177407,7 +177413,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -3.78,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -177802,7 +177808,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 15.17,
         "equity_parent_latest": 1022206.0,
         "prev_cum": null,
         "latest_cum": {
@@ -177947,7 +177953,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 3.64,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -178092,7 +178098,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.03,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -178241,7 +178247,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 8.85,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -178386,7 +178392,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 23.47,
         "equity_parent_latest": 4394057.0,
         "prev_cum": null,
         "latest_cum": {
@@ -178531,7 +178537,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -31.78,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -178771,7 +178777,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -7.52,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -179011,7 +179017,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 3.15,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -179156,7 +179162,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -102.58,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -179301,7 +179307,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.52,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -179652,7 +179658,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -10.21,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -179792,7 +179798,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -21.37,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -180099,7 +180105,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -19.84,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -180239,7 +180245,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 12.94,
         "equity_parent_latest": 2889924.0,
         "prev_cum": null,
         "latest_cum": {
@@ -180384,7 +180390,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 26.01,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -180530,7 +180536,7 @@
           }
         ],
         "equity_parent_latest": 311415.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -4.79,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -180818,7 +180824,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.13,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -180963,7 +180969,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -1.91,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -181247,7 +181253,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.31,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -181392,7 +181398,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.85,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -181537,7 +181543,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 13.8,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -181682,7 +181688,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -26.58,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -182140,7 +182146,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 15.27,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -182286,7 +182292,7 @@
           }
         ],
         "equity_parent_latest": 1803756.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 3.8,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -182431,7 +182437,7 @@
           }
         ],
         "equity_parent_latest": 868456.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 18.14,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -182575,7 +182581,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -7.41,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -182720,7 +182726,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 15.63,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -183004,7 +183010,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -5.93,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -183149,7 +183155,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 95.27,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -183295,7 +183301,7 @@
           }
         ],
         "equity_parent_latest": 1710715.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 19.19,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -183440,7 +183446,7 @@
           }
         ],
         "equity_parent_latest": 2269366.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -2.5,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -183584,7 +183590,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -25.82,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -183717,7 +183723,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 0.2,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -183862,7 +183868,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 3.7,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -184007,7 +184013,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.81,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -184152,7 +184158,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.34,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -184674,7 +184680,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 7.98,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -184819,7 +184825,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 8.22,
         "equity_parent_latest": 1865002.0,
         "prev_cum": null,
         "latest_cum": {
@@ -185059,7 +185065,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 12.28,
         "equity_parent_latest": 1888858.0,
         "prev_cum": null,
         "latest_cum": {
@@ -185821,7 +185827,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -13.05,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -186061,7 +186067,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.43,
         "equity_parent_latest": 1063979.0,
         "prev_cum": null,
         "latest_cum": {
@@ -186301,7 +186307,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -0.14,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -186446,7 +186452,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.3,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -186591,7 +186597,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 7.07,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -186873,7 +186879,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 12.17,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -187018,7 +187024,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.68,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -187307,7 +187313,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.02,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -187452,7 +187458,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -3.82,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -187597,7 +187603,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.84,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -187743,7 +187749,7 @@
           }
         ],
         "equity_parent_latest": 1446885.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 25.74,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -188062,7 +188068,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -27.12,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -188207,7 +188213,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 56.71,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -188353,7 +188359,7 @@
           }
         ],
         "equity_parent_latest": 1176371.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 3.04,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -188592,7 +188598,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 20.48,
         "equity_parent_latest": 1130545.0,
         "prev_cum": null,
         "latest_cum": {
@@ -188832,7 +188838,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 0.59,
         "equity_parent_latest": 10248576.0,
         "prev_cum": null,
         "latest_cum": {
@@ -189116,7 +189122,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -9.2,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -189261,7 +189267,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.14,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -189406,7 +189412,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.55,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -189551,7 +189557,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 18.29,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -189696,7 +189702,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -2.03,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -189841,7 +189847,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -1.71,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -189986,7 +189992,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.61,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -190430,7 +190436,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 7.5,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -190575,7 +190581,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 24.25,
         "equity_parent_latest": 1610793.0,
         "prev_cum": null,
         "latest_cum": {
@@ -190720,7 +190726,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.59,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -191023,7 +191029,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 8.21,
         "equity_parent_latest": 554438.0,
         "prev_cum": null,
         "latest_cum": {
@@ -191318,7 +191324,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.29,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -191618,7 +191624,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 33.41,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -192169,7 +192175,7 @@
           }
         ],
         "equity_parent_latest": 4446809.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 8.74,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -192468,7 +192474,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 7.3,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -192613,7 +192619,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -1.96,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -192758,7 +192764,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 7.41,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -192903,7 +192909,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -5.39,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -193127,7 +193133,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -1.83,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -193272,7 +193278,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -8.29,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -193417,7 +193423,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -30.2,
         "equity_parent_latest": 74444.0,
         "prev_cum": null,
         "latest_cum": {
@@ -193539,7 +193545,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 12.09,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -193684,7 +193690,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 50.2,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -193829,7 +193835,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.66,
         "equity_parent_latest": 845393.0,
         "prev_cum": null,
         "latest_cum": {
@@ -193974,7 +193980,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -4.14,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -194119,7 +194125,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 39.45,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -194265,7 +194271,7 @@
           }
         ],
         "equity_parent_latest": 745144.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 0.87,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -194409,7 +194415,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -2.53,
         "equity_parent_latest": 2371510.0,
         "prev_cum": null,
         "latest_cum": {
@@ -194554,7 +194560,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -7.36,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -195039,7 +195045,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -29.69,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -195374,7 +195380,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 8.7,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -195688,7 +195694,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.07,
         "equity_parent_latest": 3834226.0,
         "prev_cum": null,
         "latest_cum": {
@@ -196257,7 +196263,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 72.73,
         "equity_parent_latest": 7791478.0,
         "prev_cum": null,
         "latest_cum": {
@@ -196402,7 +196408,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 8.0,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -196638,7 +196644,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.31,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -196863,7 +196869,7 @@
           }
         ],
         "equity_parent_latest": 2778674.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 33.16,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -197317,7 +197323,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -0.29,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -197541,7 +197547,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 17.47,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -197686,7 +197692,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.26,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -197831,7 +197837,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 75.54,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -197977,7 +197983,7 @@
           }
         ],
         "equity_parent_latest": 1730245.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.23,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -198121,7 +198127,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -21.96,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -198266,7 +198272,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -1.23,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -198411,7 +198417,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.38,
         "equity_parent_latest": 2271071.0,
         "prev_cum": null,
         "latest_cum": {
@@ -198949,7 +198955,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -16.01,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -199051,7 +199057,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 29.44,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -199196,7 +199202,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.39,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -199341,7 +199347,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -19.34,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -199486,7 +199492,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.21,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -199631,7 +199637,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -4.61,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -199776,7 +199782,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 7.14,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -200000,7 +200006,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 2.07,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -200146,7 +200152,7 @@
           }
         ],
         "equity_parent_latest": 518673.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 0.94,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -200434,7 +200440,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 19.55,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -200579,7 +200585,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.48,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -200724,7 +200730,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 3.95,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -201013,7 +201019,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -0.41,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -201158,7 +201164,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 41.67,
         "equity_parent_latest": 4034972.0,
         "prev_cum": null,
         "latest_cum": {
@@ -201458,7 +201464,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.7,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -201747,7 +201753,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 2.68,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -201892,7 +201898,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 1.37,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -202038,7 +202044,7 @@
           }
         ],
         "equity_parent_latest": 2475947.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.53,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -202182,7 +202188,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -2.27,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -202472,7 +202478,7 @@
           }
         ],
         "equity_parent_latest": 1089120.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 15.11,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -202616,7 +202622,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 14.57,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -202762,7 +202768,7 @@
           }
         ],
         "equity_parent_latest": 1172152.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -2.08,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -202906,7 +202912,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.24,
         "equity_parent_latest": 51130992.0,
         "prev_cum": null,
         "latest_cum": {
@@ -203051,7 +203057,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -0.45,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -203197,7 +203203,7 @@
           }
         ],
         "equity_parent_latest": 1014644.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -0.32,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -203341,7 +203347,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.63,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -203641,7 +203647,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 13.48,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -203942,7 +203948,7 @@
           }
         ],
         "equity_parent_latest": 7231695.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 22.38,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -204086,7 +204092,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 0.81,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -204376,7 +204382,7 @@
           }
         ],
         "equity_parent_latest": 3286602.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 17.96,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -204521,7 +204527,7 @@
           }
         ],
         "equity_parent_latest": 2841442.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -0.64,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -204665,7 +204671,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 23.6,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -204810,7 +204816,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.5,
         "equity_parent_latest": 31254367.0,
         "prev_cum": null,
         "latest_cum": {
@@ -204955,7 +204961,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 29.89,
         "equity_parent_latest": 16612189.0,
         "prev_cum": null,
         "latest_cum": {
@@ -205537,7 +205543,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 2.22,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -205682,7 +205688,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.83,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -205827,7 +205833,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 17.37,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -205972,7 +205978,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -16.81,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -206117,7 +206123,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.43,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -206484,7 +206490,7 @@
           }
         ],
         "equity_parent_latest": 519000.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 12.12,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -206936,7 +206942,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 27.96,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -207172,7 +207178,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.45,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -207317,7 +207323,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 3.65,
         "equity_parent_latest": 149808.0,
         "prev_cum": null,
         "latest_cum": {
@@ -207462,7 +207468,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 20.07,
         "equity_parent_latest": 2158552.0,
         "prev_cum": null,
         "latest_cum": {
@@ -207607,7 +207613,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 6.0,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -207752,7 +207758,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 1.3,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -207898,7 +207904,7 @@
           }
         ],
         "equity_parent_latest": 39703188.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 15.42,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -208042,7 +208048,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 20.82,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -208187,7 +208193,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 12.75,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -208332,7 +208338,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 3.0,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -208477,7 +208483,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 1.64,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -208623,7 +208629,7 @@
           }
         ],
         "equity_parent_latest": 1141921.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -7.83,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -208767,7 +208773,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -5.89,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -208913,7 +208919,7 @@
           }
         ],
         "equity_parent_latest": 588706.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -7.75,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -209136,7 +209142,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.3,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -209281,7 +209287,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 29.94,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -209426,7 +209432,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -5.33,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -210019,7 +210025,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 7.14,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -210164,7 +210170,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 1.86,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -210309,7 +210315,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -8.37,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -210454,7 +210460,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -19.47,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -210599,7 +210605,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.53,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -210744,7 +210750,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -1.13,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -210889,7 +210895,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -28.78,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -211034,7 +211040,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 24.34,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -211323,7 +211329,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.5,
         "equity_parent_latest": 668365.0,
         "prev_cum": null,
         "latest_cum": {
@@ -211469,7 +211475,7 @@
           }
         ],
         "equity_parent_latest": 4238230.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.1,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -211613,7 +211619,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 3.45,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -212212,7 +212218,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 22.24,
         "equity_parent_latest": 8518802.0,
         "prev_cum": null,
         "latest_cum": {
@@ -212357,7 +212363,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 6.13,
         "equity_parent_latest": 12746962.0,
         "prev_cum": null,
         "latest_cum": {
@@ -212502,7 +212508,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 2.87,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -212647,7 +212653,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -1.25,
         "equity_parent_latest": 4721452.0,
         "prev_cum": null,
         "latest_cum": {
@@ -212787,7 +212793,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 18.39,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -212932,7 +212938,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 7.69,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -213077,7 +213083,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.02,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -213520,7 +213526,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.81,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -213665,7 +213671,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.9,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -213810,7 +213816,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.32,
         "equity_parent_latest": 3193106.0,
         "prev_cum": null,
         "latest_cum": {
@@ -213955,7 +213961,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 13.0,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -214100,7 +214106,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -1.89,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -214245,7 +214251,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 28.77,
         "equity_parent_latest": 15904635.0,
         "prev_cum": null,
         "latest_cum": {
@@ -214390,7 +214396,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 30.87,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -214535,7 +214541,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -0.81,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -214680,7 +214686,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 6.11,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -214825,7 +214831,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 31.84,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -215125,7 +215131,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 3.72,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -215270,7 +215276,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 0.21,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -215553,7 +215559,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -4.62,
         "equity_parent_latest": 353031.0,
         "prev_cum": null,
         "latest_cum": {
@@ -215836,7 +215842,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.06,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -215976,7 +215982,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 3.53,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -216121,7 +216127,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.79,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -216266,7 +216272,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 1.8,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -216490,7 +216496,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 6.0,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -216714,7 +216720,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.95,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -216859,7 +216865,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.63,
         "equity_parent_latest": 6840412.0,
         "prev_cum": null,
         "latest_cum": {
@@ -217004,7 +217010,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 35.45,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -217443,7 +217449,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 3.46,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -217588,7 +217594,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -74.73,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -217733,7 +217739,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 14.97,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -217878,7 +217884,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 6.57,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -218182,7 +218188,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 20.2,
         "equity_parent_latest": 7888932.0,
         "prev_cum": null,
         "latest_cum": {
@@ -218327,7 +218333,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 34.19,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -218472,7 +218478,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 12.44,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -218886,7 +218892,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 8.37,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -219187,7 +219193,7 @@
           }
         ],
         "equity_parent_latest": 515187.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 2.53,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -219331,7 +219337,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 54.73,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -219620,7 +219626,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.09,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -219860,7 +219866,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 7.78,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -220149,7 +220155,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -29.06,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -220518,7 +220524,7 @@
           }
         ],
         "equity_parent_latest": 7394234.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -15.55,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -220662,7 +220668,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 27.75,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -220936,7 +220942,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 14.06,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -221319,7 +221325,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.53,
         "equity_parent_latest": 1694536.0,
         "prev_cum": null,
         "latest_cum": {
@@ -221465,7 +221471,7 @@
           }
         ],
         "equity_parent_latest": 385034.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 13.57,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -221652,7 +221658,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -0.72,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -221797,7 +221803,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.18,
         "equity_parent_latest": 96724096.0,
         "prev_cum": null,
         "latest_cum": {
@@ -222269,7 +222275,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.65,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -222414,7 +222420,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 3.6,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -222932,7 +222938,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.67,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -223172,7 +223178,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 23.38,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -223461,7 +223467,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 24.36,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -223606,7 +223612,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -29.89,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -223842,7 +223848,7 @@
           }
         ],
         "equity_parent_latest": 1919924.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 3.45,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -224082,7 +224088,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 2.65,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -224322,7 +224328,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -4.69,
         "equity_parent_latest": 3555340.0,
         "prev_cum": null,
         "latest_cum": {
@@ -224467,7 +224473,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 16.28,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -224708,7 +224714,7 @@
           }
         ],
         "equity_parent_latest": 1607795.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 13.82,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -225192,7 +225198,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.12,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -225337,7 +225343,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 1.77,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -225478,7 +225484,7 @@
           }
         ],
         "equity_parent_latest": 1009359.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -4.15,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -225809,7 +225815,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 20.17,
         "equity_parent_latest": 3721550.0,
         "prev_cum": null,
         "latest_cum": {
@@ -226104,7 +226110,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -9.54,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -226423,7 +226429,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 61.65,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -226802,7 +226808,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.91,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -226947,7 +226953,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -2.03,
         "equity_parent_latest": 2380651.0,
         "prev_cum": null,
         "latest_cum": {
@@ -227092,7 +227098,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.94,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -227237,7 +227243,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 20.47,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -227382,7 +227388,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 2.19,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -227527,7 +227533,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -11.02,
         "equity_parent_latest": 422118.0,
         "prev_cum": null,
         "latest_cum": {
@@ -227766,7 +227772,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.76,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -228006,7 +228012,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 2.41,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -228246,7 +228252,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 25.26,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -228438,7 +228444,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 13.73,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -229242,7 +229248,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 8.72,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -229387,7 +229393,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -0.6,
         "equity_parent_latest": 273138.0,
         "prev_cum": null,
         "latest_cum": {
@@ -229628,7 +229634,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 29.0,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -230215,7 +230221,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.1,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -230355,7 +230361,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 21.83,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -230500,7 +230506,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -5.94,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -230800,7 +230806,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -10.4,
         "equity_parent_latest": 963721.0,
         "prev_cum": null,
         "latest_cum": {
@@ -230945,7 +230951,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 13.89,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -231514,7 +231520,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 2.32,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -231659,7 +231665,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 16.82,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -231804,7 +231810,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 17.49,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -232039,7 +232045,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 19.75,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -232422,7 +232428,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.29,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -232662,7 +232668,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 6.85,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -232894,7 +232900,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 53.53,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -233945,7 +233951,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 25.51,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -234181,7 +234187,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -3.0,
         "equity_parent_latest": 572155.0,
         "prev_cum": null,
         "latest_cum": {
@@ -234685,7 +234691,7 @@
           }
         ],
         "equity_parent_latest": 2638515.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 28.35,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -234829,7 +234835,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 20.98,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -235147,7 +235153,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 19.68,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -235292,7 +235298,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -3.14,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -236607,7 +236613,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 6.92,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -236752,7 +236758,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -66.31,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -237361,7 +237367,7 @@
           }
         ],
         "equity_parent_latest": 1080197.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 6.11,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -237505,7 +237511,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.06,
         "equity_parent_latest": 1582706.0,
         "prev_cum": null,
         "latest_cum": {
@@ -237745,7 +237751,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 13.86,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -238309,7 +238315,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.84,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -238639,7 +238645,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.58,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -239078,7 +239084,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -25.72,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -239218,7 +239224,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -4.0,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -240162,7 +240168,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 22.72,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -240605,7 +240611,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.05,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -240894,7 +240900,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 13.97,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -241039,7 +241045,7 @@
           }
         ],
         "equity_parent_latest": 451067.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 12.51,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -241275,7 +241281,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 16.54,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -241666,7 +241672,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 24.04,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -242274,7 +242280,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -19.97,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -242414,7 +242420,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 17.75,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -242771,7 +242777,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 15.94,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -242916,7 +242922,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.54,
         "equity_parent_latest": 1318131.0,
         "prev_cum": null,
         "latest_cum": {
@@ -243162,7 +243168,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -1.73,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -244341,7 +244347,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.65,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -244676,7 +244682,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 13.66,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -245631,7 +245637,7 @@
           }
         ],
         "equity_parent_latest": 568448.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 13.43,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -245770,7 +245776,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -21.9,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -245915,7 +245921,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.79,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -246060,7 +246066,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.67,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -246344,7 +246350,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.63,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -246489,7 +246495,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -11.76,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -246634,7 +246640,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -9.69,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -246934,7 +246940,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 7.18,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -247079,7 +247085,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -16.09,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -247224,7 +247230,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.62,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -247369,7 +247375,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -19.32,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -247514,7 +247520,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 3.55,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -247642,7 +247648,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -1.66,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -247787,7 +247793,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 15.66,
         "equity_parent_latest": 75750856.0,
         "prev_cum": null,
         "latest_cum": {
@@ -247932,7 +247938,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -4.5,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -248077,7 +248083,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 7.82,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -248222,7 +248228,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 1.07,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -248814,7 +248820,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 0.01,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -249103,7 +249109,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -20.09,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -249249,7 +249255,7 @@
           }
         ],
         "equity_parent_latest": 4199291.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 12.2,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -249393,7 +249399,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 1.54,
         "equity_parent_latest": 539278.0,
         "prev_cum": null,
         "latest_cum": {
@@ -249533,7 +249539,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 20.14,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -249682,7 +249688,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 13.73,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -249828,7 +249834,7 @@
           }
         ],
         "equity_parent_latest": 1585634.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.93,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -249973,7 +249979,7 @@
           }
         ],
         "equity_parent_latest": 1382161.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 8.98,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -250212,7 +250218,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 0.82,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -250357,7 +250363,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 7.26,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -250502,7 +250508,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -12.22,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -250647,7 +250653,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 3.12,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -251066,7 +251072,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 7.48,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -251350,7 +251356,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -7.54,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -251650,7 +251656,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 23.17,
         "equity_parent_latest": 1335525.0,
         "prev_cum": null,
         "latest_cum": {
@@ -251891,7 +251897,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.41,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -252270,7 +252276,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 47.27,
         "equity_parent_latest": 102058810.0,
         "prev_cum": null,
         "latest_cum": {
@@ -252510,7 +252516,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 24.74,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -252655,7 +252661,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.73,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -252800,7 +252806,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 18.23,
         "equity_parent_latest": 9300583.0,
         "prev_cum": null,
         "latest_cum": {
@@ -253042,7 +253048,7 @@
           }
         ],
         "equity_parent_latest": 3809746.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 14.74,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -253186,7 +253192,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 22.97,
         "equity_parent_latest": 3772690.0,
         "prev_cum": null,
         "latest_cum": {
@@ -253475,7 +253481,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.92,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -253699,7 +253705,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.87,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -253839,7 +253845,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 14.33,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -253985,7 +253991,7 @@
           }
         ],
         "equity_parent_latest": 1621745.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 25.57,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -254421,7 +254427,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 7.26,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -254566,7 +254572,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 20.23,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -254712,7 +254718,7 @@
           }
         ],
         "equity_parent_latest": 1160847.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.23,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -254936,7 +254942,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -39.33,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -255237,7 +255243,7 @@
           }
         ],
         "equity_parent_latest": 2373180.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 16.7,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -255381,7 +255387,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 19.19,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -255526,7 +255532,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 13.5,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -255672,7 +255678,7 @@
           }
         ],
         "equity_parent_latest": 2394698.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -2.98,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -255816,7 +255822,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -38.68,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -256056,7 +256062,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -4.41,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -256280,7 +256286,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.16,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -256505,7 +256511,7 @@
           }
         ],
         "equity_parent_latest": 4042551.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 16.44,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -256794,7 +256800,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.51,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -257056,7 +257062,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 6.92,
         "equity_parent_latest": 5593720.0,
         "prev_cum": null,
         "latest_cum": {
@@ -257201,7 +257207,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 2.18,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -257490,7 +257496,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 30.71,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -257635,7 +257641,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -7.5,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -257780,7 +257786,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 16.99,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -257925,7 +257931,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 1.1,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -258070,7 +258076,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.73,
         "equity_parent_latest": 7674929.0,
         "prev_cum": null,
         "latest_cum": {
@@ -258215,7 +258221,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.78,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -258515,7 +258521,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.92,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -258756,7 +258762,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.82,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -258901,7 +258907,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 1.97,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -264035,7 +264041,7 @@
           }
         ],
         "equity_parent_latest": 3551469.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 22.12,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -264550,7 +264556,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -0.64,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -264825,7 +264831,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.56,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -265446,7 +265452,7 @@
           }
         ],
         "equity_parent_latest": 301217.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -6.98,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -265742,7 +265748,7 @@
           }
         ],
         "equity_parent_latest": 3158762.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 52.32,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -266258,7 +266264,7 @@
           }
         ],
         "equity_parent_latest": 4849413.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 23.45,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -266468,7 +266474,7 @@
           }
         ],
         "equity_parent_latest": 696053.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -22.42,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -266698,7 +266704,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 16.87,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -267412,7 +267418,7 @@
           }
         ],
         "equity_parent_latest": 1433545.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -1.47,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -268159,7 +268165,7 @@
           }
         ],
         "equity_parent_latest": 3573491.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.5,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -268368,7 +268374,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 16.71,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -268509,7 +268515,7 @@
           }
         ],
         "equity_parent_latest": 237652.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -13.51,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -268844,7 +268850,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 1.24,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -268989,7 +268995,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.48,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -269200,7 +269206,7 @@
           }
         ],
         "equity_parent_latest": 928482.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.53,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -269493,7 +269499,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.54,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -269783,7 +269789,7 @@
           }
         ],
         "equity_parent_latest": 2536584.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 2.73,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -270076,7 +270082,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 11.88,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -270637,7 +270643,7 @@
           }
         ],
         "equity_parent_latest": 1292484.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -1.62,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -270782,7 +270788,7 @@
           }
         ],
         "equity_parent_latest": 23288098.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 74.49,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -270992,7 +270998,7 @@
           }
         ],
         "equity_parent_latest": 5296450.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 0.74,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -271137,7 +271143,7 @@
           }
         ],
         "equity_parent_latest": 212864.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -1.74,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -271282,7 +271288,7 @@
           }
         ],
         "equity_parent_latest": 62975637.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 13.77,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -272126,7 +272132,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -2.41,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -272975,7 +272981,7 @@
           }
         ],
         "equity_parent_latest": 556440.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 9.05,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -273336,7 +273342,7 @@
           }
         ],
         "equity_parent_latest": 10148070.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 8.95,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -273481,7 +273487,7 @@
           }
         ],
         "equity_parent_latest": 17008818.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 0.81,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -273755,7 +273761,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 15.87,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -274011,7 +274017,7 @@
           }
         ],
         "equity_parent_latest": 2930097.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -1.44,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -274617,7 +274623,7 @@
           }
         ],
         "equity_parent_latest": 616638.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -48.1,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -275737,7 +275743,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 30.73,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -276607,7 +276613,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 20.62,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -277473,7 +277479,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -13.8,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -278507,7 +278513,7 @@
           }
         ],
         "equity_parent_latest": 1885695.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 18.57,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -279668,7 +279674,7 @@
           }
         ],
         "equity_parent_latest": 2881875.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 1.14,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -279877,7 +279883,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.87,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -280147,7 +280153,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -20.53,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -280293,7 +280299,7 @@
           }
         ],
         "equity_parent_latest": 1155644.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -9.42,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -280632,7 +280638,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 20.34,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -280778,7 +280784,7 @@
           }
         ],
         "equity_parent_latest": 3841048.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 18.84,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -280987,7 +280993,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -0.84,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -281133,7 +281139,7 @@
           }
         ],
         "equity_parent_latest": 4793041.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 4.9,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -281556,7 +281562,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 3.53,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -281767,7 +281773,7 @@
           }
         ],
         "equity_parent_latest": 5038263.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 8.59,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -282081,7 +282087,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 10.26,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -282904,7 +282910,7 @@
           }
         ],
         "equity_parent_latest": 50923.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -60.83,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -283068,7 +283074,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 12.06,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -283279,7 +283285,7 @@
           }
         ],
         "equity_parent_latest": 410544.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -24.8,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -283450,7 +283456,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 6.95,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -283977,7 +283983,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 7.52,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -284250,7 +284256,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -1.92,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -302882,7 +302888,7 @@
           }
         ],
         "equity_parent_latest": 3112990.0,
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": 5.26,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,
@@ -304996,7 +305002,7 @@
             "source": "q1_from_backfill"
           }
         ],
-        "roe_ttm_pct": null,
+        "roe_ttm_pct": -1.92,
         "prev_cum": null,
         "latest_cum": {
           "year": 2026,

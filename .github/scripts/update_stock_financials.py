@@ -768,6 +768,47 @@ def merge_backfill_display_quarters(stocks: dict, backfill: dict) -> dict:
     return stats
 
 
+def _codes_with_backfill_quarters(stocks: dict) -> list[str]:
+    """先.一三五-1md：quarters 裡帶 q1_from_backfill 季度的代號（含先前輪次已併入、本輪沒有新增的檔）。"""
+    out = []
+    for c, s in stocks.items():
+        try:
+            if any(isinstance(r, dict) and r.get("source") == SRC_Q_FROM_BACKFILL
+                   for r in (((s or {}).get("financials") or {}).get("quarters") or [])):
+                out.append(str(c))
+        except Exception:
+            continue
+    return out
+
+
+def recompute_roe_after_backfill_merge(stocks: dict, codes) -> dict:
+    """2026-11-07 先.一三五-1md（純 bug 修復）：compute_roe_ttm() 原本在併入回補季之前算，只用官方季度；
+    1lw 併入回補季後（例 2883 季度已到 2026Q2），roe_ttm_pct 還是舊值或 None（分子停在 2024、分母是最新權益）。
+    這裡對「quarters 帶回補季」的檔（含先前輪次已併入的），用合併後近四季重算一次：
+    - 要有 equity_parent_latest（仟元→元，同 main() 的換算）與 latest_cum；
+    - 最後一個有淨利的季度必須等於 latest_cum 那一季（權益與分子同一期），否則清成 None（不拿舊四季配新權益）；
+    - 四季連續由 compute_roe_ttm() 把關（不連續回 None）。
+    單檔出錯只略過（十二節）。回傳統計。"""
+    st = {"recomputed": [], "set_none": [], "errors": {}}
+    for code in codes or []:
+        try:
+            fin = ((stocks.get(code) or stocks.get(str(code)) or {}).get("financials"))
+            if not isinstance(fin, dict):
+                continue
+            eq = fin.get("equity_parent_latest")
+            lc = fin.get("latest_cum") or {}
+            if not eq or not lc.get("year") or not lc.get("quarter"):
+                continue
+            ni_qs = [q for q in (fin.get("quarters") or []) if isinstance(q, dict) and q.get("net_income_parent") is not None]
+            fresh = bool(ni_qs) and (int(ni_qs[-1]["year"]), int(ni_qs[-1]["quarter"])) == (int(lc["year"]), int(lc["quarter"]))
+            val = compute_roe_ttm(ni_qs, eq * 1000) if fresh else None
+            fin["roe_ttm_pct"] = val
+            (st["recomputed"] if val is not None else st["set_none"]).append(str(code))
+        except Exception as e:
+            st["errors"][str(code)] = str(e)[:200]
+    return st
+
+
 def load_month_revenue_map(path: Path | None = None) -> dict:
     """先.一三五-1me：讀 data/fundamentals.json 的月營收（元，month_revenue＋revenue_history_scoring），回 {代號: {(年, 月): 營收}}。零外部請求；讀不到回空 dict。"""
     path = path or (REPO_ROOT / "data" / "fundamentals.json")
@@ -891,6 +932,14 @@ def offline_merge_backfill() -> None:
         "merged_count": len(st["merged_codes"]), "rows_added": st["rows_added"], "rejected": st["rejected"],
         "eps_mismatch_passed": st["eps_mismatch_passed"],
         "generated_at": datetime.now(TW_TZ).isoformat(), "mode": "offline"}
+    try:
+        _r = recompute_roe_after_backfill_merge(stocks, _codes_with_backfill_quarters(stocks))
+        payload["meta"]["roe_recomputed_after_backfill_merge"] = {
+            "note": "併入回補季的檔用合併後近四季重算 ROE；最後一季須等於 latest_cum、四季須連續，否則 None（先.一三五-1md）",
+            "recomputed_count": len(_r["recomputed"]), "set_none_count": len(_r["set_none"]), "errors": _r["errors"]}
+        payload["meta"]["roe_cleared_nonconsecutive_codes"] = clear_stale_nonconsecutive_roe(stocks)
+    except Exception as e:  # 十二節：重算自己出錯只警告
+        print(f"[warn] 回補季併入後 ROE 重算失敗：{e}")
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
     print(f"離線併入回補季：{len(st['merged_codes'])} 檔、{st['rows_added']} 季；拒絕 {len(st['rejected'])} 檔")
 
@@ -1004,6 +1053,15 @@ def main():
     except Exception as e:
         print(f"[warn] 回補季併入失敗：{e}")
         errors.append(f"backfill_display_merge: {e}")
+    # 先.一三五-1md：併入回補季後用合併後近四季重算 ROE；自身失敗只警告（十二節）
+    try:
+        _r = recompute_roe_after_backfill_merge(stocks, _codes_with_backfill_quarters(stocks))
+        payload["meta"]["roe_recomputed_after_backfill_merge"] = {
+            "note": "併入回補季的檔用合併後近四季重算 ROE；最後一季須等於 latest_cum、四季須連續，否則 None（先.一三五-1md）",
+            "recomputed_count": len(_r["recomputed"]), "set_none_count": len(_r["set_none"]), "errors": _r["errors"]}
+    except Exception as e:
+        print(f"[warn] 回補季併入後 ROE 重算失敗：{e}")
+        errors.append(f"roe_recompute_after_merge: {e}")
     # 先.一三五-1mb：半年報列標 period=H1/H2（不改數值）；自身失敗只警告（十二節）
     try:
         _hy = tag_half_year_periods(stocks, load_month_revenue_map())
