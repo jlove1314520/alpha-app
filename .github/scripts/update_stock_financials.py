@@ -699,8 +699,9 @@ def merge_backfill_display_quarters(stocks: dict, backfill: dict) -> dict:
     - 補進來的季度標 source=q1_from_backfill（研究端 DISPLAY_ONLY_DERIVED_SOURCES 已排除；App 已照實標「取自 FinMind 季報回補」）。
     - 安全檢查：若官方 latest_cum 那一年回補檔 Q1..Qn 都有，加總要對得上官方累計（營收／歸母淨利相對差
       ≤BACKFILL_MAX_DIFF、EPS 差 ≤BACKFILL_EPS_ABS_TOL×n）；對不上就整檔不併（寧可舊，不顯示錯的）。
+      先.一三五-1mc：只有 EPS 對不上、營收與歸母淨利都核對得到且一致時放行（股數變動），記在 eps_mismatch_passed。
     回傳統計；自身出錯只略過該檔（十二節）。"""
-    stats = {"merged_codes": [], "rows_added": 0, "rejected": {}}
+    stats = {"merged_codes": [], "rows_added": 0, "rejected": {}, "eps_mismatch_passed": {}}
     for code, s in stocks.items():
         try:
             bf_rows = backfill.get(str(code)) if isinstance(backfill, dict) else None
@@ -719,15 +720,29 @@ def merge_backfill_display_quarters(stocks: dict, backfill: dict) -> dict:
             if ly and lq and all((ly, k) in bf for k in range(1, lq + 1)):
                 rows = [bf[(ly, k)] for k in range(1, lq + 1)]
                 bad = []
+                verified = set()  # 營收／淨利實際核對過（兩邊都有值）且 ≤上限的項目
                 for key, ck in (("revenue", "revenue_cum"), ("net_income_parent", "net_income_parent_cum")):
                     vals = [r.get(key) for r in rows]
                     if lc.get(ck) is not None and None not in vals:
                         d = _rel_diff(sum(vals), lc[ck])
                         if d is not None and d > BACKFILL_MAX_DIFF:
                             bad.append(f"{key} 加總差 {d:.2%}")
+                        elif d is not None:
+                            verified.add(key)
                 eps = [r.get("eps") for r in rows]
+                eps_msg = None
                 if lc.get("eps_cum") is not None and None not in eps and abs(sum(eps) - lc["eps_cum"]) > BACKFILL_EPS_ABS_TOL * lq:
-                    bad.append(f"eps 加總 {round(sum(eps), 2)} vs 官方累計 {lc['eps_cum']}")
+                    eps_msg = f"eps 加總 {round(sum(eps), 2)} vs 官方累計 {lc['eps_cum']}"
+                # 先.一三五-1mc（2026-11-07）：累計 EPS 用加權平均股數，期中增資／減資時單季 EPS 加總本來就不等於累計，
+                # EPS 差不代表回補檔錯。營收與歸母淨利「都核對得到且 ≤上限」時，EPS 差只記在 eps_mismatch_passed、不擋；
+                # 淨利核對不到（任一邊缺值）的照舊擋，避免只憑營收放行。
+                if eps_msg:
+                    if not bad and verified >= {"revenue", "net_income_parent"}:
+                        stats["eps_mismatch_passed"][str(code)] = eps_msg
+                    else:
+                        if "net_income_parent" not in verified and not bad:
+                            eps_msg += "（歸母淨利無法核對，不放行）"
+                        bad.append(eps_msg)
                 if bad:
                     stats["rejected"][str(code)] = "；".join(bad)
                     continue
@@ -874,6 +889,7 @@ def offline_merge_backfill() -> None:
     payload.setdefault("meta", {})["financials_backfill_display_merge"] = {
         "note": "官方 quarters 沒有的季度取自 financials_backfill.json（FinMind，App 顯示用），標 source=q1_from_backfill；官方同季優先（先.一三五-1lw）",
         "merged_count": len(st["merged_codes"]), "rows_added": st["rows_added"], "rejected": st["rejected"],
+        "eps_mismatch_passed": st["eps_mismatch_passed"],
         "generated_at": datetime.now(TW_TZ).isoformat(), "mode": "offline"}
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
     print(f"離線併入回補季：{len(st['merged_codes'])} 檔、{st['rows_added']} 季；拒絕 {len(st['rejected'])} 檔")
@@ -983,6 +999,7 @@ def main():
         payload["meta"]["financials_backfill_display_merge"] = {
             "note": "官方 quarters 沒有的季度取自 financials_backfill.json（FinMind，App 顯示用），標 source=q1_from_backfill；官方同季優先（先.一三五-1lw）",
             "merged_count": len(_st["merged_codes"]), "rows_added": _st["rows_added"], "rejected": _st["rejected"],
+            "eps_mismatch_passed": _st["eps_mismatch_passed"],
             "generated_at": datetime.now(TW_TZ).isoformat(), "mode": "daily"}
     except Exception as e:
         print(f"[warn] 回補季併入失敗：{e}")

@@ -114,11 +114,18 @@ st2 = {
     "A": {"financials": {"quarters": [_q(2024, 3, 1.0), _q(2024, 4, 1.1)],
                          "latest_cum": {"year": 2026, "quarter": 2, "revenue_cum": 200.0, "net_income_parent_cum": 20.0, "eps_cum": 2.0}}},
     "B": {"financials": {"quarters": [_q(2024, 4, 1.0)],
-                         "latest_cum": {"year": 2026, "quarter": 2, "revenue_cum": 200.0, "net_income_parent_cum": 20.0, "eps_cum": 5.0}}},
+                         "latest_cum": {"year": 2026, "quarter": 2, "revenue_cum": 300.0, "net_income_parent_cum": 20.0, "eps_cum": 2.0}}},
     "C": {"financials": {"quarters": [_q(2024, 4, 1.0)]}},
+    # 先.一三五-1mc：EPS 差（股數變動）但營收／淨利一致→放行；淨利核對不到→照舊擋
+    "D": {"financials": {"quarters": [_q(2024, 4, 1.0)],
+                         "latest_cum": {"year": 2026, "quarter": 2, "revenue_cum": 200.0, "net_income_parent_cum": 20.0, "eps_cum": 1.8}}},
+    "E": {"financials": {"quarters": [_q(2024, 4, 1.0)],
+                         "latest_cum": {"year": 2026, "quarter": 2, "revenue_cum": 200.0, "net_income_parent_cum": None, "eps_cum": 1.8}}},
 }
 bf2 = {"A": [_q(2024, 1, 9.9), _q(2024, 4, 9.9), _q(2025, 1, 1.0), _q(2026, 1, 1.0), _q(2026, 2, 1.0)],
-       "B": [_q(2026, 1, 1.0), _q(2026, 2, 1.0)]}
+       "B": [_q(2026, 1, 1.0), _q(2026, 2, 1.0)],
+       "D": [_q(2026, 1, 1.0), _q(2026, 2, 1.0)],
+       "E": [_q(2026, 1, 1.0), _q(2026, 2, 1.0)]}
 r2 = m.merge_backfill_display_quarters(st2, bf2)
 qa = st2["A"]["financials"]["quarters"]
 check("回補季併入：最新季→2026Q2", (qa[-1]["year"], qa[-1]["quarter"]) == (2026, 2))
@@ -126,7 +133,10 @@ check("回補季併入：官方同季不覆蓋", [x for x in qa if (x["year"], x
 check("回補季併入：比官方最早季舊的不補", not any((x["year"], x["quarter"]) == (2024, 1) for x in qa))
 check("回補季併入：標 q1_from_backfill", all(x.get("source") == m.SRC_Q_FROM_BACKFILL for x in qa if x["year"] >= 2025))
 check("回補季併入：加總對不上整檔不併", len(st2["B"]["financials"]["quarters"]) == 1 and "B" in r2["rejected"])
-check("回補季併入：回補檔沒有的代號不報錯", r2["merged_codes"] == ["A"] and len(st2["C"]["financials"]["quarters"]) == 1)
+check("回補季併入：回補檔沒有的代號不報錯", r2["merged_codes"] == ["A", "D"] and len(st2["C"]["financials"]["quarters"]) == 1)
+check("回補季併入：EPS 差但營收淨利一致→放行並記 eps_mismatch_passed",
+      "D" not in r2["rejected"] and "D" in r2["eps_mismatch_passed"] and st2["D"]["financials"]["quarters"][-1]["quarter"] == 2)
+check("回補季併入：EPS 差且淨利無法核對→照舊擋", "E" in r2["rejected"] and "E" not in r2["eps_mismatch_passed"])
 
 # research 副本行為一致
 try:
