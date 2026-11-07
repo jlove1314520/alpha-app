@@ -966,7 +966,18 @@
       "interval_min": 15,
       "artifact": "research/ibkr_gateway_cycle.log",
       "freshness": "log_last_timestamp",
-      "note": "先.一三五-1kh-h（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。只證明啟動器有觸發，不證明 Gateway 有登入／有在跑——報價是否真的進來看 AlphaIbkrQuotes 的 data/quotes_ibkr.json。日誌 UTF-8、.gitignore。2026-11-04 01:54 起啟動器每次都寫『gateway exe not found at D:\\IBKR Gateway\\ibgateway\\ibgateway.exe』（見先.一三五-1kh-h1），本條仍會是 ok。"
+      "note": "先.一三五-1kh-h（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。只證明啟動器有觸發，不證明 Gateway 有登入／有在跑——報價是否真的進來看 AlphaIbkrQuotes 的 data/quotes_ibkr.json。日誌 UTF-8、.gitignore。2026-11-04 01:54 起啟動器每次都寫『gateway exe not found at D:\\IBKR Gateway\\ibgateway\\ibgateway.exe』（見先.一三五-1kh-h1），本條仍會是 ok。",
+      "fault_history": {
+        "count": 1,
+        "last_fault_at": "2026-11-08T04:12:01.797629+08:00",
+        "fault_types": {
+          "stalled": 1
+        },
+        "removable": null,
+        "event_log": [
+          "2026-11-08T04:12:01.797629+08:00"
+        ]
+      }
     },
     {
       "task": "AlphaNightlySix",
