@@ -598,6 +598,8 @@ def update_extra(stocks: dict) -> tuple[dict, list]:
                     fin["roe_ttm_pct"] = compute_roe_ttm(qs, b["equity"] * 1000) if fresh else None
                 if b.get("common_stock_capital"):
                     fin["shares_outstanding_approx"] = round(b["common_stock_capital"] / 10, 0)  # 仟股，同一般業
+                    fin.pop("shares_basis", None)  # 先.一三五-1my：股本÷10 重寫後，舊的推得股數標記失效，交給 fix_shares_by_implied_eps 重判
+                    fin.pop("shares_from_capital_div10", None)
                 if b.get("non_current_assets") is not None:
                     fin["non_current_assets_latest"] = b["non_current_assets"]
             stats[name] = {"rows": len(inc_rows), "cum": n_cum, "quarters_updated": n_q}
@@ -1212,6 +1214,61 @@ def restate_share_base_shift(stocks: dict, official_map: dict | None = None) -> 
     return stats
 
 
+SHARES_IMPLIED_DEV = 0.30     # 股本÷10 與推得股數相差超過 30% 才改用推得股數
+SHARES_IMPLIED_AGREE = 0.15   # 用來推股數的兩季彼此相差上限（排除金控 Q2 特別股股利這類單季偏離）
+
+
+def fix_shares_by_implied_eps(stocks: dict) -> dict:
+    """先.一三五-1my（2026-11-08）：`shares_outstanding_approx`＝普通股股本(仟元)÷10 假設每股面額 10 元，
+    對面額非 10 元的股票（櫃買名稱帶 *，例 8937 合騏*：股本÷10＝約 1.08 億股，實際約 4.2 億股）會錯。
+    取最近兩個可判定季（|EPS|≥0.05、淨利÷EPS 為正）推得股數（仟股），兩季彼此相差 ≤15% 時取平均；
+    比股本÷10 多 >30%（面額小於 10 元）→ 改用推得股數；比股本÷10 少 >30% 只記錄不改，`shares_basis=implied_from_eps`，原值存 `shares_from_capital_div10`。
+    回到 30% 內就還原成股本÷10 並拿掉標記。每次以 shares_from_capital_div10（若有）為基準重判，冪等。單檔出錯只略過（十二節）。"""
+    stats = {"changed": {}, "reverted": [], "implied_present": 0, "unverifiable_large_gap": [], "errors": []}
+    for code, s in stocks.items():
+        try:
+            fin = (s or {}).get("financials") or {}
+            base = fin.get("shares_from_capital_div10") if fin.get("shares_basis") == "implied_from_eps" else fin.get("shares_outstanding_approx")
+            if not isinstance(base, (int, float)) or base <= 0:
+                continue
+            qs = sorted([r for r in (fin.get("quarters") or []) if isinstance(r, dict) and r.get("year") and r.get("quarter")],
+                        key=lambda r: (int(r["year"]), int(r["quarter"])))
+            pts = [x for x in (_shift_implied_shares(r) for r in reversed(qs[-4:])) if x is not None][:2]
+            implied_k = None
+            if len(pts) == 2 and abs(pts[0] - pts[1]) / ((pts[0] + pts[1]) / 2) <= SHARES_IMPLIED_AGREE:
+                implied_k = round((pts[0] + pts[1]) / 2 / 1000, 0)  # 股→仟股
+            if implied_k and (base - implied_k) / base > SHARES_IMPLIED_DEV:
+                # 推得股數比股本÷10 少 >30%：面額大於 10 元極罕見，多半是股本欄位或加權股數差異，只記錄不改
+                stats["unverifiable_large_gap"].append(f"{code} 股本÷10={base:.0f} 推得={implied_k:.0f}")
+            if implied_k and (implied_k - base) / base > SHARES_IMPLIED_DEV:
+                if fin.get("shares_outstanding_approx") != implied_k or fin.get("shares_basis") != "implied_from_eps":
+                    stats["changed"][str(code)] = {"capital_div10_k": base, "implied_k": implied_k, "ratio": round(implied_k / base, 3)}
+                fin["shares_from_capital_div10"] = base
+                fin["shares_outstanding_approx"] = implied_k
+                fin["shares_basis"] = "implied_from_eps"
+                stats["implied_present"] += 1
+            elif fin.get("shares_basis") == "implied_from_eps":
+                if implied_k is None:  # 推不出股數就維持上次判定，不來回切換
+                    stats["implied_present"] += 1
+                    continue
+                fin["shares_outstanding_approx"] = base
+                fin.pop("shares_basis", None)
+                fin.pop("shares_from_capital_div10", None)
+                stats["reverted"].append(str(code))
+        except Exception as e:  # 十二節
+            print(f"[warn] {code} 推得股數修正失敗：{e}")
+            stats["errors"].append(f"{code}: {e}")
+    return stats
+
+
+def _shares_meta(st: dict, mode: str) -> dict:
+    return {"note": "shares_outstanding_approx（仟股）原為股本÷10（假設面額 10 元）；最近兩季淨利÷EPS 推得股數（兩季相差 ≤15%）比之多 >30%（面額小於 10 元）時改用推得股數、少 >30% 只記錄，"
+                    "shares_basis=implied_from_eps、原值存 shares_from_capital_div10（先.一三五-1my）",
+            "changed_this_run": st["changed"], "reverted_this_run": st["reverted"], "implied_present": st["implied_present"],
+            "lower_than_capital_not_changed": st["unverifiable_large_gap"],
+            "errors": st["errors"], "generated_at": datetime.now(TW_TZ).isoformat(), "mode": mode}
+
+
 def _share_base_meta(st: dict, mode: str) -> dict:
     return {"note": "近四季 EPS 跨越股數基準持續跳變（推得股數倍數 ≥1.5 或 ≤0.67、跳變後 ≥2 季在新水準）且以官方本益比×收盤反推的近四季 EPS 證實"
                     "「舊季 EPS÷倍數」才對得上時，舊基準季 EPS 追溯調整成新基準，原值存 eps_pre_restate、eps_basis=restated_share_base；只改 EPS 不改淨利；"
@@ -1269,6 +1326,10 @@ def offline_merge_backfill() -> None:
         payload["meta"]["financials_share_base_restate"] = _share_base_meta(restate_share_base_shift(stocks), "offline")
     except Exception as e:
         print(f"[warn] 股數基準追溯調整失敗：{e}")
+    try:  # 先.一三五-1my：面額非 10 元時股本÷10 推的股數會錯，改用推得股數；自身失敗只警告（十二節）
+        payload["meta"]["financials_shares_implied_fix"] = _shares_meta(fix_shares_by_implied_eps(stocks), "offline")
+    except Exception as e:
+        print(f"[warn] 推得股數修正失敗：{e}")
     try:
         payload["meta"]["roe_cleared_nonconsecutive_codes"] = clear_stale_nonconsecutive_roe(stocks)
     except Exception as e:
@@ -1339,6 +1400,8 @@ def main():
             fin["latest_cum"] = dict(cum, source="t187ap06_L_ci", industry="上市一般業")
             capital = bal.get("common_stock_capital")
             fin["shares_outstanding_approx"] = round(capital / 10, 0) if capital else None
+            fin.pop("shares_basis", None)  # 先.一三五-1my：同上，重寫後交給 fix_shares_by_implied_eps 重判
+            fin.pop("shares_from_capital_div10", None)
             fin["non_current_assets_latest"] = bal.get("non_current_assets")
         income_updated = len(income) - skipped_no_baseline
     except Exception as e:
@@ -1429,6 +1492,11 @@ def main():
     except Exception as e:
         print(f"[warn] 股數基準追溯調整失敗：{e}")
         errors.append(f"share_base_restate: {e}")
+    try:  # 先.一三五-1my：面額非 10 元時股本÷10 推的股數會錯，改用推得股數；自身失敗只警告（十二節）
+        payload["meta"]["financials_shares_implied_fix"] = _shares_meta(fix_shares_by_implied_eps(stocks), "daily")
+    except Exception as e:
+        print(f"[warn] 推得股數修正失敗：{e}")
+        errors.append(f"shares_implied_fix: {e}")
     try:
         payload["meta"]["roe_cleared_nonconsecutive_codes"] = clear_stale_nonconsecutive_roe(stocks)
     except Exception as e:  # 這道清理自己出錯只記警告，不擋寫檔（十二節）

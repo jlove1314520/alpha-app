@@ -1995,7 +1995,7 @@
         "8299": "eps 加總 187.37 vs 官方累計 187.43",
         "8435": "eps 加總 2.84 vs 官方累計 2.88"
       },
-      "generated_at": "2026-11-08T02:34:52.827271+08:00",
+      "generated_at": "2026-11-08T02:44:17.572240+08:00",
       "mode": "offline"
     },
     "financials_half_year_period": {
@@ -2219,7 +2219,7 @@
         "month_revenue": 17,
         "prior_year_half": 4
       },
-      "generated_at": "2026-11-08T02:34:52.971259+08:00",
+      "generated_at": "2026-11-08T02:44:17.710061+08:00",
       "mode": "offline"
     },
     "roe_recomputed_after_backfill_merge": {
@@ -2233,14 +2233,14 @@
       "fixed_rows": 0,
       "fixed_codes": [],
       "left_unverifiable": 261,
-      "generated_at": "2026-11-08T02:34:52.977245+08:00",
+      "generated_at": "2026-11-08T02:44:17.713923+08:00",
       "mode": "offline"
     },
     "financials_backfill_eps_outlier_fix": {
       "note": "回補季 EPS 推得股數低於前後兩季（兩季彼此一致）平均 >30% 時，EPS 改成淨利÷相鄰季平均股數，原值存 eps_raw（先.一三五-1mu）",
       "fixed_rows": 0,
       "fixed": {},
-      "generated_at": "2026-11-08T02:34:52.986002+08:00",
+      "generated_at": "2026-11-08T02:44:17.723021+08:00",
       "mode": "offline"
     },
     "financials_share_base_restate": {
@@ -2380,7 +2380,24 @@
       },
       "skipped_rows_with_other_basis": [],
       "errors": [],
-      "generated_at": "2026-11-08T02:34:53.096016+08:00",
+      "generated_at": "2026-11-08T02:44:17.815512+08:00",
+      "mode": "offline"
+    },
+    "financials_shares_implied_fix": {
+      "note": "shares_outstanding_approx（仟股）原為股本÷10（假設面額 10 元）；最近兩季淨利÷EPS 推得股數（兩季相差 ≤15%）比之多 >30%（面額小於 10 元）時改用推得股數、少 >30% 只記錄，shares_basis=implied_from_eps、原值存 shares_from_capital_div10（先.一三五-1my）",
+      "changed_this_run": {},
+      "reverted_this_run": [],
+      "implied_present": 18,
+      "lower_than_capital_not_changed": [
+        "1235 股本÷10=198007 推得=109196",
+        "1608 股本÷10=632774 推得=424855",
+        "6669 股本÷10=584337 推得=185976",
+        "9943 股本÷10=125172 推得=84854",
+        "5227 股本÷10=97415 推得=68133",
+        "3095 股本÷10=16180 推得=10025"
+      ],
+      "errors": [],
+      "generated_at": "2026-11-08T02:44:17.821704+08:00",
       "mode": "offline"
     }
   },
@@ -37444,7 +37461,7 @@
         ],
         "equity_parent_latest": 176751310.0,
         "roe_ttm_pct": 17.27,
-        "shares_outstanding_approx": 514683.0,
+        "shares_outstanding_approx": 2053947.0,
         "non_current_assets_latest": 229766227.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -37458,7 +37475,9 @@
           "eps_cum": 8.48,
           "source": "t187ap06_L_ci",
           "industry": "上市一般業"
-        }
+        },
+        "shares_from_capital_div10": 514683.0,
+        "shares_basis": "implied_from_eps"
       },
       "institutional": {
         "date": "20261106",
@@ -105448,7 +105467,7 @@
         ],
         "equity_parent_latest": 12569099.0,
         "roe_ttm_pct": 22.51,
-        "shares_outstanding_approx": 81599.0,
+        "shares_outstanding_approx": 162952.0,
         "non_current_assets_latest": 1995627.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -105462,7 +105481,9 @@
           "eps_cum": 8.33,
           "source": "t187ap06_L_ci",
           "industry": "上市一般業"
-        }
+        },
+        "shares_from_capital_div10": 81599.0,
+        "shares_basis": "implied_from_eps"
       },
       "institutional": {
         "date": "20261106",
@@ -115424,7 +115445,7 @@
         ],
         "equity_parent_latest": 8774091.0,
         "roe_ttm_pct": -6.97,
-        "shares_outstanding_approx": 78417.0,
+        "shares_outstanding_approx": 1547277.0,
         "non_current_assets_latest": 5222828.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -115438,7 +115459,9 @@
           "eps_cum": -0.45,
           "source": "t187ap06_L_ci",
           "industry": "上市一般業"
-        }
+        },
+        "shares_from_capital_div10": 78417.0,
+        "shares_basis": "implied_from_eps"
       },
       "institutional": {
         "date": "20261106",
@@ -119139,8 +119162,10 @@
           "source": "t187ap06_L_ci",
           "industry": "上市一般業"
         },
-        "shares_outstanding_approx": 81002.0,
-        "non_current_assets_latest": 189205.0
+        "shares_outstanding_approx": 796800.0,
+        "non_current_assets_latest": 189205.0,
+        "shares_from_capital_div10": 81002.0,
+        "shares_basis": "implied_from_eps"
       },
       "institutional": {
         "date": "20261106",
@@ -121300,7 +121325,7 @@
         ],
         "equity_parent_latest": 29113390.0,
         "roe_ttm_pct": 4.28,
-        "shares_outstanding_approx": 72565.0,
+        "shares_outstanding_approx": 698566.0,
         "non_current_assets_latest": 21953381.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -121314,7 +121339,9 @@
           "eps_cum": 2.25,
           "source": "t187ap06_L_ci",
           "industry": "上市一般業"
-        }
+        },
+        "shares_from_capital_div10": 72565.0,
+        "shares_basis": "implied_from_eps"
       },
       "institutional": {
         "date": "20261106",
@@ -124590,7 +124617,7 @@
         ],
         "equity_parent_latest": 10860906.0,
         "roe_ttm_pct": 14.62,
-        "shares_outstanding_approx": 135964.0,
+        "shares_outstanding_approx": 1351886.0,
         "non_current_assets_latest": 19694646.0,
         "source": "t187ap06_L_ci",
         "industry_format": "上市一般業",
@@ -124604,7 +124631,9 @@
           "eps_cum": 0.97,
           "source": "t187ap06_L_ci",
           "industry": "上市一般業"
-        }
+        },
+        "shares_from_capital_div10": 135964.0,
+        "shares_basis": "implied_from_eps"
       },
       "institutional": {
         "date": "20261106",
@@ -133229,8 +133258,10 @@
           "source": "t187ap06_L_ci",
           "industry": "上市一般業"
         },
-        "shares_outstanding_approx": 98915.0,
-        "non_current_assets_latest": 4478065.0
+        "shares_outstanding_approx": 990903.0,
+        "non_current_assets_latest": 4478065.0,
+        "shares_from_capital_div10": 98915.0,
+        "shares_basis": "implied_from_eps"
       }
     },
     "3673": {
@@ -135011,8 +135042,10 @@
           "source": "t187ap06_L_ci",
           "industry": "上市一般業"
         },
-        "shares_outstanding_approx": 97363.0,
-        "non_current_assets_latest": 22838161.0
+        "shares_outstanding_approx": 388069.0,
+        "non_current_assets_latest": 22838161.0,
+        "shares_from_capital_div10": 97363.0,
+        "shares_basis": "implied_from_eps"
       }
     },
     "7827": {
@@ -155169,8 +155202,10 @@
         "source": "mopsfin_t187ap06_O_ci",
         "industry_format": "上櫃一般業",
         "equity_parent_latest": 1573174.0,
-        "shares_outstanding_approx": 36289.0,
-        "non_current_assets_latest": 963589.0
+        "shares_outstanding_approx": 143279.0,
+        "non_current_assets_latest": 963589.0,
+        "shares_from_capital_div10": 36289.0,
+        "shares_basis": "implied_from_eps"
       },
       "institutional": {
         "date": "20261106",
@@ -197045,8 +197080,10 @@
         "source": "mopsfin_t187ap06_O_ci",
         "industry_format": "上櫃一般業",
         "equity_parent_latest": 3664904.0,
-        "shares_outstanding_approx": 30000.0,
-        "non_current_assets_latest": 356097.0
+        "shares_outstanding_approx": 297154.0,
+        "non_current_assets_latest": 356097.0,
+        "shares_from_capital_div10": 30000.0,
+        "shares_basis": "implied_from_eps"
       },
       "institutional": {
         "date": "20261106",
@@ -198238,8 +198275,10 @@
         "source": "mopsfin_t187ap06_O_ci",
         "industry_format": "上櫃一般業",
         "equity_parent_latest": 1790931.0,
-        "shares_outstanding_approx": 60298.0,
-        "non_current_assets_latest": 4716552.0
+        "shares_outstanding_approx": 288749.0,
+        "non_current_assets_latest": 4716552.0,
+        "shares_from_capital_div10": 60298.0,
+        "shares_basis": "implied_from_eps"
       },
       "institutional": {
         "date": "20261106",
@@ -205362,8 +205401,10 @@
         },
         "source": "mopsfin_t187ap06_O_ci",
         "industry_format": "上櫃一般業",
-        "shares_outstanding_approx": 62040.0,
-        "non_current_assets_latest": 8190340.0
+        "shares_outstanding_approx": 124053.0,
+        "non_current_assets_latest": 8190340.0,
+        "shares_from_capital_div10": 62040.0,
+        "shares_basis": "implied_from_eps"
       },
       "institutional": {
         "date": "20261106",
@@ -224914,8 +224955,10 @@
         "source": "mopsfin_t187ap06_O_ci",
         "industry_format": "上櫃一般業",
         "equity_parent_latest": 12954403.0,
-        "shares_outstanding_approx": 38019.0,
-        "non_current_assets_latest": 9248448.0
+        "shares_outstanding_approx": 921508.0,
+        "non_current_assets_latest": 9248448.0,
+        "shares_from_capital_div10": 38019.0,
+        "shares_basis": "implied_from_eps"
       },
       "institutional": {
         "date": "20261106",
@@ -227714,8 +227757,10 @@
         "source": "mopsfin_t187ap06_O_ci",
         "industry_format": "上櫃一般業",
         "equity_parent_latest": 6425027.0,
-        "shares_outstanding_approx": 38901.0,
-        "non_current_assets_latest": 2578190.0
+        "shares_outstanding_approx": 77791.0,
+        "non_current_assets_latest": 2578190.0,
+        "shares_from_capital_div10": 38901.0,
+        "shares_basis": "implied_from_eps"
       },
       "institutional": {
         "date": "20261106",
@@ -234488,8 +234533,10 @@
         "source": "mopsfin_t187ap06_O_ci",
         "industry_format": "上櫃一般業",
         "equity_parent_latest": 2981953.0,
-        "shares_outstanding_approx": 18404.0,
-        "non_current_assets_latest": 1469729.0
+        "shares_outstanding_approx": 184820.0,
+        "non_current_assets_latest": 1469729.0,
+        "shares_from_capital_div10": 18404.0,
+        "shares_basis": "implied_from_eps"
       },
       "institutional": {
         "date": "20261106",
@@ -239709,8 +239756,10 @@
         "source": "mopsfin_t187ap06_O_ci",
         "industry_format": "上櫃一般業",
         "equity_parent_latest": 1366213.0,
-        "shares_outstanding_approx": 64591.0,
-        "non_current_assets_latest": 766736.0
+        "shares_outstanding_approx": 128684.0,
+        "non_current_assets_latest": 766736.0,
+        "shares_from_capital_div10": 64591.0,
+        "shares_basis": "implied_from_eps"
       },
       "institutional": {
         "date": "20261106",
@@ -258217,8 +258266,10 @@
         "source": "mopsfin_t187ap06_O_ci",
         "industry_format": "上櫃一般業",
         "equity_parent_latest": 2455229.0,
-        "shares_outstanding_approx": 106503.0,
-        "non_current_assets_latest": 1219648.0
+        "shares_outstanding_approx": 353938.0,
+        "non_current_assets_latest": 1219648.0,
+        "shares_from_capital_div10": 106503.0,
+        "shares_basis": "implied_from_eps"
       },
       "institutional": {
         "date": "20261106",
@@ -258664,8 +258715,10 @@
         "source": "mopsfin_t187ap06_O_ci",
         "industry_format": "上櫃一般業",
         "equity_parent_latest": 2380192.0,
-        "shares_outstanding_approx": 107920.0,
-        "non_current_assets_latest": 5448208.0
+        "shares_outstanding_approx": 421914.0,
+        "non_current_assets_latest": 5448208.0,
+        "shares_from_capital_div10": 107920.0,
+        "shares_basis": "implied_from_eps"
       },
       "institutional": {
         "date": "20261106",
