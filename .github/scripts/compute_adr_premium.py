@@ -112,6 +112,14 @@ def main():
             errors.append({"ticker": us_ticker, "reason": f"台股 {tw_code} 報價缺失"})
             print(f"  ・{us_ticker}: 台股 {tw_code} 報價缺失")
             continue
+        # 先.一三五-1mg（2026-11-07）：quotes_all_tw 會照常輸出落後股（is_stale=true，例 2024-12-31 的舊列），
+        # 不得拿舊台股收盤對新美股價算溢價——落後就不寫 rows（溢價視同 null），原因寫進 errors 給 App 顯示。
+        if tw_q.get("is_stale"):
+            reason = (f"台股 {tw_code} 收盤落後（資料停在 {tw_q.get('as_of') or tw_q.get('date')}"
+                      f"，落後 {tw_q.get('stale_days')} 天），不計算溢價")
+            errors.append({"ticker": us_ticker, "reason": reason})
+            print(f"  ・{us_ticker}: {reason}")
+            continue
         if not _pos(fx_rate):
             errors.append({"ticker": us_ticker, "reason": "匯率缺失（data/fx.json）"})
             print(f"  ・{us_ticker}: 匯率缺失")

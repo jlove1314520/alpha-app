@@ -108,5 +108,19 @@ with tempfile.TemporaryDirectory() as td:
     check("只剩 CHT", sorted(doc4["rows"]) == ["CHT"], sorted(doc4["rows"]))
     check("CHT 比率 10：40×32÷10＝128 → 溢價 0", doc4["rows"]["CHT"]["premium_pct"] == 0.0)
 
+    print("情境五（先.一三五-1mg）：台股收盤落後（is_stale）→ 不拿舊收盤算溢價、記原因")
+    d5 = base / "d5"
+    setup(d5, us={"quotes": {"TSM": {"price": 200.0}, "CHT": {"price": 40.0}}},
+          tw={"quotes": {"2330": {"close": 1000.0, "as_of": "2024-12-31", "is_stale": True, "stale_days": 675},
+                         "2412": {"close": 128.0, "as_of": "2026-11-06", "is_stale": False}}},
+          fx={"usd_twd": {"rate": 32.0}})
+    rc, err = run(d5, out)
+    doc5 = json.loads(out.read_text(encoding="utf-8"))
+    check("沒有未處理例外", err is None, repr(err))
+    check("TSM 台股落後 → 不輸出", "TSM" not in doc5["rows"], doc5["rows"].get("TSM"))
+    check("TSM 原因寫明資料日期與落後天數", any(e["ticker"] == "TSM" and "2024-12-31" in e["reason"] and "675" in e["reason"]
+                                     for e in doc5["errors"]), doc5["errors"])
+    check("CHT 未落後照常計算", doc5["rows"].get("CHT", {}).get("premium_pct") == 0.0)
+
 print(f"\n合計 {ok} 過、{fail} 失敗")
 sys.exit(1 if fail else 0)
