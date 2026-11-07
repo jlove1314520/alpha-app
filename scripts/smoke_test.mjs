@@ -329,6 +329,32 @@ async function runSmokeTest(baseUrl, headless = true) {
     } catch (e) { shErrs.push(`測試本身出錯：${e.message || e}`); }
     record("184. 類股成分股清單：落後股（is_stale／close≤0）顯示「資料停在」、不顯示漲跌%與成交值（先.一三五-1mh）", shErrs.length === 0, shErrs.length ? shErrs.join("; ") : shInfo);
   }
+  // 185.【2026-11-07 先.一三五-1mb】個股頁財報：興櫃股（1260 富味鄉，官方興櫃名冊）停在 2024Q4 要說明「興櫃股…不再更新」、
+  // 不得誤標「已下市」；在市上市股 2330 不得出現興櫃／已下市註記。
+  {
+    const emErrs = []; let emInfo = "";
+    try {
+      const readFin = async (code) => {
+        await page.evaluate((c) => window.openStock(c), code);
+        await page.waitForTimeout(400);
+        await page.evaluate(() => { const b = [...document.querySelectorAll("#stock-tabs button")].find((x) => x.dataset.sub === "fin"); if (b) b.click(); });
+        let v = null;
+        for (let i = 0; i < 30; i++) {
+          await page.waitForTimeout(200);
+          v = await page.evaluate(() => ({ gross: document.getElementById("fin-gross")?.textContent || "", note: document.getElementById("fin-note")?.textContent || "" }));
+          if (v.gross && v.gross !== "—" && /Q\d/.test(v.gross)) break;
+        }
+        return v;
+      };
+      const a = await readFin("1260");
+      if (!/興櫃股：官方開放財報只涵蓋上市櫃，此為舊資料、不再更新/.test(a.gross)) emErrs.push(`1260 毛利率沒標興櫃註記：${a.gross}`);
+      if (/已下市/.test(a.gross + a.note)) emErrs.push(`1260（興櫃）被誤標已下市：${a.gross}｜${a.note.slice(0, 80)}`);
+      const b = await readFin("2330");
+      if (/興櫃|已下市/.test(b.gross)) emErrs.push(`2330 不該有興櫃／已下市註記：${b.gross}`);
+      emInfo = `1260：${a.gross}；2330：${b.gross}`;
+    } catch (e) { emErrs.push(`測試本身出錯：${e.message || e}`); }
+    record("185. 個股頁財報：興櫃股標「興櫃股…不再更新」、不誤標已下市；2330 不顯示（先.一三五-1mb）", emErrs.length === 0, emErrs.length ? emErrs.join("; ") : emInfo);
+  }
   // 6b. 選股排行列（picks-list的row，點擊應該打開個股評分報告畫面 #scr-report）
   try {
     await page.evaluate(() => window.go("picks"));

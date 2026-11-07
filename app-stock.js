@@ -514,8 +514,20 @@
     const last=fin.length?fin[fin.length-1]:null;
     // 先.一〇三-13b-C1：毛利率／營益率標出是哪一季；比「依法定期限應已公布的最新季」落後超過 2 季，加註「資料較舊」
     // （例：3324 停在 2024Q4，原本 22.5% 看起來像現況）
+    // 先.一三五-1mb：不在今日上市櫃名冊的代號，分清「興櫃」（company_info 官方興櫃名冊 tpex_t187ap03_R）與「已下市」，
+    // 落後時說明為何不會再更新（官方開放財報 t187ap06/07 只涵蓋上市櫃，興櫃不在管線範圍）。查不到名冊就不猜、照舊只標「資料較舊」。
+    let _finOffList='';
+    if(last){
+      try{await ensureListedUniverse();
+        if(!isListedNow(code)){const ci=(await loadCompanyInfo())[code]||{};
+          _finOffList=ci.industry_source==='tpex_t187ap03_R'?'emerging':'delisted'}}
+      catch(e){console.warn('[loadFinancials:offList]',e);recordGlobalError('loadFinancials:offList',e)}
+      if(currentCode!==code)return;
+    }
     const _qTag=(y,q)=>{const e=expectedLatestQuarterTW(new Date()),lag=(e[0]*4+e[1])-(y*4+q);
-      return `（${y}Q${q}${lag>2?'，資料較舊':''}）`};
+      const st=lag<=2?'':_finOffList==='emerging'?'，興櫃股：官方開放財報只涵蓋上市櫃，此為舊資料、不再更新'
+        :_finOffList==='delisted'?'，已下市：此為舊資料、不再更新':'，資料較舊';
+      return `（${y}Q${q}${st}）`};
     const _lq=last?_qTag(last.year,last.quarter):'';
     setTxt('fin-gross',last&&last.gross_margin_pct!=null?last.gross_margin_pct.toFixed(1)+'%'+_lq:'—');
     setTxt('fin-op',last&&last.op_margin_pct!=null?last.op_margin_pct.toFixed(1)+'%'+_lq:'—');
@@ -542,14 +554,11 @@
     const F=detail.financials||{},lc=F.latest_cum;
     // 先.一三五-1lz：沒有 source 的單季序列原本一律當成 TWSE 官方 t187ap06_L_ci；但已下市公司（不在今日官方名冊）
     // 的季報其實來自 2026-08-27 FinMind 歷史回補（公司下市後仍公開發行、向 MOPS 申報），不是官方開放資料，照實標出。
-    let _delisted=false;
-    if(!F.source&&last){
-      try{await ensureListedUniverse();_delisted=!isListedNow(code)}
-      catch(e){console.warn('[loadFinancials:listed]',e);recordGlobalError('loadFinancials:listed',e)}
-      if(currentCode!==code)return;
-    }
-    const src=F.source||(last&&!_delisted?'t187ap06_L_ci':'');
-    const srcTxt=_delisted?'FinMind 季報回補（非官方；此代號已下市，下市後公司仍公開發行、向 MOPS 申報）'
+    // 先.一三五-1mb：名冊判定改用上面 _finOffList（同一次查詢）；興櫃股不再誤標「已下市」。
+    const _delisted=!F.source&&_finOffList==='delisted',_emergingSrc=!F.source&&_finOffList==='emerging';
+    const src=F.source||(last&&!_finOffList?'t187ap06_L_ci':'');
+    const srcTxt=_emergingSrc?'FinMind 季報回補（非官方；此代號為興櫃股，官方開放財報只涵蓋上市櫃，不會再更新）'
+      :_delisted?'FinMind 季報回補（非官方；此代號已下市，下市後公司仍公開發行、向 MOPS 申報）'
       :src?((/_O_|mopsfin/.test(src)?'TPEx官方 ':'TWSE官方 ')+src+'（'+(F.industry_format||'上市一般業')+'）'):'';
     const lcNewer=lc&&(!last||lc.year*4+lc.quarter>last.year*4+last.quarter);
     if(lcNewer&&!last){
