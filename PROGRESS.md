@@ -1,3 +1,10 @@
+## 2026-11-07 19:31～20:0x DevQueue 20261107-193102（維運帽）先.一三五-1mj 回補季被擋 4 檔查因＋上市一般業歸母淨利回退
+等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
+- **先.一三五-1mj**（`- [x]`，零外部請求）：官方 latest_cum 歸母淨利 3135＝null、5704／6241／5386 有值；回補檔 `data/financials_backfill.json` 四檔各季 net_income_parent 全 null → 四檔都是②回補檔缺，照實記錄、維持擋（5386 EPS 57.27 vs 42.93 不放行）。
+- 副帶修 bug：上市一般業 `fetch_income()`（`.github/scripts/update_stock_financials.py`）只讀單一欄名、沒有「無子公司欄位空白→用本期淨利」回退（上市一般業 61/1039 檔缺，上櫃同路徑 0/890）。改用 `_PARENT_NI_KEYS`＋本期淨利回退；〔自行裁量〕非控制權益欄非零時不回退。離線假資料自測 4 案例符合；真實回應未驗證（本機無原始快取），下一班 market.yml 後看 61 檔缺值是否下降。
+- 冒煙測試：第一次被我外加的 `timeout 300` 中途砍掉瀏覽器（117 起 browser closed，非測試 FAIL）；不加限制重跑 `node scripts/smoke_test.mjs` exit=0，188 項 PASS、無 FAIL。
+- `data/STATUS.json`：無資料源／面板異動，本輪不更新。下一項先.一五五-3 是 [研究] 類，依一輪一頂帽子收工；佇列 `- [ ]` 29 項，不需補件。
+
 ## 2026-11-07 18:31～19:0x DevQueue 20261107-183102（研究帽）先.一五五-3 殖利率因子延長到 2025 起
 等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
 - **先.一五五-3**（維持 `- [ ]`，零外部請求）：`research/reaudit_ext2025_fin_factors.py` 新增 f_dividend_yield_ttm（分子直接呼叫 `factors._dividend_yield_ttm_cash_from_df`、本機股利快取合併；分母＝當日原始收盤），

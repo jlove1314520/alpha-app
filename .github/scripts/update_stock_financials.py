@@ -299,7 +299,13 @@ def fetch_income() -> dict[str, dict]:
             continue
         gross = _num(row.get("營業毛利（毛損）淨額"))
         op = _num(row.get("營業利益（損失）"))
-        net_parent = _num(row.get("淨利（淨損）歸屬於母公司業主"))
+        net_parent = _first(row, _PARENT_NI_KEYS)
+        if net_parent is None:
+            # 先.一三五-1mj（2026-11-07）：無子公司的公司歸屬母公司欄位留空（上市一般業 61/1039 檔缺、上櫃同路徑 0/890 缺），
+            # 比照 parse_extra_income 用本期淨利；但非控制權益欄有非零值時不回退（本期淨利會含非控制權益）。
+            nci = _first(row, ("淨利（淨損）歸屬於非控制權益", "淨利（損）歸屬於非控制權益"))
+            if not nci:
+                net_parent = _num(row.get("本期淨利（淨損）"))
         eps = _num(row.get("基本每股盈餘（元）"))
         # 2026-08-27修正：官方單位是仟元（跟月營收端點同慣例），原本沒乘1000。
         out[code] = {
