@@ -45,14 +45,17 @@ prog = E.prog
 # 第 2 批價量因子延長（DevQueue 20261107-073102）：公式照 factors.py 原文抄（窗口常數直接 import），
 # 2024 底前逐值跟 pkl 核對，差 >1e-6 就停，不靠人眼保證抄對。
 PRICE_FACS = FACS + ["f_idio_vol", "f_bab", "f_residual_momentum", "f_short_reversal_1m",
-                     "f_short_term_reversal_1w", "f_ma_breakout", "f_amihud_illiq"]
+                     "f_short_term_reversal_1w", "f_ma_breakout", "f_amihud_illiq",
+                     "f_listing_age_days"]
 
 
 from reaudit_ext2025_fin_factors import FIN_FACS, attach as attach_fin  # noqa: E402
 
 
-def _factor_series(d, mc, fac):
+def _factor_series(d, mc, fac, sid=None):
     import factors as F
+    if fac == "f_listing_age_days":  # 照 factors._listing_age_days（官方上市日，查不到全 NaN）
+        return F._listing_age_days(sid, d["date"]).astype(float)
     px = d["adj_close"].astype(float)
     r = px.pct_change()
     if fac == "f_low_vol":
@@ -111,7 +114,7 @@ def recompute(ext, mk, fac):
                     FIN_MISMATCH.append(sid)
                 v = v.where(~pre_all, d[fac].astype(float))
         else:
-            v = _factor_series(d, mc, fac)
+            v = _factor_series(d, mc, fac, sid)
         pre = (d["date"] <= "2024-12-31") & (d["date"] >= START)
         if fac in d.columns:
             a, b = d.loc[pre, fac].astype(float), v[pre]

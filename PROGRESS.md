@@ -1,3 +1,11 @@
+## 2026-11-07 13:31～14:1x DevQueue 20261107-133102（研究帽）先.一五五-3 墓園重審：月營收意外／上市天數延長到 2025 起
+等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
+- **先.一五五-3**（維持 `- [ ]`，零外部請求）：`research/reaudit_ext2025_fin_factors.py` 新增 f_revenue_surprise（本機月營收快取全部合併、舊檔優先；pit_date 照 pit.month_revenue_pit；公式逐字照 factors._revenue_surprise_sue），`research/reaudit_batch3_ext2025.py` 新增 f_listing_age_days（直接呼叫 factors._listing_age_days）。兩族都延長到 2026-09-24、48/48 跑完。
+  - 證據：2024 底前與 pkl 核對——f_revenue_surprise 不一致 0/236 檔、f_listing_age_days 最大差 0；summarize 輸出：f_revenue_surprise 第 1 批挑出那組全期 +20.6%／−27.6%、2025 起 +44.9%／−16.9%（全期重挑 63 日 1× +18.1%／−20.2%）；f_listing_age_days 全期 +6.2%／−13.0%、2025 起 +3.0%／−11.3%。`paper_opt_track.py` 重產 8 支回測全對上、last_error=None，候選欄 20 支名單不變。紙上優化軌描述性數字，非投資建議。
+  - [自行裁量] 籌碼類（法人／融資券）本機 2025 起快取只有 5/236、0/236 檔，延長要約 470 次 FinMind 請求，本輪不抓，改下一輪分批（每輪 ≤150 次）。
+  - 冒煙：第一次被我自己設的 300 秒逾時中斷（瀏覽器被關，非測試 FAIL）；重跑 188 過 0 失敗、exit 0。超過 45 分鐘收尾點約 7 分鐘等冒煙跑完才提交。
+- 收工補件：`- [ ]` 仍 ≥12；本輪時間不夠重算「DevQueue 可執行非研究」門檻，留下一輪（照實記錄）。BLOCKED：無新增。
+
 ## 2026-11-07 13:01～ DevQueue 20261107-130102（維運帽）先.一三五-1mi ADR 溢價標「台股 MM/DD、非同日」
 等待總司令審閱：9 件（同 `research/AWAITING_REVIEW.md` 等待中表格；本輪無新增）。
 - **先.一三五-1mi**（`- [x]`，零外部請求）：`.github/scripts/compute_adr_premium.py` 讀 `data/trading_calendar.json`，算「美股報價日（美東）當天或之前最近一個台股交易日」；台股收盤日早於它 → 該列加 `tw_date_mismatch`／`tw_lag_trading_days`／`tw_expected_date`，溢價照算。`app-market.js` 有旗標時在 % 後灰字標「台股 MM/DD、非同日」。日曆缺年份或日期認不得就不判斷（fail open）。

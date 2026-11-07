@@ -16,10 +16,33 @@ import numpy as np
 import pandas as pd
 
 import factors as F
-from pit import _pivot_with_statutory_pit
+from pathlib import Path
+
+from pit import _next_month_10th, _pivot_with_statutory_pit
 from reaudit_ext2025_roe_factor import _raw
 
-FIN_FACS = ["f_gross_profitability", "f_gross_margin_stability", "f_asset_growth", "f_accruals", "f_eps_growth", "f_eps_surprise"]
+FIN_FACS = ["f_gross_profitability", "f_gross_margin_stability", "f_asset_growth", "f_accruals", "f_eps_growth", "f_eps_surprise",
+            "f_revenue_surprise"]
+
+RAW = Path(__file__).resolve().parent / "data" / "raw"
+
+
+def _month_rev_raw(sid):
+    """（DevQueue 20261107-133102）月營收：本機所有 TaiwanStockMonthRevenue__{sid}__*.parquet 合併，
+    舊檔（迄 2024-12-31）優先、新檔（2024-01-01__2026-07-01／2025-06-01__latest）只補新月份；
+    pit_date 照 pit.month_revenue_pit：有 create_time 用它，否則次月 10 日。"""
+    fs = sorted(RAW.glob(f"TaiwanStockMonthRevenue__{sid}__*.parquet"),
+                key=lambda f: (0 if f.name.endswith("2024-12-31.parquet") else 1, f.name))
+    parts = [pd.read_parquet(f) for f in fs]
+    parts = [x for x in parts if not x.empty and "revenue_year" in x.columns]
+    if not parts:
+        return pd.DataFrame()
+    x = pd.concat(parts, ignore_index=True).drop_duplicates(["revenue_year", "revenue_month"], keep="first")
+    ct = x["create_time"].fillna("").astype(str)
+    has_real = ct.str.len() > 0
+    assumed = x.apply(lambda r: _next_month_10th(int(r["revenue_year"]), int(r["revenue_month"])), axis=1)
+    x["pit_date"] = ct.where(has_real, assumed)
+    return x
 
 
 def _inc(sid):
@@ -78,6 +101,20 @@ def fin_pit(sid, fac):
             W = F.SUE_TRAILING_QUARTERS
             q["v"] = dd / dd.rolling(W, min_periods=W).std()
         return q[["pit_date", "v"]]
+    if fac == "f_revenue_surprise":  # 照 factors._revenue_surprise_sue 逐字
+        rev = _month_rev_raw(sid)
+        if rev.empty:
+            return empty
+        rev = rev.sort_values(["revenue_year", "revenue_month"]).reset_index(drop=True)
+        prior = rev[["revenue_year", "revenue_month", "revenue"]].copy()
+        prior["revenue_year"] += 1
+        prior = prior.rename(columns={"revenue": "revenue_prior_year"})
+        rev = rev.merge(prior, on=["revenue_year", "revenue_month"], how="left")
+        rev["yoy"] = (rev["revenue"] - rev["revenue_prior_year"]) / rev["revenue_prior_year"].abs()
+        W = F.REVENUE_SUE_TRAILING_MONTHS
+        rev["yoy_std"] = rev["yoy"].rolling(W, min_periods=W).std()
+        rev["v"] = rev["yoy"] / rev["yoy_std"]
+        return rev[["pit_date", "v"]]
     raise ValueError(fac)
 
 
