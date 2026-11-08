@@ -601,7 +601,8 @@
     {label:'匯率 USD/TWD',file:'data/fx.json',kind:'daily',tz:'UTC',mkt:'tw',grace:3,dataDate:d=>d&&d.usd_twd&&d.usd_twd.date},
     {label:'大盤融資維持率',file:'data/margin_maintenance.json',kind:'daily',tz:'UTC',mkt:'tw',grace:3},
     {label:'前瞻選股台帳',file:'data/picks_ledger.json',kind:'daily',tz:'UTC',mkt:'tw',grace:3},
-    {label:'策略前向紙上績效',file:'data/strategy_performance.json',kind:'daily',tz:'UTC',mkt:'tw',grace:3},
+    // 先.一三五-1mr（2026-11-08）：同 1mp，重算腳本照常寫 generated_at 但價格沒更新時，改看 as_of_trading_date。
+    {label:'策略前向紙上績效',file:'data/strategy_performance.json',kind:'daily',tz:'UTC',mkt:'tw',grace:3,dataDate:d=>d&&d.as_of_trading_date},
     // 先.六十-C9（2026-10-10）：這三個大檔原本經 STATUS.json 間接判斷（viaStatus），但 STATUS.json 頂層從 09-15 起沒人更新，
     // 判斷跟著失真。改成只串流讀檔案開頭幾 KB 抓它自己的 generated_at（三檔的 meta.generated_at 都在前 1KB 內），讀到就中止下載。
     {label:'個股基本面 PER/月營收',file:'data/fundamentals.json',kind:'daily',tz:'UTC',mkt:'tw',grace:3,head:true},

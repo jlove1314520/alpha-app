@@ -8,7 +8,7 @@ const ctx = await browser.newContext({ serviceWorkers: "block" });  // SW 會攔
 const page = await ctx.newPage();
 // 先.一三五-1mq（2026-11-08）：同一套畫面檢查也套到 data/market_tw.json（data_date）
 const fakes = {};
-for (const f of ["fx", "market_tw"]) await page.route(new RegExp("data/" + f + "\\.json"), r => fakes[f] ? r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fakes[f]) }) : r.continue());
+for (const f of ["fx", "market_tw", "strategy_performance"]) await page.route(new RegExp("data/" + f + "\\.json"), r => fakes[f] ? r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fakes[f]) }) : r.continue());
 await page.addInitScript(() => { window.__ALPHA_FETCH_MEMCACHE_OFF = true; });  // 60 秒記憶體快取會讓假檔換不進去
 await page.goto(URL, { waitUntil: "load" });
 await page.evaluate(() => go("settings"));
@@ -40,6 +40,8 @@ const stale = await page.evaluate(() => {
 const TARGETS = [
   ["fx", "data/fx.json", dd => ({ fetched_at: new Date().toISOString(), errors: [], usd_twd: { rate: 32.0, date: dd, source: "selftest" } })],
   ["market_tw", "data/market_tw.json", dd => ({ fetched_at: new Date().toISOString(), data_date: dd, expected_trading_day: dd, source: "selftest" })],
+  // 先.一三五-1mr（2026-11-08）：策略前向紙上績效看 as_of_trading_date
+  ["strategy_performance", "data/strategy_performance.json", dd => ({ generated_at: new Date().toISOString(), as_of_trading_date: dd, strategies: [] })],
 ];
 for (const [key, file, mk] of TARGETS) {
   for (const [label, date, want] of [["停滯", stale, "overdue"], ["正常（今天往前最近交易日）", null, "ok"]]) {
