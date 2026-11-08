@@ -33,7 +33,7 @@
       "generated_at": "2026-09-29T23:33:27.123025+08:00"
     },
     "official_industry_2026_10_13": {
-      "applied_at": "2026-10-14T00:15:23+08:00",
+      "applied_at": "2026-11-08T10:31:33+08:00",
       "sources": [
         "https://openapi.twse.com.tw/v1/opendata/t187ap03_L",
         "https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap03_O",
@@ -42,45 +42,20 @@
       ],
       "note": "官方清單內的上市／上櫃／興櫃公司 industry 改用官方產業別代碼對應名稱；清單外（ETF 等）維持原值。腳本 scripts/apply_official_industry.py。",
       "counts": {
-        "twse_t187ap03_L": 1095,
-        "changed": 408,
-        "tpex_t187ap03_O": 893,
-        "added_company": 13,
-        "tpex_t187ap03_R": 364
+        "twse_t187ap03_L": 1099,
+        "tpex_t187ap03_O": 897,
+        "tpex_t187ap03_R": 367,
+        "added_company": 12,
+        "changed": 12
       },
       "unknown_codes": {},
       "code_name_conflicts": {},
       "ambiguity_before": {
-        "label_differs_from_official": 395,
-        "missing": 13,
-        "codes_with_multiple_spellings": 8,
-        "extra_spellings": 8,
-        "examples": {
-          "37": [
-            "運動休閒",
-            "運動休閒類"
-          ],
-          "38": [
-            "居家生活",
-            "居家生活類"
-          ],
-          "35": [
-            "綠能環保",
-            "綠能環保類"
-          ],
-          "31": [
-            "其他電子業",
-            "其他電子類"
-          ],
-          "29": [
-            "電子通路業",
-            "食品工業"
-          ],
-          "17": [
-            "金融保險",
-            "金融業"
-          ]
-        }
+        "label_differs_from_official": 0,
+        "missing": 12,
+        "codes_with_multiple_spellings": 0,
+        "extra_spellings": 0,
+        "examples": {}
       },
       "ambiguity_after": {
         "label_differs_from_official": 0,
@@ -2584,7 +2559,7 @@
       "official_domain": "tahopharma.com",
       "official_website_source": "tpex_R",
       "industry_code": "22",
-      "industry_source": "tpex_t187ap03_R"
+      "industry_source": "twse_t187ap03_L"
     },
     "6569": {
       "name": "醫揚",
@@ -6727,7 +6702,7 @@
       "official_domain": "trplus.com.tw",
       "official_website_source": "tpex_R",
       "industry_code": "38",
-      "industry_source": "tpex_t187ap03_R"
+      "industry_source": "twse_t187ap03_L"
     },
     "7866": {
       "name": "丹立",
@@ -7132,7 +7107,7 @@
       "official_domain": "gin-hwa.com",
       "official_website_source": "tpex_R",
       "industry_code": "02",
-      "industry_source": "tpex_t187ap03_R"
+      "industry_source": "tpex_t187ap03_O"
     },
     "7808": {
       "name": "訊聯智藥",
@@ -7640,7 +7615,7 @@
       "official_domain": "shng.com.tw",
       "official_website_source": "tpex_O",
       "industry_code": "23",
-      "industry_source": "tpex_t187ap03_O"
+      "industry_source": "twse_t187ap03_L"
     },
     "8916": {
       "name": "光隆",
@@ -9945,7 +9920,7 @@
       "official_domain": "qbictechnology.com",
       "official_website_source": "tpex_R",
       "industry_code": "25",
-      "industry_source": "tpex_t187ap03_R"
+      "industry_source": "tpex_t187ap03_O"
     },
     "6826": {
       "name": "和淞",
@@ -11563,7 +11538,7 @@
       "official_domain": "asrockind.com",
       "official_website_source": "tpex_R",
       "industry_code": "25",
-      "industry_source": "tpex_t187ap03_R"
+      "industry_source": "twse_t187ap03_L"
     },
     "7711": {
       "name": "永擎",
@@ -11869,7 +11844,7 @@
       "official_domain": "chainsea.com.tw",
       "official_website_source": "tpex_R",
       "industry_code": "30",
-      "industry_source": "tpex_t187ap03_R"
+      "industry_source": "tpex_t187ap03_O"
     },
     "6895": {
       "name": "宏碩系統",
@@ -12278,7 +12253,7 @@
       "official_domain": "newebinfo.com.tw",
       "official_website_source": "tpex_R",
       "industry_code": "30",
-      "industry_source": "tpex_t187ap03_R"
+      "industry_source": "tpex_t187ap03_O"
     },
     "6921": {
       "name": "嘉雨思-創",
@@ -15058,7 +15033,7 @@
       "official_domain": "young-shine.com.tw",
       "official_website_source": "tpex_R",
       "industry_code": "05",
-      "industry_source": "tpex_t187ap03_R"
+      "industry_source": "tpex_t187ap03_O"
     },
     "2250": {
       "name": "IKKA-KY",
@@ -24420,6 +24395,78 @@
       "name": "DIGITIMES",
       "industry": "數位雲端",
       "industry_code": "36",
+      "industry_source": "tpex_t187ap03_R"
+    },
+    "5235": {
+      "name": "金運",
+      "industry": "電腦及週邊設備業",
+      "industry_code": "25",
+      "industry_source": "tpex_t187ap03_R"
+    },
+    "6930": {
+      "name": "盛新",
+      "industry": "半導體業",
+      "industry_code": "24",
+      "industry_source": "tpex_t187ap03_R"
+    },
+    "7859": {
+      "name": "翰可能源",
+      "industry": "綠能環保",
+      "industry_code": "35",
+      "industry_source": "tpex_t187ap03_R"
+    },
+    "7946": {
+      "name": "廣騰",
+      "industry": "綠能環保",
+      "industry_code": "35",
+      "industry_source": "tpex_t187ap03_R"
+    },
+    "7954": {
+      "name": "鑫詮科技",
+      "industry": "半導體業",
+      "industry_code": "24",
+      "industry_source": "tpex_t187ap03_R"
+    },
+    "7955": {
+      "name": "車麗屋",
+      "industry": "居家生活",
+      "industry_code": "38",
+      "industry_source": "tpex_t187ap03_R"
+    },
+    "7957": {
+      "name": "第一傳動",
+      "industry": "電機機械",
+      "industry_code": "05",
+      "industry_source": "tpex_t187ap03_R"
+    },
+    "7958": {
+      "name": "六俊",
+      "industry": "電機機械",
+      "industry_code": "05",
+      "industry_source": "tpex_t187ap03_R"
+    },
+    "7960": {
+      "name": "亞昕科技",
+      "industry": "半導體業",
+      "industry_code": "24",
+      "industry_source": "tpex_t187ap03_R"
+    },
+    "7962": {
+      "name": "宇田控制",
+      "industry": "半導體業",
+      "industry_code": "24",
+      "industry_source": "tpex_t187ap03_R"
+    },
+    "7963": {
+      "name": "安達康",
+      "industry": "其他電子業",
+      "industry_code": "31",
+      "industry_source": "tpex_t187ap03_R"
+    },
+    "7965": {
+      "name": "昆桐",
+      "industry": "通信網路業",
+      "industry_code": "27",
       "industry_source": "tpex_t187ap03_R"
     }
   }

@@ -1,3 +1,23 @@
+## 2026-11-08 10:31～ DevQueue 20261108-103101（維運帽）先.一三五-1mm company_info 官方產業別重跑
+
+等待總司令審閱：9 件（見 `research/AWAITING_REVIEW.md`「等待中」表，本輪沒有新增）。
+
+### 先.一三五-1mm 轉上市櫃 8 檔仍只有興櫃來源
+- 做了什麼：重跑 `scripts/apply_official_industry.py`（跑前查 `data/rate_limit_state.json`：`twse_openapi`／`tpex_openapi` 皆未封鎖）；4 次請求（TWSE openapi 1＋TPEx openapi 3，同源間隔 3 秒）全 200。
+- 結果：官方代碼 35 個、衝突 0；上市 1,099／上櫃 897／興櫃 367；新增 12 家新興櫃（5235、6930、7859、7946、7954、7955、7957、7958、7960、7962、7963、7965）；產業名稱改 12 檔；改後 missing 0、多種寫法 0。
+- 證據：6467／7867／7710 → `twse_t187ap03_L`，7806／6825／6898／6938／2249 → `tpex_t187ap03_O`；重算 `listed_universe.json` active 2,152 檔中「只有興櫃來源」＝**0**（原 8）。
+- 根因：腳本順序本來就對（上市先寫、上櫃／興櫃 `setdefault` 不覆蓋），**不是順序 bug**，是 10/13 後沒人重跑 → 已補件 先.一三五-1nb 提案進排程。
+- `data/STATUS.json` company_info 條目更新（generated_at、records 3,162、來源改寫成官方公司基本資料）。
+- [自行裁量] ①`official_website_source` 仍為 `tpex_R`（官網欄位的真實來源，屬 `build_company_official_websites.py`，不動）；`_twListMarket()` 先比 industry_source，已判得出市場。②4 檔新 ETF（009827／009828／009831／009832）官方公司清單本來就沒有，不猜，另開 先.一三五-1na 處理畫面。③meta 鍵名 `official_industry_2026_10_13` 沿用（腳本寫死），內容 applied_at＝2026-11-08T10:31:33。
+- 冒煙：`node scripts/smoke_test.mjs` exit 0，輸出末段無 FAIL。
+
+### 收工補件
+- `- [ ]` 25 項（≥12）；但 DevQueue 可執行非研究項只有 1 項（門檻 6）。本輪補 2 條有實測證據的：先.一三五-1na（4 檔 ETF 法人卡通用字樣，②畫面問題）、先.一三五-1nb（apply_official_industry 進排程提案，①資料缺口）。
+- 未補滿 6：本輪掃 `data/STATUS.json` 非 ok 項，皆為週日正常未更新（stale 時間停 11/07 盤後）或靜態檔，沒有可寫成條目的真缺口；時間有限，照實記錄「補件未達門檻」。
+
+### 下一輪接續
+- 權威清單下一項是 [研究] 類（先.一五五-3 墓園重審第二批），一輪一頂帽子，本輪收工留給研究帽輪次。
+
 ## 2026-11-08 09:31～ DevQueue 20261108-093101（研究帽）先.一五五-3 第 10／11 批
 
 等待總司令審閱：9 件（見 `research/AWAITING_REVIEW.md`「等待中」表，本輪沒有新增；多為「請總司令執行一次」類，最早 2026-10-28 起）。上一輪寫 0 件與該表不一致，照該表為準。

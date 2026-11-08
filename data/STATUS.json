@@ -74,10 +74,10 @@
     },
     {
       "path": "data/company_info.json",
-      "generated_at": "2026-09-15T06:05:54.301858+08:00",
-      "records": 3150,
-      "source": "FinMind TaiwanStockInfo（research端本機parquet快取整理，一次性/不常變動）",
-      "detail": "2026-09-03回填：取自這個檔案最後一次git commit時間（build_company_info.py當時沒寫時間戳），不是重新產生；下次重跑腳本會寫入真正的產生時間 2026-09-05 已補齊：原 603 檔缺 industry，補後剩 90 檔。剩下的多半是興櫃/已下市/非上市櫃證券，沒有官方產業別可對。",
+      "generated_at": "2026-11-08T10:31:33+08:00",
+      "records": 3162,
+      "source": "產業別：官方公司基本資料（TWSE t187ap03_L／TPEx mopsfin_t187ap03_O／_R，scripts/apply_official_industry.py，上市櫃優先於興櫃）；清單外（ETF 等）沿用 FinMind TaiwanStockInfo",
+      "detail": "2026-11-08 先.一三五-1mm 重跑官方產業別：上市 1,099／上櫃 897／興櫃 367、新增 12 家新興櫃；轉上市櫃 8 檔改為 _L／_O 來源，上市櫃名冊中只有興櫃來源＝0；4 檔新 ETF（009827／009828／009831／009832）官方公司清單本來就沒有，不在本檔。（舊註）2026-09-03回填：取自這個檔案最後一次git commit時間（build_company_info.py當時沒寫時間戳），不是重新產生；下次重跑腳本會寫入真正的產生時間 2026-09-05 已補齊：原 603 檔缺 industry，補後剩 90 檔。剩下的多半是興櫃/已下市/非上市櫃證券，沒有官方產業別可對。",
       "status": "ok"
     },
     {
