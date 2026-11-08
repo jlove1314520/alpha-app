@@ -1163,6 +1163,28 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("26b. 上櫃外資缺值顯示「—」、合計／累計標「資料不全」且不把缺值當 0、來源標 TPEx（先.一〇三-3）",
     nullChipErrors.length === 0, nullChipErrors.join("; "));
 
+  // 26d.【先.一三五-1na】新上市 ETF 009827 不在 company_info（官方公司基本資料不含 ETF），
+  // 法人卡來源要靠第二層（short_lending_available.json 官方 TWSECode 組）標「TWSE T86（上市）」，不能退回通用字樣。
+  // stock_detail 用固定假資料，市場判定用真實資料檔。
+  const etfMktErrors = [];
+  try {
+    const fx = { institutional: { date: "20261106", foreign_lots: 10.0, trust_lots: 0.0, dealer_lots: -5.0,
+      history: [{ date: "20261106", foreign_lots: 10.0, trust_lots: 0.0, dealer_lots: -5.0 }] } };
+    await page.route("**/data/stock_detail/009827.json*", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fx) }));
+    await page.evaluate(() => Promise.race([window.openStock("009827"), new Promise((r) => setTimeout(r, 15000))]));
+    await page.evaluate(() => { document.querySelector('#stock-tabs button[data-sub="chip"]')?.click(); });
+    await page.waitForFunction(() => /最新 20261106/.test(document.getElementById("chip-note")?.textContent || ""), null, { timeout: 15000 }).catch(() => {});
+    const note = await page.evaluate(() => document.getElementById("chip-note")?.textContent || "");
+    await page.unroute("**/data/stock_detail/009827.json*");
+    // 前台會把「TWSE T86」白話改寫成「證交所 法人統計」（第 164 項），所以比對「（上市）」；通用字樣含 TPEx／櫃買，出現即 FAIL
+    if (!/（上市）/.test(note)) etfMktErrors.push(`009827 來源應標上市：「${note}」`);
+    if (/TPEx|櫃買/.test(note)) etfMktErrors.push(`仍是通用字樣（含上櫃）：「${note}」`);
+  } catch (e) {
+    etfMktErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("26d. 新上市 ETF 009827（不在 company_info）法人卡來源標上市（證交所，不是通用字樣）（先.一三五-1na）",
+    etfMktErrors.length === 0, etfMktErrors.join("; "));
+
   // 27.【2026-09-04新增，四修.二】未連即時伺服器時，市場頁櫃買指數列與類股熱力圖
   // 的來源標示必須帶收盤日期（今日/昨日/前次收盤（MM-DD）），不得讓盤後漲跌幅
   // 不標日期地顯示（總司令原話）。

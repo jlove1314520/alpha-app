@@ -49,6 +49,15 @@
       if(/t187ap03_L|twse_L/.test(src))return 'TWSE';
       if(/t187ap03_O|tpex_O/.test(src))return 'TPEx';
     }catch(e){console.warn('[_twListMarket]',code,e);recordGlobalError('_twListMarket',e)}
+    // 先.一三五-1na：新上市 ETF（例 009827）不在官方公司基本資料 → 第二層退回讀 short_lending_available.json
+    // （TWSE openapi SBL/TWT96U 官方欄位 TWSECode＝上市、GRETAICode＝上櫃，抓取腳本分成 twse／otc 兩組；
+    //  2026-11-08 與 company_info 交叉比對 1,740 檔 0 不一致）。兩組都沒有就回 null，維持通用字樣，不猜。
+    try{
+      if(!SHORT_LENDING_CACHE){const r=await fetch('data/short_lending_available.json?t='+Date.now());if(r.ok)SHORT_LENDING_CACHE=await r.json()}
+      const d=SHORT_LENDING_CACHE;
+      if(d&&d.twse&&d.twse[code]!=null)return 'TWSE';
+      if(d&&d.otc&&d.otc[code]!=null)return 'TPEx';
+    }catch(e){console.warn('[_twListMarket:sbl]',code,e);recordGlobalError('_twListMarket:sbl',e)}
     return null;
   }
   function _instSrcLabel(mkt){return mkt==='TWSE'?'TWSE T86（上市）':mkt==='TPEx'?'TPEx 三大法人（上櫃）':'TWSE T86／TPEx 三大法人'}

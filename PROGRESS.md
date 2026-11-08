@@ -1,3 +1,16 @@
+## 2026-11-08 12:01～12:35 DevQueue 20261108-120101（開發帽）先.一三五-1na 新上市 ETF 法人卡來源
+
+等待總司令審閱：9 件（見 `research/AWAITING_REVIEW.md`「等待中」表，本輪沒有新增）。
+
+### 先.一三五-1na 009827／009828／009831／009832 法人卡來源標上市
+- 問題：官方公司基本資料（t187ap03_L／_O）不含 ETF，這 4 檔不在 `data/company_info.json`，`_twListMarket()` 回 null，法人卡來源只能寫「證交所 法人統計／櫃買中心 三大法人」通用字樣。
+- 查過的本機檔（零請求）：`quotes_tw.json`（MIS 只含少數檔、無 009827）、`quotes_all_tw.json`／`price_history` 分桶／`by_code`／`stock_detail`（都沒有市場欄位）、`margin_by_stock_history.json`（有 twse／tpex 分組但 3.4MB）、`short_lending_available.json`（27KB，App 已在載入）。
+- 做法：`app-stock.js` `_twListMarket()` 加第二層——company_info 判不出就讀 `short_lending_available.json`（TWSE openapi SBL/TWT96U 官方欄位 TWSECode＝上市、GRETAICode＝上櫃，兩組零重疊），自己的 try/catch＋`recordGlobalError('_twListMarket:sbl')`；兩組都沒有仍回 null、維持通用字樣，不猜。
+- 證據：4 檔全在 twse 組；與 company_info 官方市場交叉比對 1,740 檔 0 不一致。冒煙新增 26d（stock_detail 用固定假資料、市場用真實檔），實際顯示「最新 20261106 · 證交所 法人統計（上市）」。
+- 冒煙：`node scripts/smoke_test.mjs` 189 項全過（538.5 秒；第一次跑 26d FAIL 是我的比對字寫成「TWSE T86」，前台白話層會改寫成「證交所 法人統計」，改比對「（上市）」且不得含 TPEx／櫃買後重跑全過，功能程式沒改）。
+- [自行裁量] 選借券可借量檔當第二層（小、已載入、官方分市場欄位）；限制：不在 TWT96U 名單的新上市標的仍會是通用字樣。
+- 收工：佇列 `- [ ]` 26 項（≥12），本輪不補件；剩約 15 分鐘不夠再跑一項加冒煙，下一輪接權威清單下一項。
+
 ## 2026-11-08 11:01～ DevQueue 20261108-110101（研究帽）先.一五五-3 第 12／13 批
 
 等待總司令審閱：9 件（見 `research/AWAITING_REVIEW.md`「等待中」表，本輪沒有新增）。
