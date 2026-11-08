@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-08T13:35:03.600719+08:00",
+ "fetched_at": "2026-11-08T14:16:12.568491+08:00",
  "source": "TWSE/TPEx 重大訊息＋TWSE 月營收＋既有除權息檔（全部官方端點）",
  "keep_days": 90,
  "importance_version": "v0（2026-10-18 先.一一〇-9）",
@@ -11,8 +11,8 @@
   },
   "tpex_mops": {
    "ok": true,
-   "rows": 285,
-   "kept": 285
+   "rows": 3,
+   "kept": 3
   },
   "twse_revenue": {
    "ok": true,
@@ -25,7 +25,7 @@
    "note": "沿用既有排程產物，未額外請求"
   }
  },
- "count": 10945,
+ "count": 10948,
  "events": [
   {
    "code": "4562",
@@ -135,6 +135,56 @@
    "title": "依臺灣證券交易所股份有限公司臺證上一字第1121801204 號函辦理",
    "source": "TWSE 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "3631",
+   "name": "晟楠",
+   "date": "2026-11-07",
+   "type": "人事",
+   "title": "本公司董事會決議通過子公司增資案",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "3489",
+   "name": "長耀地產",
+   "date": "2026-11-07",
+   "type": "其他",
+   "title": "公告本公司名稱由「森寶開發股份有限公司」更名為 「長耀地產投資股份有限公司」，公告期間： 115年11月4日至116年2月3日",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "5704",
+   "name": "老爺知",
+   "date": "2026-11-07",
+   "type": "人事",
+   "title": "公告本公司提報董事會通過之115年第三季財務報告。",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "00400A",
+   "name": "",
+   "date": "2026-11-06",
+   "type": "除權息",
+   "title": "除權息交易日（現金 0.12 元）",
+   "source": "TWSE 除權息",
+   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u",
+   "importance": 5
+  },
+  {
+   "code": "2414",
+   "name": "",
+   "date": "2026-11-06",
+   "type": "除權息",
+   "title": "除權息交易日",
+   "source": "TWSE 除權息",
+   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u",
    "importance": 5
   },
   {
@@ -2982,26 +3032,6 @@
    "source": "TPEx 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01",
    "importance": 9
-  },
-  {
-   "code": "00400A",
-   "name": "",
-   "date": "2026-11-06",
-   "type": "除權息",
-   "title": "除權息交易日（現金 0.12 元）",
-   "source": "TWSE 除權息",
-   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u",
-   "importance": 5
-  },
-  {
-   "code": "2414",
-   "name": "",
-   "date": "2026-11-06",
-   "type": "除權息",
-   "title": "除權息交易日",
-   "source": "TWSE 除權息",
-   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u",
-   "importance": 5
   },
   {
    "code": "3045",
