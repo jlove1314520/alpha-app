@@ -1,3 +1,21 @@
+## 2026-11-08 08:31～ DevQueue 20261108-083101（開發帽）先.一三五-1mq／1mr 資料健康頁改看資料日期
+
+等待總司令審閱：0 件（本輪沒有新增送審項目）。
+
+### 先.一三五-1mq 台股大盤/類股/三大法人（commit a674f9b9594）
+- 做了什麼：`app-settings.js` FRESHNESS_ITEMS 的 market_tw.json 列加 `dataDate:d=>d&&d.data_date`，沿用 1mp 的 `_freshnessJudgeDataDate()`；其他列不動。
+- 證據：`scripts/selftest_fx_freshness.mjs` 擴成多列假檔畫面檢查，全 PASS（fetched_at=現在、data_date 停 11/03 → overdue）；冒煙 188 PASS／0 FAIL。
+- [自行裁量] 第一次冒煙 #158 FAIL：該項拿 market_tw 列檢查「排程時刻：」字樣，但這列已改成依資料日期判定。畫面檢查改看同屬 market.yml 每日、沒有資料日期的 market_us 列，檢查本意不變，不是放寬。
+- 查證：git 歷史顯示 11/05、11/06 交易日在台北 17:42 前已帶到當日 data_date，18:00 規則晚上不會誤報。
+
+### 先.一三五-1mr 策略前向紙上績效（commit 5957d9bf8a7）
+- 做了什麼：strategy_performance.json 列加 `dataDate:d=>d&&d.as_of_trading_date`；自測加第三列假檔。
+- 證據：自測 14 項全 PASS；冒煙 188 PASS／0 FAIL。
+
+### 收工
+- 09:09 收工，離 09:16 時間上限不夠再跑一輪冒煙，所以不再取下一項；佇列深度檢查與自動補件也留給下一輪（未做，照實記錄）。
+- BLOCKED：本輪沒有新增。
+
 ## 2026-11-08 07:31～ DevQueue 20261108-073101（研究帽）先.一五五-3 墓園重審第 9 批（美股價量／時點 5 族）
 
 等待總司令審閱：9 件（`research/AWAITING_REVIEW.md`「等待中」表，本輪無新增）。交辦佇列 `- [ ]` 28 項（≥12，未補件）。
