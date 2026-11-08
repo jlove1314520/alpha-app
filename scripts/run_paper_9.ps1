@@ -20,4 +20,12 @@ try {
 } catch {
     Add-Content -Path $logPath -Value ("launcher error: " + $_.Exception.Message) -Encoding utf8
 }
+# 2026-11-08 paper-opt track (item 1c): run the 5 daily generators + rebuild data/paper_opt_track.json.
+# Inputs live only in gitignored research/data, so this runs locally, not in market.yml. Zero external requests.
+try {
+    $out2 = & $pythonExe scripts\run_paper_opt.py 2>&1
+    Add-Content -Path $logPath -Value ("--- paper_opt ---`n" + ($out2 -join "`n")) -Encoding utf8
+} catch {
+    Add-Content -Path $logPath -Value ("paper_opt launcher error: " + $_.Exception.Message) -Encoding utf8
+}
 exit 0
