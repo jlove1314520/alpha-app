@@ -1,3 +1,22 @@
+## 2026-11-08 14:01～14:3x DevQueue 20261108-140101（維運帽）先.一三五-1nb 提案＋先.一五四-1c 紙上優化軌本機排程
+
+等待總司令審閱：10 件（見 `research/AWAITING_REVIEW.md`「等待中」表；本輪新增 1 件：先.一三五-1nb）。
+
+### 先.一三五-1nb company_info 每週自動更新提案（commit 5a35b2ea140）
+- 新 `docs/PROPOSAL_COMPANY_INFO_WEEKLY.md`：甲（建議）audit.yml 每班叫 `apply_official_industry.py --weekly`，腳本自己判斷未滿 6 天零請求略過（某班沒觸發下一班自動補）、continue-on-error、改接 `data/rate_limit_state.json` 共用節流（twse_openapi／tpex_openapi）、每週 4 次請求；乙本機排程（需總司令操作）；丙只加逾期警示。
+- 順帶查到 audit.yml 的 git add 清單沒有 company_info.json／official_industry_code_map.json／rate_limit_state.json，寫進提案第 4 點（十節）。未改任何排程或程式。
+- 送 AWAITING（9→10），適用零之二 24 小時預設放行；後續實作排成 先.一三五-1nb-a（`- [!]` 等 11/09 14:16 後）。
+
+### 先.一五四-1c 紙上優化軌每日排程
+- **[自行裁量] 改走本機、不照條目原文掛 market.yml**：`paper_opt_track.py` 與 5 支產生器的輸入（`research/data/drawdown_fix`／`panic_pq`／`paper_opt/`）全被 .gitignore 排除（`git ls-files` 0 檔），雲端跑沒有輸入；而且 5 支產生器（11/09 起記帳）原本沒有任何排程在叫，明天起會整天漏記。
+- 新 `scripts/run_paper_opt.py`：PQ／F11／F12／F14／F17 各自獨立子行程（15 分鐘逾時、單支失敗只記警告），再跑總表，有變動只提交 `data/paper_opt_track.json`（MACHINE_WRITTEN `^data/` 內）。掛在既有本機排程 AlphaPaper9（週一～五 18:30）的 `scripts/run_paper_9.ps1` 後面——不新增 Windows 排程。
+- 證據：`python scripts/run_paper_opt.py --no-commit` 5 支＋總表全 exit 0、24 秒、11/09 前寫入 0 天；ps1 語法剖析 0 錯。`data/STATUS.json` known_limitations 加一條說明（本機才跑、電腦沒開當天不更新）。
+- **未驗證**：11/09 18:30 第一次實際觸發 → 先.一五四-1c-v（`- [!]` 等 11/09 19:00 後）。已知風險：market.yml 17:13 班常延遲，18:30 price_history 可能還沒到，產生器隔天補。
+
+### 收工補件
+- `- [ ]` 25 項，DevQueue 可執行非[研究]項本輪做完後為 0（低於 6）。查了 ① `data/audit_report.json`（e_quarters_stale 5386／5704、e_pe 80 檔都已有條目處理／結案）、BACKLOG（無未完成項）；補 2 條有解除時間的後續（1c-v、1nb-a，皆 `- [!]`）。②③④ 本輪時間不夠未逐一掃，照實記錄，留給下一輪。
+- 下一項 先.一五五-3 是 [研究]，依一輪一帽收工。
+
 ## 2026-11-08 13:01～13:40 DevQueue 20261108-130101（研究帽）先.一五五-3 第 14 批
 
 等待總司令審閱：9 件（見 `research/AWAITING_REVIEW.md`「等待中」表，本輪沒有新增）。
