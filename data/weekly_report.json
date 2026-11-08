@@ -1,36 +1,40 @@
 {
  "schema": 1,
- "generated_at": "2026-11-01T20:00:00+08:00",
- "week_start": "2026-10-25",
- "week_end": "2026-11-01",
+ "generated_at": "2026-11-08T20:00:00+08:00",
+ "week_start": "2026-11-01",
+ "week_end": "2026-11-08",
  "disclaimer": "研究與紀錄用途，非投資建議",
  "system_health": {
-  "audit_generated_at": "2026-10-31T23:00:01.787906+08:00",
+  "audit_generated_at": "2026-11-07T23:00:02.210261+08:00",
   "audit_gate_pass": true,
-  "violation_rate": 0.00047,
+  "violation_rate": 0.0,
   "violation_rate_gate": 0.01,
   "self_check_ok": true,
   "self_check_failed": [],
   "audit_age_hours": 21.0,
+  "self_check_checked_at": "2026-11-07T04:57:06.260728+08:00",
+  "self_check_age_hours": 39.0,
   "alerts": [
-   "AlphaIbkrQuotes：data/quotes_ibkr.json 已 20696 分鐘沒有新產出（預期每 5 分鐘，門檻 15 分鐘；JSON 欄位 fetched_at）",
-   "ibkr_gateway: 連續失敗1130次（四個 API 埠全部關閉（4001/4002/7496/7497）——Gateway 若在跑多半是卡在登入畫面，需人工重登）"
+   "AlphaIbkrQuotes：data/quotes_ibkr.json 已 30776 分鐘沒有新產出（預期每 5 分鐘，門檻 15 分鐘；JSON 欄位 fetched_at）",
+   "AlphaIbkrGateway：research/ibkr_gateway_cycle.log 已 993 分鐘沒有新產出（預期每 15 分鐘，門檻 45 分鐘；log 內最後時間戳）",
+   "ibkr_gateway: 連續失敗1068次（四個 API 埠全部關閉（4001/4002/7496/7497）——Gateway 若在跑多半是卡在登入畫面，需人工重登）"
   ],
-  "alerts_total": 2,
+  "alerts_total": 3,
   "level": "warn"
  },
  "freshness": {
-  "total": 25,
+  "total": 53,
   "counts": {
-   "ok": 20,
-   "stalled": 2,
-   "skipped": 3
+   "ok": 35,
+   "stalled": 3,
+   "skipped": 14,
+   "known": 1
   },
   "stalled": [
    {
     "task": "AlphaIbkrQuotes",
     "artifact": "data/quotes_ibkr.json",
-    "age_min": 20698.9,
+    "age_min": 30778.9,
     "missed_shifts": null
    },
    {
@@ -38,27 +42,24 @@
     "artifact": "data/news.json",
     "age_min": 84.9,
     "missed_shifts": 3
+   },
+   {
+    "task": "AlphaIbkrGateway",
+    "artifact": "research/ibkr_gateway_cycle.log",
+    "age_min": 995.7,
+    "missed_shifts": null
    }
   ],
-  "level": "warn"
+  "level": "bad"
  },
  "research": {
   "trials_total": 303,
-  "trials_week": 6,
-  "verdicts_week": {
-   "未結案": 6
-  },
-  "trials_week_names": [
-   "paper_m_ml_low_beta_forward_prereg",
-   "paper_n_stock_grid_range_forward_prereg",
-   "paper_o_ml_industry_rotation_forward_prereg",
-   "paper_p_order_win_drift_forward_prereg",
-   "paper_q_margin_liquidation_rebound_forward_prereg",
-   "paper_r_sbl_covering_drift_forward_prereg"
-  ],
-  "heartbeats_week": 84,
+  "trials_week": 0,
+  "verdicts_week": {},
+  "trials_week_names": [],
+  "heartbeats_week": 33,
   "heartbeats_by_track": {
-   "其他": 84
+   "其他": 33
   },
   "level": "ok"
  },
@@ -73,34 +74,34 @@
    {
     "id": "paper_3",
     "label": "紙上 3",
-    "as_of": "2026-10-08",
-    "total_return_pct": 0.0
+    "as_of": "2026-10-30",
+    "total_return_pct": -5.04
    },
    {
     "id": "paper_7030",
     "label": "紙上 70/30",
-    "as_of": "2026-10-01",
-    "total_return_pct": 0.0
+    "as_of": "2026-10-30",
+    "total_return_pct": -4.9
    },
    {
     "id": "paper_4:R1-C",
     "label": "紙上 4 R1-C",
-    "as_of": "2026-10-08",
-    "total_return_pct": 0.0,
-    "bench_0050_return_pct": 0.0
+    "as_of": "2026-10-30",
+    "total_return_pct": -12.59,
+    "bench_0050_return_pct": -8.7
    },
    {
     "id": "paper_4:R1-A",
     "label": "紙上 4 R1-A",
-    "as_of": "2026-10-08",
-    "total_return_pct": 0.0,
-    "bench_0050_return_pct": 0.0
+    "as_of": "2026-10-30",
+    "total_return_pct": -11.04,
+    "bench_0050_return_pct": -8.7
    }
   ],
   "watch": {
    "status": "OK",
    "items": 0,
-   "generated_at": "2026-10-31T09:09:19.016558+08:00"
+   "generated_at": "2026-11-07T09:19:10.966621+08:00"
   },
   "level": "ok"
  },
@@ -112,19 +113,19 @@
   },
   "errors_week": 0,
   "last_event": {
-   "ts": "2026-10-30T13:40:01+08:00",
+   "ts": "2026-11-06T13:40:01+08:00",
    "task": "settle",
    "code": "NOTHING_TO_SETTLE"
   },
-  "heartbeat_updated_at": "2026-10-30T13:40:01+08:00",
+  "heartbeat_updated_at": "2026-11-06T13:40:01+08:00",
   "heartbeat_age_hours": 54.3,
   "note": "只列已公開的排程事件代碼；成交數量、金額、損益只在本機日誌頁（連上電腦）顯示。",
   "level": "ok"
  },
  "summary": [
-  "系統健康：稽核閘門通過、自檢正常、告警 2 條",
-  "資料新鮮度：25 條管線，2 條停擺或缺檔",
-  "研究進度：本週登記試驗 6 筆（登記檔累計 303 列），心跳 84 次",
+  "系統健康：稽核閘門通過、自檢正常、告警 3 條",
+  "資料新鮮度：53 條管線，3 條停擺或缺檔",
+  "研究進度：本週登記試驗 0 筆（登記檔累計 303 列），心跳 33 次",
   "紙上追蹤：5 本帳，追蹤看門狗 OK",
   "真錢執行：本週排程事件 15 次，錯誤 0 次"
  ]
