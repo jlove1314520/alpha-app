@@ -1,3 +1,17 @@
+## 2026-11-08 07:31～ DevQueue 20261108-073101（研究帽）先.一五五-3 墓園重審第 9 批（美股價量／時點 5 族）
+
+等待總司令審閱：9 件（`research/AWAITING_REVIEW.md`「等待中」表，本輪無新增）。交辦佇列 `- [ ]` 28 項（≥12，未補件）。
+
+### 第 9 批（本收工 commit）
+- **做了什麼**：零外部請求。新 `research/reaudit_batch9_us_price.py`（f_us_momentum_12m、f_us_reversal_1m：本機 248 檔 yfinance 還原價 2011～2024，做法同 F15，只做多、逐檔自己有價日算報酬、t 收盤決定 t+1 成交、成本 0.10%、槓桿借款 DTB3＋1.5%、止損退現金 21 日、可選 SPY 200 日線閘門）與 `research/reaudit_batch9_us_timing.py`（var1018_v7 美國失業率 regime〔ALFRED 首次公布值、公布日下一交易日起可用〕、var1018_v2 月底月初、HQ#66 年底稅損反彈；S&P 500 含息指數 1991～2024）。
+- **結果（Calmar 最好、MDD 在 50% 內，樣本內最優化、偏樂觀）**：動能 3× +26.7%／−33.6%（3× 超 Reg T 只當參考；1× 最佳 +19.6%／−30.9%）；反轉 1× +27.2%／−43.3%（576 格 568 格越過天條一）；稅損反彈 3× +32.9%／−43.6%（1× +9.5%／−14.8%，14 次事件）；失業率 yoy>0.3pp 空手＋止損 10% +10.5%／−25.6%（S&P 含息 +11.0%／−55.3%）；月底月初 +4.5%／−19.2%。同 248 檔等權持有 +21.8%／−38.8%、SPY +13.7%／−33.7%。
+- **存活者偏誤未完全修正：已下市股約 97%（抽樣 55／57）無價格來源。**
+- **[自行裁量]**：本批不進 `data/paper_opt_track.json` 候選欄——選股族受存活者偏誤主導（反轉／稅損正是買跌最多的，倒掉的不在名冊），動能 1× 輸等權宇宙；失業率 Calmar 0.41 未達候選欄約前 10 名（約 0.56）。美股價格只到 2024 底，未延長（要再一次 yfinance 批次）。
+- **證據**：REAUDIT_OPTIMIZED.md 第 12 節（BATCH3-B9 標記間）、明細 `research/data/reaudit_batch3_batch9.json`／`reaudit_batch3_batch9_timing.json`、曲線 `research/data/reaudit_curves/batch3_b9_*.png`（本機）。冒煙第一次全過、第二次 159 項「page.evaluate: Resulting promise was garbage collected」（測試本身偶發、本輪沒動 index.html），第三次 `node scripts/smoke_test.mjs` 188 PASS、exit 0。
+- **籌碼續抓**：背景 `fetch_chip_2025_resume.py` 07:31～08:02 等用量 <300，FinMind 過去一小時用量一直 302～361（另一程序在打），**0 次請求**，斷點仍融資券 2338、尚餘約 172 次。
+- **推播**：本批無新候選，未送。
+- **下一輪接續**：籌碼續抓 → 籌碼五族 run；fx_twd／option_pcr 延長；第 10 批（失業率 regime 疊 0050、庫藏股／減資改全市場宇宙、HQ#65/#70 台指期跳空類）。
+
 ## 2026-11-08 07:01～ DevQueue 20261108-070101（維運帽）先.一三五-1mv H2 列 EPS 用相鄰列推股數
 
 等待總司令審閱：9 件（`research/AWAITING_REVIEW.md`「等待中」表，本輪無新增）。

@@ -659,3 +659,25 @@ q：E-rev／E-eps＝新值在當日橫斷面百分位門檻；E-52w＝新高窗�
 **本批開發時抓到並修掉的錯（照實記錄）**：①pandas 3 的 `stack()` 保留 NaN，第一版把非事件列也當事件（73 萬筆）；②價格表日期是全樣本聯集，個股零星缺日讓 `rolling(min_periods=W)` 整段 NaN、`pct_change()` 丟掉跨缺口報酬，改成逐檔在自己有價日上算。②也影響第 6 批（`reaudit_batch6_portfolio.py` 用 `px.pct_change()`），本輪已修並重跑，第 10 節為修正後數字。
 
 <!-- BATCH3-B7-END -->
+
+<!-- BATCH3-B9-BEGIN -->
+
+## 12. 第二批 第 9 批：美股價量／時點類 5 族（DevQueue 20261108-073101）
+
+零請求：個股＝`research/data/reaudit_us_prices.pkl`（yfinance 還原價，248 檔分層抽樣＋SPY，2010～2024-12-31）、指數＝`raw_yf/INDEX_SP500TR`（S&P 500 含息，1990～2024）、失業率＝ALFRED UNRATE 首次公布值（公布日下一交易日起可用）。只做多；訊號 t 收盤決定、t+1 生效；成本 0.10%／單位換手或曝險變動；槓桿借款 DTB3＋1.5%、現金收 DTB3；止損＝淨值自高點回落退現金 21 日。本機資料只到 2024 底，**未延長到 2025 起**（要再一次 yfinance 批次，另案）。
+**存活者偏誤未完全修正：已下市股約 97%（抽樣 55／57）無價格來源。**
+
+| 族 | 最佳組（Calmar，MDD 在 50% 內） | 年化 | MDD | Sharpe | Calmar | 交易／事件數 | 1× 最佳 | 越線／格數 |
+|---|---|---|---|---|---|---|---|---|
+| f_us_momentum_12m（248 檔美股，2011～2024） | lookback=252、skip=0、N=50、rebalance_days=63、spy_200d_gate=False、L=3.0、stop=0.1 | +26.7% | -33.6% | 0.82 | 0.80 | 952 | +19.6%／-30.9%（lookback=252、skip=21、N=25、rebalance_days=21、spy_200d_gate=False、L=1.0、stop=0.2） | 544／768 |
+| f_us_reversal_1m（248 檔美股，2011～2024） | lookback=63、N=25、rebalance_days=5、spy_200d_gate=False、L=1.0、stop=0.2 | +27.2% | -43.3% | 0.86 | 0.63 | 3818 | +27.2%／-43.3%（lookback=63、N=25、rebalance_days=5、spy_200d_gate=False、L=1.0、stop=0.2） | 568／576 |
+| var1018_v7_us_unemployment（1991～2024） | rule=yoy>、threshold=0.3、riskoff_exposure=0.0、L=1.0、stop=0.1 | +10.5% | -25.6% | 0.87 | 0.41 | 10 | +10.5%／-25.6% | —／288 |
+| var1018_v2_turn_of_month（1991～2024） | last_k_days_close_entry=4、first_m_days=2、L=1.0、stop=None | +4.5% | -19.2% | 0.55 | 0.24 | 408 | +4.5%／-19.2% | —／320 |
+| HQ#66_us_tax_loss_selling（2011～2024） | dec_trading_day=15、N=10、hold_days=42、L=3.0、stop=0.1 | +32.9% | -43.6% | 0.82 | 0.75 | 140 | +9.5%／-14.8% | —／288 |
+
+對照：同 248 檔等權持有（1×、不計成本）2011～2024 +21.8%／-38.8%；SPY 持有 +13.7%／-33.7%；S&P 500 含息 1991～2024 +11.0%／-55.3%（本身越過天條一）。
+明細 `research/data/reaudit_batch3_batch9.json`、`research/data/reaudit_batch3_batch9_timing.json`；曲線 `research/data/reaudit_curves/batch3_b9_*.png`（本機）。3× 超過 Reg T 2× 上限只當參考。
+**讀法提醒（為什麼本批不進候選欄）**〔自行裁量〕：①這 248 檔是「今天還在」的名冊，連等權持有都 +21.8%（SPY +13.7%），選股族要跟等權宇宙比、不是跟 SPY 比；動能 1× 最佳 +19.6%／−30.9% 年化還輸等權宇宙。②反轉（買過去 63 日跌最多）1× +27.2%／−43.3% 與稅損反彈（12 月買年初至今跌最多、每年 1 次事件、14 次）正好是存活者偏誤最放大的形狀——跌最多的股票裡，真的倒掉的那些不在名冊上；在補上下市股價格前，這兩族數字不可當紙上依據。③失業率 regime（yoy>0.3 個百分點空手、止損 10%）+10.5%／−25.6%，把 S&P 含息的 −55.3% 回撤壓回一半、年化只少 0.5 個百分點，是本批唯一不受存活者偏誤影響的；但 Calmar 0.41 未達候選欄約前 10 名門檻（約 0.56）。④月底月初效應 1991～2024 只有 +4.5%／−19.2%，S&P 上幾乎沒有東西。
+**下一步方向**：美股選股族要先接 SEC 宇宙＋下市股價格（見 `docs/US_PRICE_SOURCES.md`）才有意義；失業率 regime 可試疊在 0050 曝險（台股 regime 族同第 4 批做法）或跟 fred_yield_curve 組合。
+
+<!-- BATCH3-B9-END -->
