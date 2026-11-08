@@ -339,7 +339,7 @@ def write_candidates():
                           "notes": "；".join(note)})
     if CAND.exists():  # 第 4 批 regime 族（B4R-，reaudit_batch4_regime.py）與第 5 批價格擇時族（B5P-，reaudit_batch5_price_timing.py）原樣保留；第 6 批組合建構族（B6W-，reaudit_batch6_portfolio.py）、第 7 批事件族（B7E-，reaudit_batch7_events.py）同
         cands += [c for c in json.loads(CAND.read_text(encoding="utf-8")).get("candidates", [])
-                  if str(c.get("id", "")).startswith(("B4R-", "B5P-", "B6W-", "B7E-"))]
+                  if str(c.get("id", "")).startswith(("B4R-", "B5P-", "B6W-", "B7E-", "B10R-"))]
     cands.sort(key=lambda c: c["rank_in_table"])
     CAND.write_text(json.dumps({"generated_at": datetime.now().isoformat(timespec="seconds"),
                                 "rule": "綜合分數（年化÷|MDD|）併入 REAUDIT_OPTIMIZED.md 第 0 節總表約前 10 名者；非投資建議",
