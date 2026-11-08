@@ -591,7 +591,8 @@
     {label:'台股盤中報價（GitHub Actions）',file:'data/quotes_tw.json',kind:'intraday',tz:'Asia/Taipei',open:[9,0],close:[13,30]},
     {label:'美股即時報價（本機IBKR）',file:'data/quotes_ibkr.json',kind:'intraday',tz:'America/New_York',open:[9,30],close:[16,0],local:true},
     {label:'美股盤中報價（GitHub Actions）',file:'data/quotes_us.json',kind:'intraday',tz:'America/New_York',open:[9,30],close:[16,0]},
-    {label:'台股大盤/類股/三大法人',file:'data/market_tw.json',kind:'daily',tz:'UTC',mkt:'tw',grace:3},
+    // 先.一三五-1mq（2026-11-08）：同 1mp，market_tw.json 每班重寫 fetched_at，官方資料沒進來時改看 data_date。
+    {label:'台股大盤/類股/三大法人',file:'data/market_tw.json',kind:'daily',tz:'UTC',mkt:'tw',grace:3,dataDate:d=>d&&d.data_date},
     {label:'美股四大指數',file:'data/market_us.json',kind:'daily',tz:'UTC',mkt:'us',grace:3},
     {label:'美股類股SIC對映',file:'data/us_sic.json',kind:'daily',tz:'UTC',mkt:'us',grace:3},
     {label:'台股ADR溢價',file:'data/adr_premium.json',kind:'intraday',tz:'America/New_York',open:[9,30],close:[16,0]},

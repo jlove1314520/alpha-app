@@ -5574,7 +5574,9 @@ async function runSmokeTest(baseUrl, headless = true) {
       const doc = { workflows: [{ file: ".github/workflows/market.yml", crons: [
         { utc: "10:41", taipei: "18:41", next_day_taipei: false }, { utc: "09:13", taipei: "17:13", next_day_taipei: false },
         { utc: "21:43", taipei: "05:43", next_day_taipei: true }] }] };
-      const row = document.querySelector('#data-freshness-list .fresh-row[data-file="data/market_tw.json"]');
+      // 先.一三五-1mq（2026-11-08）：market_tw 列改依 data_date 判新鮮（不再走排程時刻規則），畫面檢查改看同屬 market.yml 每日、
+      // 沒有資料日期欄位的 market_us 列——本項要驗的「依 fetched_at 判定的每日列標出排程時刻來源」不變。
+      const row = document.querySelector('#data-freshness-list .fresh-row[data-file="data/market_us.json"]');
       return { ok: _freshnessMarketRuns(doc), none: _freshnessMarketRuns(null), bad: _freshnessMarketRuns({ workflows: [{ file: "market.yml", crons: [{ utc: "x" }] }] }),
         rowTxt: row ? row.textContent : null };
     });
@@ -5583,7 +5585,7 @@ async function runSmokeTest(baseUrl, headless = true) {
       if (JSON.stringify(r.ok.tw) !== "[9,13]" || JSON.stringify(r.ok.us) !== "[21,43]" || r.ok.src !== "market.yml cron") frErrs.push("crons 換算錯：" + JSON.stringify(r.ok));
       if (JSON.stringify(r.none.tw) !== "[6,10]" || JSON.stringify(r.none.us) !== "[21,30]") frErrs.push("讀不到 STATUS 時沒退回舊值：" + JSON.stringify(r.none));
       if (JSON.stringify(r.bad.tw) !== "[6,10]") frErrs.push("crons 格式壞時沒退回舊值：" + JSON.stringify(r.bad));
-      if (r.rowTxt != null && !/排程時刻：/.test(r.rowTxt)) frErrs.push("market_tw 列沒標排程時刻來源：" + r.rowTxt.slice(0, 80));
+      if (r.rowTxt != null && !/排程時刻：/.test(r.rowTxt)) frErrs.push("market_us 列沒標排程時刻來源：" + r.rowTxt.slice(0, 80));
       frInfo = `換算 台股 ${r.ok.tw.join(":")}／美股 ${r.ok.us.join(":")} UTC；退回 ${r.none.tw.join(":")}／${r.none.us.join(":")}；畫面列：${r.rowTxt == null ? "（未在設定頁，略過）" : (r.rowTxt.match(/排程時刻：[^；）]*/) || [""])[0]}`;
     }
   } catch (e) { frErrs.push(`測試本身出錯：${e.message || e}`); }

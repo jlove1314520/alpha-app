@@ -6,8 +6,9 @@ const URL = process.argv[2] || "http://localhost:8792/";
 const browser = await chromium.launch({ headless: true });
 const ctx = await browser.newContext({ serviceWorkers: "block" });  // SW 會攔掉 data/*.json，page.route 看不到
 const page = await ctx.newPage();
-let fake = null;
-await page.route(/data\/fx\.json/, r => fake ? r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fake) }) : r.continue());
+// 先.一三五-1mq（2026-11-08）：同一套畫面檢查也套到 data/market_tw.json（data_date）
+const fakes = {};
+for (const f of ["fx", "market_tw"]) await page.route(new RegExp("data/" + f + "\\.json"), r => fakes[f] ? r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fakes[f]) }) : r.continue());
 await page.addInitScript(() => { window.__ALPHA_FETCH_MEMCACHE_OFF = true; });  // 60 秒記憶體快取會讓假檔換不進去
 await page.goto(URL, { waitUntil: "load" });
 await page.evaluate(() => go("settings"));
@@ -36,13 +37,20 @@ const stale = await page.evaluate(() => {
   for (let i = 0; i < 20 && n < 4; i++) { c = new Date(c.getTime() - 864e5); if (isTradingDay(c, "Asia/Taipei", TW_HOLIDAYS)) { n++; out = c; } }
   const z = _zonedParts(out, "Asia/Taipei"); return _ymd(z);
 });
-for (const [label, date, want] of [["停滯", stale, "overdue"], ["正常（今天往前最近交易日）", null, "ok"]]) {
-  const dd = date || await page.evaluate(() => { const h = _zonedParts(new Date(), "Asia/Taipei").h; let c = new Date(); for (let i = 0; i < 20; i++) { const td = isTradingDay(c, "Asia/Taipei", TW_HOLIDAYS); if (td && !(i === 0 && h < 18)) return _ymd(_zonedParts(c, "Asia/Taipei")); c = new Date(c.getTime() - 864e5); } });
-  fake = { fetched_at: new Date().toISOString(), errors: [], usd_twd: { rate: 32.0, date: dd, source: "selftest" } };
-  await page.evaluate(() => loadDataFreshness());
-  const st = await page.evaluate(() => { const el = document.querySelector('.fresh-row[data-file="data/fx.json"]'); return el ? el.dataset.status + "｜" + el.innerText.replace(/\s+/g, " ") : null; });
-  const ok = st && st.startsWith(want); if (!ok) fail++;
-  console.log(`${ok ? "PASS" : "FAIL"} 畫面${label}（資料日 ${dd}）→ ${st}`);
+const TARGETS = [
+  ["fx", "data/fx.json", dd => ({ fetched_at: new Date().toISOString(), errors: [], usd_twd: { rate: 32.0, date: dd, source: "selftest" } })],
+  ["market_tw", "data/market_tw.json", dd => ({ fetched_at: new Date().toISOString(), data_date: dd, expected_trading_day: dd, source: "selftest" })],
+];
+for (const [key, file, mk] of TARGETS) {
+  for (const [label, date, want] of [["停滯", stale, "overdue"], ["正常（今天往前最近交易日）", null, "ok"]]) {
+    const dd = date || await page.evaluate(() => { const h = _zonedParts(new Date(), "Asia/Taipei").h; let c = new Date(); for (let i = 0; i < 20; i++) { const td = isTradingDay(c, "Asia/Taipei", TW_HOLIDAYS); if (td && !(i === 0 && h < 18)) return _ymd(_zonedParts(c, "Asia/Taipei")); c = new Date(c.getTime() - 864e5); } });
+    for (const k of Object.keys(fakes)) delete fakes[k];
+    fakes[key] = mk(dd);
+    await page.evaluate(() => loadDataFreshness());
+    const st = await page.evaluate(f => { const el = document.querySelector(`.fresh-row[data-file="${f}"]`); return el ? el.dataset.status + "｜" + el.innerText.replace(/\s+/g, " ") : null; }, file);
+    const ok = st && st.startsWith(want); if (!ok) fail++;
+    console.log(`${ok ? "PASS" : "FAIL"} 畫面 ${file} ${label}（資料日 ${dd}）→ ${st}`);
+  }
 }
 await browser.close();
 console.log(fail ? `FAIL ${fail} 項` : "全部 PASS");
