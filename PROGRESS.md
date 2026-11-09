@@ -1,3 +1,49 @@
+## 2026-11-10 05:31～05:5x DevQueue 20261110-053101（維運帽）先.一五四-1c-v 第一次查證＋先.一五五-3d 冒煙 #128 修好
+
+等待總司令審閱：10 件（見 `research/AWAITING_REVIEW.md`「等待中」表，本輪未新增、未結案）。
+
+### 先.一五四-1c-v 紙上優化軌第一次本機排程（11/09 18:30）——改等 11/10 19:00 再查（`- [!]`）
+- ① `research/data/paper_9_cycle.log` 11/09 18:30 段有「--- paper_opt ---」，pq／f11／f12／f14／f17 五支＋`paper_opt_track.py` 全 exit=0，總表 8 支、起跑 2026-11-09。
+- ③ `git log -- data/paper_opt_track.json` 有 `ab233bac73f 紙上優化軌本機排程更新 2026-11-09 18:30`。
+- ② `research/data/paper_opt/ledger_*.jsonl` 還沒有（五支都寫 0 天）。根因（reflog 證據）：11/09 價格 commit `c5c981dc3dd`（17:41）直接推遠端，本機 17:42 `pull --rebase` 衝突中止（`rebase (abort)`），18:30 跑的時候工作樹價格只到 11/06（模擬 I 也 HOLD 在 11-06），18:31:01 那次 pull 才拿到。現在 `paper_opt_pq.py --probe` 完整交易日已到 11/09。產生器會把上次之後的交易日一次補寫，今晚 18:30 寫 11/09＋11/10，不漏天。
+- `scripts/run_paper_opt.py` 沒壞、未改。[自行裁量] 不順手加「跑前先 pull」——屬流程變更，另補 先.一五四-1c-w 寫提案。
+- commit `685fe5c80ce`（同 commit 的 PENDING_QUEUE 也帶上一輪 040101 未提交的條目變更）。
+
+### 先.一五五-3d 冒煙 #128 FAIL——測試換算錯，App 正確（`- [x]`）
+- 2330 最新營收月 2026-09（`data/fundamentals.json`），圖 13 根＝2025-09～2026-09；`data/by_code/2330.json` monthly_close 只有 2026-06 起 → 最早缺月 2025-09，App 從 2025-09-01 補是對的。舊上限「(月數+1)×31 天」把圖尾當成本月。
+- 改法（更嚴，不是放寬）：讀圖上 `#rev-chart-labels` 實際月份＋by_code monthly_close 推最早缺月，FinMind 起日必須剛好等於該月 1 日。
+- 冒煙：`node scripts/smoke_test.mjs` 189 項全部 `- [x]`、0 項 FAIL（#128 PASS），exit 0。commit `d337396541e`。
+
+### 代為提交上一輪產物
+- 上一輪第 15 批研究產物（`research/reaudit_batch15_fullmkt_events.py`、`reaudit_batch3_ext2025.py`、`REAUDIT_OPTIMIZED.md` 第 18 節、`data/paper_opt_track.json` 候選欄）只因冒煙 #128 未過而留在工作目錄；冒煙全過後原封提交 `48205624a71`。
+
+### 收工
+- 權威清單下一項是 先.一五五-3 [研究]，本輪維運帽到此收工（一輪一頂帽子）。
+- 佇列深度：`- [ ]` 26 項（≥12）；DevQueue 可執行非研究只有 2 項（先.一三五-1nb-a、新補的 先.一五四-1c-w），低於 6。補件：本輪新增 1 條（先.一五四-1c-w，來源①資料缺口）；`research/DATA_GAP_PLAN.md` 甲類已無待抓、`docs/UX_REDESIGN_PROPOSAL.md` 無未做項，BACKLOG／全檢未逐條掃完（時間），照實記錄。
+- data/STATUS.json：本輪無資料源／面板異動，未改。
+
+## 2026-11-10 04:01～04:4x DevQueue 20261110-040101（研究帽）先.一五五-3 第 15 批（⚠️ 當輪未 commit；下一輪 20261110-053101 冒煙修好後代為提交 `48205624a71`，內容未改）
+
+等待總司令審閱：見 `research/AWAITING_REVIEW.md`「等待中」表（本輪未新增、未結案）。
+
+### 先.一五五-3 第 15 批：庫藏股／減資改全市場宇宙
+- 上一次（11/08 14:33）寫好的 `research/reaudit_batch15_fullmkt_events.py` 因撞用量上限沒跑；本輪修一個讀檔錯（空表快取沒有欄位，`read_parquet(columns=…)` 報錯 → 先整檔讀再檢查欄位）後實跑 426 秒，零請求（腳本封鎖 socket）。
+- 宇宙：本機 FinMind 四碼普通股 2,344 檔（含已下市），2010-06～2026-11-09；除息 21,745、除權 5,266、減資 547 筆照實還原；單日 |報酬|>10.5% 異常略過 9,097 筆（照實揭露）；下市後報酬記 0（非清算模型）。
+- 結果（Calmar 最佳、MDD 在 50% 內、交易 ≥100；參數用全期挑、2025 起不是樣本外）：
+  - E-buyback-full：買回金額 ≥ 當年度至決議日以前中位數、持有 63 日、N=40、1×、止損 10% → +8.3%／−10.8%／Sh 1.17、526 筆；2015～2024 +8.4%／−10.8%、2025 起（到 06-30）+6.7%／−8.0%。
+  - E-reduct-full：現金減資、63 日、N=10、1×、止損 10% → +2.9%／−16.2%／Sh 0.45、166 筆；2025 起 −2.2%。
+- 寫 `research/REAUDIT_OPTIMIZED.md` 第 18 節、明細 `research/data/reaudit_batch3_batch15.json`；候選欄新增 B15E-E-buyback-full（共 36 支）；`reaudit_batch3_ext2025.py candidates` 保留前綴補上 B14R-／B15E-（原本漏 B14R-，重跑會洗掉）；`paper_opt_track.py` 重產 8 支對上、last_error=None。推播已送（1 訂閱成功）。
+- [自行裁量] 減資族 Calmar 0.18 不進候選。
+- 籌碼續抓：FinMind 用量一直 449～450/hr（另一程序在打），0 次請求，斷點仍融資券 3438、尚餘約 133 個。
+
+### 冒煙：187/188，#128 FAIL → 依規則本輪不 commit
+- `FAIL - 128 … FinMind 起日不是最早缺月的 1 日：2025-09-01`：距今 435 天，測試上限 (13+1)×31＝434 天；`data/monthly_close.json` 的 2330 只有 2026-06 起 6 個月。本輪只動研究腳本與 `data/paper_opt_track.json`，跟這項無關，是日期推移的邊界問題；不放寬測試，新條目 先.一五五-3d（[開發]，DevQueue 可執行）。
+- 本輪產物全部留在工作目錄：`research/reaudit_batch15_fullmkt_events.py`、`research/reaudit_batch3_ext2025.py`、`research/REAUDIT_OPTIMIZED.md`、`data/paper_opt_track.json`、`PENDING_QUEUE.md`、`PROGRESS.md`。下一輪冒煙全過後提交（commit 訊息加 `DevQueue-Cycle: 20261110-040101`）。
+
+### 開工檢查
+- 先.一五四-1c-v（等 11/09 19:00）、先.一三五-1nb-a（等 11/09 14:16）解除時間已到，改回 `- [ ]`（維運帽，留給下一輪）。
+- 收工補件：本輪新增 1 條（先.一五五-3d）；其餘來源本輪時間不夠未逐一掃，照實記錄。
+
 ## 2026-11-08 14:01～14:3x DevQueue 20261108-140101（維運帽）先.一三五-1nb 提案＋先.一五四-1c 紙上優化軌本機排程
 
 等待總司令審閱：10 件（見 `research/AWAITING_REVIEW.md`「等待中」表；本輪新增 1 件：先.一三五-1nb）。
