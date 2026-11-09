@@ -637,15 +637,13 @@
       "missed_shift_threshold": 3,
       "note": "2026-09-16新增。news_events.yml排程是全天候每30分鐘一次（無平日/盤中限制），interval_min=30×stall_factor=3=90分鐘門檻。總司令原話點名這條workflow「Actions排程降級」曾經發生過（15%降級病史），列為雲端監控四條之一。同日【班次數】裁示：改用shift_profile=news_30min（shift_requires_trading_day=false，因排程本身全年無休不分平假日），連續錯過3班即亮燈——換算後門檻仍是90分鐘，與舊制數字相同，這條本來就沒有「假日誤報」的問題（cron不分平假日），改用班次計數只是統一判準表達方式，不是行為變更。",
       "fault_history": {
-        "count": 270,
-        "last_fault_at": "2026-11-09T15:47:01.723011+08:00",
+        "count": 272,
+        "last_fault_at": "2026-11-09T17:47:01.917764+08:00",
         "fault_types": {
-          "stalled": 270
+          "stalled": 272
         },
         "removable": null,
         "event_log": [
-          "2026-11-07T12:32:02.232406+08:00",
-          "2026-11-07T14:02:02.495819+08:00",
           "2026-11-07T15:32:02.586218+08:00",
           "2026-11-07T17:02:01.851825+08:00",
           "2026-11-07T19:32:01.883777+08:00",
@@ -673,7 +671,9 @@
           "2026-11-09T13:02:02.582459+08:00",
           "2026-11-09T14:32:01.560088+08:00",
           "2026-11-09T15:17:01.713590+08:00",
-          "2026-11-09T15:47:01.723011+08:00"
+          "2026-11-09T15:47:01.723011+08:00",
+          "2026-11-09T17:32:01.873909+08:00",
+          "2026-11-09T17:47:01.917764+08:00"
         ]
       }
     },
@@ -819,7 +819,18 @@
       "artifact": "data/warrant_backup_status.json",
       "freshness": "json_field",
       "field": "generated_at",
-      "note": "先.一三五-1kh-g（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。launcher 每次執行都重寫 generated_at（成功或失敗都會），所以本條只證明排程有跑；快照本身成敗看同檔 last_snapshot_date／last_failure。休市日不跑，標 tw_trading_days_only；週一判週五產出約 2.7 天＜門檻 3 天。"
+      "note": "先.一三五-1kh-g（2026-11-04 DevQueue 20261104-123101）新增，依 docs/LOCAL_TASK_FRESHNESS_INVENTORY.md。launcher 每次執行都重寫 generated_at（成功或失敗都會），所以本條只證明排程有跑；快照本身成敗看同檔 last_snapshot_date／last_failure。休市日不跑，標 tw_trading_days_only；週一判週五產出約 2.7 天＜門檻 3 天。",
+      "fault_history": {
+        "count": 1,
+        "last_fault_at": "2026-11-09T17:32:01.873909+08:00",
+        "fault_types": {
+          "stalled": 1
+        },
+        "removable": null,
+        "event_log": [
+          "2026-11-09T17:32:01.873909+08:00"
+        ]
+      }
     },
     {
       "task": "AlphaMoeaPitSnapshot",
