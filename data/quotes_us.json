@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-11-07T05:50:15+00:00",
+  "fetched_at": "2026-11-09T07:53:02+00:00",
   "source": "Finnhub /quote（免費額度，regular quote）+ yfinance Ticker.info（extended_hours：pre/post market，2026-08-27新增）",
   "meta": {
     "trading_window": false,
@@ -7,7 +7,9 @@
     "queried": 9,
     "matched": 9,
     "extended_hours_matched": 9,
-    "sparkline_stale_tickers": [],
+    "sparkline_stale_tickers": [
+      "NVDA"
+    ],
     "extended_hours_disclaimer": "延長交易時段（盤前/盤後）流動性低、價差大，僅接受限價單，價格常於隔日開盤反轉。"
   },
   "quotes": {
@@ -43,7 +45,7 @@
         186.64
       ],
       "extended_hours": {
-        "market_state": "CLOSED",
+        "market_state": "PREPRE",
         "regular": {
           "price": 186.64,
           "prev_close": 181.6,
@@ -92,7 +94,7 @@
         342.37
       ],
       "extended_hours": {
-        "market_state": "CLOSED",
+        "market_state": "PREPRE",
         "regular": {
           "price": 342.37,
           "prev_close": 344.17,
@@ -141,7 +143,7 @@
         530.61
       ],
       "extended_hours": {
-        "market_state": "CLOSED",
+        "market_state": "PREPRE",
         "regular": {
           "price": 530.61,
           "prev_close": 535.93,
@@ -190,7 +192,7 @@
         375.44
       ],
       "extended_hours": {
-        "market_state": "CLOSED",
+        "market_state": "PREPRE",
         "regular": {
           "price": 375.44,
           "prev_close": 353.1,
@@ -239,7 +241,7 @@
         284.78
       ],
       "extended_hours": {
-        "market_state": "CLOSED",
+        "market_state": "PREPRE",
         "regular": {
           "price": 284.78,
           "prev_close": 282.57,
@@ -288,7 +290,7 @@
         259.3
       ],
       "extended_hours": {
-        "market_state": "CLOSED",
+        "market_state": "PREPRE",
         "regular": {
           "price": 259.3,
           "prev_close": 260.21,
@@ -337,7 +339,7 @@
         13.85
       ],
       "extended_hours": {
-        "market_state": "CLOSED",
+        "market_state": "PREPRE",
         "regular": {
           "price": 13.85,
           "prev_close": 13.38,
@@ -386,7 +388,7 @@
         31.63
       ],
       "extended_hours": {
-        "market_state": "CLOSED",
+        "market_state": "PREPRE",
         "regular": {
           "price": 31.63,
           "prev_close": 29.72,
@@ -435,7 +437,7 @@
         49.85
       ],
       "extended_hours": {
-        "market_state": "CLOSED",
+        "market_state": "PREPRE",
         "regular": {
           "price": 49.85,
           "prev_close": 48.86,
