@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-09T13:05:04.194746+08:00",
+ "fetched_at": "2026-11-09T16:05:04.651908+08:00",
  "source": "TWSE/TPEx 重大訊息＋TWSE 月營收＋既有除權息檔（全部官方端點）",
  "keep_days": 90,
  "importance_version": "v0（2026-10-18 先.一一〇-9）",
@@ -11,8 +11,8 @@
   },
   "tpex_mops": {
    "ok": true,
-   "rows": 3,
-   "kept": 3
+   "rows": 2,
+   "kept": 2
   },
   "twse_revenue": {
    "ok": true,
@@ -25,7 +25,7 @@
    "note": "沿用既有排程產物，未額外請求"
   }
  },
- "count": 10952,
+ "count": 10954,
  "events": [
   {
    "code": "4562",
@@ -124,6 +124,26 @@
    "type": "其他",
    "title": "公告本公司使用權資產變更租賃對象",
    "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "3489",
+   "name": "長耀地產",
+   "date": "2026-11-08",
+   "type": "其他",
+   "title": "公告本公司名稱由「森寶開發股份有限公司」更名為 「長耀地產投資股份有限公司」，公告期間： 115年11月4日至116年2月3日",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "6844",
+   "name": "諾貝兒",
+   "date": "2026-11-08",
+   "type": "其他",
+   "title": "說明本公司線上商店平台委外服務廠商資安事件",
+   "source": "TPEx 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01",
    "importance": 5
   },
