@@ -4600,8 +4600,18 @@ async function runSmokeTest(baseUrl, headless = true) {
           if (need === 0 && starts.length) mcErrs.push("repo 已涵蓋 8 個月仍向 FinMind 要日線");
           // 2026-10-16（DevQueue 20261016-140101）：先.一〇四-8 圖改 13 個月後，最早缺月本來就可能在 400 天前
           // （例：10/16 時 2025-09-01＝410 天），舊的固定 400 天上限只在「沒送出請求」時才會過。改依圖上月數推上限。
-          const maxDays = ((m ? +m[2] : 8) + 1) * 31;
-          if (starts.some(s => !/-01$/.test(s) || (Date.now() - Date.parse(s)) > maxDays * 86400000)) mcErrs.push(`FinMind 起日不是最早缺月的 1 日：${starts.join(",")}`);
+          // 2026-11-10（DevQueue 20261110-053101，先.一五五-3d）：圖上 13 根是「最近 13 個營收月」，營收在次月 10 日前才公布，
+          // 最後一根常是上上個月（11/10 時是 2026-09），舊的「(月數+1)×31 天」上限把圖尾當成本月，換算錯（11/10 要 2025-09-01＝435 天 > 434）。
+          // 改成精確比對：用圖上實際月份標籤＋repo by_code monthly_close 推出最早缺月，起日必須剛好是它的 1 日（比天數上限更嚴）。
+          const labels = await p.evaluate(() => [...document.querySelectorAll("#rev-chart-labels span")].map(e => e.textContent.trim()));
+          const bcMc = JSON.parse((await import("node:fs")).readFileSync("data/by_code/2330.json", "utf8")).monthly_close || {};
+          const barMonths = labels.map(l => { const mm = l.match(/^(\d\d)\/(\d\d)$/); return mm ? `20${mm[1]}-${mm[2]}` : null; });
+          if (!barMonths.length || barMonths.some(x => !x)) mcErrs.push(`營收圖月份標籤讀不到或格式不對：${labels.join(",")}`);
+          else {
+            const firstMiss = barMonths.find(x => bcMc[x] == null);
+            const expect = firstMiss ? `${firstMiss}-01` : null;
+            if (starts.some(s => s !== expect)) mcErrs.push(`FinMind 起日不是最早缺月的 1 日：${starts.join(",")}（應為 ${expect || "不送請求"}）`);
+          }
         } else if (need > 0 && !/補充失敗/.test(t)) mcErrs.push(`FinMind 失敗時沒寫原因：${t}`);
       } finally { await ctx.close(); }
     }
