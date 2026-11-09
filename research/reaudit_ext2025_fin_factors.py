@@ -25,7 +25,7 @@ FIN_FACS = ["f_gross_profitability", "f_gross_margin_stability", "f_asset_growth
             "f_revenue_surprise", "f_dividend_yield_ttm", "f_value_pe", "f_value_pb"]
 # （DevQueue 20261107-230102）籌碼類：法人買賣超＋融資融券，日資料當日盤後公布、當日即 pit（同 factors.py 註解）。
 CHIP_FACS = ["f_inst_flow", "f_foreign_streak", "f_inst_streak_days", "f_margin_utilization", "f_short_margin_ratio"]
-FIN_FACS = FIN_FACS + CHIP_FACS
+FIN_FACS = FIN_FACS + CHIP_FACS + ["f_piotroski_fscore"]
 
 RAW = Path(__file__).resolve().parent / "data" / "raw"
 
@@ -104,6 +104,49 @@ def fin_pit(sid, fac):
             W = F.SUE_TRAILING_QUARTERS
             q["v"] = dd / dd.rolling(W, min_periods=W).std()
         return q[["pit_date", "v"]]
+    if fac == "f_piotroski_fscore":
+        # （DevQueue 20261110-060101，先.一五五-3 第 17 批）HQ#23 Piotroski F-score，9 項定義照 piotroski_fscore_sanity._fscore_components，
+        # 兩處照實修正：①現金流量表是年初累計值（2330 實測 Q1 6,256 億→Q2 1.12 兆），同年度相鄰季相減還原單季 CFO，缺前一季就 NaN；
+        # ②原版 (x > x.shift(4)).astype(float) 會把 NaN 比較記成 0、n_components 永遠 9，這裡比較時任一邊 NaN 該項就是 NaN，9 項齊才給分。
+        inc, bs = _inc(sid), _bs(sid)
+        cf = _pivot_with_statutory_pit(_raw("TaiwanStockCashFlowsStatement", sid))
+        # ③NetIncome 欄只有舊期有值（2330 實測 66 季只有 40 季），依序用 IncomeAfterTaxes、IncomeFromContinuingOperations 補（同一個稅後淨利）
+        if not inc.empty:
+            ni = inc["NetIncome"] if "NetIncome" in inc.columns else pd.Series(np.nan, index=inc.index)
+            for alt in ("IncomeAfterTaxes", "IncomeFromContinuingOperations"):
+                if alt in inc.columns:
+                    ni = ni.fillna(inc[alt])
+            inc = inc.assign(NetIncome=ni)
+        ic, bc = {"NetIncome", "Revenue", "GrossProfit"}, {"TotalAssets", "CurrentAssets", "CurrentLiabilities", "LongtermBorrowings", "CapitalStock"}
+        if inc.empty or bs.empty or cf.empty or not ic <= set(inc.columns) or not bc <= set(bs.columns):
+            return empty
+        # ④兩個 CFO 欄名在不同年份各自有值（2330：NetCashInflow… 只有 2022 起 18 季、CashFlowsFrom… 58 季，重疊期數字相同），合併成一欄
+        cc = [c for c in ("NetCashInflowFromOperatingActivities", "CashFlowsFromOperatingActivities") if c in cf.columns]
+        if not cc:
+            return empty
+        cfo_col = "_cfo_cum"
+        cf = cf.assign(_cfo_cum=cf[cc].bfill(axis=1).iloc[:, 0])[["fiscal_period_end", cfo_col]].copy()
+        fpe = pd.to_datetime(cf["fiscal_period_end"])
+        cf["_y"], cf["_q"] = fpe.dt.year, (fpe.dt.month - 1) // 3 + 1
+        cum = cf.set_index(["_y", "_q"])[cfo_col].astype(float)
+        prev = cum.reindex(list(zip(cf["_y"], cf["_q"] - 1))).to_numpy()
+        cf["cfo"] = np.where(cf["_q"] == 1, cum.to_numpy(), cum.to_numpy() - prev)
+        m = inc[["fiscal_period_end", "pit_date"] + sorted(ic)].merge(bs[["fiscal_period_end"] + sorted(bc)], on="fiscal_period_end", how="inner")
+        m = m.merge(cf[["fiscal_period_end", "cfo"]], on="fiscal_period_end", how="left").sort_values("fiscal_period_end").reset_index(drop=True)
+        ta = m["TotalAssets"].replace(0, np.nan)
+        roa, lev = m["NetIncome"] / ta, m["LongtermBorrowings"] / ta
+        cr = m["CurrentAssets"] / m["CurrentLiabilities"].replace(0, np.nan)
+        gm, at = m["GrossProfit"] / m["Revenue"].replace(0, np.nan), m["Revenue"] / ta
+
+        def gt(a, b):
+            return (a > b).astype(float).where(a.notna() & b.notna())
+        L = 4
+        comps = [gt(roa, 0 * roa), gt(m["cfo"], 0 * m["cfo"]), gt(roa, roa.shift(L)), gt(m["cfo"], m["NetIncome"]),
+                 gt(lev.shift(L), lev), gt(cr, cr.shift(L)), 1 - gt(m["CapitalStock"], m["CapitalStock"].shift(L)),
+                 gt(gm, gm.shift(L)), gt(at, at.shift(L))]
+        c = pd.concat(comps, axis=1)
+        m["v"] = c.sum(axis=1).where(c.notna().all(axis=1))
+        return m[["pit_date", "v"]]
     if fac == "f_revenue_surprise":  # 照 factors._revenue_surprise_sue 逐字
         rev = _month_rev_raw(sid)
         if rev.empty:
