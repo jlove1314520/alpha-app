@@ -26381,3 +26381,7 @@ usage_gate: 撞到 Claude 用量上限，記錄重置時間 11/11 05:30（resets
 finally: released .devqueue.lock (cycle_id=20261111-050102)
 ===== DevQueue cycle end: 2026-11-11 05:01:14 cycle_id=20261111-050102 reason=ERROR exit=1 duration_min=0.2 =====
 record_own_dirty: RECORDED_OWN_DIRTY: （無）
+usage_gate: 本輪沒有用量上限錯誤事件
+finally: released .devqueue.lock (cycle_id=20261111-053102)
+===== DevQueue cycle end: 2026-11-11 05:59:01 cycle_id=20261111-053102 reason=OK exit=0 duration_min=28 =====
+record_own_dirty: RECORDED_OWN_DIRTY: （無）
