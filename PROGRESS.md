@@ -1,3 +1,11 @@
+## 2026-11-11 05:31 DevQueue 20261111-053102（研究帽）
+
+等待總司令審閱：13 件（本輪沒有新增；見 `research/AWAITING_REVIEW.md`）。交辦佇列 `- [ ]` 剩 29 項。
+
+- 做了 先.一五五-3：第 21 批補提交（b1e679e4969）＋第 22 批 質押比（`research/reaudit_batch22_pledge.py`）／重大訊息 9 族（`research/reaudit_batch22_material_news.py`），零請求；順手修 `data/auto_heartbeat.json` 索引 CRLF 讓排程 pull --rebase 不再失敗。
+- 證據：冒煙兩次 189 PASS／0 FAIL；質押比最好 +7.4%／−24.4%（輸同名冊等權）、重大訊息最好 增減資 1.5× +19.4%／−32.6%（Calmar 0.597）都不進候選；REAUDIT_OPTIMIZED.md 第 25／25b 節。
+- [自行裁量]：融資年息 6.5%、兩族不進候選。⚠️ 本輪一次在鎖被占用時仍以空 token 釋放 git 鎖（05:43），已改正並記在條目。BLOCKED：無。
+
 ## 2026-11-11 02:31 DevQueue 20261111-023102（研究帽）
 
 等待總司令審閱：13 件（本輪沒有新增；見 `research/AWAITING_REVIEW.md`）。交辦佇列 `- [ ]` 剩 29 項。
