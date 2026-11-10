@@ -139,7 +139,9 @@ def run():
 
 def _fmt(x):
     st = "不設" if x["stop"] is None else f"{x['stop']:.0%}"
-    return f"{x['series']}／{x['transform']}／{x['riskoff_when']}於 {x['pct_threshold']:.0%} 減到 {x['riskoff_exposure']}／{x['L']}×／止損 {st}"
+    # run_sim 判定：「高」＝百分位 > q；「低」＝百分位 < 1−q（2026-11-10 修標籤，原本「低」也印 q）
+    q = x["pct_threshold"] if x["riskoff_when"] == "高" else 1 - x["pct_threshold"]
+    return f"{x['series']}／{x['transform']}／{x['riskoff_when']}於 {q:.0%} 百分位減到 {x['riskoff_exposure']}／{x['L']}×／止損 {st}"
 
 
 def render(out, p):
