@@ -49,14 +49,34 @@ def stats(r: np.ndarray, dates, trades: int, wins: int):
             "win_rate": None if trades == 0 else wins / trades, "violates_survival": mdd < -0.5}
 
 
+def add_raw_gaps(m: pd.DataFrame) -> pd.DataFrame:
+    """跳空一律用原始價、同一合約才算（2026-11-10 修正）。
+
+    第一版用日盤、夜盤「各自」還原後的價格相除；兩條序列各用自己的收盤算轉倉比率，累積後位移不同，
+    還原後跳空中位數逐年 −2%～−5%（原始價中位數約 0），訊號被假位移主導。改成：
+    - 夜盤跳空＝夜盤 T 原始開盤 ÷ 日盤 T-1 原始收盤 − 1，兩者合約不同（轉倉）時記 NaN（不交易）；
+    - 日盤跳空＝日盤 T 原始開盤 ÷ 夜盤 T 原始收盤 − 1，合約不同時記 NaN。
+    各盤自身開→收報酬（night_ret／day_ret）是同一序列內的比值，還原比率相消，不受影響。
+    """
+    n, _ = G.build_continuous_series(session="after_market")
+    n = n[["date", "open", "close", "contract_date"]].rename(
+        columns={"open": "night_open_raw", "close": "night_close_raw", "contract_date": "night_cd"})
+    mm = m[["date"]].merge(n, on="date", how="left")
+    prev_close, prev_cd = m["close"].shift(1), m["contract_date"].shift(1)
+    g_n = mm["night_open_raw"].to_numpy() / prev_close.to_numpy() - 1.0
+    g_d = m["open"].to_numpy() / mm["night_close_raw"].to_numpy() - 1.0
+    m["gap_night"] = np.where(mm["night_cd"].to_numpy() == prev_cd.to_numpy(), g_n, np.nan)
+    m["gap_day"] = np.where(mm["night_cd"].to_numpy() == m["contract_date"].to_numpy(), g_d, np.nan)
+    return m
+
+
 def main():
     s = G._load_series()
     m = G._load_session_pair(s)
-    raw = s[["date", "close"]].rename(columns={"close": "raw_close"}) if "close" in s.columns else None
+    raw = s[["date", "close"]].rename(columns={"close": "raw_close"})
     m["prev_day_close"] = m["adj_close"].shift(1)
     m["prev_day_ret"] = m["day_ret"].shift(1)
-    m["gap_night"] = m["night_open"] / m["prev_day_close"] - 1.0
-    m["gap_day"] = m["adj_open"] / m["night_close"] - 1.0
+    add_raw_gaps(m)
     if raw is not None:
         m = m.merge(raw, on="date", how="left")
         lvl = m["raw_close"].shift(1).bfill()

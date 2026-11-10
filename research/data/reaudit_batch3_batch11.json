@@ -1,0 +1,140 @@
+{
+ "generated_at": "2026-11-10T16:03:35",
+ "families": [
+  {
+   "family": "HQ#55_night_to_day",
+   "title": "夜盤 T 報酬方向 → 日盤 T",
+   "start": "2017-05-17",
+   "end": "2024-12-31",
+   "n_grid": 32,
+   "n_violates": 19,
+   "best_by_calmar": {
+    "direction": "反向",
+    "abs_signal_pctile": 0.9,
+    "L": 1.0,
+    "cagr": 0.014407543868571127,
+    "mdd": -0.20015912687890158,
+    "sharpe": 0.2714791741327237,
+    "calmar": 0.0719804492217227,
+    "trades": 281,
+    "win_rate": 0.5231316725978647,
+    "violates_survival": false
+   },
+   "best_same_params_no_cost": {
+    "cagr": 0.028551494540191236,
+    "mdd": -0.1663254693978573,
+    "sharpe": 0.5029092568918301,
+    "calmar": 0.17166038757356455,
+    "trades": 0,
+    "win_rate": null,
+    "violates_survival": false
+   },
+   "best_cagr_any": {
+    "direction": "反向",
+    "abs_signal_pctile": 0.9,
+    "L": 3.0,
+    "cagr": 0.03215457694611401,
+    "mdd": -0.5104942029971222,
+    "sharpe": 0.271479174132724,
+    "calmar": 0.06298715393305901,
+    "trades": 281,
+    "win_rate": 0.5231316725978647,
+    "violates_survival": true
+   },
+   "avg_cost_roundtrip_pct": 0.03764728523706951
+  },
+  {
+   "family": "HQ#65_night_gap",
+   "title": "日收→夜開跳空方向 → 夜盤 T",
+   "start": "2017-05-17",
+   "end": "2024-12-31",
+   "n_grid": 32,
+   "n_violates": 17,
+   "best_by_calmar": null,
+   "best_same_params_no_cost": null,
+   "best_cagr_any": {
+    "direction": "順勢",
+    "abs_signal_pctile": 0.9,
+    "L": 1.0,
+    "cagr": -0.0060203256149854445,
+    "mdd": -0.17025841930845775,
+    "sharpe": -0.10330088784231731,
+    "calmar": -0.035359928979949,
+    "trades": 224,
+    "win_rate": 0.5,
+    "violates_survival": false
+   },
+   "avg_cost_roundtrip_pct": 0.03764728523706951
+  },
+  {
+   "family": "HQ#70_day_gap",
+   "title": "夜收→日開跳空方向 → 日盤 T",
+   "start": "2017-05-17",
+   "end": "2024-12-31",
+   "n_grid": 32,
+   "n_violates": 15,
+   "best_by_calmar": {
+    "direction": "順勢",
+    "abs_signal_pctile": 0.5,
+    "L": 3.0,
+    "cagr": 0.276022856538793,
+    "mdd": -0.30462143957051013,
+    "sharpe": 0.9822765017664431,
+    "calmar": 0.9061176289100378,
+    "trades": 1029,
+    "win_rate": 0.5179786200194364,
+    "violates_survival": false
+   },
+   "best_same_params_no_cost": {
+    "cagr": 0.4872401791315628,
+    "mdd": -0.27149625002658806,
+    "sharpe": 1.50355186831939,
+    "calmar": 1.7946479153352821,
+    "trades": 0,
+    "win_rate": null,
+    "violates_survival": false
+   },
+   "best_cagr_any": {
+    "direction": "順勢",
+    "abs_signal_pctile": 0.5,
+    "L": 3.0,
+    "cagr": 0.276022856538793,
+    "mdd": -0.30462143957051013,
+    "sharpe": 0.9822765017664431,
+    "calmar": 0.9061176289100378,
+    "trades": 1029,
+    "win_rate": 0.5179786200194364,
+    "violates_survival": false
+   },
+   "avg_cost_roundtrip_pct": 0.03764728523706951
+  },
+  {
+   "family": "day_to_night",
+   "title": "日盤 T-1 報酬方向 → 夜盤 T",
+   "start": "2017-05-17",
+   "end": "2024-12-31",
+   "n_grid": 32,
+   "n_violates": 19,
+   "best_by_calmar": null,
+   "best_same_params_no_cost": null,
+   "best_cagr_any": {
+    "direction": "順勢",
+    "abs_signal_pctile": 0.9,
+    "L": 1.0,
+    "cagr": -0.004273140577726764,
+    "mdd": -0.23874938218390573,
+    "sharpe": -0.05728050026331155,
+    "calmar": -0.01789801732108867,
+    "trades": 234,
+    "win_rate": 0.5,
+    "violates_survival": false
+   },
+   "avg_cost_roundtrip_pct": 0.03764728523706951
+  }
+ ],
+ "cost_per_side": {
+  "tax": 2e-05,
+  "fee": 2e-05,
+  "slippage_points": 2.0
+ }
+}
