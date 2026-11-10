@@ -55,6 +55,14 @@ jobs:
       - name: 更新官方在市名冊
         run: python scripts/build_listed_universe.py
 
+      # 2026-11-10 先.一三五-1nb-a（提案甲 docs/PROPOSAL_COMPANY_INFO_WEEKLY.md，[預設放行]）：
+      # 公司基本資料／官方產業別每週更新。每班都叫，腳本自己判斷上次套用未滿 6 天就零請求略過
+      # （實際每週 1 次、一次 4 個請求；某班沒觸發下一班自動補）。共用 rate_limit_state 節流
+      # twse_openapi／tpex_openapi。失敗只略過，不拖垮稽核。
+      - name: 公司基本資料／官方產業別（每週，未滿 6 天略過）
+        continue-on-error: true
+        run: python scripts/apply_official_industry.py --weekly
+
       - name: 剔除榜單裡已下市/價格過期的股票
         run: python scripts/prune_delisted.py
 
@@ -89,6 +97,8 @@ jobs:
           git add -- data/schema_guard/audit.json 2>/dev/null || true
           git add data/audit_report.json data/listed_universe.json scores.json scores_momentum.json scores_future.json
           git add -- scores_list.json scores_momentum_list.json scores_future_list.json 2>/dev/null || true
+          # 先.一三五-1nb-a（十節）：apply_official_industry.py --weekly 會改寫這三檔（略過那幾班不會動到）
+          git add -- data/company_info.json research/data/official_industry_code_map.json data/rate_limit_state.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "稽核結果與上次相同，不產生 commit"
           else

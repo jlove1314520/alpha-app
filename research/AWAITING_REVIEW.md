@@ -20,7 +20,7 @@
 - N=0時「等待中」表格留表頭但清空列，不得整份刪除本檔案。
 - 2026-10-29（收件匣 031）：凡「請總司令執行一次」（要總司令本人在電腦或手機上動手）的項目，除了列 AWAITING，也同步加進 `C:\alpha\總司令待辦.md`（白話、每項一行做法、寫不做的影響）；能用腳本做的接進 `C:\alpha\run-owner-todo.ps1`（每支先問 Y/N、失敗不中斷）。總司令做完後由 CC 查證（看排程／資料檔／log，不看金鑰內容）再打勾移到「已完成」，同時 AWAITING 結案。
 
-## 等待中（目前：12件）
+## 等待中（目前：11件）
 
 | 項目 | 完成時間 | 等待審閱內容 | 等待時長 |
 |---|---|---|---|
@@ -33,7 +33,6 @@
 | 先.一四九-1 個股 K 線 6 個月～3 年日線改由 repo 提供（**甲（建議）**／乙／丙） | 2026-11-05 04:4x | `docs/PROPOSAL_KLINE_3Y_REPO.md`：by_code price 只有 60 根、price_history 每檔中位數 90 根，本機 FinMind 402；本機已有官方日檔快取 1 年（2025-10-28～2026-10-30）可零請求組出。實測 1 年逐檔 25MB（gzip 7MB），3 年約 75MB。repo pack 已 998MiB，每日改寫全部逐檔會暴增，所以甲＝`data/kline/<年>/<代號>.json` 年分檔、過去年凍結、當年每週補一次、最近 60 日沿用 by_code；回補 2023-11～2025-10 官方全市場日檔約 1,032 次（同 V1 節流規則，先寫 CLAUDE.md 再跑）。乙＝by_code 拉到 250 日（只到 1 年、每日膨脹更大）；丙＝維持 FinMind。24 小時無裁示照零之二預設放行甲。**⚠️ 2026-11-06 05:0x DevQueue：預設放行不執行**——甲要讀 holdout 期間限定快取 `paper_9_lookback`（RESTRICTED_LOOKBACK_DIRS 只准兩支讀）且產出的 2025／2026 年分檔屬 holdout 期間、需先登記 DISPLAY_ONLY（改 holdout.py＝十三節核心檔），屬「擴大 holdout」排除類別；待 Cowork／互動視窗裁示（見 PENDING_QUEUE 先.一四九-1 條目三個選項） | 0 小時 |
 | 先.一五四-1d 紙上優化軌缺資料成員（F15／F16 美股、F18 零股）要不要新增每日抓取（**甲（建議）**／乙；24 小時無裁示照甲） | 2026-11-06 19:2x | PENDING_QUEUE 先.一五四-1d：甲＝每日 1 次 yfinance 248 檔批次＋每日 1 次 TWSE TWTC7U；乙＝先不記帳、組合只記台股成員 | 剛送出 |
 | 先.一五五-2a 墓園重審 2025 起補跑：缺資料 7 列的補抓提案 | 2026-11-07 00:2x | 甲（建議）補官方／既有端點約 528 次請求（TAIFEX 2、MI_MARGN 約 85、TWTC7U 約 440、yfinance 1 批）照既有節流；乙不補、永久標資料缺。24 小時無裁示照甲預設放行 | 剛送出 |
-| 先.一三五-1nb company_info 官方產業別每週自動更新（**甲（建議）**／乙／丙；24 小時無裁示照甲） | 2026-11-08 14:1x | `docs/PROPOSAL_COMPANY_INFO_WEEKLY.md`：甲＝audit.yml 加一步 `apply_official_industry.py --weekly`（未滿 6 天零請求略過、continue-on-error、改接共用節流 twse_openapi／tpex_openapi、git add 補 company_info／code_map／rate_limit_state），每週 4 次請求；乙＝本機排程（需總司令操作）；丙＝只加逾期警示 | 剛送出 |
 | 先.一五四-1c-w AlphaPaper9 18:30 產生器讀到舊價格的對策（甲／乙／**丙＋乙警告行（建議）**；24 小時無裁示照建議） | 2026-11-10 07:1x | `docs/PROPOSAL_PAPER9_STALE_WORKTREE.md`：11/09 18:30 模擬 I 與紙上 5 支只看到 11/06（17:42、18:30:15 兩次 pull 都中止，18:31:01 才拉進）。甲＝產生器前先 fetch＋pull（11/09 實例同一套 pull 也失敗，不建議）；乙＝只印警告；丙＝啟動腳本比對開工前後 price_history tree hash，本輪 pull 拉進新價格就重跑兩支產生器（冪等、零新 git 操作）。只改 `scripts/run_paper_9.ps1` | 剛送出 |
 | 先.一五六-1 經濟日報「台股擂台」標題來源法遵阻塞（**甲（建議）**／乙／丙） | 2026-11-10 09:0x | money.udn.com/robots.txt 明文 `User-agent: Claude Disallow: /`（ClaudeBot、GPTBot 同），條款禁止內容用於 LLM／機器學習／AI 相關用途與商業用途；DevQueue 未送任何 /search 請求。甲＝放棄此來源，改找有授權或官方的分析師選股資料；乙＝向 copyright@udn.com 取得書面授權後再抓；丙＝總司令本人手動貼標題清單（**仍在條款「AI 相關用途」灰區，需總司令自行判斷**）。法遵類不適用 24 小時預設放行 | 剛送出 |
 
@@ -162,6 +161,7 @@
 
 | 項目 | 完成時間 | 審閱結果時間 | 結果 |
 |---|---|---|---|
+| 先.一三五-1nb company_info 官方產業別每週自動更新（**甲（建議）**／乙／丙） | 2026-11-08 14:1x | 2026-11-10 11:2x（[預設放行]，零之二，等約 45 小時無 Cowork 裁示） | 照甲執行（先.一三五-1nb-a）：`apply_official_industry.py --weekly`（未滿 6 天零請求略過）＋共用節流 twse_openapi／tpex_openapi＋audit.yml 加一步（continue-on-error）＋git add 三檔＋改寫 C:\alpha\CLAUDE.md 對應節。每週約 4 次請求。雲端首次實抓預計 11/16 那班。Cowork 可推翻，推翻時照 PREREG 修訂規則處理。 |
 | 先.一三五-1gt 「未分軌」98 列判軌提案（甲／**乙（建議）**／丙） | 2026-11-01 12:2x | 2026-11-05 08:4x（[預設放行]，零之二，等 92.2 小時無 Cowork 裁示；收件匣 039 亦列 1gt 乙） | 照乙執行：`research/selection_bias_ledger.py::parse()` 加未分軌退路——明確編號表 #324→US、#127→FUT、#429／#430→TW；第 3 欄 `hypothesis_queue`／`calibration`→TW；「跨市場」列同時計入 TW 與 US 分母（全體 N 不重複計）。重跑：全體 N 457 不變；TW 235→326（99.9787→99.9847 百分位）、US 77→82（→99.9390）、FUT 52→53（→99.9057）、未分軌 93→消失；撐住 3／倒下 4、跨軌重複 1 個皆不變，歷史判定不改。Cowork 可推翻，推翻時照 PREREG 修訂規則處理。 |
 | 先.一三五-1hq-a 本機看守「`.git/rebase-merge`／`rebase-apply` 殘留」（甲（建議）／乙／丙） | 2026-11-02 17:4x | 2026-11-03 18:0x（[預設放行]，零之二，等 24.4 小時無 Cowork 裁示） | 照甲執行：`scripts/check_external_connectivity.py` 加 `check_rebase_residue_alerts()` 併入 task_stalls（rebase 目錄 >30 分鐘且 `research/.git_op.lock` 不存在或持鎖 >30 分鐘 → 亮燈；只告警不刪、自身失敗 fail open）；順手讓 `local_git_commit.pull_or_abort()` 記下 pull 的 stderr。自測 `scripts/selftest_rebase_residue_alert.py` 10/10。Cowork 可推翻，推翻時照 PREREG 修訂規則處理。 |
 | 先.一三五-1ho Shioaji 盤後輪次覆蓋 stdout、`[build]` 證據消失（甲（建議）／乙） | 2026-11-02 17:1x | 2026-11-03 17:3x（[預設放行]，零之二，等 24.4 小時無 Cowork 裁示） | 照甲執行：`research/shioaji_quotes.py` 印 `[build]` 時另 append 到 `research/shioaji_build_history.log`（gitignore，寫檔失敗只印警告）。守護行程盤後未在跑，七之二重啟核對改由 先.一三五-1ho-b 於 11/04 盤中驗。Cowork 可推翻，推翻時照 PREREG 修訂規則處理。 |

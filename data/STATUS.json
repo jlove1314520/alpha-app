@@ -76,7 +76,7 @@
       "path": "data/company_info.json",
       "generated_at": "2026-09-15T06:05:54.301858+08:00",
       "records": 3162,
-      "source": "FinMind TaiwanStockInfo（research端本機parquet快取整理，一次性/不常變動）",
+      "source": "FinMind TaiwanStockInfo（名冊底稿）＋官方產業別（TWSE t187ap03_L／TPEx mopsfin_t187ap03_O・R／tpex_index_consti，scripts/apply_official_industry.py）；2026-11-10 先.一三五-1nb-a 起 audit.yml 每班叫 --weekly，未滿 6 天略過＝每週約 1 次、4 個請求",
       "detail": "2026-09-03回填：取自這個檔案最後一次git commit時間（build_company_info.py當時沒寫時間戳），不是重新產生；下次重跑腳本會寫入真正的產生時間 2026-09-05 已補齊：原 603 檔缺 industry，補後剩 90 檔。剩下的多半是興櫃/已下市/非上市櫃證券，沒有官方產業別可對。",
       "status": "ok"
     },
