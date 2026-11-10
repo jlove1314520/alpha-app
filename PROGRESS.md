@@ -19,6 +19,14 @@
 - 時間上限到，融券強制回補事件（`forced_short_covering_gate1.py` 走 `load_dev`，快取沒有會連 FinMind）留給下一輪。
 - 佇列深度：`- [ ]` 25 項（≥12），本輪不補件。
 
+## 2026-11-10 10:01～10:42 DevQueue 20261110-100101（研究帽）
+
+等待總司令審閱：見 research/AWAITING_REVIEW.md（本輪無新增）。
+
+- **先.一五五-3 籌碼族延長**：FinMind 用量 285/hr 時送最後 12 次融資融券（全 200），法人＋融資券 2025 起 236/236 抓齊。延長到 2026-09-24：f_inst_flow 48/48（舊最優反向 2× 全期 +13.8%／−36.3%、2025 起 −15.8%；全期重挑 1× +11.3%／−14.1%）、f_inst_streak_days 48/48（舊最優全期 +9.3%／−27.7%、2025 起 +5.3%；重挑 +12.8%／−20.5%）、f_foreign_streak 2/48 時間到存斷點。summarize 已重產；候選欄未重產（時間）。
+- 冒煙：`node scripts/smoke_test.mjs` 189 PASS／0 FAIL。
+- 下一輪：f_foreign_streak 剩 46 格 → 兩個融資券族 → summarize＋candidates＋paper_opt_track。
+
 ## 2026-11-10 07:01～07:2x DevQueue 20261110-070101（維運帽）先.一五四-1c-w 提案
 
 等待總司令審閱：11 件（見 `research/AWAITING_REVIEW.md`「等待中」表；本輪新增 先.一五四-1c-w 一列）。
