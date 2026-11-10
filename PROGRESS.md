@@ -1,3 +1,25 @@
+## 2026-11-10 11:01～11:3x DevQueue 20261110-110101（維運帽）先.一三五-1nb-a company_info 每週自動更新 [預設放行]
+
+等待總司令審閱：11 件（見 `research/AWAITING_REVIEW.md`「等待中」表；本輪把 先.一三五-1nb 移到已結案，12→11）。
+
+### 先.一三五-1nb-a 依提案甲實作（commit `dc369e1d0f0`）
+- **[預設放行]**：提案 `docs/PROPOSAL_COMPANY_INFO_WEEKLY.md` 11/08 14:1x 送 AWAITING，到本輪約 45 小時無 Cowork 裁示（全 repo 查無 1nb 的裁示），照提案自標建議「甲」執行（零之二：不涉及真錢、刪除、密碼、付費資料、關卡門檻）。
+- 做了什麼：
+  - `scripts/apply_official_industry.py`：加 `--weekly`（讀 `meta.official_industry_2026_10_13.applied_at`，未滿 6 天印「略過（零請求）」、exit 0；讀不到時間就照跑＝fail open）；改接 `data/rate_limit_state.json` 共用節流（`twse_openapi`／`tpex_openapi`，同源 ≥3 秒，402/403/428/429 封鎖 2 小時不重試；跨行程鎖與狀態檔寫法照抄 `.github/scripts/fetch_insider_transfer_tw.py`），原本寫死的 `time.sleep(3)` 改由節流保證。不加 `--weekly` 時行為同舊版（手動強制更新）。
+  - `.github/workflows/audit.yml`：「更新官方在市名冊」後加一步 `--weekly`（`continue-on-error: true`）。
+  - 十節：commit 步驟 `git add --` 加 `data/company_info.json`、`research/data/official_industry_code_map.json`、`data/rate_limit_state.json`（三檔 `git check-ignore` 皆未排除；`scripts/selftest_workflow_git_add_paths.py` PASS）。
+  - `C:\alpha\CLAUDE.md`「公司基本資料／產業別」節：「手動跑」劃線改成「audit.yml 每班叫 --weekly，每週約 1 次、4 個請求」（repo 外檔案）。
+  - `data/STATUS.json` company_info 來源欄更新；PENDING_QUEUE 打勾；AWAITING 1nb 移已結案。
+- 證據：本機 `--weekly` 跑兩次皆「上次套用 2026-11-08T10:31+08:00，距今 2.0 天（< 6 天）」、exit 0、零請求、company_info 未變；行程內假 requests 自測（不送真請求）：10 天前→照跑、缺 meta→警告後照跑、1 天前→略過、HTTP 429→記封鎖 2 小時、再叫→「封鎖冷卻中、不送請求」。冒煙 `node scripts/smoke_test.mjs` exit 0，189 項全 `[x]`、無未過項。
+- **未驗證**：雲端真正打 4 個請求的那一班——預計 11/16（週一）23:20 台北那班（上次套用屆時滿 8 天），看有沒有 commit `data/company_info.json`。
+- [自行裁量] 不改 cron，照提案由腳本判斷 6 天（某班沒觸發下一班自動補）。風險照實記：rate_limit_state.json 也會被 market.yml 改，兩邊同時 push 撞到時 audit.yml 既有的 rebase 重試會處理；真的 rebase 衝突那班稽核結果會丟（既有行為），頻率每週最多一次。
+- 順手修：PENDING_QUEUE 裡一處既有的 `C:\alpha` 被寫成控制字元（BEL，`\a` 跳脫被吃掉，來自上一輪 先.一五六-1 紀錄），本輪自己寫入時也踩到同一個坑，一併修正（已確認兩檔都沒有 BEL 字元）。
+
+### 收工
+- 權威清單下一項是 先.一五五-3 墓園重審第二批 **[研究]**，本輪戴維運帽，依九節一輪一頂帽子不接，留給下一輪。
+- 佇列深度：`- [ ]` 24 項（≥12）；DevQueue 可執行非研究項 0（唯一的 先.一〇三-15ak 屬互動視窗改排程）＜6 → 查補件來源：① STATUS 逾期三項（quotes_us 在 STATUS 產生後 09:45 已由雲端補上收盤後資料，屬既知 GitHub 延遲、先.一四一-3a 已在 AWAITING；quotes_ibkr 有既有條目；market_us 是時間差）無新缺口；BACKLOG（只剩 B25 已完成註記）、`docs/UX_REDESIGN_PROPOSAL.md`、先.八十 全檢節、`research/DATA_GAP_PLAN.md` 甲類（第 50 行：無待抓）→ **來源已用盡，本輪不補**；④文書核對本週用量上限規定暫停。
+- data/STATUS.json：已更新（company_info 來源欄）。
+
 ## 2026-11-10 09:01～09:4x DevQueue 20261110-090101（研究帽）先.一五六-1 阻塞＋先.一五五-3 第 18 批
 
 等待總司令審閱：12 件（見 `research/AWAITING_REVIEW.md`「等待中」表；本輪新增 先.一五六-1 一列）。
