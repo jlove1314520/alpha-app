@@ -18,6 +18,7 @@
 - 冒煙：21:52:14 全套「冒煙測試(Node.js/Playwright)（全部通過）」，EXIT=0、FAIL 0 項（#183 紙上優化軌 8 張卡、回測虛線 8/8）。
 - 收工補件：`- [ ]` 仍 ≥12；DevQueue 可執行的非研究項只多了 1e（還在提案階段）。[自行裁量] 本輪時間全花在 1a，沒再從 ①～③ 來源補件，下一輪收工時補。
 - BLOCKED：本輪沒有新增阻塞。
+- **推送事故（照實記錄）**：commit 2c255b7b 後 `git pull --rebase --autostash` 被擋——`data/auto_heartbeat.json` 的 blob 本身是 CRLF，取出後一直顯示「已修改」（忽略空白後完全相同），rebase 判定工作目錄不乾淨而失敗、autostash 還原時又衝突。處理：改用 merge 合併遠端 1 個報價 commit（只動 quotes／adr 檔，無重疊）→ push 成功（b5273fdd）；autostash 裡其他排程的未提交寫檔逐檔還原回工作目錄，只有 `data/rate_limit_state.json` 保留目前這份（別的行程在鎖內剛寫入、比 stash 新）。**殘留**：`stash@{0} devq-213102-hb`（只有換行差異）與 `stash@{1} autostash`（內容已全部還原）兩筆 stash 未刪除——刪除屬停下條件，留給總司令／互動視窗一併處理（同 先.一四五-1）。
 
 ## 2026-11-10 21:01 DevQueue 20261110-210102（開發帽）
 
