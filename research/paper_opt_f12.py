@@ -343,14 +343,52 @@ def step(day: str, s: dict, bars: dict, ind: dict, cl: dict, rf: float) -> dict:
         a["cool"] -= 1
         if a["cool"] <= 0:
             a["in_pos"], a["peak"], stop_evt = True, a["v"], "reenter"
+    # 先.一五四-1a（2026-11-10）原版影子帳戶（不乘崩盤條件；同 2×／帳戶停損 10%）——組合 C25／C20／C15 成員用原版曲線
+    o = s.setdefault("account_orig", {"v": 1.0, "peak": 1.0, "cool": 0, "in_pos": True})
+    ro, evt_o = orig_account_step(o, r1, rf)
     cf = crash_flag(cl, day)
     if cf is None:
         print(f"[warn] {day} 加權指數不足 {CRASH_N} 日，崩盤條件視為不成立")
     a["crash_prev"] = bool(cf)
     return {"date": day, "ret": round(a["v"] / v0 - 1.0, 8), "ret_1x": round(r1, 8), "equity_1x": round(mtm, 2),
             "account": round(a["v"], 8), "exposure": expo if held else 0.0,
+            "ret_orig": round(ro, 8), "account_orig": round(o["v"], 8), "orig_account_event": evt_o,
             "in_pos_next": a["in_pos"], "crash_today": cf, "account_event": stop_evt,
             "n_holdings": len(e["pos"]), "cash_frac": round(e["cash"] / mtm, 4) if mtm else None, **log}
+
+
+def orig_account_step(o: dict, r1: float, rf: float) -> tuple[float, str | None]:
+    """原版帳戶一日（drawdown_fix.overlay() 不帶條件）：曝險固定 L，帳戶自高點回撤 10% 清倉、停 21 個交易日。"""
+    v0 = o["v"]
+    if o["in_pos"]:
+        o["v"] *= 1.0 + L * r1 - max(L - 1.0, 0.0) * MARGIN_RATE
+    else:
+        o["v"] *= 1.0 + rf
+    o["v"] = max(o["v"], 0.0)
+    evt = None
+    if o["in_pos"]:
+        o["peak"] = max(o["peak"], o["v"])
+        if o["v"] < o["peak"] * (1 - ACC_STOP):
+            o["in_pos"], o["cool"], evt = False, COOLDOWN, "account_stop"
+    else:
+        o["cool"] -= 1
+        if o["cool"] <= 0:
+            o["in_pos"], o["peak"], evt = True, o["v"], "reenter"
+    return (o["v"] / v0 - 1.0) if v0 else 0.0, evt
+
+
+def orig_backfill(s: dict, rf: float) -> None:
+    """state 還沒有原版影子帳戶時，用已寫過的帳本列（ret_1x）重播；舊列不改寫，結果存 state["orig_backfill"]。"""
+    if "account_orig" in s or not LEDGER.exists():
+        return
+    o = {"v": 1.0, "peak": 1.0, "cool": 0, "in_pos": True}
+    back = {}
+    for ln in LEDGER.read_text(encoding="utf-8").splitlines():
+        if ln.strip():
+            r = json.loads(ln)
+            ro, _ = orig_account_step(o, float(r["ret_1x"]), rf)
+            back[r["date"]] = round(ro, 8)
+    s["account_orig"], s["orig_backfill"] = o, back
 
 
 def new_state(ids: list[str]) -> dict:
@@ -384,6 +422,7 @@ def main() -> int:
     if a.start != START:
         s["start"] = a.start
     s["universe_set"] = set(ids)
+    orig_backfill(s, rf)
     done = 0
     for day in calendar:
         if day < s["start"] or (s["last_date"] and day <= s["last_date"]):

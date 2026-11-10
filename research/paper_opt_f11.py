@@ -121,6 +121,48 @@ def side_cost(dw_risky: float) -> float:
     return c
 
 
+
+def _acct(s: dict, target: float, r50: float, rf: float):
+    """帳戶一日（照 reaudit_optimized_batch1.simulate()）；s 需有 eq／peak／cool／w。回傳 (日報酬, 實際目標, 成本, 事件)。"""
+    t = target
+    if s["cool"] > 0:
+        s["cool"] -= 1
+        t = 0.0
+    w0, wc = s["w"]
+    cost = side_cost(t - w0)
+    w0, wc = t, 1.0 - t
+    rl = L * r50 - (L - 1.0) * rf - FEE_LEV / 252.0
+    g0, gc = w0 * (1 + rl), wc * (1 + rf)
+    tot = g0 + gc
+    r = (tot - 1.0) - cost
+    if s["eq"] <= 0:
+        r = 0.0
+    s["eq"] = max(s["eq"] * (1 + r), 0.0)
+    s["w"] = [g0 / tot, gc / tot] if tot > 0 else [0.0, 0.0]
+    in_pos = w0 > 0
+    s["peak"] = max(s["peak"], s["eq"]) if in_pos else s["eq"]
+    evt = None
+    if in_pos and s["eq"] < s["peak"] * (1 - STOP):
+        s["cool"], s["peak"], evt = COOLDOWN, s["eq"], "account_stop"
+    return r, t, cost, evt
+
+
+def _orig_init(s: dict, rf: float) -> dict:
+    """原版影子帳戶初始化：用已寫過的帳本列重播（目標＝當天融資旗標曝險 margin_flag_exposure、0050 日報酬 r_0050），
+    不乘崩盤係數。舊列不改寫（append-only），重播出的原版日報酬存在 state["orig_backfill"]，組合合成時讀。
+    〔自行裁量〕重播用目前的無風險日利率（同月份、差異可忽略）。"""
+    o = {"eq": 1.0, "peak": 1.0, "cool": 0, "w": [0.0, 0.0]}
+    back = {}
+    rows = []
+    if LEDGER.exists():
+        rows = [json.loads(x) for x in LEDGER.read_text(encoding="utf-8").splitlines() if x.strip()]
+    for r in rows:
+        ro, *_ = _acct(o, float(r["margin_flag_exposure"]), float(r["r_0050"]), rf)
+        back[r["date"]] = round(ro, 8)
+    s["orig_backfill"] = back
+    return o
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--probe", action="store_true")
@@ -144,6 +186,8 @@ def main() -> int:
                                  "last_date": None}
     if a.start != START:
         s["start"] = a.start
+    if "orig" not in s:
+        s["orig"] = _orig_init(s, rf)
     done = 0
     for i, day in enumerate(calendar):
         if day < s["start"] or (s["last_date"] and day <= s["last_date"]):
@@ -158,31 +202,14 @@ def main() -> int:
             s["e_cur"] = exposure_at(fl, me)
             s["e_from"] = me
         cf, _on = crash_factor(levels, prev)
-        t = s["e_cur"] * cf
-        if s["cool"] > 0:
-            s["cool"] -= 1
-            t = 0.0
-        w0, wc = s["w"]
-        cost = side_cost(t - w0)
-        w0, wc = t, 1.0 - t
         r50 = b50[day][4] or 0.0
-        rl = L * r50 - (L - 1.0) * rf - FEE_LEV / 252.0
-        g0, gc = w0 * (1 + rl), wc * (1 + rf)
-        tot = g0 + gc
-        r = (tot - 1.0) - cost
-        if s["eq"] <= 0:
-            r = 0.0
-        eq0 = s["eq"]
-        s["eq"] = max(eq0 * (1 + r), 0.0)
-        s["w"] = [g0 / tot, gc / tot] if tot > 0 else [0.0, 0.0]
-        in_pos = w0 > 0
-        s["peak"] = max(s["peak"], s["eq"]) if in_pos else s["eq"]
-        evt = None
-        if in_pos and s["eq"] < s["peak"] * (1 - STOP):
-            s["cool"], s["peak"], evt = COOLDOWN, s["eq"], "account_stop"
+        r, t, cost, evt = _acct(s, s["e_cur"] * cf, r50, rf)
+        # 先.一五四-1a（2026-11-10）原版影子帳戶（不乘崩盤係數；同一套 3×／帳戶停損 30%）——組合 C25 成員用原版曲線
+        r_o, _t_o, _c_o, evt_o = _acct(s["orig"], s["e_cur"], r50, rf)
         rec = {"date": day, "ret": round(r, 8), "account": round(s["eq"], 8), "target_0050": round(t, 4),
                "margin_flag_exposure": s["e_cur"], "margin_flag_from": s.get("e_from"), "crash_factor": cf,
-               "r_0050": round(r50, 6), "cost": round(cost, 6), "account_event": evt, "cooldown_left": s["cool"]}
+               "r_0050": round(r50, 6), "cost": round(cost, 6), "account_event": evt, "cooldown_left": s["cool"],
+               "ret_orig": round(r_o, 8), "account_orig": round(s["orig"]["eq"], 8), "orig_account_event": evt_o}
         with LEDGER.open("a", encoding="utf-8") as f:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
         s["last_date"] = day

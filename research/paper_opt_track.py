@@ -167,7 +167,7 @@ def build() -> dict:
                        "leverage": c["L"], "reproduced": ok,
                        "backtest": {"period": [str(cl.index[1].date()), str(cl.index[-1].date())], "cagr": round(gl, 4), "mdd": round(ml, 4),
                                     "points": weekly_points(cl) if ok else []},
-                       "paper": paper_block(start, today)})
+                       "paper": paper_block(start, today, cid)})  # 先.一五四-1a：research/paper_opt_combo.py 寫 ledger_<cid>.jsonl
     for fid, s in SINGLES.items():
         cv = read_curve(fid, s["col"])
         g, m = stats(cv.to_numpy(), cv.index)
