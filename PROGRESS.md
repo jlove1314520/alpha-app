@@ -1,3 +1,15 @@
+## 2026-11-10 14:01～14:3x DevQueue 20261110-140101（研究帽）先.一五五-3 籌碼族延長收尾
+
+等待總司令審閱：11 件（見 `research/AWAITING_REVIEW.md`「等待中」表，本輪沒有增減）。
+
+### 先.一五五-3 f_short_margin_ratio 延長收尾（維持 - [ ]）
+- 做了什麼：零請求。照上一輪接續指示跑 `run f_short_margin_ratio`，程式核對完 2024 底前（與 pkl 差 0、不一致 0/236 檔）就結束——查斷點檔 `research/data/reaudit_batch3_ext2025_cells/f_short_margin_ratio.json` 已是 48/48（12:46 寫入，上一輪後段跑完但條目記成 2/48）。接著 `summarize`、`candidates`、`research/paper_opt_track.py` 重產。
+- 結果：第 2 批挑出的同參數（3×）全期 +22.5%／−57.0%、2025 起 +18.3%／−52.2%，**越過天條一**；全期重挑 1.5× +17.1%／−32.5%。候選欄 38 支名單不變；紙上追蹤 8 支回測對上、last_error=None。籌碼五族延長全部完成。
+- [自行裁量]：本族原本不在候選欄，越過天條一只寫在 REAUDIT_OPTIMIZED.md 5a 節與佇列條目，不另加進候選欄。
+- 冒煙：`node scripts/smoke_test.mjs` 189 項全 [x]（全部通過）。
+- 下一輪：第 12／14／16 批 regime 訊號延長到 2025 起；fx_twd／option_pcr／TX 盤別延長；美股毛利率、融券強制回補事件。
+- 佇列：`- [ ]` 項數未變（上一輪 24 項 ≥12），本輪不補件。
+
 ## 2026-11-10 11:31～12:1x DevQueue 20261110-113101（研究帽）先.一五五-3 籌碼族延長續
 
 等待總司令審閱：11 件（見 `research/AWAITING_REVIEW.md`「等待中」表，本輪沒有增減）。
