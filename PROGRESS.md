@@ -8,6 +8,7 @@
 - 冒煙：`node scripts/smoke_test.mjs`「=== 冒煙測試結果：全部通過 ===」，189 項 PASS。
 - 下一輪：`run f_short_margin_ratio`（剩 46 格）→ summarize＋candidates＋paper_opt_track；第 12／14／16 批訊號延長；剩美股毛利率、融券強制回補事件。
 - 佇列：`- [ ]` 24 項（≥12），本輪不補件。
+- ⚠️ git 事故（已處理，照實記）：`git pull --rebase --autostash` 一直被擋，原因是 `data/auto_heartbeat.json` 已提交的內容含 CRLF、屬性卻是 `eol=lf`，工作目錄永遠顯示有修改（假修改）。處理方式：開臨時 worktree，把本機兩個 commit（AlphaConnectivity 心跳 949f04d5550＋本輪研究 commit）cherry-pick 到 origin/main 上推送（`3f6ffdb39f1`、`9fae17c93f4`）；主目錄 `git reset`（mixed，不動工作檔），遠端改過的 5,664 個檔還原到 HEAD，遠端刪掉的 14 個 quote_lite／news_by_code 舊檔移除（歷史裡還在），開工前就有修改的 14 個機器檔放回本機版本（從 autostash／備份還原）。`git stash list` 留著 3 筆（devq-113101-tmp、兩筆 autostash），沒有刪，等互動視窗確認後再清。根因（CRLF blob）建議另開條目修正。
 
 ## 2026-11-10 11:01～11:3x DevQueue 20261110-110101（維運帽）先.一三五-1nb-a company_info 每週自動更新 [預設放行]
 
