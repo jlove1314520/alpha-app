@@ -10,6 +10,10 @@
 - [自行裁量] AWAITING「等待中」標頭原寫 11 件、表格實際已有 12 列（先前漏更新），本次加 1 列後改為 13。
 - 冒煙（22:12）：**189 PASS／0 FAIL**，#78「首頁首次載入實測 336.8 KB」PASS。
 
+### 推送時 autostash 回貼失敗（照實記錄）
+- `git pull --rebase --autostash` 後 stash 回貼衝突，工作目錄少了其他排程的未提交寫入（`research/data/mops_events_archive.jsonl` +576 行、`dev_queue_cycle.log`、連通性 log 等）以及**另一個行程正在改、尚未提交的 `scripts/cc_push.py`（+59 行）**。
+- 處理：只把當下工作目錄沒被改動的 12 個路徑從 `stash@{0}` 原樣取回（不提交）；`data/auto_heartbeat.json`／`data/rate_limit_state.json` 工作目錄已有較新版本，保留。`stash@{0}` 未刪除（不可逆），留待既有 先.一四五-1 殘留 stash 清理流程。本輪兩個 commit 未包含任何他人的未提交變更。
+
 ### 收工原因
 權威清單下一項 先.一五四-1a 是 [研究] 類，照九節一輪一頂帽子，留給下一輪研究帽。
 
