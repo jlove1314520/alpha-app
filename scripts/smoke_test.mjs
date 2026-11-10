@@ -1372,20 +1372,36 @@ async function runSmokeTest(baseUrl, headless = true) {
       if (/20日/.test(r.txt)) sparkGateErrors.push(`${r.code} 還在畫 20 日走勢`);
       if (!r.line && !/無日內資料/.test(r.txt)) sparkGateErrors.push(`${r.code} 沒有日內線也沒標「無日內資料」`);
     }
-    const inj = await page.evaluate(async () => {
+    // 先.一五五-3e：11/10 17:07 起間歇 FAIL（讀到「無日內資料」）。hydrateHome 有 HYDRATE_HOME_SEQ 序號守門，
+    // 測試叫的那次若被 SW 背景更新／定時刷新另起的重畫作廢，await 回來時 DOM 還是舊列。比照 #182：注入後觸發重畫，
+    // 再等那一列真的出現分時線＋平盤線＋「今日」（最多 10 秒）才量；預期內容一項不放寬，等不到照樣 FAIL，並附序號前後值。
+    const inj0 = await page.evaluate(() => {
       const row = [...document.querySelectorAll("#wl-list .swipe-row")].find((x) => x.querySelector("[data-flash-code]") && !isUS(x.querySelector("[data-flash-code]").dataset.flashCode));
       if (!row) return { skip: true };
       const code = row.querySelector("[data-flash-code]").dataset.flashCode;
       const z = _zonedParts(new Date(), "Asia/Taipei"), today = `${z.y}-${String(z.m).padStart(2, "0")}-${String(z.d).padStart(2, "0")}`;
       LIVE_KB[code] = { at: Date.now(), closes: [100, 101, 99.5, 102, 101.5], lastT: null, tradeDate: today, mode: "smoke" };
-      const prevCfg = LIVE.configured; LIVE.configured = true;
-      try { await hydrateHome(); } finally { LIVE.configured = prevCfg; }
-      const r2 = [...document.querySelectorAll("#wl-list .swipe-row")].find((x) => x.querySelector(`[data-flash-code="${code}"]`));
-      const out = { code, line: !!(r2 && r2.querySelector("svg.spark polyline")), base: !!(r2 && r2.querySelector("svg.spark line[stroke-dasharray]")), tag: r2 ? r2.querySelector(".sparkwrap em")?.textContent : "" };
-      delete LIVE_KB[code]; await hydrateHome();
-      return out;
+      window.__smoke36PrevCfg = LIVE.configured; LIVE.configured = true;
+      const seq0 = typeof HYDRATE_HOME_SEQ === "number" ? HYDRATE_HOME_SEQ : null;
+      Promise.resolve(hydrateHome()).catch((e) => console.warn("[smoke#36] hydrateHome", e));
+      return { code, seq0 };
     });
-    if (!inj.skip && (!inj.line || !inj.base || inj.tag !== "今日")) sparkGateErrors.push(`注入日內 1 分K 後 ${inj.code}：分時線 ${inj.line}、平盤線 ${inj.base}、標籤「${inj.tag}」`);
+    let inj = { skip: true };
+    if (!inj0.skip) {
+      await page.waitForFunction((code) => {
+        const r2 = [...document.querySelectorAll("#wl-list .swipe-row")].find((x) => x.querySelector(`[data-flash-code="${code}"]`));
+        return !!(r2 && r2.querySelector("svg.spark polyline") && r2.querySelector("svg.spark line[stroke-dasharray]") && r2.querySelector(".sparkwrap em")?.textContent === "今日");
+      }, inj0.code, { timeout: 10000 }).catch(() => null);
+      inj = await page.evaluate(async (code) => {
+        const r2 = [...document.querySelectorAll("#wl-list .swipe-row")].find((x) => x.querySelector(`[data-flash-code="${code}"]`));
+        const out = { code, line: !!(r2 && r2.querySelector("svg.spark polyline")), base: !!(r2 && r2.querySelector("svg.spark line[stroke-dasharray]")), tag: r2 ? r2.querySelector(".sparkwrap em")?.textContent : "",
+          seq1: typeof HYDRATE_HOME_SEQ === "number" ? HYDRATE_HOME_SEQ : null };
+        LIVE.configured = window.__smoke36PrevCfg; delete window.__smoke36PrevCfg;
+        delete LIVE_KB[code]; await hydrateHome();
+        return out;
+      }, inj0.code);
+    }
+    if (!inj.skip && (!inj.line || !inj.base || inj.tag !== "今日")) sparkGateErrors.push(`注入日內 1 分K 後 ${inj.code}：分時線 ${inj.line}、平盤線 ${inj.base}、標籤「${inj.tag}」（等 10 秒仍未出現；HYDRATE_HOME_SEQ ${inj0.seq0}→${inj.seq1}）`);
   } catch (e) {
     sparkGateErrors.push(`測試本身出錯：${e.message || e}`);
   }
