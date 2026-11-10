@@ -1,3 +1,18 @@
+## 2026-11-10 22:01 DevQueue 20261110-220101（開發帽）
+
+等待總司令審閱：13 件（新增 1 件：先.一五五-3f 首頁瘦身提案，剛送出、24 小時無裁示照甲預設放行；其餘 12 件見 `research/AWAITING_REVIEW.md`）。交辦佇列 `- [ ]` 剩 29 項，未補件（兩門檻皆達標）。
+
+### 先.一五五-3f 首頁首次載入量測＋瘦身提案（16242d0a913）
+- 做了什麼：`node scripts/measure_first_load.mjs`（393×852、無快取無 SW）量首頁首次載入 **336.8KB／58 請求**，列前 10 大並與 11/06 1lv 修完時（334.5KB）逐檔比 gzip 大小。
+- 量測表（KB gzip）：app.js 139.6｜index.html 40.0｜Sora 字型 25.8｜listed_universe 24.3｜app.css 17.9｜research_radar 14.3（+0.6）｜ir_events 12.1（+0.5）｜ex_dividend_events 10.0（+0.2）｜quotes_tw 6.7｜sw.js 5.2。
+- 判斷：**不是 bug，是正常累積**（11/06 起 +2.3KB）；1lv 的 intraday 精簡檔沒有又長大；app.js 只 +0.5KB（1kh-o 拆分後沒回彈）。但首頁整份抓三個只用一小部分的檔：research_radar 只用 `dots`（2.7KB）、法說只用近期、除權息只用未來 7 天。
+- 提案 `docs/PROPOSAL_HOME_LITE_EVENTS.md` 送 AWAITING：甲（建議）新增零外部請求 `data/home_lite.json`（本機試算 gzip 約 7.3KB）→ 首頁約 308KB；乙只拆 dots（約 325KB）；丙只加 340KB 預警。350KB 門檻未動。照目前速度約 3～4 週會頂到門檻。
+- [自行裁量] AWAITING「等待中」標頭原寫 11 件、表格實際已有 12 列（先前漏更新），本次加 1 列後改為 13。
+- 冒煙（22:12）：**189 PASS／0 FAIL**，#78「首頁首次載入實測 336.8 KB」PASS。
+
+### 收工原因
+權威清單下一項 先.一五四-1a 是 [研究] 類，照九節一輪一頂帽子，留給下一輪研究帽。
+
 ## 2026-11-10 21:31 DevQueue 20261110-213102（研究帽）
 
 等待總司令審閱：12 件（見 `research/AWAITING_REVIEW.md`「等待中」表；本輪 +1：先.一五四-1e F16 帳面價值快取更新提案，建議甲）。
