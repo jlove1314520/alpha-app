@@ -1226,3 +1226,4 @@
 {"ts": "2026-11-07T09:31:00", "cycle": "20261107-090102", "item": "先.一五五-3", "note": "反轉兩族延長 48/48；財報類延長模組上線，f_eps_growth 48/48、f_gross_profitability 45/48"}
 {"ts": "2026-11-07T11:10:00", "cycle": "20261107-103102", "item": "先.一五五-3", "note": "財報延長：f_gross_profitability/f_eps_surprise/f_accruals 48/48，f_gross_margin_stability 5/48 斷點"}
 {"ts": "2026-11-10T09:16:40", "cycle": "20261110-090101", "item": "先.一五五-3", "batch": 18, "note": "高股息ETF換股事件 DEL 隔日開盤→eff+5 停損10% 1× +13.9%/-9.3%；候選 B18E-"}
+{"ts": "2026-11-10T21:43:45+08:00", "cycle_id": "20261110-213102", "item": "先.一五四-1a", "event": "F15、F16 紙上產生器上線；1d 兩支每日抓取上線（yfinance 美股、TWSE TWTC7U）", "files": ["research/paper_opt_f15.py", "research/paper_opt_f16.py", "research/fetch_paper_opt_us_prices.py", "research/fetch_paper_opt_odd_lot.py", "scripts/run_paper_opt.py"]}

@@ -6,7 +6,9 @@ paper_opt/ 都被 .gitignore 排除（只在本機），雲端跑會沒有輸入
 改由 scripts/run_paper_9.ps1 跑完模擬 I 之後呼叫本支。
 
 做法：
-1. 依序跑 research/paper_opt_{pq,f11,f12,f14,f17}.py（各自獨立子行程、各 15 分鐘逾時；一支失敗只記警告，不影響其他支）。
+0. 先跑 research/fetch_paper_opt_us_prices.py（先.一五四-1d 甲①，美股成員價格，yfinance 每日 ≤1 次）與
+   research/fetch_paper_opt_odd_lot.py（甲②，TWSE TWTC7U 每日 ≤1 次）；只有這兩步會送外部請求。
+1. 依序跑 research/paper_opt_{pq,f11,f12,f14,f17,f15,f16}.py（各自獨立子行程、各 15 分鐘逾時；一支失敗只記警告，不影響其他支）。
    各產生器只處理還沒寫過的交易日、11/09 前不寫帳本、零外部請求（見各檔檔頭）。
 2. 跑 research/paper_opt_track.py 重算 data/paper_opt_track.json（零外部請求）。
 3. 有變動才用 scripts/local_git_commit.commit_paths() 只提交 data/paper_opt_track.json（十節：在 MACHINE_WRITTEN ^data/ 樣式內）。
@@ -29,7 +31,9 @@ for _s in (sys.stdout, sys.stderr):
     except Exception:  # noqa: BLE001
         pass
 
-GENERATORS = ["pq", "f11", "f12", "f14", "f17"]
+GENERATORS = ["pq", "f11", "f12", "f14", "f17", "f15", "f16"]
+# 先.一五四-1d 甲①：美股成員先抓價（每日最多 1 次 yfinance 批次，同台北日期已抓就零請求）
+PRE_FETCH = ["research/fetch_paper_opt_us_prices.py", "research/fetch_paper_opt_odd_lot.py"]  # 甲②：TWTC7U 每日最多 1 次
 SUMMARY = "data/paper_opt_track.json"
 TIMEOUT_SEC = 900
 
@@ -54,6 +58,8 @@ def _run(rel: str) -> bool:
 
 def main() -> int:
     no_commit = "--no-commit" in sys.argv[1:]
+    for rel in PRE_FETCH:
+        _run(rel)
     ok = {g: _run(f"research/paper_opt_{g}.py") for g in GENERATORS}
     track_ok = _run("research/paper_opt_track.py")
     print(f"產生器結果：{ok}；總表：{'OK' if track_ok else '失敗'}")
