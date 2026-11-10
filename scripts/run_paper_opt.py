@@ -10,6 +10,7 @@ paper_opt/ 都被 .gitignore 排除（只在本機），雲端跑會沒有輸入
    research/fetch_paper_opt_odd_lot.py（甲②，TWSE TWTC7U 每日 ≤1 次）；只有這兩步會送外部請求。
 1. 依序跑 research/paper_opt_{pq,f11,f12,f14,f17,f15,f16,f18}.py（各自獨立子行程、各 15 分鐘逾時；一支失敗只記警告，不影響其他支）。
    各產生器只處理還沒寫過的交易日、11/09 前不寫帳本、零外部請求（見各檔檔頭）。
+1a. 跑 research/paper_opt_regime.py（F3／F5／F2／F3F5，收件匣 042，零外部請求，只讀 f12 日線快取所以排在 f12 之後）。
 1b. 跑 research/paper_opt_arena.py（台股擂台跟單 A～D，零外部請求）、research/paper_opt_ntsf.py（國安基金護盤 NTSF-A／B，零外部請求）與 research/paper_opt_combo.py（組合 C25／C20／C15 合成，零外部請求）。
 2. 跑 research/paper_opt_track.py 重算 data/paper_opt_track.json（零外部請求）。
 3. 有變動才用 scripts/local_git_commit.commit_paths() 只提交 data/paper_opt_track.json（十節：在 MACHINE_WRITTEN ^data/ 樣式內）。
@@ -62,6 +63,7 @@ def main() -> int:
     for rel in PRE_FETCH:
         _run(rel)
     ok = {g: _run(f"research/paper_opt_{g}.py") for g in GENERATORS}
+    ok["regime"] = _run("research/paper_opt_regime.py")  # 先.一五八-1（收件匣 042）：F3／F5／F2／F3F5；只讀 f12_bars 快取，必須排在 f11／f12 之後
     ok["arena"] = _run("research/paper_opt_arena.py")  # 先.一五六-1b：台股擂台跟單 A～D 四版（帳本只留本機；總表／App 顯示見 先.一五六-1c）
     ok["ntsf"] = _run("research/paper_opt_ntsf.py")  # 先.一五六-2 ④：國安基金第 10 次護盤 NTSF-A／B（零外部請求，帳本只留本機）
     ok["combo"] = _run("research/paper_opt_combo.py")  # 先.一五四-1a ⑦：組合 C25／C20／C15 用成員原版紙上報酬合成（要在各成員之後）

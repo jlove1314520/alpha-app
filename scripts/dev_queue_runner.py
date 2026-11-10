@@ -817,7 +817,81 @@ def _reopen_expired_time_gates(now: datetime | None = None) -> int:
         return 0
 
 
+# 先.一五八-2（2026-11-11，已定案（Cowork 收件匣 042 B））維運比重上限。
+# 背景：10/11 起非例行 commit 約 76% 是維運／修排程／冒煙／PROGRESS，研究只有約 20%。
+# 規則：① 標 [自走補入] 的維運／冒煙類條目，除非是 P0（資料錯、App 壞、真錢／排程停擺），只記在 PENDING_QUEUE、不派；
+#       ② 連續 2 輪派過維運，第 3 輪必須派 [研究] 或紙上相關條目（佇列裡真的沒有研究／紙上可做時才放行維運，避免空轉）。
+# 分類只看條目標題（`**編號** 標題` 到第一個「〔」或「（」為止）＋前 300 字裡的標籤，不看長篇說明，避免說明文字誤判。
+# 要停用：MAINT_CAP_ON = False。十二節：分類／過濾自身失敗一律回傳原本 find_next 的結果（fail open）。
+MAINT_CAP_ON = True
+MAINT_STREAK_MAX = 2
+_HAT_TITLE = re.compile(r"\*\*[^*]+\*\*([^〔（(]*)")
+_P0_RE = re.compile(r"P0|資料錯|數字錯|App ?壞|畫面壞|真錢|停擺|沒觸發|沒有觸發")
+_MAINT_RE = re.compile(r"\[維運\]|冒煙|自測|selftest|PROGRESS|文書|文件|核對|排程|心跳|守門|看門狗|log")
+_PAPER_RE = re.compile(r"紙上|paper_opt|產生器|策略")
+
+
+def item_hat(text: str) -> str:
+    """回傳「研究」「維運」「開發」。研究＝[研究] 類或標題含紙上／產生器／策略；維運＝[維運] 標籤或標題含冒煙／自測／PROGRESS 等。"""
+    if item_class(text) == "研究":
+        return "研究"
+    m = _HAT_TITLE.search(text)
+    title = m.group(0) if m else text[:120]
+    if _PAPER_RE.search(title):
+        return "研究"
+    if "[維運]" in text[:300] or _MAINT_RE.search(title):
+        return "維運"
+    return "開發"
+
+
+def is_p0(text: str) -> bool:
+    m = _HAT_TITLE.search(text)
+    return bool(_P0_RE.search(m.group(0) if m else text[:120]))
+
+
+def _autofill_maint_hold(text: str) -> bool:
+    """[自走補入] 的維運類、非 P0 → 只記不派。"""
+    return "[自走補入]" in text[:400] and item_hat(text) == "維運" and not is_p0(text)
+
+
+def _maint_cap_filter(nxt: tuple[int, str] | None) -> tuple[int, str] | None:
+    if not MAINT_CAP_ON or nxt is None:
+        return nxt
+    try:
+        hats = _load_state().get("_recent_hats", [])
+        need_research = len(hats) >= MAINT_STREAK_MAX and all(h == "維運" for h in hats[-MAINT_STREAK_MAX:])
+        skip: set = set()
+        fallback = None
+        cand = nxt
+        for _ in range(60):
+            if cand is None:
+                break
+            if _autofill_maint_hold(cand[1]):
+                skip.add(item_key(cand[1]))
+            elif need_research and item_hat(cand[1]) != "研究":
+                fallback = fallback or cand
+                skip.add(item_key(cand[1]))
+            else:
+                if cand is not nxt:
+                    _safe_print(f"維運上限（收件匣 042）：跳過 {len(skip)} 項，改派 {item_key(cand[1])}（{item_hat(cand[1])}）")
+                return cand
+            cand = _find_next_base(frozenset(skip))
+        if fallback is not None:
+            _safe_print(f"維運上限（收件匣 042）：已連續 {MAINT_STREAK_MAX} 輪維運，但佇列沒有研究／紙上可派，放行 {item_key(fallback[1])}")
+        else:
+            _safe_print(f"維運上限（收件匣 042）：剩下的都是 [自走補入] 非 P0 維運條目（{len(skip)} 項），只記不派")
+        return fallback
+    except Exception as e:  # noqa: BLE001 — 十二節
+        _safe_print(f"WARN_DETECTOR_CRASHED: maint_cap_filter failed ({type(e).__name__})")
+        return nxt
+
+
 def find_next() -> tuple[int, str] | None:
+    """先.一五八-2：外層再套維運比重上限（_maint_cap_filter）。"""
+    return _maint_cap_filter(_find_next_rotated())
+
+
+def _find_next_rotated() -> tuple[int, str] | None:
     """find_next 的輪替外殼：上一輪派的是分批項，這一輪若又輪到分批項就改拿下一個
     非分批的可執行條目；沒有其他可執行條目才回頭做分批工作。
     輪替邏輯自身失敗只降級（CLAUDE.md 十二節）：回傳未輪替的原結果。"""
@@ -923,6 +997,10 @@ def _note_dispatch(text: str) -> None:
     recent.append(item_class(text))
     st["_recent_classes"] = recent[-6:]
     st["_last_was_batch"] = is_batch_item(text)
+    try:  # 先.一五八-2：記下這輪是研究／維運／開發，供維運比重上限判斷（自身失敗只略過）
+        st["_recent_hats"] = (st.get("_recent_hats", []) + [item_hat(text)])[-6:]
+    except Exception as e:  # noqa: BLE001
+        _safe_print(f"WARN_DETECTOR_CRASHED: record hat failed ({type(e).__name__})")
     _save_state(st)
 
 
@@ -1276,6 +1354,8 @@ def _idle_fallback_prompt() -> bool:
             PROMPT_OUT.write_text(f"""# DevQueue 本輪：候選補件（先.一三五-1，Cowork 收件匣 024；已連續 {idle} 輪 QUEUE_EMPTY／GATED）
 
 佇列沒有可執行項目，不准再空轉。照 先.一三二-1 的格式補件：
+- **只產研究類（收件匣 042）**：策略改良、紙上優化軌每日產生器（照 research/paper_opt_f11.py／paper_opt_regime.py 的寫法）；
+  **不產自測／文件／維運類條目**。
 - **只限台股個股層級**（不要 ETF、不要高股息），**優先前向版**（與模擬 J／K／L 同框架、2027-01-04 起跑，參數 ≤5）；
 - 每條寫成 PENDING_QUEUE `- [ ]` 新條目（標「DevQueue 可執行」、附心跳位置與來源：墓園變形方向／LEADS／資料缺口等），至少 3 條；
 - 需要 Cowork 審的草稿送 AWAITING（24 小時後適用預設放行）；
@@ -1408,7 +1488,7 @@ def build_prompt() -> int:
         multi = ("**趕工模式（先.六十四）：這一次只做上面這一項。** 做完、冒煙全綠、commit＋push、把那一行改成 `- [x]`、"
                  "照條目指示 append PROGRESS_HEARTBEAT 之後就**結束**——趕工迴圈會立刻派下一項給新的工作階段，"
                  "不要自己接著做下一項（否則迴圈無法逐項結算）。")
-        progress_rule = ("5. 趕工模式：`PROGRESS.md` 由趕工迴圈在收工時統一寫一段（完成清單／BLOCKED／剩餘項數），"
+        progress_rule = ("5. 趕工模式：`PROGRESS.md` 由趕工迴圈在收工時統一寫一段（最多 3 行：完成清單／BLOCKED／剩餘項數，收件匣 042），"
                          "這一項**不用**寫 PROGRESS.md；條目要求的 `research/PROGRESS_HEARTBEAT.jsonl` 心跳照寫。")
         block_rule = "它會把這一項標成阻塞並寫進 PENDING_QUEUE，然後**結束這一次**——趕工迴圈會自動派下一項。"
     else:
@@ -1416,8 +1496,8 @@ def build_prompt() -> int:
                  "（額度節流／所有項目都BLOCKED／碰到下面的停下條件才結束這一輪），不是做完一項\n"
                  "就結束。**一次做一項，每一項各自commit**，不要把好幾項混在同一個 commit 裡。")
         progress_rule = ("5. 更新 `PROGRESS.md`（最新的寫最上面），然後 commit + push——**收工時寫一份，\n"
-                         "   不要每做完一項就想回報**，一輪做到不能再做為止再一次寫齊每一項的段落\n"
-                         "   （做了什麼／證據／`[自行裁量]`的地方／BLOCKED的原因與解除條件）。")
+                         "   不要每做完一項就想回報**。**收工紀錄最多 3 行**（收件匣 042）：①做了哪幾項＋commit ②關鍵數字／證據\n"
+                         "   ③BLOCKED 與 `[自行裁量]`；細節寫在 PENDING_QUEUE 條目裡，不要在 PROGRESS 重複。")
         block_rule = ("它會把那一項標成阻塞並寫進 PENDING_QUEUE，然後**換下一項繼續做，不是結束整輪**\n"
                       "（除非所有項目都變成BLOCKED或已無`- [ ]`項目可做）。")
 
@@ -1485,6 +1565,9 @@ def build_prompt() -> int:
    新補的預設標「（DevQueue 可執行）」，真的需要總司令拍板、或要改核心研究檔案的才標互動視窗。
    **不得**用換行統一、自查術語、格式整理這類小事湊數；新的 alpha 試驗**只准**從⑤兩個來源補、且一律事前登記；
    來源都沒有可做的就不補，在收工紀錄照實寫「來源已用盡」。
+   ⚠️ **收件匣 042（2026-11-11 已定案）覆蓋上面的來源順序**：補件**只補研究類**（⑤研究候選、策略改良、紙上優化軌每日產生器）；
+   ①～④ 裡的維運／冒煙／自測／文書類，**除非是 P0（資料錯、App 壞、真錢／排程停擺）**，寫進 PENDING_QUEUE 時標 `[自走補入]` 就好——
+   派工端（`_maint_cap_filter`）不會派這類條目；連續 2 輪維運後第 3 輪一定派研究／紙上。門檻數字照舊，補不到就照實寫。
 {usage_note}
 ## 一定要遵守
 1. 先讀 `C:\\alpha\\alpha-app\\CLAUDE.md`（尤其「零之一、停下條件改為白名單」

@@ -2,7 +2,7 @@
 """先.一五四-1d 甲①（已定案（Cowork 11/10）：照甲執行）：紙上優化軌美股成員（F15／F16）每日價格抓取。
 
 外部請求（照 C:\\alpha\\CLAUDE.md「美股篩選資料源」一節補登）：
-  - yfinance 每日最多 1 次批次 `download(248 檔＋SPY, period=5d, auto_adjust=True)`；
+  - yfinance 每日最多 1 次批次 `download(248 檔＋SPY＋VTI＋IEF, period=5d, auto_adjust=True)`（VTI／IEF 2026-11-11 先.一五八-1 加，請求次數不變）；
     第一次執行（本機還沒有任何報酬）改 period=3mo 一次，補 F15 需要的 20 日波動暖身。
   - 同一個台北日期已抓過就零請求；失敗保留上一版、不重試。yfinance 非 Yahoo 官方、未公布上限。
 宇宙：research/data/us_stratified_universe_sample.csv usable==True（248 檔，同 reaudit_optimized_batch2_us_lowvol.py）。
@@ -37,7 +37,8 @@ def tickers() -> list[str]:
     import pandas as pd
     u = pd.read_csv(UNIVERSE_CSV)
     ids = u[u["usable"] == True]["stock_id"].astype(str).tolist()  # noqa: E712
-    return sorted(set(t.replace(".", "-") for t in ids)) + ["SPY"]
+    # 先.一五八-1（收件匣 042）：加 VTI／IEF 給 F2 危機閘門用；同一次批次下載，請求次數不變
+    return sorted(set(t.replace(".", "-") for t in ids)) + ["SPY", "VTI", "IEF"]
 
 
 def load() -> dict:

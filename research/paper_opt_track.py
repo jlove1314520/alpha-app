@@ -54,6 +54,81 @@ SINGLES = {
     "F18": {"name": "F18 零股委託簿失衡度（只調槓桿版）", "col": "best", "cagr": 0.244, "mdd": -0.230,
             "rule": "台股個股 2.85×、帳戶停損 10%，不加條件", "market": "TW"},
 }
+# 先.一五八-1（2026-11-11，已定案（Cowork 收件匣 042））：REAUDIT_OPTIMIZED.md §3「①原最優組不重調」2025 起段最強的幾支補上紙上。
+# 回測曲線：F3／F5／F2 讀 research/data/paper_opt/bt_regime.json（paper_opt_regime_seed.py 用 batch1 simulate() 延長到本機快取終點，
+# 2025 起段與 §3 表逐位核對，check.ok）；F14 讀 drawdown_fix/curve_F14.csv 的 orig（紙上產生器 paper_opt_f14.py 跑的就是原版 1×）。
+# 起跑 2026-11-11、不倒填；產生器 research/paper_opt_regime.py（F3／F5／F2／F3F5 共用）。
+EXT_START = "2026-11-11"
+EXT = {
+    "F3": {"name": "F3 0050 趨勢槓桿（50 日均線）", "market": "TW",
+           "rule": "0050 站上 50 日均線→曝險 1，跌破→0.5；3×、帳戶停損 10%（冷卻 21 天）；參數 2024 底前挑、未重調"},
+    "F5": {"name": "F5 已實現波動度 regime（0050）", "market": "TW",
+           "rule": "0050 近 60 日波動高於自己歷史中位數→曝險 0.25，否則 1；1×、不停損；參數 2024 底前挑、未重調"},
+    "F2": {"name": "F2 危機閘門 Bb-90（月均線）", "market": "TW+US",
+           "rule": "上月底 0050 高於近 6 個月底均值→股票 85%（0050／VTI 各半）、其餘 IEF，否則全 IEF；1×、帳戶停損 10%；美股腿照實換匯，晚一天入帳"},
+}
+F14_REF = {"name": "F14 ML 價量選股（HGB，原版 1×）", "cagr": 0.109, "mdd": -0.131, "market": "TW",
+           "rule": "台股抽樣宇宙 HGB 模型分數前 30 檔、每 63 個交易日換股、個股停損 15%、1×；模型凍結在 2025 版"}
+F3F5 = {"name": "F3＋F5 各半", "rule": "起跑日 F3、F5 各投一半，之後不再平衡（兩個帳戶權益平均）"}
+
+
+def _ext_tracks(today: str, errs: list) -> list:
+    out = []
+    try:
+        bt = json.loads((LEDGER_DIR / "bt_regime.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError) as e:
+        errs.append(f"bt_regime.json 讀不到（先跑 research/paper_opt_regime_seed.py）：{type(e).__name__}")
+        bt = None
+    curves = {}
+    if bt:
+        idx = pd.to_datetime(bt["dates"])
+        for fid in EXT:
+            curves[fid] = pd.Series(np.cumprod(1 + np.array(bt["curves"][fid])), idx)
+    for fid, m in EXT.items():
+        ck = (bt or {}).get("check", {}).get(fid, {})
+        ok = bool(ck.get("ok"))
+        cv = curves.get(fid)
+        g = mdd = None
+        if cv is not None:
+            g, mdd = stats(cv.to_numpy(), cv.index)
+        note = (f"2025 起段（同一組參數、未重調）年化 {ck.get('cagr_2025', 0):+.1%}、最大跌幅 {ck.get('mdd_2025', 0):.1%}；"
+                "回測期間 2003-07 起，參數用 2024 底前資料挑。") if ck else None
+        out.append({"id": fid, "kind": "single", "name": m["name"], "rule": m["rule"], "market": m["market"], "reproduced": ok,
+                    "note": note,
+                    "backtest": {"period": [str(cv.index[0].date()), str(cv.index[-1].date())] if cv is not None else None,
+                                 "cagr": None if g is None else round(g, 4), "mdd": None if mdd is None else round(mdd, 4),
+                                 "points": weekly_points(cv) if (cv is not None and ok) else []},
+                    "paper": paper_block(EXT_START, today, fid, "paper_opt_regime.py")})
+    # F3＋F5 各半：回測只畫 2025 起段（起始各半、不再平衡，跟紙上同一個做法）
+    c = None
+    if "F3" in curves and "F5" in curves:
+        a3, a5 = curves["F3"][curves["F3"].index >= "2025-01-01"], curves["F5"][curves["F5"].index >= "2025-01-01"]
+        c = 0.5 * a3 / a3.iloc[0] + 0.5 * a5 / a5.iloc[0]
+    ok = c is not None and all(bt["check"][k]["ok"] for k in ("F3", "F5"))
+    g, mdd = stats(c.to_numpy(), c.index) if c is not None else (None, None)
+    out.append({"id": "F3F5", "kind": "combo", "name": F3F5["name"], "members": ["F3", "F5"], "weight": "起始各半、不再平衡",
+                "rule": F3F5["rule"], "reproduced": ok, "note": "回測只畫 2025 起段（同一組參數、未重調）。",
+                "backtest": {"period": [str(c.index[0].date()), str(c.index[-1].date())] if c is not None else None,
+                             "cagr": None if g is None else round(g, 4), "mdd": None if mdd is None else round(mdd, 4),
+                             "points": weekly_points(c) if ok else []},
+                "paper": paper_block(EXT_START, today, "F3F5", "paper_opt_regime.py")})
+    # F14：產生器 paper_opt_f14.py 已在跑（C15 成員），這裡補成單支卡
+    try:
+        cv = read_curve("F14", "orig")
+        g, mdd = stats(cv.to_numpy(), cv.index)
+        ok = abs(g - F14_REF["cagr"]) < TOL and abs(mdd - F14_REF["mdd"]) < TOL
+        if not ok:
+            errs.append(f"F14 重算對不上 REAUDIT：{g:+.2%}/{mdd:.2%}")
+        out.append({"id": "F14", "kind": "single", "name": F14_REF["name"], "rule": F14_REF["rule"], "market": "TW", "reproduced": ok,
+                    "note": "2025 起段（原最優組、組合停損 20%）年化 +22.2%、最大跌幅 -17.0%（REAUDIT §3b）；紙上跑的是不設組合停損的原版 1×。",
+                    "backtest": {"period": [str(cv.index[0].date()), str(cv.index[-1].date())], "cagr": round(g, 4), "mdd": round(mdd, 4),
+                                 "points": weekly_points(cv) if ok else []},
+                    "paper": paper_block(next_tw_trading_day(CREATED), today, "F14")})
+    except Exception as e:  # noqa: BLE001 — 十二節：單支失敗只記錯誤
+        errs.append(f"F14 卡片失敗：{type(e).__name__}: {e}")
+    return out
+
+
 COMBOS = {
     "C25": {"name": "旗艦組合 C25（目標年化 25%）", "members": ["F11", "F12", "F15", "F16"], "L": 1.1,
             "cagr_1x": 0.237, "mdd_1x": -0.156, "mdd_L": -0.171},
@@ -117,10 +192,10 @@ def next_tw_trading_day(after: str) -> str:
 LEDGER_DIR = HERE / "data" / "paper_opt"
 
 
-def paper_block(start: str, today: str, member: str | None = None) -> dict:
+def paper_block(start: str, today: str, member: str | None = None, gen_file: str | None = None) -> dict:
     """有每日產生器的成員（research/data/paper_opt/ledger_<id>.jsonl）就讀它畫紙上曲線（先.一五四-1a）。"""
     lp = LEDGER_DIR / f"ledger_{member}.jsonl" if member else None
-    gen = HERE / f"paper_opt_{member.lower()}.py" if member else None
+    gen = HERE / (gen_file or f"paper_opt_{member.lower()}.py") if member else None  # 先.一五八-1：多支共用一個產生器時指定檔名
     if lp is not None and (lp.exists() or gen.exists()):
         rows = []
         for ln in (lp.read_text(encoding="utf-8").splitlines() if lp.exists() else []):
@@ -143,7 +218,7 @@ def paper_block(start: str, today: str, member: str | None = None) -> dict:
         status = "NOT_STARTED" if today < start else "GENERATOR_READY"
         msg = "產生器已上線，等起跑日後第一個交易日寫入" if status == "GENERATOR_READY" else "尚未起跑（起跑日前不記帳）；每日產生器已上線"
         return {"start": start, "status": status, "status_zh": msg, "points": [], "cagr_to_date": None, "mdd_to_date": None,
-                "generator": f"research/paper_opt_{member.lower()}.py"}
+                "generator": f"research/{gen.name}"}
     status = "NOT_STARTED" if today < start else "NO_SIGNAL_GENERATOR"
     msg = ("尚未起跑（起跑日前不記帳）" if status == "NOT_STARTED"
            else "每日訊號產生器尚未建好，紙上曲線從產生器上線那天起記，不倒填、不拿回測頂替")
@@ -194,6 +269,10 @@ def build() -> dict:
                    "backtest": {"period": ["2007-05-15", "2024-12-31"], "cagr": None if g is None else round(g, 4),
                                 "mdd": None if m is None else round(m, 4), "points": weekly_points(pq) if ok else []},
                    "paper": paper_block(start, today, "PQ")})
+    try:
+        tracks.extend(_ext_tracks(today, errs))  # 先.一五八-1（收件匣 042）
+    except Exception as e:  # noqa: BLE001 — 十二節：新增段失敗不拖垮舊卡片
+        errs.append(f"收件匣 042 新成員失敗：{type(e).__name__}: {e}")
     return {"generated_at": datetime.now(TW).isoformat(timespec="seconds"), "track": "紙上優化軌（先.一五四-1）",
             "start": start, "note": NOTE, "tracks": tracks, "candidates": load_candidates(errs),
             "last_error": "；".join(errs) or None, "external_requests": 0}
