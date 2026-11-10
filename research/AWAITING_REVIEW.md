@@ -20,7 +20,7 @@
 - N=0時「等待中」表格留表頭但清空列，不得整份刪除本檔案。
 - 2026-10-29（收件匣 031）：凡「請總司令執行一次」（要總司令本人在電腦或手機上動手）的項目，除了列 AWAITING，也同步加進 `C:\alpha\總司令待辦.md`（白話、每項一行做法、寫不做的影響）；能用腳本做的接進 `C:\alpha\run-owner-todo.ps1`（每支先問 Y/N、失敗不中斷）。總司令做完後由 CC 查證（看排程／資料檔／log，不看金鑰內容）再打勾移到「已完成」，同時 AWAITING 結案。
 
-## 等待中（目前：11件）
+## 等待中（目前：12件）
 
 | 項目 | 完成時間 | 等待審閱內容 | 等待時長 |
 |---|---|---|---|
@@ -35,6 +35,7 @@
 | 先.一五五-2a 墓園重審 2025 起補跑：缺資料 7 列的補抓提案 | 2026-11-07 00:2x | 甲（建議）補官方／既有端點約 528 次請求（TAIFEX 2、MI_MARGN 約 85、TWTC7U 約 440、yfinance 1 批）照既有節流；乙不補、永久標資料缺。24 小時無裁示照甲預設放行 | 剛送出 |
 | 先.一三五-1nb company_info 官方產業別每週自動更新（**甲（建議）**／乙／丙；24 小時無裁示照甲） | 2026-11-08 14:1x | `docs/PROPOSAL_COMPANY_INFO_WEEKLY.md`：甲＝audit.yml 加一步 `apply_official_industry.py --weekly`（未滿 6 天零請求略過、continue-on-error、改接共用節流 twse_openapi／tpex_openapi、git add 補 company_info／code_map／rate_limit_state），每週 4 次請求；乙＝本機排程（需總司令操作）；丙＝只加逾期警示 | 剛送出 |
 | 先.一五四-1c-w AlphaPaper9 18:30 產生器讀到舊價格的對策（甲／乙／**丙＋乙警告行（建議）**；24 小時無裁示照建議） | 2026-11-10 07:1x | `docs/PROPOSAL_PAPER9_STALE_WORKTREE.md`：11/09 18:30 模擬 I 與紙上 5 支只看到 11/06（17:42、18:30:15 兩次 pull 都中止，18:31:01 才拉進）。甲＝產生器前先 fetch＋pull（11/09 實例同一套 pull 也失敗，不建議）；乙＝只印警告；丙＝啟動腳本比對開工前後 price_history tree hash，本輪 pull 拉進新價格就重跑兩支產生器（冪等、零新 git 操作）。只改 `scripts/run_paper_9.ps1` | 剛送出 |
+| 先.一五六-1 經濟日報「台股擂台」標題來源法遵阻塞（**甲（建議）**／乙／丙） | 2026-11-10 09:0x | money.udn.com/robots.txt 明文 `User-agent: Claude Disallow: /`（ClaudeBot、GPTBot 同），條款禁止內容用於 LLM／機器學習／AI 相關用途與商業用途；DevQueue 未送任何 /search 請求。甲＝放棄此來源，改找有授權或官方的分析師選股資料；乙＝向 copyright@udn.com 取得書面授權後再抓；丙＝總司令本人手動貼標題清單（**仍在條款「AI 相關用途」灰區，需總司令自行判斷**）。法遵類不適用 24 小時預設放行 | 剛送出 |
 
 ## 等前置條件（不需總司令動作，不計入等待中）
 
