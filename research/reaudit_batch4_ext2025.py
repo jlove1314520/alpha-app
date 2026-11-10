@@ -6,7 +6,8 @@
   起點照原假說 FRED_START=2015-01-01（expanding 百分位暖機與原版一致）。
 - copper_gold_ratio：yfinance HG=F／GC=F 各 1 次（2015-01-01 起，快取 research/data/raw_yf/EXT_*.parquet，已有就不重抓）；
   yfinance 官方未公布上限，本管線日常已在用（見 C:\\alpha\\CLAUDE.md 美股篩選資料源節）。
-- fx_twd：FinMind TaiwanExchangeRate USD 2025／2026 各 1 次，只有 calls_last_hour()<300 才送，否則略過此族。
+- fx_twd：FinMind TaiwanExchangeRate USD 2025／2026 各 1 次（已有快取就零請求），calls_last_hour() ≥ FX_MAX_USAGE（預設 300、上限 450）就略過此族；2026-11-10 用 450 送 2 次。
+- option_pcr_overlay：#31 選擇權成交量 PCR，讀 TXO 整年快取（2025／2026 由 reaudit_batch14_ext2025.py fetch 抓），零請求。
 
 模擬全部呼叫 reaudit_batch4_regime 的 transforms／to_daily／run_sim／stats（只呼叫、不改），0050 延長到 REAUDIT_END。
 輸出：(a) 第 4 批挑出的最佳組（best_by_calmar）同參數看全期與 2025 起；(b) 全期重挑；(c) 核對：2024 底前的訊號值與原對齊檔差多少。
@@ -83,9 +84,12 @@ def s_fx():
     sent = 0
     if not have25:
         import finmind_client as f
+        import os
+        cap = int(os.environ.get("FX_MAX_USAGE", "300"))  # 只送 2 次；批次門檻 300 是給一次 150 次設的，可用環境變數放寬（≤450）
+        cap = min(cap, 450)
         u = f.calls_last_hour()
-        if u >= 300:
-            raise RuntimeError(f"FinMind 用量 {u}/hr ≥300，本輪不送 fx 請求")
+        if u >= cap:
+            raise RuntimeError(f"FinMind 用量 {u}/hr ≥{cap}，本輪不送 fx 請求")
         for y in (2025, 2026):
             f._fetch("TaiwanExchangeRate", "USD", f"{y}-01-01", f"{y}-12-31")
             sent += 1
@@ -136,11 +140,20 @@ def s_hy():
     return _ratio("HYG", "IEF", "2007-01-01", "HYG／IEF（還原價）")
 
 
+def s_opt_pcr():
+    """#31 台指選擇權成交量 PCR（日盤），口徑照 option_pcr_gate.build_pcr_series()；只讀 TXO 整年快取，零請求
+    （2025／2026 由 reaudit_batch14_ext2025.py fetch 抓）。"""
+    import reaudit_batch14_ext2025 as X
+    s, files = X.txo_pcr("volume")
+    return s, f"FinMind TaiwanOptionDaily TXO 日盤成交量（快取 {len(files)} 個整年檔，本次 0 次請求）"
+
+
 FAMS = {"HQ#76": (s_vix, "vix_term_structure_aligned.csv", "date", "vix_term_ratio"),
         "hy_etf_ratio": (s_hy, "hy_etf_ratio_aligned.csv", "date", "hyg_ief_ratio"),
         "fred_yield_curve": (s_fred, "fred_yield_curve_aligned.csv", "date", "spread_level"),
         "copper_gold_ratio": (s_copper_gold, "copper_gold_ratio_aligned.csv", "date", "copper_gold_ratio"),
-        "fx_twd": (s_fx, "fx_twd_aligned.csv", "date", "fx_change_n")}
+        "fx_twd": (s_fx, "fx_twd_aligned.csv", "date", "fx_change_n"),
+        "option_pcr_overlay": (s_opt_pcr, "option_pcr_aligned.csv", "signal_date", "pcr")}
 
 
 def seg_stats(r, i0):

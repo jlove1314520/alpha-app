@@ -1,3 +1,16 @@
+## 2026-11-10 15:50 DevQueue 20261110-153101（研究帽）
+
+等待總司令審閱：11 件（見 `research/AWAITING_REVIEW.md`「等待中」表，本輪沒有增減）。
+
+- **先.一五五-3 fx_twd／選擇權 PCR 兩族延長到 2025 起**（維持 - [ ]）：FinMind 共 **4 次請求**（TaiwanExchangeRate USD 2025／2026、TaiwanOptionDaily TXO 2025／2026，全 200），其餘零請求。
+  - fx_twd（2×、止損 10%）：全期 +37.4%／−41.1%／Calmar 0.91、2025 起 +74.8%／−33.8%；同期 0050 Calmar 0.74。
+  - option_oi_pcr_69（新 `research/reaudit_batch14_ext2025.py`；1.5×、止損 20%）：全期 +31.1%／−36.2%／Sh 1.20／Calmar 0.86、2025 起 +78.8%／−25.5%（減碼 63 天）；1.5× 不擇時 Calmar 0.76。
+  - option_pcr_overlay（#31 成交量版，接進 `reaudit_batch4_ext2025.py`）：全期 Calmar 0.58（重挑 0.61），**輸 0050 買進持有 0.75**；候選欄數字已更新，未刪（汰換另議）。
+- [自行裁量] FinMind 用量 434～437/hr（另一程序在打），少量單發請求門檻放寬到 450（新環境變數 FX_MAX_USAGE／FETCH_MAX_USAGE，上限寫死 450）；批次抓取仍守 300。已記進 `C:lpha\CLAUDE.md` 頻率清單。
+- [自行裁量] fx_twd 全期重挑（止損 20%）2025 起 +167% 是用含 2025 的全期挑出來的，不是樣本外，照實標註。
+- 證據：`research/data/reaudit_batch3_batch4_ext2025.json`、`research/data/reaudit_batch3_batch14_ext2025.json`；2024 底前與原對齊檔核對最大差 ≤4e-16；paper_opt_track 重產 8 支對上、last_error=None、候選 38 支；冒煙 `node scripts/smoke_test.mjs` exit 0、189 PASS。
+- 下一輪：第 12 批 #54 成交值集中度延長（需全市場逐檔成交值 2025 起，先查本機快取）、TX 盤別延長、美股毛利率、融券強制回補事件。
+
 ## 2026-11-10 15:05 DevQueue 20261110-143101（研究帽）
 
 等待總司令審閱：見 `research/AWAITING_REVIEW.md`（本輪未新增）。
