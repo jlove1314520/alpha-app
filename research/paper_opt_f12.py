@@ -56,6 +56,7 @@ TAIEX = OUT / "taiex_closes.json"
 
 sys.path.insert(0, str(HERE))
 from validation import costs as costmod  # noqa: E402  （只呼叫、不改）
+import paper_opt_exright_fix as XF  # noqa: E402  （先.一五八-3）
 
 START = "2026-11-09"
 MA_N, RISE_LB, MOM_WIN, TOP_N, REBAL = 150, 10, 60, 20, 21
@@ -144,7 +145,8 @@ def build_bars(ids: list[str]) -> tuple[dict, list[str]]:
                 prev = r
     cal |= set(new_days)
     calendar = sorted(cal)
-    _wj(BARS, {"note": "F12 紙上：原始 OHLC＋還原日報酬（見 paper_opt_f12.py 檔頭）", "calendar": calendar, "bars": bars})
+    XF.apply_once(cache, XF.lookback_last())  # 先.一五八-3 除權息日 0 報酬補正（冪等，只補一次）
+    _wj(BARS, {"note": "F12 紙上：原始 OHLC＋還原日報酬（見 paper_opt_f12.py 檔頭）", "calendar": calendar, "bars": bars, "exright_fix": cache.get("exright_fix")})
     return bars, calendar
 
 

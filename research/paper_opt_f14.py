@@ -35,6 +35,7 @@ if hasattr(sys.stdout, "reconfigure"):
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import paper_opt_f12 as F12  # noqa: E402  （共用工具：宇宙、加權指數序列、成本常數）
+import paper_opt_exright_fix as XF  # noqa: E402  （先.一五八-3）
 
 costmod = F12.costmod
 OUT = F12.OUT
@@ -151,7 +152,8 @@ def build_bars(ids: list[str]) -> tuple[dict, list[str]]:
                 prev = r
     cal |= nd
     calendar = sorted(cal)
-    F12._wj(BARS, {"note": "F14 紙上：原始 OHLC＋還原日報酬＋成交量（股）＋成交值（元）", "calendar": calendar, "bars": bars})
+    XF.apply_once(cache, XF.lookback_last())  # 先.一五八-3 除權息日 0 報酬補正（冪等，只補一次）
+    F12._wj(BARS, {"note": "F14 紙上：原始 OHLC＋還原日報酬＋成交量（股）＋成交值（元）", "calendar": calendar, "bars": bars, "exright_fix": cache.get("exright_fix")})
     return bars, calendar
 
 
