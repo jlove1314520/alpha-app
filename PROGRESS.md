@@ -1,3 +1,14 @@
+## 2026-11-10 11:31～12:1x DevQueue 20261110-113101（研究帽）先.一五五-3 籌碼族延長續
+
+等待總司令審閱：11 件（見 `research/AWAITING_REVIEW.md`「等待中」表，本輪沒有增減）。
+
+### 先.一五五-3 籌碼族延長到 2025 起（維持 - [ ]）
+- 做了什麼：零請求，`REAUDIT_DEADLINE=1794283200 python research/reaudit_batch3_ext2025.py run …`，延長到 2026-09-24：f_foreign_streak 補完 48/48、f_margin_utilization 48/48、f_short_margin_ratio 2/48（12:00 時間到、已存斷點）。
+- 證據：f_margin_utilization／f_short_margin_ratio 2024 底前重算值與 pkl 比對，兩族不一致都是 0/236 檔（log 記「最大差 0.00e+00」）。第 2 批挑出的同參數，全期／2025 起表現：f_foreign_streak +10.6%／−19.5%、2025 起 +22.2%／−18.1%（全期重挑 1× +11.1%／−20.1%）；f_margin_utilization（反向）+5.0%／−10.7%、2025 起 +0.6%／−3.7%（全期重挑順向 63 日 N=10 1× +12.9%／−24.6%）。summarize 重產 REAUDIT_OPTIMIZED.md 5a 節；candidates 38 支、名單不變；paper_opt_track.py 8 支回測都對上、last_error=None。
+- 冒煙：`node scripts/smoke_test.mjs`「=== 冒煙測試結果：全部通過 ===」，189 項 PASS。
+- 下一輪：`run f_short_margin_ratio`（剩 46 格）→ summarize＋candidates＋paper_opt_track；第 12／14／16 批訊號延長；剩美股毛利率、融券強制回補事件。
+- 佇列：`- [ ]` 24 項（≥12），本輪不補件。
+
 ## 2026-11-10 11:01～11:3x DevQueue 20261110-110101（維運帽）先.一三五-1nb-a company_info 每週自動更新 [預設放行]
 
 等待總司令審閱：11 件（見 `research/AWAITING_REVIEW.md`「等待中」表；本輪把 先.一三五-1nb 移到已結案，12→11）。
