@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated_at": "2026-11-10T11:53:16.328751+08:00",
-    "last_fetch_count": 9,
-    "reductions_generated_at": "2026-11-10T11:53:24.106851+08:00"
+    "generated_at": "2026-11-10T17:36:14.235578+08:00",
+    "last_fetch_count": 11,
+    "reductions_generated_at": "2026-11-10T17:36:23.441172+08:00"
   },
   "events": {
     "01010T": [
@@ -1703,7 +1703,10 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-11-06",
-        "applied": false
+        "applied": true,
+        "official_factor": 0.9950372208436724,
+        "official_source": "TWSE TWT49U",
+        "factor_applied": 0.9950372208436724
       }
     ],
     "5258": [
@@ -1808,6 +1811,16 @@
         "official_factor": 0.9834710743801653,
         "official_source": "TWSE TWT49U",
         "factor_applied": 0.9834710743801653
+      },
+      {
+        "ex_date": "2026-11-17",
+        "cash": 0.35,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.0,
+        "rights_price": 0.0,
+        "type": "息",
+        "first_seen": "2026-11-10",
+        "applied": false
       }
     ],
     "00982T": [
@@ -4223,6 +4236,42 @@
         "first_seen": "2026-11-09",
         "applied": false
       }
+    ],
+    "00690": [
+      {
+        "ex_date": "2026-11-17",
+        "cash": 2.0,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.0,
+        "rights_price": 0.0,
+        "type": "息",
+        "first_seen": "2026-11-10",
+        "applied": false
+      }
+    ],
+    "00932": [
+      {
+        "ex_date": "2026-11-17",
+        "cash": 0.23,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.0,
+        "rights_price": 0.0,
+        "type": "息",
+        "first_seen": "2026-11-10",
+        "applied": false
+      }
+    ],
+    "6655": [
+      {
+        "ex_date": "2026-11-24",
+        "cash": 2.6,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.0,
+        "rights_price": 0.0,
+        "type": "息",
+        "first_seen": "2026-11-10",
+        "applied": false
+      }
     ]
   },
   "reductions": {
@@ -4428,6 +4477,18 @@
         "ref_price": 96.15,
         "reason": "退還股款",
         "first_seen": "2026-11-04",
+        "applied": false
+      }
+    ],
+    "00662": [
+      {
+        "code": "00662",
+        "resume_date": "2026-11-17",
+        "pre_close": 117.8,
+        "ref_price": 23.56,
+        "reason": "分割",
+        "source": "TWSE TWTCAU",
+        "first_seen": "2026-11-10",
         "applied": false
       }
     ]

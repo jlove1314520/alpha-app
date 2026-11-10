@@ -1,21 +1,21 @@
 {
- "generated_at": "2026-11-10T11:54:30+08:00",
+ "generated_at": "2026-11-10T17:37:50+08:00",
  "date": "2026-11-10",
- "data_asof": "2026-11-09",
+ "data_asof": "2026-11-10",
  "method": "固定規則摘要（不呼叫語言模型、不做市場判斷）；只讀 repo 內既有排程產物，不額外請求外部 API",
  "disclaimer": "規則摘要，非 AI 判斷、非投資建議",
  "premarket": {
   "lines": [
    "美股（2026-11-09）：道瓊工業指數 +2.15%、S&P 500 +2.35%、那斯達克綜合指數 +2.74%、費城半導體指數 +6.86%",
    "台指期 202611（一般盤）41,423，+4.47%",
-   "加權指數前收（2026-11-09）41,661.70，+4.94%",
+   "加權指數前收（2026-11-10）42,711.92，+2.52%",
    "未來 3 天事件：法說會 0 場、除權息 1 檔",
    "2026-11-09 上市櫃重大訊息 369 則（其他 136、併購 116、人事 78、法說會 21、增減資 12、處分資產 4、財務 2）"
   ],
   "line_dates": [
    "2026-11-09",
    "2026-11-09",
-   "2026-11-09",
+   "2026-11-10",
    null,
    null
   ],
@@ -27,7 +27,7 @@
    null
   ],
   "us": {
-   "fetched_at": "2026-11-10T03:51:22+00:00",
+   "fetched_at": "2026-11-10T09:32:16+00:00",
    "indices": [
     {
      "symbol": "^DJI",
@@ -60,11 +60,11 @@
    ]
   },
   "tw": {
-   "fetched_at": "2026-11-10T03:50:57+00:00",
+   "fetched_at": "2026-11-10T09:31:36+00:00",
    "taiex": {
-    "close": 41661.7,
-    "change_pct": 4.94,
-    "as_of": "2026-11-09"
+    "close": 42711.92,
+    "change_pct": 2.52,
+    "as_of": "2026-11-10"
    },
    "tx_futures": {
     "contract_month": "202611",
@@ -766,10 +766,10 @@
   "week_start": "2026-11-09",
   "taiex_week": {
    "from_close": 39701.64,
-   "to_close": 41661.7,
-   "to_date": "2026-11-09",
-   "change_pct": 4.94,
-   "days": 1
+   "to_close": 42711.92,
+   "to_date": "2026-11-10",
+   "change_pct": 7.58,
+   "days": 2
   },
   "paper": [
    {
@@ -778,9 +778,9 @@
     "started": true,
     "start_date": "2026-10-01",
     "note": null,
-    "as_of": "2026-11-09",
-    "total_return_pct": -9.63,
-    "bench_return_pct": -13.68,
+    "as_of": "2026-11-10",
+    "total_return_pct": -8.23,
+    "bench_return_pct": -11.69,
     "source": "data/strategy_curves.json"
    },
    {
@@ -789,9 +789,9 @@
     "started": true,
     "start_date": "2026-10-08",
     "note": null,
-    "as_of": "2026-11-09",
-    "total_return_pct": -7.29,
-    "bench_return_pct": -15.22,
+    "as_of": "2026-11-10",
+    "total_return_pct": -5.56,
+    "bench_return_pct": -13.27,
     "source": "data/strategy_curves.json"
    },
    {
@@ -811,9 +811,9 @@
     "started": true,
     "start_date": "2026-10-08",
     "note": null,
-    "as_of": "2026-11-09",
-    "total_return_pct": -11.11,
-    "bench_return_pct": -15.22,
+    "as_of": "2026-11-10",
+    "total_return_pct": -8.7,
+    "bench_return_pct": -13.27,
     "source": "data/strategy_curves.json"
    },
    {
@@ -822,9 +822,9 @@
     "started": true,
     "start_date": "2026-10-08",
     "note": null,
-    "as_of": "2026-11-09",
-    "total_return_pct": -22.44,
-    "bench_return_pct": -15.22,
+    "as_of": "2026-11-10",
+    "total_return_pct": -19.78,
+    "bench_return_pct": -13.27,
     "source": "data/strategy_curves.json"
    },
    {
@@ -833,9 +833,9 @@
     "started": true,
     "start_date": "2026-11-02",
     "note": null,
-    "as_of": "2026-11-09",
+    "as_of": "2026-11-10",
     "total_return_pct": -3.39,
-    "bench_return_pct": -6.39,
+    "bench_return_pct": -4.23,
     "source": "data/strategy_curves.json"
    },
    {
@@ -844,15 +844,15 @@
     "started": true,
     "start_date": "2026-11-02",
     "note": null,
-    "as_of": "2026-11-09",
-    "total_return_pct": -15.32,
-    "bench_return_pct": -6.39,
+    "as_of": "2026-11-10",
+    "total_return_pct": -10.31,
+    "bench_return_pct": -4.23,
     "source": "data/strategy_curves.json"
    }
   ],
   "lines": [
-   "加權指數 2026-11-09 當週 1 個交易日 +4.94%（39,701.64→41,661.70）",
-   "紙上追蹤：6／7 條已啟動（模擬 A 穩健 累計 -9.63%、模擬 D 三檔分散 累計 -7.29%、模擬 B 景氣閘門 累計 -11.11%、模擬 C 加速 累計 -22.44%、模擬 F 賣波動 累計 -3.39%、模擬 G 個股低換手（營收驚喜） 累計 -15.32%）"
+   "加權指數 2026-11-09 當週 2 個交易日 +7.58%（39,701.64→42,711.92）",
+   "紙上追蹤：6／7 條已啟動（模擬 A 穩健 累計 -8.23%、模擬 D 三檔分散 累計 -5.56%、模擬 B 景氣閘門 累計 -8.70%、模擬 C 加速 累計 -19.78%、模擬 F 賣波動 累計 -3.39%、模擬 G 個股低換手（營收驚喜） 累計 -10.31%）"
   ]
  }
 }
