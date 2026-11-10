@@ -9,7 +9,8 @@
   或 DevQueue 連 2 輪「有 cycle start、沒 cycle end」（收件匣 026：wrapper 每條出口都會寫 cycle end，沒寫＝中途死掉）
   → 推「⚠️ CC 停住：<原因>」；同一原因 6 小時內只推一次。
   （收件匣 035）真的叫了 claude 的輪次連 2 次登入過期 → 另推「⚠️ CC 登入過期，請在 Alpha CC 打 /login」（同樣 6 小時一次）。
-- cc_daily：每天 22:00 後第一次 tick 推「今天做完 N 件、還剩 M 件、等你決定 K 件」。
+- cc_daily：每天 22:00 後第一次 tick 推「今天整條完成 N 件、推進中 P 件、DevQueue 有產出 R 輪、工作 commit C 個；還剩 M、等你決定 K」。
+  （Cowork 11/10 修：完成數改用 PENDING_QUEUE 今天的打勾紀錄，舊版只認心跳，常報 0 件。）
 
 用法：python scripts/cc_push.py tick   （run-dev-queue-cycle.ps1 每輪開頭呼叫：scan＋stuck＋daily）
       python scripts/cc_push.py scan   （互動視窗標完 - [x] 後可立刻呼叫）
@@ -289,6 +290,54 @@ def awaiting_count() -> int:
     return sum(1 for l in m.group(1).splitlines() if l.startswith("|"))
 
 
+_ID_RE = re.compile(r"^([-+])- \[([ x!])\] \*\*(\S+) ", re.M)
+_TAG_RE = re.compile(r"(?:先|補|修|驗|建置)\.[一二三四五六七八九十〇百\d]+(?:-[0-9A-Za-z]+)*")  # CC 11/10：允許多段（先.一三五-1nb-a）
+
+
+def _git(args: list[str]) -> str:
+    import subprocess  # noqa: PLC0415
+    return subprocess.run(["git", "-C", str(ROOT), *args], capture_output=True, text=True,
+                          encoding="utf-8", errors="replace", timeout=60).stdout
+
+
+def _done_today_git(now: datetime) -> set[str]:
+    """（Cowork 11/10）今天從 `- [ ]`／`- [!]` 改成 `- [x]` 的條目編號（今天的 commit＋尚未提交的改動）。
+    舊版只認「今天有心跳＋已打勾」，但多數輪次不寫心跳，導致整天做了十幾輪仍報 0 件。"""
+    since = now.strftime("%Y-%m-%d 00:00:00 +0800")
+    try:
+        txt = _git(["log", f"--since={since}", "--format=", "-p", "--unified=0", "--", "PENDING_QUEUE.md"])
+        txt += _git(["diff", "--unified=0", "--", "PENDING_QUEUE.md"])
+    except Exception as e:  # noqa: BLE001 — 十二節：只降級
+        _warn(f"讀 PENDING_QUEUE 歷史失敗：{e}")
+        return set()
+    added, removed = set(), set()
+    for sign, mark, iid in _ID_RE.findall(txt):
+        if sign == "+" and mark == "x":
+            added.add(iid)
+        elif sign == "-" and mark in " !":
+            removed.add(iid)
+    # CC 11/10：只算現在仍是 - [x] 的（今天打勾後又改回 [ ]／[!] 的不算）
+    now_done = set(re.findall(r"^- \[x\] \*\*(\S+) ", _read(PQ), re.M))
+    return added & removed & now_done
+
+
+def daily_activity(now: datetime) -> dict:
+    """今天的實際產出：有產出的 DevQueue 輪數、工作 commit 數、推進到的分批條目。"""
+    today = now.date().isoformat()
+    ok_cycles = len(re.findall(rf"cycle end: {today} [^\n]*reason=OK", _read(DQ_LOG)))
+    commits, tags = 0, set()
+    try:
+        out = _git(["log", f"--since={now:%Y-%m-%d} 00:00:00 +0800", "--format=%s"])
+        for subj in out.splitlines():
+            if not subj or MACHINE_COMMIT.search(subj) or re.match(r"(Merge|DevQueue|PROGRESS|文件：)", subj) or re.search(r"本機補跑|熱檔匯出|備援補抓|執行紀錄|排程更新|cycle log|auto-update|stream update", subj):
+                continue
+            commits += 1
+            tags.update(_TAG_RE.findall(subj))
+    except Exception as e:  # noqa: BLE001
+        _warn(f"讀 git log 失敗：{e}")
+    return {"ok_cycles": ok_cycles, "commits": commits, "tags": tags}
+
+
 def daily_counts(now: datetime) -> tuple[int, int, int]:
     today = now.date().isoformat()
     titles = done_titles(_read(PQ))
@@ -302,6 +351,7 @@ def daily_counts(now: datetime) -> tuple[int, int, int]:
             iid = item_id(str(rec.get("item", "")))
             if iid in titles:
                 done.add(iid)
+    done |= _done_today_git(now)
     remain = len(re.findall(r"^- \[ \] \*\*", _read(PQ), re.M))
     return len(done), remain, awaiting_count()
 
@@ -311,8 +361,15 @@ def daily(st: dict, now: datetime, send=_send) -> int:
     if (now.hour, now.minute) < DAILY_HM or st.get("daily_date") == today:
         return 0
     n, m, k = daily_counts(now)
+    act = daily_activity(now)
+    done_ids = _done_today_git(now)
+    open_ids = set(re.findall(r"^- \[[ !]\] \*\*(\S+) ", _read(PQ), re.M))
+    moving = sorted(t for t in act["tags"] if t in open_ids and t not in done_ids)
     st["daily_date"] = today
-    r = send(f"CC 今日摘要（{now:%m/%d}）", f"今天做完 {n} 件、還剩 {m} 件、等你決定 {k} 件", "cc_daily")
+    body = (f"今天整條完成 {n} 件、推進中 {len(moving)} 件（{'、'.join(moving[:4]) or '—'}）；"
+            f"DevQueue 有產出 {act['ok_cycles']} 輪、工作 commit {act['commits']} 個。"
+            f"還剩 {m} 件、等你決定 {k} 件")
+    r = send(f"CC 今日摘要（{now:%m/%d}）", body, "cc_daily")
     if not r.get("ok") and not r.get("muted"):
         _warn(f"cc_daily 未送達：{(r.get('errors') or ['?'])[0]}")
     return 1

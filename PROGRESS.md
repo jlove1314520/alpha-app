@@ -1,3 +1,12 @@
+## 2026-11-10 22:4x 互動視窗：收件匣 041 每日摘要「今天做完 0 件」誤報修正（先.一五七-1）
+
+- 為什麼：11/10 cc_daily 推「今天做完 0 件」，實際整條完成 6 件。根因：`daily_counts()` 只認「今天有 PROGRESS_HEARTBEAT 心跳＋已打勾」，多數輪次不寫心跳。
+- 改了什麼（`scripts/cc_push.py`，Cowork 起稿、CC 審過再補）：新增 `_done_today_git()`（PENDING_QUEUE 今天 commit＋未提交改動裡 [ ]／[!]→[x]，且現在仍是 [x]，與舊心跳法取聯集）、`daily_activity()`（reason=OK 輪數、非機器工作 commit 數、推進中條目）；文案改「今天整條完成 N 件、推進中 P 件（…）；DevQueue 有產出 R 輪、工作 commit C 個。還剩 M 件、等你決定 K 件」。CC 補：多段編號 regex、英文機器 commit 過濾、只算目前仍打勾。`scripts/selftest_cc_push.py` stub `_git`、⑧比新文案。
+- 自測：`selftest_cc_push.py` 12/12、`selftest_cc_push_stuck.py` 全過。未動 index.html，不需冒煙。
+- 11/10 實算：完成 6、推進中 3、有產出 18 輪、工作 commit 22、還剩 30、等決定 13；已補發更正推播（cc_daily）。
+- 未做：`scripts/build_research.py.cowork_test` 不刪（先.一三五-1fy 查過有獨有內容，Cowork 也不確定）。
+- 同時登記收件匣 040（先.一五七-0，開機自動開 Alpha CC）：腳本已修已驗，安裝被權限擋，待總司令雙擊 `install-alpha-cc-autostart.cmd`（總司令待辦第 8 項）。
+
 ## 2026-11-10 22:01 DevQueue 20261110-220101（開發帽）
 
 等待總司令審閱：13 件（新增 1 件：先.一五五-3f 首頁瘦身提案，剛送出、24 小時無裁示照甲預設放行；其餘 12 件見 `research/AWAITING_REVIEW.md`）。交辦佇列 `- [ ]` 剩 29 項，未補件（兩門檻皆達標）。

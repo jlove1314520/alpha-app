@@ -20,6 +20,7 @@ import cc_push as C  # noqa: E402
 
 tmp = Path(tempfile.mkdtemp())
 C.STATE, C.HB, C.PQ, C.AWAIT, C.USAGE, C.DQ_LOG = (tmp / n for n in ("st.json", "hb.jsonl", "pq.md", "aw.md", "u.json", "dq.log"))
+C._git = lambda args: ""  # 自測不讀真 repo 的 git 歷史（Cowork 11/10 改版 cc_daily）
 sent = []
 ok = lambda t, b, k: (sent.append((k, t, b)), {"ok": 1})[1]  # noqa: E731
 now = datetime.fromisoformat("2026-10-21T15:00:00+08:00")
@@ -65,7 +66,7 @@ C.daily(st, datetime.fromisoformat("2026-10-21T21:59:00+08:00"), ok)
 res.append(("⑧22:00 前不推", len(sent) == s1))
 C.daily(st, datetime.fromisoformat("2026-10-21T22:01:00+08:00"), ok)
 res.append(("⑧22:00 後推 cc_daily：做完 2（九-1、九-3）、還剩 2、等決定 1", len(sent) == s1 + 1 and sent[-1][0] == "cc_daily"
-            and sent[-1][2] == "今天做完 2 件、還剩 2 件、等你決定 1 件"))
+            and sent[-1][2].startswith("今天整條完成 2 件、推進中 0 件") and sent[-1][2].endswith("還剩 2 件、等你決定 1 件")))
 C.daily(st, datetime.fromisoformat("2026-10-21T22:31:00+08:00"), ok)
 res.append(("⑧同日不重推", len(sent) == s1 + 1))
 
