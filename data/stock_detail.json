@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-11-12T01:06:03.202143+08:00",
+    "generated_at": "2026-11-12T02:04:53.587459+08:00",
     "financials_source": "TWSE openapi t187ap06_L_ci(綜合損益表-一般業) + t187ap07_L_ci(資產負債表-一般業)",
     "financials_updated_count": 390,
     "errors": [],
@@ -1950,7 +1950,7 @@
         "9960",
         "9962"
       ],
-      "recorded_at": "2026-11-12T01:09:04+08:00"
+      "recorded_at": "2026-11-12T02:07:30+08:00"
     },
     "roe_cleared_nonconsecutive_codes": [],
     "financials_backfill_display_merge": {
@@ -1990,7 +1990,7 @@
         "8066": "eps 加總 -1.14 vs 官方累計 -1.09",
         "8435": "eps 加總 2.84 vs 官方累計 2.88"
       },
-      "generated_at": "2026-11-12T01:06:03.237018+08:00",
+      "generated_at": "2026-11-12T02:04:53.631474+08:00",
       "mode": "daily"
     },
     "financials_half_year_period": {
@@ -2210,7 +2210,7 @@
         "month_revenue": 16,
         "prior_year_half": 4
       },
-      "generated_at": "2026-11-12T01:06:03.378549+08:00",
+      "generated_at": "2026-11-12T02:04:53.802500+08:00",
       "mode": "daily"
     },
     "roe_recomputed_after_backfill_merge": {
@@ -2225,14 +2225,14 @@
       "fixed_by_neighbor_shares": 0,
       "fixed_codes": [],
       "left_unverifiable": 211,
-      "generated_at": "2026-11-12T01:06:03.383306+08:00",
+      "generated_at": "2026-11-12T02:04:53.807806+08:00",
       "mode": "daily"
     },
     "financials_backfill_eps_outlier_fix": {
       "note": "回補季 EPS 推得股數低於前後兩季（兩季彼此一致）平均 >30% 時，EPS 改成淨利÷相鄰季平均股數，原值存 eps_raw（先.一三五-1mu）",
       "fixed_rows": 0,
       "fixed": {},
-      "generated_at": "2026-11-12T01:06:03.394359+08:00",
+      "generated_at": "2026-11-12T02:04:53.819891+08:00",
       "mode": "daily"
     },
     "financials_share_base_restate": {
@@ -2372,7 +2372,7 @@
       },
       "skipped_rows_with_other_basis": [],
       "errors": [],
-      "generated_at": "2026-11-12T01:06:03.606272+08:00",
+      "generated_at": "2026-11-12T02:04:54.083182+08:00",
       "mode": "daily"
     },
     "financials_shares_implied_fix": {
@@ -2431,7 +2431,7 @@
         "3095 股本÷10=16180 推得=10025"
       ],
       "errors": [],
-      "generated_at": "2026-11-12T01:06:03.617363+08:00",
+      "generated_at": "2026-11-12T02:04:54.095235+08:00",
       "mode": "daily"
     },
     "financials_official_eps_outlier_fix": {
@@ -2446,7 +2446,7 @@
         "6514 2023Q4 eps=0.8：再外一季股數不一致或缺",
         "8480 2021Q2 eps=1.48：再外一季股數不一致或缺"
       ],
-      "generated_at": "2026-11-12T01:06:03.501457+08:00",
+      "generated_at": "2026-11-12T02:04:53.949246+08:00",
       "mode": "daily"
     }
   },
