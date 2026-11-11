@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated_at": "2026-11-11T09:33:05.326323+08:00",
-    "last_fetch_count": 11,
-    "reductions_generated_at": "2026-11-11T09:33:13.623117+08:00"
+    "generated_at": "2026-11-11T19:36:21.552775+08:00",
+    "last_fetch_count": 15,
+    "reductions_generated_at": "2026-11-11T19:36:29.834929+08:00"
   },
   "events": {
     "01010T": [
@@ -1114,6 +1114,16 @@
         "first_seen": "2026-08-26",
         "applied": true,
         "factor_applied": 0.9931619941348974
+      },
+      {
+        "ex_date": "2026-12-04",
+        "cash": 0.141372,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.0,
+        "rights_price": 0.0,
+        "type": "息",
+        "first_seen": "2026-11-11",
+        "applied": false
       }
     ],
     "7818": [
@@ -1860,6 +1870,16 @@
         "factor_applied": 0.9902710215427379,
         "factor_applied_before_official": 0.9908964558721334,
         "official_source": "TWSE TWT49U"
+      },
+      {
+        "ex_date": "2026-11-13",
+        "cash": 0.138,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.0,
+        "rights_price": 0.0,
+        "type": "息",
+        "first_seen": "2026-11-11",
+        "applied": false
       }
     ],
     "00936": [
@@ -4272,6 +4292,42 @@
         "first_seen": "2026-11-10",
         "applied": false
       }
+    ],
+    "1437": [
+      {
+        "ex_date": "2026-12-03",
+        "cash": 0.624652,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.0,
+        "rights_price": 0.0,
+        "type": "息",
+        "first_seen": "2026-11-11",
+        "applied": false
+      }
+    ],
+    "2646": [
+      {
+        "ex_date": "2026-12-07",
+        "cash": 0.0,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.09970967,
+        "rights_price": 0.0,
+        "type": "權",
+        "first_seen": "2026-11-11",
+        "applied": false
+      }
+    ],
+    "8390": [
+      {
+        "ex_date": "2026-11-11",
+        "official_factor": 0.9813186813186813,
+        "pre_close": 81.9,
+        "ref_price": 80.37,
+        "source": "TPEx exDailyQ",
+        "first_seen": "2026-11-11",
+        "applied": true,
+        "factor_applied": 0.9813186813186813
+      }
     ]
   },
   "reductions": {
@@ -4489,6 +4545,17 @@
         "reason": "分割",
         "source": "TWSE TWTCAU",
         "first_seen": "2026-11-10",
+        "applied": false
+      }
+    ],
+    "1808": [
+      {
+        "code": "1808",
+        "resume_date": "2026-11-23",
+        "pre_close": 31.0,
+        "ref_price": 36.25,
+        "reason": "退還股款",
+        "first_seen": "2026-11-11",
         "applied": false
       }
     ]
