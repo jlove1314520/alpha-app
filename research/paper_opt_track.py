@@ -70,6 +70,18 @@ EXT = {
 F14_REF = {"name": "F14 ML 價量選股（HGB，原版 1×）", "cagr": 0.109, "mdd": -0.131, "market": "TW",
            "rule": "台股抽樣宇宙 HGB 模型分數前 30 檔、每 63 個交易日換股、個股停損 15%、1×；模型凍結在 2025 版"}
 F3F5 = {"name": "F3＋F5 各半", "rule": "起跑日 F3、F5 各投一半，之後不再平衡（兩個帳戶權益平均）"}
+# 先.一五九-1（2026-11-11，已定案（Cowork 收件匣 043））：REAUDIT §5a 個股因子「舊最優」（2024 底前挑、2025 起未重調）上紙上。
+# 回測曲線讀 research/data/paper_opt/bt_stock.json（paper_opt_stock_seed.py：§5a 同一份引擎權益＋overlay，2025 起段逐位核對）；
+# 產生器 research/paper_opt_stock.py（直接呼叫 backtest/engine.py run_backtest，宇宙＝#133 抽樣扣掉 2025 起無價格的 71 檔）。
+STOCK = {
+    "S1": {"name": "S1 月營收驚喜（SUE）前 20 檔", "rule": "月營收年增率÷過去 12 個月年增率標準差，最高 20 檔；每 21 個交易日換股、個股停損 15%、跌破 150 日均線出場；1×、組合停損 10%"},
+    "S1x15": {"name": "S1 月營收驚喜 1.5×", "rule": "同 S1，1.5 倍（融資 6.5%/年）、組合停損 10%；⚠️ 回測 2025 起反而比 1× 差（停損來回觸發）"},
+    "S1x2": {"name": "S1 月營收驚喜 2×", "rule": "同 S1，2 倍（融資 6.5%/年）、組合停損 10%；⚠️ 回測 2025 起比 1× 差、2015～24 MDD 逼近 −48%"},
+    "S2": {"name": "S2 一週反轉因子（反向）前 30 檔 3×", "rule": "近 5 日報酬最高的 30 檔（因子＝−5 日報酬，取分數低端）；21 日換股、不設個股停損；3×、組合停損 10%；3× 超過台股融資上限，只當紙上參考"},
+    "S3": {"name": "S3 均線突破×量比 前 10 檔 1.5×", "rule": "（價÷60 日均線−1）×（20 日均量÷60 日均量）最高 10 檔；21 日換股、個股停損 15%；1.5×、組合停損 10%"},
+    "S4": {"name": "S4 外資連買強度 前 30 檔", "rule": "外資連續買超累計÷20 日均量最高 30 檔；加權指數 >200 日均線才換股進場；21 日換股、個股停損 15%；1×、組合停損 20%"},
+}
+S1S3F14 = {"name": "S1＋S3＋F14 各三分之一", "rule": "起跑日 S1、S3、F14（原版 1×）各投 1/3，之後不再平衡"}
 
 
 def _ext_tracks(today: str, errs: list) -> list:
@@ -126,6 +138,40 @@ def _ext_tracks(today: str, errs: list) -> list:
                     "paper": paper_block(next_tw_trading_day(CREATED), today, "F14")})
     except Exception as e:  # noqa: BLE001 — 十二節：單支失敗只記錯誤
         errs.append(f"F14 卡片失敗：{type(e).__name__}: {e}")
+    return out
+
+
+def _stock_tracks(today: str, errs: list) -> list:
+    try:
+        bt = json.loads((LEDGER_DIR / "bt_stock.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError) as e:
+        errs.append(f"bt_stock.json 讀不到（先跑 research/paper_opt_stock_seed.py）：{type(e).__name__}")
+        bt = None
+    out = []
+    idx = pd.to_datetime(bt["dates"]) if bt else None
+    for sid, m in STOCK.items():
+        ck = (bt or {}).get("check", {}).get(sid, {})
+        ok = bt is not None and ck.get("ok") is not False  # 加碼版表上沒有數字（ok=None）：同引擎同 overlay，照算
+        cv = pd.Series(bt["curves"][sid], idx) if bt else None
+        g, mdd = stats(cv.to_numpy(), cv.index) if cv is not None else (None, None)
+        pre, post = ck.get("pre2025") or {}, ck.get("from2025") or {}
+        note = (f"2025 起段（2024 底前挑的參數、未重調）年化 {post.get('cagr', 0):+.1%}、最大跌幅 {post.get('mdd', 0):.1%}、Sharpe {post.get('sharpe', 0):.2f}；"
+                f"2015～2024 年化 {pre.get('cagr', 0):+.1%}、最大跌幅 {pre.get('mdd', 0):.1%}。#133 抽樣宇宙（存活者偏誤未完全排除）、只做多。") if ck else None
+        out.append({"id": sid, "kind": "single", "name": m["name"], "rule": m["rule"], "market": "TW", "reproduced": ok, "note": note,
+                    "backtest": {"period": [str(cv.index[0].date()), str(cv.index[-1].date())] if cv is not None else None,
+                                 "cagr": None if g is None else round(g, 4), "mdd": None if mdd is None else round(mdd, 4),
+                                 "points": weekly_points(cv) if (cv is not None and ok) else []},
+                    "paper": paper_block(EXT_START, today, sid, "paper_opt_stock.py")})
+    c = (bt or {}).get("combo")
+    cs = pd.Series(c["curve"], pd.to_datetime(c["dates"])) if c else None
+    ok = cs is not None and all((bt["check"][k]["ok"] is True) for k in ("S1", "S3"))
+    g, mdd = stats(cs.to_numpy(), cs.index) if cs is not None else (None, None)
+    out.append({"id": "S1S3F14", "kind": "combo", "name": S1S3F14["name"], "members": ["S1", "S3", "F14"], "weight": "起始各 1/3、不再平衡",
+                "rule": S1S3F14["rule"], "reproduced": ok, "note": "回測只畫 2025 起段（各成員參數 2024 底前挑、未重調；F14 用原版 1×、不設組合停損，同紙上）。",
+                "backtest": {"period": [str(cs.index[0].date()), str(cs.index[-1].date())] if cs is not None else None,
+                             "cagr": None if g is None else round(g, 4), "mdd": None if mdd is None else round(mdd, 4),
+                             "points": weekly_points(cs) if ok else []},
+                "paper": paper_block(EXT_START, today, "S1S3F14", "paper_opt_stock.py")})
     return out
 
 
@@ -273,6 +319,10 @@ def build() -> dict:
         tracks.extend(_ext_tracks(today, errs))  # 先.一五八-1（收件匣 042）
     except Exception as e:  # noqa: BLE001 — 十二節：新增段失敗不拖垮舊卡片
         errs.append(f"收件匣 042 新成員失敗：{type(e).__name__}: {e}")
+    try:
+        tracks.extend(_stock_tracks(today, errs))  # 先.一五九-1（收件匣 043）
+    except Exception as e:  # noqa: BLE001 — 十二節：新增段失敗不拖垮舊卡片
+        errs.append(f"收件匣 043 個股成員失敗：{type(e).__name__}: {e}")
     return {"generated_at": datetime.now(TW).isoformat(timespec="seconds"), "track": "紙上優化軌（先.一五四-1）",
             "start": start, "note": NOTE, "tracks": tracks, "candidates": load_candidates(errs),
             "last_error": "；".join(errs) or None, "external_requests": 0}

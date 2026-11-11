@@ -1,3 +1,8 @@
+## 2026-11-11 互動視窗：收件匣 043 個股策略上紙上（先.一五九）
+
+- 新增 `research/paper_opt_stock.py`（S1 月營收驚喜、S2 一週反轉反向 3×、S3 均線突破 1.5×、S4 外資連買，＋S1 1.5×／2×、S1＋S3＋F14 各 1/3），直接呼叫回測引擎、零外部請求，起跑 11/11；`research/paper_opt_stock_seed.py` 回測基準線 4 支 2025 起段與 REAUDIT §5a 逐位對上；看板 20 支。S5（高股息 ETF 剔除）BLOCKED：本機事件表是人工整理、不會每日更新。
+- 自測 `scripts/selftest_paper_opt_stock.py` 全過（含因子核對：S2～S4 前 N 名重疊 90～100%）；冒煙 189 PASS／0 FAIL。發現 S1 加碼版在 10% 組合停損下回測 2025 起反而變差，待 Cowork 裁示是否改停損。
+
 ## 2026-11-11 08:01 DevQueue 20261111-080102（維運帽）
 
 等待總司令審閱：12 件（本輪沒有新增；見 `research/AWAITING_REVIEW.md`）。交辦佇列 `- [ ]` 剩 27 項。
