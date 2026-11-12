@@ -1,14 +1,23 @@
 {
- "generated_at": "2026-11-12T01:01:44.255Z",
+ "generated_at": "2026-11-12T23:51:46.479Z",
  "url": "https://jlove1314520.github.io/alpha-app",
- "all_passed": true,
+ "all_passed": false,
  "crashed": false,
  "crash_error": null,
  "total": 189,
- "passed": 189,
- "failed": 0,
- "failures": [],
+ "passed": 187,
+ "failed": 2,
+ "failures": [
+  {
+   "name": "108. 價格歷史全市場缺日自測通過；選股紀錄資料不完整批次有標註、曲線檔批次數與帳本一致（先.八十-9）",
+   "detail": "全市場缺日自測未通過：FAIL ①最近 90 個開市日（2026-07-08 起，先.八十四-1 改為跟 90 筆保留一致）每個開市日檔數 ≥ 中位數 2392 的 90%（缺日：[('2026-09-25', 0), ('2026-09-28', 0), ('2026-10-09', 0), ('2026-10-26', 0)]）"
+  },
+  {
+   "name": "178. 研究室前向模擬看板：14 張卡、壞檔只顯示「資料尚未產生」、點開有近 30 日走勢＋持股、回撤 40% 紅色、可點 ≥44px、無禁用詞（先.一四七-0）",
+   "detail": "可點區最小高度 43.999969482421875px（應 ≥44）"
+  }
+ ],
  "global_errors_final": [],
- "run_url": "https://github.com/jlove1314520/alpha-app/actions/runs/43130818090",
- "commit": "395b566ac"
+ "run_url": "https://github.com/jlove1314520/alpha-app/actions/runs/43331494504",
+ "commit": "743c2cd09"
 }
