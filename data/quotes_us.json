@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-11-14T01:55:53+00:00",
+  "fetched_at": "2026-11-14T06:08:25+00:00",
   "source": "Finnhub /quote（免費額度，regular quote）+ yfinance Ticker.info（extended_hours：pre/post market，2026-08-27新增）",
   "meta": {
     "trading_window": false,
@@ -7,9 +7,7 @@
     "queried": 9,
     "matched": 9,
     "extended_hours_matched": 9,
-    "sparkline_stale_tickers": [
-      "AAPL"
-    ],
+    "sparkline_stale_tickers": [],
     "extended_hours_disclaimer": "延長交易時段（盤前/盤後）流動性低、價差大，僅接受限價單，價格常於隔日開盤反轉。"
   },
   "quotes": {
@@ -45,7 +43,7 @@
         162.85
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "CLOSED",
         "regular": {
           "price": 162.85,
           "prev_close": 166.19,
@@ -94,7 +92,7 @@
         356.27
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "CLOSED",
         "regular": {
           "price": 356.27,
           "prev_close": 354.88,
@@ -143,7 +141,7 @@
         523.88
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "CLOSED",
         "regular": {
           "price": 523.88,
           "prev_close": 523.0,
@@ -192,7 +190,7 @@
         398.73
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "CLOSED",
         "regular": {
           "price": 398.73,
           "prev_close": 405.49,
@@ -241,7 +239,7 @@
         295.77
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "CLOSED",
         "regular": {
           "price": 295.77,
           "prev_close": 298.7,
@@ -290,7 +288,7 @@
         266.66
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "CLOSED",
         "regular": {
           "price": 266.66,
           "prev_close": 267.44,
@@ -339,7 +337,7 @@
         15.4
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "CLOSED",
         "regular": {
           "price": 15.4,
           "prev_close": 15.76,
@@ -388,7 +386,7 @@
         35.55
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "CLOSED",
         "regular": {
           "price": 35.55,
           "prev_close": 36.29,
@@ -437,7 +435,7 @@
         49.87
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "CLOSED",
         "regular": {
           "price": 49.87,
           "prev_close": 49.09,
