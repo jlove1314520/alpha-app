@@ -2,8 +2,8 @@
  "meta": {
   "created_at": "2026-10-11T14:17:33.521387+08:00",
   "schema_note": "B19 前瞻訊號台帳（非回測）：每筆在事件發生後 4 日內事前寫入，寫入後內容不可修改；entry_close 為寫入日之後第一個交易日收盤（避免前視）；returns.t5/t20/t60 由 update_signal_ledger_returns.py 只回填 null 欄位。status=待驗證線索 者不得影響任何評分。規格 research/B19_SIGNAL_LEDGER_SPEC.md。非投資建議。",
-  "last_build_at": "2026-11-14T02:09:39.896502+08:00",
-  "total_signals": 5015,
+  "last_build_at": "2026-11-14T09:54:13.538495+08:00",
+  "total_signals": 5022,
   "source": ".github/scripts/build_signal_ledger.py（讀 events.json L1＋news.json L3＋price_history.json）",
   "last_returns_backfill_at": "2026-11-13T17:52:12.961273+08:00",
   "entry_skipped": {
@@ -182958,6 +182958,254 @@
    "anchor_trade_date": "2026-11-13",
    "weight": 1.0,
    "ref_close": 1520.0,
+   "ref_close_date": "2026-11-13",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "f34636be788db9b2",
+   "recorded_at": "2026-11-14T09:54:13.538495+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9877832",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-11-14",
+   "title": "台積電美國廠獲利爆發 前三季大賺539億、年增逾10倍",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.1007,
+   "pre_vol_spike": 0.864,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-13",
+   "weight": 1.0,
+   "ref_close": 2350.0,
+   "ref_close_date": "2026-11-13",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "cd437e36dbfc2ffc",
+   "recorded_at": "2026-11-14T09:54:13.538495+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9877610",
+   "type": "媒體報導",
+   "code": "2408",
+   "event_date": "2026-11-14",
+   "title": "世芯、南亞科等10月業績報捷 三大法人卡位",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0975,
+   "pre_vol_spike": 1.183,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-13",
+   "weight": 1.0,
+   "ref_close": 377.0,
+   "ref_close_date": "2026-11-13",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "6c35b3df2b5ead0d",
+   "recorded_at": "2026-11-14T09:54:13.538495+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/11074/9877617",
+   "type": "媒體報導",
+   "code": "7918",
+   "event_date": "2026-11-14",
+   "title": "興櫃一周回顧／創鉅材料漲逾四成 稱冠",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": null,
+   "pre_vol_spike": null,
+   "reflected": "unknown",
+   "pre_volume_spike": null,
+   "reason": "價格序列不足（0<23 筆）",
+   "weight": 1.0,
+   "ref_close": null,
+   "ref_close_date": null,
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "88e7451392ebabbf",
+   "recorded_at": "2026-11-14T09:54:13.538495+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9877618",
+   "type": "媒體報導",
+   "code": "0050",
+   "event_date": "2026-11-14",
+   "title": "一周熱門零股／0050、高息ETF 交投重心",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.1081,
+   "pre_vol_spike": 0.57,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-13",
+   "weight": 1.0,
+   "ref_close": 102.5,
+   "ref_close_date": "2026-11-13",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "70e3f3f02043c4e5",
+   "recorded_at": "2026-11-14T09:54:13.538495+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9877619",
+   "type": "媒體報導",
+   "code": "020041",
+   "event_date": "2026-11-14",
+   "title": "ETN趨勢導航／兆豐半導體氣候N 周漲22%",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.2296,
+   "pre_vol_spike": 1.126,
+   "reflected": "caution",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-13",
+   "weight": 0.5,
+   "ref_close": 16.71,
+   "ref_close_date": "2026-11-13",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "ed2bec7080ccd257",
+   "recorded_at": "2026-11-14T09:54:13.538495+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9877616",
+   "type": "媒體報導",
+   "code": "1907",
+   "event_date": "2026-11-14",
+   "title": "永豐餘前三季 EPS 1.33元 榮成0.34元",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0161,
+   "pre_vol_spike": 0.425,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-13",
+   "weight": 1.0,
+   "ref_close": 28.4,
+   "ref_close_date": "2026-11-13",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "aef601e1ef716dfa",
+   "recorded_at": "2026-11-14T09:54:13.538495+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/11074/9877633",
+   "type": "媒體報導",
+   "code": "3219",
+   "event_date": "2026-11-13",
+   "title": "倚強科前三季 EPS 4.89 元 本季有望不淡",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.1502,
+   "pre_vol_spike": 2.293,
+   "reflected": "caution",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-11-13",
+   "weight": 0.5,
+   "ref_close": 108.0,
    "ref_close_date": "2026-11-13",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
    "entry_close": null,
