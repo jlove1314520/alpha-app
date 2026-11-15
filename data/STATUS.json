@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-15T09:22:43.265513+08:00",
+  "updated_at": "2026-11-15T16:05:26.428273+08:00",
   "latest_commit": "c401192",
   "data_files_defaults": "data_files 沒寫 source＝通用解析（讀 generated_at）；沒寫 detail＝無補充說明",
   "data_files": [
@@ -7,14 +7,14 @@
       "path": "data/adjustment_anomalies.json",
       "generated_at": "2026-11-14T09:55:02.751689+08:00",
       "records": 7032,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/adr_premium.json",
       "generated_at": "2026-11-14T06:08:26+00:00",
       "records": 4,
       "source": "通用解析（讀 computed_at）",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/audit_report.json",
@@ -99,7 +99,7 @@
       "generated_at": "2026-11-14T01:54:45.737437+00:00",
       "records": 8,
       "source": "通用解析（讀 meta.generated_at）",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/customs_trade.json",
@@ -113,7 +113,7 @@
       "path": "data/daily_brief.json",
       "generated_at": "2026-11-14T09:54:42+08:00",
       "records": 7,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/dependency_status.json",
@@ -138,15 +138,15 @@
     },
     {
       "path": "data/events.json",
-      "generated_at": "2026-11-15T08:25:32.408755+08:00",
-      "records": 15555,
+      "generated_at": "2026-11-15T15:15:42.363216+08:00",
+      "records": 15559,
       "source": "通用解析（讀 fetched_at）",
       "status": "ok"
     },
     {
       "path": "data/events_search.json",
-      "generated_at": "2026-11-15T08:25:32.408755+08:00",
-      "records": 15555,
+      "generated_at": "2026-11-15T15:15:42.363216+08:00",
+      "records": 15559,
       "source": "通用解析（讀 top.fetched_at）",
       "status": "ok"
     },
@@ -184,13 +184,13 @@
       "generated_at": "2026-11-14T09:53:00.265734+08:00",
       "records": 1374,
       "source": "通用解析（讀 meta.generated_at）",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/forward_sim_watch.json",
       "generated_at": "2026-11-14T09:54:42+08:00",
       "records": 14,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/fundamentals.json",
@@ -205,7 +205,7 @@
       "generated_at": "2026-11-14T09:54:57+08:00",
       "records": 23,
       "source": "通用解析（讀 fetched_at）",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/fx.json",
@@ -235,25 +235,25 @@
       "generated_at": "2026-11-14T09:54:55+08:00",
       "records": 45,
       "source": "通用解析（讀 meta.generated_at）",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/insider_transfer_tw_history.json",
       "generated_at": "2026-11-14T01:52:29+00:00",
       "records": 217,
       "source": "通用解析（讀 meta.last_run.fetched_at）",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/institutional_history.json",
       "generated_at": "2026-11-14T09:52:52.617686+08:00",
       "records": 2140,
       "source": "通用解析（讀 meta.generated_at）",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/ir_events.json",
-      "generated_at": "2026-11-15T08:25:32.408755+08:00",
+      "generated_at": "2026-11-15T15:15:42.363216+08:00",
       "records": 585,
       "source": "通用解析（讀 fetched_at）",
       "status": "ok"
@@ -277,7 +277,7 @@
       "generated_at": "2026-11-14T09:50:45.981996+08:00",
       "records": 2179,
       "source": "通用解析（讀 meta.generated_at）",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/margin_maintenance.json",
@@ -299,7 +299,7 @@
       "records": 37,
       "source": "TWSE openapi(MI_INDEX)/TPEx openapi/TAIFEX openapi/TWSE T86",
       "detail": "sectors=37 institutional_history_days=10 errors=[]",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/market_us.json",
@@ -307,7 +307,7 @@
       "records": 4,
       "source": "yfinance",
       "detail": "indices=['^DJI', '^GSPC', '^IXIC', '^SOX']",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/monthly_close.json",
@@ -318,22 +318,22 @@
     },
     {
       "path": "data/news.json",
-      "generated_at": "2026-11-15T08:25:32.408755+08:00",
+      "generated_at": "2026-11-15T15:15:42.363216+08:00",
       "records": 300,
       "source": "通用解析（讀 fetched_at）",
       "status": "ok"
     },
     {
       "path": "data/news_evidence.json",
-      "generated_at": "2026-11-15T08:32:29.449900+08:00",
-      "records": 82365,
+      "generated_at": "2026-11-15T15:22:35.129528+08:00",
+      "records": 82565,
       "source": "通用解析（讀 meta.generated_at）",
       "status": "ok"
     },
     {
       "path": "data/news_urls.json",
-      "generated_at": "2026-11-15T08:25:48.980800+08:00",
-      "records": 89117,
+      "generated_at": "2026-11-15T15:15:55.587596+08:00",
+      "records": 89183,
       "source": "通用解析（讀 meta.generated_at）",
       "status": "ok"
     },
@@ -362,13 +362,13 @@
       "path": "data/paper_10.json",
       "generated_at": "2026-11-14T09:54:35+08:00",
       "records": null,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/paper_11.json",
       "generated_at": "2026-11-14T09:54:36+08:00",
       "records": null,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/paper_12.json",
@@ -380,85 +380,85 @@
       "path": "data/paper_13.json",
       "generated_at": "2026-11-14T09:54:36+08:00",
       "records": null,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/paper_14.json",
       "generated_at": "2026-11-14T09:54:37+08:00",
       "records": null,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/paper_15.json",
       "generated_at": "2026-11-14T09:54:38+08:00",
       "records": null,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/paper_16.json",
       "generated_at": "2026-11-14T09:54:39+08:00",
       "records": 4,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/paper_17.json",
       "generated_at": "2026-11-14T09:54:40+08:00",
       "records": null,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/paper_18.json",
       "generated_at": "2026-11-14T09:54:41+08:00",
       "records": null,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/paper_1b.json",
       "generated_at": "2026-11-14T09:54:19.458791+08:00",
       "records": 3,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/paper_3.json",
       "generated_at": "2026-11-14T09:54:20.724891+08:00",
       "records": 5,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/paper_4.json",
       "generated_at": "2026-11-14T09:54:21.586982+08:00",
       "records": 5,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/paper_5.json",
       "generated_at": "2026-11-14T09:54:22+08:00",
       "records": 15,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/paper_6.json",
       "generated_at": "2026-11-14T09:54:24+08:00",
       "records": 12,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/paper_7.json",
       "generated_at": "2026-11-14T09:54:25+08:00",
       "records": 20,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/paper_7030.json",
       "generated_at": "2026-11-14T09:54:18.740124+08:00",
       "records": 3,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/paper_8.json",
       "generated_at": "2026-11-14T09:54:34+08:00",
       "records": null,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/paper_9.json",
@@ -483,7 +483,7 @@
       "path": "data/paper_tracking_watch.json",
       "generated_at": "2026-11-14T09:54:42.248709+08:00",
       "records": 3,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/paper_trades.json",
@@ -552,7 +552,7 @@
       "records": 237,
       "source": "TWSE MIS（mis.twse.com.tw，證交所公開即時行情端點）",
       "detail": "queried=237 matched=237 trading_window=False",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/quotes_us.json",
@@ -560,28 +560,28 @@
       "records": 9,
       "source": "Finnhub /quote（免費額度，regular quote）+ yfinance Ticker.info（extended_hours：pre/post market，2026-08-27新增）",
       "detail": "queried=9 matched=9 trading_window=False market_session=closed extended_hours_matched=9",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/research.json",
       "generated_at": "2026-11-14T09:54:47+08:00",
       "records": 1986,
       "source": "通用解析（讀 meta.generated_at）",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/research_radar.json",
       "generated_at": "2026-11-14T09:54:47+08:00",
       "records": 1261,
       "source": "通用解析（讀 meta.generated_at）",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/research_scorecard.json",
       "generated_at": "2026-11-14T09:54:42+08:00",
       "records": 6,
       "source": "通用解析（讀 meta.generated_at）",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/revenue_backfill.json",
@@ -608,7 +608,7 @@
       "generated_at": "2026-11-14T09:53:44.289289+08:00",
       "records": 2139,
       "source": "通用解析（讀 meta.generated_at）",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/securities_lending_sell.json",
@@ -623,7 +623,7 @@
       "generated_at": "2026-11-14T01:52:27+00:00",
       "records": 1312,
       "source": "通用解析（讀 meta.generated_at）",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/short_lending_available.json",
@@ -638,7 +638,7 @@
       "generated_at": "2026-11-14T01:52:21+00:00",
       "records": 1250,
       "source": "通用解析（讀 meta.generated_at）",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/signal_ledger.json",
@@ -653,7 +653,7 @@
       "records": 38,
       "source": "research/build_signal_status.py（人工彙整TRIALS_LEDGER.md/STRATEGY_GRAVEYARD.md，非自動剖析；2026-10-11常備.開發-35起market.yml每日重產）",
       "detail": "研究方向=21條 外部策略=17條 資料日(最新結案)=2026-09-10",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/smoke_cloud.json",
@@ -666,13 +666,13 @@
       "generated_at": "2026-11-14T09:53:58.143385+08:00",
       "records": 2961,
       "source": "通用解析（讀 meta.generated_at）",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/status_lite.json",
-      "generated_at": "2026-11-14T21:37:37+00:00",
+      "generated_at": "2026-11-15T01:22:45+00:00",
       "records": 1,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/stock_detail.json",
@@ -687,7 +687,7 @@
       "generated_at": "2026-11-14T09:50:45.981996+08:00",
       "records": 2184,
       "source": "通用解析（讀 meta.generated_at）",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/stock_names.json",
@@ -709,7 +709,7 @@
       "generated_at": "2026-11-14T09:54:42+08:00",
       "records": 11,
       "source": "通用解析（讀 meta.generated_at）",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/strategy_history.json",
@@ -753,7 +753,7 @@
     },
     {
       "path": "data/themes.json",
-      "generated_at": "2026-11-15T08:32:37.693798+08:00",
+      "generated_at": "2026-11-15T15:22:40.570675+08:00",
       "records": 199,
       "source": "通用解析（讀 meta.generated_at）",
       "status": "ok"
@@ -762,19 +762,19 @@
       "path": "data/tpex_limit_next.json",
       "generated_at": "2026-11-14T01:53:16+00:00",
       "records": 997,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/trading_calendar.json",
       "generated_at": "2026-11-14T09:54:57+08:00",
       "records": 3,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/trials_index.json",
       "generated_at": "2026-11-14T01:54:42+00:00",
       "records": 491,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/tw50_constituents.json",
@@ -816,14 +816,14 @@
       "path": "data/us_analyst_reco.json",
       "generated_at": "2026-11-14T01:55:54+00:00",
       "records": 9,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/us_events.json",
       "generated_at": "2026-11-14T01:52:10+00:00",
       "records": 9,
       "source": "通用解析（讀 fetched_at）",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/us_financials.json",
@@ -836,7 +836,7 @@
       "generated_at": "2026-11-14T01:51:13+00:00",
       "records": 4,
       "source": "通用解析（讀 updated_at）",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/us_insider_trading.json",
@@ -858,14 +858,14 @@
       "generated_at": "2026-11-14T09:51:26+08:00",
       "records": 253,
       "source": "通用解析（讀 meta.generated_at）",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/us_sic.json",
       "generated_at": "2026-11-14T01:51:28+00:00",
       "records": 9,
       "source": "通用解析（讀 fetched_at）",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/warrant_backup_status.json",
@@ -883,7 +883,7 @@
       "path": "data/whitelist_price_status.json",
       "generated_at": "2026-11-14T09:53:16.454558+08:00",
       "records": 3,
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "data/price_history/",
@@ -899,7 +899,7 @@
       "records": 1972,
       "source": "research/generate_scores_live.py（GitHub Actions market.yml每日排程自動執行，JSON-only，不依賴parquet/FinMind）",
       "detail": "engine_version=scoring-live-json universe_size=1972 avg_coverage=0.833 weights_hash=4d1a7df9f8f5 coverage_collapse_warning=False backtest_status=尚未回測驗證",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "scores_momentum.json",
@@ -907,7 +907,7 @@
       "records": 1985,
       "source": "research/generate_scores_momentum.py（GitHub Actions market.yml每日排程自動執行，題材動能榜，跟價值成長榜物理分離的獨立引擎，見weights_frozen_momentum.json）",
       "detail": "engine_version=scoring-momentum-v1 universe_size=1985 avg_coverage=0.994 weights_hash=0ea99f55d5a4 coverage_collapse_warning=None backtest_status=回測未通過",
-      "status": "ok"
+      "status": "stale"
     },
     {
       "path": "scores_future.json",
@@ -915,7 +915,7 @@
       "records": 1983,
       "source": "research/generate_scores_future.py（GitHub Actions market.yml每日排程自動執行，未來性濾網(a)類因子，跟另外兩榜物理分離的獨立引擎，見weights_frozen_future.json）",
       "detail": "engine_version=scoring-future-v1 universe_size=1983 avg_coverage=0.848 weights_hash=2909ad72626d coverage_collapse_warning=None backtest_status=回測未通過",
-      "status": "ok"
+      "status": "stale"
     }
   ],
   "workflows": [
@@ -969,7 +969,7 @@
     }
   ],
   "schedule_health": {
-    "checked_at": "2026-11-15T09:22:43+08:00",
+    "checked_at": "2026-11-15T16:05:26+08:00",
     "any_overdue": true,
     "overdue_names": [
       "台股逐筆tick（本機Shioaji）",
@@ -1092,11 +1092,11 @@
   },
   "local_pipeline_health": {
     "checked_at": "2026-11-14T09:55:02.738874+08:00",
-    "status": "ok",
+    "status": "stale",
     "reason": "在 GitHub Actions runner 上執行，沒有本機產出檔",
     "note": "在沒有本機產出檔的環境（例如 GitHub Actions runner）跑這支時，這一段必然取不到值，屬預期行為，不是故障。本機管線新鮮度請看本機產生的版本或 data/audit_report.json 的 local_task_health。",
-    "status_checked_at": "2026-11-15T01:22:43.265513+00:00",
-    "status_age_hours": 23.5
+    "status_checked_at": "2026-11-15T08:05:26.428273+00:00",
+    "status_age_hours": 30.2
   },
   "adjustment_anomaly_warnings": {
     "n_warnings": 7032,
@@ -1490,14 +1490,14 @@
   "any_overdue": true,
   "updated_by": "scripts/check_local_schedule_heartbeat.py（local_schedule_watchdog.yml 每 30 分鐘）",
   "local_schedule_heartbeat": {
-    "checked_at": "2026-11-15T01:22:43.160103+00:00",
+    "checked_at": "2026-11-15T08:05:26.211829+00:00",
     "stall_threshold_minutes": 60,
     "track_stall_threshold_minutes": 360,
     "tracks": {
       "devqueue": {
         "last_commit_sha": "bcd81b020531617bbdb1e0a77d5b924f3dc0d522",
         "last_commit_at": "2026-11-11T14:58:45+00:00",
-        "minutes_since": 4944.0,
+        "minutes_since": 5346.7,
         "track_stalled": true
       },
       "marathon": {
@@ -1515,7 +1515,7 @@
       "connectivity": {
         "last_commit_sha": "b021862fef6784712c553627def7ef0a66b15e2a",
         "last_commit_at": "2026-11-11T17:12:15+00:00",
-        "minutes_since": 4810.5,
+        "minutes_since": 5213.2,
         "track_stalled": true
       },
       "market_catchup": {
@@ -1527,7 +1527,7 @@
     },
     "claude_auth": {
       "overall_status": "STALLED_3H",
-      "detail": "devqueue:STALLED_3H(82.4h)",
+      "detail": "devqueue:STALLED_3H(89.11h)",
       "launchers": {
         "devqueue": {
           "status": "STALLED_3H",
@@ -1536,7 +1536,7 @@
           "last_cycle_id": "20261111-223102",
           "last_attempt_at": "2026-11-11T22:58:43+08:00",
           "last_ok_at": "2026-11-11T22:13:57+08:00",
-          "hours_since_last_attempt": 82.4
+          "hours_since_last_attempt": 89.11
         },
         "marathon": {
           "status": "STALLED_3H",
@@ -1545,7 +1545,7 @@
           "last_cycle_id": "20261020-191357",
           "last_attempt_at": "2026-10-20T19:15:45+08:00",
           "last_ok_at": "2026-10-20T19:15:45+08:00",
-          "hours_since_last_attempt": 614.12
+          "hours_since_last_attempt": 620.83
         },
         "hypothesis_queue": {
           "status": "STALLED_3H",
@@ -1554,17 +1554,17 @@
           "last_cycle_id": "2026-10-20 19:25:14",
           "last_attempt_at": "2026-10-20T19:25:15+08:00",
           "last_ok_at": "2026-10-20T19:25:15+08:00",
-          "hours_since_last_attempt": 613.96
+          "hours_since_last_attempt": 620.67
         }
       },
-      "checked_at": "2026-11-15T01:22:43.160103+00:00"
+      "checked_at": "2026-11-15T08:05:26.211829+00:00"
     },
     "ibkr_quotes": {
       "last_commit_sha": null,
       "last_commit_at": null,
       "minutes_since": null,
       "file_fetched_at": "2026-10-18T11:01:05.500839+08:00",
-      "file_minutes_since": 40221.6,
+      "file_minutes_since": 40624.3,
       "note": "只記錄不判定停擺——盤外時段與IBKR Gateway每週人工登入空窗都會讓這個數字變大，那是預期行為不是故障，見本檔案docstring。2026-10-01【先.六-三】起IBKR排程盤中最多每30分鐘才commit一次（commit洪水修法），所以minutes_since在盤中落在30分鐘內是正常；file_fetched_at是已commit的quotes_ibkr.json內的抓取時間，同樣只記錄、不得拿來當停擺判定（停擺判定只看三軌）"
     },
     "stalled": true,
@@ -1576,10 +1576,10 @@
       "market_catchup"
     ],
     "judged_by": "any_of_local_heartbeats",
-    "stall_minutes": 4810.5,
+    "stall_minutes": 5213.2,
     "note": "本機排程最後活動時間；2026-09-27【乾.三主體第八點】裁示改為「DevQueue／Marathon／Hypothesis-queue三軌任一有新鮮心跳（≤60分鐘）即視為本機整體存活」（取代原本只看DevQueue單一訊號的版本，因為DevQueue的既有碰撞防護機制在互動視窗長時間編輯檔案時會正確YIELD但不留心跳，容易誤判——詳見PENDING_QUEUE.md查.一條目的根因分析）。個別軌道超過360分鐘另外標記track_stalled警告，不影響本機整體存活的判定，但值得單獨留意。偵測放在雲端是因為本機push被卡住時無法自己通知任何人。"
   },
-  "data_files_checked_at": "2026-11-15T09:22:43.265513+08:00",
+  "data_files_checked_at": "2026-11-15T16:05:26.428273+08:00",
   "orphan_processes": {
     "count": 0,
     "total_private_mb": 0,
