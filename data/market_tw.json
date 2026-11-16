@@ -1,16 +1,15 @@
 {
-  "fetched_at": "2026-11-14T01:50:47+00:00",
+  "fetched_at": "2026-11-16T19:34:34+00:00",
   "errors": [],
-  "expected_trading_day": "2026-11-13",
+  "expected_trading_day": "2026-11-16",
   "taiex": {
     "name": "發行量加權股價指數",
-    "close": 43675.12,
-    "change_pct": 1.35,
-    "data_date": "2026-11-13",
-    "source": "TWSE openapi MI_INDEX",
+    "close": 41040.08,
+    "change_pct": -6.03,
+    "data_date": "2026-11-16",
+    "source": "TWSE rwd MI_INDEX（openapi 落後，改用帶日期官方端點）",
     "sparkline_source": "TWSE FMTQIK（官方逐月）",
     "sparkline": [
-      46969.87,
       47111.26,
       46822.08,
       46292.93,
@@ -29,10 +28,10 @@
       42711.92,
       44257.15,
       43091.87,
-      43675.12
+      43675.12,
+      41040.08
     ],
     "sparkline_dates": [
-      "2026-10-15",
       "2026-10-16",
       "2026-10-19",
       "2026-10-20",
@@ -51,10 +50,10 @@
       "2026-11-10",
       "2026-11-11",
       "2026-11-12",
-      "2026-11-13"
+      "2026-11-13",
+      "2026-11-16"
     ],
     "sparkline_60d": [
-      45857.27,
       45308.68,
       44719.35,
       44933.74,
@@ -113,10 +112,10 @@
       42711.92,
       44257.15,
       43091.87,
-      43675.12
+      43675.12,
+      41040.08
     ],
     "sparkline_60d_dates": [
-      "2026-08-17",
       "2026-08-18",
       "2026-08-19",
       "2026-08-20",
@@ -175,238 +174,239 @@
       "2026-11-10",
       "2026-11-11",
       "2026-11-12",
-      "2026-11-13"
+      "2026-11-13",
+      "2026-11-16"
     ]
   },
   "sectors": [
     {
       "name": "水泥窯製類指數",
-      "close": 738.23,
-      "change_pct": 1.53,
-      "data_date": "2026-11-13"
+      "close": 698.61,
+      "change_pct": -5.37,
+      "data_date": "2026-11-16"
     },
     {
       "name": "塑膠化工類指數",
-      "close": 1281.49,
-      "change_pct": 2.74,
-      "data_date": "2026-11-13"
+      "close": 1192.94,
+      "change_pct": -6.91,
+      "data_date": "2026-11-16"
     },
     {
       "name": "機電類指數",
-      "close": 14803.92,
-      "change_pct": 1.2,
-      "data_date": "2026-11-13"
+      "close": 13811.72,
+      "change_pct": -6.7,
+      "data_date": "2026-11-16"
     },
     {
       "name": "水泥類指數",
-      "close": 129.97,
-      "change_pct": -0.14,
-      "data_date": "2026-11-13"
+      "close": 126.95,
+      "change_pct": -2.32,
+      "data_date": "2026-11-16"
     },
     {
       "name": "食品類指數",
-      "close": 1912.19,
-      "change_pct": 0.62,
-      "data_date": "2026-11-13"
+      "close": 1917.23,
+      "change_pct": 0.26,
+      "data_date": "2026-11-16"
     },
     {
       "name": "塑膠類指數",
-      "close": 472.57,
-      "change_pct": 3.85,
-      "data_date": "2026-11-13"
+      "close": 431.69,
+      "change_pct": -8.65,
+      "data_date": "2026-11-16"
     },
     {
       "name": "紡織纖維類指數",
-      "close": 486.87,
-      "change_pct": 1.98,
-      "data_date": "2026-11-13"
+      "close": 480.66,
+      "change_pct": -1.28,
+      "data_date": "2026-11-16"
     },
     {
       "name": "電機機械類指數",
-      "close": 471.15,
-      "change_pct": 1.82,
-      "data_date": "2026-11-13"
+      "close": 443.48,
+      "change_pct": -5.87,
+      "data_date": "2026-11-16"
     },
     {
       "name": "電器電纜類指數",
-      "close": 95.6,
-      "change_pct": 0.42,
-      "data_date": "2026-11-13"
+      "close": 90.48,
+      "change_pct": -5.36,
+      "data_date": "2026-11-16"
     },
     {
       "name": "化學生技醫療類指數",
-      "close": 160.64,
-      "change_pct": 0.85,
-      "data_date": "2026-11-13"
+      "close": 154.05,
+      "change_pct": -4.1,
+      "data_date": "2026-11-16"
     },
     {
       "name": "化學類指數",
-      "close": 175.48,
-      "change_pct": -0.06,
-      "data_date": "2026-11-13"
+      "close": 168.73,
+      "change_pct": -3.85,
+      "data_date": "2026-11-16"
     },
     {
       "name": "生技醫療類指數",
-      "close": 93.32,
-      "change_pct": 1.21,
-      "data_date": "2026-11-13"
+      "close": 89.39,
+      "change_pct": -4.21,
+      "data_date": "2026-11-16"
     },
     {
       "name": "玻璃陶瓷類指數",
-      "close": 194.92,
-      "change_pct": 4.0,
-      "data_date": "2026-11-13"
+      "close": 176.07,
+      "change_pct": -9.67,
+      "data_date": "2026-11-16"
     },
     {
       "name": "造紙類指數",
-      "close": 256.04,
-      "change_pct": -1.5,
-      "data_date": "2026-11-13"
+      "close": 252.88,
+      "change_pct": -1.23,
+      "data_date": "2026-11-16"
     },
     {
       "name": "鋼鐵類指數",
-      "close": 116.82,
-      "change_pct": -1.85,
-      "data_date": "2026-11-13"
+      "close": 115.02,
+      "change_pct": -1.54,
+      "data_date": "2026-11-16"
     },
     {
       "name": "橡膠類指數",
-      "close": 180.66,
-      "change_pct": 0.5,
-      "data_date": "2026-11-13"
+      "close": 178.18,
+      "change_pct": -1.37,
+      "data_date": "2026-11-16"
     },
     {
       "name": "汽車類指數",
-      "close": 278.41,
-      "change_pct": 0.83,
-      "data_date": "2026-11-13"
+      "close": 274.73,
+      "change_pct": -1.32,
+      "data_date": "2026-11-16"
     },
     {
       "name": "電子工業類指數",
-      "close": 2692.95,
-      "change_pct": 1.2,
-      "data_date": "2026-11-13"
+      "close": 2512.06,
+      "change_pct": -6.72,
+      "data_date": "2026-11-16"
     },
     {
       "name": "半導體類指數",
-      "close": 1480.33,
-      "change_pct": 1.23,
-      "data_date": "2026-11-13"
+      "close": 1386.65,
+      "change_pct": -6.33,
+      "data_date": "2026-11-16"
     },
     {
       "name": "電腦及週邊設備類指數",
-      "close": 394.58,
-      "change_pct": 1.91,
-      "data_date": "2026-11-13"
+      "close": 369.51,
+      "change_pct": -6.35,
+      "data_date": "2026-11-16"
     },
     {
       "name": "光電類指數",
-      "close": 67.61,
-      "change_pct": 2.74,
-      "data_date": "2026-11-13"
+      "close": 61.95,
+      "change_pct": -8.37,
+      "data_date": "2026-11-16"
     },
     {
       "name": "通信網路類指數",
-      "close": 226.75,
-      "change_pct": 1.35,
-      "data_date": "2026-11-13"
+      "close": 218.02,
+      "change_pct": -3.85,
+      "data_date": "2026-11-16"
     },
     {
       "name": "電子零組件類指數",
-      "close": 718.61,
-      "change_pct": 0.6,
-      "data_date": "2026-11-13"
+      "close": 650.95,
+      "change_pct": -9.42,
+      "data_date": "2026-11-16"
     },
     {
       "name": "電子通路類指數",
-      "close": 320.37,
-      "change_pct": 0.83,
-      "data_date": "2026-11-13"
+      "close": 306.54,
+      "change_pct": -4.32,
+      "data_date": "2026-11-16"
     },
     {
       "name": "資訊服務類指數",
-      "close": 251.45,
-      "change_pct": 0.56,
-      "data_date": "2026-11-13"
+      "close": 252.81,
+      "change_pct": 0.54,
+      "data_date": "2026-11-16"
     },
     {
       "name": "其他電子類指數",
-      "close": 242.41,
-      "change_pct": 0.6,
-      "data_date": "2026-11-13"
+      "close": 222.16,
+      "change_pct": -8.35,
+      "data_date": "2026-11-16"
     },
     {
       "name": "建材營造類指數",
-      "close": 427.11,
-      "change_pct": 1.51,
-      "data_date": "2026-11-13"
+      "close": 427.88,
+      "change_pct": 0.18,
+      "data_date": "2026-11-16"
     },
     {
       "name": "航運類指數",
-      "close": 215.9,
-      "change_pct": 1.91,
-      "data_date": "2026-11-13"
+      "close": 214.49,
+      "change_pct": -0.65,
+      "data_date": "2026-11-16"
     },
     {
       "name": "觀光餐旅類指數",
-      "close": 98.3,
-      "change_pct": 1.15,
-      "data_date": "2026-11-13"
+      "close": 97.16,
+      "change_pct": -1.16,
+      "data_date": "2026-11-16"
     },
     {
       "name": "金融保險類指數",
-      "close": 3744.99,
-      "change_pct": 2.16,
-      "data_date": "2026-11-13"
+      "close": 3617.63,
+      "change_pct": -3.4,
+      "data_date": "2026-11-16"
     },
     {
       "name": "貿易百貨類指數",
-      "close": 232.2,
-      "change_pct": 0.43,
-      "data_date": "2026-11-13"
+      "close": 230.73,
+      "change_pct": -0.63,
+      "data_date": "2026-11-16"
     },
     {
       "name": "油電燃氣類指數",
-      "close": 121.68,
-      "change_pct": 2.36,
-      "data_date": "2026-11-13"
+      "close": 118.13,
+      "change_pct": -2.92,
+      "data_date": "2026-11-16"
     },
     {
       "name": "綠能環保類指數",
-      "close": 105.34,
-      "change_pct": -1.68,
-      "data_date": "2026-11-13"
+      "close": 99.49,
+      "change_pct": -5.55,
+      "data_date": "2026-11-16"
     },
     {
       "name": "數位雲端類指數",
-      "close": 38.29,
-      "change_pct": 7.98,
-      "data_date": "2026-11-13"
+      "close": 38.02,
+      "change_pct": -0.71,
+      "data_date": "2026-11-16"
     },
     {
       "name": "運動休閒類指數",
-      "close": 54.33,
-      "change_pct": 2.12,
-      "data_date": "2026-11-13"
+      "close": 54.61,
+      "change_pct": 0.52,
+      "data_date": "2026-11-16"
     },
     {
       "name": "居家生活類指數",
-      "close": 96.43,
-      "change_pct": 2.41,
-      "data_date": "2026-11-13"
+      "close": 97.48,
+      "change_pct": 1.09,
+      "data_date": "2026-11-16"
     },
     {
       "name": "其他類指數",
-      "close": 266.39,
-      "change_pct": 1.44,
-      "data_date": "2026-11-13"
+      "close": 261.49,
+      "change_pct": -1.84,
+      "data_date": "2026-11-16"
     }
   ],
   "tpex": {
-    "date": "20261113",
-    "close": 342.41,
-    "change": 6.68,
-    "change_pct": 1.9896940994251333,
+    "date": "20261116",
+    "close": 319.12,
+    "change": -23.29,
+    "change_pct": -6.801787330977483,
     "sparkline": [
       369.24,
       345.52,
@@ -417,7 +417,8 @@
       332.97,
       344.11,
       335.73,
-      342.41
+      342.41,
+      319.12
     ]
   },
   "tx_futures": {
@@ -559,45 +560,27 @@
       "date": "20261113"
     }
   },
-  "data_date": "2026-11-13",
-  "stale_note": null,
+  "data_date": "2026-11-16",
+  "stale_note": "台指期資料停在 11/13",
   "institutional": {
-    "date": "20261113",
-    "foreign_net_lots": 388769.5,
-    "trust_net_lots": -44881.8,
-    "dealer_net_lots": -156717.4,
-    "total_net_lots": 187170.3,
+    "date": "20261116",
+    "foreign_net_lots": -1258599.6,
+    "trust_net_lots": -148299.4,
+    "dealer_net_lots": -1295515.9,
+    "total_net_lots": -2702414.8,
     "scope": "上市，不含權證／牛熊證（T86 ALLBUT0999）；外資含外資自營商",
-    "market_volume_lots": 12361786.6,
-    "foreign_net_amt": 288.37,
-    "trust_net_amt": 95.39,
-    "dealer_net_amt": 68.92,
-    "dealer_self_net_amt": 42.99,
-    "dealer_hedge_net_amt": 25.94,
+    "market_volume_lots": 14120171.4,
+    "foreign_net_amt": -701.89,
+    "trust_net_amt": -183.02,
+    "dealer_net_amt": -259.03,
+    "dealer_self_net_amt": 31.19,
+    "dealer_hedge_net_amt": -290.22,
     "foreign_dealer_net_amt": 0.0,
-    "total_net_amt": 452.68,
+    "total_net_amt": -1143.94,
     "amt_unit": "億元",
     "amt_scope": "上市全部證券金額（BFI82U，含一般／零股／盤後定價／鉅額，含權證）；外資＝外資及陸資（不含外資自營商），外資自營商已計入自營商（官方註記）"
   },
   "institutional_history": [
-    {
-      "date": "20261102",
-      "foreign_net_lots": -213105.6,
-      "trust_net_lots": 89177.0,
-      "dealer_net_lots": -1094487.2,
-      "total_net_lots": -1218415.8,
-      "scope": "上市，不含權證／牛熊證（T86 ALLBUT0999）；外資含外資自營商",
-      "market_volume_lots": 10422514.1,
-      "foreign_net_amt": -735.21,
-      "trust_net_amt": 338.16,
-      "dealer_net_amt": -152.88,
-      "dealer_self_net_amt": 4.66,
-      "dealer_hedge_net_amt": -157.55,
-      "foreign_dealer_net_amt": 0.0,
-      "total_net_amt": -549.93,
-      "amt_unit": "億元",
-      "amt_scope": "上市全部證券金額（BFI82U，含一般／零股／盤後定價／鉅額，含權證）；外資＝外資及陸資（不含外資自營商），外資自營商已計入自營商（官方註記）"
-    },
     {
       "date": "20261103",
       "foreign_net_lots": -970006.3,
@@ -757,6 +740,24 @@
       "dealer_hedge_net_amt": 25.94,
       "foreign_dealer_net_amt": 0.0,
       "total_net_amt": 452.68,
+      "amt_unit": "億元",
+      "amt_scope": "上市全部證券金額（BFI82U，含一般／零股／盤後定價／鉅額，含權證）；外資＝外資及陸資（不含外資自營商），外資自營商已計入自營商（官方註記）"
+    },
+    {
+      "date": "20261116",
+      "foreign_net_lots": -1258599.6,
+      "trust_net_lots": -148299.4,
+      "dealer_net_lots": -1295515.9,
+      "total_net_lots": -2702414.8,
+      "scope": "上市，不含權證／牛熊證（T86 ALLBUT0999）；外資含外資自營商",
+      "market_volume_lots": 14120171.4,
+      "foreign_net_amt": -701.89,
+      "trust_net_amt": -183.02,
+      "dealer_net_amt": -259.03,
+      "dealer_self_net_amt": 31.19,
+      "dealer_hedge_net_amt": -290.22,
+      "foreign_dealer_net_amt": 0.0,
+      "total_net_amt": -1143.94,
       "amt_unit": "億元",
       "amt_scope": "上市全部證券金額（BFI82U，含一般／零股／盤後定價／鉅額，含權證）；外資＝外資及陸資（不含外資自營商），外資自營商已計入自營商（官方註記）"
     }

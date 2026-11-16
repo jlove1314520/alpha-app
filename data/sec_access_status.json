@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-11-14T17:06:19+08:00",
+ "generated_at": "2026-11-17T03:43:47+08:00",
  "note": "SEC（sec.gov／data.sec.gov）各腳本最近一輪的回應狀態碼；最近一輪有 403＝疑似 User-Agent 被擋（先.一〇三-1b-3）",
  "blocked_scripts": [],
  "warning": null,
  "scripts": {
   "build_us_screener.py": {
-   "last_run_at": "2026-11-14T09:51:26+08:00",
+   "last_run_at": "2026-11-17T03:35:17+08:00",
    "status_counts": {
     "200": 4
    },
@@ -14,18 +14,19 @@
    "ua_contact_set": false
   },
   "fetch_us_13f_holdings.py": {
-   "last_run_at": "2026-11-14T09:52:30+08:00",
+   "last_run_at": "2026-11-17T03:43:47+08:00",
    "status_counts": {
-    "200": 4
+    "400": 1
    },
    "last_403_at": null,
    "last_run_403": false,
    "ua_contact_set": false
   },
   "fetch_us_8k.py": {
-   "last_run_at": "2026-11-14T09:52:10+08:00",
+   "last_run_at": "2026-11-17T03:42:32+08:00",
    "status_counts": {
-    "200": 9
+    "200": 1,
+    "error": 16
    },
    "last_403_at": null,
    "last_run_403": false,
@@ -42,16 +43,16 @@
    "ua_contact_set": false
   },
   "fetch_us_insider_trading.py": {
-   "last_run_at": "2026-11-14T09:52:06+08:00",
+   "last_run_at": "2026-11-17T03:35:24+08:00",
    "status_counts": {
-    "200": 132
+    "400": 9
    },
    "last_403_at": null,
    "last_run_403": false,
    "ua_contact_set": false
   },
   "fetch_us_sic.py": {
-   "last_run_at": "2026-11-14T09:51:28+08:00",
+   "last_run_at": "2026-11-17T03:35:20+08:00",
    "status_counts": {
     "200": 10
    },

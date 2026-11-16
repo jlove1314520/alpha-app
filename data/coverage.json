@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-11-14T01:54:45.737437+00:00",
+    "generated_at": "2026-11-16T19:45:52.695834+00:00",
     "universe_size": 1986,
     "reason_categories": {
       "R1": "個股完全無此類原始資料",
@@ -14,12 +14,12 @@
   "factors": {
     "earnings_growth": {
       "label": "財報成長",
-      "coverage_pct": 0.8263,
-      "covered_count": 1641,
-      "missing_count": 345,
+      "coverage_pct": 0.8253,
+      "covered_count": 1639,
+      "missing_count": 347,
       "missing_reason_breakdown": {
-        "個股完全無此類原始資料": 51,
-        "個股有資料但數量/期數不足以計算": 294
+        "個股完全無此類原始資料": 14,
+        "個股有資料但數量/期數不足以計算": 333
       }
     },
     "revenue_momentum": {
@@ -60,13 +60,13 @@
     },
     "technical": {
       "label": "技術型態",
-      "coverage_pct": 0.996,
-      "covered_count": 1978,
-      "missing_count": 8,
+      "coverage_pct": 0.9975,
+      "covered_count": 1981,
+      "missing_count": 5,
       "missing_reason_breakdown": {
         "個股完全無此類原始資料": 1,
-        "個股有資料但數量/期數不足以計算": 3,
-        "其他（資料足夠但計算仍失敗，如虧損股/樣本不足）": 4
+        "個股有資料但數量/期數不足以計算": 2,
+        "其他（資料足夠但計算仍失敗，如虧損股/樣本不足）": 2
       }
     },
     "analyst": {
