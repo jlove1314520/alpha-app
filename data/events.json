@@ -1,13 +1,13 @@
 {
- "fetched_at": "2026-11-16T04:25:54.309180+08:00",
+ "fetched_at": "2026-11-16T08:25:30.485623+08:00",
  "source": "TWSE/TPEx 重大訊息＋TWSE 月營收＋既有除權息檔（全部官方端點）",
  "keep_days": 90,
  "importance_version": "v0（2026-10-18 先.一一〇-9）",
  "meta": {
   "twse_mops": {
    "ok": true,
-   "rows": 2,
-   "kept": 2
+   "rows": 4,
+   "kept": 4
   },
   "tpex_mops": {
    "ok": true,
@@ -25,7 +25,7 @@
    "note": "沿用既有排程產物，未額外請求"
   }
  },
- "count": 14474,
+ "count": 14478,
  "events": [
   {
    "code": "1707",
@@ -440,7 +440,7 @@
   {
    "code": "2072",
    "name": "世紀能源",
-   "date": "2026-11-14",
+   "date": "2026-11-15",
    "type": "其他",
    "title": "公告本公司名稱由「世紀離岸風電設備股份有限公司」更名 為「世紀能源設備股份有限公司」，公告期間：115年8月26日至 115年11月25日。",
    "source": "TWSE 重大訊息",
@@ -448,52 +448,32 @@
    "importance": 5
   },
   {
-   "code": "3432",
-   "name": "台端",
-   "date": "2026-11-14",
-   "type": "其他",
-   "title": "依臺灣證券交易所股份有限公司臺證上一字第1121801204 號函辦理",
+   "code": "6994",
+   "name": "富威電力",
+   "date": "2026-11-15",
+   "type": "人事",
+   "title": "公告本公司董事長異動",
    "source": "TWSE 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01",
    "importance": 5
   },
   {
-   "code": "3489",
-   "name": "長耀地產",
-   "date": "2026-11-14",
-   "type": "其他",
-   "title": "公告本公司名稱由「森寶開發股份有限公司」更名為 「長耀地產投資股份有限公司」，公告期間： 115年11月4日至116年2月3日",
-   "source": "TPEx 重大訊息",
+   "code": "6994",
+   "name": "富威電力",
+   "date": "2026-11-15",
+   "type": "人事",
+   "title": "公告本公司自然人董事異動",
+   "source": "TWSE 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01",
    "importance": 5
   },
   {
-   "code": "4174",
-   "name": "浩鼎",
-   "date": "2026-11-14",
+   "code": "6994",
+   "name": "富威電力",
+   "date": "2026-11-15",
    "type": "其他",
-   "title": "公告本公司與Novartis Pharma AG簽訂ADC平台技術合作暨授權 合約",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
-   "code": "2754",
-   "name": "亞洲藏壽司",
-   "date": "2026-11-14",
-   "type": "併購",
-   "title": "更正公告本公司民國115年第3季合併財務報告經董事會 決議通過",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 9
-  },
-  {
-   "code": "3324",
-   "name": "雙鴻",
-   "date": "2026-11-14",
-   "type": "其他",
-   "title": "公告本公司受邀參加 JP Morgan APAC Technology, Innovation and Growth Conference",
-   "source": "TPEx 重大訊息",
+   "title": "公告本公司永續發展委員會成員異動",
+   "source": "TWSE 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01",
    "importance": 5
   },
@@ -14601,6 +14581,66 @@
    "data_ym": "2026-10",
    "date_basis": "首次出現在 TWSE 月營收彙總表的日期（官方未提供逐家公告日；實際公告日不晚於此日）",
    "importance": 6
+  },
+  {
+   "code": "3489",
+   "name": "長耀地產",
+   "date": "2026-11-14",
+   "type": "其他",
+   "title": "公告本公司名稱由「森寶開發股份有限公司」更名為 「長耀地產投資股份有限公司」，公告期間： 115年11月4日至116年2月3日",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "4174",
+   "name": "浩鼎",
+   "date": "2026-11-14",
+   "type": "其他",
+   "title": "公告本公司與Novartis Pharma AG簽訂ADC平台技術合作暨授權 合約",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "2754",
+   "name": "亞洲藏壽司",
+   "date": "2026-11-14",
+   "type": "併購",
+   "title": "更正公告本公司民國115年第3季合併財務報告經董事會 決議通過",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 9
+  },
+  {
+   "code": "3324",
+   "name": "雙鴻",
+   "date": "2026-11-14",
+   "type": "其他",
+   "title": "公告本公司受邀參加 JP Morgan APAC Technology, Innovation and Growth Conference",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "2072",
+   "name": "世紀能源",
+   "date": "2026-11-14",
+   "type": "其他",
+   "title": "公告本公司名稱由「世紀離岸風電設備股份有限公司」更名 為「世紀能源設備股份有限公司」，公告期間：115年8月26日至 115年11月25日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "3432",
+   "name": "台端",
+   "date": "2026-11-14",
+   "type": "其他",
+   "title": "依臺灣證券交易所股份有限公司臺證上一字第1121801204 號函辦理",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
   },
   {
    "code": "00401A",
