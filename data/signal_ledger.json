@@ -2,8 +2,8 @@
  "meta": {
   "created_at": "2026-10-11T14:17:33.521387+08:00",
   "schema_note": "B19 前瞻訊號台帳（非回測）：每筆在事件發生後 4 日內事前寫入，寫入後內容不可修改；entry_close 為寫入日之後第一個交易日收盤（避免前視）；returns.t5/t20/t60 由 update_signal_ledger_returns.py 只回填 null 欄位。status=待驗證線索 者不得影響任何評分。規格 research/B19_SIGNAL_LEDGER_SPEC.md。非投資建議。",
-  "last_build_at": "2026-11-18T02:36:23.551110+08:00",
-  "total_signals": 5337,
+  "last_build_at": "2026-11-18T03:29:04.794189+08:00",
+  "total_signals": 5349,
   "source": ".github/scripts/build_signal_ledger.py（讀 events.json L1＋news.json L3＋price_history.json）",
   "last_returns_backfill_at": "2026-11-18T02:36:25.619147+08:00",
   "entry_skipped": {
@@ -198400,6 +198400,433 @@
    "anchor_trade_date": "2026-11-17",
    "weight": 1.0,
    "ref_close": 2170.0,
+   "ref_close_date": "2026-11-17",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "0c7c20f06b4107d3",
+   "recorded_at": "2026-11-18T03:29:04.794189+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9885189",
+   "type": "媒體報導",
+   "code": "2412",
+   "event_date": "2026-11-18",
+   "title": "中華電、遠傳談展望 電信雙雄強攻衛星通訊",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0313,
+   "pre_vol_spike": 1.033,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-17",
+   "weight": 1.0,
+   "ref_close": 164.5,
+   "ref_close_date": "2026-11-17",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "5c8cebddb3ba2295",
+   "recorded_at": "2026-11-18T03:29:04.794189+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9884906",
+   "type": "媒體報導",
+   "code": "2886",
+   "event_date": "2026-11-18",
+   "title": "12檔籌碼穩定股領漲抗跌 華航、兆豐金等將扮多頭明燈",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0321,
+   "pre_vol_spike": 0.921,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-17",
+   "weight": 1.0,
+   "ref_close": 54.7,
+   "ref_close_date": "2026-11-17",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "1cef291bba6745aa",
+   "recorded_at": "2026-11-18T03:29:04.794189+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9884914",
+   "type": "媒體報導",
+   "code": "2027",
+   "event_date": "2026-11-18",
+   "title": "凱基證多面向剖析2027趨勢",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0688,
+   "pre_vol_spike": 6.611,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-11-17",
+   "weight": 0.5,
+   "ref_close": 45.35,
+   "ref_close_date": "2026-11-17",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "0b951ecac33033b6",
+   "recorded_at": "2026-11-18T03:29:04.794189+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9884852",
+   "type": "媒體報導",
+   "code": "7901",
+   "event_date": "2026-11-18",
+   "title": "大大寬頻下月上市",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": null,
+   "pre_vol_spike": null,
+   "reflected": "unknown",
+   "pre_volume_spike": null,
+   "reason": "價格序列不足（0<23 筆）",
+   "weight": 1.0,
+   "ref_close": null,
+   "ref_close_date": null,
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "671dcdde2c33fb8e",
+   "recorded_at": "2026-11-18T03:29:04.794189+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9884830",
+   "type": "媒體報導",
+   "code": "4722",
+   "event_date": "2026-11-18",
+   "title": "國精化衝刺電子材料",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.2007,
+   "pre_vol_spike": 0.876,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-17",
+   "weight": 1.0,
+   "ref_close": 113.5,
+   "ref_close_date": "2026-11-17",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "029871e7a6776f6d",
+   "recorded_at": "2026-11-18T03:29:04.794189+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E5%9C%B0%E5%BF%83%E5%BC%95%E5%8A%9B115%E5%B9%B4%E7%AC%AC-%E6%AC%A1%E8%82%A1%E6%9D%B1%E8%87%A8%E6%99%82%E6%9C%83%E9%87%8D%E8%A6%81%E6%B1%BA%E8%AD%B0%E4%BA%8B%E9%A0%85-143452461.html",
+   "type": "媒體報導",
+   "code": "3629",
+   "event_date": "2026-11-17",
+   "title": "【公告】地心引力115年第一次股東臨時會重要決議事項",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0202,
+   "pre_vol_spike": 1.272,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-17",
+   "weight": 1.0,
+   "ref_close": 12.1,
+   "ref_close_date": "2026-11-17",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "7c581f475da3a3f4",
+   "recorded_at": "2026-11-18T03:29:04.794189+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%9C%B0%E5%BF%83%E5%BC%95%E5%8A%9B-115%E5%B9%B4%E7%AC%AC-%E6%AC%A1%E8%82%A1%E6%9D%B1%E8%87%A8%E6%99%82%E6%9C%83%E9%87%8D%E8%A6%81%E6%B1%BA%E8%AD%B0%E4%BA%8B%E9%A0%85-142900774.html",
+   "type": "媒體報導",
+   "code": "3629",
+   "event_date": "2026-11-17",
+   "title": "地心引力 115年第一次股東臨時會重要決議事項",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0202,
+   "pre_vol_spike": 1.272,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-17",
+   "weight": 1.0,
+   "ref_close": 12.1,
+   "ref_close_date": "2026-11-17",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "1b2ceab9fd61cfa0",
+   "recorded_at": "2026-11-18T03:29:04.794189+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E5%AF%8C%E9%82%A6%E7%B6%9C%E5%90%88%E8%AD%89%E5%88%B8%E8%87%AA11%E6%9C%8819%E6%97%A5%E8%B5%B7%E5%8A%A0%E5%85%A5%E6%98%B1%E9%90%B3%E6%87%89%E6%9D%90%E8%88%88%E6%AB%83%E8%82%A1%E7%A5%A8%E6%8E%A8%E8%96%A6%E8%AD%89%E5%88%B8%E5%95%86-133620827.html",
+   "type": "媒體報導",
+   "code": "7932",
+   "event_date": "2026-11-17",
+   "title": "【公告】富邦綜合證券自11月19日起加入昱鐳應材興櫃股票推薦證券商",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": null,
+   "pre_vol_spike": null,
+   "reflected": "unknown",
+   "pre_volume_spike": null,
+   "reason": "價格序列不足（0<23 筆）",
+   "weight": 1.0,
+   "ref_close": null,
+   "ref_close_date": null,
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "40d8c2fa6992cfcb",
+   "recorded_at": "2026-11-18T03:29:04.794189+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E5%AF%8C%E9%82%A6%E7%B6%9C%E5%90%88%E8%AD%89%E5%88%B8%E8%87%AA11%E6%9C%8819%E6%97%A5%E8%B5%B7%E5%8A%A0%E5%85%A5%E5%89%B5%E9%89%85%E6%9D%90%E6%96%99%E8%88%88%E6%AB%83%E8%82%A1%E7%A5%A8%E6%8E%A8%E8%96%A6%E8%AD%89%E5%88%B8%E5%95%86-133618759.html",
+   "type": "媒體報導",
+   "code": "7918",
+   "event_date": "2026-11-17",
+   "title": "【公告】富邦綜合證券自11月19日起加入創鉅材料興櫃股票推薦證券商",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": null,
+   "pre_vol_spike": null,
+   "reflected": "unknown",
+   "pre_volume_spike": null,
+   "reason": "價格序列不足（0<23 筆）",
+   "weight": 1.0,
+   "ref_close": null,
+   "ref_close_date": null,
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "5b5ac51510ff6ec5",
+   "recorded_at": "2026-11-18T03:29:04.794189+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9884907",
+   "type": "媒體報導",
+   "code": "7901",
+   "event_date": "2026-11-17",
+   "title": "大大寬頻創固網寬頻獨立上市首例 拚12月中旬掛牌",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": null,
+   "pre_vol_spike": null,
+   "reflected": "unknown",
+   "pre_volume_spike": null,
+   "reason": "價格序列不足（0<23 筆）",
+   "weight": 1.0,
+   "ref_close": null,
+   "ref_close_date": null,
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "dc6e79c7873eb773",
+   "recorded_at": "2026-11-18T03:29:04.794189+08:00",
+   "layer": "L3",
+   "source": "中央社財經",
+   "source_id": "https://www.cna.com.tw/news/afe/202611170301.aspx",
+   "type": "媒體報導",
+   "code": "7901",
+   "event_date": "2026-11-17",
+   "title": "大大寬頻創固網寬頻獨立上市首例 拚12月中旬掛牌",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": null,
+   "pre_vol_spike": null,
+   "reflected": "unknown",
+   "pre_volume_spike": null,
+   "reason": "價格序列不足（0<23 筆）",
+   "weight": 1.0,
+   "ref_close": null,
+   "ref_close_date": null,
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "010f7c9682143953",
+   "recorded_at": "2026-11-18T03:29:04.794189+08:00",
+   "layer": "L3",
+   "source": "中央社財經",
+   "source_id": "https://www.cna.com.tw/news/afe/202611170294.aspx",
+   "type": "媒體報導",
+   "code": "2884",
+   "event_date": "2026-11-17",
+   "title": "玉山金前10月賺贏去年 黃男州：適度提高現金股利",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "中央社財經"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0064,
+   "pre_vol_spike": 1.414,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-17",
+   "weight": 1.0,
+   "ref_close": 46.65,
    "ref_close_date": "2026-11-17",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
    "entry_close": null,
