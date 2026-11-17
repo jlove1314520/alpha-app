@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-17T12:16:53+08:00",
+ "generated_at": "2026-11-18T02:37:04+08:00",
  "note": "休市日（全日不交易）；週末不列。台股來自 TWSE 官方日曆端點；美股依 NYSE 官方頁抄錄。",
  "tw": {
   "2026": {
@@ -29,22 +29,44 @@
     "2026-10-26",
     "2026-12-25"
    ],
-   "published": true,
-   "checked_at": "2026-11-11T02:21:38+08:00",
-   "source": "https://www.twse.com.tw/rwd/zh/holidaySchedule/holidaySchedule?response=json&queryYear=2026",
-   "unscheduled_closed": [
-    "2026-07-10",
-    "2026-10-23"
-   ],
-   "unscheduled_source": "TWSE FMTQIK 市場成交資訊（已過去月份的實際交易日；當月每日收盤後確認，當天另需官方報價檔資料日期佐證）",
-   "daily_confirm_through": "2026-11-16",
-   "daily_confirm_checked_at": "2026-11-17T03:46:00+08:00"
+   "published": false,
+   "checked_at": "2026-11-18T02:37:04+08:00",
+   "note": "TWSE 尚未公布 2026 年市場開休市日期（查詢回傳的是其他年度的表），公布後排程自動補上"
   },
   "2027": {
-   "closed": [],
-   "published": false,
-   "checked_at": "2026-11-11T02:21:38+08:00",
-   "note": "TWSE 尚未公布 2027 年市場開休市日期（查詢回傳的是其他年度的表），公布後排程自動補上"
+   "closed": [
+    "2027-01-01",
+    "2027-02-02",
+    "2027-02-03",
+    "2027-02-04",
+    "2027-02-05",
+    "2027-02-06",
+    "2027-02-07",
+    "2027-02-08",
+    "2027-02-09",
+    "2027-02-10",
+    "2027-02-28",
+    "2027-03-01",
+    "2027-04-04",
+    "2027-04-05",
+    "2027-04-06",
+    "2027-04-30",
+    "2027-05-01",
+    "2027-06-09",
+    "2027-09-15",
+    "2027-09-28",
+    "2027-10-10",
+    "2027-10-11",
+    "2027-10-25",
+    "2027-12-24",
+    "2027-12-25",
+    "2027-12-31"
+   ],
+   "published": true,
+   "checked_at": "2026-11-18T02:37:04+08:00",
+   "source": "https://www.twse.com.tw/rwd/zh/holidaySchedule/holidaySchedule?response=json&queryYear=2027",
+   "unscheduled_closed": [],
+   "unscheduled_source": "TWSE FMTQIK 市場成交資訊（已過去月份的實際交易日）"
   }
  },
  "us": {
