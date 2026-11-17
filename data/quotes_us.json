@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-11-17T01:52:48+00:00",
+  "fetched_at": "2026-11-17T07:46:19+00:00",
   "source": "Finnhub /quote（免費額度，regular quote）+ yfinance Ticker.info（extended_hours：pre/post market，2026-08-27新增）",
   "meta": {
     "trading_window": false,
@@ -7,9 +7,7 @@
     "queried": 9,
     "matched": 9,
     "extended_hours_matched": 9,
-    "sparkline_stale_tickers": [
-      "TSM"
-    ],
+    "sparkline_stale_tickers": [],
     "extended_hours_disclaimer": "延長交易時段（盤前/盤後）流動性低、價差大，僅接受限價單，價格常於隔日開盤反轉。"
   },
   "quotes": {
@@ -23,7 +21,6 @@
       "open": 159.015,
       "quote_time": 1794862800,
       "sparkline": [
-        217.09,
         216.47,
         221.97,
         212.21,
@@ -42,10 +39,11 @@
         168.89,
         173.73,
         166.19,
-        162.85
+        162.85,
+        156.14
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 156.14,
           "prev_close": 162.85,
@@ -72,7 +70,6 @@
       "open": 357.125,
       "quote_time": 1794862800,
       "sparkline": [
-        342.94,
         339.5,
         343.99,
         348.22,
@@ -91,10 +88,11 @@
         348.51,
         355.63,
         354.88,
-        356.27
+        356.27,
+        352.78
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 352.78,
           "prev_close": 356.27,
@@ -121,7 +119,6 @@
       "open": 525.09,
       "quote_time": 1794862800,
       "sparkline": [
-        533.52,
         531.87,
         532.95,
         521.08,
@@ -140,10 +137,11 @@
         533.16,
         521.13,
         523.0,
-        523.88
+        523.88,
+        517.99
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 517.99,
           "prev_close": 523.88,
@@ -189,10 +187,10 @@
         413.35,
         405.49,
         398.73,
-        377.02
+        373.45
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 373.45,
           "prev_close": 398.73,
@@ -219,7 +217,6 @@
       "open": 293.81,
       "quote_time": 1794862800,
       "sparkline": [
-        344.18,
         340.28,
         334.76,
         324.22,
@@ -238,10 +235,11 @@
         287.38,
         293.45,
         298.7,
-        295.77
+        295.77,
+        283.72
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 283.72,
           "prev_close": 295.77,
@@ -268,7 +266,6 @@
       "open": 262.395,
       "quote_time": 1794862800,
       "sparkline": [
-        262.45,
         262.63,
         262.37,
         250.38,
@@ -287,10 +284,11 @@
         270.87,
         266.17,
         267.44,
-        266.66
+        266.66,
+        257.75
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 257.75,
           "prev_close": 266.66,
@@ -317,7 +315,6 @@
       "open": 14.32,
       "quote_time": 1794862800,
       "sparkline": [
-        20.08,
         19.67,
         19.82,
         18.53,
@@ -336,10 +333,11 @@
         15.04,
         16.08,
         15.76,
-        15.4
+        15.4,
+        14.34
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 14.34,
           "prev_close": 15.4,
@@ -366,7 +364,6 @@
       "open": 33,
       "quote_time": 1794862800,
       "sparkline": [
-        40.8,
         40.77,
         42.41,
         37.74,
@@ -385,10 +382,11 @@
         35.48,
         37.82,
         36.29,
-        35.55
+        35.55,
+        32.8
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 32.8,
           "prev_close": 35.55,
@@ -415,7 +413,6 @@
       "open": 50.01,
       "quote_time": 1794862800,
       "sparkline": [
-        47.63,
         47.59,
         47.5,
         48.72,
@@ -434,10 +431,11 @@
         48.81,
         49.03,
         49.09,
-        49.87
+        49.87,
+        49.8
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 49.8,
           "prev_close": 49.87,
