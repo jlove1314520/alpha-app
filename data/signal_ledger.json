@@ -2,8 +2,8 @@
  "meta": {
   "created_at": "2026-10-11T14:17:33.521387+08:00",
   "schema_note": "B19 前瞻訊號台帳（非回測）：每筆在事件發生後 4 日內事前寫入，寫入後內容不可修改；entry_close 為寫入日之後第一個交易日收盤（避免前視）；returns.t5/t20/t60 由 update_signal_ledger_returns.py 只回填 null 欄位。status=待驗證線索 者不得影響任何評分。規格 research/B19_SIGNAL_LEDGER_SPEC.md。非投資建議。",
-  "last_build_at": "2026-11-19T02:04:59.583279+08:00",
-  "total_signals": 5436,
+  "last_build_at": "2026-11-19T03:08:37.196916+08:00",
+  "total_signals": 5451,
   "source": ".github/scripts/build_signal_ledger.py（讀 events.json L1＋news.json L3＋price_history.json）",
   "last_returns_backfill_at": "2026-11-19T02:05:01.854049+08:00",
   "entry_skipped": {
@@ -204103,6 +204103,540 @@
    "anchor_trade_date": "2026-11-18",
    "weight": 1.0,
    "ref_close": 2175.0,
+   "ref_close_date": "2026-11-18",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "024bfe66f1e99d83",
+   "recorded_at": "2026-11-19T03:08:37.196916+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5739/9887385",
+   "type": "媒體報導",
+   "code": "2454",
+   "event_date": "2026-11-19",
+   "title": "台積、聯發科 認購熱",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0125,
+   "pre_vol_spike": 1.275,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-18",
+   "weight": 1.0,
+   "ref_close": 3940.0,
+   "ref_close_date": "2026-11-18",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "5e75631c352c6f84",
+   "recorded_at": "2026-11-19T03:08:37.196916+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9887349",
+   "type": "媒體報導",
+   "code": "6153",
+   "event_date": "2026-11-19",
+   "title": "嘉聯益攻機器人 專案明年量產",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0485,
+   "pre_vol_spike": 0.445,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-18",
+   "weight": 1.0,
+   "ref_close": 14.7,
+   "ref_close_date": "2026-11-18",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "42c5c60f5194b876",
+   "recorded_at": "2026-11-19T03:08:37.196916+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E7%81%A3%E5%A4%A7-%E6%9C%AC%E5%85%AC%E5%8F%B8%E8%88%87%E9%80%9A%E5%82%B3%E6%9C%83%E6%9C%89%E9%97%9C%E9%A0%BB%E8%AD%9C%E9%99%84%E6%AC%BE%E8%A8%B4%E8%A8%9F%E5%88%A4%E6%B1%BA%E8%AA%AA%E6%98%8E-150900541.html",
+   "type": "媒體報導",
+   "code": "3045",
+   "event_date": "2026-11-18",
+   "title": "台灣大 本公司與通傳會有關頻譜附款訴訟判決說明",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0116,
+   "pre_vol_spike": 0.788,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-18",
+   "weight": 1.0,
+   "ref_close": 127.5,
+   "ref_close_date": "2026-11-18",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "2665b8c4604f5485",
+   "recorded_at": "2026-11-19T03:08:37.196916+08:00",
+   "layer": "L3",
+   "source": "經濟日報焦點",
+   "source_id": "https://money.udn.com/money/story/123398/9887576",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-11-18",
+   "title": "美股早盤／輝達財報亮眼也難救 大盤由紅翻黑 台積電 ADR 跌0.4%",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0919,
+   "pre_vol_spike": 1.537,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-18",
+   "weight": 1.0,
+   "ref_close": 2175.0,
+   "ref_close_date": "2026-11-18",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "b3c14d77cd23f0ba",
+   "recorded_at": "2026-11-19T03:08:37.196916+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E8%97%A5%E8%8F%AF%E8%97%A5%E6%96%B0%E8%97%A5besremi-ropeginterferon-alfa-2b-145315765.html",
+   "type": "媒體報導",
+   "code": "6446",
+   "event_date": "2026-11-18",
+   "title": "【公告】藥華藥新藥BESREMi（Ropeginterferon alfa-2b）向巴西衛生部衛生監督局申請新增適應症，新增適應症為原發性血小板過多症（ET）",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0674,
+   "pre_vol_spike": 1.172,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-18",
+   "weight": 1.0,
+   "ref_close": 1245.0,
+   "ref_close_date": "2026-11-18",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "ec7ac2fa431365e8",
+   "recorded_at": "2026-11-19T03:08:37.196916+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E8%97%A5%E8%8F%AF%E8%97%A5-%E6%9C%AC%E5%85%AC%E5%8F%B8%E6%96%B0%E8%97%A5besremi-ropeginterferon-alfa-2b-144900956.html",
+   "type": "媒體報導",
+   "code": "6446",
+   "event_date": "2026-11-18",
+   "title": "藥華藥 本公司新藥BESREMi（Ropeginterferon alfa-2b）向巴西衛生部衛生監督局申請新增適應症，新增適應症為原發性血小板過多症...",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0674,
+   "pre_vol_spike": 1.172,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-18",
+   "weight": 1.0,
+   "ref_close": 1245.0,
+   "ref_close_date": "2026-11-18",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "4a58590fd0908f85",
+   "recorded_at": "2026-11-19T03:08:37.196916+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E5%A4%A7%E8%BB%8A%E9%9A%8A%E4%BB%A3%E9%87%8D%E8%A6%81%E5%AD%90%E5%85%AC%E5%8F%B8%E5%85%A8%E7%90%83%E5%95%86%E5%8B%99%E7%A7%91%E6%8A%80%E8%82%A1%E4%BB%BD%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8%E5%85%AC%E5%91%8A%E8%B3%87%E9%80%9A%E5%AE%89%E5%85%A8%E4%BA%8B%E4%BB%B6-141308444.html",
+   "type": "媒體報導",
+   "code": "2640",
+   "event_date": "2026-11-18",
+   "title": "【公告】大車隊代重要子公司全球商務科技股份有限公司公告資通安全事件",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0575,
+   "pre_vol_spike": 0.468,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-18",
+   "weight": 1.0,
+   "ref_close": 138.0,
+   "ref_close_date": "2026-11-18",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "96d08e40f9aa1cd2",
+   "recorded_at": "2026-11-19T03:08:37.196916+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%A4%A7%E8%BB%8A%E9%9A%8A-%E4%BB%A3%E9%87%8D%E8%A6%81%E5%AD%90%E5%85%AC%E5%8F%B8%E5%85%A8%E7%90%83%E5%95%86%E5%8B%99%E7%A7%91%E6%8A%80%E8%82%A1%E4%BB%BD%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8%E5%85%AC%E5%91%8A%E8%B3%87%E9%80%9A%E5%AE%89%E5%85%A8%E4%BA%8B%E4%BB%B6-140400880.html",
+   "type": "媒體報導",
+   "code": "2640",
+   "event_date": "2026-11-18",
+   "title": "大車隊 代重要子公司全球商務科技股份有限公司公告資通安全事件",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0575,
+   "pre_vol_spike": 0.468,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-18",
+   "weight": 1.0,
+   "ref_close": 138.0,
+   "ref_close_date": "2026-11-18",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "f6989f015aa5c7bc",
+   "recorded_at": "2026-11-19T03:08:37.196916+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E9%9B%B2%E8%B1%B9%E8%83%BD%E6%BA%90%E5%8F%97%E9%82%80%E5%8F%83%E5%8A%A0%E5%87%B1%E5%9F%BA%E8%AD%89%E5%88%B8%E8%82%A1%E4%BB%BD%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8%E4%B8%BB%E8%BE%A6%E4%B9%8B%E6%B3%95%E4%BA%BA%E8%AA%AA%E6%98%8E%E6%9C%83-%E5%90%91%E6%8A%95%E8%B3%87%E4%BA%BA%E8%AA%AA%E6%98%8E%E9%9B%B2%E8%B1%B9%E8%83%BD%E6%BA%90%E4%B9%8B%E7%87%9F%E9%81%8B%E6%A6%82%E6%B3%81-%E8%B2%A1%E5%8B%99%E5%8F%8A%E6%A5%AD%E5%8B%99%E7%9B%B8%E9%97%9C%E8%B3%87%E8%A8%8A-140304099.html",
+   "type": "媒體報導",
+   "code": "6869",
+   "event_date": "2026-11-18",
+   "title": "【公告】雲豹能源受邀參加凱基證券股份有限公司主辦之法人說明會， 向投資人說明雲豹能源之營運概況、財務及業務相關資訊。",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0087,
+   "pre_vol_spike": 1.31,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-18",
+   "weight": 1.0,
+   "ref_close": 58.2,
+   "ref_close_date": "2026-11-18",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "9a2fb22b9ebf79ff",
+   "recorded_at": "2026-11-19T03:08:37.196916+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E9%9B%B2%E8%B1%B9%E8%83%BD%E6%BA%90-%E6%9C%AC%E5%85%AC%E5%8F%B8%E5%8F%97%E9%82%80%E5%8F%83%E5%8A%A0%E5%87%B1%E5%9F%BA%E8%AD%89%E5%88%B8%E8%82%A1%E4%BB%BD%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8%E4%B8%BB%E8%BE%A6%E4%B9%8B%E6%B3%95%E4%BA%BA%E8%AA%AA%E6%98%8E%E6%9C%83-%E5%90%91%E6%8A%95%E8%B3%87%E4%BA%BA%E8%AA%AA%E6%98%8E%E6%9C%AC%E5%85%AC%E5%8F%B8%E4%B9%8B%E7%87%9F%E9%81%8B%E6%A6%82%E6%B3%81-%E8%B2%A1%E5%8B%99%E5%8F%8A%E6%A5%AD%E5%8B%99%E7%9B%B8%E9%97%9C%E8%B3%87%E8%A8%8A-135900301.html",
+   "type": "媒體報導",
+   "code": "6869",
+   "event_date": "2026-11-18",
+   "title": "雲豹能源 本公司受邀參加凱基證券股份有限公司主辦之法人說明會， 向投資人說明本公司之營運概況、財務及業務相關資訊。",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0087,
+   "pre_vol_spike": 1.31,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-18",
+   "weight": 1.0,
+   "ref_close": 58.2,
+   "ref_close_date": "2026-11-18",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "07219e9f30e47624",
+   "recorded_at": "2026-11-19T03:08:37.196916+08:00",
+   "layer": "L3",
+   "source": "中央社財經",
+   "source_id": "https://www.cna.com.tw/news/afe/202611180316.aspx",
+   "type": "媒體報導",
+   "code": "2368",
+   "event_date": "2026-11-18",
+   "title": "證交所：創意、欣興、金像電、華通違約交割 合計2.66億",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "中央社財經"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1648,
+   "pre_vol_spike": 0.999,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-18",
+   "weight": 1.0,
+   "ref_close": 877.0,
+   "ref_close_date": "2026-11-18",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "481620402c2fc764",
+   "recorded_at": "2026-11-19T03:08:37.196916+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9887217",
+   "type": "媒體報導",
+   "code": "2027",
+   "event_date": "2026-11-18",
+   "title": "友輝：投入光波導與半導體封裝領域 拚2027、2028年放量",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0729,
+   "pre_vol_spike": 2.202,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-11-18",
+   "weight": 0.5,
+   "ref_close": 46.45,
+   "ref_close_date": "2026-11-18",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "c65c65c1ea2232a4",
+   "recorded_at": "2026-11-19T03:08:37.196916+08:00",
+   "layer": "L3",
+   "source": "中央社財經",
+   "source_id": "https://www.cna.com.tw/news/afe/202611180306.aspx",
+   "type": "媒體報導",
+   "code": "2027",
+   "event_date": "2026-11-18",
+   "title": "友輝：投入光波導與半導體封裝領域 拚2027、2028年放量",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0729,
+   "pre_vol_spike": 2.202,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-11-18",
+   "weight": 0.5,
+   "ref_close": 46.45,
+   "ref_close_date": "2026-11-18",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "1f205127fb26a26d",
+   "recorded_at": "2026-11-19T03:08:37.196916+08:00",
+   "layer": "L3",
+   "source": "中央社財經",
+   "source_id": "https://www.cna.com.tw/news/afe/202611180304.aspx",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-11-18",
+   "title": "外資賣超台股逾765億元 調節台積電逾1.5萬張",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0919,
+   "pre_vol_spike": 1.537,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-18",
+   "weight": 1.0,
+   "ref_close": 2175.0,
+   "ref_close_date": "2026-11-18",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "8ee25bcd7dbfc0a0",
+   "recorded_at": "2026-11-19T03:08:37.196916+08:00",
+   "layer": "L3",
+   "source": "中央社財經",
+   "source_id": "https://www.cna.com.tw/news/afe/202611180283.aspx",
+   "type": "媒體報導",
+   "code": "2945",
+   "event_date": "2026-11-18",
+   "title": "三商家購股臨會通過轉型更名眾聯投控",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0066,
+   "pre_vol_spike": 1.706,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-18",
+   "weight": 1.0,
+   "ref_close": 38.4,
    "ref_close_date": "2026-11-18",
    "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
    "entry_close": null,
