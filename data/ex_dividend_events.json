@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated_at": "2026-11-18T11:12:07.697818+08:00",
-    "last_fetch_count": 47,
-    "reductions_generated_at": "2026-11-18T11:12:29.772065+08:00"
+    "generated_at": "2026-11-19T02:03:33.620646+08:00",
+    "last_fetch_count": 48,
+    "reductions_generated_at": "2026-11-19T02:03:41.082386+08:00"
   },
   "events": {
     "01010T": [
@@ -2713,7 +2713,10 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-11-16",
-        "applied": false
+        "applied": true,
+        "official_factor": 0.984093763080787,
+        "official_source": "TWSE TWT49U",
+        "factor_applied": 0.984093763080787
       }
     ],
     "00994A": [
@@ -3730,7 +3733,10 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-11-16",
-        "applied": false
+        "applied": true,
+        "official_factor": 0.9946488294314382,
+        "official_source": "TWSE TWT49U",
+        "factor_applied": 0.9946488294314382
       }
     ],
     "01007T": [
@@ -4316,6 +4322,16 @@
         "first_seen": "2026-10-20",
         "applied": true,
         "factor_applied": 0.9938900203665987
+      },
+      {
+        "ex_date": "2026-11-18",
+        "official_factor": 0.9938775510204081,
+        "pre_close": 9.8,
+        "ref_price": 9.74,
+        "source": "TPEx exDailyQ",
+        "first_seen": "2026-11-18",
+        "applied": true,
+        "factor_applied": 0.9938775510204081
       }
     ],
     "0056": [
@@ -4367,6 +4383,16 @@
         "first_seen": "2026-10-21",
         "applied": true,
         "factor_applied": 0.9936753338018272
+      },
+      {
+        "ex_date": "2026-11-18",
+        "official_factor": 0.9937062937062937,
+        "pre_close": 14.3,
+        "ref_price": 14.21,
+        "source": "TPEx exDailyQ",
+        "first_seen": "2026-11-18",
+        "applied": true,
+        "factor_applied": 0.9937062937062937
       }
     ],
     "00907": [
@@ -4600,7 +4626,10 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-11-04",
-        "applied": false
+        "applied": true,
+        "official_factor": 0.9819004524886877,
+        "official_source": "TWSE TWT49U",
+        "factor_applied": 0.9819004524886877
       }
     ],
     "5434": [
@@ -4612,7 +4641,10 @@
         "rights_price": 0.0,
         "type": "權",
         "first_seen": "2026-11-04",
-        "applied": false
+        "applied": true,
+        "official_factor": 0.997907949790795,
+        "official_source": "TWSE TWT49U",
+        "factor_applied": 0.997907949790795
       }
     ],
     "009823": [
@@ -4966,7 +4998,10 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-11-16",
-        "applied": false
+        "applied": true,
+        "official_factor": 0.9809968847352025,
+        "official_source": "TWSE TWT49U",
+        "factor_applied": 0.9809968847352025
       }
     ],
     "00949": [
@@ -4978,7 +5013,10 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-11-16",
-        "applied": false
+        "applied": true,
+        "official_factor": 0.8648769574944071,
+        "official_source": "TWSE TWT49U",
+        "factor_applied": 0.8648769574944071
       }
     ],
     "020038": [
@@ -5219,6 +5257,114 @@
         "first_seen": "2026-11-17",
         "applied": true,
         "factor_applied": 0.9872448979591837
+      }
+    ],
+    "0051": [
+      {
+        "ex_date": "2026-11-20",
+        "cash": 4.5,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.0,
+        "rights_price": 0.0,
+        "type": "息",
+        "first_seen": "2026-11-18",
+        "applied": false
+      }
+    ],
+    "0055": [
+      {
+        "ex_date": "2026-11-20",
+        "cash": 2.7,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.0,
+        "rights_price": 0.0,
+        "type": "息",
+        "first_seen": "2026-11-18",
+        "applied": false
+      }
+    ],
+    "00771": [
+      {
+        "ex_date": "2026-11-20",
+        "cash": 0.21,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.0,
+        "rights_price": 0.0,
+        "type": "息",
+        "first_seen": "2026-11-18",
+        "applied": false
+      }
+    ],
+    "00850": [
+      {
+        "ex_date": "2026-11-20",
+        "cash": 1.0,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.0,
+        "rights_price": 0.0,
+        "type": "息",
+        "first_seen": "2026-11-18",
+        "applied": false
+      }
+    ],
+    "3701": [
+      {
+        "ex_date": "2026-12-04",
+        "cash": 0.199892,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.0,
+        "rights_price": 0.0,
+        "type": "息",
+        "first_seen": "2026-11-18",
+        "applied": false
+      }
+    ],
+    "00758B": [
+      {
+        "ex_date": "2026-11-18",
+        "official_factor": 0.9877952755905512,
+        "pre_close": 50.8,
+        "ref_price": 50.18,
+        "source": "TPEx exDailyQ",
+        "first_seen": "2026-11-18",
+        "applied": true,
+        "factor_applied": 0.9877952755905512
+      }
+    ],
+    "00759B": [
+      {
+        "ex_date": "2026-11-18",
+        "official_factor": 0.9878731343283582,
+        "pre_close": 53.6,
+        "ref_price": 52.95,
+        "source": "TPEx exDailyQ",
+        "first_seen": "2026-11-18",
+        "applied": true,
+        "factor_applied": 0.9878731343283582
+      }
+    ],
+    "00760B": [
+      {
+        "ex_date": "2026-11-18",
+        "official_factor": 0.9864114832535885,
+        "pre_close": 52.25,
+        "ref_price": 51.54,
+        "source": "TPEx exDailyQ",
+        "first_seen": "2026-11-18",
+        "applied": true,
+        "factor_applied": 0.9864114832535885
+      }
+    ],
+    "00768B": [
+      {
+        "ex_date": "2026-11-18",
+        "official_factor": 0.9825138860316807,
+        "pre_close": 48.61,
+        "ref_price": 47.76,
+        "source": "TPEx exDailyQ",
+        "first_seen": "2026-11-18",
+        "applied": true,
+        "factor_applied": 0.9825138860316807
       }
     ]
   },
