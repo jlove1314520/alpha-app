@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-11-19T04:16:53+00:00",
+  "fetched_at": "2026-11-19T07:14:31+00:00",
   "source": "Finnhub /quote（免費額度，regular quote）+ yfinance Ticker.info（extended_hours：pre/post market，2026-08-27新增）",
   "meta": {
     "trading_window": false,
@@ -7,7 +7,9 @@
     "queried": 9,
     "matched": 9,
     "extended_hours_matched": 9,
-    "sparkline_stale_tickers": [],
+    "sparkline_stale_tickers": [
+      "GOOGL"
+    ],
     "extended_hours_disclaimer": "延長交易時段（盤前/盤後）流動性低、價差大，僅接受限價單，價格常於隔日開盤反轉。"
   },
   "quotes": {
@@ -43,7 +45,7 @@
         150.96
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 150.96,
           "prev_close": 155.46,
@@ -92,7 +94,7 @@
         352.45
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 352.45,
           "prev_close": 351.91,
@@ -141,7 +143,7 @@
         508.29
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 508.29,
           "prev_close": 506.24,
@@ -190,7 +192,7 @@
         362.62
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 362.62,
           "prev_close": 359.69,
@@ -239,7 +241,7 @@
         282.44
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 282.44,
           "prev_close": 280.2,
@@ -288,7 +290,7 @@
         267.74
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 267.74,
           "prev_close": 257.89,
@@ -337,7 +339,7 @@
         13.96
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 13.96,
           "prev_close": 14.14,
@@ -386,7 +388,7 @@
         32.52
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 32.52,
           "prev_close": 31.83,
@@ -435,7 +437,7 @@
         49.62
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PREPRE",
         "regular": {
           "price": 49.62,
           "prev_close": 49.38,
