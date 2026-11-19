@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-19T22:09:09+08:00",
+ "generated_at": "2026-11-20T02:26:28+08:00",
  "note": "前向模擬追蹤檔新鮮度＋起跑日檢查；只讀 generated_at／started／start_not_before／last_error，帳本（paper_10～18）只讀 date 欄查重複／漏記；不讀淨值與報酬",
  "rules": {
   "stale_trading_days_gt": 2,
@@ -13,7 +13,7 @@
    "file": "paper_5.json",
    "status": "OK",
    "issues": [],
-   "generated_at": "2026-11-19T22:08:47+08:00",
+   "generated_at": "2026-11-20T02:26:11+08:00",
    "started": true,
    "start_not_before": "2026-11-02",
    "trading_days_since_generated": 0
@@ -22,7 +22,7 @@
    "file": "paper_6.json",
    "status": "OK",
    "issues": [],
-   "generated_at": "2026-11-19T22:08:50+08:00",
+   "generated_at": "2026-11-20T02:26:14+08:00",
    "started": true,
    "start_not_before": "2026-11-02",
    "trading_days_since_generated": 0
@@ -31,7 +31,7 @@
    "file": "paper_7.json",
    "status": "OK",
    "issues": [],
-   "generated_at": "2026-11-19T22:08:51+08:00",
+   "generated_at": "2026-11-20T02:26:14+08:00",
    "started": true,
    "start_not_before": "2026-11-02",
    "trading_days_since_generated": 0
@@ -40,7 +40,7 @@
    "file": "paper_8.json",
    "status": "OK",
    "issues": [],
-   "generated_at": "2026-11-19T22:08:59+08:00",
+   "generated_at": "2026-11-20T02:26:20+08:00",
    "started": false,
    "start_not_before": "2026-12-01",
    "trading_days_since_generated": 0
@@ -49,18 +49,18 @@
    "file": "paper_9.json",
    "status": "STALE",
    "issues": [
-    "generated_at 之後已過 6 個交易日未更新（上限 2）（2026 年官方休市日未公布，只排除週末，交易日數可能高估）"
+    "generated_at 之後已過 7 個交易日未更新（上限 2）（2026 年官方休市日未公布，只排除週末，交易日數可能高估）"
    ],
    "generated_at": "2026-11-11T18:30:15+08:00",
    "started": true,
    "start_not_before": "2026-11-02",
-   "trading_days_since_generated": 6
+   "trading_days_since_generated": 7
   },
   {
    "file": "paper_10.json",
    "status": "OK",
    "issues": [],
-   "generated_at": "2026-11-19T22:09:00+08:00",
+   "generated_at": "2026-11-20T02:26:21+08:00",
    "started": false,
    "start_not_before": "2026-12-01",
    "trading_days_since_generated": 0,
@@ -70,7 +70,7 @@
    "file": "paper_11.json",
    "status": "OK",
    "issues": [],
-   "generated_at": "2026-11-19T22:09:01+08:00",
+   "generated_at": "2026-11-20T02:26:22+08:00",
    "started": false,
    "start_not_before": "2026-12-01",
    "trading_days_since_generated": 0,
@@ -80,7 +80,7 @@
    "file": "paper_12.json",
    "status": "STALE",
    "issues": [
-    "generated_at 之後已過 6 個交易日未更新（上限 2）（2026 年官方休市日未公布，只排除週末，交易日數可能高估）"
+    "generated_at 之後已過 7 個交易日未更新（上限 2）（2026 年官方休市日未公布，只排除週末，交易日數可能高估）"
    ],
    "gate": {
     "streak_achieved_on": null,
@@ -89,14 +89,14 @@
    "generated_at": "2026-11-11T17:44:18+08:00",
    "started": false,
    "start_not_before": "2026-12-01",
-   "trading_days_since_generated": 6,
+   "trading_days_since_generated": 7,
    "ledger": null
   },
   {
    "file": "paper_13.json",
    "status": "OK",
    "issues": [],
-   "generated_at": "2026-11-19T22:09:02+08:00",
+   "generated_at": "2026-11-20T02:26:23+08:00",
    "started": false,
    "start_not_before": "2027-01-04",
    "trading_days_since_generated": 0,
@@ -106,7 +106,7 @@
    "file": "paper_14.json",
    "status": "OK",
    "issues": [],
-   "generated_at": "2026-11-19T22:09:03+08:00",
+   "generated_at": "2026-11-20T02:26:23+08:00",
    "started": false,
    "start_not_before": "2027-01-04",
    "trading_days_since_generated": 0,
@@ -116,7 +116,7 @@
    "file": "paper_15.json",
    "status": "OK",
    "issues": [],
-   "generated_at": "2026-11-19T22:09:04+08:00",
+   "generated_at": "2026-11-20T02:26:24+08:00",
    "started": false,
    "start_not_before": "2027-01-04",
    "trading_days_since_generated": 0,
@@ -126,7 +126,7 @@
    "file": "paper_16.json",
    "status": "OK",
    "issues": [],
-   "generated_at": "2026-11-19T22:09:05+08:00",
+   "generated_at": "2026-11-20T02:26:25+08:00",
    "started": false,
    "start_not_before": "2027-01-04",
    "trading_days_since_generated": 0,
@@ -136,7 +136,7 @@
    "file": "paper_17.json",
    "status": "OK",
    "issues": [],
-   "generated_at": "2026-11-19T22:09:06+08:00",
+   "generated_at": "2026-11-20T02:26:26+08:00",
    "started": false,
    "start_not_before": "2027-01-04",
    "trading_days_since_generated": 0,
@@ -146,7 +146,7 @@
    "file": "paper_18.json",
    "status": "OK",
    "issues": [],
-   "generated_at": "2026-11-19T22:09:08+08:00",
+   "generated_at": "2026-11-20T02:26:26+08:00",
    "started": false,
    "start_not_before": "2027-01-04",
    "trading_days_since_generated": 0,
