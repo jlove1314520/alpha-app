@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated_at": "2026-11-19T10:52:23.151686+08:00",
-    "last_fetch_count": 23,
-    "reductions_generated_at": "2026-11-19T10:52:30.290373+08:00"
+    "generated_at": "2026-11-19T22:07:03.153008+08:00",
+    "last_fetch_count": 24,
+    "reductions_generated_at": "2026-11-19T22:07:12.841042+08:00"
   },
   "events": {
     "01010T": [
@@ -1598,7 +1598,10 @@
         "rights_price": 0.0,
         "type": "權",
         "first_seen": "2026-11-05",
-        "applied": false
+        "applied": true,
+        "official_factor": 0.9828252788104089,
+        "official_source": "TWSE TWT49U",
+        "factor_applied": 0.9828252788104089
       }
     ],
     "2330": [
@@ -3748,7 +3751,10 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-10-19",
-        "applied": false
+        "applied": true,
+        "official_factor": 0.9801801801801803,
+        "official_source": "TWSE TWT49U",
+        "factor_applied": 0.9801801801801803
       }
     ],
     "8467": [
@@ -5365,6 +5371,18 @@
         "first_seen": "2026-11-18",
         "applied": true,
         "factor_applied": 0.9825138860316807
+      }
+    ],
+    "2345": [
+      {
+        "ex_date": "2026-12-04",
+        "cash": 0.0,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.01782156,
+        "rights_price": 0.0,
+        "type": "權",
+        "first_seen": "2026-11-19",
+        "applied": false
       }
     ]
   },
