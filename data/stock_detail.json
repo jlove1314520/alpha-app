@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-11-21T01:46:33.466593+08:00",
+    "generated_at": "2026-11-21T02:51:31.947256+08:00",
     "financials_source": "TWSE openapi t187ap06_L_ci(綜合損益表-一般業) + t187ap07_L_ci(資產負債表-一般業)",
     "financials_updated_count": 1050,
     "errors": [],
@@ -1034,7 +1034,7 @@
     },
     "margin_data_dates": {
       "twse": null,
-      "twse_basis": "同班 rwd MI_MARGN 沒有逐股資料，無法比對",
+      "twse_basis": "openapi 與 rwd 2026-11-20 只有 7.6% 相同（<98%），不推定",
       "tpex": "2026-11-20",
       "tpex_basis": "TPEx 回應 Date 欄",
       "tpex_codes": [
@@ -1962,7 +1962,7 @@
         "9960",
         "9962"
       ],
-      "recorded_at": "2026-11-21T01:50:32+08:00"
+      "recorded_at": "2026-11-21T02:54:34+08:00"
     },
     "roe_cleared_nonconsecutive_codes": [],
     "financials_backfill_display_merge": {
@@ -1973,7 +1973,7 @@
       "eps_mismatch_passed": {
         "2885": "eps 加總 2.68 vs 官方累計 2.64"
       },
-      "generated_at": "2026-11-21T01:46:33.520108+08:00",
+      "generated_at": "2026-11-21T02:51:32.003467+08:00",
       "mode": "daily"
     },
     "financials_half_year_period": {
@@ -2183,7 +2183,7 @@
         "q2_q4_pair": 1326,
         "prior_year_half": 4
       },
-      "generated_at": "2026-11-21T01:46:33.749164+08:00",
+      "generated_at": "2026-11-21T02:51:32.241629+08:00",
       "mode": "daily"
     },
     "roe_recomputed_after_backfill_merge": {
@@ -2198,14 +2198,14 @@
       "fixed_by_neighbor_shares": 0,
       "fixed_codes": [],
       "left_unverifiable": 208,
-      "generated_at": "2026-11-21T01:46:33.755336+08:00",
+      "generated_at": "2026-11-21T02:51:32.247988+08:00",
       "mode": "daily"
     },
     "financials_backfill_eps_outlier_fix": {
       "note": "回補季 EPS 推得股數低於前後兩季（兩季彼此一致）平均 >30% 時，EPS 改成淨利÷相鄰季平均股數，原值存 eps_raw（先.一三五-1mu）",
       "fixed_rows": 0,
       "fixed": {},
-      "generated_at": "2026-11-21T01:46:33.772591+08:00",
+      "generated_at": "2026-11-21T02:51:32.265883+08:00",
       "mode": "daily"
     },
     "financials_share_base_restate": {
@@ -2329,7 +2329,7 @@
       },
       "skipped_rows_with_other_basis": [],
       "errors": [],
-      "generated_at": "2026-11-21T01:46:34.132049+08:00",
+      "generated_at": "2026-11-21T02:51:32.650892+08:00",
       "mode": "daily"
     },
     "financials_shares_implied_fix": {
@@ -2458,7 +2458,7 @@
         "9943 股本÷10=125172 推得=84633"
       ],
       "errors": [],
-      "generated_at": "2026-11-21T01:46:34.147584+08:00",
+      "generated_at": "2026-11-21T02:51:32.666159+08:00",
       "mode": "daily"
     },
     "financials_official_eps_outlier_fix": {
@@ -2470,7 +2470,7 @@
         "6514 2023Q4 eps=0.8：再外一季股數不一致或缺",
         "8480 2021Q2 eps=1.48：再外一季股數不一致或缺"
       ],
-      "generated_at": "2026-11-21T01:46:33.945142+08:00",
+      "generated_at": "2026-11-21T02:51:32.450881+08:00",
       "mode": "daily"
     }
   },
