@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-11-21T03:33:47+00:00",
+  "fetched_at": "2026-11-21T06:56:21+00:00",
   "source": "Finnhub /quote（免費額度，regular quote）+ yfinance Ticker.info（extended_hours：pre/post market，2026-08-27新增）",
   "meta": {
     "trading_window": false,
@@ -7,9 +7,7 @@
     "queried": 9,
     "matched": 9,
     "extended_hours_matched": 9,
-    "sparkline_stale_tickers": [
-      "UMC"
-    ],
+    "sparkline_stale_tickers": [],
     "extended_hours_disclaimer": "延長交易時段（盤前/盤後）流動性低、價差大，僅接受限價單，價格常於隔日開盤反轉。"
   },
   "quotes": {
@@ -45,7 +43,7 @@
         125.53
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "CLOSED",
         "regular": {
           "price": 125.53,
           "prev_close": 145.98,
@@ -94,7 +92,7 @@
         342.56
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "CLOSED",
         "regular": {
           "price": 342.56,
           "prev_close": 349.21,
@@ -143,7 +141,7 @@
         484.52
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "CLOSED",
         "regular": {
           "price": 484.52,
           "prev_close": 498.3,
@@ -192,7 +190,7 @@
         318.71
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "CLOSED",
         "regular": {
           "price": 318.71,
           "prev_close": 352.09,
@@ -241,7 +239,7 @@
         265.29
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "CLOSED",
         "regular": {
           "price": 265.29,
           "prev_close": 272.66,
@@ -290,7 +288,7 @@
         246.82
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "CLOSED",
         "regular": {
           "price": 246.82,
           "prev_close": 257.37,
@@ -339,7 +337,7 @@
         12.04
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "CLOSED",
         "regular": {
           "price": 12.04,
           "prev_close": 13.4,
@@ -388,7 +386,7 @@
         26.27
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "CLOSED",
         "regular": {
           "price": 26.27,
           "prev_close": 30.49,
@@ -437,7 +435,7 @@
         49.08
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "CLOSED",
         "regular": {
           "price": 49.08,
           "prev_close": 49.55,
