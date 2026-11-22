@@ -1,12 +1,12 @@
 {
- "generated_at": "2026-11-21T23:37:36.408Z",
+ "generated_at": "2026-11-22T23:50:06.801Z",
  "url": "https://jlove1314520.github.io/alpha-app",
  "all_passed": false,
  "crashed": false,
  "crash_error": null,
  "total": 189,
- "passed": 187,
- "failed": 2,
+ "passed": 186,
+ "failed": 3,
  "failures": [
   {
    "name": "108. 價格歷史全市場缺日自測通過；選股紀錄資料不完整批次有標註、曲線檔批次數與帳本一致（先.八十-9）",
@@ -15,9 +15,13 @@
   {
    "name": "122. 過期資料標出資料月份與原因（進出口／工業生產／供給觀察），dependency_status 每週落地（先.八十一-14）",
    "detail": "dependency_status.json 超過 8 天沒更新（2026-11-09T08:00:05.127501+08:00）"
+  },
+  {
+   "name": "179. 資料過期：紅條＋卡片標紅＋狀態列不准綠；資料新就不顯示；強制更新保留自選股與 SW 註冊；SW 立即接手＋資料網路優先（先.一四八-1）",
+   "detail": "強制更新按鈕高 43.99998474121094"
   }
  ],
  "global_errors_final": [],
- "run_url": "https://github.com/jlove1314520/alpha-app/actions/runs/44962213008",
- "commit": "90074a849"
+ "run_url": "https://github.com/jlove1314520/alpha-app/actions/runs/45084775875",
+ "commit": "389c4c0df"
 }
