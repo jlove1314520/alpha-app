@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated_at": "2026-11-21T10:54:20.210535+08:00",
+    "generated_at": "2026-11-23T23:05:54.654979+08:00",
     "last_fetch_count": 20,
-    "reductions_generated_at": "2026-11-21T10:54:27.365178+08:00"
+    "reductions_generated_at": "2026-11-23T23:06:02.350791+08:00"
   },
   "events": {
     "01010T": [
@@ -5487,6 +5487,30 @@
         "applied": true,
         "factor_applied": 0.988257107540173
       }
+    ],
+    "4414": [
+      {
+        "ex_date": "2026-12-08",
+        "cash": 0.00915,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.0,
+        "rights_price": 0.0,
+        "type": "息",
+        "first_seen": "2026-11-23",
+        "applied": false
+      }
+    ],
+    "6277": [
+      {
+        "ex_date": "2026-12-08",
+        "cash": 2.3,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.0,
+        "rights_price": 0.0,
+        "type": "息",
+        "first_seen": "2026-11-23",
+        "applied": false
+      }
     ]
   },
   "reductions": {
@@ -5717,7 +5741,8 @@
         "ref_price": 36.25,
         "reason": "退還股款",
         "first_seen": "2026-11-11",
-        "applied": false
+        "applied": true,
+        "factor_applied": 1.1693548387096775
       }
     ]
   }
