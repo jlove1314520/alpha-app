@@ -1,13 +1,13 @@
 {
- "fetched_at": "2026-11-23T05:19:06.656971+08:00",
+ "fetched_at": "2026-11-23T09:51:07.097820+08:00",
  "source": "TWSE/TPEx 重大訊息＋TWSE 月營收＋既有除權息檔（全部官方端點）",
  "keep_days": 90,
  "importance_version": "v0（2026-10-18 先.一一〇-9）",
  "meta": {
   "twse_mops": {
    "ok": true,
-   "rows": 3,
-   "kept": 3
+   "rows": 2,
+   "kept": 2
   },
   "tpex_mops": {
    "ok": true,
@@ -25,7 +25,7 @@
    "note": "沿用既有排程產物，未額外請求"
   }
  },
- "count": 15340,
+ "count": 15342,
  "events": [
   {
    "code": "1707",
@@ -158,19 +158,9 @@
    "importance": 5
   },
   {
-   "code": "3711",
-   "name": "日月光投控",
-   "date": "2026-11-21",
-   "type": "其他",
-   "title": "補充說明子公司環旭電子(股)公司115年10月28日公告",
-   "source": "TWSE 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
-  },
-  {
    "code": "2072",
    "name": "世紀能源",
-   "date": "2026-11-21",
+   "date": "2026-11-22",
    "type": "其他",
    "title": "公告本公司名稱由「世紀離岸風電設備股份有限公司」更名 為「世紀能源設備股份有限公司」，公告期間：115年8月26日至 115年11月25日。",
    "source": "TWSE 重大訊息",
@@ -178,14 +168,16 @@
    "importance": 5
   },
   {
-   "code": "3432",
-   "name": "台端",
-   "date": "2026-11-21",
-   "type": "其他",
-   "title": "依臺灣證券交易所股份有限公司臺證上一字第1121801204 號函辦理",
+   "code": "8101",
+   "name": "華冠",
+   "date": "2026-11-22",
+   "type": "法說會",
+   "title": "本公司受邀參加福邦證券舉辦線上法人說明會。",
    "source": "TWSE 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01",
-   "importance": 5
+   "call_date": "2026-11-24",
+   "call_date_basis": "重大訊息說明欄「召開法人說明會之日期」",
+   "importance": 7
   },
   {
    "code": "3489",
@@ -214,6 +206,36 @@
    "type": "其他",
    "title": "本公司網路資安事件說明",
    "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "3711",
+   "name": "日月光投控",
+   "date": "2026-11-21",
+   "type": "其他",
+   "title": "補充說明子公司環旭電子(股)公司115年10月28日公告",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "2072",
+   "name": "世紀能源",
+   "date": "2026-11-21",
+   "type": "其他",
+   "title": "公告本公司名稱由「世紀離岸風電設備股份有限公司」更名 為「世紀能源設備股份有限公司」，公告期間：115年8月26日至 115年11月25日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01",
+   "importance": 5
+  },
+  {
+   "code": "3432",
+   "name": "台端",
+   "date": "2026-11-21",
+   "type": "其他",
+   "title": "依臺灣證券交易所股份有限公司臺證上一字第1121801204 號函辦理",
+   "source": "TWSE 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01",
    "importance": 5
   },
