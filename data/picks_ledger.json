@@ -2,11 +2,11 @@
   "meta": {
     "created_at": "2026-08-28T01:44:36.415088+08:00",
     "schema_note": "前瞻選股台帳（非回測）：每個snapshot是三榜其中一榜在某個data_asof的Top20快照，寫入後不可回頭修改內容（見already_snapshotted()）。returns.t5/t20/t60/t120由update_picks_ledger_returns.py（2026-08-28骨架新增，2026-09-01完整實作並掛進market.yml每日排程，2026-09-15補上price_stale進場價守門，不再是骨架）在對應的未來交易日回填，回填前恆為null——App顯示時null代表「還沒到回填時間點」，不是資料遺失。",
-    "last_snapshot_at": "2026-11-24T13:37:46.772329+08:00",
+    "last_snapshot_at": "2026-11-24T21:06:05.595907+08:00",
     "total_snapshots": 194,
-    "generated_at": "2026-11-24T13:37:48.453059+08:00",
+    "generated_at": "2026-11-24T21:06:06.775758+08:00",
     "source": ".github/scripts/build_picks_ledger.py（market.yml排程；讀scores.json/scores_momentum.json/scores_future.json三榜Top20+quotes_all_tw.json收盤價+market_tw.json大盤收盤）",
-    "last_returns_backfill_at": "2026-11-23T23:07:11.899488+08:00",
+    "last_returns_backfill_at": "2026-11-24T21:06:06.775756+08:00",
     "returns_anchor_note": "2026-10-11 先.七十七-4 更正進場點：進場＝快照 taken_at 之後第一個交易日收盤，出場＝其後第 N 個交易日收盤（持有恰 N 日）；舊規則用快照前的 price_date 收盤進場，已全部重算",
     "returns_recomputed_at": "2026-10-11T18:02:28.426925+08:00",
     "returns_anchor_rule": "taken_at_next_close_v2",
@@ -703,7 +703,7 @@
         "missing_entry": 0,
         "missing_exit": 1,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -1379,7 +1379,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -2019,7 +2019,7 @@
         "missing_entry": 2,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -2687,7 +2687,7 @@
         "missing_entry": 0,
         "missing_exit": 1,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -3327,7 +3327,7 @@
         "missing_entry": 2,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -3995,7 +3995,7 @@
         "missing_entry": 0,
         "missing_exit": 1,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -4672,7 +4672,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -5313,7 +5313,7 @@
         "missing_entry": 2,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -5982,7 +5982,7 @@
         "missing_entry": 0,
         "missing_exit": 1,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -6658,7 +6658,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -7298,7 +7298,7 @@
         "missing_entry": 2,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -7966,7 +7966,7 @@
         "missing_entry": 0,
         "missing_exit": 1,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -8642,7 +8642,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -9282,7 +9282,7 @@
         "missing_entry": 2,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -9950,7 +9950,7 @@
         "missing_entry": 0,
         "missing_exit": 1,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -10626,7 +10626,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -11258,7 +11258,7 @@
         "missing_entry": 2,
         "missing_exit": 1,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -11926,7 +11926,7 @@
         "missing_entry": 0,
         "missing_exit": 1,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -12602,7 +12602,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -13234,7 +13234,7 @@
         "missing_entry": 2,
         "missing_exit": 1,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -13902,7 +13902,7 @@
         "missing_entry": 0,
         "missing_exit": 1,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -14578,7 +14578,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -15218,7 +15218,7 @@
         "missing_entry": 2,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -15886,7 +15886,7 @@
         "missing_entry": 0,
         "missing_exit": 1,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -16563,7 +16563,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -17204,7 +17204,7 @@
         "missing_entry": 2,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -17881,7 +17881,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -18539,7 +18539,7 @@
         "missing_entry": 1,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -19179,7 +19179,7 @@
         "missing_entry": 2,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -19855,7 +19855,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -20531,7 +20531,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -21207,7 +21207,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -21883,7 +21883,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -22559,7 +22559,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -23235,7 +23235,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -23911,7 +23911,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -24587,7 +24587,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -25263,7 +25263,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -25939,7 +25939,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -26616,7 +26616,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -27293,7 +27293,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -27970,7 +27970,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -28646,7 +28646,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -29322,7 +29322,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -29998,7 +29998,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -30674,7 +30674,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -31350,7 +31350,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -32026,7 +32026,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -32702,7 +32702,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -33378,7 +33378,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -34054,7 +34054,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -34730,7 +34730,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -35406,7 +35406,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -36082,7 +36082,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -36758,7 +36758,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -37434,7 +37434,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -38110,7 +38110,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -38787,7 +38787,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -39464,7 +39464,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -40141,7 +40141,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -40817,7 +40817,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -41493,7 +41493,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -42169,7 +42169,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -42845,7 +42845,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -43521,7 +43521,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -44197,7 +44197,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -44873,7 +44873,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -45549,7 +45549,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -46225,7 +46225,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -46901,7 +46901,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -47577,7 +47577,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -48253,7 +48253,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -48930,7 +48930,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -49607,7 +49607,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -50284,7 +50284,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -50961,7 +50961,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -51638,7 +51638,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -52315,7 +52315,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -52991,7 +52991,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -53667,7 +53667,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -54344,7 +54344,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -55021,7 +55021,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -55698,7 +55698,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -56375,7 +56375,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -57052,7 +57052,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -57729,7 +57729,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -58406,7 +58406,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -59083,7 +59083,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -59760,7 +59760,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -60437,7 +60437,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -61115,7 +61115,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -61793,7 +61793,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -62471,7 +62471,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -63148,7 +63148,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -63825,7 +63825,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -64502,7 +64502,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -65179,7 +65179,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -65856,7 +65856,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -66533,7 +66533,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -67210,7 +67210,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -67887,7 +67887,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -68564,7 +68564,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -69242,7 +69242,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -69920,7 +69920,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -70598,7 +70598,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -71276,7 +71276,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -71954,7 +71954,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       },
       "non_trading_day_duplicate": true
     },
@@ -72632,7 +72632,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -73309,7 +73309,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -73986,7 +73986,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -74656,7 +74656,7 @@
         "missing_entry": 0,
         "missing_exit": 1,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -75334,7 +75334,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -76012,7 +76012,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -76682,7 +76682,7 @@
         "missing_entry": 0,
         "missing_exit": 1,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -77360,7 +77360,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -78038,7 +78038,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -78716,7 +78716,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -79394,7 +79394,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -80072,7 +80072,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -80742,7 +80742,7 @@
         "missing_entry": 0,
         "missing_exit": 1,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -81420,7 +81420,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -82098,7 +82098,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -82768,7 +82768,7 @@
         "missing_entry": 0,
         "missing_exit": 1,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -83446,7 +83446,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -84124,7 +84124,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -84802,7 +84802,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -85480,7 +85480,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -86158,7 +86158,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -86836,7 +86836,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -87514,7 +87514,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -88192,7 +88192,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -88222,7 +88222,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.073893+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -16.6524,
+              "excess_vs_taiex_pct": -3.6928,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668136+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88247,7 +88255,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.073912+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -16.9492,
+              "excess_vs_taiex_pct": -3.9896,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668156+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88272,7 +88288,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.073927+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -33.3047,
+              "excess_vs_taiex_pct": -20.3451,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668168+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88297,7 +88321,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.073943+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -16.4921,
+              "excess_vs_taiex_pct": -3.5326,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668179+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88322,7 +88354,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.073957+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -26.7465,
+              "excess_vs_taiex_pct": -13.7869,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668191+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88347,7 +88387,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.073972+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -6.8182,
+              "excess_vs_taiex_pct": 6.1414,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668203+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88372,7 +88420,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.073989+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -2.148,
+              "excess_vs_taiex_pct": 10.8116,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668242+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88397,7 +88453,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074004+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -2.454,
+              "excess_vs_taiex_pct": 10.5056,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668254+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88422,7 +88486,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074018+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -18.5941,
+              "excess_vs_taiex_pct": -5.6345,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668264+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88447,7 +88519,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074033+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -35.5828,
+              "excess_vs_taiex_pct": -22.6232,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668274+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88472,7 +88552,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074048+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -9.4139,
+              "excess_vs_taiex_pct": 3.5457,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668284+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88497,7 +88585,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074063+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -13.3495,
+              "excess_vs_taiex_pct": -0.3899,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668294+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88522,7 +88618,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074077+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -15.7732,
+              "excess_vs_taiex_pct": -2.8136,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668304+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88547,7 +88651,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074093+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -26.07,
+              "excess_vs_taiex_pct": -13.1105,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668314+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88572,7 +88684,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074107+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -47.4961,
+              "excess_vs_taiex_pct": -34.5365,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668324+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88597,7 +88717,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074121+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -26.5957,
+              "excess_vs_taiex_pct": -13.6362,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668334+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88622,7 +88750,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074136+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -3.3624,
+              "excess_vs_taiex_pct": 9.5972,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668344+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88647,7 +88783,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074150+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -14.4357,
+              "excess_vs_taiex_pct": -1.4761,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668354+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88672,7 +88816,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074165+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -19.2308,
+              "excess_vs_taiex_pct": -6.2712,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668365+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88697,7 +88849,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074179+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -26.5686,
+              "excess_vs_taiex_pct": -13.609,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668375+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88710,7 +88870,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -88740,7 +88900,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074633+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": 20.7273,
+              "excess_vs_taiex_pct": 33.6869,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668667+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88765,7 +88933,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074652+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": 18.3721,
+              "excess_vs_taiex_pct": 31.3317,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668678+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88790,7 +88966,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074668+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -21.3172,
+              "excess_vs_taiex_pct": -8.3576,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668690+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88815,7 +88999,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074683+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -5.1896,
+              "excess_vs_taiex_pct": 7.77,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668700+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88840,7 +89032,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074699+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": 13.6054,
+              "excess_vs_taiex_pct": 26.565,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668712+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88865,7 +89065,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074716+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -10.3203,
+              "excess_vs_taiex_pct": 2.6393,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668724+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88890,7 +89098,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074730+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -4.8736,
+              "excess_vs_taiex_pct": 8.0859,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668734+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88915,7 +89131,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074747+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -14.1,
+              "excess_vs_taiex_pct": -1.1404,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668746+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88940,7 +89164,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074761+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -17.9402,
+              "excess_vs_taiex_pct": -4.9806,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668756+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88965,7 +89197,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074776+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -5.5882,
+              "excess_vs_taiex_pct": 7.3713,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668766+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -88990,7 +89230,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074791+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -12.2951,
+              "excess_vs_taiex_pct": 0.6645,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668776+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89015,7 +89263,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074807+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -17.7165,
+              "excess_vs_taiex_pct": -4.757,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668789+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89040,7 +89296,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074824+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -10.1949,
+              "excess_vs_taiex_pct": 2.7647,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668801+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89065,7 +89329,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074839+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -3.9931,
+              "excess_vs_taiex_pct": 8.9665,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668811+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89090,7 +89362,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074856+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -7.5658,
+              "excess_vs_taiex_pct": 5.3938,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668828+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89115,7 +89395,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074870+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -16.6835,
+              "excess_vs_taiex_pct": -3.7239,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668838+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89140,7 +89428,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074886+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -13.3005,
+              "excess_vs_taiex_pct": -0.3409,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668848+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89165,7 +89461,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074904+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -16.501,
+              "excess_vs_taiex_pct": -3.5414,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668860+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89190,7 +89494,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074918+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -11.1392,
+              "excess_vs_taiex_pct": 1.8203,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668870+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89215,7 +89527,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.074936+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -31.4851,
+              "excess_vs_taiex_pct": -18.5256,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.668880+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89228,7 +89548,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -89258,7 +89578,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.075376+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -1.2563,
+              "excess_vs_taiex_pct": 11.7033,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669168+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89283,7 +89611,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.075391+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -1.9257,
+              "excess_vs_taiex_pct": 11.0339,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669179+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89308,7 +89644,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.075406+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -13.6546,
+              "excess_vs_taiex_pct": -0.695,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669190+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89333,7 +89677,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.075420+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -4.2328,
+              "excess_vs_taiex_pct": 8.7268,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669200+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89358,7 +89710,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.075443+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -16.0563,
+              "excess_vs_taiex_pct": -3.0968,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669230+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89383,7 +89743,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.075458+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -16.5278,
+              "excess_vs_taiex_pct": -3.5682,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669241+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89408,7 +89776,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.075472+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -12.6183,
+              "excess_vs_taiex_pct": 0.3413,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669252+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89433,7 +89809,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.075489+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -28.1046,
+              "excess_vs_taiex_pct": -15.145,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669264+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89458,7 +89842,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.075506+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -19.4303,
+              "excess_vs_taiex_pct": -6.4707,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669275+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89483,7 +89875,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.075522+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -39.759,
+              "excess_vs_taiex_pct": -26.7995,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669291+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89508,7 +89908,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.075537+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -40.1274,
+              "excess_vs_taiex_pct": -27.1678,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669302+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89533,7 +89941,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.075551+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -15.6809,
+              "excess_vs_taiex_pct": -2.7213,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669314+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89558,7 +89974,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.075566+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -3.4913,
+              "excess_vs_taiex_pct": 9.4683,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669326+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89583,7 +90007,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.075581+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -12.4842,
+              "excess_vs_taiex_pct": 0.4753,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669337+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89608,7 +90040,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.075598+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -31.405,
+              "excess_vs_taiex_pct": -18.4454,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669351+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89633,7 +90073,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.075612+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -7.332,
+              "excess_vs_taiex_pct": 5.6276,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669361+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89658,7 +90106,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.075626+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -19.4831,
+              "excess_vs_taiex_pct": -6.5235,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669377+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89683,7 +90139,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.075643+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -19.72,
+              "excess_vs_taiex_pct": -6.7604,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669389+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89708,7 +90172,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.075658+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -5.1724,
+              "excess_vs_taiex_pct": 7.7872,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669401+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89733,7 +90205,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.075675+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -35.2339,
+              "excess_vs_taiex_pct": -22.2743,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669412+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89746,7 +90226,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -89776,7 +90256,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076119+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -16.6524,
+              "excess_vs_taiex_pct": -3.6928,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669700+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89801,7 +90289,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076134+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -16.9492,
+              "excess_vs_taiex_pct": -3.9896,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669710+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89826,7 +90322,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076148+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -33.3047,
+              "excess_vs_taiex_pct": -20.3451,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669721+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89851,7 +90355,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076162+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -26.7465,
+              "excess_vs_taiex_pct": -13.7869,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669730+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89876,7 +90388,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076177+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -16.4921,
+              "excess_vs_taiex_pct": -3.5326,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669741+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89901,7 +90421,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076191+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -6.8182,
+              "excess_vs_taiex_pct": 6.1414,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669750+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89926,7 +90454,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076206+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -2.454,
+              "excess_vs_taiex_pct": 10.5056,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669761+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89951,7 +90487,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076220+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -2.148,
+              "excess_vs_taiex_pct": 10.8116,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669772+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -89976,7 +90520,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076234+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -9.4139,
+              "excess_vs_taiex_pct": 3.5457,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669781+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90001,7 +90553,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076256+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -35.5828,
+              "excess_vs_taiex_pct": -22.6232,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669791+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90026,7 +90586,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076275+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -18.5941,
+              "excess_vs_taiex_pct": -5.6345,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669801+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90051,7 +90619,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076290+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -15.7732,
+              "excess_vs_taiex_pct": -2.8136,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669812+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90076,7 +90652,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076304+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -26.07,
+              "excess_vs_taiex_pct": -13.1105,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669822+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90101,7 +90685,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076318+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -13.3495,
+              "excess_vs_taiex_pct": -0.3899,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669835+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90126,7 +90718,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076333+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -47.4961,
+              "excess_vs_taiex_pct": -34.5365,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669846+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90151,7 +90751,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076347+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -26.5957,
+              "excess_vs_taiex_pct": -13.6362,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669855+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90176,7 +90784,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076361+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -3.3624,
+              "excess_vs_taiex_pct": 9.5972,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669866+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90201,7 +90817,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076375+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -26.5686,
+              "excess_vs_taiex_pct": -13.609,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669876+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90226,7 +90850,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076393+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -19.2308,
+              "excess_vs_taiex_pct": -6.2712,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669886+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90251,7 +90883,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076407+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -14.4357,
+              "excess_vs_taiex_pct": -1.4761,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.669896+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90264,7 +90904,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -90294,7 +90934,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076855+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": 20.7273,
+              "excess_vs_taiex_pct": 33.6869,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670183+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90319,7 +90967,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076870+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": 18.3721,
+              "excess_vs_taiex_pct": 31.3317,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670193+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90344,7 +91000,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076884+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -21.3172,
+              "excess_vs_taiex_pct": -8.3576,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670205+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90369,7 +91033,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076899+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -5.1896,
+              "excess_vs_taiex_pct": 7.77,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670233+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90394,7 +91066,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076913+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": 13.6054,
+              "excess_vs_taiex_pct": 26.565,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670246+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90419,7 +91099,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076927+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -10.3203,
+              "excess_vs_taiex_pct": 2.6393,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670258+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90444,7 +91132,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076942+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -4.8736,
+              "excess_vs_taiex_pct": 8.0859,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670268+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90469,7 +91165,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076956+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -14.1,
+              "excess_vs_taiex_pct": -1.1404,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670279+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90494,7 +91198,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076970+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -17.9402,
+              "excess_vs_taiex_pct": -4.9806,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670289+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90519,7 +91231,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076984+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -5.5882,
+              "excess_vs_taiex_pct": 7.3713,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670298+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90544,7 +91264,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.076998+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -12.2951,
+              "excess_vs_taiex_pct": 0.6645,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670308+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90569,7 +91297,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077011+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -17.7165,
+              "excess_vs_taiex_pct": -4.757,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670318+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90594,7 +91330,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077026+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -10.1949,
+              "excess_vs_taiex_pct": 2.7647,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670329+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90619,7 +91363,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077040+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -3.9931,
+              "excess_vs_taiex_pct": 8.9665,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670341+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90644,7 +91396,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077055+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -7.5658,
+              "excess_vs_taiex_pct": 5.3938,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670352+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90669,7 +91429,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077069+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -16.6835,
+              "excess_vs_taiex_pct": -3.7239,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670362+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90694,7 +91462,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077083+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -13.3005,
+              "excess_vs_taiex_pct": -0.3409,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670372+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90719,7 +91495,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077097+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -16.501,
+              "excess_vs_taiex_pct": -3.5414,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670382+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90744,7 +91528,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077114+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -11.1392,
+              "excess_vs_taiex_pct": 1.8203,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670392+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90769,7 +91561,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077128+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -31.4851,
+              "excess_vs_taiex_pct": -18.5256,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670401+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90782,7 +91582,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -90812,7 +91612,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077570+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -1.2563,
+              "excess_vs_taiex_pct": 11.7033,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670685+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90837,7 +91645,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077585+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -1.9257,
+              "excess_vs_taiex_pct": 11.0339,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670695+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90862,7 +91678,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077599+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -13.6546,
+              "excess_vs_taiex_pct": -0.695,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670705+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90887,7 +91711,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077612+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -4.2328,
+              "excess_vs_taiex_pct": 8.7268,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670715+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90912,7 +91744,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077626+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -16.5278,
+              "excess_vs_taiex_pct": -3.5682,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670725+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90937,7 +91777,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077640+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -16.0563,
+              "excess_vs_taiex_pct": -3.0968,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670734+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90962,7 +91810,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077654+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -12.6183,
+              "excess_vs_taiex_pct": 0.3413,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670744+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -90987,7 +91843,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077668+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -28.1046,
+              "excess_vs_taiex_pct": -15.145,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670753+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -91012,7 +91876,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077683+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -19.4303,
+              "excess_vs_taiex_pct": -6.4707,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670763+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -91037,7 +91909,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077697+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -39.759,
+              "excess_vs_taiex_pct": -26.7995,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670773+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -91062,7 +91942,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077711+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -40.1274,
+              "excess_vs_taiex_pct": -27.1678,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670783+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -91087,7 +91975,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077726+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -15.6809,
+              "excess_vs_taiex_pct": -2.7213,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670792+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -91112,7 +92008,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077740+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -3.4913,
+              "excess_vs_taiex_pct": 9.4683,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670803+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -91137,7 +92041,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077754+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -12.4842,
+              "excess_vs_taiex_pct": 0.4753,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670813+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -91162,7 +92074,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077768+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -31.405,
+              "excess_vs_taiex_pct": -18.4454,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670823+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -91187,7 +92107,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077783+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -7.332,
+              "excess_vs_taiex_pct": 5.6276,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670833+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -91212,7 +92140,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077797+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -19.4831,
+              "excess_vs_taiex_pct": -6.5235,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670843+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -91237,7 +92173,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077814+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -19.72,
+              "excess_vs_taiex_pct": -6.7604,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670853+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -91262,7 +92206,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077829+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -5.1724,
+              "excess_vs_taiex_pct": 7.7872,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670862+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -91287,7 +92239,15 @@
               "anchor_rule": "taken_at_next_close_v2",
               "filled_at": "2026-11-03T18:15:12.077842+08:00"
             },
-            "t20": null,
+            "t20": {
+              "return_pct": -35.2339,
+              "excess_vs_taiex_pct": -22.2743,
+              "entry_date": "2026-10-27",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 20,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.670872+08:00"
+            },
             "t60": null,
             "t120": null
           },
@@ -91300,7 +92260,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -91818,7 +92778,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -92336,7 +93296,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -92854,7 +93814,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -93372,7 +94332,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -93890,7 +94850,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -94408,7 +95368,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -94926,7 +95886,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -95444,7 +96404,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -95962,7 +96922,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -96480,7 +97440,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -96998,7 +97958,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -97516,7 +98476,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -98034,7 +98994,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -98552,7 +99512,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -99070,7 +100030,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -99588,7 +100548,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -100106,7 +101066,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -100624,7 +101584,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -101134,7 +102094,7 @@
         "missing_entry": 0,
         "missing_exit": 1,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -101652,7 +102612,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -102170,7 +103130,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -102688,7 +103648,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -103206,7 +104166,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -103724,7 +104684,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -104242,7 +105202,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -104760,7 +105720,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -105278,7 +106238,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -105796,7 +106756,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -106314,7 +107274,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -106832,7 +107792,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -107350,7 +108310,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -107868,7 +108828,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -108386,7 +109346,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -108904,7 +109864,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -109422,7 +110382,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -109940,7 +110900,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -110458,7 +111418,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -110966,7 +111926,7 @@
         "missing_entry": 1,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -111484,7 +112444,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -111505,7 +112465,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -5.4386,
+              "excess_vs_taiex_pct": -5.514,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.688401+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111522,7 +112490,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -6.01,
+              "excess_vs_taiex_pct": -6.0854,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.688423+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111539,7 +112515,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -1.8106,
+              "excess_vs_taiex_pct": -1.886,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.688439+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111556,7 +112540,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -7.1651,
+              "excess_vs_taiex_pct": -7.2405,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.688457+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111573,7 +112565,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -13.8498,
+              "excess_vs_taiex_pct": -13.9252,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.688471+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111590,7 +112590,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": 0.7317,
+              "excess_vs_taiex_pct": 0.6563,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.688486+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111607,7 +112615,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -2.1705,
+              "excess_vs_taiex_pct": -2.246,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.688501+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111624,7 +112640,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -10.3795,
+              "excess_vs_taiex_pct": -10.4549,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.688516+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111641,7 +112665,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -15.283,
+              "excess_vs_taiex_pct": -15.3585,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.688532+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111658,7 +112690,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": 4.3257,
+              "excess_vs_taiex_pct": 4.2503,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.688547+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111675,7 +112715,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -4.5714,
+              "excess_vs_taiex_pct": -4.6469,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.688562+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111692,7 +112740,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -2.7293,
+              "excess_vs_taiex_pct": -2.8047,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.688578+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111709,7 +112765,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": 8.9013,
+              "excess_vs_taiex_pct": 8.8258,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.688599+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111726,7 +112790,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -1.3678,
+              "excess_vs_taiex_pct": -1.4432,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.688613+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111743,7 +112815,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -1.4545,
+              "excess_vs_taiex_pct": -1.53,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.688628+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111760,7 +112840,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -0.5803,
+              "excess_vs_taiex_pct": -0.6557,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.688645+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111777,7 +112865,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -17.6116,
+              "excess_vs_taiex_pct": -17.687,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.688659+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111794,7 +112890,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -14.726,
+              "excess_vs_taiex_pct": -14.8015,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.688674+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111811,7 +112915,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -19.4073,
+              "excess_vs_taiex_pct": -19.4827,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.688690+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111828,7 +112940,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": 1.4205,
+              "excess_vs_taiex_pct": 1.345,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.688704+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111842,7 +112962,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -111863,7 +112983,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -23.9609,
+              "excess_vs_taiex_pct": -24.0363,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689159+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111880,7 +113008,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -25.2093,
+              "excess_vs_taiex_pct": -25.2847,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689175+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111897,7 +113033,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -10.9983,
+              "excess_vs_taiex_pct": -11.0737,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689191+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111914,7 +113058,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -7.7236,
+              "excess_vs_taiex_pct": -7.799,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689226+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111931,7 +113083,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -16.2393,
+              "excess_vs_taiex_pct": -16.3147,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689245+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111948,7 +113108,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -1.3937,
+              "excess_vs_taiex_pct": -1.4692,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689262+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111965,7 +113133,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -15.283,
+              "excess_vs_taiex_pct": -15.3585,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689276+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111982,7 +113158,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -0.6623,
+              "excess_vs_taiex_pct": -0.7377,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689290+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -111999,7 +113183,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -1.897,
+              "excess_vs_taiex_pct": -1.9725,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689304+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112016,7 +113208,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -16.6486,
+              "excess_vs_taiex_pct": -16.7241,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689320+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112033,7 +113233,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -10.0119,
+              "excess_vs_taiex_pct": -10.0874,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689338+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112050,7 +113258,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -3.0418,
+              "excess_vs_taiex_pct": -3.1173,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689361+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112067,7 +113283,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -16.6405,
+              "excess_vs_taiex_pct": -16.7159,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689382+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112084,7 +113308,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -5.2548,
+              "excess_vs_taiex_pct": -5.3302,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689398+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112101,7 +113333,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -20.4,
+              "excess_vs_taiex_pct": -20.4754,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689414+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112118,7 +113358,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -2.5381,
+              "excess_vs_taiex_pct": -2.6135,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689429+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112135,7 +113383,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -12.1294,
+              "excess_vs_taiex_pct": -12.2048,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689446+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112152,7 +113408,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -3.0556,
+              "excess_vs_taiex_pct": -3.131,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689461+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112169,7 +113433,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -2.4931,
+              "excess_vs_taiex_pct": -2.5685,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689475+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112186,7 +113458,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -17.316,
+              "excess_vs_taiex_pct": -17.3914,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689491+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112200,7 +113480,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -112221,7 +113501,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": 0.5484,
+              "excess_vs_taiex_pct": 0.473,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689934+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112238,7 +113526,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -3.2078,
+              "excess_vs_taiex_pct": -3.2832,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689946+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112255,7 +113551,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -9.0253,
+              "excess_vs_taiex_pct": -9.1007,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689959+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112272,7 +113576,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -1.7951,
+              "excess_vs_taiex_pct": -1.8706,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689972+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112289,7 +113601,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -5.4632,
+              "excess_vs_taiex_pct": -5.5386,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689984+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112306,7 +113626,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -4.6791,
+              "excess_vs_taiex_pct": -4.7546,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.689996+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112323,7 +113651,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -3.7585,
+              "excess_vs_taiex_pct": -3.834,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.690005+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112340,7 +113676,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -25.2093,
+              "excess_vs_taiex_pct": -25.2847,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.690019+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112357,7 +113701,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -11.6827,
+              "excess_vs_taiex_pct": -11.7582,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.690030+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112374,7 +113726,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -3.0556,
+              "excess_vs_taiex_pct": -3.131,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.690042+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112391,7 +113751,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -4.7219,
+              "excess_vs_taiex_pct": -4.7974,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.690055+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112408,7 +113776,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -3.3533,
+              "excess_vs_taiex_pct": -3.4287,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.690070+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112425,7 +113801,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -1.1257,
+              "excess_vs_taiex_pct": -1.2011,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.690083+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112442,7 +113826,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -0.6689,
+              "excess_vs_taiex_pct": -0.7443,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.690097+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112459,7 +113851,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": 1.1765,
+              "excess_vs_taiex_pct": 1.101,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.690109+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112476,7 +113876,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -2.5063,
+              "excess_vs_taiex_pct": -2.5817,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.690124+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112493,7 +113901,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -7.9208,
+              "excess_vs_taiex_pct": -7.9962,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.690139+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112510,7 +113926,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -7.6433,
+              "excess_vs_taiex_pct": -7.7187,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.690154+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112527,7 +113951,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": 0.9375,
+              "excess_vs_taiex_pct": 0.8621,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.690169+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112544,7 +113976,15 @@
           "price_date": "2026-11-16",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -0.4425,
+              "excess_vs_taiex_pct": -0.5179,
+              "entry_date": "2026-11-17",
+              "exit_date": "2026-11-24",
+              "holding_trading_days": 5,
+              "anchor_rule": "taken_at_next_close_v2",
+              "filled_at": "2026-11-24T21:06:06.690181+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -112558,7 +113998,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -112916,7 +114356,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -113274,7 +114714,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -113632,7 +115072,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -113990,7 +115430,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -114348,7 +115788,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -114706,7 +116146,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -115064,7 +116504,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -115422,7 +116862,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -115780,7 +117220,7 @@
         "missing_entry": 0,
         "missing_exit": 0,
         "market_gap_days": [],
-        "checked_at": "2026-11-24T13:37:48+08:00"
+        "checked_at": "2026-11-24T21:06:06+08:00"
       }
     },
     {
@@ -115805,7 +117245,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 1595.0
         },
         {
           "code": "4973",
@@ -115820,7 +117262,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 110.5
         },
         {
           "code": "2451",
@@ -115835,7 +117279,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 255.0
         },
         {
           "code": "4967",
@@ -115850,7 +117296,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 246.0
         },
         {
           "code": "3260",
@@ -115865,7 +117313,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 271.0
         },
         {
           "code": "5289",
@@ -115880,7 +117330,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 853.0
         },
         {
           "code": "3135",
@@ -115895,7 +117347,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 113.0
         },
         {
           "code": "3709",
@@ -115910,7 +117364,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 51.4
         },
         {
           "code": "5351",
@@ -115925,7 +117381,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 85.9
         },
         {
           "code": "8271",
@@ -115940,7 +117398,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 155.0
         },
         {
           "code": "2344",
@@ -115955,7 +117415,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 105.0
         },
         {
           "code": "6770",
@@ -115970,7 +117432,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 53.3
         },
         {
           "code": "6505",
@@ -115985,7 +117449,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 80.3
         },
         {
           "code": "2363",
@@ -116000,7 +117466,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 44.55
         },
         {
           "code": "3661",
@@ -116015,7 +117483,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 3915.0
         },
         {
           "code": "6265",
@@ -116030,7 +117500,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 32.45
         },
         {
           "code": "1808",
@@ -116045,7 +117517,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 36.05
         },
         {
           "code": "2337",
@@ -116060,7 +117534,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 68.0
         },
         {
           "code": "2615",
@@ -116075,7 +117551,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 97.1
         },
         {
           "code": "3006",
@@ -116090,9 +117568,18 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 183.5
         }
-      ]
+      ],
+      "data_status": {
+        "complete": true,
+        "missing_entry": 0,
+        "missing_exit": 0,
+        "market_gap_days": [],
+        "checked_at": "2026-11-24T21:06:06+08:00"
+      }
     },
     {
       "snapshot_date": "2026-11-23",
@@ -116116,7 +117603,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 166.0
         },
         {
           "code": "6925",
@@ -116131,7 +117620,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 122.0
         },
         {
           "code": "1477",
@@ -116146,7 +117637,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 225.0
         },
         {
           "code": "3227",
@@ -116161,7 +117654,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 188.0
         },
         {
           "code": "3661",
@@ -116176,7 +117671,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 3915.0
         },
         {
           "code": "1476",
@@ -116191,7 +117688,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 370.5
         },
         {
           "code": "2412",
@@ -116206,7 +117705,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 164.5
         },
         {
           "code": "8016",
@@ -116221,7 +117722,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 249.0
         },
         {
           "code": "6614",
@@ -116236,7 +117739,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 42.55
         },
         {
           "code": "7828",
@@ -116251,7 +117756,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 1415.0
         },
         {
           "code": "2451",
@@ -116266,7 +117773,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 255.0
         },
         {
           "code": "2886",
@@ -116281,7 +117790,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 55.0
         },
         {
           "code": "9933",
@@ -116296,7 +117807,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 54.0
         },
         {
           "code": "2610",
@@ -116311,7 +117824,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 22.5
         },
         {
           "code": "5876",
@@ -116326,7 +117841,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 52.7
         },
         {
           "code": "7722",
@@ -116341,7 +117858,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 250.0
         },
         {
           "code": "8415",
@@ -116356,7 +117875,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 42.1
         },
         {
           "code": "2892",
@@ -116371,7 +117892,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 39.8
         },
         {
           "code": "5457",
@@ -116386,7 +117909,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 28.7
         },
         {
           "code": "8089",
@@ -116401,9 +117926,18 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 29.2
         }
-      ]
+      ],
+      "data_status": {
+        "complete": true,
+        "missing_entry": 0,
+        "missing_exit": 0,
+        "market_gap_days": [],
+        "checked_at": "2026-11-24T21:06:06+08:00"
+      }
     },
     {
       "snapshot_date": "2026-11-23",
@@ -116427,7 +117961,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 1735.0
         },
         {
           "code": "6491",
@@ -116442,7 +117978,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 358.0
         },
         {
           "code": "7734",
@@ -116457,7 +117995,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 1430.0
         },
         {
           "code": "7751",
@@ -116472,7 +118012,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 896.0
         },
         {
           "code": "8096",
@@ -116487,7 +118029,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 60.1
         },
         {
           "code": "6693",
@@ -116502,7 +118046,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 107.0
         },
         {
           "code": "2379",
@@ -116517,7 +118063,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 694.0
         },
         {
           "code": "3563",
@@ -116532,7 +118080,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 504.0
         },
         {
           "code": "7769",
@@ -116547,7 +118097,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 3200.0
         },
         {
           "code": "2360",
@@ -116562,7 +118114,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 1015.0
         },
         {
           "code": "4968",
@@ -116577,7 +118131,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 72.3
         },
         {
           "code": "5464",
@@ -116592,7 +118148,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 32.55
         },
         {
           "code": "6155",
@@ -116607,7 +118165,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 43.2
         },
         {
           "code": "6739",
@@ -116622,7 +118182,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 646.0
         },
         {
           "code": "6907",
@@ -116637,7 +118199,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 103.0
         },
         {
           "code": "7777",
@@ -116652,7 +118216,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 23.25
         },
         {
           "code": "6708",
@@ -116667,7 +118233,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 74.5
         },
         {
           "code": "3227",
@@ -116682,7 +118250,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 188.0
         },
         {
           "code": "5904",
@@ -116697,7 +118267,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 71.3
         },
         {
           "code": "6781",
@@ -116712,9 +118284,18 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 675.0
         }
-      ]
+      ],
+      "data_status": {
+        "complete": true,
+        "missing_entry": 0,
+        "missing_exit": 0,
+        "market_gap_days": [],
+        "checked_at": "2026-11-24T21:06:06+08:00"
+      }
     },
     {
       "snapshot_date": "2026-11-24",
@@ -116738,7 +118319,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 1595.0
         },
         {
           "code": "4973",
@@ -116753,7 +118336,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 110.5
         },
         {
           "code": "2451",
@@ -116768,7 +118353,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 255.0
         },
         {
           "code": "3260",
@@ -116783,7 +118370,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 271.0
         },
         {
           "code": "4967",
@@ -116798,7 +118387,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 246.0
         },
         {
           "code": "3135",
@@ -116813,7 +118404,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 113.0
         },
         {
           "code": "5289",
@@ -116828,7 +118421,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 853.0
         },
         {
           "code": "3709",
@@ -116843,7 +118438,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 51.4
         },
         {
           "code": "8271",
@@ -116858,7 +118455,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 155.0
         },
         {
           "code": "5351",
@@ -116873,7 +118472,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 85.9
         },
         {
           "code": "2344",
@@ -116888,7 +118489,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 105.0
         },
         {
           "code": "6770",
@@ -116903,7 +118506,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 53.3
         },
         {
           "code": "6505",
@@ -116918,7 +118523,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 80.3
         },
         {
           "code": "2363",
@@ -116933,7 +118540,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 44.55
         },
         {
           "code": "3661",
@@ -116948,7 +118557,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 3915.0
         },
         {
           "code": "6265",
@@ -116963,7 +118574,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 32.45
         },
         {
           "code": "1808",
@@ -116978,7 +118591,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 36.05
         },
         {
           "code": "2609",
@@ -116993,7 +118608,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 56.3
         },
         {
           "code": "2615",
@@ -117008,7 +118625,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 97.1
         },
         {
           "code": "3006",
@@ -117023,9 +118642,18 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 183.5
         }
-      ]
+      ],
+      "data_status": {
+        "complete": true,
+        "missing_entry": 0,
+        "missing_exit": 0,
+        "market_gap_days": [],
+        "checked_at": "2026-11-24T21:06:06+08:00"
+      }
     },
     {
       "snapshot_date": "2026-11-24",
@@ -117049,7 +118677,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 166.0
         },
         {
           "code": "6925",
@@ -117064,7 +118694,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 122.0
         },
         {
           "code": "1477",
@@ -117079,7 +118711,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 225.0
         },
         {
           "code": "3227",
@@ -117094,7 +118728,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 188.0
         },
         {
           "code": "3661",
@@ -117109,7 +118745,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 3915.0
         },
         {
           "code": "1476",
@@ -117124,7 +118762,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 370.5
         },
         {
           "code": "2412",
@@ -117139,7 +118779,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 164.5
         },
         {
           "code": "8016",
@@ -117154,7 +118796,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 249.0
         },
         {
           "code": "6614",
@@ -117169,7 +118813,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 42.55
         },
         {
           "code": "7828",
@@ -117184,7 +118830,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 1415.0
         },
         {
           "code": "2451",
@@ -117199,7 +118847,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 255.0
         },
         {
           "code": "2886",
@@ -117214,7 +118864,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 55.0
         },
         {
           "code": "9933",
@@ -117229,7 +118881,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 54.0
         },
         {
           "code": "2610",
@@ -117244,7 +118898,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 22.5
         },
         {
           "code": "5876",
@@ -117259,7 +118915,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 52.7
         },
         {
           "code": "7722",
@@ -117274,7 +118932,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 250.0
         },
         {
           "code": "8415",
@@ -117289,7 +118949,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 42.1
         },
         {
           "code": "2892",
@@ -117304,7 +118966,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 39.8
         },
         {
           "code": "5457",
@@ -117319,7 +118983,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 28.7
         },
         {
           "code": "8089",
@@ -117334,9 +119000,18 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 29.2
         }
-      ]
+      ],
+      "data_status": {
+        "complete": true,
+        "missing_entry": 0,
+        "missing_exit": 0,
+        "market_gap_days": [],
+        "checked_at": "2026-11-24T21:06:06+08:00"
+      }
     },
     {
       "snapshot_date": "2026-11-24",
@@ -117360,7 +119035,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 1735.0
         },
         {
           "code": "6491",
@@ -117375,7 +119052,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 358.0
         },
         {
           "code": "7734",
@@ -117390,7 +119069,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 1430.0
         },
         {
           "code": "7751",
@@ -117405,7 +119086,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 896.0
         },
         {
           "code": "8096",
@@ -117420,7 +119103,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 60.1
         },
         {
           "code": "6693",
@@ -117435,7 +119120,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 107.0
         },
         {
           "code": "2379",
@@ -117450,7 +119137,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 694.0
         },
         {
           "code": "3563",
@@ -117465,7 +119154,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 504.0
         },
         {
           "code": "7769",
@@ -117480,7 +119171,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 3200.0
         },
         {
           "code": "2360",
@@ -117495,7 +119188,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 1015.0
         },
         {
           "code": "4968",
@@ -117510,7 +119205,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 72.3
         },
         {
           "code": "5464",
@@ -117525,7 +119222,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 32.55
         },
         {
           "code": "6155",
@@ -117540,7 +119239,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 43.2
         },
         {
           "code": "6739",
@@ -117555,7 +119256,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 646.0
         },
         {
           "code": "6907",
@@ -117570,7 +119273,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 103.0
         },
         {
           "code": "7777",
@@ -117585,7 +119290,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 23.25
         },
         {
           "code": "6708",
@@ -117600,7 +119307,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 74.5
         },
         {
           "code": "3227",
@@ -117615,7 +119324,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 188.0
         },
         {
           "code": "5904",
@@ -117630,7 +119341,9 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 71.3
         },
         {
           "code": "6781",
@@ -117645,9 +119358,18 @@
             "t20": null,
             "t60": null,
             "t120": null
-          }
+          },
+          "entry_date": "2026-11-24",
+          "entry_price": 675.0
         }
-      ]
+      ],
+      "data_status": {
+        "complete": true,
+        "missing_entry": 0,
+        "missing_exit": 0,
+        "market_gap_days": [],
+        "checked_at": "2026-11-24T21:06:06+08:00"
+      }
     }
   ]
 }
