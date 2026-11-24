@@ -1,13 +1,15 @@
 {
-  "fetched_at": "2026-11-24T04:41:42+00:00",
+  "fetched_at": "2026-11-24T09:43:58+00:00",
   "source": "Finnhub /quote（免費額度，regular quote）+ yfinance Ticker.info（extended_hours：pre/post market，2026-08-27新增）",
   "meta": {
     "trading_window": false,
-    "market_session": "closed",
+    "market_session": "pre",
     "queried": 9,
     "matched": 9,
     "extended_hours_matched": 9,
-    "sparkline_stale_tickers": [],
+    "sparkline_stale_tickers": [
+      "AMZN"
+    ],
     "extended_hours_disclaimer": "延長交易時段（盤前/盤後）流動性低、價差大，僅接受限價單，價格常於隔日開盤反轉。"
   },
   "quotes": {
@@ -43,7 +45,7 @@
         165.05
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PRE",
         "regular": {
           "price": 165.05,
           "prev_close": 125.53,
@@ -51,13 +53,13 @@
           "change_pct": 31.483,
           "time": 1795467601
         },
-        "pre": null,
-        "post": {
-          "price": 166.79,
-          "change": 1.7399902,
-          "change_pct": 1.0542201,
-          "time": 1795481997
-        }
+        "pre": {
+          "price": 158.95,
+          "change": -6.100006,
+          "change_pct": -3.6958535,
+          "time": 1795513430
+        },
+        "post": null
       }
     },
     "AAPL": {
@@ -92,7 +94,7 @@
         349.08
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PRE",
         "regular": {
           "price": 349.08,
           "prev_close": 342.56,
@@ -100,13 +102,13 @@
           "change_pct": 1.903,
           "time": 1795467601
         },
-        "pre": null,
-        "post": {
-          "price": 349.6997,
-          "change": 0.61972046,
-          "change_pct": 0.17752965,
-          "time": 1795481957
-        }
+        "pre": {
+          "price": 351.61,
+          "change": 2.5299988,
+          "change_pct": 0.7247619,
+          "time": 1795513425
+        },
+        "post": null
       }
     },
     "MSFT": {
@@ -141,7 +143,7 @@
         492.5
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PRE",
         "regular": {
           "price": 492.5,
           "prev_close": 484.52,
@@ -149,13 +151,13 @@
           "change_pct": 1.647,
           "time": 1795467601
         },
-        "pre": null,
-        "post": {
-          "price": 492.6,
-          "change": 0.1000061,
-          "change_pct": 0.020305809,
-          "time": 1795481967
-        }
+        "pre": {
+          "price": 494.98,
+          "change": 2.480011,
+          "change_pct": 0.50355554,
+          "time": 1795513340
+        },
+        "post": null
       }
     },
     "TSM": {
@@ -190,7 +192,7 @@
         363.6
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PRE",
         "regular": {
           "price": 363.6,
           "prev_close": 318.71,
@@ -198,13 +200,13 @@
           "change_pct": 14.085,
           "time": 1795467602
         },
-        "pre": null,
-        "post": {
-          "price": 369.99,
-          "change": 6.389984,
-          "change_pct": 1.7574214,
-          "time": 1795481998
-        }
+        "pre": {
+          "price": 363.7,
+          "change": 0.27340698,
+          "change_pct": 0.075230315,
+          "time": 1795513427
+        },
+        "post": null
       }
     },
     "GOOGL": {
@@ -239,7 +241,7 @@
         282.1
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PRE",
         "regular": {
           "price": 282.1,
           "prev_close": 265.29,
@@ -247,13 +249,13 @@
           "change_pct": 6.336,
           "time": 1795467601
         },
-        "pre": null,
-        "post": {
-          "price": 284.749,
-          "change": 2.6489868,
-          "change_pct": 0.93902403,
-          "time": 1795481983
-        }
+        "pre": {
+          "price": 281.4,
+          "change": -0.7000122,
+          "change_pct": -0.24814329,
+          "time": 1795513274
+        },
+        "post": null
       }
     },
     "AMZN": {
@@ -288,7 +290,7 @@
         255.39
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PRE",
         "regular": {
           "price": 255.39,
           "prev_close": 246.82,
@@ -296,13 +298,13 @@
           "change_pct": 3.472,
           "time": 1795467601
         },
-        "pre": null,
-        "post": {
-          "price": 257.0,
-          "change": 1.6100006,
-          "change_pct": 0.63040864,
-          "time": 1795481995
-        }
+        "pre": {
+          "price": 255.8965,
+          "change": 0.50650024,
+          "change_pct": 0.19832423,
+          "time": 1795513430
+        },
+        "post": null
       }
     },
     "UMC": {
@@ -337,7 +339,7 @@
         14.39
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PRE",
         "regular": {
           "price": 14.39,
           "prev_close": 12.04,
@@ -345,13 +347,13 @@
           "change_pct": 19.518,
           "time": 1795467602
         },
-        "pre": null,
-        "post": {
-          "price": 14.6,
-          "change": 0.21000004,
-          "change_pct": 1.459347,
-          "time": 1795481973
-        }
+        "pre": {
+          "price": 14.2,
+          "change": -0.19500065,
+          "change_pct": -1.3546414,
+          "time": 1795513225
+        },
+        "post": null
       }
     },
     "ASX": {
@@ -386,7 +388,7 @@
         31.88
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PRE",
         "regular": {
           "price": 31.88,
           "prev_close": 26.27,
@@ -394,13 +396,13 @@
           "change_pct": 21.355,
           "time": 1795467602
         },
-        "pre": null,
-        "post": {
-          "price": 32.4,
-          "change": 0.52000237,
-          "change_pct": 1.6311241,
-          "time": 1795481832
-        }
+        "pre": {
+          "price": 31.3,
+          "change": -0.6000004,
+          "change_pct": -1.8808789,
+          "time": 1795512925
+        },
+        "post": null
       }
     },
     "CHT": {
@@ -435,7 +437,7 @@
         49.66
       ],
       "extended_hours": {
-        "market_state": "POSTPOST",
+        "market_state": "PRE",
         "regular": {
           "price": 49.66,
           "prev_close": 49.08,
@@ -444,12 +446,7 @@
           "time": 1795467602
         },
         "pre": null,
-        "post": {
-          "price": 49.66,
-          "change": 0.0,
-          "change_pct": 0.0,
-          "time": 1795467636
-        }
+        "post": null
       }
     }
   }
