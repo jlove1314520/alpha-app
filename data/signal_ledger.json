@@ -2,8 +2,8 @@
  "meta": {
   "created_at": "2026-10-11T14:17:33.521387+08:00",
   "schema_note": "B19 前瞻訊號台帳（非回測）：每筆在事件發生後 4 日內事前寫入，寫入後內容不可修改；entry_close 為寫入日之後第一個交易日收盤（避免前視）；returns.t5/t20/t60 由 update_signal_ledger_returns.py 只回填 null 欄位。status=待驗證線索 者不得影響任何評分。規格 research/B19_SIGNAL_LEDGER_SPEC.md。非投資建議。",
-  "last_build_at": "2026-11-24T21:06:07.023582+08:00",
-  "total_signals": 5859,
+  "last_build_at": "2026-11-25T04:12:46.046375+08:00",
+  "total_signals": 5878,
   "source": ".github/scripts/build_signal_ledger.py（讀 events.json L1＋news.json L3＋price_history.json）",
   "last_returns_backfill_at": "2026-11-24T21:06:08.649919+08:00",
   "entry_skipped": {
@@ -228528,6 +228528,686 @@
     "l1_l2_corroborated": false,
     "independent_l3_sources": [
      "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0276,
+   "pre_vol_spike": 2.024,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-11-24",
+   "weight": 0.5,
+   "ref_close": 2230.0,
+   "ref_close_date": "2026-11-24",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "b447526dcbccaea6",
+   "recorded_at": "2026-11-25T04:12:46.046375+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9899767",
+   "type": "媒體報導",
+   "code": "2030",
+   "event_date": "2026-11-25",
+   "title": "生醫將重新納入13項戰略產業 政院：2030 年產值衝兆元",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.0695,
+   "pre_vol_spike": 1.034,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-24",
+   "weight": 1.0,
+   "ref_close": 22.1,
+   "ref_close_date": "2026-11-24",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "6ad0b89691f5be5d",
+   "recorded_at": "2026-11-25T04:12:46.046375+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/tcl-%E8%8F%AF%E6%98%9F%E5%85%89%E9%9B%BB%E7%99%BC%E8%A1%A8%E6%AF%AB%E7%93%A6%E7%B4%9A%E7%AD%86%E9%9B%BB%E8%9E%A2%E5%B9%95-%E5%8A%9F%E8%80%97%E9%99%8D%E8%87%B3-1-%E7%93%A6%E4%BB%A5%E4%B8%8B-174504397.html",
+   "type": "媒體報導",
+   "code": "4979",
+   "event_date": "2026-11-25",
+   "title": "TCL 華星光電發表毫瓦級筆電螢幕 功耗降至 1 瓦以下",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1193,
+   "pre_vol_spike": 1.85,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-24",
+   "weight": 1.0,
+   "ref_close": 280.5,
+   "ref_close_date": "2026-11-24",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "b3971f9986234ee2",
+   "recorded_at": "2026-11-25T04:12:46.046375+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9899473",
+   "type": "媒體報導",
+   "code": "2368",
+   "event_date": "2026-11-25",
+   "title": "12檔連漲強勢股短多關注 聯電、金像電等近五日獲資金回補",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0299,
+   "pre_vol_spike": 1.466,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-24",
+   "weight": 1.0,
+   "ref_close": 860.0,
+   "ref_close_date": "2026-11-24",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "f155924a74f23098",
+   "recorded_at": "2026-11-25T04:12:46.046375+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/11074/9899485",
+   "type": "媒體報導",
+   "code": "6690",
+   "event_date": "2026-11-25",
+   "title": "安碁資訊營收 要年增雙位數",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.05,
+   "pre_vol_spike": 3.659,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-11-24",
+   "weight": 0.5,
+   "ref_close": 199.5,
+   "ref_close_date": "2026-11-24",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "46073576db35bd8d",
+   "recorded_at": "2026-11-25T04:12:46.046375+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5710/9899516",
+   "type": "媒體報導",
+   "code": "3704",
+   "event_date": "2026-11-25",
+   "title": "合勤控強化資安、 AI 整合",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1052,
+   "pre_vol_spike": 1.539,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-24",
+   "weight": 1.0,
+   "ref_close": 34.45,
+   "ref_close_date": "2026-11-24",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "6c5d65afe695ce9d",
+   "recorded_at": "2026-11-25T04:12:46.046375+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9899511",
+   "type": "媒體報導",
+   "code": "6689",
+   "event_date": "2026-11-25",
+   "title": "上詮上月 EPS 0.07元 伊雲谷-0.03元",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1559,
+   "pre_vol_spike": 0.613,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-24",
+   "weight": 1.0,
+   "ref_close": 62.8,
+   "ref_close_date": "2026-11-24",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "28ec5a26ce3acb0e",
+   "recorded_at": "2026-11-25T04:12:46.046375+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9899512",
+   "type": "媒體報導",
+   "code": "3504",
+   "event_date": "2026-11-25",
+   "title": "揚明光上月 EPS -0.03元 百一-0.055元",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1164,
+   "pre_vol_spike": 0.731,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-24",
+   "weight": 1.0,
+   "ref_close": 44.8,
+   "ref_close_date": "2026-11-24",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "ac9955bca7e0bd2d",
+   "recorded_at": "2026-11-25T04:12:46.046375+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/5607/9899510",
+   "type": "媒體報導",
+   "code": "6112",
+   "event_date": "2026-11-25",
+   "title": "惠特上月 EPS 0.42元 邁達特0.2元",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1896,
+   "pre_vol_spike": 0.835,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-24",
+   "weight": 1.0,
+   "ref_close": 42.95,
+   "ref_close_date": "2026-11-24",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "1c87c7519b2943a4",
+   "recorded_at": "2026-11-25T04:12:46.046375+08:00",
+   "layer": "L3",
+   "source": "經濟日報證券",
+   "source_id": "https://money.udn.com/money/story/11074/9899462",
+   "type": "媒體報導",
+   "code": "7942",
+   "event_date": "2026-11-25",
+   "title": "東佑達機器人展秀肌肉",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": null,
+   "pre_vol_spike": null,
+   "reflected": "unknown",
+   "pre_volume_spike": null,
+   "reason": "價格序列不足（0<23 筆）",
+   "weight": 1.0,
+   "ref_close": null,
+   "ref_close_date": null,
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "b395769231ee069c",
+   "recorded_at": "2026-11-25T04:12:46.046375+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9899805",
+   "type": "媒體報導",
+   "code": "6850",
+   "event_date": "2026-11-24",
+   "title": "光鼎生技法說會揭六大應用布局 CDMO 成營運新動能",
+   "status": "待驗證線索",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.026,
+   "pre_vol_spike": 0.27,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2024-12-31",
+   "weight": 1.0,
+   "ref_close": null,
+   "ref_close_date": null,
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "bb8fc401252444a4",
+   "recorded_at": "2026-11-25T04:12:46.046375+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E7%A0%B87450%E5%84%84%E5%9C%A8%E5%BE%B7%E5%B7%9E%E8%93%8B2%E5%A5%88%E7%B1%B3%E5%BB%A0-%E5%8F%B0%E7%A9%8D%E9%9B%BB%E5%9B%9E%E6%87%89-%E6%8C%81%E7%BA%8C%E8%A9%95%E4%BC%B0-145207427.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-11-24",
+   "title": "砸7450億在德州蓋2奈米廠？台積電回應：持續評估",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0276,
+   "pre_vol_spike": 2.024,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-11-24",
+   "weight": 0.5,
+   "ref_close": 2230.0,
+   "ref_close_date": "2026-11-24",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "a9d9acd15205dde8",
+   "recorded_at": "2026-11-25T04:12:46.046375+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E4%BC%8A%E9%9B%B2%E8%B0%B7-%E4%BB%A3%E9%87%8D%E8%A6%81%E5%AD%90%E5%85%AC%E5%8F%B8%E9%9B%B2%E9%A6%A5%E6%95%B8%E4%BD%8D%E8%82%A1%E4%BB%BD%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8%E5%85%AC%E5%91%8A%E6%9B%B4%E6%8F%9B%E7%B0%BD%E8%AD%89%E6%9C%83%E8%A8%88%E5%B8%AB-144900454.html",
+   "type": "媒體報導",
+   "code": "6689",
+   "event_date": "2026-11-24",
+   "title": "伊雲谷 代重要子公司雲馥數位股份有限公司公告更換簽證會計師",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1559,
+   "pre_vol_spike": 0.613,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-24",
+   "weight": 1.0,
+   "ref_close": 62.8,
+   "ref_close_date": "2026-11-24",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "8013a11a42514743",
+   "recorded_at": "2026-11-25T04:12:46.046375+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E4%BC%8A%E9%9B%B2%E8%B0%B7-%E4%BB%A3%E9%87%8D%E8%A6%81%E5%AD%90%E5%85%AC%E5%8F%B8%E9%9B%B2%E9%A6%A5%E6%95%B8%E4%BD%8D%E8%82%A1%E4%BB%BD%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8%E5%85%AC%E5%91%8A%E8%91%A3%E4%BA%8B%E6%9C%83%E6%B1%BA%E8%AD%B0%E5%8F%AC%E9%96%8B115%E5%B9%B4%E7%AC%AC-%E6%AC%A1%E8%82%A1%E6%9D%B1%E8%87%A8%E6%99%82%E6%9C%83%E7%9B%B8%E9%97%9C%E4%BA%8B%E5%AE%9C-144400930.html",
+   "type": "媒體報導",
+   "code": "6689",
+   "event_date": "2026-11-24",
+   "title": "伊雲谷 代重要子公司雲馥數位股份有限公司公告董事會決議召開115年第一次股東臨時會相關事宜",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1559,
+   "pre_vol_spike": 0.613,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-24",
+   "weight": 1.0,
+   "ref_close": 62.8,
+   "ref_close_date": "2026-11-24",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "0a64309ae9961cce",
+   "recorded_at": "2026-11-25T04:12:46.046375+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.stock.yahoo.com/news/%E4%BC%8A%E9%9B%B2%E8%B0%B7-%E4%BB%A3%E9%87%8D%E8%A6%81%E5%AD%90%E5%85%AC%E5%8F%B8%E9%9B%B2%E9%A6%A5%E6%95%B8%E4%BD%8D%E8%82%A1%E4%BB%BD%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8%E8%91%A3%E4%BA%8B%E6%9C%83%E9%80%9A%E9%81%8E%E8%A7%A3%E9%99%A4%E7%B6%93%E7%90%86%E4%BA%BA%E7%AB%B6%E6%A5%AD%E7%A6%81%E6%AD%A2%E4%B9%8B%E9%99%90%E5%88%B6-144400698.html",
+   "type": "媒體報導",
+   "code": "6689",
+   "event_date": "2026-11-24",
+   "title": "伊雲谷 代重要子公司雲馥數位股份有限公司董事會通過解除經理人競業禁止之限制",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1559,
+   "pre_vol_spike": 0.613,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-24",
+   "weight": 1.0,
+   "ref_close": 62.8,
+   "ref_close_date": "2026-11-24",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "970fe8ff9abd9da9",
+   "recorded_at": "2026-11-25T04:12:46.046375+08:00",
+   "layer": "L3",
+   "source": "Yahoo股市",
+   "source_id": "https://tw.news.yahoo.com/%E5%8F%B0%E7%A9%8D%E9%9B%BB%E5%BE%B7%E5%B7%9E%E8%A8%AD%E6%96%B0%E5%BB%A0-%E8%B7%AF%E9%80%8F%E6%8F%AD%E8%A9%95%E4%BC%B0%E4%B8%AD-143539450.html",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-11-24",
+   "title": "台積電德州設新廠？路透揭評估中",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0276,
+   "pre_vol_spike": 2.024,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-11-24",
+   "weight": 0.5,
+   "ref_close": 2230.0,
+   "ref_close_date": "2026-11-24",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "15f6c464cb81ffaf",
+   "recorded_at": "2026-11-25T04:12:46.046375+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9899586",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-11-24",
+   "title": "德州布局有進展了？台積電最新說明來了",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0276,
+   "pre_vol_spike": 2.024,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-11-24",
+   "weight": 0.5,
+   "ref_close": 2230.0,
+   "ref_close_date": "2026-11-24",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "92c2e5142c537703",
+   "recorded_at": "2026-11-25T04:12:46.046375+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9899540",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-11-24",
+   "title": "減稅成落腳德州關鍵？台積電：提申報資訊為透明良好溝通",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": 0.0276,
+   "pre_vol_spike": 2.024,
+   "reflected": "fresh",
+   "pre_volume_spike": true,
+   "anchor_trade_date": "2026-11-24",
+   "weight": 0.5,
+   "ref_close": 2230.0,
+   "ref_close_date": "2026-11-24",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "c976dcd6fc2f2e7f",
+   "recorded_at": "2026-11-25T04:12:46.046375+08:00",
+   "layer": "L3",
+   "source": "經濟日報產業",
+   "source_id": "https://money.udn.com/money/story/5612/9899518",
+   "type": "媒體報導",
+   "code": "6884",
+   "event_date": "2026-11-24",
+   "title": "海柏特跨界搶單！外送平台、掃地機器人到冷氣都包 印度拚2027年貢獻",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": true,
+    "independent_l3_sources": [
+     "經濟日報"
+    ],
+    "own_data": "not_implemented"
+   },
+   "run_before": -0.1233,
+   "pre_vol_spike": 1.058,
+   "reflected": "fresh",
+   "pre_volume_spike": false,
+   "anchor_trade_date": "2026-11-24",
+   "weight": 1.0,
+   "ref_close": 29.5,
+   "ref_close_date": "2026-11-24",
+   "entry_rule": "寫入日之後第一個交易日收盤（回填腳本只填一次）",
+   "entry_close": null,
+   "entry_date": null,
+   "returns": {
+    "t5": null,
+    "t20": null,
+    "t60": null
+   }
+  },
+  {
+   "id": "9a4e2f0e112bafe5",
+   "recorded_at": "2026-11-25T04:12:46.046375+08:00",
+   "layer": "L3",
+   "source": "中央社財經",
+   "source_id": "https://www.cna.com.tw/news/afe/202611240292.aspx",
+   "type": "媒體報導",
+   "code": "2330",
+   "event_date": "2026-11-24",
+   "title": "減稅成落腳德州關鍵？台積電：提申報資訊為透明良好溝通",
+   "status": "訊號",
+   "cross_validation": {
+    "l1_l2_corroborated": false,
+    "independent_l3_sources": [
+     "Yahoo股市",
+     "中央社財經",
      "經濟日報"
     ],
     "own_data": "not_implemented"
