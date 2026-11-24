@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-11-24T10:23:32.200940+08:00",
- "duration_sec": 7.8,
+ "generated_at": "2026-11-25T07:58:27.332783+08:00",
+ "duration_sec": 6.9,
  "reference": {
   "twse": {
    "ok": true,
@@ -10,25 +10,25 @@
   "tpex": {
    "ok": true,
    "rows": 1020,
-   "usable": 887
+   "usable": 904
   }
  },
- "universe": 2126,
- "reference_date": "2026-11-23",
+ "universe": 2143,
+ "reference_date": "2026-11-24",
  "listed_universe_size": 2154,
- "stocks_with_violation": 1,
+ "stocks_with_violation": 0,
  "code_free_violations": 0,
  "completeness_gap_stocks": 0,
  "completeness_gap_rate": 0.0,
- "violation_rate": 0.00047,
+ "violation_rate": 0.0,
  "violation_rate_gate": 0.01,
  "gate_pass": true,
  "informational_only_checks": [
   "e_pe"
  ],
  "a4_mixed_date": {
-  "max_date": "2026-11-23",
-  "checked": 2126,
+  "max_date": "2026-11-24",
+  "checked": 2143,
   "mixed_date_count": 0,
   "mixed_date_rate": 0.0,
   "mixed_date_codes_sample": [],
@@ -36,38 +36,38 @@
  },
  "a_price_source_unverifiable_breakdown": {
   "TWSE｜quotes_tw.json｜quotes_tw 沒有這檔（只含自選／觀察清單）": 1074,
-  "TPEx｜quotes_tw.json｜quotes_tw 沒有這檔（只含自選／觀察清單）": 797
+  "TPEx｜quotes_tw.json｜quotes_tw 沒有這檔（只含自選／觀察清單）": 812
  },
- "total_violations": 74,
+ "total_violations": 80,
  "by_check": {
   "a_price_source": {
-   "checked": 6633,
+   "checked": 6686,
    "violations": 0,
-   "unverifiable": 1871,
+   "unverifiable": 1886,
    "note": ""
   },
   "a2_not_in_official": {
    "checked": 0,
    "violations": 0,
    "unverifiable": 0,
-   "note": "歷史檔案（price_history）另有 506 個已下市代號，屬正常歷史保留，不列違規"
+   "note": "歷史檔案（price_history）另有 489 個已下市代號，屬正常歷史保留，不列違規"
   },
   "a3_stale_price": {
    "checked": 1985,
-   "violations": 1,
+   "violations": 0,
    "unverifiable": 1,
    "note": ""
   },
   "c_range": {
-   "checked": 2125,
+   "checked": 2142,
    "violations": 0,
    "unverifiable": 1,
    "note": ""
   },
   "e_pe": {
-   "checked": 1269,
-   "violations": 73,
-   "unverifiable": 857,
+   "checked": 1275,
+   "violations": 80,
+   "unverifiable": 868,
    "note": ""
   },
   "f_null_as_number": {
@@ -89,9 +89,9 @@
    "code": "5314",
    "name": "世紀*",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 6.87,
-   "official": 23.98,
-   "diff_pct": 248.9,
+   "ours": 7.26,
+   "official": 25.34,
+   "diff_pct": 248.85,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -99,8 +99,8 @@
    "code": "8932",
    "name": "智通*",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 91.09,
-   "official": 25.96,
+   "ours": 95.09,
+   "official": 27.1,
    "diff_pct": 71.5,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
@@ -109,49 +109,9 @@
    "code": "4906",
    "name": "正文",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 546.0,
+   "ours": 600.0,
    "official": 910.0,
-   "diff_pct": 66.67,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "6216",
-   "name": "居易",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 556.67,
-   "official": 835.0,
-   "diff_pct": 50.0,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "6669",
-   "name": "緯穎",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 8.17,
-   "official": 12.13,
-   "diff_pct": 48.43,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "9943",
-   "name": "好樂迪",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 7.87,
-   "official": 11.65,
-   "diff_pct": 48.04,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "2033",
-   "name": "佳大",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 228.62,
-   "official": 331.5,
-   "diff_pct": 45.0,
+   "diff_pct": 51.67,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -159,9 +119,39 @@
    "code": "3714",
    "name": "富采",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 29.96,
+   "ours": 31.92,
    "official": 17.28,
-   "diff_pct": 42.32,
+   "diff_pct": 45.87,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "9943",
+   "name": "好樂迪",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 8.05,
+   "official": 11.65,
+   "diff_pct": 44.76,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "6216",
+   "name": "居易",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 586.67,
+   "official": 835.0,
+   "diff_pct": 42.33,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2033",
+   "name": "佳大",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 233.79,
+   "official": 331.5,
+   "diff_pct": 41.79,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -169,8 +159,8 @@
    "code": "3095",
    "name": "及成",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 10.8,
-   "official": 15.21,
+   "ours": 10.82,
+   "official": 15.24,
    "diff_pct": 40.86,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
@@ -179,59 +169,19 @@
    "code": "8050",
    "name": "廣積",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 11.57,
-   "official": 16.05,
+   "ours": 12.43,
+   "official": 17.24,
    "diff_pct": 38.74,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
    "check": "e_pe",
-   "code": "6579",
-   "name": "研揚",
+   "code": "6669",
+   "name": "緯穎",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 11.15,
-   "official": 15.04,
-   "diff_pct": 34.83,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "6908",
-   "name": "宏碁遊戲-創",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 541.25,
-   "official": 721.67,
-   "diff_pct": 33.33,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "5386",
-   "name": "青雲",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 1.88,
-   "official": 2.46,
-   "diff_pct": 30.78,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "3152",
-   "name": "璟德",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 24.23,
-   "official": 17.2,
-   "diff_pct": 29.01,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "2938",
-   "name": "床的世界",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 8.98,
-   "official": 11.46,
-   "diff_pct": 27.67,
+   "ours": 8.97,
+   "official": 12.13,
+   "diff_pct": 35.16,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -239,301 +189,19 @@
    "code": "6108",
    "name": "競國",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 13.86,
+   "ours": 15.25,
    "official": 10.25,
-   "diff_pct": 26.05,
+   "diff_pct": 32.77,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
    "check": "e_pe",
-   "code": "2002",
-   "name": "中鋼",
+   "code": "5386",
+   "name": "青雲",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 561.67,
-   "official": 421.25,
-   "diff_pct": 25.0,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "3504",
-   "name": "揚明光",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 815.0,
-   "official": 1018.75,
-   "diff_pct": 25.0,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "6451",
-   "name": "訊芯-KY",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 738.0,
-   "official": 922.5,
-   "diff_pct": 25.0,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "1529",
-   "name": "樂事綠能",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 25.73,
-   "official": 31.97,
-   "diff_pct": 24.24,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  }
- ],
- "violations": [
-  {
-   "check": "a3_stale_price",
-   "code": "1538",
-   "name": "正峰",
-   "detail": "這一檔在選股榜單上，但本地價格已落後官方最新交易日 14 天",
-   "ours": "2026-11-09",
-   "official": "2026-11-23",
-   "diff_pct": null,
-   "source": "quotes_all_tw.json / price_history.json"
-  },
-  {
-   "check": "e_pe",
-   "code": "1101",
-   "name": "台泥",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 78.71,
-   "official": 69.71,
-   "diff_pct": 11.43,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "1452",
-   "name": "宏益",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 100.0,
-   "official": 111.11,
-   "diff_pct": 11.11,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "1529",
-   "name": "樂事綠能",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 25.73,
-   "official": 31.97,
-   "diff_pct": 24.24,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "1563",
-   "name": "巧新",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 22.65,
-   "official": 18.51,
-   "diff_pct": 18.27,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "1586",
-   "name": "和勤",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 34.69,
-   "official": 42.5,
-   "diff_pct": 22.5,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "1808",
-   "name": "潤隆",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 7.11,
-   "official": 5.65,
-   "diff_pct": 20.56,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "2002",
-   "name": "中鋼",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 561.67,
-   "official": 421.25,
-   "diff_pct": 25.0,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "2033",
-   "name": "佳大",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 228.62,
-   "official": 331.5,
-   "diff_pct": 45.0,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "2243",
-   "name": "宏旭-KY",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 21.22,
-   "official": 23.61,
-   "diff_pct": 11.28,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "2249",
-   "name": "湧盛",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 4.76,
-   "official": 5.43,
-   "diff_pct": 13.98,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "2348",
-   "name": "海悅",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 7.83,
-   "official": 9.12,
-   "diff_pct": 16.43,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "2436",
-   "name": "偉詮電",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 7.4,
-   "official": 8.17,
-   "diff_pct": 10.39,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "2440",
-   "name": "太空梭",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 117.0,
-   "official": 130.0,
-   "diff_pct": 11.11,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "2442",
-   "name": "新美齊",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 1.86,
-   "official": 2.26,
-   "diff_pct": 21.32,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "2462",
-   "name": "良得電",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 362.5,
-   "official": 290.0,
-   "diff_pct": 20.0,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "2474",
-   "name": "可成",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 16.83,
-   "official": 15.07,
-   "diff_pct": 10.44,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "2528",
-   "name": "皇普",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 9.85,
-   "official": 8.61,
-   "diff_pct": 12.59,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "2534",
-   "name": "宏盛",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 148.89,
-   "official": 167.5,
-   "diff_pct": 12.5,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "2724",
-   "name": "藝舍-KY",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 178.33,
-   "official": 152.86,
-   "diff_pct": 14.28,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "2755",
-   "name": "揚秦",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 12.24,
-   "official": 13.78,
-   "diff_pct": 12.59,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "2938",
-   "name": "床的世界",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 8.98,
-   "official": 11.46,
-   "diff_pct": 27.67,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "3095",
-   "name": "及成",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 10.8,
-   "official": 15.21,
-   "diff_pct": 40.86,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "3135",
-   "name": "凌航",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 2.96,
-   "official": 3.29,
-   "diff_pct": 11.29,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "3138",
-   "name": "耀登",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 56.14,
-   "official": 62.14,
-   "diff_pct": 10.69,
+   "ours": 2.07,
+   "official": 2.7,
+   "diff_pct": 30.49,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -541,8 +209,360 @@
    "code": "3152",
    "name": "璟德",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 24.23,
-   "official": 17.2,
+   "ours": 26.61,
+   "official": 18.89,
+   "diff_pct": 29.01,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2002",
+   "name": "中鋼",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 585.0,
+   "official": 421.25,
+   "diff_pct": 27.99,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2938",
+   "name": "床的世界",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 9.47,
+   "official": 12.09,
+   "diff_pct": 27.62,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "6908",
+   "name": "宏碁遊戲-創",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 567.5,
+   "official": 721.67,
+   "diff_pct": 27.17,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "6176",
+   "name": "瑞儀",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 11.31,
+   "official": 8.38,
+   "diff_pct": 25.91,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "1563",
+   "name": "巧新",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 24.89,
+   "official": 18.51,
+   "diff_pct": 25.62,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "6579",
+   "name": "研揚",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 11.99,
+   "official": 15.04,
+   "diff_pct": 25.48,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2462",
+   "name": "良得電",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 386.25,
+   "official": 290.0,
+   "diff_pct": 24.92,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  }
+ ],
+ "violations": [
+  {
+   "check": "e_pe",
+   "code": "1101",
+   "name": "台泥",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 81.29,
+   "official": 69.71,
+   "diff_pct": 14.25,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "1452",
+   "name": "宏益",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 100.5,
+   "official": 111.11,
+   "diff_pct": 10.56,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "1529",
+   "name": "樂事綠能",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 27.56,
+   "official": 31.97,
+   "diff_pct": 16.0,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "1563",
+   "name": "巧新",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 24.89,
+   "official": 18.51,
+   "diff_pct": 25.62,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "1586",
+   "name": "和勤",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 34.49,
+   "official": 42.25,
+   "diff_pct": 22.5,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "1616",
+   "name": "億泰",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 90.62,
+   "official": 80.88,
+   "diff_pct": 10.75,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "1808",
+   "name": "潤隆",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 7.36,
+   "official": 5.65,
+   "diff_pct": 23.2,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2002",
+   "name": "中鋼",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 585.0,
+   "official": 421.25,
+   "diff_pct": 27.99,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2027",
+   "name": "大成鋼",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 8.77,
+   "official": 7.76,
+   "diff_pct": 11.52,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2033",
+   "name": "佳大",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 233.79,
+   "official": 331.5,
+   "diff_pct": 41.79,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2237",
+   "name": "華德動能-創",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 6.67,
+   "official": 5.86,
+   "diff_pct": 12.1,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2249",
+   "name": "湧盛",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 5.06,
+   "official": 5.77,
+   "diff_pct": 14.0,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2323",
+   "name": "中環",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 3.46,
+   "official": 2.95,
+   "diff_pct": 14.78,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2328",
+   "name": "廣宇",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 107.97,
+   "official": 95.92,
+   "diff_pct": 11.16,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2329",
+   "name": "華泰",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 15.98,
+   "official": 14.05,
+   "diff_pct": 12.08,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2388",
+   "name": "威盛",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 28.26,
+   "official": 24.83,
+   "diff_pct": 12.12,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2419",
+   "name": "仲琦",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 112.62,
+   "official": 97.95,
+   "diff_pct": 13.03,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2427",
+   "name": "三商電",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 76.74,
+   "official": 67.5,
+   "diff_pct": 12.04,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2442",
+   "name": "新美齊",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 1.98,
+   "official": 2.26,
+   "diff_pct": 14.31,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2462",
+   "name": "良得電",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 386.25,
+   "official": 290.0,
+   "diff_pct": 24.92,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2474",
+   "name": "可成",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 17.96,
+   "official": 15.07,
+   "diff_pct": 16.09,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2528",
+   "name": "皇普",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 10.15,
+   "official": 8.61,
+   "diff_pct": 15.17,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2536",
+   "name": "宏普",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 4.02,
+   "official": 3.61,
+   "diff_pct": 10.18,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2724",
+   "name": "藝舍-KY",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 185.0,
+   "official": 158.57,
+   "diff_pct": 14.29,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2755",
+   "name": "揚秦",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 12.1,
+   "official": 13.63,
+   "diff_pct": 12.65,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2938",
+   "name": "床的世界",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 9.47,
+   "official": 12.09,
+   "diff_pct": 27.62,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "3095",
+   "name": "及成",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 10.82,
+   "official": 15.24,
+   "diff_pct": 40.86,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "3152",
+   "name": "璟德",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 26.61,
+   "official": 18.89,
    "diff_pct": 29.01,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
@@ -551,9 +571,9 @@
    "code": "3163",
    "name": "波若威",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 38.89,
-   "official": 43.51,
-   "diff_pct": 11.88,
+   "ours": 42.75,
+   "official": 47.84,
+   "diff_pct": 11.9,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -561,9 +581,9 @@
    "code": "3290",
    "name": "東浦",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 9.35,
-   "official": 7.2,
-   "diff_pct": 22.98,
+   "ours": 9.72,
+   "official": 7.49,
+   "diff_pct": 22.92,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -571,9 +591,19 @@
    "code": "3356",
    "name": "奇偶",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 4.33,
+   "ours": 4.63,
    "official": 3.83,
-   "diff_pct": 11.59,
+   "diff_pct": 17.23,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "3380",
+   "name": "明泰",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 227.5,
+   "official": 191.15,
+   "diff_pct": 15.98,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -581,9 +611,9 @@
    "code": "3388",
    "name": "崇越電",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 10.83,
-   "official": 12.1,
-   "diff_pct": 11.72,
+   "ours": 11.76,
+   "official": 13.14,
+   "diff_pct": 11.71,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -591,8 +621,8 @@
    "code": "3489",
    "name": "森寶",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 305.71,
-   "official": 267.5,
+   "ours": 322.86,
+   "official": 282.5,
    "diff_pct": 12.5,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
@@ -601,9 +631,9 @@
    "code": "3504",
    "name": "揚明光",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 815.0,
+   "ours": 896.0,
    "official": 1018.75,
-   "diff_pct": 25.0,
+   "diff_pct": 13.7,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -611,9 +641,9 @@
    "code": "3520",
    "name": "華盈",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 170.62,
-   "official": 195.0,
-   "diff_pct": 14.29,
+   "ours": 185.62,
+   "official": 212.14,
+   "diff_pct": 14.28,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -621,9 +651,9 @@
    "code": "3521",
    "name": "台鋼建設",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 6.14,
-   "official": 7.3,
-   "diff_pct": 18.96,
+   "ours": 6.28,
+   "official": 7.47,
+   "diff_pct": 18.98,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -631,9 +661,29 @@
    "code": "3550",
    "name": "聯穎",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 27.55,
+   "ours": 30.28,
    "official": 23.93,
-   "diff_pct": 13.13,
+   "diff_pct": 20.98,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "3563",
+   "name": "牧德",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 28.9,
+   "official": 24.58,
+   "diff_pct": 14.95,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "3591",
+   "name": "艾笛森",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 123.89,
+   "official": 108.16,
+   "diff_pct": 12.7,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -641,9 +691,9 @@
    "code": "3709",
    "name": "鑫聯大投控",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 3.39,
-   "official": 3.83,
-   "diff_pct": 13.01,
+   "ours": 3.66,
+   "official": 4.13,
+   "diff_pct": 12.97,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -651,9 +701,19 @@
    "code": "3714",
    "name": "富采",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 29.96,
+   "ours": 31.92,
    "official": 17.28,
-   "diff_pct": 42.32,
+   "diff_pct": 45.87,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "4155",
+   "name": "訊映",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 8.91,
+   "official": 7.59,
+   "diff_pct": 14.79,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -661,8 +721,8 @@
    "code": "4303",
    "name": "信立",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 14.27,
-   "official": 17.54,
+   "ours": 15.63,
+   "official": 19.22,
    "diff_pct": 22.94,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
@@ -671,9 +731,9 @@
    "code": "4534",
    "name": "慶騰",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 38.24,
-   "official": 29.55,
-   "diff_pct": 22.72,
+   "ours": 42.06,
+   "official": 32.5,
+   "diff_pct": 22.73,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -681,8 +741,8 @@
    "code": "4747",
    "name": "強生",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 66.58,
-   "official": 55.0,
+   "ours": 68.95,
+   "official": 56.96,
    "diff_pct": 17.39,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
@@ -691,9 +751,9 @@
    "code": "4906",
    "name": "正文",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 546.0,
+   "ours": 600.0,
    "official": 910.0,
-   "diff_pct": 66.67,
+   "diff_pct": 51.67,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -701,19 +761,9 @@
    "code": "4971",
    "name": "IET-KY",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 52.29,
-   "official": 59.07,
-   "diff_pct": 12.96,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "4977",
-   "name": "眾達-KY",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 27.25,
-   "official": 30.7,
-   "diff_pct": 12.67,
+   "ours": 57.46,
+   "official": 64.9,
+   "diff_pct": 12.95,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -721,9 +771,19 @@
    "code": "5206",
    "name": "坤悅",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 3.56,
-   "official": 4.01,
-   "diff_pct": 12.52,
+   "ours": 3.68,
+   "official": 4.14,
+   "diff_pct": 12.53,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "5292",
+   "name": "華懋",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 18.7,
+   "official": 16.8,
+   "diff_pct": 10.18,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -731,8 +791,8 @@
    "code": "5309",
    "name": "系統電",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 97.05,
-   "official": 111.32,
+   "ours": 106.67,
+   "official": 122.35,
    "diff_pct": 14.7,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
@@ -741,9 +801,9 @@
    "code": "5314",
    "name": "世紀*",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 6.87,
-   "official": 23.98,
-   "diff_pct": 248.9,
+   "ours": 7.26,
+   "official": 25.34,
+   "diff_pct": 248.85,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -751,9 +811,9 @@
    "code": "5386",
    "name": "青雲",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 1.88,
-   "official": 2.46,
-   "diff_pct": 30.78,
+   "ours": 2.07,
+   "official": 2.7,
+   "diff_pct": 30.49,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -761,8 +821,8 @@
    "code": "5512",
    "name": "力麒",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 60.9,
-   "official": 67.67,
+   "ours": 61.8,
+   "official": 68.67,
    "diff_pct": 11.12,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
@@ -771,9 +831,9 @@
    "code": "6108",
    "name": "競國",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 13.86,
+   "ours": 15.25,
    "official": 10.25,
-   "diff_pct": 26.05,
+   "diff_pct": 32.77,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -781,9 +841,9 @@
    "code": "6176",
    "name": "瑞儀",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 10.73,
+   "ours": 11.31,
    "official": 8.38,
-   "diff_pct": 21.94,
+   "diff_pct": 25.91,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -791,8 +851,8 @@
    "code": "6186",
    "name": "新潤",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 11.39,
-   "official": 13.12,
+   "ours": 12.25,
+   "official": 14.11,
    "diff_pct": 15.21,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
@@ -801,8 +861,8 @@
    "code": "6207",
    "name": "雷科",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 47.53,
-   "official": 52.52,
+   "ours": 52.28,
+   "official": 57.76,
    "diff_pct": 10.49,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
@@ -811,9 +871,19 @@
    "code": "6216",
    "name": "居易",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 556.67,
+   "ours": 586.67,
    "official": 835.0,
-   "diff_pct": 50.0,
+   "diff_pct": 42.33,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "6239",
+   "name": "力成",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 18.15,
+   "official": 16.3,
+   "diff_pct": 10.19,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -821,9 +891,9 @@
    "code": "6241",
    "name": "鑫永洋",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 14.32,
-   "official": 16.18,
-   "diff_pct": 12.97,
+   "ours": 15.0,
+   "official": 16.94,
+   "diff_pct": 12.93,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -831,9 +901,9 @@
    "code": "6432",
    "name": "今展科",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 19.46,
-   "official": 21.47,
-   "diff_pct": 10.34,
+   "ours": 21.4,
+   "official": 23.61,
+   "diff_pct": 10.31,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -841,9 +911,9 @@
    "code": "6451",
    "name": "訊芯-KY",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 738.0,
+   "ours": 810.0,
    "official": 922.5,
-   "diff_pct": 25.0,
+   "diff_pct": 13.89,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -851,9 +921,9 @@
    "code": "6465",
    "name": "威潤",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 7.66,
-   "official": 9.22,
-   "diff_pct": 20.32,
+   "ours": 8.06,
+   "official": 9.69,
+   "diff_pct": 20.28,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -861,9 +931,9 @@
    "code": "6488",
    "name": "環球晶",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 23.48,
-   "official": 25.93,
-   "diff_pct": 10.42,
+   "ours": 25.8,
+   "official": 28.49,
+   "diff_pct": 10.41,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -871,9 +941,19 @@
    "code": "6579",
    "name": "研揚",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 11.15,
+   "ours": 11.99,
    "official": 15.04,
-   "diff_pct": 34.83,
+   "diff_pct": 25.48,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "6591",
+   "name": "動力-KY",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 45.07,
+   "official": 39.86,
+   "diff_pct": 11.57,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -881,8 +961,8 @@
    "code": "6597",
    "name": "立誠",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 642.22,
-   "official": 722.5,
+   "ours": 700.0,
+   "official": 787.5,
    "diff_pct": 12.5,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
@@ -891,19 +971,9 @@
    "code": "6669",
    "name": "緯穎",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 8.17,
+   "ours": 8.97,
    "official": 12.13,
-   "diff_pct": 48.43,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "6715",
-   "name": "嘉基",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 156.57,
-   "official": 172.33,
-   "diff_pct": 10.06,
+   "diff_pct": 35.16,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -911,9 +981,19 @@
    "code": "6821",
    "name": "聯寶",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 28.78,
-   "official": 31.78,
-   "diff_pct": 10.43,
+   "ours": 30.31,
+   "official": 33.48,
+   "diff_pct": 10.44,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "6873",
+   "name": "泓德能源",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 256.88,
+   "official": 225.88,
+   "diff_pct": 12.07,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -921,9 +1001,9 @@
    "code": "6898",
    "name": "程曦資訊",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 8.46,
-   "official": 9.62,
-   "diff_pct": 13.68,
+   "ours": 8.83,
+   "official": 10.03,
+   "diff_pct": 13.61,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -931,19 +1011,9 @@
    "code": "6908",
    "name": "宏碁遊戲-創",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 541.25,
+   "ours": 567.5,
    "official": 721.67,
-   "diff_pct": 33.33,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "6947",
-   "name": "台鎔科技",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 26.31,
-   "official": 30.62,
-   "diff_pct": 16.38,
+   "diff_pct": 27.17,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -951,9 +1021,19 @@
    "code": "6967",
    "name": "汎瑋材料",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 10.13,
-   "official": 12.42,
-   "diff_pct": 22.6,
+   "ours": 10.8,
+   "official": 13.24,
+   "diff_pct": 22.58,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "7749",
+   "name": "意騰-KY",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 16.95,
+   "official": 15.22,
+   "diff_pct": 10.22,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -961,19 +1041,19 @@
    "code": "8050",
    "name": "廣積",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 11.57,
-   "official": 16.05,
+   "ours": 12.43,
+   "official": 17.24,
    "diff_pct": 38.74,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
    "check": "e_pe",
-   "code": "8112",
-   "name": "至上",
+   "code": "8404",
+   "name": "百和興業-KY",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 3.58,
-   "official": 4.0,
-   "diff_pct": 11.65,
+   "ours": 35.48,
+   "official": 31.72,
+   "diff_pct": 10.61,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -981,19 +1061,9 @@
    "code": "8421",
    "name": "旭源",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 18.95,
-   "official": 21.76,
+   "ours": 20.81,
+   "official": 23.89,
    "diff_pct": 14.82,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "8429",
-   "name": "金麗-KY",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 45.4,
-   "official": 50.44,
-   "diff_pct": 11.1,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -1001,19 +1071,9 @@
    "code": "8932",
    "name": "智通*",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 91.09,
-   "official": 25.96,
+   "ours": 95.09,
+   "official": 27.1,
    "diff_pct": 71.5,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "9941",
-   "name": "裕融",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 8.75,
-   "official": 9.78,
-   "diff_pct": 11.79,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -1021,9 +1081,9 @@
    "code": "9943",
    "name": "好樂迪",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 7.87,
+   "ours": 8.05,
    "official": 11.65,
-   "diff_pct": 48.04,
+   "diff_pct": 44.76,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   }
  ],
@@ -1735,7 +1795,7 @@
   "note": "由 scripts/check_external_connectivity.py 每 5 分鐘更新。產出檔停擺依據修改時間判定；connectivity_alerts 額外納入internet/tailscale/ibkr_gateway 這類「行程活著但連不上」的連續失敗告警（2026-09-15新增，此前只印在log沒亮燈，IBKR斷線6天才被發現就是這個缺口）。"
  },
  "self_check": {
-  "checked_at": "2026-11-24T10:21:49.455535+08:00",
+  "checked_at": "2026-11-25T07:57:16.973137+08:00",
   "ok": true,
   "checks": [
    {
@@ -1757,7 +1817,7 @@
   "note": "audit.yml 每次執行最前面跑，確認後面幾支腳本要用到的 import/常數撈得到——2026-09-10~17 因 data_audit.py 誤刪 TWSE_COMPANY 導致build_listed_universe.py 連續一週 ImportError 全滅，但audit_report.json 本身完全沒有任何紀錄，只能靠 gh run list 才查得到，這個欄位就是補這個盲點。"
  },
  "domain_blocklist_scan": {
-  "checked_at": "2026-11-24T10:21:49.455535+08:00",
+  "checked_at": "2026-11-25T07:57:16.973137+08:00",
   "domains": [
    "mopsov.twse.com.tw",
    "doc.twse.com.tw",
@@ -2102,7 +2162,7 @@
   "note": "2026-09-20合規.三：掃repo全部.py找黑名單網域硬寫字串（黑名單來源research/net_guard.py::DOMAIN_BLOCKLIST）。unguarded=True代表該檔案提到黑名單網域卻沒有`import net_guard`，是最可能重演2026-09-19 mopsov違規事件的檔案，由check_external_connectivity.py轉成local_task_health告警。"
  },
  "queue_depth_sync": {
-  "checked_at": "2026-11-24T10:21:49.455535+08:00",
+  "checked_at": "2026-11-25T07:57:16.973137+08:00",
   "ok": true,
   "detail": {
    "ok": true,
@@ -2112,7 +2172,7 @@
   "note": "2026-09-20【Q4前視與#23無法重現】四：確認兩份*_CONTINUATION_PROMPT.txt跟research/queue_depth_config.py（單一事實來源）仍然一致，避免重演2026-09-19門檻更正只同步部分位置、連續5輪沒觸發補件規則的問題。"
  },
  "reproducibility_check": {
-  "checked_at": "2026-11-24T10:21:49.455535+08:00",
+  "checked_at": "2026-11-25T07:57:16.973137+08:00",
   "ok": true,
   "detail": {
    "ok": true,
