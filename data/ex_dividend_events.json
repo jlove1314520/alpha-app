@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated_at": "2026-11-26T11:49:43.241748+08:00",
-    "last_fetch_count": 16,
-    "reductions_generated_at": "2026-11-26T11:49:53.527160+08:00"
+    "generated_at": "2026-11-27T03:01:59.334588+08:00",
+    "last_fetch_count": 17,
+    "reductions_generated_at": "2026-11-27T03:02:06.422307+08:00"
   },
   "events": {
     "01010T": [
@@ -3341,6 +3341,16 @@
         "applied": true,
         "factor_applied": 0.978021978021978,
         "note": "adj_close 已由 scripts/fix_backfill_exdiv.py 以官方係數重算（至 2026-10-15），只補記帳、不再乘"
+      },
+      {
+        "ex_date": "2026-11-26",
+        "official_factor": 0.9558985667034179,
+        "pre_close": 90.7,
+        "ref_price": 86.7,
+        "source": "TPEx exDailyQ",
+        "first_seen": "2026-11-26",
+        "applied": true,
+        "factor_applied": 0.9558985667034179
       }
     ],
     "6171": [
@@ -5570,7 +5580,10 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-11-24",
-        "applied": false
+        "applied": true,
+        "official_factor": 0.9625,
+        "official_source": "TWSE TWT49U",
+        "factor_applied": 0.9625
       }
     ],
     "6438": [
@@ -5582,6 +5595,18 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-11-25",
+        "applied": false
+      }
+    ],
+    "6994": [
+      {
+        "ex_date": "2026-12-11",
+        "cash": 0.6067,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.0,
+        "rights_price": 0.0,
+        "type": "息",
+        "first_seen": "2026-11-26",
         "applied": false
       }
     ]
