@@ -1,62 +1,62 @@
 {
-  "computed_at": "2026-11-26T09:24:31+00:00",
+  "computed_at": "2026-11-26T14:58:23+00:00",
   "source": "quotes_us.json × fx.json ÷ ADR比率，對 quotes_all_tw.json（台股盤後收盤）計算溢價（比率來源見各檔ADR_RATIOS/rows.source，三來源查證紀錄見本檔檔頭docstring）",
   "rows": {
     "TSM": {
       "tw_code": "2330",
       "ratio": 5,
       "source": "SEC EDGAR 20-F CIK 1046179；1 ADS＝5股普通股（1997年掛牌以來未變）",
-      "us_price": 342.34,
+      "us_price": 342.38,
       "us_quote_time": 1795640400,
       "tw_price": 2150.0,
       "tw_quote_date": "2026-11-25",
       "tw_price_kind": "台股盤後收盤（quotes_all_tw.json）",
       "fx_rate": 33.126,
       "fx_date": "2026-11-25",
-      "implied_tw_price": 2268.071,
-      "premium_pct": 5.492
+      "implied_tw_price": 2268.336,
+      "premium_pct": 5.504
     },
     "UMC": {
       "tw_code": "2303",
       "ratio": 5,
       "source": "UMC官方FAQ（umc.com/en/Html/faqs）+ SEC EDGAR 20-F CIK 1033767；1 ADS＝5股普通股",
-      "us_price": 13.19,
+      "us_price": 13.2,
       "us_quote_time": 1795640400,
       "tw_price": 87.4,
       "tw_quote_date": "2026-11-25",
       "tw_price_kind": "台股盤後收盤（quotes_all_tw.json）",
       "fx_rate": 33.126,
       "fx_date": "2026-11-25",
-      "implied_tw_price": 87.386,
-      "premium_pct": -0.016
+      "implied_tw_price": 87.453,
+      "premium_pct": 0.06
     },
     "ASX": {
       "tw_code": "3711",
       "ratio": 2,
       "source": "Nasdaq官方上市名稱 + SEC EDGAR CIK 1122411；1 ADS＝2股普通股",
-      "us_price": 29.49,
+      "us_price": 29.5,
       "us_quote_time": 1795640400,
       "tw_price": 488.0,
       "tw_quote_date": "2026-11-25",
       "tw_price_kind": "台股盤後收盤（quotes_all_tw.json）",
       "fx_rate": 33.126,
       "fx_date": "2026-11-25",
-      "implied_tw_price": 488.443,
-      "premium_pct": 0.091
+      "implied_tw_price": 488.608,
+      "premium_pct": 0.125
     },
     "CHT": {
       "tw_code": "2412",
       "ratio": 10,
       "source": "SEC EDGAR 20-F CIK 1132924；1 ADS＝10股普通股",
-      "us_price": 50.02,
+      "us_price": 50.04,
       "us_quote_time": 1795640400,
       "tw_price": 163.5,
       "tw_quote_date": "2026-11-25",
       "tw_price_kind": "台股盤後收盤（quotes_all_tw.json）",
       "fx_rate": 33.126,
       "fx_date": "2026-11-25",
-      "implied_tw_price": 165.696,
-      "premium_pct": 1.343
+      "implied_tw_price": 165.763,
+      "premium_pct": 1.384
     }
   },
   "errors": []
